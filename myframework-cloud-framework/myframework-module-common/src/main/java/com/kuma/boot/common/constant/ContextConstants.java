@@ -25,6 +25,7 @@ public final class ContextConstants {
     public static final String GRAY_VERSION = "gray_version";
 
     private ContextConstants() {
+
     }
 }
 
