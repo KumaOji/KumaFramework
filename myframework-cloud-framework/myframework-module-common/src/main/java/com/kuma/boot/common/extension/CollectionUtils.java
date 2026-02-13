@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.apache.commons.collections4.CollectionUtils
  *  org.apache.commons.lang3.ArrayUtils
@@ -53,7 +53,7 @@ public final class CollectionUtils {
     public static <K, V> Map<K, V> toMap(Object ... pairs) {
         HashMap<Object, Object> ret = new HashMap<Object, Object>();
         if (pairs == null || pairs.length == 0) {
-            return ret;
+            return (Map<K, V>) ret;
         }
         if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("Map pairs can not be odd number.");
