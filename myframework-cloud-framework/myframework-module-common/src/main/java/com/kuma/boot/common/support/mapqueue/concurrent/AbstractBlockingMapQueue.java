@@ -42,19 +42,19 @@ implements BlockingMapQueue<K, V> {
     private final List<MapQueue.Synchronizer<K, V>> synchronizers = new CopyOnWriteArrayList<MapQueue.Synchronizer<K, V>>();
 
     private void invokeSynchronizersBeforeEnqueue(K key, V value) {
-        this.synchronizers.forEach((? super T it) -> it.beforeEnqueue(key, value, this.readOnly));
+        this.synchronizers.forEach(it -> it.beforeEnqueue(key, value, this.readOnly));
     }
 
     private void invokeSynchronizersAfterEnqueue(K key, V value) {
-        this.synchronizers.forEach((? super T it) -> it.afterEnqueue(key, value, this.readOnly));
+        this.synchronizers.forEach(it -> it.afterEnqueue(key, value, this.readOnly));
     }
 
     private void invokeSynchronizersBeforeDequeue(K key, V value) {
-        this.synchronizers.forEach((? super T it) -> it.beforeDequeue(key, value, this.readOnly));
+        this.synchronizers.forEach(it -> it.beforeDequeue(key, value, this.readOnly));
     }
 
     private void invokeSynchronizersAfterDequeue(K key, V value) {
-        this.synchronizers.forEach((? super T it) -> it.afterDequeue(key, value, this.readOnly));
+        this.synchronizers.forEach(it -> it.afterDequeue(key, value, this.readOnly));
     }
 
     private boolean nonBlockingEnqueue(K k, V v) {
@@ -372,16 +372,14 @@ implements BlockingMapQueue<K, V> {
         Objects.requireNonNull(value);
         this.lock.lockInterruptibly();
         try {
-            V newValue;
             V oldValue = this.get(key);
-            V v = newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
+            V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
             if (newValue == null) {
                 this.nonBlockingDequeue(key);
             } else {
                 this.blockingEnqueue(key, newValue);
             }
-            V v2 = newValue;
-            return v2;
+            return newValue;
         }
         finally {
             this.lock.unlock();
@@ -795,21 +793,16 @@ implements BlockingMapQueue<K, V> {
         }
         this.lock.lock();
         try {
-            int n;
-            block12: {
-                boolean signalNotFull;
-                int i;
-                int n2 = Math.min(maxElements, this.count);
-                try {
-                    Iterator<V> iterator = this.map.values().iterator();
-                    for (i = 0; i < n2 && iterator.hasNext(); ++i) {
+            int n2 = Math.min(maxElements, this.count);
+            int i = 0;
+            boolean signalNotFull = false;
+            try {
+                Iterator<V> iterator = this.map.values().iterator();
+                for (; i < n2 && iterator.hasNext(); ++i) {
                         V next = iterator.next();
                         iterator.remove();
                         c.add(next);
                     }
-                    n = n2;
-                    if (i <= 0) break block12;
-                    signalNotFull = this.count == this.capacity;
                 }
                 catch (Throwable throwable) {
                     if (i > 0) {
@@ -821,12 +814,14 @@ implements BlockingMapQueue<K, V> {
                     }
                     throw throwable;
                 }
-                this.count -= i;
-                if (signalNotFull) {
-                    this.notFull.signal();
+                if (i > 0) {
+                    signalNotFull = this.count == this.capacity;
+                    this.count -= i;
+                    if (signalNotFull) {
+                        this.notFull.signal();
+                    }
                 }
-            }
-            return n;
+            return i;
         }
         finally {
             this.lock.unlock();

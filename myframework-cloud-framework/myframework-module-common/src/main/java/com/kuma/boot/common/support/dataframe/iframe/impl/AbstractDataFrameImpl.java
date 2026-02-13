@@ -127,7 +127,7 @@ extends AbstractWindowDataFrame<T> {
     public <K, K2, V> Map<K, Map<K2, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends K2> key2Mapper, Function<? super T, ? extends V> valueMapper) {
         Map<Object, List<T>> oldMap = this.stream().collect(Collectors.groupingBy(keyMapper));
         HashMap map = new HashMap(oldMap.size());
-        oldMap.forEach((? super K key, ? super V list) -> map.put(key, this.from(list.stream()).toMap(key2Mapper, valueMapper)));
+        oldMap.forEach((key, list) -> map.put(key, this.from(list.stream()).toMap(key2Mapper, valueMapper)));
         return map;
     }
 
@@ -263,7 +263,7 @@ extends AbstractWindowDataFrame<T> {
 
     @Override
     public <R> BigDecimal avg(Function<T, R> function) {
-        List bigDecimalList = this.stream().map(function).filter(Objects::nonNull).map((? super T e) -> {
+        List bigDecimalList = this.stream().map(function).filter(Objects::nonNull).map(e -> {
             if (e instanceof BigDecimal) {
                 return (BigDecimal)e;
             }
@@ -458,7 +458,7 @@ extends AbstractWindowDataFrame<T> {
             List tmpList = (List)treeMap.get(t);
             tmpList.add(t);
         }
-        return treeMap.values().stream().map((? super T list) -> {
+        return treeMap.values().stream().map(list -> {
             if (list.size() == 1) {
                 return list.get(0);
             }
@@ -714,12 +714,12 @@ extends AbstractWindowDataFrame<T> {
 
     public static <T, G, C> List<T> replenish(List<T> itemDTOList, Function<T, G> groupDim, Function<T, C> collectDim, List<C> allDim, ReplenishFunction<G, C, T> getEmptyObject) {
         Map<G, List<T>> nameItemListMap = itemDTOList.stream().collect(Collectors.groupingBy(groupDim));
-        nameItemListMap.forEach((? super K name, ? super V itemList) -> {
+        nameItemListMap.forEach((name, itemList) -> {
             ArrayList tmpAll = new ArrayList(allDim);
             List abasicssaList = itemList.stream().map(collectDim).collect(Collectors.toList());
             tmpAll.removeAll(abasicssaList);
             if (ListUtils.isNotEmpty(tmpAll)) {
-                List missingList = tmpAll.stream().map((? super T e) -> getEmptyObject.apply(name, e)).collect(Collectors.toList());
+                List missingList = tmpAll.stream().map(e -> getEmptyObject.apply(name, e)).collect(Collectors.toList());
                 itemList.addAll(missingList);
             }
         });
@@ -743,7 +743,7 @@ extends AbstractWindowDataFrame<T> {
     }
 
     protected <F> Stream<T> fi2Stream(Stream<FI2<T, F>> stream, SetFunction<T, F> setFunction) {
-        return stream.map((? super T e) -> {
+        return stream.map(e -> {
             setFunction.accept(e.getC1(), e.getC2());
             return e.getC1();
         });
@@ -761,7 +761,7 @@ extends AbstractWindowDataFrame<T> {
             if (length <= 1) {
                 return Stream.of(new FI2<Object, String>(e, (String)getFunction.apply(e)));
             }
-            return Arrays.stream(arrText).map((? super T text) -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), StringUtils.strip((CharSequence)text, (CharSequence)"\""))).collect(Collectors.toList()).stream();
+            return Arrays.stream(arrText).map(text -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), StringUtils.strip((CharSequence) text, (CharSequence) "\""))).collect(Collectors.toList()).stream();
         });
     }
 
@@ -778,7 +778,7 @@ extends AbstractWindowDataFrame<T> {
             if (objects.size() == 1) {
                 return Stream.of(new FI2<Object, String>(e, objects.get(0).toString()));
             }
-            return objects.stream().map((? super T text) -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), text.toString())).collect(Collectors.toList()).stream();
+            return objects.stream().map(text -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), text.toString())).collect(Collectors.toList()).stream();
         });
     }
 
@@ -799,7 +799,7 @@ extends AbstractWindowDataFrame<T> {
             if (objects.size() == 1) {
                 return Stream.of(new FI2(e, objects.iterator().next()));
             }
-            return objects.stream().map((? super T text) -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), text)).collect(Collectors.toList()).stream();
+            return objects.stream().map(text -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), text)).collect(Collectors.toList()).stream();
         });
     }
 
@@ -833,7 +833,7 @@ extends AbstractWindowDataFrame<T> {
                 }
                 stream = objects.stream();
             }
-            return stream.map((? super T text) -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), elementClass.cast(text))).collect(Collectors.toList()).stream();
+            return stream.map(text -> new FI2(BeanCopyUtil.copyProperties(e, e.getClass()), elementClass.cast(text))).collect(Collectors.toList()).stream();
         });
     }
 }

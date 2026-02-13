@@ -100,7 +100,10 @@ public class Prepare<I, N, E> {
     protected void init(E target) {
         if (this.filter.test(target)) {
             if (EmptyUtil.isNotEmpty(this.collSetGetList)) {
-                this.collSetGetList.stream().filter((? super T s) -> s.get(target) != null).flatMap(s -> ((List)s.get(target)).stream()).forEach(this.write::add);
+                this.collSetGetList.stream()
+                        .filter(s -> s.get(target) != null)
+                        .flatMap(s -> ((List<?>) s.get(target)).stream())
+                        .forEach(this.write::add);
             }
             if (EmptyUtil.isNotEmpty(this.setGetList)) {
                 this.setGetList.stream().map(s -> s.get(target)).forEach(this.write::add);

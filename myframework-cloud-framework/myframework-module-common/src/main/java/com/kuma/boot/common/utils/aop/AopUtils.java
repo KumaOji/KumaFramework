@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.aspectj.lang.JoinPoint
  *  org.springframework.aop.framework.AdvisedSupport
@@ -71,7 +71,7 @@ extends org.springframework.aop.support.AopUtils {
     public static Method getMethod(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
         Object[] arguments = joinPoint.getArgs();
-        List<Class> collect = Arrays.stream(arguments).map(Object::getClass).toList();
+        List<? extends Class<?>> collect = Arrays.stream(arguments).map(Object::getClass).toList();
         return ClassUtils.getMethodIfAvailable((Class)joinPoint.getSignature().getDeclaringType(), (String)methodName, (Class[])collect.toArray(new Class[collect.size()]));
     }
 }

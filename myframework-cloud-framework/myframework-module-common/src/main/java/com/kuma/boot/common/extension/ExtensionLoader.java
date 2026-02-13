@@ -68,14 +68,13 @@ public class ExtensionLoader<T> {
     }
 
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
-        ExtensionLoader.checkExtensionAnnotation(type);
-        ExtensionLoader loader = (ExtensionLoader)EXTENSION_LOADERS.get(type);
+        checkExtensionAnnotation(type);
+        ExtensionLoader<?> loader = EXTENSION_LOADERS.get(type);
         if (loader == null) {
-            ExtensionLoader loader1;
-            EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
-            loader = loader1 = (ExtensionLoader)EXTENSION_LOADERS.get(type);
+            EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<>(type));
+            loader = EXTENSION_LOADERS.get(type);
         }
-        return loader;
+        return (ExtensionLoader<T>) loader;
     }
 
     public T getAdaptiveExtension() {
@@ -193,9 +192,8 @@ public class ExtensionLoader<T> {
         try {
             Object instance = EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
-                Object instance1;
-                EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]));
-                instance = instance1 = EXTENSION_INSTANCES.get(clazz);
+                EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.getDeclaredConstructor().newInstance());
+                instance = EXTENSION_INSTANCES.get(clazz);
             }
             this.injectExtension(instance);
             if (wrap) {
@@ -279,51 +277,39 @@ public class ExtensionLoader<T> {
         }
     }
 
-    private void loadResource(Map<String, Class<?>> extensionClasses, ClassLoader classLoader, URL resourceURL, boolean overridden, String ... excludedPackages) {
-        block14: {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(resourceURL.openStream(), StandardCharsets.UTF_8));
-                block9: while (true) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        int ci = line.indexOf(35);
-                        if (ci >= 0) {
-                            line = line.substring(0, ci);
-                        }
-                        if ((line = line.trim()).isEmpty()) continue;
-                        try {
-                            String clazz;
-                            String name = null;
-                            int i = line.indexOf(61);
-                            if (i > 0) {
-                                name = line.substring(0, i).trim();
-                                clazz = line.substring(i + 1).trim();
-                            } else {
-                                clazz = line;
-                            }
-                            if (!StringUtils.isNotEmpty((CharSequence)clazz) || this.isExcluded(clazz, excludedPackages)) continue block9;
-                            this.loadClass(extensionClasses, resourceURL, Class.forName(clazz, true, classLoader), name, overridden);
-                            continue block9;
-                        }
-                        catch (Throwable t) {
-                            IllegalStateException e = new IllegalStateException("Failed to load extension class (interface: " + String.valueOf(this.type) + ", class line: " + line + ") in " + String.valueOf(resourceURL) + ", cause: " + t.getMessage(), t);
-                            this.exceptions.put(line, e);
-                        }
-                    }
-                    break block14;
-                    {
-                        continue block9;
-                        break;
-                    }
-                    break;
+    private void loadResource(Map<String, Class<?>> extensionClasses, ClassLoader classLoader, URL resourceURL, boolean overridden, String... excludedPackages) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceURL.openStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int ci = line.indexOf('#');
+                if (ci >= 0) {
+                    line = line.substring(0, ci);
                 }
-                finally {
-                    reader.close();
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                try {
+                    String clazz;
+                    String name = null;
+                    int i = line.indexOf('=');
+                    if (i > 0) {
+                        name = line.substring(0, i).trim();
+                        clazz = line.substring(i + 1).trim();
+                    } else {
+                        clazz = line;
+                    }
+                    if (!StringUtils.isNotEmpty(clazz) || this.isExcluded(clazz, excludedPackages)) {
+                        continue;
+                    }
+                    this.loadClass(extensionClasses, resourceURL, Class.forName(clazz, true, classLoader), name, overridden);
+                } catch (Throwable t) {
+                    IllegalStateException e = new IllegalStateException("Failed to load extension class (interface: " + this.type + ", class line: " + line + ") in " + resourceURL + ", cause: " + t.getMessage(), t);
+                    this.exceptions.put(line, e);
                 }
             }
-            catch (Throwable t) {
-                log.error("Exception occurred when loading extension class (interface: " + String.valueOf(this.type) + ", class file: " + String.valueOf(resourceURL) + ") in " + String.valueOf(resourceURL), t);
-            }
+        } catch (Throwable t) {
+            log.error("Exception occurred when loading extension class (interface: " + this.type + ", class file: " + resourceURL + ")", t);
         }
     }
 
@@ -339,7 +325,7 @@ public class ExtensionLoader<T> {
             this.wrapperExtensionLoader.cacheWrapperClass(clazz);
             return;
         }
-        clazz.getConstructor(new Class[0]);
+        clazz.getConstructor();
         if (StringUtils.isEmpty(name) && (name = this.findExtensionName(clazz)).isEmpty()) {
             throw new IllegalStateException("No such extension name for the class " + clazz.getName() + " in the config " + String.valueOf(resourceURL));
         }

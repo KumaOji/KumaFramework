@@ -227,7 +227,7 @@ extends AbstractCommonFrame<T> {
         SupplierFunction supplier = windowList -> {
             int index = n == -1 ? windowList.size() - 1 : n - 1;
             if (index < 0 || index >= windowList.size()) {
-                return windowList.stream().map((? super T e) -> new FI2<Object, Object>(e, null)).collect(Collectors.toList());
+                return windowList.stream().map(e -> new FI2<Object, Object>(e, null)).collect(Collectors.toList());
             }
             ArrayList result = new ArrayList();
             for (int i = 0; i < windowList.size(); ++i) {
@@ -264,7 +264,7 @@ extends AbstractCommonFrame<T> {
         SupplierFunction supplier = windowList -> {
             if (this.isAllRow(overParam)) {
                 BigDecimal value = SDFrame.read(windowList).sum(field);
-                return windowList.stream().map((? super T e) -> new FI2<Object, BigDecimal>(e, value)).collect(Collectors.toList());
+                return windowList.stream().map(e -> new FI2<Object, BigDecimal>(e, value)).collect(Collectors.toList());
             }
             return this.slidingWindowSum(windowList, overParam, field);
         };
@@ -315,7 +315,7 @@ extends AbstractCommonFrame<T> {
         SupplierFunction supplier = windowList -> {
             if (this.isAllRow(overParam)) {
                 BigDecimal value = SDFrame.read(windowList).defaultScale(this.defaultScale, this.defaultRoundingMode).avg(field);
-                return windowList.stream().map((? super T e) -> new FI2<Object, BigDecimal>(e, value)).collect(Collectors.toList());
+                return windowList.stream().map(e -> new FI2<Object, BigDecimal>(e, value)).collect(Collectors.toList());
             }
             return this.slidingWindowAvg(windowList, overParam, field);
         };
@@ -450,7 +450,7 @@ extends AbstractCommonFrame<T> {
         SupplierFunction supplier = windowList -> {
             if (this.isAllRow(overParam)) {
                 Object value = SDFrame.read(windowList).maxValue(field);
-                return windowList.stream().map((? super T e) -> new FI2<Object, Comparable>(e, (Comparable)value)).collect(Collectors.toList());
+                return windowList.stream().map(e -> new FI2<Object, Comparable>(e, (Comparable)value)).collect(Collectors.toList());
             }
             return this.slidingWindowForMaxValue(windowList, overParam, field);
         };
@@ -461,7 +461,7 @@ extends AbstractCommonFrame<T> {
         SupplierFunction supplier = windowList -> {
             if (this.isAllRow(overParam)) {
                 Object value = SDFrame.read(windowList).minValue(field);
-                return windowList.stream().map((? super T e) -> new FI2<Object, Comparable>(e, (Comparable)value)).collect(Collectors.toList());
+                return windowList.stream().map(e -> new FI2<Object, Comparable>(e, (Comparable)value)).collect(Collectors.toList());
             }
             return this.slidingWindowForMinValue(windowList, overParam, field);
         };
@@ -472,7 +472,7 @@ extends AbstractCommonFrame<T> {
         SupplierFunction supplier = windowList -> {
             if (this.isAllRow(overParam)) {
                 int count = windowList.size();
-                return windowList.stream().map((? super T e) -> new FI2<Object, Integer>(e, count)).collect(Collectors.toList());
+                return windowList.stream().map(e -> new FI2<Object, Integer>(e, count)).collect(Collectors.toList());
             }
             ArrayList result = new ArrayList();
             for (int i = 0; i < windowList.size(); ++i) {

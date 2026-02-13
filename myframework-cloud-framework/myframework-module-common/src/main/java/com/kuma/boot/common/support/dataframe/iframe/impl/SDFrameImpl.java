@@ -634,7 +634,7 @@ implements SDFrame<T> {
         List<FI2<K, BigDecimal>> sumList = this.returnDF(dataList).groupKey(key, tBigDecimalCollector);
         List<T> countList = ((SDFrameImpl)this.returnDF(dataList).groupByCount((Function)key)).viewList();
         Map<Object, Long> countMap = countList.stream().collect(Collectors.toMap(FI2::getC1, FI2::getC2));
-        List collect = sumList.stream().map((? super T e) -> new FI3(e.getC1(), (BigDecimal)e.getC2(), (Long)countMap.get(e.getC1()))).collect(Collectors.toList());
+        List collect = sumList.stream().map(e -> new FI3(e.getC1(), (BigDecimal)e.getC2(), (Long)countMap.get(e.getC1()))).collect(Collectors.toList());
         return this.returnDF(collect);
     }
 
@@ -645,7 +645,7 @@ implements SDFrame<T> {
         List<FI3<K, J, BigDecimal>> sumList = this.returnDF(dataList).groupKey(key, key2, tBigDecimalCollector);
         List<T> countList = ((SDFrameImpl)this.returnDF(dataList).groupByCount((Function)key, (Function)key2)).viewList();
         Map countMap = countList.stream().collect(Collectors.toMap(e -> String.valueOf(e.getC1()) + "_" + String.valueOf(e.getC2()), Function.identity()));
-        List collect = sumList.stream().map((? super T e) -> {
+        List collect = sumList.stream().map(e -> {
             FI3 countItem = (FI3)countMap.get(String.valueOf(e.getC1()) + "_" + String.valueOf(e.getC2()));
             return new FI4(e.getC1(), e.getC2(), (BigDecimal)e.getC3(), (Long)countItem.getC3());
         }).collect(Collectors.toList());

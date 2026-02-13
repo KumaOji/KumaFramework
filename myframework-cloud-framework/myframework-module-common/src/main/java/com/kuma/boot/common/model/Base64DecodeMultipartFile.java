@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.springframework.web.multipart.MultipartFile
  */
@@ -108,19 +108,21 @@ implements MultipartFile {
         ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
         byte[] buff = new byte[100];
         int rc = 0;
-        while ((rc = in.read(buff, 0, 100)) > 0) {
-            swapStream.write(buff, 0, rc);
-        }
-        data = swapStream.toByteArray();
-        if (in == null) return Base64.getEncoder().encodeToString(data);
-        try {
-            in.close();
+        try{
+            while ((rc = in.read(buff, 0, 100)) > 0) {
+                swapStream.write(buff, 0, rc);
+            }
+            data = swapStream.toByteArray();
+            if (in == null) return Base64.getEncoder().encodeToString(data);
+            try {
+                in.close();
+                return Base64.getEncoder().encodeToString(data);
+            }
+            catch (IOException e) {
+                LogUtils.error("inputStreamToStream\u9519\u8bef", e);
+            }
             return Base64.getEncoder().encodeToString(data);
         }
-        catch (IOException e) {
-            LogUtils.error("inputStreamToStream\u9519\u8bef", e);
-        }
-        return Base64.getEncoder().encodeToString(data);
         catch (IOException e) {
             try {
                 LogUtils.error("\u8f6c\u7801\u9519\u8bef", e);

@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  cn.hutool.core.bean.BeanUtil
  *  cn.hutool.core.bean.copier.CopyOptions
@@ -201,7 +201,7 @@ extends org.springframework.util.ReflectionUtils {
     }
 
     public static Object findEnumObjByName(Class<?> cls, String methodName, String name) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        ?[] objects = cls.getEnumConstants();
+        Object[] objects = cls.getEnumConstants();
         Method method = cls.getMethod(methodName, new Class[0]);
         for (Object object : objects) {
             Object invoke = method.invoke(object, new Object[0]);
@@ -418,8 +418,8 @@ extends org.springframework.util.ReflectionUtils {
         Object vo;
         if (clazz.isRecord()) {
             Field[] fields = clazz.getDeclaredFields();
-            ArrayList<T> params = new ArrayList<T>();
-            ArrayList<Field> fieldList = new ArrayList<Field>();
+            ArrayList<Object> params = new ArrayList<>();
+            ArrayList<Field> fieldList = new ArrayList<>();
             for (Field field : fields) {
                 if ("serialVersionUID".equals(field.getName())) continue;
                 T value = ReflectionUtils.tryGetValue(t, field.getName());
@@ -438,7 +438,7 @@ extends org.springframework.util.ReflectionUtils {
         if (ArrayUtil.isEmpty((Object[])params)) {
             Constructor constructor = ReflectUtil.getConstructor(clazz, (Class[])new Class[0]);
             try {
-                return constructor.newInstance(new Object[0]);
+                return (T) constructor.newInstance(new Object[0]);
             }
             catch (Exception e) {
                 throw new BootException("Instance class [{}] error!");
@@ -450,7 +450,7 @@ extends org.springframework.util.ReflectionUtils {
             throw new BootException("No Constructor matched for parameter types: [{}]");
         }
         try {
-            return constructor.newInstance(params);
+            return (T) constructor.newInstance(params);
         }
         catch (Exception e) {
             throw new BootException("Instance class [{}] error!");

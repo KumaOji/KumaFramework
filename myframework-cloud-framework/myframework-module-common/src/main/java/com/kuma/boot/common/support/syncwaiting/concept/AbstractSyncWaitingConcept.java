@@ -26,39 +26,35 @@ implements SyncWaitingConcept {
     @Override
     public <T> T waitSync(Object key, SyncCaller caller, SyncWaitingConfiguration configuration) {
         this.lock();
-        SyncWaiter exist = this.findWaitingSyncWaiter(key);
-        if (exist == null) {
-            Object t;
-            SyncWaiter waiter = this.reuseSyncWaiter(key);
-            if (waiter == null) {
-                throw new NullPointerException("No SyncWaiter to reuse");
+        try {
+            SyncWaiter exist = this.findWaitingSyncWaiter(key);
+            if (exist == null) {
+                SyncWaiter waiter = this.reuseSyncWaiter(key);
+                if (waiter == null) {
+                    throw new NullPointerException("No SyncWaiter to reuse");
+                }
+                try {
+                    caller.call(key);
+                } catch (Throwable e) {
+                    this.recycleSyncWaiter(key);
+                    throw e;
+                }
+                try {
+                    waiter.performWait(configuration.getWaitingTime());
+                    Object value = waiter.value();
+                    this.recycleSyncWaiter(key);
+                    return (T) value;
+                } catch (Throwable e) {
+                    this.recycleSyncWaiter(key);
+                    waiter.performNotify();
+                    throw e;
+                }
             }
-            try {
-                caller.call(key);
-            }
-            catch (Throwable e) {
-                this.recycleSyncWaiter(key);
-                throw e;
-            }
-            try {
-                waiter.performWait(configuration.getWaitingTime());
-                Object value = waiter.value();
-                this.recycleSyncWaiter(key);
-                t = value;
-            }
-            catch (Throwable e) {
-                this.recycleSyncWaiter(key);
-                waiter.performNotify();
-                throw e;
-            }
-            return t;
-        }
-        exist.performWait(configuration.getQueuingTime());
-        T t = this.waitSync(key, caller, configuration);
-        return t;
-        finally {
+            exist.performWait(configuration.getQueuingTime());
+        } finally {
             this.unlock();
         }
+        return this.waitSync(key, caller, configuration);
     }
 
     /*
