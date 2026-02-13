@@ -1,11 +1,6 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.util.FastByteArrayOutputStream
- */
 package com.kuma.boot.common.support.compiler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -18,7 +13,6 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import org.springframework.util.FastByteArrayOutputStream;
 
 public class InMemoryJavaCompiler {
     private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
@@ -40,13 +34,13 @@ public class InMemoryJavaCompiler {
     extends SimpleJavaFileObject {
         private final String className;
         private final CharSequence sourceCode;
-        private final FastByteArrayOutputStream byteCode;
+        private final ByteArrayOutputStream byteCode;
 
         public MemoryJavaFileObject(String className, CharSequence sourceCode) {
             super(URI.create("string:///" + className.replace(".", "/") + JavaFileObject.Kind.SOURCE.extension), JavaFileObject.Kind.SOURCE);
             this.className = className;
             this.sourceCode = sourceCode;
-            this.byteCode = new FastByteArrayOutputStream();
+            this.byteCode = new ByteArrayOutputStream();
         }
 
         @Override
