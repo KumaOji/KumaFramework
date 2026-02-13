@@ -34,7 +34,12 @@ dependencies {
     implementation projectLibs.jackson.core
     implementation projectLibs.jackson.databind
     implementation projectLibs.transmittable.thread.local
+    implementation projectLibs.snappy.java
+    implementation projectLibs.kryo
+    implementation projectLibs.jsoup
+    implementation projectLibs.snakeyaml
     implementation projectLibs.slf4j.api
+    implementation projectLibs.logback.classic
     implementation projectLibs.jspecify
     implementation projectLibs.uuid.creator
     implementation projectLibs.aopalliance

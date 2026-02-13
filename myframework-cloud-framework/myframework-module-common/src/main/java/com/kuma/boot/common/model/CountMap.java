@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.jspecify.annotations.Nullable
  */
@@ -53,11 +53,11 @@ public class CountMap {
     }
 
     public <T> @Nullable T getMax() {
-        return this.data.entrySet().stream().max(Comparator.comparingLong(entry -> ((AtomicLong)entry.getValue()).longValue())).map(Map.Entry::getKey).orElse(null);
+        return (T) this.data.entrySet().stream().max(Comparator.comparingLong(entry -> ((AtomicLong)entry.getValue()).longValue())).map(Map.Entry::getKey).orElse(null);
     }
 
     public <T> @Nullable T getMin() {
-        return this.data.entrySet().stream().min(Comparator.comparingLong(entry -> ((AtomicLong)entry.getValue()).longValue())).map(Map.Entry::getKey).orElse(null);
+        return (T) this.data.entrySet().stream().min(Comparator.comparingLong(entry -> ((AtomicLong)entry.getValue()).longValue())).map(Map.Entry::getKey).orElse(null);
     }
 
     public int size() {

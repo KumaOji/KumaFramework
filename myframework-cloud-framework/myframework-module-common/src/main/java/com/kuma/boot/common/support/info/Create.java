@@ -20,6 +20,6 @@ public @interface Create {
 
     public String content() default "";
 
-    public String createor() default "shuigedeng";
+    public String createor() default "kuma";
 }
 

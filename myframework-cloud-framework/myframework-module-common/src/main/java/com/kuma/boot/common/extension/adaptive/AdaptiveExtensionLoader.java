@@ -62,7 +62,7 @@ public class AdaptiveExtensionLoader<T> {
     private T createAdaptiveExtension() {
         try {
             Object t = this.getAdaptiveExtensionClass().getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-            return this.extensionLoader.injectExtension(t);
+            return this.extensionLoader.injectExtension((T) t);
         }
         catch (Exception e) {
             throw new IllegalStateException("Can't create adaptive extension " + String.valueOf(this.extensionLoader.getType()) + ", cause: " + e.getMessage(), e);

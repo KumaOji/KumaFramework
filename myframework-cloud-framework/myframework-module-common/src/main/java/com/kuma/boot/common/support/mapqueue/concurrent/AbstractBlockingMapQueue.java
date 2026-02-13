@@ -1,11 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.mapqueue.concurrent;
 
-import com.kuma.boot.common.support.mapqueue.concept.MapQueue;
 import com.kuma.boot.common.support.mapqueue.concept.MapQueueElement;
-import com.kuma.boot.common.support.mapqueue.concurrent.BlockingMapQueue;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,140 +42,211 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class AbstractBlockingMapQueue<K, V>
-implements BlockingMapQueue<K, V> {
+/**
+ * AbstractBlockingMapQueue
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public abstract class AbstractBlockingMapQueue<K, V> implements BlockingMapQueue<K, V> {
+
+    /**
+     * The capacity bound, or Integer.MAX_VALUE if none
+     */
     private final int capacity;
+
+    /**
+     * Current number of elements
+     */
+    // size 方法没加锁，可以用 cas 优化
+    // 或者 size 加锁
     private int count;
+
+    /**
+     * Lock
+     */
     private final ReentrantLock lock;
+
+    /**
+     * Wait queue for waiting takes
+     */
     private final Condition notEmpty;
+
+    /**
+     * Wait queue for waiting puts
+     */
     private final Condition notFull;
+
     private final Map<K, V> map;
+
     private final Map<K, V> readOnly;
-    private final List<MapQueue.Synchronizer<K, V>> synchronizers = new CopyOnWriteArrayList<MapQueue.Synchronizer<K, V>>();
 
-    private void invokeSynchronizersBeforeEnqueue(K key, V value) {
-        this.synchronizers.forEach(it -> it.beforeEnqueue(key, value, this.readOnly));
+    private final List<Synchronizer<K, V>> synchronizers = new CopyOnWriteArrayList<>();
+
+    private void invokeSynchronizersBeforeEnqueue( K key, V value ) {
+        synchronizers.forEach(it -> it.beforeEnqueue(key, value, readOnly));
     }
 
-    private void invokeSynchronizersAfterEnqueue(K key, V value) {
-        this.synchronizers.forEach(it -> it.afterEnqueue(key, value, this.readOnly));
+    private void invokeSynchronizersAfterEnqueue( K key, V value ) {
+        synchronizers.forEach(it -> it.afterEnqueue(key, value, readOnly));
     }
 
-    private void invokeSynchronizersBeforeDequeue(K key, V value) {
-        this.synchronizers.forEach(it -> it.beforeDequeue(key, value, this.readOnly));
+    private void invokeSynchronizersBeforeDequeue( K key, V value ) {
+        synchronizers.forEach(it -> it.beforeDequeue(key, value, readOnly));
     }
 
-    private void invokeSynchronizersAfterDequeue(K key, V value) {
-        this.synchronizers.forEach(it -> it.afterDequeue(key, value, this.readOnly));
+    private void invokeSynchronizersAfterDequeue( K key, V value ) {
+        synchronizers.forEach(it -> it.afterDequeue(key, value, readOnly));
     }
 
-    private boolean nonBlockingEnqueue(K k, V v) {
+    /*
+     * /** Links node at end of queue.
+     *
+     * @param node the node
+     */
+    /*
+     * private void enqueue(LinkedBlockingQueue.Node<E> node) { // assert
+     * putLock.isHeldByCurrentThread(); // assert last.next == null; last = last.next =
+     * node; }
+     */
+    private boolean nonBlockingEnqueue( K k, V v ) {
         boolean x;
-        if (this.map.containsKey(k)) {
-            this.invokeSynchronizersBeforeEnqueue(k, v);
-            this.map.put(k, v);
-            x = true;
-        } else if (this.count < this.capacity) {
-            this.invokeSynchronizersBeforeEnqueue(k, v);
-            this.map.put(k, v);
-            ++this.count;
+        if (map.containsKey(k)) {
+            invokeSynchronizersBeforeEnqueue(k, v);
+            map.put(k, v);
             x = true;
         } else {
-            x = false;
+            if (count < capacity) {
+                invokeSynchronizersBeforeEnqueue(k, v);
+                map.put(k, v);
+                count++;
+                x = true;
+            } else {
+                x = false;
+            }
         }
         if (x) {
-            this.invokeSynchronizersAfterEnqueue(k, v);
+            invokeSynchronizersAfterEnqueue(k, v);
         }
-        this.notEmpty.signal();
+        // 发送未空信号
+        notEmpty.signal();
         return x;
     }
 
-    private V blockingEnqueue(K k, V v) throws InterruptedException {
+    private V blockingEnqueue( K k, V v ) throws InterruptedException {
         V x;
-        if (this.map.containsKey(k)) {
-            this.invokeSynchronizersBeforeEnqueue(k, v);
-            x = this.map.put(k, v);
+        if (map.containsKey(k)) {
+            // 已经存在
+            // 更新节点
+            // count不变
+            invokeSynchronizersBeforeEnqueue(k, v);
+            x = map.put(k, v);
         } else {
-            while (this.count == this.capacity) {
-                this.notFull.await();
+            // 不存在
+            while (count == capacity) {
+                // 满了，等未满的信号
+                notFull.await();
             }
-            this.invokeSynchronizersBeforeEnqueue(k, v);
-            x = this.map.put(k, v);
-            ++this.count;
+            // 添加节点
+            // count+1
+            invokeSynchronizersBeforeEnqueue(k, v);
+            x = map.put(k, v);
+            count++;
         }
-        this.invokeSynchronizersAfterEnqueue(k, v);
-        this.notEmpty.signal();
+        invokeSynchronizersAfterEnqueue(k, v);
+        // 发送未空信号
+        notEmpty.signal();
         return x;
     }
 
-    private boolean blockingEnqueue(K k, V v, long timeout, TimeUnit unit) throws InterruptedException {
-        if (this.map.containsKey(k)) {
-            this.invokeSynchronizersBeforeEnqueue(k, v);
-            this.map.put(k, v);
+    private boolean blockingEnqueue( K k, V v, long timeout, TimeUnit unit )
+            throws InterruptedException {
+        if (map.containsKey(k)) {
+            // 已经存在
+            // 更新节点
+            // count不变
+            invokeSynchronizersBeforeEnqueue(k, v);
+            map.put(k, v);
         } else {
+            // 不存在
             long nanos = unit.toNanos(timeout);
-            while (this.count == this.capacity) {
-                if (nanos <= 0L) {
+            while (count == capacity) {
+                // 满了，等未满的信号
+                if (nanos <= 0) {
                     return false;
                 }
-                nanos = this.notFull.awaitNanos(nanos);
+                nanos = notFull.awaitNanos(nanos);
             }
-            this.invokeSynchronizersBeforeEnqueue(k, v);
-            this.map.put(k, v);
-            ++this.count;
+            // 添加节点
+            // count+1
+            invokeSynchronizersBeforeEnqueue(k, v);
+            map.put(k, v);
+            count++;
         }
-        this.invokeSynchronizersAfterEnqueue(k, v);
-        this.notEmpty.signal();
+        invokeSynchronizersAfterEnqueue(k, v);
+        // 发送未空信号
+        notEmpty.signal();
         return true;
     }
 
-    private V nonBlockingDequeue(K k) {
-        if (this.map.containsKey(k)) {
-            this.invokeSynchronizersBeforeDequeue(k, this.map.get(k));
-            V v = this.map.remove(k);
-            --this.count;
-            this.invokeSynchronizersAfterDequeue(k, v);
-            this.notFull.signal();
+    private V nonBlockingDequeue( K k ) {
+        if (map.containsKey(k)) {
+            // 已经存在
+            // 移除节点
+            // count-1
+            invokeSynchronizersBeforeDequeue(k, map.get(k));
+            V v = map.remove(k);
+            count--;
+            invokeSynchronizersAfterDequeue(k, v);
+            // 发送未满信号
+            notFull.signal();
             return v;
         }
         return null;
     }
 
     private Map.Entry<K, V> nonBlockingDequeue() {
-        if (this.count > 0) {
-            return this.dequeue0();
+        if (count > 0) {
+            return dequeue0();
         }
         return null;
     }
 
+    /**
+     * 出队
+     *
+     * @return 下一个数据节点
+     */
     private Map.Entry<K, V> blockingDequeue() throws InterruptedException {
-        while (this.count == 0) {
-            this.notEmpty.await();
+        while (count == 0) {
+            notEmpty.await();
         }
-        return this.dequeue0();
+        return dequeue0();
     }
 
-    private Map.Entry<K, V> blockingDequeue(long timeout, TimeUnit unit) throws InterruptedException {
+    private Map.Entry<K, V> blockingDequeue( long timeout, TimeUnit unit )
+            throws InterruptedException {
         long nanos = unit.toNanos(timeout);
-        while (this.count == 0) {
-            if (nanos <= 0L) {
+        while (count == 0) {
+            if (nanos <= 0) {
                 return null;
             }
-            nanos = this.notEmpty.awaitNanos(nanos);
+            nanos = notEmpty.awaitNanos(nanos);
         }
-        return this.dequeue0();
+        return dequeue0();
     }
 
     private Map.Entry<K, V> dequeue0() {
-        Iterator<Map.Entry<K, V>> iterator = this.map.entrySet().iterator();
+        Iterator<Map.Entry<K, V>> iterator = map.entrySet().iterator();
         Map.Entry<K, V> entry = iterator.next();
         K k = entry.getKey();
         V v = entry.getValue();
-        this.invokeSynchronizersBeforeDequeue(k, v);
+        invokeSynchronizersBeforeDequeue(k, v);
         iterator.remove();
-        --this.count;
-        this.invokeSynchronizersAfterDequeue(k, v);
-        this.notFull.signal();
+        count--;
+        invokeSynchronizersAfterDequeue(k, v);
+        notFull.signal();
         return entry;
     }
 
@@ -173,42 +256,39 @@ implements BlockingMapQueue<K, V> {
         this(Integer.MAX_VALUE, false);
     }
 
-    public AbstractBlockingMapQueue(int capacity) {
+    public AbstractBlockingMapQueue( int capacity ) {
         this(capacity, false);
     }
 
-    public AbstractBlockingMapQueue(boolean fair) {
+    public AbstractBlockingMapQueue( boolean fair ) {
         this(Integer.MAX_VALUE, fair);
     }
 
-    public AbstractBlockingMapQueue(Map<K, V> map) {
+    public AbstractBlockingMapQueue( Map<K, V> map ) {
         this(Integer.MAX_VALUE, false, map);
     }
 
-    public AbstractBlockingMapQueue(int capacity, Map<K, V> map) {
+    public AbstractBlockingMapQueue( int capacity, Map<K, V> map ) {
         this(capacity, false, map);
     }
 
-    public AbstractBlockingMapQueue(boolean fair, Map<K, V> map) {
+    public AbstractBlockingMapQueue( boolean fair, Map<K, V> map ) {
         this(Integer.MAX_VALUE, fair, map);
     }
 
-    public AbstractBlockingMapQueue(int capacity, boolean fair) {
+    public AbstractBlockingMapQueue( int capacity, boolean fair ) {
         if (capacity <= 0) {
             throw new IllegalArgumentException();
         }
         this.capacity = capacity;
-        this.map = this.createMap();
+        this.map = createMap();
         this.readOnly = Collections.unmodifiableMap(this.map);
         this.lock = new ReentrantLock(fair);
-        this.notEmpty = this.lock.newCondition();
-        this.notFull = this.lock.newCondition();
+        this.notEmpty = lock.newCondition();
+        this.notFull = lock.newCondition();
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public AbstractBlockingMapQueue(int capacity, boolean fair, Map<? extends K, ? extends V> map) {
+    public AbstractBlockingMapQueue( int capacity, boolean fair, Map<? extends K, ? extends V> map ) {
         this(capacity, fair);
         this.lock.lock();
         try {
@@ -217,1187 +297,1268 @@ implements BlockingMapQueue<K, V> {
             if (size >= capacity) {
                 throw new IllegalStateException("Queue full");
             }
-            this.count = size;
-        }
-        finally {
-            this.lock.unlock();
+            count = size;
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    public void addSynchronizer(MapQueue.Synchronizer<K, V> synchronizer) {
-        this.synchronizers.add(synchronizer);
+    public void addSynchronizer( Synchronizer<K, V> synchronizer ) {
+        synchronizers.add(synchronizer);
     }
 
     @Override
-    public void removeSynchronizer(MapQueue.Synchronizer<K, V> synchronizer) {
-        this.synchronizers.remove(synchronizer);
+    public void removeSynchronizer( Synchronizer<K, V> synchronizer ) {
+        synchronizers.remove(synchronizer);
     }
 
+    /**
+     * Returns the number of elements in this queue.
+     *
+     * @return the number of elements in this queue
+     */
     public int size() {
-        return this.count;
+        return count;
     }
 
+    /**
+     * Returns the number of additional elements that this queue can ideally (in the absence of memory or resource
+     * constraints) accept without blocking. This is always equal to the initial capacity of this queue less the current
+     * {@code size} of this queue.
+     *
+     * <p>
+     * Note that you <em>cannot</em> always tell if an attempt to insert an element will succeed by inspecting
+     * {@code remainingCapacity} because it may be the case that another thread is about to insert or remove an
+     * element.
+     */
     public int remainingCapacity() {
-        return this.capacity - this.count;
+        return capacity - count;
     }
 
     public boolean isEmpty() {
-        return this.size() == 0;
+        return size() == 0;
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * put
+     * @param key
+     * @param value
+     * @return
+     * @throws InterruptedException
      */
-    public V put(K key, V value) throws InterruptedException {
-        this.lock.lockInterruptibly();
+    public V put( K key, V value ) throws InterruptedException {
+        lock.lockInterruptibly();
         try {
-            V v = this.blockingEnqueue(key, value);
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+            return blockingEnqueue(key, value);
+        } finally {
+            lock.unlock();
         }
     }
 
-    public void putAll(Map<? extends K, ? extends V> m) throws InterruptedException {
-        for (Map.Entry<K, V> entry : m.entrySet()) {
-            this.put(entry.getKey(), entry.getValue());
+    public void putAll( Map<? extends K, ? extends V> m ) throws InterruptedException {
+        for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+            put(entry.getKey(), entry.getValue());
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public V putIfAbsent(K key, V value) throws InterruptedException {
-        this.lock.lockInterruptibly();
+    public V putIfAbsent( K key, V value ) throws InterruptedException {
+        lock.lockInterruptibly();
         try {
-            V oldValue = this.map.get(key);
+            V oldValue = map.get(key);
+            // 如果不存在或值为null则需要添加
             if (oldValue == null) {
-                V v = this.blockingEnqueue(key, value);
-                return v;
+                return blockingEnqueue(key, value);
+            } else {
+                return oldValue;
             }
-            V v = oldValue;
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) throws InterruptedException {
+    public V computeIfAbsent( K key, Function<? super K, ? extends V> mappingFunction )
+            throws InterruptedException {
         Objects.requireNonNull(mappingFunction);
-        this.lock.lockInterruptibly();
+        lock.lockInterruptibly();
         try {
-            V oldValue = this.map.get(key);
+            V oldValue = map.get(key);
             if (oldValue == null) {
                 V newValue = mappingFunction.apply(key);
                 if (newValue == null) {
-                    V v = null;
-                    return v;
+                    return null;
+                } else {
+                    blockingEnqueue(key, newValue);
+                    return newValue;
                 }
-                this.blockingEnqueue(key, newValue);
-                V v = newValue;
-                return v;
+            } else {
+                return oldValue;
             }
-            V v = oldValue;
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws InterruptedException {
+    public V computeIfPresent(
+            K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
+            throws InterruptedException {
         Objects.requireNonNull(remappingFunction);
-        this.lock.lockInterruptibly();
+        lock.lockInterruptibly();
         try {
-            V oldValue = this.map.get(key);
+            V oldValue = map.get(key);
             if (oldValue != null) {
                 V newValue = remappingFunction.apply(key, oldValue);
                 if (newValue == null) {
-                    this.nonBlockingDequeue(key);
-                    V v = null;
-                    return v;
+                    nonBlockingDequeue(key);
+                    return null;
+                } else {
+                    blockingEnqueue(key, newValue);
+                    return newValue;
                 }
-                this.blockingEnqueue(key, newValue);
-                V v = newValue;
-                return v;
+            } else {
+                return null;
             }
-            V v = null;
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws InterruptedException {
+    public V compute( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
+            throws InterruptedException {
         Objects.requireNonNull(remappingFunction);
-        this.lock.lockInterruptibly();
+        lock.lockInterruptibly();
         try {
             Objects.requireNonNull(remappingFunction);
-            V oldValue = this.map.get(key);
+            V oldValue = map.get(key);
             V newValue = remappingFunction.apply(key, oldValue);
             if (newValue == null) {
-                if (oldValue != null || this.map.containsKey(key)) {
-                    this.nonBlockingDequeue(key);
+                // delete mapping
+                if (oldValue != null || map.containsKey(key)) {
+                    // something to remove
+                    nonBlockingDequeue(key);
+                } else {
+                    // nothing to do. Leave things as they were.
                 }
-                V v = null;
-                return v;
+                return null;
+            } else {
+                // add or replace old mapping
+                blockingEnqueue(key, newValue);
+                return newValue;
             }
-            this.blockingEnqueue(key, newValue);
-            V v = newValue;
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) throws InterruptedException {
+    public V merge( K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction )
+            throws InterruptedException {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);
-        this.lock.lockInterruptibly();
+        lock.lockInterruptibly();
         try {
-            V oldValue = this.get(key);
-            V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
+            V oldValue = get(key);
+            V newValue = ( oldValue == null ) ? value : remappingFunction.apply(oldValue, value);
             if (newValue == null) {
-                this.nonBlockingDequeue(key);
+                nonBlockingDequeue(key);
             } else {
-                this.blockingEnqueue(key, newValue);
+                blockingEnqueue(key, newValue);
             }
             return newValue;
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public boolean offer(K key, V value, long timeout, TimeUnit unit) throws InterruptedException {
-        this.lock.lockInterruptibly();
-        try {
-            boolean bl = this.blockingEnqueue(key, value, timeout, unit);
-            return bl;
-        }
-        finally {
-            this.lock.unlock();
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * Inserts the specified element at the tail of this queue, waiting if necessary up to the specified wait time for
+     * space to become available.
+     *
+     * @return {@code true} if successful, or {@code false} if the specified waiting time elapses before space is
+     * available
+     * @throws InterruptedException {@inheritDoc}
+     * @throws NullPointerException {@inheritDoc}
      */
-    public boolean offer(K key, V value) {
-        this.lock.lock();
+    /*
+     * public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException
+     * {
+     *
+     * if (e == null) throw new NullPointerException(); long nanos =
+     * unit.toNanos(timeout); int c = -1; final ReentrantLock putLock = this.putLock;
+     * final AtomicInteger count = this.count; putLock.lockInterruptibly(); try { while
+     * (count.get() == capacity) { if (nanos <= 0) return false; nanos =
+     * notFull.awaitNanos(nanos); } enqueue(new LinkedBlockingQueue.Node<E>(e)); c =
+     * count.getAndIncrement(); if (c + 1 < capacity) notFull.signal(); } finally {
+     * putLock.unlock(); } if (c == 0) signalNotEmpty(); return true; }
+     */
+    public boolean offer( K key, V value, long timeout, TimeUnit unit ) throws InterruptedException {
+        lock.lockInterruptibly();
         try {
-            boolean bl = this.nonBlockingEnqueue(key, value);
-            return bl;
+            return blockingEnqueue(key, value, timeout, unit);
+        } finally {
+            lock.unlock();
         }
-        finally {
-            this.lock.unlock();
+    }
+
+    /**
+     * Inserts the specified element at the tail of this queue if it is possible to do so immediately without exceeding
+     * the queue's capacity, returning {@code true} upon success and {@code false} if this queue is full. When using a
+     * capacity-restricted queue, this method is generally preferable to method {@link BlockingQueue#add add}, which can
+     * fail to insert an element only by throwing an exception.
+     *
+     * @throws NullPointerException if the specified element is null
+     */
+    /*
+     * public boolean offer(E e) { if (e == null) throw new NullPointerException(); final
+     * AtomicInteger count = this.count; if (count.get() == capacity) return false; int c
+     * = -1; LinkedBlockingQueue.Node<E> node = new LinkedBlockingQueue.Node<E>(e); final
+     * ReentrantLock putLock = this.putLock; putLock.lock(); try { if (count.get() <
+     * capacity) { enqueue(node); c = count.getAndIncrement(); if (c + 1 < capacity)
+     * notFull.signal(); } } finally { putLock.unlock(); } if (c == 0) signalNotEmpty();
+     * return c >= 0; }
+     */
+    public boolean offer( K key, V value ) {
+        lock.lock();
+        try {
+            return nonBlockingEnqueue(key, value);
+        } finally {
+            lock.unlock();
         }
     }
 
     public Map.Entry<K, V> take() throws InterruptedException {
-        this.lock.lockInterruptibly();
+        lock.lockInterruptibly();
         try {
-            Map.Entry<K, V> entry = this.blockingDequeue();
-            return entry;
-        }
-        finally {
-            this.lock.unlock();
+            return blockingDequeue();
+        } finally {
+            lock.unlock();
         }
     }
 
     public V takeValue() throws InterruptedException {
-        return this.take().getValue();
+        return take().getValue();
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public Map.Entry<K, V> poll(long timeout, TimeUnit unit) throws InterruptedException {
-        this.lock.lockInterruptibly();
+    public Map.Entry<K, V> poll( long timeout, TimeUnit unit ) throws InterruptedException {
+        lock.lockInterruptibly();
         try {
-            Map.Entry<K, V> entry = this.blockingDequeue(timeout, unit);
-            return entry;
-        }
-        finally {
-            this.lock.unlock();
+            return blockingDequeue(timeout, unit);
+        } finally {
+            lock.unlock();
         }
     }
 
-    public V pollValue(long timeout, TimeUnit unit) throws InterruptedException {
-        return this.poll(timeout, unit).getValue();
+    public V pollValue( long timeout, TimeUnit unit ) throws InterruptedException {
+        return poll(timeout, unit).getValue();
     }
 
     public Map.Entry<K, V> poll() {
-        this.lock.lock();
+        lock.lock();
         try {
-            Map.Entry<K, V> entry = this.nonBlockingDequeue();
-            return entry;
-        }
-        finally {
-            this.lock.unlock();
+            return nonBlockingDequeue();
+        } finally {
+            lock.unlock();
         }
     }
 
     public V pollValue() {
-        return this.poll().getValue();
+        return poll().getValue();
     }
 
     public Map.Entry<K, V> peek() {
-        this.lock.lock();
+        lock.lock();
         try {
-            if (this.count == 0) {
-                Map.Entry<K, V> entry = null;
-                return entry;
+            if (count == 0) {
+                return null;
             }
-            Iterator<Map.Entry<K, V>> iterator = this.map.entrySet().iterator();
+            Iterator<Map.Entry<K, V>> iterator = map.entrySet().iterator();
             if (iterator.hasNext()) {
-                Map.Entry<K, V> entry = iterator.next();
-                return entry;
+                return iterator.next();
+            } else {
+                return null;
             }
-            Map.Entry<K, V> entry = null;
-            return entry;
-        }
-        finally {
-            this.lock.unlock();
+        } finally {
+            lock.unlock();
         }
     }
 
     public V peekValue() {
-        return this.peek().getValue();
+        return peek().getValue();
     }
 
-    public V get(K key) {
-        this.lock.lock();
+    public V get( K key ) {
+        lock.lock();
         try {
-            V v = this.map.get(key);
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+            return map.get(key);
+        } finally {
+            lock.unlock();
         }
     }
+
+    public V getOrDefault( K key, V defaultValue ) {
+        lock.lock();
+        try {
+            return map.getOrDefault(key, defaultValue);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Unlinks interior Node p with predecessor trail.
+     */
+    /*
+     * void unlink(LinkedBlockingQueue.Node<E> p, LinkedBlockingQueue.Node<E> trail) { //
+     * assert isFullyLocked(); // p.next is not changed, to allow iterators that are //
+     * traversing p to maintain their weak-consistency guarantee. p.item = null;
+     * trail.next = p.next; if (last == p) last = trail; if (count.getAndDecrement() ==
+     * capacity) notFull.signal(); }
+     */
 
     /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+     * /** Removes a single instance of the specified element from this queue, if it is
+     * present. More formally, removes an element {@code e} such that {@code o.equals(e)},
+     * if this queue contains one or more such elements. Returns {@code true} if this
+     * queue contained the specified element (or equivalently, if this queue changed as a
+     * result of the call).
+     *
+     * @param o element to be removed from this queue, if present
+     *
+     * @return {@code true} if this queue changed as a result of the call
      */
-    public V getOrDefault(K key, V defaultValue) {
-        this.lock.lock();
-        try {
-            V v = this.map.getOrDefault(key, defaultValue);
-            return v;
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    public V remove(K key) {
-        this.lock.lock();
-        try {
-            V v = this.nonBlockingDequeue(key);
-            return v;
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
     /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+     * public boolean remove(Object o) { if (o == null) return false; fullyLock(); try {
+     * for (LinkedBlockingQueue.Node<E> trail = head, p = trail.next; p != null; trail =
+     * p, p = p.next) { if (o.equals(p.item)) { unlink(p, trail); return true; } } return
+     * false; } finally { fullyUnlock(); } }
      */
-    public boolean remove(K key, V value) {
-        this.lock.lock();
+    public V remove( K key ) {
+        lock.lock();
         try {
-            boolean remove;
-            if (Objects.equals(this.map.get(key), value)) {
-                this.invokeSynchronizersBeforeDequeue(key, value);
+            return nonBlockingDequeue(key);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public boolean remove( K key, V value ) {
+        lock.lock();
+        try {
+            if (Objects.equals(map.get(key), value)) {
+                invokeSynchronizersBeforeDequeue(key, value);
             }
-            if (remove = this.map.remove(key, value)) {
-                --this.count;
-                this.invokeSynchronizersAfterDequeue(key, value);
-                this.notFull.signal();
+            boolean remove = map.remove(key, value);
+            if (remove) {
+                count--;
+                invokeSynchronizersAfterDequeue(key, value);
+                // 发送未满信号
+                notFull.signal();
             }
-            boolean bl = remove;
-            return bl;
-        }
-        finally {
-            this.lock.unlock();
+            return remove;
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public boolean removeValue(V value) {
-        this.lock.lock();
+    public boolean removeValue( V value ) {
+        lock.lock();
         try {
             boolean removed = false;
-            Iterator<Map.Entry<K, V>> iterator = this.map.entrySet().iterator();
+            Iterator<Map.Entry<K, V>> iterator = map.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<K, V> entry = iterator.next();
                 K k = entry.getKey();
                 V v = entry.getValue();
-                if (!Objects.equals(value, v)) continue;
-                this.invokeSynchronizersBeforeDequeue(k, v);
-                iterator.remove();
-                --this.count;
-                removed = true;
-                this.invokeSynchronizersAfterDequeue(k, v);
+                if (Objects.equals(value, v)) {
+                    invokeSynchronizersBeforeDequeue(k, v);
+                    iterator.remove();
+                    count--;
+                    removed = true;
+                    invokeSynchronizersAfterDequeue(k, v);
+                }
             }
             if (removed) {
-                this.notFull.signal();
+                notFull.signal();
             }
-            boolean bl = removed;
-            return bl;
+            return removed;
+        } finally {
+            lock.unlock();
         }
-        finally {
-            this.lock.unlock();
+    }
+
+    public boolean replace( K key, V oldValue, V newValue ) {
+        lock.lock();
+        try {
+            return map.replace(key, oldValue, newValue);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public V replace( K key, V value ) {
+        lock.lock();
+        try {
+            return map.replace(key, value);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void replaceAll( BiFunction<? super K, ? super V, ? extends V> function ) {
+        lock.lock();
+        try {
+            map.replaceAll(function);
+        } finally {
+            lock.unlock();
         }
     }
 
     /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+     * /** Returns {@code true} if this queue contains the specified element. More
+     * formally, returns {@code true} if and only if this queue contains at least one
+     * element {@code e} such that {@code o.equals(e)}.
+     *
+     * @param o object to be checked for containment in this queue
+     *
+     * @return {@code true} if this queue contains the specified element
      */
-    public boolean replace(K key, V oldValue, V newValue) {
-        this.lock.lock();
-        try {
-            boolean bl = this.map.replace(key, oldValue, newValue);
-            return bl;
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
     /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+     * public boolean contains(Object o) { if (o == null) return false; fullyLock(); try {
+     * for (LinkedBlockingQueue.Node<E> p = head.next; p != null; p = p.next) if
+     * (o.equals(p.item)) return true; return false; } finally { fullyUnlock(); } }
      */
-    public V replace(K key, V value) {
-        this.lock.lock();
+    public boolean containsKey( K key ) {
+        lock.lock();
         try {
-            V v = this.map.replace(key, value);
-            return v;
-        }
-        finally {
-            this.lock.unlock();
+            return map.containsKey(key);
+        } finally {
+            lock.unlock();
         }
     }
 
-    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-        this.lock.lock();
+    public boolean containsValue( V v ) {
+        lock.lock();
         try {
-            this.map.replaceAll(function);
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    public boolean containsKey(K key) {
-        this.lock.lock();
-        try {
-            boolean bl = this.map.containsKey(key);
-            return bl;
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    public boolean containsValue(V v) {
-        this.lock.lock();
-        try {
-            boolean bl = this.map.containsValue(v);
-            return bl;
-        }
-        finally {
-            this.lock.unlock();
+            return map.containsValue(v);
+        } finally {
+            lock.unlock();
         }
     }
 
     public Set<K> keySet() {
-        this.lock.lock();
+        lock.lock();
         try {
-            Set<K> set = this.map.keySet();
-            return set;
-        }
-        finally {
-            this.lock.unlock();
+            return map.keySet();
+        } finally {
+            lock.unlock();
         }
     }
 
     public Collection<V> values() {
-        this.lock.lock();
+        lock.lock();
         try {
-            Collection<V> collection = this.map.values();
-            return collection;
-        }
-        finally {
-            this.lock.unlock();
+            return map.values();
+        } finally {
+            lock.unlock();
         }
     }
 
     public Set<Map.Entry<K, V>> entrySet() {
-        this.lock.lock();
+        lock.lock();
         try {
-            Set<Map.Entry<K, V>> set = this.map.entrySet();
-            return set;
-        }
-        finally {
-            this.lock.unlock();
+            return map.entrySet();
+        } finally {
+            lock.unlock();
         }
     }
 
+    /**
+     * Returns an array containing all of the elements in this queue, in proper sequence.
+     *
+     * <p>
+     * The returned array will be "safe" in that no references to it are maintained by this queue. (In other words, this
+     * method must allocate a new array). The caller is thus free to modify the returned array.
+     *
+     * <p>
+     * This method acts as bridge between array-based and collection-based APIs.
+     *
+     * @return an array containing all of the elements in this queue
+     */
     /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+     * public Object[] toArray() { fullyLock(); try { int size = count.get(); Object[] a =
+     * new Object[size]; int k = 0; for (LinkedBlockingQueue.Node<E> p = head.next; p !=
+     * null; p = p.next) a[k++] = p.item; return a; } finally { fullyUnlock(); } }
      */
     public Object[] toArray() {
-        this.lock.lock();
+        lock.lock();
         try {
-            int size = this.count;
+            int size = count;
             Object[] a = new Object[size];
             int k = 0;
-            for (Map.Entry<K, V> value : this.map.entrySet()) {
+            for (Map.Entry<K, V> value : map.entrySet()) {
                 a[k++] = value;
             }
-            Object[] objectArray = a;
-            return objectArray;
-        }
-        finally {
-            this.lock.unlock();
+            return a;
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public Object[] toValueArray() {
-        this.lock.lock();
+        lock.lock();
         try {
-            int size = this.count;
+            int size = count;
             Object[] a = new Object[size];
             int k = 0;
-            for (V value : this.map.values()) {
+            for (V value : map.values()) {
                 a[k++] = value;
             }
-            Object[] objectArray = a;
-            return objectArray;
-        }
-        finally {
-            this.lock.unlock();
+            return a;
+        } finally {
+            lock.unlock();
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public <T> T[] toValueArray(T[] a) {
-        this.lock.lock();
+    @SuppressWarnings("unchecked")
+    public <T> T[] toValueArray( T[] a ) {
+        lock.lock();
         try {
-            int size = this.count;
+            int size = count;
             if (a.length < size) {
-                a = (Object[])Array.newInstance(a.getClass().getComponentType(), size);
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
             }
             int k = 0;
-            for (V value : this.map.values()) {
-                a[k++] = value;
+            for (V value : map.values()) {
+                a[k++] = (T) value;
             }
             if (a.length > k) {
                 a[k] = null;
             }
-            Object[] objectArray = a;
-            return objectArray;
-        }
-        finally {
-            this.lock.unlock();
+            return a;
+        } finally {
+            lock.unlock();
         }
     }
 
+    @Override
     public int hashCode() {
-        this.lock.lock();
+        lock.lock();
         try {
-            int n = this.map.hashCode();
-            return n;
-        }
-        finally {
-            this.lock.unlock();
+            return map.hashCode();
+        } finally {
+            lock.unlock();
         }
     }
 
+    @Override
     public String toString() {
-        this.lock.lock();
+        lock.lock();
         try {
-            String string = this.map.toString();
-            return string;
-        }
-        finally {
-            this.lock.unlock();
+            return map.toString();
+        } finally {
+            lock.unlock();
         }
     }
 
-    public boolean equals(Object obj) {
-        this.lock.lock();
+    @Override
+    public boolean equals( Object obj ) {
+        lock.lock();
         try {
-            boolean bl = this.map.equals(obj);
-            return bl;
-        }
-        finally {
-            this.lock.unlock();
+            return map.equals(obj);
+        } finally {
+            lock.unlock();
         }
     }
 
-    public void clear() {
-        this.lock.lock();
-        try {
-            this.map.clear();
-            this.notFull.signalAll();
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int drainValueTo(Collection<? super V> c) {
-        return this.drainValueTo(c, Integer.MAX_VALUE);
-    }
-
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * Atomically removes all of the elements from this queue. The queue will be empty after this call returns.
      */
-    public int drainValueTo(Collection<? super V> c, int maxElements) {
+    /*
+     * public void clear() { fullyLock(); try { for (LinkedBlockingQueue.Node<E> p, h =
+     * head; (p = h.next) != null; h = p) { h.next = h; p.item = null; } head = last; //
+     * assert head.item == null && head.next == null; if (count.getAndSet(0) == capacity)
+     * notFull.signal(); } finally { fullyUnlock(); } }
+     */
+    public void clear() {
+        lock.lock();
+        try {
+            map.clear();
+            notFull.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException {@inheritDoc}
+     * @throws NullPointerException {@inheritDoc}
+     * @throws IllegalArgumentException {@inheritDoc}
+     */
+    /*
+     * public int drainTo(Collection<? super E> c) { return drainTo(c, Integer.MAX_VALUE);
+     * }
+     */
+    public int drainValueTo( Collection<? super V> c ) {
+        return drainValueTo(c, Integer.MAX_VALUE);
+    }
+
+    /**
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException {@inheritDoc}
+     * @throws NullPointerException {@inheritDoc}
+     * @throws IllegalArgumentException {@inheritDoc}
+     */
+    /*
+     * public int drainTo(Collection<? super E> c, int maxElements) { if (c == null) throw
+     * new NullPointerException(); if (c == this) throw new IllegalArgumentException(); if
+     * (maxElements <= 0) return 0; boolean signalNotFull = false; final ReentrantLock
+     * takeLock = this.takeLock; takeLock.lock(); try { int n = Math.min(maxElements,
+     * count.get()); // count.get provides visibility to first n Nodes
+     * LinkedBlockingQueue.Node<E> h = head; int i = 0; try { while (i < n) {
+     * LinkedBlockingQueue.Node<E> p = h.next; c.add(p.item); p.item = null; h.next = h; h
+     * = p; ++i; } return n; } finally { // Restore invariants even if c.add() threw if (i
+     * > 0) { // assert h.item == null; head = h; signalNotFull = (count.getAndAdd(-i) ==
+     * capacity); } } } finally { takeLock.unlock(); if (signalNotFull) signalNotFull(); }
+     * }
+     */
+    public int drainValueTo( Collection<? super V> c, int maxElements ) {
         if (c == null) {
             throw new NullPointerException();
         }
         if (maxElements <= 0) {
             return 0;
         }
-        this.lock.lock();
+        lock.lock();
         try {
-            int n2 = Math.min(maxElements, this.count);
+            int n = Math.min(maxElements, count);
             int i = 0;
-            boolean signalNotFull = false;
             try {
-                Iterator<V> iterator = this.map.values().iterator();
-                for (; i < n2 && iterator.hasNext(); ++i) {
-                        V next = iterator.next();
-                        iterator.remove();
-                        c.add(next);
-                    }
+                Iterator<V> iterator = map.values().iterator();
+                while (i < n && iterator.hasNext()) {
+                    V next = iterator.next();
+                    iterator.remove();
+                    c.add(next);
+                    ++i;
                 }
-                catch (Throwable throwable) {
-                    if (i > 0) {
-                        boolean signalNotFull2 = this.count == this.capacity;
-                        this.count -= i;
-                        if (signalNotFull2) {
-                            this.notFull.signal();
-                        }
-                    }
-                    throw throwable;
-                }
+                return n;
+            } finally {
                 if (i > 0) {
-                    signalNotFull = this.count == this.capacity;
-                    this.count -= i;
+                    boolean signalNotFull = ( count == capacity );
+                    count -= i;
                     if (signalNotFull) {
-                        this.notFull.signal();
+                        notFull.signal();
                     }
                 }
-            return i;
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    public void forEach(BiConsumer<? super K, ? super V> action) {
-        this.lock.lock();
-        try {
-            this.map.forEach(action);
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    public Iterator<Map.Entry<K, V>> iterator() {
-        return new Itr(this);
-    }
-
-    public Iterator<V> valueIterator() {
-        return new ValueItr(this);
-    }
-
-    public Spliterator<Map.Entry<K, V>> spliterator() {
-        return new LBQSpliterator(this, this);
-    }
-
-    public Spliterator<V> valueSpliterator() {
-        return new ValueLBQSpliterator(this, this);
-    }
-
-    private void writeObject(ObjectOutputStream s) throws IOException {
-        this.lock.lock();
-        try {
-            s.defaultWriteObject();
-            s.writeObject(this.map);
-        }
-        finally {
-            this.lock.unlock();
-        }
-    }
-
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
-        s.defaultReadObject();
-        Map map = (Map)s.readObject();
-        this.map.putAll(map);
-        this.count = map.size();
-    }
-
-    @Override
-    public ConcurrentMap<K, V> map() {
-        return new MapImpl(this);
-    }
-
-    @Override
-    public BlockingQueue<V> queue() {
-        return new QueueImpl(this);
-    }
-
-    private class Itr
-    implements Iterator<Map.Entry<K, V>> {
-        private final Iterator<Map.Entry<K, V>> iterator;
-        final /* synthetic */ AbstractBlockingMapQueue this$0;
-
-        Itr(AbstractBlockingMapQueue abstractBlockingMapQueue) {
-            AbstractBlockingMapQueue abstractBlockingMapQueue2 = abstractBlockingMapQueue;
-            Objects.requireNonNull(abstractBlockingMapQueue2);
-            this.this$0 = abstractBlockingMapQueue2;
-            abstractBlockingMapQueue.lock.lock();
-            try {
-                this.iterator = abstractBlockingMapQueue.map.entrySet().iterator();
             }
-            finally {
-                abstractBlockingMapQueue.lock.unlock();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void forEach( BiConsumer<? super K, ? super V> action ) {
+        lock.lock();
+        try {
+            map.forEach(action);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Returns an iterator over the elements in this queue in proper sequence. The elements will be returned in order
+     * from first (head) to last (tail).
+     *
+     * <p>
+     * The returned iterator is <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
+     *
+     * @return an iterator over the elements in this queue in proper sequence
+     */
+    /*
+     * public Iterator<E> iterator() { return new LinkedBlockingQueue.Itr(); }
+     */
+    public Iterator<Map.Entry<K, V>> iterator() {
+        return new Itr();
+    }
+
+    /**
+     * Itr
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private class Itr implements Iterator<Map.Entry<K, V>> {
+
+        private final Iterator<Map.Entry<K, V>> iterator;
+
+        Itr() {
+            lock.lock();
+            try {
+                iterator = map.entrySet().iterator();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public boolean hasNext() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                boolean bl = this.iterator.hasNext();
-                return bl;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return iterator.hasNext();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public Map.Entry<K, V> next() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                Map.Entry entry = this.iterator.next();
-                return entry;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return iterator.next();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public void remove() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                this.iterator.remove();
-            }
-            finally {
-                this.this$0.lock.unlock();
+                iterator.remove();
+            } finally {
+                lock.unlock();
             }
         }
     }
 
-    private class ValueItr
-    implements Iterator<V> {
-        private final Iterator<V> iterator;
-        final /* synthetic */ AbstractBlockingMapQueue this$0;
+    public Iterator<V> valueIterator() {
+        return new ValueItr();
+    }
 
-        ValueItr(AbstractBlockingMapQueue abstractBlockingMapQueue) {
-            AbstractBlockingMapQueue abstractBlockingMapQueue2 = abstractBlockingMapQueue;
-            Objects.requireNonNull(abstractBlockingMapQueue2);
-            this.this$0 = abstractBlockingMapQueue2;
-            abstractBlockingMapQueue.lock.lock();
+    /**
+     * ValueItr
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private class ValueItr implements Iterator<V> {
+
+        private final Iterator<V> iterator;
+
+        ValueItr() {
+            lock.lock();
             try {
-                this.iterator = abstractBlockingMapQueue.map.values().iterator();
-            }
-            finally {
-                abstractBlockingMapQueue.lock.unlock();
+                iterator = map.values().iterator();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public boolean hasNext() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                boolean bl = this.iterator.hasNext();
-                return bl;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return iterator.hasNext();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public V next() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                Object v = this.iterator.next();
-                return v;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return iterator.next();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public void remove() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                this.iterator.remove();
-            }
-            finally {
-                this.this$0.lock.unlock();
+                iterator.remove();
+            } finally {
+                lock.unlock();
             }
         }
     }
 
-    private class LBQSpliterator<K, V>
-    implements Spliterator<Map.Entry<K, V>> {
-        final Spliterator<Map.Entry<K, V>> spliterator;
-        final /* synthetic */ AbstractBlockingMapQueue this$0;
+    /**
+     * Returns a {@link Spliterator} over the elements in this queue.
+     *
+     * <p>
+     * The returned spliterator is <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
+     *
+     * <p>
+     * The {@code Spliterator} reports {@link Spliterator#CONCURRENT}, {@link Spliterator#ORDERED}, and
+     * {@link Spliterator#NONNULL}.
+     *
+     * @return a {@code Spliterator} over the elements in this queue
+     * @implNote The {@code Spliterator} implements {@code trySplit} to permit limited parallelism.
+     * @since 1.8
+     */
+    /*
+     * public Spliterator<E> spliterator() { return new
+     * LinkedBlockingQueue.LBQSpliterator<E>(this); }
+     */
+    public Spliterator<Map.Entry<K, V>> spliterator() {
+        return new LBQSpliterator<>(this);
+    }
 
-        LBQSpliterator(AbstractBlockingMapQueue abstractBlockingMapQueue, AbstractBlockingMapQueue<K, V> queue) {
-            AbstractBlockingMapQueue abstractBlockingMapQueue2 = abstractBlockingMapQueue;
-            Objects.requireNonNull(abstractBlockingMapQueue2);
-            this.this$0 = abstractBlockingMapQueue2;
+    /**
+     * LBQSpliterator
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private class LBQSpliterator<K, V> implements Spliterator<Map.Entry<K, V>> {
+
+        final Spliterator<Map.Entry<K, V>> spliterator;
+
+        LBQSpliterator( AbstractBlockingMapQueue<K, V> queue ) {
             this.spliterator = queue.map.entrySet().spliterator();
         }
 
         @Override
         public long estimateSize() {
-            return this.spliterator.estimateSize();
+            return spliterator.estimateSize();
         }
 
         @Override
         public Spliterator<Map.Entry<K, V>> trySplit() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                Spliterator<Map.Entry<K, V>> spliterator = this.spliterator.trySplit();
-                return spliterator;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return spliterator.trySplit();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
-        public void forEachRemaining(Consumer<? super Map.Entry<K, V>> action) {
-            this.this$0.lock.lock();
+        public void forEachRemaining( Consumer<? super Map.Entry<K, V>> action ) {
+            lock.lock();
             try {
-                this.spliterator.forEachRemaining(action);
-            }
-            finally {
-                this.this$0.lock.unlock();
+                spliterator.forEachRemaining(action);
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
-        public boolean tryAdvance(Consumer<? super Map.Entry<K, V>> action) {
-            this.this$0.lock.lock();
+        public boolean tryAdvance( Consumer<? super Map.Entry<K, V>> action ) {
+            lock.lock();
             try {
-                boolean bl = this.spliterator.tryAdvance(action);
-                return bl;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return spliterator.tryAdvance(action);
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public int characteristics() {
-            return 4368;
+            return Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.CONCURRENT;
         }
     }
 
-    private class ValueLBQSpliterator<V>
-    implements Spliterator<V> {
-        final Spliterator<V> spliterator;
-        final /* synthetic */ AbstractBlockingMapQueue this$0;
+    public Spliterator<V> valueSpliterator() {
+        return new ValueLBQSpliterator<>(this);
+    }
 
-        ValueLBQSpliterator(AbstractBlockingMapQueue abstractBlockingMapQueue, AbstractBlockingMapQueue<K, V> queue) {
-            AbstractBlockingMapQueue abstractBlockingMapQueue2 = abstractBlockingMapQueue;
-            Objects.requireNonNull(abstractBlockingMapQueue2);
-            this.this$0 = abstractBlockingMapQueue2;
+    /**
+     * ValueLBQSpliterator
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private class ValueLBQSpliterator<V> implements Spliterator<V> {
+
+        final Spliterator<V> spliterator;
+
+        ValueLBQSpliterator( AbstractBlockingMapQueue<K, V> queue ) {
             this.spliterator = queue.map.values().spliterator();
         }
 
         @Override
         public long estimateSize() {
-            return this.spliterator.estimateSize();
+            return spliterator.estimateSize();
         }
 
         @Override
         public Spliterator<V> trySplit() {
-            this.this$0.lock.lock();
+            lock.lock();
             try {
-                Spliterator<V> spliterator = this.spliterator.trySplit();
-                return spliterator;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return spliterator.trySplit();
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
-        public void forEachRemaining(Consumer<? super V> action) {
-            this.this$0.lock.lock();
+        public void forEachRemaining( Consumer<? super V> action ) {
+            lock.lock();
             try {
-                this.spliterator.forEachRemaining(action);
-            }
-            finally {
-                this.this$0.lock.unlock();
+                spliterator.forEachRemaining(action);
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
-        public boolean tryAdvance(Consumer<? super V> action) {
-            this.this$0.lock.lock();
+        public boolean tryAdvance( Consumer<? super V> action ) {
+            lock.lock();
             try {
-                boolean bl = this.spliterator.tryAdvance(action);
-                return bl;
-            }
-            finally {
-                this.this$0.lock.unlock();
+                return spliterator.tryAdvance(action);
+            } finally {
+                lock.unlock();
             }
         }
 
         @Override
         public int characteristics() {
-            return 4368;
+            return Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.CONCURRENT;
         }
     }
 
-    private class MapImpl
-    implements ConcurrentMap<K, V> {
-        final /* synthetic */ AbstractBlockingMapQueue this$0;
-
-        private MapImpl(AbstractBlockingMapQueue abstractBlockingMapQueue) {
-            AbstractBlockingMapQueue abstractBlockingMapQueue2 = abstractBlockingMapQueue;
-            Objects.requireNonNull(abstractBlockingMapQueue2);
-            this.this$0 = abstractBlockingMapQueue2;
+    /**
+     * Saves this queue to a stream (that is, serializes it).
+     *
+     * @param s the stream
+     * @throws IOException if an I/O error occurs
+     * @serialData The capacity is emitted (int), followed by all of its elements (each an {@code Object}) in the proper
+     * order, followed by a null
+     */
+    /*
+     * private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {
+     *
+     * fullyLock(); try { // Write out any hidden stuff, plus capacity
+     * s.defaultWriteObject();
+     *
+     * // Write out all elements in the proper order. for (LinkedBlockingQueue.Node<E> p =
+     * head.next; p != null; p = p.next) s.writeObject(p.item);
+     *
+     * // Use trailing null as sentinel s.writeObject(null); } finally { fullyUnlock(); }
+     * }
+     */
+    private void writeObject( ObjectOutputStream s ) throws IOException {
+        lock.lock();
+        try {
+            s.defaultWriteObject();
+            s.writeObject(map);
+            // s.writeObject(null);
+        } finally {
+            lock.unlock();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readObject( ObjectInputStream s ) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        Map<K, V> map = (Map<K, V>) s.readObject();
+        this.map.putAll(map);
+        count = map.size();
+    }
+
+    @Override
+    public ConcurrentMap<K, V> map() {
+        return new MapImpl();
+    }
+
+    @Override
+    public BlockingQueue<V> queue() {
+        return new QueueImpl();
+    }
+
+    /**
+     * MapImpl
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    @SuppressWarnings("unchecked")
+    private class MapImpl implements ConcurrentMap<K, V> {
 
         @Override
         public int size() {
-            return this.this$0.size();
+            return AbstractBlockingMapQueue.this.size();
         }
 
         @Override
         public boolean isEmpty() {
-            return this.this$0.isEmpty();
+            return AbstractBlockingMapQueue.this.isEmpty();
         }
 
         @Override
-        public V get(Object key) {
-            return this.this$0.get(key);
+        public V get( Object key ) {
+            return AbstractBlockingMapQueue.this.get((K) key);
         }
 
         @Override
-        public V getOrDefault(Object key, V defaultValue) {
-            return this.this$0.getOrDefault(key, defaultValue);
+        public V getOrDefault( Object key, V defaultValue ) {
+            return AbstractBlockingMapQueue.this.getOrDefault((K) key, defaultValue);
         }
 
         @Override
-        public boolean containsKey(Object key) {
-            return this.this$0.containsKey(key);
+        public boolean containsKey( Object key ) {
+            return AbstractBlockingMapQueue.this.containsKey((K) key);
         }
 
         @Override
-        public boolean containsValue(Object value) {
-            return this.this$0.containsValue(value);
+        public boolean containsValue( Object value ) {
+            return AbstractBlockingMapQueue.this.containsValue((V) value);
         }
 
         @Override
-        public V put(K key, V value) {
+        public V put( K key, V value ) {
             try {
-                return this.this$0.put(key, value);
-            }
-            catch (InterruptedException e) {
+                return AbstractBlockingMapQueue.this.put(key, value);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public void putAll(Map<? extends K, ? extends V> m) {
+        public void putAll( Map<? extends K, ? extends V> m ) {
             try {
-                this.this$0.putAll(m);
-            }
-            catch (InterruptedException e) {
+                AbstractBlockingMapQueue.this.putAll(m);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public V putIfAbsent(K key, V value) {
+        public V putIfAbsent( K key, V value ) {
             try {
-                return this.this$0.putIfAbsent(key, value);
-            }
-            catch (InterruptedException e) {
+                return AbstractBlockingMapQueue.this.putIfAbsent(key, value);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public V remove(Object key) {
-            return this.this$0.remove(key);
+        public V remove( Object key ) {
+            return AbstractBlockingMapQueue.this.remove((K) key);
         }
 
         @Override
         public void clear() {
-            this.this$0.clear();
+            AbstractBlockingMapQueue.this.clear();
         }
 
         @Override
         public Set<K> keySet() {
-            return this.this$0.keySet();
+            return AbstractBlockingMapQueue.this.keySet();
         }
 
         @Override
         public Collection<V> values() {
-            return this.this$0.values();
+            return AbstractBlockingMapQueue.this.values();
         }
 
         @Override
-        public Set<Map.Entry<K, V>> entrySet() {
-            return this.this$0.entrySet();
+        public Set<Entry<K, V>> entrySet() {
+            return AbstractBlockingMapQueue.this.entrySet();
         }
 
         @Override
         public int hashCode() {
-            return this.this$0.hashCode();
+            return AbstractBlockingMapQueue.this.hashCode();
         }
 
         @Override
-        public boolean equals(Object o) {
-            return this.this$0.equals(o);
+        public boolean equals( Object o ) {
+            return AbstractBlockingMapQueue.this.equals(o);
         }
 
         @Override
-        public boolean remove(Object key, Object value) {
-            return this.this$0.remove(key, value);
+        public boolean remove( Object key, Object value ) {
+            return AbstractBlockingMapQueue.this.remove((K) key, (V) value);
         }
 
         @Override
-        public boolean replace(K key, V oldValue, V newValue) {
-            return this.this$0.replace(key, oldValue, newValue);
+        public boolean replace( K key, V oldValue, V newValue ) {
+            return AbstractBlockingMapQueue.this.replace(key, oldValue, newValue);
         }
 
         @Override
-        public V replace(K key, V value) {
-            return this.this$0.replace(key, value);
+        public V replace( K key, V value ) {
+            return AbstractBlockingMapQueue.this.replace(key, value);
         }
 
         @Override
-        public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-            this.this$0.replaceAll(function);
+        public void replaceAll( BiFunction<? super K, ? super V, ? extends V> function ) {
+            AbstractBlockingMapQueue.this.replaceAll(function);
         }
 
         @Override
-        public void forEach(BiConsumer<? super K, ? super V> action) {
-            this.this$0.forEach(action);
+        public void forEach( BiConsumer<? super K, ? super V> action ) {
+            AbstractBlockingMapQueue.this.forEach(action);
         }
 
         @Override
-        public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+        public V computeIfAbsent( K key, Function<? super K, ? extends V> mappingFunction ) {
             try {
-                return this.this$0.computeIfAbsent(key, mappingFunction);
-            }
-            catch (InterruptedException e) {
+                return AbstractBlockingMapQueue.this.computeIfAbsent(key, mappingFunction);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        public V computeIfPresent(
+                K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction ) {
             try {
-                return this.this$0.computeIfPresent(key, remappingFunction);
-            }
-            catch (InterruptedException e) {
+                return AbstractBlockingMapQueue.this.computeIfPresent(key, remappingFunction);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        public V compute( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction ) {
             try {
-                return this.this$0.compute(key, remappingFunction);
-            }
-            catch (InterruptedException e) {
+                return AbstractBlockingMapQueue.this.compute(key, remappingFunction);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
         @Override
-        public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        public V merge(
+                K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction ) {
             try {
-                return this.this$0.merge(key, value, remappingFunction);
-            }
-            catch (InterruptedException e) {
+                return AbstractBlockingMapQueue.this.merge(key, value, remappingFunction);
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        @Override
         public String toString() {
-            return this.this$0.toString();
+            return AbstractBlockingMapQueue.this.toString();
         }
     }
 
-    private class QueueImpl
-    extends AbstractQueue<V>
-    implements BlockingQueue<V> {
-        final /* synthetic */ AbstractBlockingMapQueue this$0;
-
-        private QueueImpl(AbstractBlockingMapQueue abstractBlockingMapQueue) {
-            AbstractBlockingMapQueue abstractBlockingMapQueue2 = abstractBlockingMapQueue;
-            Objects.requireNonNull(abstractBlockingMapQueue2);
-            this.this$0 = abstractBlockingMapQueue2;
-        }
+    /**
+     * QueueImpl
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    @SuppressWarnings("unchecked")
+    private class QueueImpl extends AbstractQueue<V> implements BlockingQueue<V> {
 
         @Override
         public int size() {
-            return this.this$0.size();
+            return AbstractBlockingMapQueue.this.size();
         }
 
         @Override
         public int remainingCapacity() {
-            return this.this$0.remainingCapacity();
+            return AbstractBlockingMapQueue.this.remainingCapacity();
         }
 
         @Override
-        public void put(V v) throws InterruptedException {
+        public void put( V v ) throws InterruptedException {
             if (v instanceof MapQueueElement) {
-                Object key = ((MapQueueElement)v).getKey();
-                this.this$0.put(key, v);
+                K key = (K) ( (MapQueueElement<?>) v ).getKey();
+                AbstractBlockingMapQueue.this.put(key, v);
             }
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean offer(V v) {
+        public boolean offer( V v ) {
             if (v instanceof MapQueueElement) {
-                Object key = ((MapQueueElement)v).getKey();
-                return this.this$0.offer(key, v);
+                K key = (K) ( (MapQueueElement<?>) v ).getKey();
+                return AbstractBlockingMapQueue.this.offer(key, v);
             }
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean offer(V v, long timeout, TimeUnit unit) throws InterruptedException {
+        public boolean offer( V v, long timeout, TimeUnit unit ) throws InterruptedException {
             if (v instanceof MapQueueElement) {
-                Object key = ((MapQueueElement)v).getKey();
-                return this.this$0.offer(key, v, timeout, unit);
+                K key = (K) ( (MapQueueElement<?>) v ).getKey();
+                return AbstractBlockingMapQueue.this.offer(key, v, timeout, unit);
             }
             throw new UnsupportedOperationException();
         }
 
         @Override
         public V take() throws InterruptedException {
-            return this.this$0.takeValue();
+            return AbstractBlockingMapQueue.this.takeValue();
         }
 
         @Override
         public V poll() {
-            return this.this$0.pollValue();
+            return AbstractBlockingMapQueue.this.pollValue();
         }
 
         @Override
-        public V poll(long timeout, TimeUnit unit) throws InterruptedException {
-            return this.this$0.pollValue(timeout, unit);
+        public V poll( long timeout, TimeUnit unit ) throws InterruptedException {
+            return AbstractBlockingMapQueue.this.pollValue(timeout, unit);
         }
 
         @Override
         public V peek() {
-            return this.this$0.peekValue();
+            return AbstractBlockingMapQueue.this.peekValue();
         }
 
         @Override
-        public boolean remove(Object o) {
-            return this.this$0.removeValue(o);
+        public boolean remove( Object o ) {
+            return AbstractBlockingMapQueue.this.removeValue((V) o);
         }
 
         @Override
-        public boolean contains(Object o) {
-            return this.this$0.containsValue(o);
+        public boolean contains( Object o ) {
+            return AbstractBlockingMapQueue.this.containsValue((V) o);
         }
 
         @Override
         public Object[] toArray() {
-            return this.this$0.toValueArray();
+            return AbstractBlockingMapQueue.this.toValueArray();
         }
 
         @Override
-        public <T> T[] toArray(T[] a) {
-            return this.this$0.toValueArray(a);
+        public <T> T[] toArray( T[] a ) {
+            return AbstractBlockingMapQueue.this.toValueArray(a);
         }
 
         @Override
         public String toString() {
-            return this.this$0.toString();
+            return AbstractBlockingMapQueue.this.toString();
         }
 
         @Override
         public void clear() {
-            this.this$0.clear();
+            AbstractBlockingMapQueue.this.clear();
         }
 
         @Override
-        public int drainTo(Collection<? super V> c) {
-            return this.this$0.drainValueTo(c);
+        public int drainTo( Collection<? super V> c ) {
+            return AbstractBlockingMapQueue.this.drainValueTo(c);
         }
 
         @Override
-        public int drainTo(Collection<? super V> c, int maxElements) {
-            return this.this$0.drainValueTo(c, maxElements);
+        public int drainTo( Collection<? super V> c, int maxElements ) {
+            return AbstractBlockingMapQueue.this.drainValueTo(c, maxElements);
         }
 
         @Override
         public Iterator<V> iterator() {
-            return this.this$0.valueIterator();
+            return AbstractBlockingMapQueue.this.valueIterator();
         }
 
         @Override
         public Spliterator<V> spliterator() {
-            return this.this$0.valueSpliterator();
+            return AbstractBlockingMapQueue.this.valueSpliterator();
         }
     }
 }
-

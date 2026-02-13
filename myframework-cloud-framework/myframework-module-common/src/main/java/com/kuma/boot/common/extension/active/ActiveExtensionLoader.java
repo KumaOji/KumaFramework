@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.slf4j.Logger
  *  org.slf4j.LoggerFactory
@@ -84,7 +84,7 @@ public class ActiveExtensionLoader<T> {
         if (!loadedExtensions.isEmpty()) {
             activateExtensions.addAll(loadedExtensions);
         }
-        return activateExtensions;
+        return (List<T>) activateExtensions;
     }
 
     public List<T> getActivateExtension(URL url, String key) {

@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  io.swagger.v3.oas.annotations.media.Schema
  */
@@ -47,7 +47,7 @@ implements Serializable {
         Response<EmptyResponse> response = new Response<EmptyResponse>();
         EmptyResponse emptyResponse = new EmptyResponse();
         response.setResult(emptyResponse);
-        return response;
+        return (Response<T>) response;
     }
 
     public static Response<?> from(StatusEnum status, Code code) {

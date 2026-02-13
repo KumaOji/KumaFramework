@@ -1,39 +1,72 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
 import com.kuma.boot.common.utils.lang.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** 字符集工具类 */
 public final class CharsetUtils {
+
+    private CharsetUtils() {}
+
+    /** unicode 编码模式 */
     private static final Pattern UNICODE_PATTERN = Pattern.compile("(\\\\u(\\p{XDigit}{4}))");
 
-    private CharsetUtils() {
-    }
-
+    /**
+     * unicode 转中文 分隔
+     * @param unicode 编码
+     * @return 中文
+     */
     public static String unicodeToZh(String unicode) {
         if (StringUtils.isEmpty(unicode)) {
             return null;
         }
+
         String[] strings = unicode.split("\\\\u");
         StringBuilder builder = new StringBuilder();
-        for (int i = 1; i < strings.length; ++i) {
+        // 由于unicode字符串以 \ u 开头，因此分割出的第一个字符是""。
+        for (int i = 1; i < strings.length; i++) {
             String code = strings[i];
+
+            // 只考虑4个字符的部分
             String actualCode = code.substring(0, 4);
-            char c = (char)Integer.valueOf(actualCode, 16).intValue();
+            final char c = (char) Integer.valueOf(actualCode, 16).intValue();
             builder.append(c);
-            if (code.length() <= 4) continue;
-            builder.append(code.substring(4));
+
+            if (code.length() > 4) {
+                // 如果有超过4个字母的部分，直接当做字符串处理掉
+                builder.append(code.substring(4));
+            }
         }
         return builder.toString();
     }
 
+    /**
+     * 中文转 unicode 编码
+     * @param zh 中文字符串
+     * @return 编码
+     */
     public static String zhToUnicode(String zh) {
         if (StringUtils.isEmpty(zh)) {
             return null;
         }
+
         char[] chars = zh.toCharArray();
         StringBuilder builder = new StringBuilder();
         for (char aChar : chars) {
@@ -42,48 +75,76 @@ public final class CharsetUtils {
         return builder.toString();
     }
 
+    /**
+     * 是否为中文字符
+     * @param c char
+     * @return 是否
+     */
     public static boolean isChinese(char c) {
         boolean result = false;
-        if (c >= '\u4e00' && c <= '\u29fa5') {
+        // 汉字范围 \u4e00-\u9fa5 (中文)
+        if (c >= 19968 && c <= 171941) {
             result = true;
         }
         return result;
     }
 
+    /**
+     * 是否包含中文
+     * @param string 字符串
+     * @return 是否
+     */
     public static boolean isContainsChinese(String string) {
-        char[] chars;
         if (StringUtils.isEmpty(string)) {
             return false;
         }
-        for (char c : chars = string.toCharArray()) {
-            if (!CharsetUtils.isChinese(c)) continue;
-            return true;
+
+        char[] chars = string.toCharArray();
+        for (char c : chars) {
+            if (isChinese(c)) {
+                return true;
+            }
         }
+
         return false;
     }
 
+    /**
+     * 是否全是中文
+     * @param string 字符串
+     * @return 是否
+     */
     public static boolean isAllChinese(String string) {
-        char[] chars;
         if (StringUtils.isEmpty(string)) {
             return false;
         }
-        for (char c : chars = string.toCharArray()) {
-            if (CharsetUtils.isChinese(c)) continue;
-            return false;
+
+        char[] chars = string.toCharArray();
+        for (char c : chars) {
+            if (!isChinese(c)) {
+                return false;
+            }
         }
+
         return true;
     }
 
+    /**
+     * unicode 编码转字符串
+     * @param unicodeText 文本
+     * @return 结果
+     */
     public static String unicodeToString(String unicodeText) {
         if (StringUtils.isEmptyTrim(unicodeText)) {
             return unicodeText;
         }
+
         Matcher matcher = UNICODE_PATTERN.matcher(unicodeText);
+        char ch;
         while (matcher.find()) {
-            char ch = (char)Integer.parseInt(matcher.group(2), 16);
-            unicodeText = unicodeText.replace(matcher.group(1), "" + ch);
+            ch = (char) Integer.parseInt(matcher.group(2), 16);
+            unicodeText = unicodeText.replace(matcher.group(1), ch + "");
         }
         return unicodeText;
     }
 }
-

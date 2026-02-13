@@ -1,10 +1,6 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.common.support.complete;
 
-import com.kuma.boot.common.support.complete.EmptyUtil;
-import com.kuma.boot.common.support.complete.Prepare;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,57 +12,159 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 补充函数
+ * <p>
+ * 这应该是 complete函数 一年多来的究极演化体了。可同时支持多组补充函数
+ * <p> v1.0：@link cn.hehouhui.util.FunctionUtil#complete(Collection, Function, BiConsumer, Function)
+ * <p> v1.1: @link FunctionUtil#complete(Collection, Function, FunctionUtil.SetGet[])
+ * <p> 例子：
+ * <blockquote><pre>
+ *   Complete.start(userList)
+ *             // 补充用户名称
+ *             .build(userService::getUsernameMap)
+ *             .filter(user -> user.getUserId() > 0)
+ *             .add(User::getUserId, User::setUsername)
+ *             .then()
+ *             .over();
+ * </pre></blockquote>
+ *
+ * @author HeHui
+ * @since 2024-12-29 02:08
+ */
 public class Complete<E> {
-    private final List<Prepare<?, ?, E>> actuator = new ArrayList();
+
+    private final List<Prepare<?, ?, E>> actuator = new ArrayList<>();
     private final Collection<E> collection;
 
-    private Complete(Collection<E> collection) {
+
+    private Complete(final Collection<E> collection) {
         this.collection = collection;
     }
 
+
+    /**
+     * 启动一个完成对象，用于处理集合中的元素
+     * 此方法的主要作用是初始化一个Complete对象，以便对给定集合进行后续的操作
+     * 它提供了一种通用的方式来开始对集合的处理，而不暴露底层实现细节
+     *
+     * @param collection 一个包含E类型元素的集合，用于初始化Complete对象
+     * @param <E>        集合中元素的类型，使用泛型来允许处理不同类型的集合
+     *
+     * @return 返回一个初始化后的Complete对象，用于执行后续的完成操作
+     */
     public static <E> Complete<E> start(Collection<E> collection) {
-        return new Complete<E>(collection);
+        return new Complete<>(collection);
     }
 
-    public <I, N> Prepare<I, N, E> build(Function<? super List<I>, ? extends Map<? super I, ? extends N>> nameMapCreator) {
-        Prepare prepare = new Prepare(nameMapCreator, this);
-        this.actuator.add(prepare);
+    /**
+     * 构建一个Prepare对象，并将其添加到执行器中
+     * 此方法允许用户提供一个自定义的映射创建函数，用于将项目列表转换为带有名称的映射
+     *
+     * @param nameMapCreator 一个函数，接受一个项目的列表，返回一个映射，其中包含每个项目的名称和对应的节点
+     *
+     * @return 返回构建的Prepare对象，它已经准备好被执行
+     */
+    public <I, N> Prepare<I, N, E> build(final Function<? super List<I>, ? extends Map<? super I, ? extends N>> nameMapCreator) {
+        // 创建一个新的Prepare对象，传入自定义的映射创建函数和当前配置
+        Prepare<I, N, E> prepare = new Prepare<>(nameMapCreator, this);
+        // 将创建的Prepare对象添加到执行器中，以便后续执行
+        actuator.add(prepare);
+        // 返回创建的Prepare对象
         return prepare;
     }
 
-    public <I, N> Prepare<I, N, E> build(Function<? super E, ? extends I> idGetter, BiConsumer<? super E, ? super N> nameSetter, Function<? super List<I>, ? extends Map<? super I, ? extends N>> nameMapCreator) {
-        Prepare<? extends I, ? super N, ? super E> prepare = new Prepare<I, N, E>(nameMapCreator, this);
+    /**
+     * 构建一个Prepare对象，用于处理元素的ID和名称映射
+     * 而存在
+     *
+     * @param <I>            元素ID的类型
+     * @param <N>            元素名称的类型
+     * @param idGetter       一个函数，用于获取元素的ID
+     * @param nameSetter     一个消费者，用于设置元素的名称
+     * @param nameMapCreator 一个函数，用于创建从ID列表到名称映射的Map
+     *
+     * @return 返回构建的Prepare对象
+     */
+    public <I, N> Prepare<I, N, E> build(Function<? super E, ? extends I> idGetter,
+                                         BiConsumer<? super E, ? super N> nameSetter,
+                                         final Function<? super List<I>, ? extends Map<? super I, ? extends N>> nameMapCreator) {
+        // 创建一个新的Prepare对象，传入自定义的映射创建函数和当前配置
+        Prepare<I, N, E> prepare = new Prepare<>(nameMapCreator, this);
+        // 向Prepare对象中添加idGetter和nameSetter，以便处理元素的ID和名称
         prepare.add(idGetter, nameSetter);
-        this.actuator.add(prepare);
+        // 将创建的Prepare对象添加到执行器中，以便后续执行
+        actuator.add(prepare);
+        // 返回创建的Prepare对象
         return prepare;
     }
 
+    /**
+     * 执行一个操作并完成流程，如果没有特定的执行结果.
+     * 此方法提供了一种统一的方式来结束一个流程或操作，而不需指定具体的完成结果.
+     * 它通过返回一个Complete对象来表示流程或操作已经尝试完成，无论是否有实际的执行结果.
+     *
+     * @return 返回一个Complete对象，表示操作的完成状态.如果操作没有特定的结果，则结果为null.
+     */
     public Complete<E> run() {
-        return this.finish(null);
+        return finish(null);
     }
 
+    /**
+     * 执行当前存量函数设置值，然后清空执行器并返回当前对象
+     * 此方法用于标记当前操作或流程已完成它通常在操作的最后一步调用，以表示操作结束
+     *
+     * @param executor 调度器
+     *
+     * @return 返回当前对象实例，以便进行链式调用或进一步操作
+     */
     public Complete<E> finish(Executor executor) {
-        this.over(executor);
+        over(executor);
         return this;
     }
 
+
+    /**
+     * 调用当前实例的over方法处理其内部的collection
+     * 此方法的存在是为了提供一个便捷的方式，使得当前实例可以直接调用其内部的collection进行处理
+     * 而不需要显式地传递collection参数
+     * 方法首先检查集合是否为空，如果为空，则不执行任何操作
+     * 然后，它遍历集合中的每个元素，对每个元素执行初始化操作
+     * 最后，再次遍历集合中的每个元素，对每个元素执行完成操作
+     */
     public void over() {
-        this.over(null);
+        over(null);
     }
 
+
+    /**
+     * 执行初始化和完成操作于集合中的每个元素
+     * 如果集合或执行器为空，则仅清除actuator
+     * 此方法首先对集合中的每个元素执行初始化操作，然后对每个元素执行完成操作
+     * 使用CompletableFuture来并行执行完成操作，可以选择性地使用提供的执行器
+     *
+     * @param executor 用于执行完成操作的线程池执行器，可以为空
+     */
     public void over(Executor executor) {
-        if (EmptyUtil.isEmpty(this.collection) || EmptyUtil.isEmpty(this.actuator)) {
-            this.actuator.clear();
+        // 检查集合是否为空，如果为空，则不执行任何操作
+        if (EmptyUtil.isEmpty(collection) || EmptyUtil.isEmpty(actuator)) {
+            actuator.clear();
             return;
         }
-        this.collection.forEach(item -> this.actuator.forEach(prepare -> prepare.init(item)));
+
+        // 遍历集合中的每个元素，对每个元素执行初始化操作
+        collection.forEach(item -> actuator.forEach(prepare -> prepare.init(item)));
+
+        // 再次遍历集合中的每个元素，对每个元素执行完成操作
         if (executor == null) {
-            this.actuator.stream().map(Prepare::finish).reduce(Consumer::andThen).ifPresent(this.collection::forEach);
+            actuator.stream().map(Prepare::finish).reduce(Consumer::andThen).ifPresent(collection::forEach);
         } else {
-            List futures = this.actuator.stream().map(prepare -> CompletableFuture.supplyAsync(prepare::finish, executor)).collect(Collectors.toList());
-            futures.stream().map(CompletableFuture::join).reduce(Consumer::andThen).ifPresent(this.collection::forEach);
+            // 使用CompletableFuture来并行执行这些操作，以提高效率
+            List<CompletableFuture<Consumer<E>>> futures = actuator.stream().map(prepare -> CompletableFuture.supplyAsync(prepare::finish, executor)).collect(Collectors.toList());
+            futures.stream().map(CompletableFuture::join).reduce(Consumer::andThen).ifPresent(collection::forEach);
         }
-        this.actuator.clear();
+
+        // 清空actuator列表，以便下一次使用
+        actuator.clear();
     }
 }
-

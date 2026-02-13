@@ -1,29 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.context.expression.BeanExpressionContextAccessor
- *  org.springframework.context.expression.BeanFactoryAccessor
- *  org.springframework.context.expression.EnvironmentAccessor
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.expression.Expression
- *  org.springframework.expression.ExpressionParser
- *  org.springframework.expression.ParserContext
- *  org.springframework.expression.PropertyAccessor
- *  org.springframework.expression.TypeConverter
- *  org.springframework.expression.TypeLocator
- *  org.springframework.expression.common.TemplateParserContext
- *  org.springframework.expression.spel.SpelParserConfiguration
- *  org.springframework.expression.spel.standard.SpelExpressionParser
- *  org.springframework.expression.spel.support.MapAccessor
- *  org.springframework.expression.spel.support.StandardEvaluationContext
- *  org.springframework.expression.spel.support.StandardTypeConverter
- *  org.springframework.expression.spel.support.StandardTypeLocator
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.expression;
 
-import com.kuma.boot.common.support.expression.CacheExpressionResolver;
-import com.kuma.boot.common.support.expression.Context;
 import org.springframework.context.expression.BeanExpressionContextAccessor;
 import org.springframework.context.expression.BeanFactoryAccessor;
 import org.springframework.context.expression.EnvironmentAccessor;
@@ -31,26 +23,38 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
-import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.TypeConverter;
-import org.springframework.expression.TypeLocator;
 import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.MapAccessor;
+import org.springframework.context.expression.MapAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 
+/**
+ * 使用Spring EL实现的表达式解析器
+ *
+ * @author livk
+ * @see SpelExpressionParser
+ */
 public class SpringExpressionResolver
-extends CacheExpressionResolver<EvaluationContext, Expression> {
+        extends CacheExpressionResolver<EvaluationContext, Expression> {
+
     private final ExpressionParser expressionParser;
+
     private final ParserContext beanExpressionParserContext = new TemplateParserContext();
 
+    /**
+     * Instantiates a new Spring expression resolver.
+     */
     public SpringExpressionResolver() {
         this(new SpelParserConfiguration());
     }
 
+    /**
+     * Instantiates a new Spring expression resolver.
+     * @param beanClassLoader the bean class loader
+     */
     public SpringExpressionResolver(ClassLoader beanClassLoader) {
         this(new SpelParserConfiguration(null, beanClassLoader));
     }
@@ -78,19 +82,19 @@ extends CacheExpressionResolver<EvaluationContext, Expression> {
     @Override
     protected EvaluationContext transform(Context context) {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-        evaluationContext.addPropertyAccessor((PropertyAccessor)new BeanExpressionContextAccessor());
-        evaluationContext.addPropertyAccessor((PropertyAccessor)new BeanFactoryAccessor());
-        evaluationContext.addPropertyAccessor((PropertyAccessor)new MapAccessor());
-        evaluationContext.addPropertyAccessor((PropertyAccessor)new EnvironmentAccessor());
-        evaluationContext.setTypeLocator((TypeLocator)new StandardTypeLocator());
-        evaluationContext.setTypeConverter((TypeConverter)new StandardTypeConverter());
+        evaluationContext.addPropertyAccessor(new BeanExpressionContextAccessor());
+        evaluationContext.addPropertyAccessor(new BeanFactoryAccessor());
+        evaluationContext.addPropertyAccessor(new MapAccessor());
+        evaluationContext.addPropertyAccessor(new EnvironmentAccessor());
+        evaluationContext.setTypeLocator(new StandardTypeLocator());
+        evaluationContext.setTypeConverter(new StandardTypeConverter());
         evaluationContext.setVariables(context.asMap());
         return evaluationContext;
     }
 
     @Override
-    protected <T> T calculate(Expression expression, EvaluationContext context, Class<T> returnType) {
-        return (T)expression.getValue(context, returnType);
+    protected <T> T calculate(
+            Expression expression, EvaluationContext context, Class<T> returnType) {
+        return expression.getValue(context, returnType);
     }
 }
-

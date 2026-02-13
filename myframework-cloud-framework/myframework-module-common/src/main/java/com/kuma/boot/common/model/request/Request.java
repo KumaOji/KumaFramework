@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  io.swagger.v3.oas.annotations.media.Schema
  *  jakarta.validation.constraints.NotNull
@@ -37,7 +37,7 @@ implements Serializable {
         Request<EmptyRequest> request = new Request<EmptyRequest>();
         EmptyRequest emptyRequest = new EmptyRequest();
         request.setOrder(emptyRequest);
-        return request;
+        return (Request<T>) request;
     }
 
     public String getVersion() {

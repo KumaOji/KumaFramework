@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  cn.hutool.core.util.StrUtil
  *  io.swagger.v3.oas.annotations.media.Schema
@@ -110,7 +110,7 @@ implements Serializable {
     }
 
     public static <T> Result<T> of(String status, String code, String message, T data) {
-        return Result.builder().status(status).code(code).data(data).message(message).timestamp(Instant.now().toEpochMilli()).requestId(StrUtil.isNotBlank((CharSequence)TraceUtils.getKmcTraceId()) ? TraceUtils.getKmcTraceId() : IdGeneratorUtils.getIdStr()).build();
+        return (Result<T>) Result.builder().status(status).code(code).data(data).message(message).timestamp(Instant.now().toEpochMilli()).requestId(StrUtil.isNotBlank((CharSequence)TraceUtils.getKmcTraceId()) ? TraceUtils.getKmcTraceId() : IdGeneratorUtils.getIdStr()).build();
     }
 
     public String getStatus() {

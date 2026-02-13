@@ -20,6 +20,6 @@ public @interface Update {
 
     public String content();
 
-    public String updator() default "shuigedeng";
+    public String updator() default "kuma";
 }
 

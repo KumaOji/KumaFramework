@@ -1,10 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe.impl;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+
 import com.kuma.boot.common.support.dataframe.iframe.SDFrame;
-import com.kuma.boot.common.support.dataframe.iframe.impl.AbstractCommonFrame;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI2;
 import com.kuma.boot.common.support.dataframe.iframe.window.SupplierFunction;
 import com.kuma.boot.common.support.dataframe.iframe.window.Window;
@@ -21,20 +36,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-public abstract class AbstractWindowDataFrame<T>
-extends AbstractCommonFrame<T> {
-    protected final Window<T> emptyWindow = new WindowBuilder(Range.START_ROW, Range.END_ROW);
+/**
+ * Window DataFrame implement
+ *
+ * @author caizhihao
+ * @param <T>
+ */
+public abstract class AbstractWindowDataFrame<T> extends AbstractCommonFrame<T> {
+
+    protected final Window<T> emptyWindow = new WindowBuilder<>(Range.START_ROW, Range.END_ROW);
+
     protected Window<T> window;
 
     protected <V> List<FI2<T, V>> overAbject(Window<T> overParam, SupplierFunction<T, V> supplier) {
-        ((WindowBuilder)overParam).initDefault();
-        List windowList = this.viewList();
-        ArrayList<FI2<T, V>> result = new ArrayList<FI2<T, V>>();
+        ((WindowBuilder<T>) overParam).initDefault();
+        List<T> windowList = viewList();
+        List<FI2<T, V>> result = new ArrayList<>();
         if (ListUtils.isEmpty(windowList)) {
             return result;
         }
+
         Comparator<T> comparator = overParam.getComparator();
         List<Function<T, ?>> partitionList = overParam.partitions();
         if (ListUtils.isEmpty(partitionList)) {
@@ -43,133 +65,177 @@ extends AbstractCommonFrame<T> {
             }
             return supplier.get(windowList);
         }
-        ArrayList<List<T>> allWindowList = new ArrayList<List<T>>();
-        this.dfsFindWindow(allWindowList, windowList, partitionList, 0);
-        for (List list : allWindowList) {
+
+        // 获取每个窗口
+        List<List<T>> allWindowList = new ArrayList<>();
+        dfsFindWindow(allWindowList, windowList, partitionList, 0);
+
+        for (List<T> data : allWindowList) {
             if (comparator != null) {
-                list.sort(comparator);
+                data.sort(comparator);
             }
-            List tmpList = supplier.get(list);
+            List<FI2<T, V>> tmpList = supplier.get(data);
             result.addAll(tmpList);
         }
+
         return result;
     }
 
-    protected void dfsFindWindow(List<List<T>> result, List<T> windowList, List<Function<T, ?>> partitionList, int index) {
+    protected void dfsFindWindow(
+            List<List<T>> result,
+            List<T> windowList,
+            List<Function<T, ?>> partitionList,
+            int index) {
         if (index >= partitionList.size()) {
             result.add(windowList);
             return;
         }
         Function<T, ?> partitionBy = partitionList.get(index);
-        Map<?, List<T>> collect = windowList.stream().collect(Collectors.groupingBy(partitionBy));
+        Map<?, List<T>> collect = windowList.stream().collect(groupingBy(partitionBy));
         for (List<T> window : collect.values()) {
-            this.dfsFindWindow(result, window, partitionList, index + 1);
+            dfsFindWindow(result, window, partitionList, index + 1);
         }
     }
 
     protected List<FI2<T, Integer>> windowFunctionForRowNumber(Window<T> overParam) {
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            int index = 1;
-            for (Object t : windowList) {
-                result.add(new FI2(t, index++));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+        SupplierFunction<T, Integer> supplier =
+                windowList -> {
+                    List<FI2<T, Integer>> result = new ArrayList<>();
+                    int index = 1;
+                    for (T t : windowList) {
+                        result.add(new FI2<>(t, index++));
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
     protected List<FI2<T, Integer>> windowFunctionForRank(Window<T> overParam) {
-        this.checkWindow(overParam);
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            int n = windowList.size();
-            int rank = 1;
-            result.add(new FI2(windowList.get(0), 1));
-            for (int i = 1; i < windowList.size(); ++i) {
-                Object pre = windowList.get(i - 1);
-                Object cur = windowList.get(i);
-                if (overParam.getComparator().compare(pre, cur) != 0) {
-                    rank = i + 1;
-                }
-                if (rank > n) break;
-                result.add(new FI2(cur, rank));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+        checkWindow(overParam);
+
+        SupplierFunction<T, Integer> supplier =
+                (windowList) -> {
+                    List<FI2<T, Integer>> result = new ArrayList<>();
+                    int n = windowList.size();
+                    int rank = 1;
+                    result.add(new FI2<>(windowList.get(0), 1));
+                    for (int i = 1; i < windowList.size(); i++) {
+                        T pre = windowList.get(i - 1);
+                        T cur = windowList.get(i);
+                        if (overParam.getComparator().compare(pre, cur) != 0) {
+                            rank = i + 1;
+                        }
+                        if (rank <= n) {
+                            result.add(new FI2<>(cur, rank));
+                        } else {
+                            break;
+                        }
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
     protected List<FI2<T, Integer>> windowFunctionForDenseRank(Window<T> overParam) {
-        this.checkWindow(overParam);
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            int n = windowList.size();
-            int rank = 1;
-            result.add(new FI2(windowList.get(0), 1));
-            for (int i = 1; i < windowList.size(); ++i) {
-                Object pre = windowList.get(i - 1);
-                Object cur = windowList.get(i);
-                if (overParam.getComparator().compare(pre, cur) != 0) {
-                    ++rank;
-                }
-                if (rank > n) break;
-                result.add(new FI2(cur, rank));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+        checkWindow(overParam);
+
+        SupplierFunction<T, Integer> supplier =
+                (windowList) -> {
+                    List<FI2<T, Integer>> result = new ArrayList<>();
+                    int n = windowList.size();
+                    int rank = 1;
+                    result.add(new FI2<>(windowList.get(0), 1));
+                    for (int i = 1; i < windowList.size(); i++) {
+                        T pre = windowList.get(i - 1);
+                        T cur = windowList.get(i);
+                        if (overParam.getComparator().compare(pre, cur) != 0) {
+                            rank += 1;
+                        }
+                        if (rank <= n) {
+                            result.add(new FI2<>(cur, rank));
+                        } else {
+                            break;
+                        }
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
     protected List<FI2<T, BigDecimal>> windowFunctionForPercentRank(Window<T> overParam) {
-        this.checkWindow(overParam);
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            int n = windowList.size();
-            int rank = 1;
-            result.add(new FI2(windowList.get(0), BigDecimal.ZERO));
-            for (int i = 1; i < windowList.size(); ++i) {
-                Object pre = windowList.get(i - 1);
-                Object cur = windowList.get(i);
-                if (overParam.getComparator().compare(pre, cur) != 0) {
-                    rank = i + 1;
-                }
-                if (rank > n) break;
-                BigDecimal divide = MathUtils.divide(rank - 1, windowList.size() - 1, this.defaultScale, this.defaultRoundingMode);
-                result.add(new FI2(cur, divide));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+        checkWindow(overParam);
+
+        SupplierFunction<T, BigDecimal> supplier =
+                (windowList) -> {
+                    // (rank-1) / (rows-1)
+                    List<FI2<T, BigDecimal>> result = new ArrayList<>();
+                    int n = windowList.size();
+                    int rank = 1;
+                    result.add(new FI2<>(windowList.get(0), BigDecimal.ZERO));
+                    for (int i = 1; i < windowList.size(); i++) {
+                        T pre = windowList.get(i - 1);
+                        T cur = windowList.get(i);
+                        if (overParam.getComparator().compare(pre, cur) != 0) {
+                            rank = i + 1;
+                        }
+                        if (rank <= n) {
+                            BigDecimal divide =
+                                    MathUtils.divide(
+                                            (rank - 1),
+                                            windowList.size() - 1,
+                                            defaultScale,
+                                            defaultRoundingMode);
+                            result.add(new FI2<>(cur, divide));
+                        } else {
+                            break;
+                        }
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
     protected List<FI2<T, BigDecimal>> windowFunctionForCumeDist(Window<T> overParam) {
-        this.checkWindow(overParam);
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            int n = windowList.size();
-            int rank = 1;
-            HashMap<Integer, Integer> rankCountMap = new HashMap<Integer, Integer>();
-            for (int i = 0; i < windowList.size(); ++i) {
-                Object pre = i > 0 ? (Object)windowList.get(i - 1) : null;
-                Object cur = windowList.get(i);
-                if (pre != null && overParam.getComparator().compare(pre, cur) != 0) {
-                    rankCountMap.put(rank, i);
-                    rank = i + 1;
-                }
-                if (rank > n) break;
-                result.add(new FI2(cur, rank));
-            }
-            rankCountMap.computeIfAbsent(rank, k -> windowList.size());
-            ArrayList resultList = new ArrayList();
-            result.forEach(e -> {
-                Integer count = (Integer)rankCountMap.get(e.getC2());
-                BigDecimal divide = MathUtils.divide(count, windowList.size(), this.defaultScale, this.defaultRoundingMode);
-                resultList.add(new FI2(e.getC1(), divide));
-            });
-            return resultList;
-        };
-        return this.overAbject(overParam, supplier);
+        checkWindow(overParam);
+
+        SupplierFunction<T, BigDecimal> supplier =
+                (windowList) -> {
+                    List<FI2<T, Integer>> result = new ArrayList<>();
+                    int n = windowList.size();
+                    int rank = 1;
+                    Map<Integer, Integer> rankCountMap = new HashMap<>();
+                    for (int i = 0; i < windowList.size(); i++) {
+                        T pre = i > 0 ? windowList.get(i - 1) : null;
+                        T cur = windowList.get(i);
+                        if (pre != null && overParam.getComparator().compare(pre, cur) != 0) {
+                            // 次数的rank累积的计数最大
+                            rankCountMap.put(rank, i);
+                            rank = i + 1;
+                        }
+                        if (rank <= n) {
+                            result.add(new FI2<>(cur, rank));
+                        } else {
+                            break;
+                        }
+                    }
+                    // 最大排名
+                    rankCountMap.computeIfAbsent(rank, k -> windowList.size());
+                    List<FI2<T, BigDecimal>> resultList = new ArrayList<>();
+                    result.forEach(
+                            e -> {
+                                Integer count = rankCountMap.get(e.getC2());
+                                BigDecimal divide =
+                                        MathUtils.divide(
+                                                count,
+                                                windowList.size(),
+                                                defaultScale,
+                                                defaultRoundingMode);
+                                resultList.add(new FI2<>(e.getC1(), divide));
+                            });
+                    return resultList;
+                };
+
+        return overAbject(overParam, supplier);
     }
 
     private void checkWindow(Window<T> overParam) {
@@ -179,77 +245,117 @@ extends AbstractCommonFrame<T> {
         }
     }
 
-    protected <F> List<FI2<T, F>> windowFunctionForLag(Window<T> overParam, Function<T, F> field, int n) {
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            for (int i = 0; i < windowList.size(); ++i) {
-                int preIndex = i - n;
-                if (preIndex < 0) {
-                    result.add(new FI2(windowList.get(i), null));
-                    continue;
-                }
-                FI2<Integer, Integer> indexRange = this.getIndexRange(overParam, i, windowList);
-                if (!this.isInRange(indexRange, preIndex)) {
-                    preIndex = -1;
-                }
-                Object value = null;
-                if (preIndex >= 0 && preIndex < windowList.size()) {
-                    value = field.apply(windowList.get(preIndex));
-                }
-                result.add(new FI2(windowList.get(i), value));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+    /**
+     * 获取当前行的前N行的值
+     */
+    protected <F> List<FI2<T, F>> windowFunctionForLag(
+            Window<T> overParam, Function<T, F> field, int n) {
+        SupplierFunction<T, F> supplier =
+                (windowList) -> {
+                    List<FI2<T, F>> result = new ArrayList<>();
+                    for (int i = 0; i < windowList.size(); i++) {
+                        int preIndex = i - n;
+                        if (preIndex < 0) {
+                            result.add(new FI2<>(windowList.get(i), null));
+                            continue;
+                        }
+
+                        FI2<Integer, Integer> indexRange = getIndexRange(overParam, i, windowList);
+                        if (!isInRange(indexRange, preIndex)) {
+                            preIndex = -1;
+                        }
+
+                        F value = null;
+                        if (preIndex >= 0 && preIndex < windowList.size()) {
+                            value = field.apply(windowList.get(preIndex));
+                        }
+                        result.add(new FI2<>(windowList.get(i), value));
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
-    protected <F> List<FI2<T, F>> windowFunctionForLead(Window<T> overParam, Function<T, F> field, int n) {
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            for (int i = 0; i < windowList.size(); ++i) {
-                int afterIndex = i + n;
-                FI2<Integer, Integer> indexRange = this.getIndexRange(overParam, i, windowList);
-                if (!this.isInRange(indexRange, afterIndex)) {
-                    afterIndex = -1;
-                }
-                Object value = null;
-                if (afterIndex >= 0 && afterIndex < windowList.size()) {
-                    value = field.apply(windowList.get(afterIndex));
-                }
-                result.add(new FI2(windowList.get(i), value));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+    /**
+     * 获取当前行的后N行的值
+     */
+    protected <F> List<FI2<T, F>> windowFunctionForLead(
+            Window<T> overParam, Function<T, F> field, int n) {
+        SupplierFunction<T, F> supplier =
+                (windowList) -> {
+                    List<FI2<T, F>> result = new ArrayList<>();
+                    for (int i = 0; i < windowList.size(); i++) {
+                        int afterIndex = i + n;
+
+                        FI2<Integer, Integer> indexRange = getIndexRange(overParam, i, windowList);
+                        if (!isInRange(indexRange, afterIndex)) {
+                            afterIndex = -1;
+                        }
+
+                        F value = null;
+                        if (afterIndex >= 0 && afterIndex < windowList.size()) {
+                            value = field.apply(windowList.get(afterIndex));
+                        }
+                        result.add(new FI2<>(windowList.get(i), value));
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
-    protected <F> List<FI2<T, F>> windowFunctionForNthValue(Window<T> overParam, Function<T, F> field, int n) {
-        SupplierFunction supplier = windowList -> {
-            int index = n == -1 ? windowList.size() - 1 : n - 1;
-            if (index < 0 || index >= windowList.size()) {
-                return windowList.stream().map(e -> new FI2<Object, Object>(e, null)).collect(Collectors.toList());
-            }
-            ArrayList result = new ArrayList();
-            for (int i = 0; i < windowList.size(); ++i) {
-                Object value = null;
-                FI2<Integer, Integer> indexRange = this.getIndexRange(overParam, i, windowList);
-                if (indexRange.getC1() < 0) {
-                    indexRange.setC1(0);
-                }
-                if ((index = n != -1 ? indexRange.getC1() + n - 1 : indexRange.getC2()) >= 0 && index < windowList.size() && this.isInRange(indexRange, index)) {
-                    value = field.apply(windowList.get(index));
-                }
-                result.add(new FI2(windowList.get(i), value));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+    /**
+     * 获取窗口内第N行的值
+     */
+    protected <F> List<FI2<T, F>> windowFunctionForNthValue(
+            Window<T> overParam, Function<T, F> field, int n) {
+        SupplierFunction<T, F> supplier =
+                (windowList) -> {
+                    int index;
+                    if (n == -1) {
+                        // 获取窗口最后一行
+                        index = windowList.size() - 1;
+                    } else {
+                        index = n - 1;
+                    }
+
+                    if (index < 0 || index >= windowList.size()) {
+                        return windowList.stream()
+                                .map(e -> new FI2<T, F>(e, null))
+                                .collect(toList());
+                    }
+
+                    List<FI2<T, F>> result = new ArrayList<>();
+                    for (int i = 0; i < windowList.size(); i++) {
+                        F value = null;
+                        FI2<Integer, Integer> indexRange = getIndexRange(overParam, i, windowList);
+                        if (indexRange.getC1() < 0) {
+                            // 重新设置窗口开始边界
+                            indexRange.setC1(0);
+                        }
+
+                        if (n != -1) {
+                            // 获取窗口内的第n行
+                            index = indexRange.getC1() + n - 1;
+                        } else {
+                            index = indexRange.getC2();
+                        }
+                        if (index >= 0
+                                && index < windowList.size()
+                                && isInRange(indexRange, index)) {
+                            value = field.apply(windowList.get(index));
+                        }
+                        result.add(new FI2<>(windowList.get(i), value));
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
-    public <V> FI2<Integer, Integer> getIndexRange(Window<T> overParam, int currentIndex, List<V> windowList) {
+    public <V> FI2<Integer, Integer> getIndexRange(
+            Window<T> overParam, int currentIndex, List<V> windowList) {
         Integer startIndex = overParam.getStartRange().getStartIndex(currentIndex, windowList);
         Integer endIndex = overParam.getEndRange().getEndIndex(currentIndex, windowList);
-        return new FI2<Integer, Integer>(startIndex, endIndex);
+        return new FI2<>(startIndex, endIndex);
     }
 
     public boolean isInRange(FI2<Integer, Integer> round, int index) {
@@ -257,45 +363,60 @@ extends AbstractCommonFrame<T> {
     }
 
     public boolean isAllRow(Window<T> overParam) {
-        return Range.START_ROW.equals(overParam.getStartRange()) && Range.END_ROW.equals(overParam.getEndRange());
+        return Range.START_ROW.equals(overParam.getStartRange())
+                && Range.END_ROW.equals(overParam.getEndRange());
     }
 
-    protected <F> List<FI2<T, BigDecimal>> windowFunctionForSum(Window<T> overParam, Function<T, F> field) {
-        SupplierFunction supplier = windowList -> {
-            if (this.isAllRow(overParam)) {
-                BigDecimal value = SDFrame.read(windowList).sum(field);
-                return windowList.stream().map(e -> new FI2<Object, BigDecimal>(e, value)).collect(Collectors.toList());
-            }
-            return this.slidingWindowSum(windowList, overParam, field);
-        };
-        return this.overAbject(overParam, supplier);
+    protected <F> List<FI2<T, BigDecimal>> windowFunctionForSum(
+            Window<T> overParam, Function<T, F> field) {
+        SupplierFunction<T, BigDecimal> supplier =
+                (windowList) -> {
+                    if (isAllRow(overParam)) {
+                        BigDecimal value = SDFrame.read(windowList).sum(field);
+                        return windowList.stream().map(e -> new FI2<>(e, value)).collect(toList());
+                    }
+                    return slidingWindowSum(windowList, overParam, field);
+                };
+        return overAbject(overParam, supplier);
     }
 
-    public <F> List<FI2<T, BigDecimal>> slidingWindowSum(List<T> nums, Window<T> overParam, Function<T, F> field) {
-        FI2<Integer, Integer> firstSlidingWindow = this.getFirstSlidingWindow(nums, overParam);
+    public <F> List<FI2<T, BigDecimal>> slidingWindowSum(
+            List<T> nums, Window<T> overParam, Function<T, F> field) {
+        FI2<Integer, Integer> firstSlidingWindow = getFirstSlidingWindow(nums, overParam);
         Integer startIndex = firstSlidingWindow.getC1();
         Integer endIndex = firstSlidingWindow.getC2();
+
+        // 计算第一个窗口的和
         BigDecimal windowSum = BigDecimal.ZERO;
-        for (int i = startIndex.intValue(); i <= endIndex && i < nums.size(); ++i) {
-            if (i < 0) continue;
-            windowSum = windowSum.add(this.getBigDecimalValue(nums.get(i), field));
+        for (int i = startIndex; i <= endIndex && i < nums.size(); i++) {
+            if (i >= 0) {
+                windowSum = windowSum.add(getBigDecimalValue(nums.get(i), field));
+            }
         }
-        ArrayList<FI2<T, BigDecimal>> dataList = new ArrayList<FI2<T, BigDecimal>>();
-        dataList.add(new FI2<T, BigDecimal>(nums.get(0), windowSum));
+        List<FI2<T, BigDecimal>> dataList = new ArrayList<>();
+
+        dataList.add(new FI2<>(nums.get(0), windowSum));
+
+        // 滑动窗口并计算后续窗口的和 移动次数
         int index = 1;
         while (dataList.size() < nums.size()) {
-            if (!overParam.getEndRange().isFixedEndIndex() && (endIndex = Integer.valueOf(endIndex + 1)) >= 0 && endIndex < nums.size()) {
-                windowSum = windowSum.add(this.getBigDecimalValue(nums.get(endIndex), field));
+            if (!overParam.getEndRange().isFixedEndIndex()) {
+                ++endIndex;
+                if (endIndex >= 0 && endIndex < nums.size()) {
+                    windowSum = windowSum.add(getBigDecimalValue(nums.get(endIndex), field));
+                }
             }
+
             if (!overParam.getStartRange().isFixedStartIndex()) {
                 if (startIndex >= 0 && startIndex < nums.size()) {
-                    windowSum = windowSum.subtract(this.getBigDecimalValue(nums.get(startIndex), field));
+                    windowSum = windowSum.subtract(getBigDecimalValue(nums.get(startIndex), field));
                 }
-                Integer n = startIndex;
-                startIndex = startIndex + 1;
+                startIndex++;
             }
-            if (endIndex < 0) continue;
-            dataList.add(new FI2<T, BigDecimal>(nums.get(index++), windowSum));
+
+            if (endIndex >= 0) {
+                dataList.add(new FI2<>(nums.get(index++), windowSum));
+            }
         }
         return dataList;
     }
@@ -306,50 +427,84 @@ extends AbstractCommonFrame<T> {
             return BigDecimal.ZERO;
         }
         if (apply instanceof BigDecimal) {
-            return (BigDecimal)apply;
+            return (BigDecimal) apply;
+        } else {
+            return new BigDecimal(String.valueOf(apply));
         }
-        return new BigDecimal(String.valueOf(apply));
     }
 
-    protected <F> List<FI2<T, BigDecimal>> windowFunctionForAvg(Window<T> overParam, Function<T, F> field) {
-        SupplierFunction supplier = windowList -> {
-            if (this.isAllRow(overParam)) {
-                BigDecimal value = SDFrame.read(windowList).defaultScale(this.defaultScale, this.defaultRoundingMode).avg(field);
-                return windowList.stream().map(e -> new FI2<Object, BigDecimal>(e, value)).collect(Collectors.toList());
-            }
-            return this.slidingWindowAvg(windowList, overParam, field);
-        };
-        return this.overAbject(overParam, supplier);
+    protected <F> List<FI2<T, BigDecimal>> windowFunctionForAvg(
+            Window<T> overParam, Function<T, F> field) {
+        SupplierFunction<T, BigDecimal> supplier =
+                (windowList) -> {
+                    if (isAllRow(overParam)) {
+                        BigDecimal value =
+                                SDFrame.read(windowList)
+                                        .defaultScale(defaultScale, defaultRoundingMode)
+                                        .avg(field);
+                        return windowList.stream().map(e -> new FI2<>(e, value)).collect(toList());
+                    }
+
+                    return slidingWindowAvg(windowList, overParam, field);
+                };
+        return overAbject(overParam, supplier);
     }
 
-    public <F> List<FI2<T, BigDecimal>> slidingWindowAvg(List<T> nums, Window<T> overParam, Function<T, F> field) {
-        FI2<Integer, Integer> firstSlidingWindow = this.getFirstSlidingWindow(nums, overParam);
+    public <F> List<FI2<T, BigDecimal>> slidingWindowAvg(
+            List<T> nums, Window<T> overParam, Function<T, F> field) {
+        FI2<Integer, Integer> firstSlidingWindow = getFirstSlidingWindow(nums, overParam);
         Integer startIndex = firstSlidingWindow.getC1();
         Integer endIndex = firstSlidingWindow.getC2();
+
+        // 计算第一个窗口
         BigDecimal windowSum = BigDecimal.ZERO;
         int windowSize = 0;
-        for (int i = startIndex.intValue(); i <= endIndex && i < nums.size(); ++i) {
-            if (i < 0) continue;
-            ++windowSize;
-            windowSum = windowSum.add(this.getBigDecimalValue(nums.get(i), field));
+        for (int i = startIndex; i <= endIndex && i < nums.size(); i++) {
+            if (i >= 0) {
+                windowSize++;
+                windowSum = windowSum.add(getBigDecimalValue(nums.get(i), field));
+            }
         }
-        ArrayList<FI2<T, BigDecimal>> dataList = new ArrayList<FI2<T, BigDecimal>>();
-        dataList.add(new FI2<T, BigDecimal>(nums.get(0), MathUtils.divide(windowSum, new BigDecimal(windowSize), this.defaultScale, this.defaultRoundingMode)));
+        List<FI2<T, BigDecimal>> dataList = new ArrayList<>();
+        dataList.add(
+                new FI2<>(
+                        nums.get(0),
+                        MathUtils.divide(
+                                windowSum,
+                                new BigDecimal(windowSize),
+                                defaultScale,
+                                defaultRoundingMode)));
+
+        // 滑动窗口并计算后续窗口的和 窗口大小
         int index = 1;
         while (dataList.size() < nums.size()) {
-            if (!overParam.getEndRange().isFixedEndIndex() && (endIndex = Integer.valueOf(endIndex + 1)) >= 0 && endIndex < nums.size()) {
-                windowSum = windowSum.add(this.getBigDecimalValue(nums.get(endIndex), field));
+            // 滑动右窗口
+            if (!overParam.getEndRange().isFixedEndIndex()) {
+                ++endIndex;
+                if (endIndex >= 0 && endIndex < nums.size()) {
+                    windowSum = windowSum.add(getBigDecimalValue(nums.get(endIndex), field));
+                }
             }
+
+            // 滑动左窗口
             if (!overParam.getStartRange().isFixedStartIndex()) {
                 if (startIndex >= 0 && startIndex < nums.size()) {
-                    windowSum = windowSum.subtract(this.getBigDecimalValue(nums.get(startIndex), field));
+                    windowSum = windowSum.subtract(getBigDecimalValue(nums.get(startIndex), field));
                 }
-                Integer n = startIndex;
-                startIndex = startIndex + 1;
+                startIndex++;
             }
-            windowSize = this.getActualWindowSize(nums, startIndex, endIndex);
-            if (endIndex < 0) continue;
-            dataList.add(new FI2<T, BigDecimal>(nums.get(index++), MathUtils.divide(windowSum, new BigDecimal(windowSize), this.defaultScale, this.defaultRoundingMode)));
+
+            windowSize = getActualWindowSize(nums, startIndex, endIndex);
+            if (endIndex >= 0) {
+                dataList.add(
+                        new FI2<>(
+                                nums.get(index++),
+                                MathUtils.divide(
+                                        windowSum,
+                                        new BigDecimal(windowSize),
+                                        defaultScale,
+                                        defaultRoundingMode)));
+            }
         }
         return dataList;
     }
@@ -361,175 +516,232 @@ extends AbstractCommonFrame<T> {
         if (startIndex < 0 && endIndex >= nums.size()) {
             return nums.size();
         }
+
         int left = startIndex < 0 ? 0 : startIndex;
         int right = endIndex >= nums.size() ? nums.size() - 1 : endIndex;
         return right - left + 1;
     }
 
     public FI2<Integer, Integer> getFirstSlidingWindow(List<T> windowList, Window<T> overParam) {
-        return this.getIndexRange(overParam, 0, windowList);
+        return getIndexRange(overParam, 0, windowList);
     }
 
-    public <F extends Comparable<? super F>> void updateSlidingWindowMaxQueue(LinkedList<Integer> queue, FieldValueList<T, F> obj, int i) {
-        while (!queue.isEmpty() && ((Comparable)obj.get(queue.peekLast())).compareTo(obj.get(i)) < 0) {
+    public <F extends Comparable<? super F>> void updateSlidingWindowMaxQueue(
+            LinkedList<Integer> queue, FieldValueList<T, F> obj, int i) {
+        // 移除比当前元素小的. 就是之前比他（i）先进的但是比他小的已经没有意义了不会再获取他们，只会可能获取到i
+        while (!queue.isEmpty() && obj.get(queue.peekLast()).compareTo(obj.get(i)) < 0) {
             queue.removeLast();
         }
+        // 添加队列
         queue.add(i);
     }
 
-    public <F extends Comparable<? super F>> void updateSlidingWindowMinQueue(LinkedList<Integer> queue, FieldValueList<T, F> obj, int i) {
-        while (!queue.isEmpty() && ((Comparable)obj.get(queue.peekLast())).compareTo(obj.get(i)) > 0) {
+    public <F extends Comparable<? super F>> void updateSlidingWindowMinQueue(
+            LinkedList<Integer> queue, FieldValueList<T, F> obj, int i) {
+        // 移除比当前元素大的. 就是之前比他（i）先进的但是比他大的已经没有意义了不会再获取他们，只会可能获取到i
+        while (!queue.isEmpty() && obj.get(queue.peekLast()).compareTo(obj.get(i)) > 0) {
             queue.removeLast();
         }
+        // 添加队列
         queue.add(i);
     }
 
-    public <F extends Comparable<? super F>> List<FI2<T, F>> slidingWindowForMaxValue(List<T> nums, Window<T> overParam, Function<T, F> field) {
-        FI2<Integer, Integer> firstSlidingWindow = this.getFirstSlidingWindow(nums, overParam);
+    public <F extends Comparable<? super F>> List<FI2<T, F>> slidingWindowForMaxValue(
+            List<T> nums, Window<T> overParam, Function<T, F> field) {
+        FI2<Integer, Integer> firstSlidingWindow = getFirstSlidingWindow(nums, overParam);
         Integer startIndex = firstSlidingWindow.getC1();
         Integer endIndex = firstSlidingWindow.getC2();
-        FieldValueList<T, F> obj = new FieldValueList<T, F>(nums, field);
-        LinkedList<Integer> queue = new LinkedList<Integer>();
-        for (int i = startIndex.intValue(); i <= endIndex && i < nums.size(); ++i) {
-            if (i < 0) continue;
-            this.updateSlidingWindowMaxQueue(queue, obj, i);
+        FieldValueList<T, F> obj = new FieldValueList<>(nums, field);
+
+        // 双端队列，存放窗口内的元素的索引。 单调递减
+        LinkedList<Integer> queue = new LinkedList<>();
+
+        // 初始化第一个窗口
+        for (int i = startIndex; i <= endIndex && i < nums.size(); i++) {
+            if (i < 0) {
+                continue;
+            }
+            updateSlidingWindowMaxQueue(queue, obj, i);
         }
-        ArrayList<FI2<T, F>> dataList = new ArrayList<FI2<T, F>>();
-        Integer maxIndex = (Integer)queue.peekFirst();
-        dataList.add(new FI2<T, Comparable>(nums.get(0), (Comparable)obj.get(maxIndex)));
+
+        List<FI2<T, F>> dataList = new ArrayList<>();
+        Integer maxIndex = queue.peekFirst();
+        dataList.add(new FI2<>(nums.get(0), obj.get(maxIndex)));
+
+        // 滑动窗口
         int index = 1;
         while (dataList.size() < nums.size()) {
-            if (!overParam.getEndRange().isFixedEndIndex() && (endIndex = Integer.valueOf(endIndex + 1)) >= 0 && endIndex < nums.size()) {
-                this.updateSlidingWindowMaxQueue(queue, obj, endIndex);
+            if (!overParam.getEndRange().isFixedEndIndex()) {
+                ++endIndex;
+                if (endIndex >= 0 && endIndex < nums.size()) {
+                    updateSlidingWindowMaxQueue(queue, obj, endIndex);
+                }
             }
+
             if (!overParam.getStartRange().isFixedStartIndex()) {
-                Integer n = startIndex;
-                startIndex = startIndex + 1;
+                startIndex++;
             }
+
+            // 窗口边界更新了，将越界的最大元素移除掉， 只要最大值没有越界就可以获取到，
+            // 那些不是最大值的虽然可能已经出窗口了但是获取不到不用管
             while (!queue.isEmpty() && queue.peekFirst() < startIndex) {
                 queue.removeFirst();
             }
-            if (endIndex < 0) continue;
-            dataList.add(new FI2<T, Comparable>(nums.get(index++), (Comparable)obj.get(queue.peekFirst())));
+
+            if (endIndex >= 0) {
+                dataList.add(new FI2<>(nums.get(index++), obj.get(queue.peekFirst())));
+            }
         }
         return dataList;
     }
 
-    public <F extends Comparable<? super F>> List<FI2<T, F>> slidingWindowForMinValue(List<T> nums, Window<T> overParam, Function<T, F> field) {
-        FI2<Integer, Integer> firstSlidingWindow = this.getFirstSlidingWindow(nums, overParam);
+    public <F extends Comparable<? super F>> List<FI2<T, F>> slidingWindowForMinValue(
+            List<T> nums, Window<T> overParam, Function<T, F> field) {
+        FI2<Integer, Integer> firstSlidingWindow = getFirstSlidingWindow(nums, overParam);
         Integer startIndex = firstSlidingWindow.getC1();
         Integer endIndex = firstSlidingWindow.getC2();
-        FieldValueList<T, F> obj = new FieldValueList<T, F>(nums, field);
-        LinkedList<Integer> queue = new LinkedList<Integer>();
-        for (int i = startIndex.intValue(); i <= endIndex && i < nums.size(); ++i) {
-            if (i < 0) continue;
-            this.updateSlidingWindowMinQueue(queue, obj, i);
+        FieldValueList<T, F> obj = new FieldValueList<>(nums, field);
+
+        // 双端队列，存放窗口内的元素的索引。 单调递增
+        LinkedList<Integer> queue = new LinkedList<>();
+
+        // 初始化第一个窗口
+        for (int i = startIndex; i <= endIndex && i < nums.size(); i++) {
+            if (i < 0) {
+                continue;
+            }
+            updateSlidingWindowMinQueue(queue, obj, i);
         }
-        ArrayList<FI2<T, F>> dataList = new ArrayList<FI2<T, F>>();
-        Integer maxIndex = (Integer)queue.peekFirst();
-        dataList.add(new FI2<T, Comparable>(nums.get(0), (Comparable)obj.get(maxIndex)));
+
+        List<FI2<T, F>> dataList = new ArrayList<>();
+        Integer maxIndex = queue.peekFirst();
+        dataList.add(new FI2<>(nums.get(0), obj.get(maxIndex)));
+
+        // 滑动窗口
         int index = 1;
         while (dataList.size() < nums.size()) {
-            if (!overParam.getEndRange().isFixedEndIndex() && (endIndex = Integer.valueOf(endIndex + 1)) >= 0 && endIndex < nums.size()) {
-                this.updateSlidingWindowMinQueue(queue, obj, endIndex);
+            if (!overParam.getEndRange().isFixedEndIndex()) {
+                ++endIndex;
+                if (endIndex >= 0 && endIndex < nums.size()) {
+                    updateSlidingWindowMinQueue(queue, obj, endIndex);
+                }
             }
+
             if (!overParam.getStartRange().isFixedStartIndex()) {
-                Integer n = startIndex;
-                startIndex = startIndex + 1;
+                startIndex++;
             }
+
             while (!queue.isEmpty() && queue.peekFirst() < startIndex) {
                 queue.removeFirst();
             }
-            if (endIndex < 0) continue;
-            dataList.add(new FI2<T, Comparable>(nums.get(index++), (Comparable)obj.get(queue.peekFirst())));
+
+            if (endIndex >= 0) {
+                dataList.add(new FI2<>(nums.get(index++), obj.get(queue.peekFirst())));
+            }
         }
         return dataList;
     }
 
-    protected <F extends Comparable<? super F>> List<FI2<T, F>> windowFunctionForMaxValue(Window<T> overParam, Function<T, F> field) {
-        SupplierFunction supplier = windowList -> {
-            if (this.isAllRow(overParam)) {
-                Object value = SDFrame.read(windowList).maxValue(field);
-                return windowList.stream().map(e -> new FI2<Object, Comparable>(e, (Comparable)value)).collect(Collectors.toList());
-            }
-            return this.slidingWindowForMaxValue(windowList, overParam, field);
-        };
-        return this.overAbject(overParam, supplier);
+    protected <F extends Comparable<? super F>> List<FI2<T, F>> windowFunctionForMaxValue(
+            Window<T> overParam, Function<T, F> field) {
+        SupplierFunction<T, F> supplier =
+                (windowList) -> {
+                    if (isAllRow(overParam)) {
+                        F value = SDFrame.read(windowList).maxValue(field);
+                        return windowList.stream().map(e -> new FI2<>(e, value)).collect(toList());
+                    }
+                    return slidingWindowForMaxValue(windowList, overParam, field);
+                };
+        return overAbject(overParam, supplier);
     }
 
-    protected <F extends Comparable<? super F>> List<FI2<T, F>> windowFunctionForMinValue(Window<T> overParam, Function<T, F> field) {
-        SupplierFunction supplier = windowList -> {
-            if (this.isAllRow(overParam)) {
-                Object value = SDFrame.read(windowList).minValue(field);
-                return windowList.stream().map(e -> new FI2<Object, Comparable>(e, (Comparable)value)).collect(Collectors.toList());
-            }
-            return this.slidingWindowForMinValue(windowList, overParam, field);
-        };
-        return this.overAbject(overParam, supplier);
+    protected <F extends Comparable<? super F>> List<FI2<T, F>> windowFunctionForMinValue(
+            Window<T> overParam, Function<T, F> field) {
+        SupplierFunction<T, F> supplier =
+                (windowList) -> {
+                    if (isAllRow(overParam)) {
+                        F value = SDFrame.read(windowList).minValue(field);
+                        return windowList.stream().map(e -> new FI2<>(e, value)).collect(toList());
+                    }
+                    return slidingWindowForMinValue(windowList, overParam, field);
+                };
+        return overAbject(overParam, supplier);
     }
 
     protected List<FI2<T, Integer>> windowFunctionForCount(Window<T> overParam) {
-        SupplierFunction supplier = windowList -> {
-            if (this.isAllRow(overParam)) {
-                int count = windowList.size();
-                return windowList.stream().map(e -> new FI2<Object, Integer>(e, count)).collect(Collectors.toList());
-            }
-            ArrayList result = new ArrayList();
-            for (int i = 0; i < windowList.size(); ++i) {
-                FI2<Integer, Integer> indexRange = this.getIndexRange(overParam, i, windowList);
-                if (indexRange.getC1() <= 0) {
-                    indexRange.setC1(0);
-                }
-                if (indexRange.getC2() > windowList.size() - 1) {
-                    indexRange.setC2(windowList.size() - 1);
-                }
-                Integer value = indexRange.getC2() - indexRange.getC1() + 1;
-                result.add(new FI2(windowList.get(i), value));
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+        SupplierFunction<T, Integer> supplier =
+                (windowList) -> {
+                    if (isAllRow(overParam)) {
+                        int count = windowList.size();
+                        return windowList.stream().map(e -> new FI2<>(e, count)).collect(toList());
+                    }
+                    List<FI2<T, Integer>> result = new ArrayList<>();
+                    for (int i = 0; i < windowList.size(); i++) {
+                        FI2<Integer, Integer> indexRange = getIndexRange(overParam, i, windowList);
+                        if (indexRange.getC1() <= 0) {
+                            indexRange.setC1(0);
+                        }
+                        if (indexRange.getC2() > windowList.size() - 1) {
+                            indexRange.setC2(windowList.size() - 1);
+                        }
+                        Integer value = indexRange.getC2() - indexRange.getC1() + 1;
+                        result.add(new FI2<>(windowList.get(i), value));
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 
     protected List<FI2<T, Integer>> windowFunctionForNtile(Window<T> overParam, int n) {
         if (n <= 0) {
             throw new IllegalArgumentException("incorrect arguments to ntile for " + n);
         }
-        SupplierFunction supplier = windowList -> {
-            ArrayList result = new ArrayList();
-            if (windowList.size() % n == 0) {
-                int groupSize = windowList.size() / n;
-                int bucket = 1;
-                int index = 0;
-                for (Object t : windowList) {
-                    if (++index > groupSize) {
-                        ++bucket;
-                        index = 1;
+
+        SupplierFunction<T, Integer> supplier =
+                (windowList) -> {
+                    List<FI2<T, Integer>> result = new ArrayList<>();
+
+                    // 能均匀分
+                    if (windowList.size() % n == 0) {
+                        int groupSize = windowList.size() / n;
+                        int bucket = 1;
+                        int index = 0;
+                        for (T t : windowList) {
+                            index++;
+                            if (index > groupSize) {
+                                bucket++;
+                                index = 1;
+                            }
+                            result.add(new FI2<>(t, bucket));
+                        }
+                        return result;
                     }
-                    result.add(new FI2(t, bucket));
-                }
-                return result;
-            }
-            int[] arr = new int[n];
-            int index = 0;
-            for (int count = windowList.size(); count > 0; --count) {
-                if (index >= arr.length) {
-                    index = 0;
-                }
-                int n2 = index++;
-                arr[n2] = arr[n2] + 1;
-            }
-            int bucket = 1;
-            for (int i = 0; i < windowList.size(); ++i) {
-                int n3 = bucket - 1;
-                arr[n3] = arr[n3] - 1;
-                result.add(new FI2(windowList.get(i), bucket));
-                if (arr[bucket - 1] > 0) continue;
-                ++bucket;
-            }
-            return result;
-        };
-        return this.overAbject(overParam, supplier);
+
+                    // 不能均匀分
+                    // 如果不能平均分配，则优先分配较小编号的桶，并且各个桶中能放的行数最多相差1。
+                    // 先分配组1，再分配组2，再分配组3。 如此循环直到将数字分配完
+                    int[] arr = new int[n];
+                    int count = windowList.size();
+                    int index = 0;
+                    while (count > 0) {
+                        if (index >= arr.length) {
+                            index = 0;
+                        }
+                        arr[index++]++;
+                        count--;
+                    }
+
+                    // 去消耗每个桶的数字，如果消耗完则桶编号增加
+                    int bucket = 1;
+                    for (int i = 0; i < windowList.size(); i++) {
+                        arr[bucket - 1]--;
+                        result.add(new FI2<>(windowList.get(i), bucket));
+                        if (arr[bucket - 1] <= 0) {
+                            bucket++;
+                        }
+                    }
+                    return result;
+                };
+        return overAbject(overParam, supplier);
     }
 }
-

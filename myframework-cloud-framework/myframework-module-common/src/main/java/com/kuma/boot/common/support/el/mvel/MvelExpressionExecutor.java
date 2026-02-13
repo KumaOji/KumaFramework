@@ -8,8 +8,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class MvelExpressionExecutor
-implements ExpressionExecutor {
+public final class MvelExpressionExecutor implements ExpressionExecutor {
     private static final Map<String, Serializable> compiledExpressionMap = new ConcurrentHashMap<String, Serializable>();
 
     @Override

@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  io.swagger.v3.oas.annotations.media.Schema
  */
@@ -37,7 +37,7 @@ implements Serializable {
     }
 
     public static <R> PageResult<R> of(long totalSize, int totalPage, int currentPage, int pageSize, List<R> data) {
-        return PageResult.builder().totalSize(totalSize).totalPage(totalPage).currentPage(currentPage).pageSize(pageSize).data(data).build();
+        return (PageResult<R>) PageResult.builder().totalSize(totalSize).totalPage(totalPage).currentPage(currentPage).pageSize(pageSize).data((List<Object>) data).build();
     }
 
     public long getTotalSize() {

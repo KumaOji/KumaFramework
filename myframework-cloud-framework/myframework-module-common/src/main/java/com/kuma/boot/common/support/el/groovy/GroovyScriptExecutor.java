@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class GroovyScriptExecutor
-implements ExpressionExecutor {
+public final class GroovyScriptExecutor implements ExpressionExecutor {
     private static final Map<String, Class<?>> classMap = new ConcurrentHashMap();
     private static final List<String> defaultImports = new ArrayList<String>();
 

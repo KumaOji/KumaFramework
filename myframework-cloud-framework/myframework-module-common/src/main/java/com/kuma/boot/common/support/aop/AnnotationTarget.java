@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  com.google.common.collect.Sets
  *  org.springframework.aop.Pointcut
@@ -29,13 +29,13 @@ final class AnnotationTarget<A extends Annotation> {
     private final Set<ElementType> elementTypes;
 
     public static <A extends Annotation> AnnotationTarget<A> of(Class<A> annotationType) {
-        return CACHE.computeIfAbsent(annotationType, AnnotationTarget::new);
+        return (AnnotationTarget<A>) CACHE.computeIfAbsent(annotationType, AnnotationTarget::new);
     }
 
     private AnnotationTarget(Class<A> annotationType) {
         this.annotationType = annotationType;
         Target target = annotationType.getAnnotation(Target.class);
-        this.elementTypes = Sets.newHashSet((Object[])target.value());
+        this.elementTypes = Sets.newHashSet();
     }
 
     public A getAnnotation(Method method) {

@@ -1,21 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.HashBasedTable
- *  com.google.common.collect.Table
- *  com.google.common.util.concurrent.Futures
- *  com.google.common.util.concurrent.ListeningExecutorService
- *  com.google.common.util.concurrent.MoreExecutors
- *  com.google.common.util.concurrent.ThreadFactoryBuilder
- *  javax.annotation.concurrent.NotThreadSafe
- *  org.apache.commons.collections4.CollectionUtils
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.objectrelation;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -43,534 +47,1030 @@ import java.util.stream.Stream;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.commons.collections4.CollectionUtils;
 
+/**
+ * 对象关系匹配器 可匹配一对一或一对多 <br/> 非线程安全 <br/> 用于在一个已有的集合（源集合）中，每个元素中的几个属性要靠另一个接口/服务去查，查完拿回来匹配并组装到当前集合内对应的元素中 <br/>
+ * 例如要查询评论信息返回评论对象集合，一个评论类中包含了评论ID、评论内容、用户ID、用户名、用户头像、文章ID、文章标题、文章内容 <br/> 通常分为下面几步 <br/>
+ * 1.根据检索条件分页查询评论信息，包含了评论ID、评论内容、用户ID、文章ID <br/> 2.抽取出所有的用户ID，根据这些用户ID调用用户查询服务获取用户信息集合（新集合），然后用评论集合和用户集合进行join(or
+ * mapping)，再设置对应的用户名和用户头像 <br/> 3.抽取出所有的文章ID，根据这些文章ID调用文章查询接口获取文章信息集合（新集合），然后用评论集合和文章集合进行一一匹配，再设置对应的文章标题和文章内容 <br/>
+ * 对这类问题的解决方案大致可抽象为下面几步 <br/> 1.在源集合中找出要根据哪些标识（ID or condition）来查询 <br/> 1.1.可能只有某些元素有这种标识，需要过滤出包含标识的元素 <br/>
+ * 2.根据这些标识查询需要的新集合 <br/> 2.1.根据这些标识查询缓存 <br/> 2.2.将未命中缓存的标识调用一个批量查询集合的方法或用多线程调用单个查询的方法 <br/>
+ * 2.2.1.某些接口会有限制，比如最多只能查100条，需要分批查询 <br/> 2.2.2.失败的话可能需要重试 <br/> 2.3.将未在缓存中的数据放入缓存 <br/> 2.4.将上面两步查出来的数据合并 <br/>
+ * 3.将查询出来的新集合按照指定的方式分组变为Map <br/> 3.1.某些接口只能进行简单查询（比如只能查全部无法根据状态过滤），需要查出后自己过滤（只要生效中的） <br/>
+ * 4.遍历源集合并按照指定的规则来从上面Map中找到关联的对象 <br/> 5.找出Map的数据后如果非空则调用setter来设置属性值 <br/>
+ *
+ * 调用方式（例如根据评论中的文章ID查询文章并设置文章的标题和内容）： <br/> ObjectRelationMatcher<CommentDTO, Long, List<Long>, ArticleDTO, Long>
+ * matcher = new ObjectRelationMatcher<>(); <br/> matcher.setElements(comments) <br/>
+ * .setElementIdentifierExtractor(CommentDTO::getArticleId) <br/> .setIdentifierCollectorType(List.class) <br/>
+ * .setBatchQueryMethod(articleService::queryByIds) <br/> .setDataKeyGenerator(ArticleDTO::getId) <br/>
+ * .setElementToKeyMapping(CommentDTO::getArticleId) <br/> .match() <br/> .processOneToOne((comment, article) -> { <br/>
+ * comment.setArticleTitle(article.getTitle()); <br/> comment.setArticleContent(article.getContent()); <br/> }, comment
+ * -> { <br/> comment.setArticleTitle("未知标题"); <br/> comment.setArticleContent("未知内容"); <br/> }); <br/>
+ *
+ * @param <E> 源集合的元素类型
+ * @param <I> 源集合元素生成标识的类型
+ * @param <C> 标识的集合类型
+ * @param <D> 新集合的元素类型
+ * @param <K> 新集合元素生成key的类型 // TODO 将线程池部分抽出 当前用的是默认实现（固定大小） // TODO 将缓存部分抽出 当前用的是默认实现（本地内存） // TODO 将重试部分抽出
+ * 当前用的是默认实现（固定时长+固定次数）
+ */
 @NotThreadSafe
 public final class ObjectRelationMatcher2<E, I, C extends Collection<I>, D, K> {
+
+    /**
+     * 默认缓存的集合数量为16
+     */
     private static final int DEFAULT_CACHE_COLLECTION_COUNT = 16;
+
+    /**
+     * 默认每个集合缓存的元素数量为128
+     */
     private static final int DEFAULT_CACHE_IDENTIFIER_COUNT_PER_COLLECTION = 128;
+
+    /**
+     * 线程池产生的现成命名规则为orm-parallel-query-pool-现成的tid
+     */
     private static final String EXECUTOR_THREAD_NAME_FORMAT = "orm-parallel-query-pool-%d";
+
+    /**
+     * 线程池并发的数量默认为CPU逻辑处理器数量（同FJP） 这样不太适合Intel-HT的CPU
+     */
     private static final int EXECUTOR_PARALLEL_SIZE = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * 线程池队列长度默认为1024
+     */
     private static final int EXECUTOR_QUEUE_SIZE = 1024;
-    private static Table<String, Object, Object> cache = HashBasedTable.create((int)16, (int)128);
+
+    /**
+     * 通用缓存(name, identifier) -> data
+     */
+    private static Table<String, Object, Object> cache;
+
+    /**
+     * 并发查询的线程池
+     */
     private static ListeningExecutorService parallelQueryPool;
+
+    /**
+     * 源集合
+     */
     private Collection<E> elements;
+
+    /**
+     * 需要过滤元素的方法，有的场景会根据一个类型来筛选，比如集合中的元素本身就不属于一种类型
+     */
     private Predicate<E> elementFilter;
+
+    /**
+     * 提取元素标识符的方法
+     */
     private Function<E, I> elementIdentifierExtractor;
+
+    /**
+     * 提取元素标识符的方法，用于多对多
+     */
     private Function<E, Collection<I>> elementIdentifiersExtractor;
+
+    /**
+     * 将标识符聚合成什么集合 要看查询新集合的参数是什么 可能是List或Set
+     */
     private Collector<I, ?, C> identifierCollector;
+
+    /**
+     * 批量查询新集合的方法 如果有批量的查询方法 优先使用批量查询
+     */
     private Function<C, ? extends Collection<D>> batchQueryMethod;
+
+    /**
+     * 批量查询最多可查的数据条数 某些接口会对数量做限制 可以使用这个参数实现分批查询
+     */
     private int maxBatchQuerySize;
+
+    /**
+     * 单个查询的方法 如果没有批量查询方法（对方没有这种接口）可以使用这个参数 如果和batchQueryMethod同时存在 如果查询标识的数量为1会优先使用这个方法
+     */
     private Function<I, D> singleQueryMethod;
+
+    /**
+     * 是否需要并发调用查询方法 默认为true 如果某些接口有QPS的限流可以将这个值设置为false进行串行查询
+     */
     private boolean parallelExecuteQuery = true;
+
+    /**
+     * 如果查询异常 需要重试的次数 默认为0（不重试）
+     */
     private int queryExceptionRetryTimes;
+
+    /**
+     * 如果查询异常 重试的等待间隔 默认为0（立即重试）
+     */
     private long queryExceptionRetryInterval;
+
+    /**
+     * 查询出来的新集合需要过滤元素的方法 某些场景下 查询接口无法做到最细粒度的查询（比如无法排除"已失效"的） 则用这个参数自己进行过滤
+     */
     private Predicate<D> dataFilter;
+
+    /**
+     * 新集合的元素生成唯一键（key）的方法
+     */
     private Function<D, K> dataKeyGenerator;
+
+    /**
+     * 源集合的元素映射到新集合唯一键的方法
+     */
     private Function<E, K> elementToKeyMapping;
+
+    /**
+     * 源集合的元素映射到新集合唯一键的方法
+     */
     private Function<E, Collection<K>> elementToKeysMapping;
+
+    /**
+     * 源集合和新集合的关系是否为一对多 默认为false（一对一）
+     */
     private boolean oneToMany;
+
+    /**
+     * 源集合和新集合的关系是否为多对多 默认为false（一对一）
+     */
     private boolean manyToMany;
+
+    /**
+     * 如果关系为一对多 新集合为空集合（[]）是否算未匹配 默认为false（不算 也就是算匹配上了0条）
+     */
     private boolean emptyAsUnmatched;
+
+    /**
+     * 查询新集合是否使用缓存 默认为false（不使用）
+     */
     private boolean useCache;
+
+    /**
+     * 缓存键的名称
+     */
     private String cacheKeyName;
+
+    /**
+     * 匹配后是否需要立即清理缓存 默认为false（不清理 需要自己手动清）
+     */
     private boolean clearCacheAfterMatch;
+
+    /**
+     * 匹配器的事件监听器
+     */
     private ObjectRelationMatcherEvent<E, I, C, D, K> eventListener;
+
+    /**
+     * 是否已完成匹配
+     */
     private boolean matched;
+
+    /**
+     * 匹配后的一对一关系
+     */
     private Map<E, D> oneToOneMap;
+
+    /**
+     * 匹配后的一对多关系
+     */
     private Map<E, List<D>> oneToManyMap;
+
+    /**
+     * 匹配后的一对多关系
+     */
     private Map<E, List<D>> manyToManyMap;
 
+    // 初始化缓存和线程池
+    static {
+        cache =
+                HashBasedTable.create(
+                        DEFAULT_CACHE_COLLECTION_COUNT,
+                        DEFAULT_CACHE_IDENTIFIER_COUNT_PER_COLLECTION);
+
+        ExecutorService originalPool =
+                new ThreadPoolExecutor(
+                        EXECUTOR_PARALLEL_SIZE,
+                        EXECUTOR_PARALLEL_SIZE,
+                        0L,
+                        TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(EXECUTOR_QUEUE_SIZE),
+                        new ThreadFactoryBuilder()
+                                .setNameFormat(EXECUTOR_THREAD_NAME_FORMAT)
+                                .build(),
+                        new ThreadPoolExecutor.CallerRunsPolicy());
+
+        parallelQueryPool = MoreExecutors.listeningDecorator(originalPool);
+    }
+
+    public ObjectRelationMatcher2() {
+        super();
+    }
+
+    /**
+     * 校验参数设置是否有问题
+     */
     private void validate() {
-        Objects.requireNonNull(this.elements, "\u6e90\u96c6\u5408\u4e0d\u80fd\u4e3a\u7a7a");
-        if (this.manyToMany) {
-            Objects.requireNonNull(this.elementIdentifiersExtractor, "\u6807\u8bc6\u7b26\u63d0\u53d6\u5668\u4e0d\u80fd\u4e3a\u7a7a");
+        Objects.requireNonNull(elements, "源集合不能为空");
+        if (manyToMany) {
+            Objects.requireNonNull(elementIdentifiersExtractor, "标识符提取器不能为空");
         } else {
-            Objects.requireNonNull(this.elementIdentifierExtractor, "\u6807\u8bc6\u7b26\u63d0\u53d6\u5668\u4e0d\u80fd\u4e3a\u7a7a");
+            Objects.requireNonNull(elementIdentifierExtractor, "标识符提取器不能为空");
         }
-        if (this.batchQueryMethod != null) {
-            Objects.requireNonNull(this.identifierCollector, "\u6279\u91cf\u67e5\u8be2\u6a21\u5f0f\u4e0b\u6807\u8bc6\u805a\u5408\u5668\u4e0d\u80fd\u4e3a\u7a7a");
+
+        // 只有设置了批量查询方法时才需要指定collector（要保持和批量查询方法的参数一致）
+        if (batchQueryMethod != null) {
+            Objects.requireNonNull(identifierCollector, "批量查询模式下标识聚合器不能为空");
         } else {
-            this.setIdentifierCollectorType(List.class);
-            Objects.requireNonNull(this.singleQueryMethod, "\u6279\u91cf\u67e5\u8be2\u65b9\u6cd5\u548c\u5355\u4e2a\u67e5\u8be2\u65b9\u6cd5\u81f3\u5c11\u8981\u6307\u5b9a\u4e00\u4e2a");
+            // 没有批量查询的方法按照单个查询方法来
+            setIdentifierCollectorType(List.class);
+
+            Objects.requireNonNull(singleQueryMethod, "批量查询方法和单个查询方法至少要指定一个");
         }
-        if (this.queryExceptionRetryTimes < 0) {
-            this.queryExceptionRetryTimes = 0;
+
+        // 重试配置修正
+        if (queryExceptionRetryTimes < 0) {
+            queryExceptionRetryTimes = 0;
         }
-        if (this.queryExceptionRetryInterval < 0L) {
-            this.queryExceptionRetryInterval = 0L;
+        if (queryExceptionRetryInterval < 0) {
+            queryExceptionRetryInterval = 0;
         }
-        Objects.requireNonNull(this.dataKeyGenerator, "\u65b0\u96c6\u5408\u552f\u4e00\u952e\u751f\u6210\u5668\u4e0d\u80fd\u4e3a\u7a7a");
-        if (this.manyToMany) {
-            Objects.requireNonNull(this.elementToKeysMapping, "\u6e90\u96c6\u5408\u5230\u552f\u4e00\u952e\u7684\u6620\u5c04\u5173\u7cfb\u4e0d\u80fd\u4e3a\u7a7a");
+
+        Objects.requireNonNull(dataKeyGenerator, "新集合唯一键生成器不能为空");
+
+        if (manyToMany) {
+            Objects.requireNonNull(elementToKeysMapping, "源集合到唯一键的映射关系不能为空");
         } else {
-            Objects.requireNonNull(this.elementToKeyMapping, "\u6e90\u96c6\u5408\u5230\u552f\u4e00\u952e\u7684\u6620\u5c04\u5173\u7cfb\u4e0d\u80fd\u4e3a\u7a7a");
+            Objects.requireNonNull(elementToKeyMapping, "源集合到唯一键的映射关系不能为空");
         }
-        if (this.useCache) {
-            if (this.manyToMany) {
-                throw new RuntimeException("\u591a\u5bf9\u591a\u7684\u60c5\u51b5\u4e0b\u4e0d\u80fd\u4f7f\u7528\u7f13\u5b58");
+
+        if (useCache) {
+            if (manyToMany) {
+                throw new RuntimeException("多对多的情况下不能使用缓存");
             }
-            Objects.requireNonNull(this.cacheKeyName, "\u4f7f\u7528\u7f13\u5b58\u7684\u60c5\u51b5\u4e0b\u7f13\u5b58\u540d\u79f0\u4e0d\u80fd\u4e3a\u7a7a");
+            Objects.requireNonNull(cacheKeyName, "使用缓存的情况下缓存名称不能为空");
         }
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setIdentifierCollectorType(Class<? extends Collection> type) {
-        Objects.requireNonNull(type, "\u6807\u8bc6\u6536\u96c6\u5668\u7c7b\u578b\u4e0d\u80fd\u8bbe\u7f6e\u4e3anull");
+    @SuppressWarnings("unchecked")
+    public ObjectRelationMatcher2<E, I, C, D, K> setIdentifierCollectorType(
+            Class<? extends Collection> type ) {
+        Objects.requireNonNull(type, "标识收集器类型不能设置为null");
         if (List.class.isAssignableFrom(type)) {
-            this.setIdentifierCollector(Collectors.toList());
+            this.setIdentifierCollector((Collector<I, ?, C>) Collectors.toList());
         } else if (Set.class.isAssignableFrom(type)) {
-            this.setIdentifierCollector(Collectors.toSet());
+            this.setIdentifierCollector((Collector<I, ?, C>) Collectors.toSet());
         } else {
-            throw new RuntimeException("\u65e0\u6cd5\u5904\u7406\u7684\u6807\u8bc6\u6536\u96c6\u5668\u7c7b\u578b: " + String.valueOf(type));
+            throw new RuntimeException("无法处理的标识收集器类型: " + type);
         }
         return this;
     }
 
+    /**
+     * 关系匹配
+     *
+     * @return 当前对象本身
+     */
     public ObjectRelationMatcher2<E, I, C, D, K> match() {
-        Stream<Object> identifierStream;
-        HashMap elementDataListMap;
-        HashMap elementDataMap;
-        this.validate();
-        if (this.manyToMany) {
+        validate();
+
+        // 源集合的元素和新集合的元素对应关系（一对一）
+        Map<E, D> elementDataMap;
+
+        // 源集合的元素和新集合的元素对应关系（一对多）
+        Map<E, List<D>> elementDataListMap;
+
+        if (manyToMany) {
+            // 多对多
             elementDataMap = null;
-            elementDataListMap = new HashMap(this.elements.size(), 1.0f);
-        } else if (this.oneToMany) {
+            elementDataListMap = new HashMap<>(elements.size(), 1);
+        } else if (oneToMany) {
+            // 一对多
             elementDataMap = null;
-            elementDataListMap = new HashMap(this.elements.size(), 1.0f);
+            elementDataListMap = new HashMap<>(elements.size(), 1);
         } else {
-            elementDataMap = new HashMap(this.elements.size(), 1.0f);
+            // 一对一
+            elementDataMap = new HashMap<>(elements.size(), 1);
             elementDataListMap = null;
         }
-        Stream<E> elementStream = this.filteredElementStream();
-        if (this.useCache) {
-            ArrayList identifierList = new ArrayList(this.elements.size());
-            if (this.manyToMany) {
-                elementStream.forEach(element -> {
-                    Collection<I> identifiers = this.elementIdentifiersExtractor.apply(element);
-                    if (CollectionUtils.isNotEmpty(identifiers)) {
-                        identifierList.addAll(identifiers);
-                    }
-                });
-            } else if (this.oneToMany) {
-                elementStream.forEach(element -> {
-                    I identifier = this.elementIdentifierExtractor.apply(element);
-                    List<D> list = this.getDataListFormCache(identifier);
-                    if (!(list == null || list.isEmpty() && this.emptyAsUnmatched)) {
-                        elementDataListMap.put(element, list);
-                    } else {
-                        identifierList.add(identifier);
-                    }
-                });
+
+        // 过滤后的源集合
+        Stream<E> elementStream = filteredElementStream();
+
+        // 待查询的标识集合
+        Stream<I> identifierStream;
+
+        // 如果使用缓存 先从缓存里找 这个方法体为了填充已命中的关系映射和待查询列表
+        if (useCache) {
+            // 没命中缓存的标识
+            List<I> identifierList = new ArrayList<>(elements.size());
+            if (manyToMany) {
+                // 多对多
+                elementStream.forEach(
+                        element -> {
+                            Collection<I> identifiers = elementIdentifiersExtractor.apply(element);
+                            if (CollectionUtils.isNotEmpty(identifiers)) {
+                                // 多对多没有缓存
+                                identifierList.addAll(identifiers);
+                            }
+                        });
+            } else if (oneToMany) {
+                // 一对多
+                elementStream.forEach(
+                        element -> {
+                            I identifier = elementIdentifierExtractor.apply(element);
+                            List<D> list = getDataListFormCache(identifier);
+                            // 如果命中缓存了不为null 并且 不是空集合 或空集合算匹配成功
+                            if (list != null && ( !list.isEmpty() || !emptyAsUnmatched )) {
+                                elementDataListMap.put(element, list);
+                            } else {
+                                // 如果没找到 或者是找到了但是配置了emptyAsUnmatched=true 都认为是没找到
+                                identifierList.add(identifier);
+                            }
+                        });
             } else {
-                elementStream.forEach(element -> {
-                    I identifier = this.elementIdentifierExtractor.apply(element);
-                    D data = this.getDataFromCache(identifier);
-                    if (data != null) {
-                        elementDataMap.put(element, data);
-                    } else {
-                        identifierList.add(identifier);
-                    }
-                });
+                // 一对一
+                elementStream.forEach(
+                        element -> {
+                            I identifier = elementIdentifierExtractor.apply(element);
+                            D data = getDataFromCache(identifier);
+                            // 非空表示命中缓存 命中了则加入关系映射中 未命中则加入待查询列表中
+                            if (data != null) {
+                                elementDataMap.put(element, data);
+                            } else {
+                                identifierList.add(identifier);
+                            }
+                        });
             }
             identifierStream = identifierList.stream();
         } else {
-            identifierStream = elementStream.map(this.elementIdentifierExtractor);
+            // 不使用缓存的话 直接提取所有标识符
+            identifierStream = elementStream.map(elementIdentifierExtractor);
         }
-        Collection identifierCollection = (Collection)identifierStream.collect(this.identifierCollector);
+
+        // 待查询的标识符集合
+        C identifierCollection = identifierStream.collect(identifierCollector);
+
+        // 如果有待查询的标识符 说明没走缓存或缓存中有未命中的数据
         if (!identifierCollection.isEmpty()) {
-            Collection dataCollection = null;
+            Collection<D> dataCollection = null;
+
             int retryCount = 0;
             Exception lastException = null;
-            while (true) {
+
+            do {
                 try {
-                    if (identifierCollection.size() == 1 && this.singleQueryMethod != null) {
-                        D data = this.singleQueryMethod.apply(identifierCollection.iterator().next());
-                        dataCollection = Optional.ofNullable(data).map(Collections::singletonList).orElse(Collections.emptyList());
-                    } else if (this.batchQueryMethod != null) {
-                        if (this.maxBatchQuerySize <= 0) {
-                            dataCollection = this.batchQueryMethod.apply(identifierCollection);
-                        } else {
-                            int pages = (identifierCollection.size() + this.maxBatchQuerySize - 1) / this.maxBatchQuerySize;
-                            List identifierListBatches = Stream.iterate(0, x -> x + 1).limit(pages).map(x -> (Collection)identifierCollection.stream().skip((long)x.intValue() * (long)this.maxBatchQuerySize).limit(this.maxBatchQuerySize).collect(this.identifierCollector)).collect(Collectors.toList());
-                            if (this.parallelExecuteQuery) {
-                                List futures = identifierListBatches.stream().map(x -> parallelQueryPool.submit(() -> this.batchQueryMethod.apply(x))).collect(Collectors.toList());
-                                dataCollection = ((List)Futures.allAsList(futures).get()).stream().flatMap(Collection::stream).collect(Collectors.toList());
+                    // 如果需要查询的数据只有一个 并且配置了单个查询的方法 优先查单个的方法
+                    if (identifierCollection.size() == 1 && singleQueryMethod != null) {
+                        D data = singleQueryMethod.apply(identifierCollection.iterator().next());
+                        dataCollection =
+                                Optional.ofNullable(data)
+                                        .map(Collections::singletonList)
+                                        .orElse(Collections.emptyList());
+                    } else {
+                        // 如果需要查询多个 那么看是否配置了批量查询方法 如果配置了则优先使用批量查询方法
+                        if (batchQueryMethod != null) {
+                            // 如果没有配置批量最大可查条数 直接调用批量查询方法
+                            if (maxBatchQuerySize <= 0) {
+                                dataCollection = batchQueryMethod.apply(identifierCollection);
                             } else {
-                                dataCollection = identifierListBatches.stream().map(this.batchQueryMethod).flatMap(Collection::stream).collect(Collectors.toList());
+                                // 如果接口有限制最大查询数量 则分批查
+                                // 按照分页来分批 之所以不用guava的是因为guava的只能拆为List<List<?>>
+                                // 但是我们的collector是自定义的
+                                int pages =
+                                        ( identifierCollection.size() + maxBatchQuerySize - 1 )
+                                                / maxBatchQuerySize;
+                                List<C> identifierListBatches =
+                                        Stream.iterate(0, x -> x + 1)
+                                                .limit(pages)
+                                                .map(
+                                                        x ->
+                                                                identifierCollection.stream()
+                                                                        .skip(
+                                                                                (long) x
+                                                                                        * maxBatchQuerySize)
+                                                                        .limit(maxBatchQuerySize)
+                                                                        .collect(
+                                                                                identifierCollector))
+                                                .collect(Collectors.toList());
+                                // 如果配置了并发查询 则用线程池来调用 否则使用串行查询
+                                if (parallelExecuteQuery) {
+                                    List<ListenableFuture<? extends Collection<D>>> futures =
+                                            identifierListBatches.stream()
+                                                    .map(
+                                                            x ->
+                                                                    parallelQueryPool.submit(
+                                                                            () ->
+                                                                                    batchQueryMethod
+                                                                                            .apply(
+                                                                                                    x)))
+                                                    .collect(Collectors.toList());
+                                    dataCollection =
+                                            Futures.allAsList(futures).get().stream()
+                                                    .flatMap(Collection::stream)
+                                                    .collect(Collectors.toList());
+                                } else {
+                                    // 只有显式设置了parallelExecuteQuery=false 才会串行查询
+                                    dataCollection =
+                                            identifierListBatches.stream()
+                                                    .map(batchQueryMethod)
+                                                    .flatMap(Collection::stream)
+                                                    .collect(Collectors.toList());
+                                }
+                            }
+                        } else if (singleQueryMethod != null) {
+                            // 如果配置了并发查询 则用线程池来调用 否则使用串行查询
+                            if (parallelExecuteQuery) {
+                                List<ListenableFuture<D>> futures =
+                                        identifierCollection.stream()
+                                                .map(
+                                                        x ->
+                                                                parallelQueryPool.submit(
+                                                                        () ->
+                                                                                singleQueryMethod
+                                                                                        .apply(x)))
+                                                .collect(Collectors.toList());
+                                dataCollection = Futures.allAsList(futures).get();
+                            } else {
+                                dataCollection =
+                                        identifierCollection.stream()
+                                                .map(singleQueryMethod)
+                                                .collect(Collectors.toList());
                             }
                         }
-                    } else if (this.singleQueryMethod != null) {
-                        if (this.parallelExecuteQuery) {
-                            List futures = identifierCollection.stream().map(x -> parallelQueryPool.submit(() -> this.singleQueryMethod.apply(x))).collect(Collectors.toList());
-                            dataCollection = (Collection)Futures.allAsList(futures).get();
-                        } else {
-                            dataCollection = identifierCollection.stream().map(this.singleQueryMethod).collect(Collectors.toList());
-                        }
                     }
-                    if (this.eventListener == null) break;
-                    this.eventListener.onQuerySuccess(identifierCollection, retryCount, dataCollection);
-                }
-                catch (Exception e2) {
-                    lastException = e2;
-                    if (this.eventListener != null) {
-                        this.eventListener.onQueryException(identifierCollection, retryCount, e2);
+                    if (eventListener != null) {
+                        eventListener.onQuerySuccess(
+                                identifierCollection, retryCount, dataCollection);
                     }
+                    // 上面没有异常的话 说明已经成功了 则结束掉循环
+                    break;
+                } catch (Exception e) {
+                    lastException = e;
+                    if (eventListener != null) {
+                        eventListener.onQueryException(identifierCollection, retryCount, e);
+                    }
+                    // 休眠再重试
                     try {
-                        Thread.sleep(this.queryExceptionRetryInterval);
-                        continue;
+                        Thread.sleep(queryExceptionRetryInterval);
+                    } catch (InterruptedException ignored) {
                     }
-                    catch (InterruptedException identifierListBatches) {
-                        // empty catch block
-                    }
-                    if (++retryCount <= this.queryExceptionRetryTimes) continue;
                 }
-                break;
+            } while (++retryCount <= queryExceptionRetryTimes);
+
+            // 超过重试次数 说明每次执行都异常没有走到break
+            if (retryCount > queryExceptionRetryTimes) {
+                throw new RuntimeException(
+                        "query for" + identifierCollection + "failure", lastException);
             }
-            if (retryCount > this.queryExceptionRetryTimes) {
-                throw new RuntimeException("query for" + String.valueOf(identifierCollection) + "failure", lastException);
-            }
+
+            // 返回的数据不是空才处理 因为空的话没有处理的必要 这里认为方法（主要是批量方法）返回的empty是没查到
             if (CollectionUtils.isNotEmpty(dataCollection)) {
-                Stream dataStream = dataCollection.stream();
-                if (this.dataFilter != null) {
-                    dataStream = dataStream.filter(this.dataFilter);
+                Stream<D> dataStream = dataCollection.stream();
+                // 过滤新集合
+                if (dataFilter != null) {
+                    dataStream = dataStream.filter(dataFilter);
                 }
-                elementStream = this.filteredElementStream();
-                if (this.manyToMany) {
-                    keyDataListMap = dataStream.filter(Objects::nonNull).collect(Collectors.groupingBy(this.dataKeyGenerator));
-                    elementStream.filter(element -> !keyDataListMap.containsKey(element)).forEach(element -> {
-                        Collection<K> collection = this.elementToKeysMapping.apply(element);
-                        for (K key : collection) {
-                            List list = (List)keyDataListMap.get(key);
-                            elementDataListMap.put(element, list);
-                        }
-                        K key = this.elementToKeyMapping.apply(element);
-                        List list = (List)keyDataListMap.get(key);
-                        elementDataListMap.put(element, list);
-                        if (!(!this.useCache || list == null || list.isEmpty() && this.emptyAsUnmatched)) {
-                            this.putListToCache(this.elementIdentifierExtractor.apply(element), list);
-                        }
-                    });
-                } else if (this.oneToMany) {
-                    keyDataListMap = dataStream.filter(Objects::nonNull).collect(Collectors.groupingBy(this.dataKeyGenerator));
-                    elementStream.filter(element -> !keyDataListMap.containsKey(element)).forEach(element -> {
-                        K key = this.elementToKeyMapping.apply(element);
-                        List list = (List)keyDataListMap.get(key);
-                        elementDataListMap.put(element, list);
-                        if (!(!this.useCache || list == null || list.isEmpty() && this.emptyAsUnmatched)) {
-                            this.putListToCache(this.elementIdentifierExtractor.apply(element), list);
-                        }
-                    });
+
+                // 过滤源集合 因为只根据过滤后的内容进行了查询
+                elementStream = filteredElementStream();
+
+                if (manyToMany) {
+                    // 多对多
+                    Map<K, List<D>> keyDataListMap =
+                            dataStream
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.groupingBy(dataKeyGenerator));
+                    elementStream
+                            .filter(element -> !keyDataListMap.containsKey(element))
+                            .forEach(
+                                    element -> {
+                                        Collection<K> collection =
+                                                elementToKeysMapping.apply(element);
+                                        for (K key : collection) {
+                                            List<D> list = keyDataListMap.get(key);
+                                            elementDataListMap.put(element, list);
+                                        }
+                                        K key = elementToKeyMapping.apply(element);
+                                        List<D> list = keyDataListMap.get(key);
+                                        elementDataListMap.put(element, list);
+                                        if (useCache
+                                                && list != null
+                                                && ( !list.isEmpty() || !emptyAsUnmatched )) {
+                                            putListToCache(
+                                                    elementIdentifierExtractor.apply(element),
+                                                    list);
+                                        }
+                                    });
+
+                } else if (oneToMany) {
+                    // 一对多
+                    Map<K, List<D>> keyDataListMap =
+                            dataStream
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.groupingBy(dataKeyGenerator));
+                    elementStream
+                            .filter(element -> !keyDataListMap.containsKey(element))
+                            .forEach(
+                                    element -> {
+                                        K key = elementToKeyMapping.apply(element);
+                                        List<D> list = keyDataListMap.get(key);
+                                        elementDataListMap.put(element, list);
+                                        if (useCache
+                                                && list != null
+                                                && ( !list.isEmpty() || !emptyAsUnmatched )) {
+                                            putListToCache(
+                                                    elementIdentifierExtractor.apply(element),
+                                                    list);
+                                        }
+                                    });
                 } else {
-                    Map keyDataMap = dataStream.filter(Objects::nonNull).collect(HashMap::new, (m, e) -> m.put(this.dataKeyGenerator.apply(e), e), Map::putAll);
-                    elementStream.filter(element -> !elementDataMap.containsKey(element)).forEach(element -> {
-                        K key = this.elementToKeyMapping.apply(element);
-                        Object data = keyDataMap.get(key);
-                        elementDataMap.put(element, data);
-                        if (this.useCache && data != null) {
-                            this.putToCache(this.elementIdentifierExtractor.apply(element), data);
-                        }
-                    });
+                    // 一对一
+                    Map<K, D> keyDataMap =
+                            dataStream
+                                    .filter(Objects::nonNull)
+                                    .collect(
+                                            HashMap::new,
+                                            ( m, e ) -> m.put(dataKeyGenerator.apply(e), e),
+                                            Map::putAll);
+                    elementStream
+                            .filter(element -> !elementDataMap.containsKey(element))
+                            .forEach(
+                                    element -> {
+                                        K key = elementToKeyMapping.apply(element);
+                                        D data = keyDataMap.get(key);
+                                        elementDataMap.put(element, data);
+                                        if (useCache && data != null) {
+                                            putToCache(
+                                                    elementIdentifierExtractor.apply(element),
+                                                    data);
+                                        }
+                                    });
                 }
             }
         }
-        if (this.manyToMany) {
-            this.elements.stream().filter(element -> !elementDataListMap.containsKey(element)).forEach(element -> elementDataListMap.put(element, null));
-        } else if (this.oneToMany) {
-            this.elements.stream().filter(element -> !elementDataListMap.containsKey(element)).forEach(element -> elementDataListMap.put(element, null));
+
+        // 补充未匹配的
+        if (manyToMany) {
+            // 多对多
+            elements.stream()
+                    .filter(element -> !elementDataListMap.containsKey(element))
+                    .forEach(element -> elementDataListMap.put(element, null));
+        } else if (oneToMany) {
+            // 一对多
+            elements.stream()
+                    .filter(element -> !elementDataListMap.containsKey(element))
+                    .forEach(element -> elementDataListMap.put(element, null));
         } else {
-            this.elements.stream().filter(element -> !elementDataMap.containsKey(element)).forEach(element -> elementDataMap.put(element, null));
+            // 一对一
+            elements.stream()
+                    .filter(element -> !elementDataMap.containsKey(element))
+                    .forEach(element -> elementDataMap.put(element, null));
         }
+
         this.oneToOneMap = elementDataMap;
         this.oneToManyMap = elementDataListMap;
         this.manyToManyMap = elementDataListMap;
-        if (this.useCache && this.clearCacheAfterMatch) {
-            this.clearCache();
+
+        // 如果需要match后清理缓存 则立即清理
+        if (useCache && clearCacheAfterMatch) {
+            clearCache();
         }
-        this.matched = true;
+
+        matched = true;
+
         return this;
     }
 
-    private Stream<E> filteredElementStream() {
-        Stream<E> stream = this.elements.stream();
-        return Optional.ofNullable(this.elementFilter).map(stream::filter).orElse(stream);
-    }
-
-    private D getDataFromCache(I identifier) {
-        return (D)cache.get((Object)this.cacheKeyName, identifier);
-    }
-
-    private List<D> getDataListFormCache(I identifier) {
-        return (List)cache.get((Object)this.cacheKeyName, identifier);
-    }
-
-    private void putToCache(I identifier, D data) {
-        cache.put((Object)this.cacheKeyName, identifier, data);
-    }
-
-    private void putListToCache(I identifier, List<D> list) {
-        cache.put((Object)this.cacheKeyName, identifier, list);
-    }
-
-    private void clearCache() {
-        ObjectRelationMatcher2.clearCache(this.cacheKeyName);
-    }
-
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * 根据配置过滤源集合并返回源集合流
+     *
+     * @return 源集合流
      */
-    public static void clearCache(String cacheKeyName) {
-        Map map;
-        Map map2 = map = (Map)cache.columnMap().get(cacheKeyName);
-        synchronized (map2) {
+    private Stream<E> filteredElementStream() {
+        Stream<E> stream = elements.stream();
+        return Optional.ofNullable(elementFilter).map(stream::filter).orElse(stream);
+    }
+
+    /**
+     * 根据标识从缓存获取数据
+     *
+     * @param identifier 标识
+     * @return 缓存中的数据
+     */
+    @SuppressWarnings("unchecked")
+    private D getDataFromCache( I identifier ) {
+        return (D) cache.get(cacheKeyName, identifier);
+    }
+
+    /**
+     * 根据标识从缓存获取集合
+     *
+     * @param identifier 标识
+     * @return 缓存中的集合
+     */
+    @SuppressWarnings("unchecked")
+    private List<D> getDataListFormCache( I identifier ) {
+        return (List<D>) cache.get(cacheKeyName, identifier);
+    }
+
+    /**
+     * 将数据添加到缓存
+     *
+     * @param identifier 标识
+     * @param data 数据
+     */
+    private void putToCache( I identifier, D data ) {
+        cache.put(cacheKeyName, identifier, data);
+    }
+
+    /**
+     * 将集合添加到缓存
+     *
+     * @param identifier 标识
+     * @param list 集合
+     */
+    private void putListToCache( I identifier, List<D> list ) {
+        cache.put(cacheKeyName, identifier, list);
+    }
+
+    /**
+     * 清除当前缓存
+     */
+    private void clearCache() {
+        clearCache(cacheKeyName);
+    }
+
+    /**
+     * 清除某个缓存
+     *
+     * @param cacheKeyName 缓存名称
+     */
+    public static void clearCache( String cacheKeyName ) {
+        Map<String, Object> map = cache.columnMap().get(cacheKeyName);
+        synchronized (map) {
             map.clear();
         }
     }
 
+    /**
+     * 清除全部缓存
+     */
     public static void clearAllCaches() {
         cache.clear();
     }
 
-    public Map<E, D> getOneToOneRelations(boolean containsUnmatched) {
-        if (!this.matched) {
-            throw new RuntimeException("\u9700\u8981\u5148\u8c03\u7528match\u65b9\u6cd5");
+    /**
+     * 获取一对一的关系
+     *
+     * @param containsUnmatched 是否包含未匹配的 false表示不包含（inner join） true表示包含（left join）
+     * @return 源集合对象和新集合对象的对应关系
+     */
+    public Map<E, D> getOneToOneRelations( boolean containsUnmatched ) {
+        if (!matched) {
+            throw new RuntimeException("需要先调用match方法");
         }
-        if (this.oneToMany) {
-            throw new RuntimeException("\u4e00\u5bf9\u591a\u5173\u7cfb\u5e94\u8be5\u8c03\u7528getOneToManyRelations\u65b9\u6cd5");
+        if (oneToMany) {
+            throw new RuntimeException("一对多关系应该调用getOneToManyRelations方法");
         }
-        HashMap<E, D> map = new HashMap<E, D>(this.oneToOneMap);
+        Map<E, D> map = new HashMap<>(oneToOneMap);
+        // 如果不需要未匹配的 则将全map中value为null的元素移除
         if (!containsUnmatched) {
-            map.entrySet().stream().filter(x -> x.getValue() == null).map(Map.Entry::getKey).collect(Collectors.toList()).forEach(map::remove);
+            map.entrySet().stream()
+                    .filter(x -> x.getValue() == null)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList())
+                    .forEach(map::remove);
         }
         return map;
     }
 
+    /**
+     * 获取一对一的关系 只返回已匹配的
+     *
+     * @return 源集合对象和新集合对象的对应关系
+     */
     public Map<E, D> getOneToOneRelations() {
-        return this.getOneToOneRelations(false);
+        return getOneToOneRelations(false);
     }
 
-    public Map<E, List<D>> getOneToManyRelations(boolean containsUnmatched) {
-        if (!this.matched) {
-            throw new RuntimeException("\u9700\u8981\u5148\u8c03\u7528match\u65b9\u6cd5");
+    /**
+     * 获取一对多的关系
+     *
+     * @param containsUnmatched 是否包含未匹配的 false表示不包含（inner join） true表示包含（left join）
+     * @return 源集合对象和新集合对象的对应关系
+     */
+    public Map<E, List<D>> getOneToManyRelations( boolean containsUnmatched ) {
+        if (!matched) {
+            throw new RuntimeException("需要先调用match方法");
         }
-        if (!this.oneToMany) {
-            throw new RuntimeException("\u4e00\u5bf9\u4e00\u5173\u7cfb\u5e94\u8be5\u8c03\u7528getOneToOneRelations\u65b9\u6cd5");
+        if (!oneToMany) {
+            throw new RuntimeException("一对一关系应该调用getOneToOneRelations方法");
         }
-        HashMap<E, List<D>> map = new HashMap<E, List<D>>(this.oneToManyMap);
+        Map<E, List<D>> map = new HashMap<>(oneToManyMap);
+        // 如果不需要未匹配的 则将全map中value为null的元素移除
         if (!containsUnmatched) {
-            map.entrySet().stream().filter(x -> x.getValue() == null || ((List)x.getValue()).isEmpty() && this.emptyAsUnmatched).map(Map.Entry::getKey).collect(Collectors.toList()).forEach(map::remove);
+            map.entrySet().stream()
+                    .filter(
+                            x ->
+                                    x.getValue() == null
+                                            || ( x.getValue().isEmpty() && emptyAsUnmatched ))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList())
+                    .forEach(map::remove);
         }
         return map;
     }
 
+    /**
+     * 获取一对多的关系 只返回已匹配的
+     *
+     * @return 源集合对象和新集合对象的对应关系
+     */
     public Map<E, List<D>> getOneToManyRelations() {
-        return this.getOneToManyRelations(false);
+        return getOneToManyRelations(false);
     }
 
-    public void processOneToOne(BiConsumer<E, D> matchedProcessor, Consumer<E> unmatchedProcessor) {
-        if (!this.matched) {
-            throw new RuntimeException("\u9700\u8981\u5148\u8c03\u7528match\u65b9\u6cd5");
+    /**
+     * 处理所有一对一的关系
+     *
+     * @param matchedProcessor 已匹配到关系的处理器
+     * @param unmatchedProcessor 未匹配到关系的处理器
+     */
+    public void processOneToOne( BiConsumer<E, D> matchedProcessor, Consumer<E> unmatchedProcessor ) {
+        if (!matched) {
+            throw new RuntimeException("需要先调用match方法");
         }
-        if (this.oneToMany) {
-            throw new RuntimeException("\u4e00\u5bf9\u591a\u5173\u7cfb\u5e94\u8be5\u8c03\u7528getOneToManyRelations\u65b9\u6cd5");
+        if (oneToMany) {
+            throw new RuntimeException("一对多关系应该调用getOneToManyRelations方法");
         }
-        this.oneToOneMap.forEach((k, v) -> {
-            if (v != null) {
-                matchedProcessor.accept(k, v);
-            } else if (unmatchedProcessor != null) {
-                unmatchedProcessor.accept(k);
-            }
-        });
+        oneToOneMap.forEach(
+                ( k, v ) -> {
+                    if (v != null) {
+                        matchedProcessor.accept(k, v);
+                    } else if (unmatchedProcessor != null) {
+                        unmatchedProcessor.accept(k);
+                    }
+                });
     }
 
-    public void processOneToOne(BiConsumer<E, D> matchedProcessor) {
-        this.processOneToOne(matchedProcessor, null);
+    /**
+     * 处理已匹配的一对一的关系
+     *
+     * @param matchedProcessor 已匹配到关系的处理器
+     */
+    public void processOneToOne( BiConsumer<E, D> matchedProcessor ) {
+        processOneToOne(matchedProcessor, null);
     }
 
-    public void processOneToMany(BiConsumer<E, List<D>> matchedProcessor, Consumer<E> unmatchedProcessor) {
-        if (!this.matched) {
-            throw new RuntimeException("\u9700\u8981\u5148\u8c03\u7528match\u65b9\u6cd5");
+    /**
+     * 处理所有一对多的关系
+     *
+     * @param matchedProcessor 已匹配到关系的处理器
+     * @param unmatchedProcessor 未匹配到关系的处理器
+     */
+    public void processOneToMany(
+            BiConsumer<E, List<D>> matchedProcessor, Consumer<E> unmatchedProcessor ) {
+        if (!matched) {
+            throw new RuntimeException("需要先调用match方法");
         }
-        if (!this.oneToMany) {
-            throw new RuntimeException("\u4e00\u5bf9\u4e00\u5173\u7cfb\u5e94\u8be5\u8c03\u7528getOneToOneRelations\u65b9\u6cd5");
+        if (!oneToMany) {
+            throw new RuntimeException("一对一关系应该调用getOneToOneRelations方法");
         }
-        this.oneToManyMap.forEach((k, v) -> {
-            if (!(v == null || v.isEmpty() && this.emptyAsUnmatched)) {
-                matchedProcessor.accept((E)k, (List<D>)v);
-            } else if (unmatchedProcessor != null) {
-                unmatchedProcessor.accept(k);
-            }
-        });
+        oneToManyMap.forEach(
+                ( k, v ) -> {
+                    if (v != null && ( !v.isEmpty() || !emptyAsUnmatched )) {
+                        matchedProcessor.accept(k, v);
+                    } else if (unmatchedProcessor != null) {
+                        unmatchedProcessor.accept(k);
+                    }
+                });
     }
 
-    public void processManyToMany(BiConsumer<E, List<D>> matchedProcessor, Consumer<E> unmatchedProcessor) {
-        if (!this.matched) {
-            throw new RuntimeException("\u9700\u8981\u5148\u8c03\u7528match\u65b9\u6cd5");
+    /**
+     * 处理所有一对多的关系
+     *
+     * @param matchedProcessor 已匹配到关系的处理器
+     * @param unmatchedProcessor 未匹配到关系的处理器
+     */
+    public void processManyToMany(
+            BiConsumer<E, List<D>> matchedProcessor, Consumer<E> unmatchedProcessor ) {
+        if (!matched) {
+            throw new RuntimeException("需要先调用match方法");
         }
-        if (!this.manyToMany) {
-            throw new RuntimeException("\u4e00\u5bf9\u4e00\u5173\u7cfb\u5e94\u8be5\u8c03\u7528getOneToOneRelations\u65b9\u6cd5");
+        if (!manyToMany) {
+            throw new RuntimeException("一对一关系应该调用getOneToOneRelations方法");
         }
-        this.manyToManyMap.forEach((k, v) -> {
-            if (!(v == null || v.isEmpty() && this.emptyAsUnmatched)) {
-                matchedProcessor.accept((E)k, (List<D>)v);
-            } else if (unmatchedProcessor != null) {
-                unmatchedProcessor.accept(k);
-            }
-        });
+        manyToManyMap.forEach(
+                ( k, v ) -> {
+                    if (v != null && ( !v.isEmpty() || !emptyAsUnmatched )) {
+                        matchedProcessor.accept(k, v);
+                    } else if (unmatchedProcessor != null) {
+                        unmatchedProcessor.accept(k);
+                    }
+                });
     }
 
-    public void processOneToMany(BiConsumer<E, List<D>> matchedProcessor) {
-        this.processOneToMany(matchedProcessor, null);
+    /**
+     * 处理已匹配的一对多的关系
+     *
+     * @param matchedProcessor 已匹配到关系的处理器
+     */
+    public void processOneToMany( BiConsumer<E, List<D>> matchedProcessor ) {
+        processOneToMany(matchedProcessor, null);
     }
 
     private ObjectRelationMatcher2<E, I, C, D, K> markUnmatched() {
-        this.matched = false;
+        matched = false;
         return this;
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setElements(Collection<E> elements) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setElements( Collection<E> elements ) {
         this.elements = elements;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setElementFilter(Predicate<E> elementFilter) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setElementFilter( Predicate<E> elementFilter ) {
         this.elementFilter = elementFilter;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setElementIdentifierExtractor(Function<E, I> elementIdentifierExtractor) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setElementIdentifierExtractor(
+            Function<E, I> elementIdentifierExtractor ) {
         this.elementIdentifierExtractor = elementIdentifierExtractor;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setIdentifierCollector(Collector<I, ?, C> identifierCollector) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setIdentifierCollector(
+            Collector<I, ?, C> identifierCollector ) {
         this.identifierCollector = identifierCollector;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setBatchQueryMethod(Function<C, ? extends Collection<D>> batchQueryMethod) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setBatchQueryMethod(
+            Function<C, ? extends Collection<D>> batchQueryMethod ) {
         this.batchQueryMethod = batchQueryMethod;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setMaxBatchQuerySize(int maxBatchQuerySize) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setMaxBatchQuerySize( int maxBatchQuerySize ) {
         this.maxBatchQuerySize = maxBatchQuerySize;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setSingleQueryMethod(Function<I, D> singleQueryMethod) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setSingleQueryMethod(
+            Function<I, D> singleQueryMethod ) {
         this.singleQueryMethod = singleQueryMethod;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setParallelExecuteQuery(boolean parallelExecuteQuery) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setParallelExecuteQuery(
+            boolean parallelExecuteQuery ) {
         this.parallelExecuteQuery = parallelExecuteQuery;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setQueryExceptionRetryTimes(int queryExceptionRetryTimes) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setQueryExceptionRetryTimes(
+            int queryExceptionRetryTimes ) {
         this.queryExceptionRetryTimes = queryExceptionRetryTimes;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setQueryExceptionRetryInterval(long queryExceptionRetryInterval) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setQueryExceptionRetryInterval(
+            long queryExceptionRetryInterval ) {
         this.queryExceptionRetryInterval = queryExceptionRetryInterval;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setDataFilter(Predicate<D> dataFilter) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setDataFilter( Predicate<D> dataFilter ) {
         this.dataFilter = dataFilter;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setDataKeyGenerator(Function<D, K> dataKeyGenerator) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setDataKeyGenerator(
+            Function<D, K> dataKeyGenerator ) {
         this.dataKeyGenerator = dataKeyGenerator;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setElementToKeyMapping(Function<E, K> elementToKeyMapping) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setElementToKeyMapping(
+            Function<E, K> elementToKeyMapping ) {
         this.elementToKeyMapping = elementToKeyMapping;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setOneToMany(boolean oneToMany) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setOneToMany( boolean oneToMany ) {
         this.oneToMany = oneToMany;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setEmptyAsUnmatched(boolean emptyAsUnmatched) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setEmptyAsUnmatched( boolean emptyAsUnmatched ) {
         this.emptyAsUnmatched = emptyAsUnmatched;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setUseCache(boolean useCache) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setUseCache( boolean useCache ) {
         this.useCache = useCache;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setCacheKeyName(String cacheKeyName) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setCacheKeyName( String cacheKeyName ) {
         this.cacheKeyName = cacheKeyName;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setClearCacheAfterMatch(boolean clearCacheAfterMatch) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setClearCacheAfterMatch(
+            boolean clearCacheAfterMatch ) {
         this.clearCacheAfterMatch = clearCacheAfterMatch;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setEventListener(ObjectRelationMatcherEvent<E, I, C, D, K> eventListener) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setEventListener(
+            ObjectRelationMatcherEvent<E, I, C, D, K> eventListener ) {
         this.eventListener = eventListener;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setElementIdentifiersExtractor(Function<E, Collection<I>> elementIdentifiersExtractor) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setElementIdentifiersExtractor(
+            Function<E, Collection<I>> elementIdentifiersExtractor ) {
         this.elementIdentifiersExtractor = elementIdentifiersExtractor;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setElementToKeysMapping(Function<E, Collection<K>> elementToKeysMapping) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setElementToKeysMapping(
+            Function<E, Collection<K>> elementToKeysMapping ) {
         this.elementToKeysMapping = elementToKeysMapping;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
-    public ObjectRelationMatcher2<E, I, C, D, K> setManyToMany(boolean manyToMany) {
+    public ObjectRelationMatcher2<E, I, C, D, K> setManyToMany( boolean manyToMany ) {
         this.manyToMany = manyToMany;
-        return this.markUnmatched();
+        return markUnmatched();
     }
 
+    /**
+     * 停机 释放资源
+     */
     public static void shutdown() {
         try {
-            ObjectRelationMatcher2.clearAllCaches();
-        }
-        catch (Exception exception) {
-            // empty catch block
+            // 清理缓存
+            clearAllCaches();
+        } catch (Exception ignored) {
         }
         try {
+            // 关闭线程池
             parallelQueryPool.shutdown();
-        }
-        catch (Exception exception) {
-            // empty catch block
+        } catch (Exception ignored) {
         }
     }
 
-    static {
-        ThreadPoolExecutor originalPool = new ThreadPoolExecutor(EXECUTOR_PARALLEL_SIZE, EXECUTOR_PARALLEL_SIZE, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024), new ThreadFactoryBuilder().setNameFormat(EXECUTOR_THREAD_NAME_FORMAT).build(), new ThreadPoolExecutor.CallerRunsPolicy());
-        parallelQueryPool = MoreExecutors.listeningDecorator((ExecutorService)originalPool);
-    }
-
+    /**
+     * ObjectRelationMatcherEvent
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
     public static class ObjectRelationMatcherEvent<E, I, C extends Collection<I>, D, K> {
-        public void onQuerySuccess(C identifierCollection, int count, Collection<D> dataCollection) {
+
+        /**
+         * 查询新集合成功
+         *
+         * @param identifierCollection 标识集合
+         * @param count 重试次数 0表示首次查询未重试
+         * @param dataCollection 查询到的数据
+         */
+        public void onQuerySuccess(
+                C identifierCollection, int count, Collection<D> dataCollection ) {
             if (count == 0) {
-                LogUtils.debug("orm query for {} results are: {}", identifierCollection, dataCollection);
+                LogUtils.debug(
+                        "orm query for {} results are: {}", identifierCollection, dataCollection);
             } else {
-                LogUtils.debug("orm query(retry={}) for {} results are: {}", count, identifierCollection, dataCollection);
+                LogUtils.debug(
+                        "orm query(retry={}) for {} results are: {}",
+                        count,
+                        identifierCollection,
+                        dataCollection);
             }
         }
 
-        public void onQueryException(C identifierCollection, int count, Exception e) {
+        /**
+         * 查询新集合发生异常
+         *
+         * @param identifierCollection 标识集合
+         * @param count 重试次数 0表示首次查询未重试
+         * @param e 异常信息
+         */
+        public void onQueryException( C identifierCollection, int count, Exception e ) {
             if (count == 0) {
                 LogUtils.warn("orm query for {} throws exception: ", identifierCollection, e);
             } else {
-                LogUtils.warn("orm query(retry={}) for {} throws exception: ", count, identifierCollection, e);
+                LogUtils.warn(
+                        "orm query(retry={}) for {} throws exception: ",
+                        count,
+                        identifierCollection,
+                        e);
             }
         }
     }
 }
-

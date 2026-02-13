@@ -1,7 +1,26 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe.impl;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 import com.kuma.boot.common.support.dataframe.iframe.IFrame;
 import com.kuma.boot.common.support.dataframe.iframe.SDFrame;
@@ -11,8 +30,6 @@ import com.kuma.boot.common.support.dataframe.iframe.function.ListToOneFunction;
 import com.kuma.boot.common.support.dataframe.iframe.function.NumberFunction;
 import com.kuma.boot.common.support.dataframe.iframe.function.ReplenishFunction;
 import com.kuma.boot.common.support.dataframe.iframe.function.SetFunction;
-import com.kuma.boot.common.support.dataframe.iframe.impl.AbstractDataFrameImpl;
-import com.kuma.boot.common.support.dataframe.iframe.impl.WindowSDFrameImpl;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI2;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI3;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI4;
@@ -47,15 +64,17 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SDFrameImpl<T>
-extends AbstractDataFrameImpl<T>
-implements SDFrame<T> {
+/**
+ * @author caizhihao
+ */
+public class SDFrameImpl<T> extends AbstractDataFrameImpl<T> implements SDFrame<T> {
+
     protected Stream<T> data;
 
     public SDFrameImpl(Stream<T> data) {
-        List tmp = data.collect(Collectors.toList());
+        List<T> tmp = data.collect(toList());
         if (ListUtils.isNotEmpty(tmp)) {
-            this.fieldClass = tmp.get(0).getClass();
+            fieldClass = tmp.get(0).getClass();
         }
         this.data = tmp.stream();
     }
@@ -64,29 +83,38 @@ implements SDFrame<T> {
         if (list == null) {
             list = Collections.emptyList();
         }
+        /*
+         * else { // update reference ，don't let the original list affect the current flow
+         * list = new ArrayList<>(list); }
+         */
         this.data = list.stream();
         if (!list.isEmpty()) {
-            this.fieldClass = list.get(0).getClass();
+            fieldClass = list.get(0).getClass();
         }
     }
 
+    // After obtaining it, the number of lists will be changed using this
     @Override
     public List<T> toLists() {
-        List tmp = this.data.collect(Collectors.toList());
-        this.data = tmp.stream();
+        List<T> tmp = data.collect(toList());
+        // To prevent external changes in the number of tmp from affecting this area, make
+        // a copy
+        // new ArrayList<>(tmp)
+        // data = new ArrayList<>(tmp).stream();
+        data = tmp.stream();
         return tmp;
     }
 
-    @Override
+    // After obtaining it, the number of lists will not be changed using this
     public List<T> viewList() {
-        List tmp = this.data.collect(Collectors.toList());
-        this.data = tmp.stream();
+        List<T> tmp = data.collect(toList());
+        data = tmp.stream();
         return tmp;
     }
 
     @Override
     public <R> SDFrameImpl<R> from(Stream<R> data) {
-        return new SDFrameImpl<R>(data);
+        return new SDFrameImpl<>(data);
     }
 
     @Override
@@ -97,14 +125,14 @@ implements SDFrame<T> {
 
     @Override
     public SDFrameImpl<T> forEachParallel(Consumer<? super T> action) {
-        ((Stream)this.viewList().stream().parallel()).forEach(action);
+        viewList().stream().parallel().forEach(action);
         return this;
     }
 
     @Override
     public SDFrameImpl<T> forEachDo(ConsumerIndex<? super T> action) {
         int index = 0;
-        for (Object t : this) {
+        for (T t : this) {
             action.accept(index++, t);
         }
         return this;
@@ -112,146 +140,153 @@ implements SDFrame<T> {
 
     @Override
     public SDFrame<T> defaultScale(int scale) {
-        this.initDefaultScale(scale, this.defaultRoundingMode);
+        initDefaultScale(scale, defaultRoundingMode);
         return this;
     }
 
     @Override
     public SDFrame<T> defaultScale(int scale, RoundingMode roundingMode) {
-        this.initDefaultScale(scale, roundingMode);
+        initDefaultScale(scale, roundingMode);
         return this;
     }
 
     @Override
     public <R> SDFrameImpl<R> map(Function<T, R> map) {
-        return this.returnDF(this.stream().map(map));
+        return returnDF(stream().map(map));
     }
 
     @Override
     public <R> SDFrame<R> mapParallel(Function<T, R> map) {
-        return this.returnDF(((Stream)this.stream().parallel()).map(map));
+        return returnDF(stream().parallel().map(map));
     }
 
     @Override
-    public <R extends Number> SDFrame<T> mapPercent(Function<T, R> get, SetFunction<T, BigDecimal> set) {
-        return this.mapPercent((Function)get, (SetFunction)set, 2);
+    public <R extends Number> SDFrame<T> mapPercent(
+            Function<T, R> get, SetFunction<T, BigDecimal> set) {
+        return mapPercent(get, set, 2);
     }
 
     @Override
-    public <R extends Number> SDFrame<T> mapPercent(Function<T, R> get, SetFunction<T, BigDecimal> set, int scale) {
-        this.viewList().forEach(e -> {
-            Number value = (Number)get.apply(e);
-            BigDecimal percentageValue = MathUtils.percentage(MathUtils.toBigDecimal(value), scale);
-            set.accept(e, percentageValue);
-        });
+    public <R extends Number> SDFrame<T> mapPercent(
+            Function<T, R> get, SetFunction<T, BigDecimal> set, int scale) {
+        viewList()
+                .forEach(
+                        e -> {
+                            R value = get.apply(e);
+                            BigDecimal percentageValue =
+                                    MathUtils.percentage(MathUtils.toBigDecimal(value), scale);
+                            set.accept(e, percentageValue);
+                        });
         return this;
     }
 
     @Override
     public SDFrameImpl<List<T>> partition(int n) {
-        return this.returnDF(new PartitionList<T>(this.viewList(), n));
+        return returnDF(new PartitionList<>(viewList(), n));
     }
 
     @Override
     public <R, K> SDFrameImpl<R> join(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
-        return this.returnDF(this.joinList(other, on, join));
+        return returnDF(joinList(other, on, join));
     }
 
     @Override
     public <R, K> SDFrameImpl<R> joinOnce(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
-        return this.returnDF(this.joinList(other, on, join, true));
+        return returnDF(joinList(other, on, join, true));
     }
 
     @Override
     public <R, K> SDFrameImpl<R> join(IFrame<K> other, JoinOn<T, K> on) {
-        return this.join((IFrame)other, (JoinOn)on, (Join)new DefaultJoin());
+        return join(other, on, new DefaultJoin<>());
     }
 
     @Override
     public <K> SDFrameImpl<T> joinVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join) {
-        this.joinListLink(other, on, join);
+        joinListLink(other, on, join);
         return this;
     }
 
     @Override
     public <K> SDFrameImpl<T> joinOnceVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join) {
-        this.joinListLink(other, on, join, true);
+        joinListLink(other, on, join, true);
         return this;
     }
 
     @Override
     public <R, K> SDFrameImpl<R> leftJoin(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
-        return this.returnDF(this.leftJoinList(other, on, join));
+        return returnDF(leftJoinList(other, on, join));
     }
 
     @Override
-    public <R, K> SDFrameImpl<R> leftJoinOnce(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
-        return this.returnDF(this.leftJoinList(other, on, join, true));
+    public <R, K> SDFrameImpl<R> leftJoinOnce(
+            IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
+        return returnDF(leftJoinList(other, on, join, true));
     }
 
     @Override
     public <R, K> SDFrameImpl<R> leftJoin(IFrame<K> other, JoinOn<T, K> on) {
-        return this.leftJoin((IFrame)other, (JoinOn)on, (Join)new DefaultJoin());
+        return leftJoin(other, on, new DefaultJoin<>());
     }
 
     @Override
     public <K> SDFrameImpl<T> leftJoinVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join) {
-        this.leftJoinListLink(other, on, join);
+        leftJoinListLink(other, on, join);
         return this;
     }
 
     @Override
     public <K> SDFrame<T> leftJoinOnceVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join) {
-        this.leftJoinListLink(other, on, join, true);
+        leftJoinListLink(other, on, join, true);
         return this;
     }
 
     @Override
     public <R, K> SDFrameImpl<R> rightJoin(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
-        return this.returnDF(this.rightJoinList(other, on, join));
+        return returnDF(rightJoinList(other, on, join));
     }
 
     @Override
-    public <R, K> SDFrameImpl<R> rightJoinOnce(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
-        return this.returnDF(this.rightJoinList(other, on, join, true));
+    public <R, K> SDFrameImpl<R> rightJoinOnce(
+            IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join) {
+        return returnDF(rightJoinList(other, on, join, true));
     }
 
     @Override
     public <R, K> SDFrameImpl<R> rightJoin(IFrame<K> other, JoinOn<T, K> on) {
-        return this.rightJoin((IFrame)other, (JoinOn)on, (Join)new DefaultJoin());
+        return rightJoin(other, on, new DefaultJoin<>());
     }
 
     @Override
     public <K> SDFrameImpl<T> rightJoinVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join) {
-        this.rightJoinListLink(other, on, join);
+        rightJoinListLink(other, on, join);
         return this;
     }
 
     @Override
     public <K> SDFrame<T> rightJoinOnceVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join) {
-        this.rightJoinListLink(other, on, join, true);
+        rightJoinListLink(other, on, join, true);
         return this;
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> addRowNumberCol() {
-        ArrayList result = new ArrayList();
+        List<FI2<T, Integer>> result = new ArrayList<>();
         int index = 1;
-        for (Object t : this) {
-            result.add(new FI2(t, index++));
+        for (T t : this) {
+            result.add(new FI2<>(t, index++));
         }
-        return this.returnDF(result);
+        return returnDF(result);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> addRowNumberCol(Sorter<T> sorter) {
-        return ((SDFrameImpl)this.sortAsc((Comparator)sorter)).addRowNumberCol();
+        return sortAsc(sorter).addRowNumberCol();
     }
 
     @Override
     public SDFrameImpl<T> addRowNumberCol(SetFunction<T, Integer> set) {
         int index = 1;
-        for (Object t : this) {
+        for (T t : this) {
             set.accept(t, index++);
         }
         return this;
@@ -259,222 +294,250 @@ implements SDFrame<T> {
 
     @Override
     public SDFrameImpl<T> addRowNumberCol(Sorter<T> sorter, SetFunction<T, Integer> set) {
-        return ((SDFrameImpl)this.sortAsc((Comparator)sorter)).addRowNumberCol((SetFunction)set);
+        return sortAsc(sorter).addRowNumberCol(set);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> addRankCol(Sorter<T> sorter) {
-        return this.overRank((Window)Window.sortBy(sorter));
+        return overRank(Window.sortBy(sorter));
     }
 
     @Override
     public SDFrame<T> addRankCol(Sorter<T> sorter, SetFunction<T, Integer> set) {
-        return this.fi2Frame((SDFrameImpl)this.addRankCol((Sorter)sorter), (SetFunction)set);
+        return fi2Frame(this.addRankCol(sorter), set);
     }
 
     @Override
-    public SDFrameImpl<FI2<T, String>> explodeString(Function<T, String> getFunction, String delimiter) {
-        return this.returnDF(this.explodeStringStream(getFunction, delimiter));
+    public SDFrameImpl<FI2<T, String>> explodeString(
+            Function<T, String> getFunction, String delimiter) {
+        return returnDF(explodeStringStream(getFunction, delimiter));
     }
 
     @Override
-    public SDFrameImpl<T> explodeString(Function<T, String> getFunction, SetFunction<T, String> setFunction, String delimiter) {
-        return this.returnDF(this.fi2Stream(this.explodeStringStream(getFunction, delimiter), setFunction));
+    public SDFrameImpl<T> explodeString(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction, String delimiter) {
+        return returnDF(fi2Stream(explodeStringStream(getFunction, delimiter), setFunction));
     }
 
     @Override
     public SDFrameImpl<FI2<T, String>> explodeJsonArray(Function<T, String> getFunction) {
-        return this.returnDF(this.explodeJsonArrayStream(getFunction));
+        return returnDF(explodeJsonArrayStream(getFunction));
     }
 
     @Override
-    public SDFrameImpl<T> explodeJsonArray(Function<T, String> getFunction, SetFunction<T, String> setFunction) {
-        return this.returnDF(this.fi2Stream(this.explodeJsonArrayStream(getFunction), setFunction));
+    public SDFrameImpl<T> explodeJsonArray(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction) {
+        return returnDF(fi2Stream(explodeJsonArrayStream(getFunction), setFunction));
     }
 
     @Override
-    public <E> SDFrameImpl<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> getFunction) {
-        return this.returnDF(this.explodeCollectionStream(getFunction));
+    public <E> SDFrameImpl<FI2<T, E>> explodeCollection(
+            Function<T, ? extends Collection<E>> getFunction) {
+        return returnDF(explodeCollectionStream(getFunction));
     }
 
     @Override
-    public <E> SDFrame<T> explodeCollection(Function<T, ? extends Collection<E>> getFunction, SetFunction<T, E> setFunction) {
-        return this.returnDF(this.fi2Stream(this.explodeCollectionStream(getFunction), setFunction));
+    public <E> SDFrame<T> explodeCollection(
+            Function<T, ? extends Collection<E>> getFunction, SetFunction<T, E> setFunction) {
+        return returnDF(fi2Stream(explodeCollectionStream(getFunction), setFunction));
     }
 
     @Override
-    public <E> SDFrameImpl<FI2<T, E>> explodeCollectionArray(Function<T, ?> getFunction, Class<E> elementClass) {
-        return this.returnDF(this.explodeCollectionArrayStream(getFunction, elementClass));
+    public <E> SDFrameImpl<FI2<T, E>> explodeCollectionArray(
+            Function<T, ?> getFunction, Class<E> elementClass) {
+        return returnDF(explodeCollectionArrayStream(getFunction, elementClass));
     }
 
     @Override
-    public <E> SDFrameImpl<T> explodeCollectionArray(Function<T, ?> getFunction, SetFunction<T, E> setFunction, Class<E> elementClass) {
-        return this.returnDF(this.fi2Stream(this.explodeCollectionArrayStream(getFunction, elementClass), setFunction));
+    public <E> SDFrameImpl<T> explodeCollectionArray(
+            Function<T, ?> getFunction, SetFunction<T, E> setFunction, Class<E> elementClass) {
+        return returnDF(
+                fi2Stream(explodeCollectionArrayStream(getFunction, elementClass), setFunction));
     }
 
     @Override
     public Stream<T> stream() {
-        return this.data;
+        return data;
     }
 
     @Override
     public long count() {
-        List tmp = this.stream().collect(Collectors.toList());
-        this.data = tmp.stream();
+        List<T> tmp = stream().collect(toList());
+        data = tmp.stream();
         return tmp.size();
     }
 
+    /**
+     * =========================== 排序相关 =====================================
+     **/
     @Override
     public SDFrameImpl<T> sortDesc(Comparator<T> comparator) {
-        this.data = this.stream().sorted(comparator.reversed());
+        data = stream().sorted(comparator.reversed());
         return this;
     }
 
     @Override
     public <R extends Comparable<? super R>> SDFrameImpl<T> sortDesc(Function<T, R> function) {
-        this.sortDesc((Comparator)NullLastComparator.comparing(function));
+        sortDesc(NullLastComparator.comparing(function));
         return this;
     }
 
     @Override
     public SDFrameImpl<T> sortAsc(Comparator<T> comparator) {
-        this.data = this.stream().sorted(comparator);
+        data = stream().sorted(comparator);
         return this;
     }
 
     @Override
     public <R extends Comparable<R>> SDFrameImpl<T> sortAsc(Function<T, R> function) {
-        this.sortAsc((Comparator)NullFirstComparator.comparing(function));
+        sortAsc(NullFirstComparator.comparing(function));
         return this;
     }
 
     @Override
     public SDFrame<T> cutFirstRank(Sorter<T> sorter, int n) {
-        return ((SDFrameImpl)((SDFrameImpl)this.overRank((Window)Window.sortBy(sorter))).whereLe(FI2::getC2, Integer.valueOf(n))).map(FI2::getC1);
+        return overRank(Window.sortBy(sorter)).whereLe(FI2::getC2, n).map(FI2::getC1);
     }
 
+    /** =========================== 截取相关 ===================================== **/
     @Override
     public SDFrame<T> cutFirst(int n) {
-        DFList<T> first = new DFList<T>(this.viewList()).first(n);
+        DFList<T> first = new DFList<>(viewList()).first(n);
         List<T> build = first.build();
-        return this.returnThis(build);
+        return returnThis(build);
     }
 
     @Override
     public SDFrame<T> cutLast(int n) {
-        DFList<T> first = new DFList<T>(this.viewList()).last(n);
-        this.data = first.build().stream();
+        DFList<T> first = new DFList<>(viewList()).last(n);
+        data = first.build().stream();
         return this;
     }
 
     @Override
     public SDFrame<T> cut(Integer startIndex, Integer endIndex) {
-        return this.returnThis(this.getList(startIndex, endIndex));
+        return returnThis(getList(startIndex, endIndex));
     }
 
     @Override
     public SDFrame<T> cutPage(int page, int pageSize) {
-        return this.returnThis(this.page(page, pageSize));
+        return returnThis(page(page, pageSize));
     }
 
     @Override
     public SDFrame<T> distinct() {
-        this.data = this.stream().distinct();
+        data = stream().distinct();
         return this;
     }
 
     @Override
     public <R extends Comparable<R>> SDFrameImpl<T> distinct(Function<T, R> function) {
-        return this.distinct((Comparator)Comparator.comparing(function));
+        return distinct(Comparator.comparing(function));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> distinct(Function<T, R> function, ListToOneFunction<T> listOneFunction) {
-        return this.distinct((Comparator)Comparator.comparing(function), (ListToOneFunction)listOneFunction);
+    public <R extends Comparable<R>> SDFrameImpl<T> distinct(
+            Function<T, R> function, ListToOneFunction<T> listOneFunction) {
+        return distinct(Comparator.comparing(function), listOneFunction);
     }
 
     @Override
     public SDFrameImpl<T> distinct(Comparator<T> comparator) {
-        ArrayList tmp = this.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet(comparator)), ArrayList::new));
-        return this.returnThis(tmp);
+        ArrayList<T> tmp =
+                stream()
+                        .collect(
+                                collectingAndThen(
+                                        toCollection(() -> new TreeSet<>(comparator)),
+                                        ArrayList::new));
+        return returnThis(tmp);
     }
 
     @Override
     public SDFrameImpl<T> distinct(Comparator<T> comparator, ListToOneFunction<T> function) {
-        return this.returnThis(this.distinctList(this.viewList(), comparator, function));
+        return returnThis(distinctList(viewList(), comparator, function));
     }
 
     @Override
     public long countDistinct(Comparator<T> comparator) {
-        return ((SDFrameImpl)this.distinct((Comparator)comparator)).count();
+        return distinct(comparator).count();
     }
 
     @Override
     public <R extends Comparable<R>> long countDistinct(Function<T, R> function) {
-        return this.countDistinct(Comparator.comparing(function));
+        return countDistinct(Comparator.comparing(function));
     }
 
+    /**
+     * =========================== 筛选相关 =====================================
+     **/
     @Override
     public SDFrameImpl<T> where(Predicate<? super T> predicate) {
-        return this.returnThis(this.stream().filter(predicate));
+        return returnThis(stream().filter(predicate));
     }
 
     @Override
     public <R> SDFrameImpl<T> whereNull(Function<T, R> function) {
-        return this.returnThis(this.whereNullStream(function));
+        return returnThis(whereNullStream(function));
     }
 
     @Override
     public <R> SDFrameImpl<T> whereNotNull(Function<T, R> function) {
-        return this.returnThis(this.whereNotNullStream(function));
+        return returnThis(whereNotNullStream(function));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> whereBetween(Function<T, R> function, R start, R end) {
+    public <R extends Comparable<R>> SDFrameImpl<T> whereBetween(
+            Function<T, R> function, R start, R end) {
         if (start == null && end == null) {
             return this;
         }
-        return this.returnThis(this.whereBetweenStream(function, start, end));
+        return returnThis(whereBetweenStream(function, start, end));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> whereBetweenN(Function<T, R> function, R start, R end) {
+    public <R extends Comparable<R>> SDFrameImpl<T> whereBetweenN(
+            Function<T, R> function, R start, R end) {
         if (start == null && end == null) {
             return this;
         }
-        return this.returnThis(this.whereBetweenNStream(function, start, end));
+        return returnThis(whereBetweenNStream(function, start, end));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> whereBetweenR(Function<T, R> function, R start, R end) {
+    public <R extends Comparable<R>> SDFrameImpl<T> whereBetweenR(
+            Function<T, R> function, R start, R end) {
+        // 筛选条件都不存在默认不筛选
         if (start == null && end == null) {
             return this;
         }
-        return this.returnThis(this.whereBetweenRStream(function, start, end));
+        return returnThis(whereBetweenRStream(function, start, end));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> whereBetweenL(Function<T, R> function, R start, R end) {
+    public <R extends Comparable<R>> SDFrameImpl<T> whereBetweenL(
+            Function<T, R> function, R start, R end) {
         if (start == null && end == null) {
             return this;
         }
-        return this.returnThis(this.whereBetweenLStream(function, start, end));
+        return returnThis(whereBetweenLStream(function, start, end));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> whereNotBetween(Function<T, R> function, R start, R end) {
+    public <R extends Comparable<R>> SDFrameImpl<T> whereNotBetween(
+            Function<T, R> function, R start, R end) {
         if (start == null || end == null) {
             return this;
         }
-        return this.returnThis(this.whereNotBetweenStream(function, start, end));
+        return returnThis(whereNotBetweenStream(function, start, end));
     }
 
     @Override
-    public <R extends Comparable<R>> SDFrameImpl<T> whereNotBetweenN(Function<T, R> function, R start, R end) {
+    public <R extends Comparable<R>> SDFrameImpl<T> whereNotBetweenN(
+            Function<T, R> function, R start, R end) {
         if (start == null || end == null) {
             return this;
         }
-        return this.returnThis(this.whereNotBetweenNStream(function, start, end));
+        return returnThis(whereNotBetweenNStream(function, start, end));
     }
 
     @Override
@@ -482,7 +545,7 @@ implements SDFrame<T> {
         if (list == null || list.isEmpty()) {
             return this;
         }
-        return this.returnThis(this.whereInStream(function, list));
+        return returnThis(whereInStream(function, list));
     }
 
     @Override
@@ -490,22 +553,22 @@ implements SDFrame<T> {
         if (list == null || list.isEmpty()) {
             return this;
         }
-        return this.returnThis(this.whereNotInStream(function, list));
+        return returnThis(whereNotInStream(function, list));
     }
 
     @Override
     public SDFrameImpl<T> whereTrue(Predicate<T> predicate) {
-        return this.returnThis(this.stream().filter(predicate));
+        return returnThis(stream().filter(predicate));
     }
 
     @Override
     public SDFrameImpl<T> whereNotTrue(Predicate<T> predicate) {
-        return this.whereTrue((Predicate)predicate.negate());
+        return whereTrue(predicate.negate());
     }
 
     @Override
     public <R> SDFrameImpl<T> whereEq(Function<T, R> function, R value) {
-        return this.returnThis(this.whereEqStream(function, value));
+        return returnThis(whereEqStream(function, value));
     }
 
     @Override
@@ -513,7 +576,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereNotEqStream(function, value));
+        return returnThis(whereNotEqStream(function, value));
     }
 
     @Override
@@ -521,7 +584,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereGtStream(function, value));
+        return returnThis(whereGtStream(function, value));
     }
 
     @Override
@@ -529,7 +592,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereGeStream(function, value));
+        return returnThis(whereGeStream(function, value));
     }
 
     @Override
@@ -537,7 +600,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereLtStream(function, value));
+        return returnThis(whereLtStream(function, value));
     }
 
     @Override
@@ -545,7 +608,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereLeStream(function, value));
+        return returnThis(whereLeStream(function, value));
     }
 
     @Override
@@ -553,7 +616,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereLikeStream(function, value));
+        return returnThis(whereLikeStream(function, value));
     }
 
     @Override
@@ -561,7 +624,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereNotLikeStream(function, value));
+        return returnThis(whereNotLikeStream(function, value));
     }
 
     @Override
@@ -569,7 +632,7 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereLikeLeftStream(function, value));
+        return returnThis(whereLikeLeftStream(function, value));
     }
 
     @Override
@@ -577,577 +640,721 @@ implements SDFrame<T> {
         if (value == null) {
             return this;
         }
-        return this.returnThis(this.whereLikeRightStream(function, value));
+        return returnThis(whereLikeRightStream(function, value));
     }
 
+    /** =========================== 分组相关 ===================================== **/
     @Override
     public <K> SDFrameImpl<FI2<K, List<T>>> group(Function<? super T, ? extends K> key) {
-        return this.returnDF(this.groupKey(key));
+        return returnDF(groupKey(key));
     }
 
     @Override
-    public <K, R extends Number> SDFrameImpl<FI2<K, BigDecimal>> groupBySum(Function<T, K> key, NumberFunction<T, R> value) {
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.summingBigDecimalForNumber(value);
-        List<FI2<K, BigDecimal>> collect = this.groupKey(key, tBigDecimalCollector);
-        return this.returnDF(collect);
+    public <K, R extends Number> SDFrameImpl<FI2<K, BigDecimal>> groupBySum(
+            Function<T, K> key, NumberFunction<T, R> value) {
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.summingBigDecimalForNumber(value);
+        List<FI2<K, BigDecimal>> collect = groupKey(key, tBigDecimalCollector);
+        return returnDF(collect);
     }
 
     @Override
-    public <K, J, R extends Number> SDFrameImpl<FI3<K, J, BigDecimal>> groupBySum(Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value) {
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.summingBigDecimalForNumber(value);
-        List<FI3<K, J, BigDecimal>> collect = this.groupKey(key, key2, tBigDecimalCollector);
-        return this.returnDF(collect);
+    public <K, J, R extends Number> SDFrameImpl<FI3<K, J, BigDecimal>> groupBySum(
+            Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value) {
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.summingBigDecimalForNumber(value);
+        List<FI3<K, J, BigDecimal>> collect = groupKey(key, key2, tBigDecimalCollector);
+        return returnDF(collect);
     }
 
     @Override
-    public <K, J, H, R extends Number> SDFrameImpl<FI4<K, J, H, BigDecimal>> groupBySum(Function<T, K> key, Function<T, J> key2, Function<T, H> key3, NumberFunction<T, R> value) {
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.summingBigDecimalForNumber(value);
-        List<FI4<K, J, H, BigDecimal>> collect = this.groupKey(key, key2, key3, tBigDecimalCollector);
-        return this.returnDF(collect);
+    public <K, J, H, R extends Number> SDFrameImpl<FI4<K, J, H, BigDecimal>> groupBySum(
+            Function<T, K> key,
+            Function<T, J> key2,
+            Function<T, H> key3,
+            NumberFunction<T, R> value) {
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.summingBigDecimalForNumber(value);
+        List<FI4<K, J, H, BigDecimal>> collect = groupKey(key, key2, key3, tBigDecimalCollector);
+        return returnDF(collect);
     }
 
     @Override
     public <K> SDFrameImpl<FI2<K, Long>> groupByCount(Function<T, K> key) {
-        Collector counting = Collectors.counting();
-        Map<K, Long> collect = this.stream().collect(Collectors.groupingBy(key, counting));
-        return this.returnDF(FrameUtil.toListFI2(collect));
+        Collector<Object, ?, Long> counting = counting();
+        Map<K, Long> collect = stream().collect(groupingBy(key, counting));
+        return returnDF(FrameUtil.toListFI2(collect));
     }
 
     @Override
-    public <K, J> SDFrameImpl<FI3<K, J, Long>> groupByCount(Function<T, K> key, Function<T, J> key2) {
-        Collector counting = Collectors.counting();
-        Map<K, Map<J, Long>> collect = this.stream().collect(Collectors.groupingBy(key, Collectors.groupingBy(key2, counting)));
-        return this.returnDF(FrameUtil.toListFI3(collect));
+    public <K, J> SDFrameImpl<FI3<K, J, Long>> groupByCount(
+            Function<T, K> key, Function<T, J> key2) {
+        Collector<Object, ?, Long> counting = counting();
+        Map<K, Map<J, Long>> collect =
+                stream().collect(groupingBy(key, groupingBy(key2, counting)));
+        return returnDF(FrameUtil.toListFI3(collect));
     }
 
     @Override
-    public <K, J, H> SDFrameImpl<FI4<K, J, H, Long>> groupByCount(Function<T, K> key, Function<T, J> key2, Function<T, H> key3) {
-        Collector counting = Collectors.counting();
-        Map<K, Map<J, Map<H, Long>>> collect = this.stream().collect(Collectors.groupingBy(key, Collectors.groupingBy(key2, Collectors.groupingBy(key3, counting))));
-        return this.returnDF(FrameUtil.toListFI4(collect));
+    public <K, J, H> SDFrameImpl<FI4<K, J, H, Long>> groupByCount(
+            Function<T, K> key, Function<T, J> key2, Function<T, H> key3) {
+        Collector<Object, ?, Long> counting = counting();
+        Map<K, Map<J, Map<H, Long>>> collect =
+                stream().collect(groupingBy(key, groupingBy(key2, groupingBy(key3, counting))));
+        return returnDF(FrameUtil.toListFI4(collect));
     }
 
     @Override
-    public <K, R extends Number> SDFrameImpl<FI3<K, BigDecimal, Long>> groupBySumCount(Function<T, K> key, NumberFunction<T, R> value) {
-        List<T> dataList = this.viewList();
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.summingBigDecimalForNumber(value);
-        List<FI2<K, BigDecimal>> sumList = this.returnDF(dataList).groupKey(key, tBigDecimalCollector);
-        List<T> countList = ((SDFrameImpl)this.returnDF(dataList).groupByCount((Function)key)).viewList();
-        Map<Object, Long> countMap = countList.stream().collect(Collectors.toMap(FI2::getC1, FI2::getC2));
-        List collect = sumList.stream().map(e -> new FI3(e.getC1(), (BigDecimal)e.getC2(), (Long)countMap.get(e.getC1()))).collect(Collectors.toList());
-        return this.returnDF(collect);
+    public <K, R extends Number> SDFrameImpl<FI3<K, BigDecimal, Long>> groupBySumCount(
+            Function<T, K> key, NumberFunction<T, R> value) {
+        List<T> dataList = viewList();
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.summingBigDecimalForNumber(value);
+        List<FI2<K, BigDecimal>> sumList = returnDF(dataList).groupKey(key, tBigDecimalCollector);
+        List<FI2<K, Long>> countList = returnDF(dataList).groupByCount(key).viewList();
+        Map<K, Long> countMap =
+                countList.stream().collect(Collectors.toMap(FI2::getC1, FI2::getC2));
+        List<FI3<K, BigDecimal, Long>> collect =
+                sumList.stream()
+                        .map(e -> new FI3<>(e.getC1(), e.getC2(), countMap.get(e.getC1())))
+                        .collect(Collectors.toList());
+        return returnDF(collect);
     }
 
     @Override
-    public <K, J, R extends Number> SDFrameImpl<FI4<K, J, BigDecimal, Long>> groupBySumCount(Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value) {
-        List<T> dataList = this.viewList();
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.summingBigDecimalForNumber(value);
-        List<FI3<K, J, BigDecimal>> sumList = this.returnDF(dataList).groupKey(key, key2, tBigDecimalCollector);
-        List<T> countList = ((SDFrameImpl)this.returnDF(dataList).groupByCount((Function)key, (Function)key2)).viewList();
-        Map countMap = countList.stream().collect(Collectors.toMap(e -> String.valueOf(e.getC1()) + "_" + String.valueOf(e.getC2()), Function.identity()));
-        List collect = sumList.stream().map(e -> {
-            FI3 countItem = (FI3)countMap.get(String.valueOf(e.getC1()) + "_" + String.valueOf(e.getC2()));
-            return new FI4(e.getC1(), e.getC2(), (BigDecimal)e.getC3(), (Long)countItem.getC3());
-        }).collect(Collectors.toList());
-        return this.returnDF(collect);
+    public <K, J, R extends Number> SDFrameImpl<FI4<K, J, BigDecimal, Long>> groupBySumCount(
+            Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value) {
+        List<T> dataList = viewList();
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.summingBigDecimalForNumber(value);
+        List<FI3<K, J, BigDecimal>> sumList =
+                returnDF(dataList).groupKey(key, key2, tBigDecimalCollector);
+        List<FI3<K, J, Long>> countList = returnDF(dataList).groupByCount(key, key2).viewList();
+        // 合并sum和count字段
+        Map<String, FI3<K, J, Long>> countMap =
+                countList.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        e -> e.getC1() + "_" + e.getC2(), Function.identity()));
+        List<FI4<K, J, BigDecimal, Long>> collect =
+                sumList.stream()
+                        .map(
+                                e -> {
+                                    FI3<K, J, Long> countItem =
+                                            countMap.get(e.getC1() + "_" + e.getC2());
+                                    return new FI4<>(
+                                            e.getC1(), e.getC2(), e.getC3(), countItem.getC3());
+                                })
+                        .collect(Collectors.toList());
+        return returnDF(collect);
     }
 
     @Override
-    public <K, R extends Number> SDFrameImpl<FI2<K, BigDecimal>> groupByAvg(Function<T, K> key, NumberFunction<T, R> value) {
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.averagingBigDecimal(value, this.defaultScale, this.getOldRoundingMode());
-        List<FI2<K, BigDecimal>> collect = this.groupKey(key, tBigDecimalCollector);
-        return this.returnDF(collect);
+    public <K, R extends Number> SDFrameImpl<FI2<K, BigDecimal>> groupByAvg(
+            Function<T, K> key, NumberFunction<T, R> value) {
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.averagingBigDecimal(value, defaultScale, getOldRoundingMode());
+        List<FI2<K, BigDecimal>> collect = groupKey(key, tBigDecimalCollector);
+        return returnDF(collect);
     }
 
     @Override
-    public <K, J, R extends Number> SDFrameImpl<FI3<K, J, BigDecimal>> groupByAvg(Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value) {
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.averagingBigDecimal(value, this.defaultScale, this.getOldRoundingMode());
-        List<FI3<K, J, BigDecimal>> collect = this.groupKey(key, key2, tBigDecimalCollector);
-        return this.returnDF(collect);
+    public <K, J, R extends Number> SDFrameImpl<FI3<K, J, BigDecimal>> groupByAvg(
+            Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value) {
+
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.averagingBigDecimal(value, defaultScale, getOldRoundingMode());
+        List<FI3<K, J, BigDecimal>> collect = groupKey(key, key2, tBigDecimalCollector);
+        return returnDF(collect);
     }
 
     @Override
-    public <K, J, H, R extends Number> SDFrameImpl<FI4<K, J, H, BigDecimal>> groupByAvg(Function<T, K> key, Function<T, J> key2, Function<T, H> key3, NumberFunction<T, R> value) {
-        Collector<T, ?, BigDecimal> tBigDecimalCollector = CollectorsPlusUtil.averagingBigDecimal(value, this.defaultScale, this.getOldRoundingMode());
-        List<FI4<K, J, H, BigDecimal>> collect = this.groupKey(key, key2, key3, tBigDecimalCollector);
-        return this.returnDF(collect);
+    public <K, J, H, R extends Number> SDFrameImpl<FI4<K, J, H, BigDecimal>> groupByAvg(
+            Function<T, K> key,
+            Function<T, J> key2,
+            Function<T, H> key3,
+            NumberFunction<T, R> value) {
+        Collector<T, ?, BigDecimal> tBigDecimalCollector =
+                CollectorsPlusUtil.averagingBigDecimal(value, defaultScale, getOldRoundingMode());
+        List<FI4<K, J, H, BigDecimal>> collect = groupKey(key, key2, key3, tBigDecimalCollector);
+        return returnDF(collect);
     }
 
     @Override
-    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, T>> groupByMax(Function<T, K> key, Function<T, V> value) {
-        Map<K, T> collect = this.stream().collect(Collectors.groupingBy(key, Collectors.collectingAndThen(Collectors.toList(), this.getListMaxFunction(value))));
-        return this.returnDF(FrameUtil.toListFI2(collect));
+    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, T>> groupByMax(
+            Function<T, K> key, Function<T, V> value) {
+        Map<K, T> collect =
+                stream()
+                        .collect(
+                                groupingBy(
+                                        key,
+                                        collectingAndThen(toList(), getListMaxFunction(value))));
+        return returnDF(FrameUtil.toListFI2(collect));
     }
 
     @Override
-    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, T>> groupByMax(Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
-        Map<K, Map<J, T>> collect = this.groupToMap(key, key2, this.getListMaxFunction(value));
-        return this.returnDF(FrameUtil.toListFI3(collect));
+    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, T>> groupByMax(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
+        Map<K, Map<J, T>> collect = groupToMap(key, key2, getListMaxFunction(value));
+        return returnDF(FrameUtil.toListFI3(collect));
     }
 
     @Override
-    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, V>> groupByMaxValue(Function<T, K> key, Function<T, V> value) {
-        return ((SDFrameImpl)this.groupByMax((Function)key, (Function)value)).map(e -> new FI2(e.getC1(), (Comparable)this.getApplyValue(value, e.getC2())));
+    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, V>> groupByMaxValue(
+            Function<T, K> key, Function<T, V> value) {
+        return groupByMax(key, value)
+                .map(e -> new FI2<>(e.getC1(), getApplyValue(value, e.getC2())));
     }
 
     @Override
-    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, V>> groupByMaxValue(Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
-        return ((SDFrameImpl)this.groupByMax((Function)key, (Function)key2, (Function)value)).map(e -> new FI3(e.getC1(), e.getC2(), (Comparable)this.getApplyValue(value, e.getC3())));
+    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, V>> groupByMaxValue(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
+        return groupByMax(key, key2, value)
+                .map(e -> new FI3<>(e.getC1(), e.getC2(), getApplyValue(value, e.getC3())));
     }
 
     @Override
-    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, T>> groupByMin(Function<T, K> key, Function<T, V> value) {
-        Map<K, Object> collect = this.stream().collect(Collectors.groupingBy(key, Collectors.collectingAndThen(Collectors.toList(), e -> e.stream().min(Comparator.comparing(value)).orElse(null))));
-        return this.returnDF(FrameUtil.toListFI2(collect));
+    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, T>> groupByMin(
+            Function<T, K> key, Function<T, V> value) {
+        Map<K, T> collect =
+                stream()
+                        .collect(
+                                groupingBy(
+                                        key,
+                                        collectingAndThen(
+                                                toList(),
+                                                e ->
+                                                        e.stream()
+                                                                .min(Comparator.comparing(value))
+                                                                .orElse(null))));
+        return returnDF(FrameUtil.toListFI2(collect));
     }
 
     @Override
-    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, T>> groupByMin(Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
-        Map<K, Map<J, T>> collect = this.groupToMap(key, key2, this.getListMinFunction(value));
-        return this.returnDF(FrameUtil.toListFI3(collect));
+    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, T>> groupByMin(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
+        Map<K, Map<J, T>> collect = groupToMap(key, key2, getListMinFunction(value));
+        return returnDF(FrameUtil.toListFI3(collect));
     }
 
     @Override
-    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, V>> groupByMinValue(Function<T, K> key, Function<T, V> value) {
-        return ((SDFrameImpl)this.groupByMin((Function)key, (Function)value)).map(e -> new FI2(e.getC1(), (Comparable)this.getApplyValue(value, e.getC2())));
+    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, V>> groupByMinValue(
+            Function<T, K> key, Function<T, V> value) {
+        return groupByMin(key, value)
+                .map(e -> new FI2<>(e.getC1(), getApplyValue(value, e.getC2())));
     }
 
     @Override
-    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, V>> groupByMinValue(Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
-        return ((SDFrameImpl)this.groupByMin((Function)key, (Function)key2, (Function)value)).map(e -> new FI3(e.getC1(), e.getC2(), (Comparable)this.getApplyValue(value, e.getC3())));
+    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, V>> groupByMinValue(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
+        return groupByMin(key, key2, value)
+                .map(e -> new FI3<>(e.getC1(), e.getC2(), getApplyValue(value, e.getC3())));
     }
 
     @Override
-    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, MaxMin<V>>> groupByMaxMinValue(Function<T, K> key, Function<T, V> value) {
-        Map<K, MaxMin<V>> map = this.stream().collect(Collectors.groupingBy(key, Collectors.collectingAndThen(Collectors.toList(), this.getListGroupMaxMinValueFunction(value))));
-        return this.returnDF(FrameUtil.toListFI2(map));
+    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, MaxMin<V>>> groupByMaxMinValue(
+            Function<T, K> key, Function<T, V> value) {
+        Map<K, MaxMin<V>> map =
+                stream()
+                        .collect(
+                                groupingBy(
+                                        key,
+                                        collectingAndThen(
+                                                toList(), getListGroupMaxMinValueFunction(value))));
+        return returnDF(FrameUtil.toListFI2(map));
     }
 
     @Override
-    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, MaxMin<V>>> groupByMaxMinValue(Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
-        Map<K, Map<J, MaxMin<V>>> map = this.stream().collect(Collectors.groupingBy(key, Collectors.groupingBy(key2, Collectors.collectingAndThen(Collectors.toList(), this.getListGroupMaxMinValueFunction(value)))));
-        return this.returnDF(FrameUtil.toListFI3(map));
+    public <K, J, V extends Comparable<? super V>>
+    SDFrameImpl<FI3<K, J, MaxMin<V>>> groupByMaxMinValue(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
+        Map<K, Map<J, MaxMin<V>>> map =
+                stream()
+                        .collect(
+                                groupingBy(
+                                        key,
+                                        groupingBy(
+                                                key2,
+                                                collectingAndThen(
+                                                        toList(),
+                                                        getListGroupMaxMinValueFunction(value)))));
+        return returnDF(FrameUtil.toListFI3(map));
     }
 
     @Override
-    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, MaxMin<T>>> groupByMaxMin(Function<T, K> key, Function<T, V> value) {
-        Map<K, MaxMin<T>> map = this.stream().collect(Collectors.groupingBy(key, Collectors.collectingAndThen(Collectors.toList(), this.getListGroupMaxMinFunction(value))));
-        return this.returnDF(FrameUtil.toListFI2(map));
+    public <K, V extends Comparable<? super V>> SDFrameImpl<FI2<K, MaxMin<T>>> groupByMaxMin(
+            Function<T, K> key, Function<T, V> value) {
+        Map<K, MaxMin<T>> map =
+                stream()
+                        .collect(
+                                groupingBy(
+                                        key,
+                                        collectingAndThen(
+                                                toList(), getListGroupMaxMinFunction(value))));
+        return returnDF(FrameUtil.toListFI2(map));
     }
 
     @Override
-    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, MaxMin<T>>> groupByMaxMin(Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
-        Map<K, Map<J, MaxMin<T>>> map = this.stream().collect(Collectors.groupingBy(key, Collectors.groupingBy(key2, Collectors.collectingAndThen(Collectors.toList(), this.getListGroupMaxMinFunction(value)))));
-        return this.returnDF(FrameUtil.toListFI3(map));
+    public <K, J, V extends Comparable<? super V>> SDFrameImpl<FI3<K, J, MaxMin<T>>> groupByMaxMin(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value) {
+        Map<K, Map<J, MaxMin<T>>> map =
+                stream()
+                        .collect(
+                                groupingBy(
+                                        key,
+                                        groupingBy(
+                                                key2,
+                                                collectingAndThen(
+                                                        toList(),
+                                                        getListGroupMaxMinFunction(value)))));
+        return returnDF(FrameUtil.toListFI3(map));
     }
 
+    /**
+     * =========================== Window Function =====================================
+     **/
     @Override
     public WindowSDFrame<T> window(Window<T> window) {
-        WindowSDFrameImpl<T> frame = new WindowSDFrameImpl<T>(window, this.stream());
-        this.transmitMember(this, frame);
+        WindowSDFrameImpl<T> frame = new WindowSDFrameImpl<>(window, stream());
+        transmitMember(this, frame);
         return frame;
     }
 
     @Override
     public WindowSDFrame<T> window() {
-        WindowSDFrameImpl<T> frame = new WindowSDFrameImpl<T>(this.emptyWindow, this.stream());
-        this.transmitMember(this, frame);
+        WindowSDFrameImpl<T> frame = new WindowSDFrameImpl<>(emptyWindow, stream());
+        transmitMember(this, frame);
         return frame;
     }
 
-    public <F> SDFrameImpl<T> fi2Frame(SDFrameImpl<FI2<T, F>> frame, SetFunction<T, F> setFunction) {
-        return ((SDFrameImpl)frame.forEachDo((T e) -> setFunction.accept(e.getC1(), e.getC2()))).map(FI2::getC1);
+    public <F> SDFrameImpl<T> fi2Frame(
+            SDFrameImpl<FI2<T, F>> frame, SetFunction<T, F> setFunction) {
+        return frame.forEachDo(e -> setFunction.accept(e.getC1(), e.getC2())).map(FI2::getC1);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overRowNumber(Window<T> overParam) {
-        return this.returnDF(this.windowFunctionForRowNumber(overParam));
+        return returnDF(windowFunctionForRowNumber(overParam));
     }
 
     @Override
     public SDFrame<FI2<T, Integer>> overRowNumber() {
-        return this.overRowNumber(this.emptyWindow);
+        return overRowNumber(emptyWindow);
     }
 
     @Override
     public SDFrameImpl<T> overRowNumberS(SetFunction<T, Integer> setFunction, Window<T> overParam) {
-        return this.fi2Frame((SDFrameImpl)this.overRowNumber((Window)overParam), (SetFunction)setFunction);
+        return fi2Frame(overRowNumber(overParam), setFunction);
     }
 
     @Override
     public SDFrame<T> overRowNumberS(SetFunction<T, Integer> setFunction) {
-        return this.overRowNumberS((SetFunction)setFunction, this.emptyWindow);
+        return overRowNumberS(setFunction, emptyWindow);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overRank(Window<T> overParam) {
-        return this.returnDF(this.windowFunctionForRank(overParam));
+        return returnDF(windowFunctionForRank(overParam));
     }
 
     @Override
     public SDFrameImpl<T> overRankS(SetFunction<T, Integer> setFunction, Window<T> overParam) {
-        return this.fi2Frame((SDFrameImpl)this.overRank((Window)overParam), (SetFunction)setFunction);
+        return fi2Frame(overRank(overParam), setFunction);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overDenseRank(Window<T> overParam) {
-        return this.returnDF(this.windowFunctionForDenseRank(overParam));
+        return returnDF(windowFunctionForDenseRank(overParam));
     }
 
     @Override
     public SDFrameImpl<T> overDenseRankS(SetFunction<T, Integer> setFunction, Window<T> overParam) {
-        return this.fi2Frame((SDFrameImpl)this.overDenseRank((Window)overParam), (SetFunction)setFunction);
+        return fi2Frame(overDenseRank(overParam), setFunction);
     }
 
     @Override
     public SDFrameImpl<FI2<T, BigDecimal>> overPercentRank(Window<T> overParam) {
-        return this.returnDF(this.windowFunctionForPercentRank(overParam));
+        return returnDF(windowFunctionForPercentRank(overParam));
     }
 
     @Override
-    public SDFrameImpl<T> overPercentRankS(SetFunction<T, BigDecimal> setFunction, Window<T> overParam) {
-        return this.fi2Frame((SDFrameImpl)this.overPercentRank((Window)overParam), (SetFunction)setFunction);
+    public SDFrameImpl<T> overPercentRankS(
+            SetFunction<T, BigDecimal> setFunction, Window<T> overParam) {
+        return fi2Frame(overPercentRank(overParam), setFunction);
     }
 
     @Override
     public SDFrameImpl<FI2<T, BigDecimal>> overCumeDist(Window<T> overParam) {
-        return this.returnDF(this.windowFunctionForCumeDist(overParam));
+        return returnDF(windowFunctionForCumeDist(overParam));
     }
 
     @Override
-    public SDFrameImpl<T> overCumeDistS(SetFunction<T, BigDecimal> setFunction, Window<T> overParam) {
-        return this.fi2Frame((SDFrameImpl)this.overCumeDist((Window)overParam), (SetFunction)setFunction);
+    public SDFrameImpl<T> overCumeDistS(
+            SetFunction<T, BigDecimal> setFunction, Window<T> overParam) {
+        return fi2Frame(overCumeDist(overParam), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overLag(Window<T> overParam, Function<T, F> field, int n) {
-        return this.returnDF(this.windowFunctionForLag(overParam, field, n));
+        return returnDF(windowFunctionForLag(overParam, field, n));
     }
 
     @Override
-    public <F> SDFrame<T> overLagS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overLag((Window)overParam, (Function)field, n), setFunction);
+    public <F> SDFrame<T> overLagS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n) {
+        return fi2Frame(overLag(overParam, field, n), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overLag(Function<T, F> field, int n) {
-        return this.overLag(this.emptyWindow, (Function)field, n);
+        return overLag(emptyWindow, field, n);
     }
 
     @Override
     public <F> SDFrame<T> overLagS(SetFunction<T, F> setFunction, Function<T, F> field, int n) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overLag((Function)field, n), setFunction);
+        return fi2Frame(overLag(field, n), setFunction);
     }
 
     @Override
-    public <F> SDFrame<T> overLeadS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overLead((Window)overParam, (Function)field, n), setFunction);
+    public <F> SDFrame<T> overLeadS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n) {
+        return fi2Frame(overLead(overParam, field, n), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overLead(Window<T> overParam, Function<T, F> field, int n) {
-        return this.returnDF(this.windowFunctionForLead(overParam, field, n));
+        return returnDF(windowFunctionForLead(overParam, field, n));
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overLead(Function<T, F> field, int n) {
-        return this.overLead(this.emptyWindow, (Function)field, n);
+        return overLead(emptyWindow, field, n);
     }
 
     @Override
     public <F> SDFrame<T> overLeadS(SetFunction<T, F> setFunction, Function<T, F> field, int n) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overLead((Function)field, n), setFunction);
+        return fi2Frame(overLead(field, n), setFunction);
     }
 
     @Override
-    public <F> SDFrameImpl<FI2<T, F>> overNthValue(Window<T> overParam, Function<T, F> field, int n) {
-        return this.returnDF(this.windowFunctionForNthValue(overParam, field, n));
+    public <F> SDFrameImpl<FI2<T, F>> overNthValue(
+            Window<T> overParam, Function<T, F> field, int n) {
+        return returnDF(windowFunctionForNthValue(overParam, field, n));
     }
 
     @Override
-    public <F> SDFrame<T> overNthValueS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overNthValue((Window)overParam, (Function)field, n), setFunction);
+    public <F> SDFrame<T> overNthValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n) {
+        return fi2Frame(overNthValue(overParam, field, n), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overNthValue(Function<T, F> field, int n) {
-        return this.overNthValue(this.emptyWindow, (Function)field, n);
+        return overNthValue(emptyWindow, field, n);
     }
 
     @Override
-    public <F> SDFrameImpl<T> overNthValueS(SetFunction<T, F> setFunction, Function<T, F> field, int n) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overNthValue((Function)field, n), setFunction);
+    public <F> SDFrameImpl<T> overNthValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field, int n) {
+        return fi2Frame(overNthValue(field, n), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overFirstValue(Window<T> overParam, Function<T, F> field) {
-        return this.overNthValue((Window)overParam, (Function)field, 1);
+        return overNthValue(overParam, field, 1);
     }
 
     @Override
-    public <F> SDFrame<T> overFirstValueS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overFirstValue((Window)overParam, (Function)field), setFunction);
+    public <F> SDFrame<T> overFirstValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
+        return fi2Frame(overFirstValue(overParam, field), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overFirstValue(Function<T, F> field) {
-        return this.overFirstValue(this.emptyWindow, (Function)field);
+        return overFirstValue(emptyWindow, field);
     }
 
     @Override
     public <F> SDFrameImpl<T> overFirstValueS(SetFunction<T, F> setFunction, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overFirstValue((Function)field), setFunction);
+        return fi2Frame(overFirstValue(field), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overLastValue(Window<T> overParam, Function<T, F> field) {
-        return this.overNthValue((Window)overParam, (Function)field, -1);
+        return overNthValue(overParam, field, -1);
     }
 
     @Override
-    public <F> SDFrameImpl<T> overLastValueS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overLastValue((Window)overParam, (Function)field), setFunction);
+    public <F> SDFrameImpl<T> overLastValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
+        return fi2Frame(overLastValue(overParam, field), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, F>> overLastValue(Function<T, F> field) {
-        return this.overLastValue(this.emptyWindow, (Function)field);
+        return overLastValue(emptyWindow, field);
     }
 
     @Override
     public <F> SDFrame<T> overLastValueS(SetFunction<T, F> setFunction, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overLastValue((Function)field), setFunction);
+        return fi2Frame(overLastValue(field), setFunction);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, BigDecimal>> overSum(Window<T> overParam, Function<T, F> field) {
-        return this.returnDF(this.windowFunctionForSum(overParam, field));
+        return returnDF(windowFunctionForSum(overParam, field));
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, BigDecimal>> overSum(Function<T, F> field) {
-        return this.overSum(this.emptyWindow, (Function)field);
+        return overSum(emptyWindow, field);
     }
 
     @Override
-    public <F> SDFrameImpl<T> overSumS(SetFunction<T, BigDecimal> setFunction, Window<T> overParam, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overSum((Window)overParam, (Function)field), (SetFunction<T, F>)setFunction);
+    public <F> SDFrameImpl<T> overSumS(
+            SetFunction<T, BigDecimal> setFunction, Window<T> overParam, Function<T, F> field) {
+        return fi2Frame(overSum(overParam, field), setFunction);
     }
 
     @Override
-    public <F> SDFrameImpl<T> overSumS(SetFunction<T, BigDecimal> setFunction, Function<T, F> field) {
-        return this.overSumS((SetFunction)setFunction, this.emptyWindow, (Function)field);
+    public <F> SDFrameImpl<T> overSumS(
+            SetFunction<T, BigDecimal> setFunction, Function<T, F> field) {
+        return overSumS(setFunction, emptyWindow, field);
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, BigDecimal>> overAvg(Window<T> overParam, Function<T, F> field) {
-        return this.returnDF(this.windowFunctionForAvg(overParam, field));
+        return returnDF(windowFunctionForAvg(overParam, field));
     }
 
     @Override
     public <F> SDFrameImpl<FI2<T, BigDecimal>> overAvg(Function<T, F> field) {
-        return this.overAvg(this.emptyWindow, (Function)field);
+        return overAvg(emptyWindow, field);
     }
 
     @Override
-    public <F> SDFrameImpl<T> overAvgS(SetFunction<T, BigDecimal> setFunction, Window<T> overParam, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overAvg((Window)overParam, (Function)field), (SetFunction<T, F>)setFunction);
+    public <F> SDFrameImpl<T> overAvgS(
+            SetFunction<T, BigDecimal> setFunction, Window<T> overParam, Function<T, F> field) {
+        return fi2Frame(overAvg(overParam, field), setFunction);
     }
 
     @Override
-    public <F> SDFrameImpl<T> overAvgS(SetFunction<T, BigDecimal> setFunction, Function<T, F> field) {
-        return this.overAvgS((SetFunction)setFunction, this.emptyWindow, (Function)field);
+    public <F> SDFrameImpl<T> overAvgS(
+            SetFunction<T, BigDecimal> setFunction, Function<T, F> field) {
+        return overAvgS(setFunction, emptyWindow, field);
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMaxValue(Window<T> overParam, Function<T, F> field) {
-        return this.returnDF(this.windowFunctionForMaxValue(overParam, field));
+    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMaxValue(
+            Window<T> overParam, Function<T, F> field) {
+        return returnDF(windowFunctionForMaxValue(overParam, field));
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMaxValue(Function<T, F> field) {
-        return this.overMaxValue(this.emptyWindow, (Function)field);
+    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMaxValue(
+            Function<T, F> field) {
+        return overMaxValue(emptyWindow, field);
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<T> overMaxValueS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overMaxValue((Window)overParam, (Function)field), setFunction);
+    public <F extends Comparable<? super F>> SDFrameImpl<T> overMaxValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
+        return fi2Frame(overMaxValue(overParam, field), setFunction);
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<T> overMaxValueS(SetFunction<T, F> setFunction, Function<T, F> field) {
-        return this.overMaxValueS((SetFunction)setFunction, this.emptyWindow, (Function)field);
+    public <F extends Comparable<? super F>> SDFrameImpl<T> overMaxValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field) {
+        return overMaxValueS(setFunction, emptyWindow, field);
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMinValue(Window<T> overParam, Function<T, F> field) {
-        return this.returnDF(this.windowFunctionForMinValue(overParam, field));
+    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMinValue(
+            Window<T> overParam, Function<T, F> field) {
+        return returnDF(windowFunctionForMinValue(overParam, field));
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMinValue(Function<T, F> field) {
-        return this.overMinValue(this.emptyWindow, (Function)field);
+    public <F extends Comparable<? super F>> SDFrameImpl<FI2<T, F>> overMinValue(
+            Function<T, F> field) {
+        return overMinValue(emptyWindow, field);
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<T> overMinValueS(SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
-        return this.fi2Frame((SDFrameImpl<FI2<T, F>>)this.overMinValue((Window)overParam, (Function)field), setFunction);
+    public <F extends Comparable<? super F>> SDFrameImpl<T> overMinValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field) {
+        return fi2Frame(overMinValue(overParam, field), setFunction);
     }
 
     @Override
-    public <F extends Comparable<? super F>> SDFrameImpl<T> overMinValueS(SetFunction<T, F> setFunction, Function<T, F> field) {
-        return this.overMinValueS((SetFunction)setFunction, this.emptyWindow, (Function)field);
+    public <F extends Comparable<? super F>> SDFrameImpl<T> overMinValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field) {
+        return overMinValueS(setFunction, emptyWindow, field);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overCount(Window<T> overParam) {
-        return this.returnDF(this.windowFunctionForCount(overParam));
+        return returnDF(windowFunctionForCount(overParam));
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overCount() {
-        return this.overCount(this.emptyWindow);
+        return overCount(emptyWindow);
     }
 
     @Override
     public SDFrameImpl<T> overCountS(SetFunction<T, Integer> setFunction, Window<T> overParam) {
-        return this.fi2Frame((SDFrameImpl)this.overCount((Window)overParam), (SetFunction)setFunction);
+        return fi2Frame(overCount(overParam), setFunction);
     }
 
     @Override
     public SDFrameImpl<T> overCountS(SetFunction<T, Integer> setFunction) {
-        return this.overCountS((SetFunction)setFunction, this.emptyWindow);
+        return overCountS(setFunction, emptyWindow);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overNtile(int n) {
-        return this.overNtile(this.emptyWindow, n);
+        return overNtile(emptyWindow, n);
     }
 
     @Override
     public SDFrameImpl<FI2<T, Integer>> overNtile(Window<T> overParam, int n) {
-        return this.returnDF(this.windowFunctionForNtile(overParam, n));
+        return returnDF(windowFunctionForNtile(overParam, n));
     }
 
     @Override
-    public SDFrameImpl<T> overNtileS(SetFunction<T, Integer> setFunction, Window<T> overParam, int n) {
-        return this.fi2Frame((SDFrameImpl)this.overNtile((Window)overParam, n), (SetFunction)setFunction);
+    public SDFrameImpl<T> overNtileS(
+            SetFunction<T, Integer> setFunction, Window<T> overParam, int n) {
+        return fi2Frame(overNtile(overParam, n), setFunction);
     }
 
     @Override
     public SDFrameImpl<T> overNtileS(SetFunction<T, Integer> setFunction, int n) {
-        return this.overNtileS((SetFunction)setFunction, this.emptyWindow, n);
+        return overNtileS(setFunction, emptyWindow, n);
     }
 
     @Override
     public SDFrameImpl<T> unionAll(IFrame<T> other) {
-        ArrayList<T> ts = new ArrayList<T>(this.viewList());
+        ArrayList<T> ts = new ArrayList<>(viewList());
         ts.addAll(other.toLists());
-        return this.returnDF(ts);
+        return returnDF(ts);
     }
 
     @Override
     public SDFrameImpl<T> unionAll(Collection<T> other) {
-        ArrayList<T> ts = new ArrayList<T>(this.viewList());
+        ArrayList<T> ts = new ArrayList<>(viewList());
         ts.addAll(other);
-        return this.returnDF(ts);
+        return returnDF(ts);
     }
 
     @Override
     public SDFrameImpl<T> union(IFrame<T> other) {
-        return this.returnDF(this.unionList(this.viewList(), other.toLists()));
+        return returnDF(unionList(viewList(), other.toLists()));
     }
 
     @Override
     public SDFrameImpl<T> union(IFrame<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.unionList(this.viewList(), other.toLists(), comparator));
+        return returnDF(unionList(viewList(), other.toLists(), comparator));
     }
 
     @Override
     public SDFrameImpl<T> union(Collection<T> other) {
-        return this.returnDF(this.unionList(this.viewList(), other));
+        return returnDF(unionList(viewList(), other));
     }
 
     @Override
     public SDFrameImpl<T> union(Collection<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.unionList(this.viewList(), other, comparator));
+        return returnDF(unionList(viewList(), other, comparator));
     }
 
     @Override
     public SDFrameImpl<T> retainAll(IFrame<T> other) {
-        return this.returnDF(this.retainAllList(this.viewList(), other.toLists()));
+        return returnDF(retainAllList(viewList(), other.toLists()));
     }
 
     @Override
     public SDFrameImpl<T> retainAll(IFrame<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.retainAllList(this.viewList(), other.toLists(), comparator));
+        return returnDF(retainAllList(viewList(), other.toLists(), comparator));
     }
 
     @Override
     public SDFrameImpl<T> retainAll(Collection<T> other) {
-        return this.returnDF(this.retainAllList(this.viewList(), other));
+        return returnDF(retainAllList(viewList(), other));
     }
 
     @Override
     public SDFrameImpl<T> retainAll(Collection<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.retainAllList(this.viewList(), other, comparator));
+        return returnDF(retainAllList(viewList(), other, comparator));
     }
 
     @Override
     public SDFrameImpl<T> intersection(IFrame<T> other) {
-        return this.returnDF(this.intersectionList(this.viewList(), other.toLists()));
+        return returnDF(intersectionList(viewList(), other.toLists()));
     }
 
     @Override
     public SDFrameImpl<T> intersection(IFrame<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.intersectionList(this.viewList(), other.toLists(), comparator));
+        return returnDF(intersectionList(viewList(), other.toLists(), comparator));
     }
 
     @Override
     public SDFrameImpl<T> intersection(Collection<T> other) {
-        return this.returnDF(this.intersectionList(this.viewList(), other));
+        return returnDF(intersectionList(viewList(), other));
     }
 
     @Override
     public SDFrameImpl<T> intersection(Collection<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.intersectionList(this.viewList(), other, comparator));
+        return returnDF(intersectionList(viewList(), other, comparator));
     }
 
     @Override
     public SDFrameImpl<T> different(IFrame<T> other) {
-        return this.returnDF(this.differentList(this.viewList(), other.toLists()));
+        return returnDF(differentList(viewList(), other.toLists()));
     }
 
     @Override
     public SDFrameImpl<T> different(IFrame<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.differentList(this.viewList(), other.toLists(), comparator));
+        return returnDF(differentList(viewList(), other.toLists(), comparator));
     }
 
     @Override
     public SDFrameImpl<T> different(Collection<T> other) {
-        return this.returnDF(this.differentList(this.viewList(), other));
+        return returnDF(differentList(viewList(), other));
     }
 
     @Override
     public SDFrame<T> different(Collection<T> other, Comparator<T> comparator) {
-        return this.returnDF(this.differentList(this.viewList(), other, comparator));
+        return returnDF(differentList(viewList(), other, comparator));
     }
 
     @Override
-    public <G, C> SDFrameImpl<T> replenish(Function<T, G> groupDim, Function<T, C> collectDim, List<C> allDim, ReplenishFunction<G, C, T> getEmptyObject) {
-        return this.returnDF(SDFrameImpl.replenish(this.viewList(), groupDim, collectDim, allDim, getEmptyObject));
+    public <G, C> SDFrameImpl<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            List<C> allDim,
+            ReplenishFunction<G, C, T> getEmptyObject) {
+        return returnDF(replenish(viewList(), groupDim, collectDim, allDim, getEmptyObject));
     }
 
     @Override
-    public <C> SDFrameImpl<T> replenish(Function<T, C> collectDim, List<C> allDim, Function<C, T> getEmptyObject) {
-        return this.returnDF(SDFrameImpl.replenish(this.viewList(), collectDim, allDim, getEmptyObject));
+    public <C> SDFrameImpl<T> replenish(
+            Function<T, C> collectDim, List<C> allDim, Function<C, T> getEmptyObject) {
+        return returnDF(replenish(viewList(), collectDim, allDim, getEmptyObject));
     }
 
     @Override
-    public <G, C> SDFrameImpl<T> replenish(Function<T, G> groupDim, Function<T, C> collectDim, ReplenishFunction<G, C, T> getEmptyObject) {
-        return this.returnDF(SDFrameImpl.replenish(this.viewList(), groupDim, collectDim, getEmptyObject));
+    public <G, C> SDFrameImpl<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            ReplenishFunction<G, C, T> getEmptyObject) {
+        return returnDF(replenish(viewList(), groupDim, collectDim, getEmptyObject));
     }
 
+    /**
+     * If the operation is on its own data, it can be return this But in the end, it
+     * cannot be controlled. It is recommended to reread
+     */
     protected SDFrameImpl<T> returnThis(Stream<T> stream) {
         this.data = stream;
         return this;
@@ -1159,15 +1366,14 @@ implements SDFrame<T> {
     }
 
     protected <R> SDFrameImpl<R> returnDF(List<R> dataList) {
-        SDFrameImpl<R> frame = new SDFrameImpl<R>(dataList);
-        this.transmitMember(this, frame);
+        SDFrameImpl<R> frame = new SDFrameImpl<>(dataList);
+        transmitMember(this, frame);
         return frame;
     }
 
     protected <R> SDFrameImpl<R> returnDF(Stream<R> stream) {
-        SDFrameImpl<R> frame = new SDFrameImpl<R>(stream);
-        this.transmitMember(this, frame);
+        SDFrameImpl<R> frame = new SDFrameImpl<>(stream);
+        transmitMember(this, frame);
         return frame;
     }
 }
-

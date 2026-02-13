@@ -3,8 +3,7 @@
  */
 package com.kuma.boot.common.support.deepcopy;
 
-public class DeepCopyException
-extends RuntimeException {
+public class DeepCopyException extends RuntimeException {
     public DeepCopyException() {
     }
 

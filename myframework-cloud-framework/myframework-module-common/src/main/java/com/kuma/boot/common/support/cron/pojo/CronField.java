@@ -1,21 +1,41 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.cron.pojo;
 
-import com.kuma.boot.common.support.cron.pojo.CronPosition;
 import com.kuma.boot.common.support.cron.util.CompareUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/** cron表达式的域 */
 public class CronField {
+
     public static final String STAR = "*";
+
     public static final String COMMA = ",";
+
     public static final String HYPHEN = "-";
+
     public static final String SLASH = "/";
+
     private CronPosition cronPosition;
+
     private String express;
+
     private List<Integer> listCache = null;
 
     public CronField(CronPosition cronPosition, String express) {
@@ -24,94 +44,120 @@ public class CronField {
     }
 
     public CronPosition getCronPosition() {
-        return this.cronPosition;
+        return cronPosition;
     }
 
     public String getExpress() {
-        return this.express;
+        return express;
     }
 
+    /** 是否包含全部的数值，即是 * */
     public boolean containsAll() {
-        return STAR.equals(this.express);
+        return STAR.equals(express);
     }
 
+    /** 是否包含 , */
     public boolean containsComma() {
-        return this.express.contains(COMMA);
+        return express.contains(COMMA);
     }
 
+    /** 是否包含 - */
     public boolean containsHyphen() {
-        return this.express.contains(HYPHEN);
+        return express.contains(HYPHEN);
     }
 
+    /** 是否包含 / */
     public boolean containsSlash() {
-        return this.express.contains(SLASH);
+        return express.contains(SLASH);
     }
 
+    /** 3.计算某域的哪些点 */
     public List<Integer> points() {
+        // 缓存计算的
+        if (null != listCache) {
+            return listCache;
+        }
+
+        listCache = new ArrayList<>(5);
+
+        int min = cronPosition.getMin();
+        int max = cronPosition.getMax();
+
+        // *这种情况
+        if (STAR.equals(express)) {
+            for (int i = min; i <= max; i++) {
+                listCache.add(i);
+            }
+            return listCache;
+        }
+        // 带有,的情况,分割之后每部分单独处理
+        if (containsComma()) {
+            String[] split = express.split(COMMA);
+            for (String part : split) {
+                listCache.addAll(new CronField(cronPosition, part).points());
+            }
+            if (listCache.size() > 1) {
+                // 去重
+                CompareUtil.removeDuplicate(listCache);
+                // 排序
+                Collections.sort(listCache);
+            }
+
+            return listCache;
+        }
+        // 0-3 0/2 3-15/2 5 模式统一为 (min-max)/step
+        int left;
         int right;
-        if (null != this.listCache) {
-            return this.listCache;
-        }
-        this.listCache = new ArrayList<Integer>(5);
-        int min = this.cronPosition.getMin();
-        int max = this.cronPosition.getMax();
-        if (STAR.equals(this.express)) {
-            for (int i = min; i <= max; ++i) {
-                this.listCache.add(i);
-            }
-            return this.listCache;
-        }
-        if (this.containsComma()) {
-            String[] split;
-            for (String part : split = this.express.split(COMMA)) {
-                this.listCache.addAll(new CronField(this.cronPosition, part).points());
-            }
-            if (this.listCache.size() > 1) {
-                CompareUtil.removeDuplicate(this.listCache);
-                Collections.sort(this.listCache);
-            }
-            return this.listCache;
-        }
         int step = 1;
-        if (this.containsHyphen()) {
-            strings = this.express.split(HYPHEN);
+
+        // 包含-的情况
+        if (containsHyphen()) {
+            String[] strings = express.split(HYPHEN);
             left = Integer.parseInt(strings[0]);
-            CompareUtil.assertRange(this.cronPosition, left);
+            CompareUtil.assertRange(cronPosition, left);
+            // 1-32/2的情况
             if (strings[1].contains(SLASH)) {
                 String[] split = strings[1].split(SLASH);
+                // 32
                 right = Integer.parseInt(split[0]);
                 CompareUtil.assertSize(left, right);
-                CompareUtil.assertRange(this.cronPosition, right);
+                CompareUtil.assertRange(cronPosition, right);
+                // 2
                 step = Integer.parseInt(split[1]);
             } else {
+                // 1-32的情况
                 right = Integer.parseInt(strings[1]);
                 CompareUtil.assertSize(left, right);
-                CompareUtil.assertRange(this.cronPosition, right);
+                CompareUtil.assertRange(cronPosition, right);
             }
-        } else if (this.containsSlash()) {
-            strings = this.express.split(SLASH);
+            // 仅仅包含/
+        } else if (containsSlash()) {
+            String[] strings = express.split(SLASH);
             left = Integer.parseInt(strings[0]);
-            CompareUtil.assertRange(this.cronPosition, left);
+            CompareUtil.assertRange(cronPosition, left);
             step = Integer.parseInt(strings[1]);
             right = max;
             CompareUtil.assertSize(left, right);
         } else {
-            int single = Integer.parseInt(this.express);
+            // 普通的数字
+            int single = Integer.parseInt(express);
+            // 星期域上 7 转换为 0
             if (CronPosition.WEEK == this.cronPosition && 7 == single) {
                 single = 0;
             }
-            CompareUtil.assertRange(this.cronPosition, single);
-            this.listCache.add(single);
-            return this.listCache;
+            CompareUtil.assertRange(cronPosition, single);
+            listCache.add(single);
+            return listCache;
         }
+
         for (int i = left; i <= right; i += step) {
-            this.listCache.add(i);
+            listCache.add(i);
         }
-        return this.listCache;
+        return listCache;
     }
 
+    @Override
     public String toString() {
-        return "CronField{cronPosition=" + String.valueOf((Object)this.cronPosition) + ", express='" + this.express + "'}";
+        return "CronField{" + "cronPosition=" + cronPosition + ", express='" + express + '\'' + '}';
     }
 }
-

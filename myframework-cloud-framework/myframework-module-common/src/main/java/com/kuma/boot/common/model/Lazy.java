@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.jspecify.annotations.Nullable
  */
@@ -39,7 +39,7 @@ Serializable {
             synchronized (lazy) {
                 result = this.value;
                 if (null == result) {
-                    Supplier<T> s = this.supplier;
+                    Supplier<T> s = (Supplier<T>) this.supplier;
                     if (s == null) {
                         throw new RuntimeException("supplier is null");
                     }

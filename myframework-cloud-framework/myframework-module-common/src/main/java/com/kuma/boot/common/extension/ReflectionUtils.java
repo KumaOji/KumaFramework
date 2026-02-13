@@ -113,11 +113,11 @@ public class ReflectionUtils {
     public static <T> Class<T> getSuperClassGenricType(Class<?> clazz, int index) {
         Type genType = clazz.getGenericSuperclass();
         if (!(genType instanceof ParameterizedType)) {
-            return Object.class;
+            return (Class<T>) Object.class;
         }
         Type[] params = ((ParameterizedType)genType).getActualTypeArguments();
         if (index >= params.length || index < 0 || !(params[index] instanceof Class)) {
-            return Object.class;
+            return (Class<T>) Object.class;
         }
         return (Class)params[index];
     }

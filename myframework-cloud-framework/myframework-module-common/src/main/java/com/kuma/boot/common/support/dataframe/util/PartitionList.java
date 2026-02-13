@@ -8,8 +8,7 @@ import java.math.RoundingMode;
 import java.util.AbstractList;
 import java.util.List;
 
-public class PartitionList<T>
-extends AbstractList<List<T>> {
+public class PartitionList<T> extends AbstractList<List<T>> {
     final List<T> list;
     final int size;
 
@@ -115,8 +114,8 @@ extends AbstractList<List<T>> {
                 increment = signum < 0;
                 break;
             }
-            case HALF_EVEN: 
-            case HALF_DOWN: 
+            case HALF_EVEN:
+            case HALF_DOWN:
             case HALF_UP: {
                 int absRem = Math.abs(rem);
                 int cmpRemToHalfDivisor = absRem - (Math.abs(q) - absRem);

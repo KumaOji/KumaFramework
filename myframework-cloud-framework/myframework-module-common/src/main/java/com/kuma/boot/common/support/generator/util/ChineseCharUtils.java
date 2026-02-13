@@ -31,7 +31,7 @@ public class ChineseCharUtils {
         for (int i = length; i > 0; --i) {
             str = (String)str + ChineseCharUtils.genOneChineseChars();
         }
-        return str;
+        return str.toString();
     }
 
     public static String genRandomLengthChineseChars(int start, int end) {
@@ -44,7 +44,7 @@ public class ChineseCharUtils {
                 str = (String)str + ChineseCharUtils.genOneChineseChars();
             }
         }
-        return str;
+        return str.toString();
     }
 
     public static char getOneOddChar() {

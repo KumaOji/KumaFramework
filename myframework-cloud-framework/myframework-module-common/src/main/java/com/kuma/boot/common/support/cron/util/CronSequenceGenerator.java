@@ -129,8 +129,8 @@ public class CronSequenceGenerator {
 
     private void reset(Calendar calendar, List<Integer> fields) {
         Iterator<Integer> iterator = fields.iterator();
+        int field = 0;
         while (iterator.hasNext()) {
-            int field;
             calendar.set(field, (field = iterator.next().intValue()) == 5 ? 1 : 0);
         }
     }

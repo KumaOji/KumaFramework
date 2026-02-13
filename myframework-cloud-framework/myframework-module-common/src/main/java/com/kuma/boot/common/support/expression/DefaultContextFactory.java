@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  com.google.common.collect.Maps
  *  org.springframework.core.DefaultParameterNameDiscoverer
@@ -21,8 +21,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
-class DefaultContextFactory
-implements ContextFactory {
+class DefaultContextFactory implements ContextFactory {
     private final Map<Method, String[]> parameterNamesCache = new ConcurrentHashMap<Method, String[]>(64);
     private final ParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
 

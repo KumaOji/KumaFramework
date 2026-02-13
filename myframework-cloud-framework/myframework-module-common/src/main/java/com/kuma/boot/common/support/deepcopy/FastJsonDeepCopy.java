@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  com.alibaba.fastjson2.JSON
  *  com.alibaba.fastjson2.JSONWriter$Feature
@@ -11,8 +11,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.kuma.boot.common.support.deepcopy.AbstractDeepCopy;
 
-public class FastJsonDeepCopy
-extends AbstractDeepCopy {
+public class FastJsonDeepCopy extends AbstractDeepCopy {
     private static final FastJsonDeepCopy INSTANCE = new FastJsonDeepCopy();
 
     public static FastJsonDeepCopy getInstance() {

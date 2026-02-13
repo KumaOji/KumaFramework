@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  org.aopalliance.aop.Advice
  *  org.aopalliance.intercept.MethodInvocation
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 public abstract class AnnotationAbstractPointcutAdvisor<A extends Annotation>
 extends AbstractPointcutAdvisor
 implements IntroductionInterceptor {
-    protected final Class<A> annotationType = GenericTypeResolver.resolveTypeArgument(((Object)((Object)this)).getClass(), AnnotationAbstractPointcutAdvisor.class);
+    protected final Class<A> annotationType = (Class<A>) GenericTypeResolver.resolveTypeArgument(((Object)((Object)this)).getClass(), AnnotationAbstractPointcutAdvisor.class);
 
     public @NonNull Object invoke(@NonNull MethodInvocation invocation) throws Throwable {
         Assert.notNull(this.annotationType, (String)"annotationType must not be null");
