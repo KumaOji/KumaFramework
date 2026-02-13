@@ -1,5 +1,1 @@
-plugins {
-    id 'java-library'
-}
-
 description = 'Myframework 总体架构'

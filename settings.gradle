@@ -37,3 +37,6 @@ gradle.settingsEvaluated {
         throw new GradleException("This build requires JDK 25. Current: ${JavaVersion.current()}. Use -Dorg.gradle.ignoreBuildJavaVersionCheck to skip.")
     }
 }
+
+include 'myframework-cloud-framework:myframework-module-mybatis'
+include 'myframework-cloud-framework:myframework-module-datasource'

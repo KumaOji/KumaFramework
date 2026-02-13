@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework mybatis模块'
+
+dependencies {
+    api projectLibs.mybatis.plus
+    api projectLibs.mybatis.spring
+}

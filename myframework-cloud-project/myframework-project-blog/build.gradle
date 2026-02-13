@@ -14,20 +14,15 @@ dependencyManagement {
 
 def root = rootProject
 bootRun {
-    systemProperty 'mysql.host', root.findProperty('mysql.host') ?: 'localhost'
-    systemProperty 'mysql.port', root.findProperty('mysql.port') ?: '3306'
-    systemProperty 'mysql.database', root.findProperty('mysql.database') ?: 'blog'
-    systemProperty 'mysql.username', root.findProperty('mysql.username') ?: ''
-    systemProperty 'mysql.password', root.findProperty('mysql.password') ?: ''
+    systemProperty 'mysql.host', root.findProperty('mysql.host')
+    systemProperty 'mysql.port', root.findProperty('mysql.port')
+    systemProperty 'mysql.database', root.findProperty('mysql.database')
+    systemProperty 'mysql.username', root.findProperty('mysql.username')
+    systemProperty 'mysql.password', root.findProperty('mysql.password')
 }
 
 dependencies {
-    implementation project(':myframework-cloud-framework:myframework-module-common')
-
-    implementation projectLibs.spring.boot.starter.web
-    implementation projectLibs.mybatis.plus
-    implementation projectLibs.mybatis.spring
-    runtimeOnly projectLibs.mysql
+    implementation project(':myframework-cloud-framework:myframework-module-infrastruct')
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

@@ -3,3 +3,7 @@ plugins {
 }
 
 description = 'Myframework spring模块'
+
+dependencies {
+    api projectLibs.spring.boot.starter.web
+}

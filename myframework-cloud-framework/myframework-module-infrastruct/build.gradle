@@ -3,3 +3,10 @@ plugins {
 }
 
 description = 'Myframework 基础设施模块'
+
+dependencies {
+    api project(':myframework-cloud-framework:myframework-module-common')
+    api project(':myframework-cloud-framework:myframework-module-spring')
+    api project(':myframework-cloud-framework:myframework-module-mybatis')
+    api project(':myframework-cloud-framework:myframework-module-datasource')
+}
