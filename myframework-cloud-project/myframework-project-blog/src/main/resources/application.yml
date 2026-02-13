@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://${mysql.host:localhost}:${mysql.port:3306}/${mysql.database:blog}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${mysql.username:}
+    password: ${mysql.password:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto

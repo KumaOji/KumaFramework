@@ -1,0 +1,36 @@
+plugins {
+    id 'java-library'
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+def springBootVersion = projectLibs.versions.springboot.get()
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+def root = rootProject
+bootRun {
+    systemProperty 'mysql.host', root.findProperty('mysql.host') ?: 'localhost'
+    systemProperty 'mysql.port', root.findProperty('mysql.port') ?: '3306'
+    systemProperty 'mysql.database', root.findProperty('mysql.database') ?: 'blog'
+    systemProperty 'mysql.username', root.findProperty('mysql.username') ?: ''
+    systemProperty 'mysql.password', root.findProperty('mysql.password') ?: ''
+}
+
+dependencies {
+    implementation project(':myframework-cloud-framework:myframework-module-common')
+
+    implementation projectLibs.spring.boot.starter.web
+    implementation projectLibs.mybatis.plus
+    implementation projectLibs.mybatis.spring
+    runtimeOnly projectLibs.mysql
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    testImplementation projectLibs.spring.boot.starter.test
+}

@@ -1,0 +1,12 @@
+# Idea
+.idea/
+
+# Gradle
+.gradle/
+build/
+
+# temp
+temp/
+
+# properties
+gradle.properties

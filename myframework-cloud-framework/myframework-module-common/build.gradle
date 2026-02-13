@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework 公共模块'
+
+dependencies {
+    // 版本目录 projectLibs 在 settings.gradle 中定义，来自 gradle/libs.versions.toml
+    implementation projectLibs.hutool.core
+    implementation projectLibs.hutool.extra
+    implementation projectLibs.hutool.crypto
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
