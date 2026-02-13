@@ -8,8 +8,7 @@ import com.kuma.boot.common.tree.TreeNode;
 import java.util.List;
 import java.util.Objects;
 
-public class ForestNode
-extends TreeNode {
+public class ForestNode extends TreeNode {
     private static final long serialVersionUID = -5188222097134746118L;
     private Object content;
 

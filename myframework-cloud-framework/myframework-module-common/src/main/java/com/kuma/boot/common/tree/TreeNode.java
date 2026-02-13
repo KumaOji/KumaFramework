@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TreeNode
-implements INode {
+public class TreeNode implements INode {
     protected Long id;
     protected Long parentId;
     protected List<? extends INode> children = new ArrayList<INode>();

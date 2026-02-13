@@ -83,6 +83,7 @@ hutool-core = { module = "cn.hutool:hutool-core", version.ref = "hutool" }
 hutool-extra = { module = "cn.hutool:hutool-extra", version.ref = "hutool" }
 hutool-crypto = { module = "cn.hutool:hutool-crypto", version.ref = "hutool" }
 hutool-json = { module = "cn.hutool:hutool-json", version.ref = "hutool" }
+hutool-http = { module = "cn.hutool:hutool-http", version.ref = "hutool" }
 easyexcel = { module = "com.alibaba:easyexcel", version.ref = "easyexcel" }
 satoken-core = { module = "cn.dev33:sa-token-core", version.ref = "sa-token" }
 satoken-web = { module = "cn.dev33:sa-token-spring-boot3-starter", version.ref = "sa-token" }

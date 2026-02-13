@@ -31,8 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 @SuppressWarnings("all")
-public class TreeUtils
-extends TreeUtil {
+public class TreeUtils extends TreeUtil {
     public static final TreeNodeConfig DEFAULT_CONFIG = TreeNodeConfig.DEFAULT_CONFIG.setNameKey("label");
     private static final String CHILD_NAME = "children";
     public static final String GET = "get";

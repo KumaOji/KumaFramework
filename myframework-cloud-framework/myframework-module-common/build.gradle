@@ -10,6 +10,7 @@ dependencies {
     implementation projectLibs.hutool.extra
     implementation projectLibs.hutool.crypto
     implementation projectLibs.hutool.json
+    implementation projectLibs.hutool.http
     implementation projectLibs.guava
     implementation projectLibs.spring.core
     implementation projectLibs.spring.context

@@ -8,8 +8,7 @@ import com.kuma.boot.common.tree.TreeNode;
 import java.util.List;
 import java.util.Objects;
 
-public class MapperNode
-extends TreeNode {
+public class MapperNode extends TreeNode {
     private String title;
     private Long key;
     private Long value;
