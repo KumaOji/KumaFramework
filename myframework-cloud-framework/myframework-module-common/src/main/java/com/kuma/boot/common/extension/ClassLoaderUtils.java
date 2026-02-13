@@ -106,14 +106,14 @@ public class ClassLoaderUtils {
     }
 
     private static Class<?> tryPrimitiveClass(String className) {
-        if (className.length() <= 7 && Character.isLowerCase(className.charAt(0))) {
+        if (className.length() <= MAX_PRIM_CLASS_NAME_LENGTH && Character.isLowerCase(className.charAt(0))) {
             return PRIMITIVE_CLASSES.get(className);
         }
         return null;
     }
 
     static {
-        HashMap<String, Class<Object>> primitives = new HashMap<String, Class<Object>>(10, 1.0f);
+        HashMap<String, Class<?>> primitives = new HashMap<>(10, 1.0f);
         primitives.put("boolean", Boolean.TYPE);
         primitives.put("byte", Byte.TYPE);
         primitives.put("int", Integer.TYPE);
@@ -133,23 +133,24 @@ public class ClassLoaderUtils {
         }
 
         private void put(ClassLoader classLoader, String className, V value) {
-            ConcurrentMap old;
             ClassLoader cl = classLoader == null ? ClassLoaderUtils.class.getClassLoader() : classLoader;
-            ConcurrentMap<String, WeakReference<V>> innerCache = (ConcurrentHashMap<String, WeakReference<V>>)this.cache.get(cl);
-            if (innerCache == null && (old = (ConcurrentMap)this.cache.putIfAbsent(cl, innerCache = new ConcurrentHashMap<String, WeakReference<V>>(100))) != null) {
-                innerCache = old;
+            ConcurrentMap<String, WeakReference<V>> innerCache = this.cache.get(cl);
+            if (innerCache == null) {
+                ConcurrentMap<String, WeakReference<V>> newCache = new ConcurrentHashMap<>(100);
+                ConcurrentMap<String, WeakReference<V>> existing = this.cache.putIfAbsent(cl, newCache);
+                innerCache = existing != null ? existing : newCache;
             }
             innerCache.put(className, new WeakReference<V>(value));
         }
 
         public V get(ClassLoader classloader, String className) {
-            V value;
-            ConcurrentMap innerCache = (ConcurrentMap)this.cache.get(classloader);
+            ClassLoader cl = classloader == null ? ClassLoaderUtils.class.getClassLoader() : classloader;
+            ConcurrentMap<String, WeakReference<V>> innerCache = this.cache.get(cl);
             if (innerCache == null) {
                 return null;
             }
-            WeakReference reference = (WeakReference)innerCache.get(className);
-            V v = value = reference == null ? null : (V)reference.get();
+            WeakReference<V> reference = innerCache.get(className);
+            V value = reference == null ? null : reference.get();
             if (reference != null && value == null) {
                 innerCache.remove(className);
             }

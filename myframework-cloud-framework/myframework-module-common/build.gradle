@@ -29,7 +29,9 @@ dependencies {
     implementation projectLibs.xk.time
     implementation projectLibs.swagger.annotations
     implementation projectLibs.jackson.annotations
+    implementation projectLibs.jackson.core
     implementation projectLibs.jackson.databind
+    implementation projectLibs.transmittable.thread.local
     implementation projectLibs.slf4j.api
     implementation projectLibs.jspecify
     implementation projectLibs.uuid.creator

@@ -42,7 +42,7 @@ public class ForestNodeManager<T extends INode> {
             if (forestNode.getParentId() != 0L && !this.parentIds.contains(forestNode.getId())) continue;
             roots.add(forestNode);
         }
-        return roots;
+        return (List<T>) roots;
     }
 
     public String toString() {

@@ -19,7 +19,6 @@
  *  tools.jackson.databind.cfg.DatatypeFeature
  *  tools.jackson.databind.cfg.DateTimeFeature
  *  tools.jackson.databind.json.JsonMapper
- *  tools.jackson.databind.json.JsonMapper$Builder
  *  tools.jackson.databind.node.ArrayNode
  *  tools.jackson.databind.node.ObjectNode
  *  tools.jackson.databind.type.CollectionLikeType
@@ -60,11 +59,11 @@ import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.cfg.DatatypeFeature;
-import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.cfg.DatatypeFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.type.CollectionLikeType;
 import tools.jackson.databind.type.MapType;
 
@@ -574,9 +573,9 @@ public final class JacksonUtils {
         if (StringUtils.isEmptyTrim(json) || CollectionUtils.isEmpty(indexPrefixList)) {
             return Collections.emptyList();
         }
-        ArrayList results = Lists.newArrayList();
-        Stack<Integer> stack = new Stack<Integer>();
-        ArrayList indexList = Lists.newArrayList();
+        List<String> results = new ArrayList<>();
+        Stack<Integer> stack = new Stack<>();
+        List<String> indexList = new ArrayList<>();
         for (i = 0; i < json.length(); ++i) {
             char ch = json.charAt(i);
             if ('{' == ch) {
@@ -592,7 +591,7 @@ public final class JacksonUtils {
         }
         for (i = 0; i < indexPrefixList.size(); ++i) {
             String prefix = JacksonUtils.getPrefix(indexPrefixList.get(i));
-            String result = prefix + (String)indexList.get(i);
+            String result = prefix + indexList.get(i);
             results.add(result);
         }
         return results;
@@ -610,7 +609,22 @@ public final class JacksonUtils {
     }
 
     private static class JacksonHolder {
-        private static final JsonMapper INSTANCE = ((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)((JsonMapper.Builder)JsonMapper.builder().findAndAddModules()).defaultLocale(Locale.CHINA)).defaultTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()))).configure((DatatypeFeature)DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)).configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)).configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true).configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true).configure(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS, true).configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS, true).configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true).propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)).defaultDateFormat((DateFormat)new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA))).addModule((tools.jackson.databind.JacksonModule)new JacksonModule())).build();
+        private static final JsonMapper INSTANCE = JsonMapper.builder()
+                .findAndAddModules()
+                .defaultLocale(Locale.CHINA)
+                .defaultTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()))
+                .configure((DatatypeFeature) DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
+                .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
+                .enable(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS)
+                .enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
+                .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
+                .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+                .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA))
+                .addModule(new JacksonModule())
+                .build();
 
         private JacksonHolder() {
         }

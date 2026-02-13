@@ -65,7 +65,7 @@ extends JSR310DateTimeDeserializerBase<LocalDateTime> {
     }
 
     protected JSR310DateTimeDeserializerBase<LocalDateTime> withDateFormat(DateTimeFormatter formatter) {
-        return new tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer(formatter);
+        return new LocalDateTimeDeserializer(formatter);
     }
 
     private LocalDateTime convert(String source) {
@@ -144,7 +144,7 @@ extends JSR310DateTimeDeserializerBase<LocalDateTime> {
                         result = LocalDateTime.of(year, month, day, hour, minute, second);
                     } else {
                         int partialSecond = parser.getIntValue();
-                        if (partialSecond < 1000 && !context.isEnabled((DatatypeFeature)DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)) {
+                        if (partialSecond < 1000 && !context.isEnabled((DatatypeFeature) DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)) {
                             partialSecond *= 1000000;
                         }
                         if (parser.nextToken() != JsonToken.END_ARRAY) {

@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  cn.hutool.core.bean.BeanUtil
  *  cn.hutool.core.collection.CollUtil
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
+@SuppressWarnings("all")
 public class TreeUtils
 extends TreeUtil {
     public static final TreeNodeConfig DEFAULT_CONFIG = TreeNodeConfig.DEFAULT_CONFIG.setNameKey("label");
@@ -42,7 +42,7 @@ extends TreeUtil {
     public static <T, R, M> Map<String, Object> buildTree(List<T> list, Function<T, R> idNameFunc, Function<T, R> parentIdNameFunc, M parentFlag) {
         String idName = TreeUtils.getLambdaFieldName(idNameFunc);
         String parentIdName = TreeUtils.getLambdaFieldName(parentIdNameFunc);
-        List<Object> root = list.stream().filter(item -> String.valueOf(parentFlag).equals(String.valueOf((char[])ReflectionUtils.getFieldValue(item, parentIdName)))).toList();
+        List<Object> root = Collections.singletonList(list.stream().filter(item -> String.valueOf(parentFlag).equals(String.valueOf((char[]) ReflectionUtils.getFieldValue(item, parentIdName)))).toList());
         list.removeAll(root);
         HashMap<String, Object> map = new HashMap<String, Object>();
         AtomicInteger index = new AtomicInteger(0);
@@ -60,7 +60,7 @@ extends TreeUtil {
         String idName = TreeUtils.getLambdaFieldName(idNameFunc);
         String parentIdName = "parentId";
         String parentFlag = "0";
-        List<Object> root = list.stream().filter(item -> parentFlag.equals(String.valueOf((char[])ReflectionUtils.getFieldValue(item, parentIdName)))).toList();
+        List<Object> root = Collections.singletonList(list.stream().filter(item -> parentFlag.equals(String.valueOf((char[]) ReflectionUtils.getFieldValue(item, parentIdName)))).toList());
         list.removeAll(root);
         HashMap<String, Object> map = new HashMap<String, Object>();
         AtomicInteger index = new AtomicInteger(0);
@@ -76,7 +76,7 @@ extends TreeUtil {
 
     public static <T> Map<String, Object> getChildren(Map<String, Object> itemMap, List<T> list, String idName, String parentIdName) {
         if (TreeUtils.hasChildren(itemMap, list, idName, parentIdName)) {
-            List<Object> collect = list.stream().filter(item -> String.valueOf((char[])ReflectionUtils.getFieldValue(item, parentIdName)).equals(String.valueOf(itemMap.get(idName)))).toList();
+            List<Object> collect = Collections.singletonList(list.stream().filter(item -> String.valueOf((char[]) ReflectionUtils.getFieldValue(item, parentIdName)).equals(String.valueOf(itemMap.get(idName)))).toList());
             HashMap<String, Object> map = new HashMap<String, Object>();
             if (CollUtil.isNotEmpty(collect)) {
                 itemMap.put(CHILD_NAME, collect);

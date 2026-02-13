@@ -9,7 +9,7 @@ package com.kuma.boot.common.holder;
 import com.alibaba.ttl.TransmittableThreadLocal;
 
 public class TenantContextHolder {
-    private static final ThreadLocal<String> TENANT_CONTEXT = new TransmittableThreadLocal();
+    private static final ThreadLocal<String> TENANT_CONTEXT = new TransmittableThreadLocal<>();
 
     private TenantContextHolder() {
     }

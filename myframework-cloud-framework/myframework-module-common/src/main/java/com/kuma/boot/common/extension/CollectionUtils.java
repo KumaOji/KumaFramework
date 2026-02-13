@@ -49,6 +49,7 @@ public final class CollectionUtils {
         return parameters;
     }
 
+    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> toMap(Object ... pairs) {
         HashMap<Object, Object> ret = new HashMap<Object, Object>();
         if (pairs == null || pairs.length == 0) {
@@ -63,13 +64,12 @@ public final class CollectionUtils {
             Object v = pairs[2 * i + 1];
             ret.put(k, v);
         }
-        return ret;
+        return (Map<K, V>) (Map<?, ?>) ret;
     }
 
     @SafeVarargs
     public static <T> Set<T> ofSet(T ... values) {
-        int size;
-        int n = size = values == null ? 0 : values.length;
+        int size = values == null ? 0 : values.length;
         if (size < 1) {
             return Collections.emptySet();
         }

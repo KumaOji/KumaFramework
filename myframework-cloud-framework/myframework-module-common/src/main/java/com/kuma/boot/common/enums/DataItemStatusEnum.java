@@ -12,7 +12,6 @@ package com.kuma.boot.common.enums;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.common.collect.ImmutableMap;
 import com.kuma.boot.common.enums.base.BaseUiEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
@@ -65,7 +64,10 @@ public enum DataItemStatusEnum implements BaseUiEnum<Integer>
         JSON_STRUCTURE = new ArrayList<Map<String, Object>>();
         for (DataItemStatusEnum dataItemStatusEnum : DataItemStatusEnum.values()) {
             INDEX_MAP.put(dataItemStatusEnum.getValue(), dataItemStatusEnum);
-            JSON_STRUCTURE.add(dataItemStatusEnum.getValue(), (Map<String, Object>)ImmutableMap.builder().put((Object)"value", (Object)dataItemStatusEnum.getValue()).put((Object)"key", (Object)dataItemStatusEnum.name()).put((Object)"text", (Object)dataItemStatusEnum.getDescription()).build());
+            JSON_STRUCTURE.add(Map.of(
+                    "value", dataItemStatusEnum.getValue(),
+                    "key", dataItemStatusEnum.name(),
+                    "text", dataItemStatusEnum.getDescription()));
         }
     }
 }

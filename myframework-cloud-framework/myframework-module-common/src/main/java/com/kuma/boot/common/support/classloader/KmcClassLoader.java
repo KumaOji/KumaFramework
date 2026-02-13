@@ -9,8 +9,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-public class KmcClassLoader
-extends ClassLoader {
+public class KmcClassLoader extends ClassLoader {
     public static Class getClassByScn(String className) {
         Class<?> myclass = null;
         try {

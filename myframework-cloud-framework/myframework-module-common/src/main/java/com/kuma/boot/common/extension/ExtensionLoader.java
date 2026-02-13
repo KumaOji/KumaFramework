@@ -124,10 +124,10 @@ public class ExtensionLoader<T> {
     }
 
     private Holder<Object> getOrCreateHolder(String name) {
-        Holder holder = (Holder)this.cachedInstances.get(name);
+        Holder<Object> holder = this.cachedInstances.get(name);
         if (holder == null) {
-            this.cachedInstances.putIfAbsent(name, new Holder());
-            holder = (Holder)this.cachedInstances.get(name);
+            this.cachedInstances.putIfAbsent(name, new Holder<>());
+            holder = this.cachedInstances.get(name);
         }
         return holder;
     }
@@ -164,10 +164,9 @@ public class ExtensionLoader<T> {
     }
 
     public List<T> getLoadedExtensionInstances() {
-        ArrayList instances = new ArrayList();
+        ArrayList<T> instances = new ArrayList<>();
         this.cachedInstances.values().forEach(holder -> {
-            Object t = holder.get();
-            instances.add(t);
+            instances.add((T) holder.get());
         });
         return instances;
     }
@@ -204,7 +203,7 @@ public class ExtensionLoader<T> {
                     Collections.reverse(wrapperClassesList);
                 }
                 if (CollectionUtils.isNotEmpty(wrapperClassesList)) {
-                    for (Class clazz2 : wrapperClassesList) {
+                    for (Class<?> clazz2 : wrapperClassesList) {
                         Wrapper wrapper = clazz2.getAnnotation(Wrapper.class);
                         if (wrapper != null && (!ArrayUtils.contains((Object[])wrapper.matches(), (Object)name) || ArrayUtils.contains((Object[])wrapper.mismatches(), (Object)name))) continue;
                         Object t = clazz2.getConstructor(this.type).newInstance(instance);
@@ -244,7 +243,7 @@ public class ExtensionLoader<T> {
     }
 
     private Map<String, Class<?>> loadExtensionClasses() {
-        HashMap extensionClasses = new HashMap();
+        HashMap<String, Class<?>> extensionClasses = new HashMap<>();
         for (LoadingStrategy strategy : LoadingStrategyHolder.strategies) {
             this.loadDirectory(extensionClasses, strategy.directory(), this.type.getName(), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
         }
@@ -390,16 +389,16 @@ public class ExtensionLoader<T> {
             extensionClasses.put(name, clazz);
         } else if (c != clazz) {
             if (clazz.isAnnotationPresent(Order.class) || c.isAnnotationPresent(Order.class)) {
-                int srcValue;
                 Order destOrder = clazz.getAnnotation(Order.class);
                 int destValue = destOrder != null ? destOrder.value() : 0;
                 Order srcOrder = c.getAnnotation(Order.class);
-                int n = srcValue = srcOrder != null ? srcOrder.value() : 0;
+                int srcValue = srcOrder != null ? srcOrder.value() : 0;
                 if (srcValue > destValue) {
                     log.debug("Compare extension " + this.type.getName() + " name " + name + " use " + clazz.getName() + " instead of " + c.getName());
                     extensionClasses.put(name, clazz);
+                } else {
+                    log.debug("Compare extension " + this.type.getName() + " name " + name + " use " + c.getName() + " ignore " + clazz.getName());
                 }
-                log.debug("Compare extension " + this.type.getName() + " name " + name + " use " + c.getName() + " ignore " + clazz.getName());
                 return;
             }
             String duplicateMsg = "Duplicate extension " + this.type.getName() + " name " + name + " on " + c.getName() + " and " + clazz.getName();

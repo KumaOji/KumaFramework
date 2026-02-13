@@ -50,6 +50,7 @@ spring-expression = "6.2.6"
 jakarta-servlet-api = "6.0.0"
 jakarta-validation-api = "3.0.2"
 swagger-annotations = "2.2.29"
+jackson = "3.0.4"
 jackson-annotations = "2.18.2"
 slf4j = "2.0.16"
 jspecify = "1.0.0"
@@ -62,9 +63,9 @@ javassist = "3.30.2-GA"
 jakarta-annotation-api = "3.0.0"
 aspectjweaver = "1.9.22.1"
 spring-context-support = "6.2.6"
-jackson-databind = "2.18.2"
 orika = "1.5.4"
 hessian = "4.0.66"
+transmittable-thread-local = "2.14.5"
 
 ## 统一定义依赖
 [libraries]
@@ -126,9 +127,11 @@ javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation-api" }
 aspectjweaver = { module = "org.aspectj:aspectjweaver", version.ref = "aspectjweaver" }
 spring-context-support = { module = "org.springframework:spring-context-support", version.ref = "spring-context-support" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
+jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 orika-core = { module = "ma.glasnost.orika:orika-core", version.ref = "orika" }
 hessian = { module = "com.caucho:hessian", version.ref = "hessian" }
+transmittable-thread-local = { module = "com.alibaba:transmittable-thread-local", version.ref = "transmittable-thread-local" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

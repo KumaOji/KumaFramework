@@ -7,8 +7,7 @@ import com.kuma.boot.common.enums.base.CodeEnum;
 import com.kuma.boot.common.enums.base.SelfDescribedEnum;
 import java.util.Objects;
 
-public interface CommonEnum
-extends CodeEnum,
+public interface CommonEnum extends CodeEnum,
 SelfDescribedEnum {
     default public boolean match(String value) {
         if (value == null) {
