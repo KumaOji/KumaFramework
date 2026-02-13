@@ -1,0 +1,126 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package com.kuma.boot.common.enums;
+
+import com.kuma.boot.common.enums.UserEnum;
+
+public enum CachePrefixEnum {
+    NONCE,
+    ONLINE_NUM,
+    MEMBER_DISTRIBUTION,
+    ONLINE_MEMBER,
+    ACCESS_TOKEN,
+    REFRESH_TOKEN,
+    CONNECT_RESULT,
+    SESSION_KEY,
+    PERMISSION_LIST,
+    DEPARTMENT_IDS,
+    LOGIN_TIME_LIMIT,
+    SETTING,
+    VERIFICATION,
+    VERIFICATION_IMAGE,
+    EXPRESS,
+    CAPTCHA,
+    GOODS,
+    GOODS_SKU,
+    SHIP_SCRIPT,
+    SKU,
+    SKU_STOCK,
+    PROMOTION_GOODS_STOCK,
+    GOODS_STOCK,
+    CATEGORY,
+    CATEGORY_ARRAY,
+    VISIT_COUNT,
+    UPLOADER,
+    REGION,
+    SPlATFORM,
+    _CODE_PREFIX,
+    SMTP,
+    SETTINGS,
+    WAYBILL,
+    SMS_CODE,
+    EMAIL_CODE,
+    ADMIN_URL_ROLE,
+    STORE_URL_ROLE,
+    MOBILE_VALIDATE,
+    EMAIL_VALIDATE,
+    SHIP_TEMPLATE,
+    SHIP_TEMPLATE_ONE,
+    PROMOTION,
+    PROMOTION_GOODS,
+    STORE_ID_MINUS,
+    STORE_ID_HALF_PRICE,
+    STORE_ID_FULL_DISCOUNT,
+    STORE_ID_SECKILL,
+    STORE_ID_GROUP_BUY,
+    STORE_ID_EXCHANGE,
+    CART_ORIGIN_DATA_PREFIX,
+    BUY_NOW_ORIGIN_DATA_PREFIX,
+    TRADE_ORIGIN_DATA_PREFIX,
+    CART_SKU_PREFIX,
+    CART_MEMBER_ID_PREFIX,
+    CART_PROMOTION_PREFIX,
+    PRICE_SESSION_ID_PREFIX,
+    TRADE_SESSION_ID_PREFIX,
+    CHECKOUT_PARAM_ID_PREFIX,
+    TRADE_SN_CACHE_PREFIX,
+    ORDER_SN_CACHE_PREFIX,
+    ORDER_SN_SIGN_CACHE_PREFIX,
+    PAY_LOG_SN_CACHE_PREFIX,
+    CONTRACT_SN_CACHE_PREFIX,
+    SMALL_CHANGE_CACHE_PREFIX,
+    AFTER_SALE_SERVICE_PREFIX,
+    TRADE,
+    SITE_NAVIGATION,
+    PAYMENT_CONFIG,
+    FLOW,
+    HOT_WORD,
+    MEMBER_POINT,
+    POINT_ORDER,
+    WEIBO_STATE,
+    QQ_STATE,
+    GITHUB_STATE,
+    VERIFICATION_KEY,
+    VERIFICATION_RESULT,
+    WECHAT_CGI_ACCESS_TOKEN,
+    WECHAT_JS_API_TOKEN,
+    WECHAT_SESSION_PARAMS,
+    ALIPAY_CONFIG,
+    WECHAT_PAY_CONFIG,
+    WECHAT_PLAT_FORM_CERT,
+    CONNECT_AUTH,
+    PV,
+    UV,
+    GOODS_PV,
+    GOODS_UV,
+    STORE_PV,
+    STORE_UV,
+    STORE_GOODS_PV,
+    STORE_GOODS_UV,
+    DISTRIBUTION,
+    FIND_MOBILE,
+    ARTICLE_CATEGORY,
+    ARTICLE_CACHE,
+    INIT_INDEX_PROCESS,
+    INIT_INDEX_FLAG,
+    STORE_CATEGORY,
+    MENU_USER_ID,
+    USER_MENU,
+    ORDER,
+    SENSITIVE;
+
+
+    public static String removePrefix(String str) {
+        return str.substring(str.lastIndexOf("}_") + 2);
+    }
+
+    public String getPrefix() {
+        return "{" + this.name() + "}_";
+    }
+
+    public String getPrefix(UserEnum user) {
+        return "{" + this.name() + "_" + user.name() + "}_";
+    }
+}
+

@@ -2,7 +2,8 @@ package com.kuma.blog.controller;
 
 import com.kuma.blog.entity.Post;
 import com.kuma.blog.mapper.PostMapper;
-import com.kuma.cloud.utils.KumaUtils;
+
+import com.kuma.boot.common.utils.test.KumaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

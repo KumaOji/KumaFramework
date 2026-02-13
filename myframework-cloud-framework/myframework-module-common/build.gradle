@@ -4,10 +4,37 @@ plugins {
 
 description = 'Myframework 公共模块'
 
+
 dependencies {
     implementation projectLibs.hutool.core
     implementation projectLibs.hutool.extra
     implementation projectLibs.hutool.crypto
+    implementation projectLibs.guava
+    implementation projectLibs.spring.core
+    implementation projectLibs.spring.context
+    implementation projectLibs.spring.beans
+    implementation projectLibs.spring.aop
+    implementation projectLibs.spring.web
+    implementation projectLibs.spring.webflux
+    implementation projectLibs.spring.expression
+    implementation projectLibs.commons.lang3
+    implementation projectLibs.commons.collections4
+    implementation projectLibs.commons.codec
+    implementation projectLibs.commons.io
+    implementation projectLibs.commons.compress
+    implementation projectLibs.commons.net
+    implementation projectLibs.bouncycastle.provider
+    implementation projectLibs.reactor.core
+    implementation projectLibs.reactivestreams
+    implementation projectLibs.xk.time
+    implementation projectLibs.swagger.annotations
+    implementation projectLibs.jackson.annotations
+    implementation projectLibs.slf4j.api
+    implementation projectLibs.jspecify
+    implementation projectLibs.uuid.creator
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.jakarta.validation.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }
+

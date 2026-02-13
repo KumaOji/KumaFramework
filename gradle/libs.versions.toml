@@ -29,6 +29,31 @@ disruptor = "4.0.0"
 spring-javaformat = "0.0.40"
 lombok = "1.18.42"
 spring-dependency-management = "1.1.7"
+cfr = "0.152"
+commons-lang3 = "3.14.0"
+commons-collections4 = "4.4"
+commons-codec = "1.17.0"
+commons-io = "2.16.1"
+commons-compress = "1.27.1"
+commons-net = "3.10.0"
+bouncycastle = "1.78.1"
+xk-time = "3.2.4"
+reactor-core = "3.7.4"
+reactivestreams = "1.0.4"
+spring-core = "6.2.6"
+spring-context = "6.2.6"
+spring-beans = "6.2.6"
+spring-aop = "6.2.6"
+spring-web = "6.2.6"
+spring-webflux = "6.2.6"
+spring-expression = "6.2.6"
+jakarta-servlet-api = "6.0.0"
+jakarta-validation-api = "3.0.2"
+swagger-annotations = "2.2.29"
+jackson-annotations = "2.18.2"
+slf4j = "2.0.16"
+jspecify = "1.0.0"
+uuid-creator = "5.3.4"
 
 ## 统一定义依赖
 [libraries]
@@ -56,6 +81,32 @@ spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-start
 spring-boot-starter-undertow = { module = "org.springframework.boot:spring-boot-starter-undertow", version.ref = "springboot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springboot" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springboot" }
+cfr = { module = "org.benf:cfr", version.ref = "cfr" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+commons-collections4 = { module = "org.apache.commons:commons-collections4", version.ref = "commons-collections4" }
+commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
+commons-net = { module = "commons-net:commons-net", version.ref = "commons-net" }
+bouncycastle-provider = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+xk-time = { module = "com.github.xkzhangsan:xk-time", version.ref = "xk-time" }
+reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "reactor-core" }
+reactivestreams = { module = "org.reactivestreams:reactive-streams", version.ref = "reactivestreams" }
+spring-core = { module = "org.springframework:spring-core", version.ref = "spring-core" }
+spring-context = { module = "org.springframework:spring-context", version.ref = "spring-context" }
+spring-beans = { module = "org.springframework:spring-beans", version.ref = "spring-beans" }
+spring-aop = { module = "org.springframework:spring-aop", version.ref = "spring-aop" }
+spring-web = { module = "org.springframework:spring-web", version.ref = "spring-web" }
+spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "spring-webflux" }
+spring-expression = { module = "org.springframework:spring-expression", version.ref = "spring-expression" }
+jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet-api" }
+jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation-api" }
+swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger-annotations" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson-annotations" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+uuid-creator = { module = "com.github.f4b6a3:uuid-creator", version.ref = "uuid-creator" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

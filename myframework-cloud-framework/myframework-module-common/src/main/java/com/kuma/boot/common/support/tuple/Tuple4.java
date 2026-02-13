@@ -1,0 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package com.kuma.boot.common.support.tuple;
+
+import java.io.Serializable;
+
+public class Tuple4<T1, T2, T3, T4>
+implements Serializable {
+    final T1 _1;
+    final T2 _2;
+    final T3 _3;
+    final T4 _4;
+
+    public Tuple4(T1 _1, T2 _2, T3 _3, T4 _4) {
+        this._1 = _1;
+        this._2 = _2;
+        this._3 = _3;
+        this._4 = _4;
+    }
+
+    public T1 _1() {
+        return this._1;
+    }
+
+    public T2 _2() {
+        return this._2;
+    }
+
+    public T3 _3() {
+        return this._3;
+    }
+
+    public T4 _4() {
+        return this._4;
+    }
+}
+
