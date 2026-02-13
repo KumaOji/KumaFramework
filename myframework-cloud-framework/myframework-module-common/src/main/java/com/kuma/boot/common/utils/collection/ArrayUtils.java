@@ -1,15 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Lists
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.collection;
 
 import com.google.common.collect.Lists;
 import com.kuma.boot.common.support.handler.Handler;
-import com.kuma.boot.common.utils.collection.ArrayPrimitiveUtils;
-import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.reflect.ClassGenericUtils;
 import java.lang.reflect.Array;
@@ -19,230 +27,375 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
+/** 数组工具类 */
 public final class ArrayUtils {
+
+    private ArrayUtils() {}
+
+    /** 空字符串列表 */
     public static final String[] STRING_EMPTY = new String[0];
 
-    private ArrayUtils() {
-    }
-
+    /**
+     * 数组是否为空
+     * @param objects 数组对象
+     * @return 是否为空
+     */
     public static boolean isEmpty(Object[] objects) {
         return null == objects || objects.length <= 0;
     }
 
+    /**
+     * 数组是否不为空
+     * @param objects 数组对象
+     * @return 是否为空
+     */
     public static boolean isNotEmpty(Object[] objects) {
-        return !ArrayUtils.isEmpty(objects);
+        return !isEmpty(objects);
     }
 
-    public static <T> List<T> toList(T[] objects) {
+    /**
+     * 数组转换为列表
+     * @param objects 数组
+     * @param <T> 泛型
+     * @return 列表
+     */
+    public static <T> List<T> toList(final T[] objects) {
         if (ArrayUtils.isEmpty(objects)) {
             return Collections.emptyList();
         }
-        ArrayList objectList = new ArrayList(objects.length);
-        objectList.addAll(Lists.newArrayList((Object[])objects));
+
+        List<T> objectList = new ArrayList<>(objects.length);
+        objectList.addAll(Lists.newArrayList(objects));
         return objectList;
     }
 
-    public static Object[] toArray(List<?> objectList) {
+    /**
+     * 转换为数组
+     * @param objectList 集合
+     * @return 对象数组
+     */
+    public static Object[] toArray(final List<?> objectList) {
         if (CollectionUtils.isEmpty(objectList)) {
             return new Object[0];
         }
+
         Object[] objects = new Object[objectList.size()];
-        for (int i = 0; i < objects.length; ++i) {
+        for (int i = 0; i < objects.length; i++) {
             objects[i] = objectList.get(i);
         }
         return objects;
     }
 
-    public static <K, V> K[] toArray(V[] values, Handler<? super V, K> keyFunction) {
+    /**
+     * 数组转换为数组 （1）通过一层转换
+     * @param values 集合
+     * @param keyFunction 处理函数
+     * @param <K> 泛型 K
+     * @param <V> 泛型 V
+     * @return 对象数组
+     */
+    @SuppressWarnings("unchecked")
+    public static <K, V> K[] toArray(final V[] values, Handler<? super V, K> keyFunction) {
         if (ArrayUtils.isEmpty(values)) {
-            return new Object[0];
+            return (K[]) new Object[] {};
         }
-        Object[] resultArray = new Object[values.length];
-        for (int i = 0; i < values.length; ++i) {
+
+        K[] resultArray = (K[]) new Object[values.length];
+        for (int i = 0; i < values.length; i++) {
             K result = keyFunction.handle(values[i]);
             resultArray[i] = result;
         }
         return resultArray;
     }
 
-    public static <K> K[] union(K[] values, K ... others) {
+    /**
+     * 数组的并集
+     * @param values 集合
+     * @param others 其他数组信息
+     * @return 对象数组
+     * @param <K> 泛型
+     */
+    @SuppressWarnings("unchecked")
+    public static <K> K[] union(final K[] values, final K... others) {
         if (ArrayUtils.isEmpty(values)) {
             return others;
         }
         if (ArrayUtils.isEmpty(others)) {
             return values;
         }
-        Object[] resultArray = new Object[others.length];
+
+        K[] resultArray = (K[]) new Object[others.length];
+
+        // 从 values 的下标开始添加
         System.arraycopy(others, 0, resultArray, values.length, others.length);
         return resultArray;
     }
 
+    /**
+     * 是否包含数据
+     * @param array 数组信息
+     * @param objectToFind 待发现的对象
+     * @return 是否包含
+     */
     public static boolean contains(Object[] array, Object objectToFind) {
-        return ArrayUtils.indexOf(array, objectToFind) != -1;
+        return indexOf(array, objectToFind) != -1;
     }
 
+    /**
+     * 是否不包含数据
+     * @param array 数组信息
+     * @param objectToFind 待发现的对象
+     * @return 是否不包含
+     */
     public static boolean notContains(Object[] array, Object objectToFind) {
-        return !ArrayUtils.contains(array, objectToFind);
+        return !contains(array, objectToFind);
     }
 
+    /**
+     * 查询对应元素的下标
+     * @param array 数组信息
+     * @param objectToFind 待发现的对象
+     * @return 下标
+     */
     public static int indexOf(Object[] array, Object objectToFind) {
-        return ArrayUtils.indexOf(array, objectToFind, 0);
+        return indexOf(array, objectToFind, 0);
     }
 
+    /**
+     * 查询对应元素的下标
+     * @param array 数组信息
+     * @param objectToFind 待发现的对象
+     * @param startIndex 开始下标
+     * @return 下标
+     */
     public static int indexOf(Object[] array, Object objectToFind, int startIndex) {
-        block5: {
-            block4: {
-                if (array == null) {
-                    return -1;
-                }
-                if (startIndex < 0) {
-                    startIndex = 0;
-                }
-                if (objectToFind != null) break block4;
-                for (int i = startIndex; i < array.length; ++i) {
-                    if (array[i] != null) continue;
-                    return i;
-                }
-                break block5;
+        if (array == null) {
+            return -1;
+        } else {
+            if (startIndex < 0) {
+                startIndex = 0;
             }
-            if (!array.getClass().getComponentType().isInstance(objectToFind)) break block5;
-            for (int i = startIndex; i < array.length; ++i) {
-                if (!objectToFind.equals(array[i])) continue;
-                return i;
+
+            int i;
+            if (objectToFind == null) {
+                for (i = startIndex; i < array.length; ++i) {
+                    if (array[i] == null) {
+                        return i;
+                    }
+                }
+            } else if (array.getClass().getComponentType().isInstance(objectToFind)) {
+                for (i = startIndex; i < array.length; ++i) {
+                    if (objectToFind.equals(array[i])) {
+                        return i;
+                    }
+                }
             }
+
+            return -1;
         }
-        return -1;
     }
 
-    public static <R> R[] listToArray(List<R> list) {
-        Class elemClass = ClassGenericUtils.getGenericClass(list);
-        Object[] array = (Object[])Array.newInstance(elemClass, list.size());
-        for (int i = 0; i < list.size(); ++i) {
+    /**
+     * 列表转数组
+     * @param list 列表
+     * @param <R> 泛型
+     * @return 结果
+     */
+    @SuppressWarnings("unchecked")
+    public static <R> R[] listToArray(final List<R> list) {
+        // 1. 判断是否为空
+        final Class elemClass = ClassGenericUtils.getGenericClass(list);
+        R[] array = (R[]) Array.newInstance(elemClass, list.size());
+
+        for (int i = 0; i < list.size(); i++) {
             Array.set(array, i, list.get(i));
         }
+
         return array;
     }
 
+    /**
+     * 数组转列表 （1）如果为空，则直接转为空。
+     * @param array 数组
+     * @param <E> 泛型原型
+     * @return 列表
+     */
     @SafeVarargs
-    public static <E> List<E> arrayToList(E ... array) {
+    public static <E> List<E> arrayToList(final E... array) {
         if (ArrayUtils.isEmpty(array)) {
             return Lists.newArrayList();
         }
-        return Lists.newArrayList((Object[])array);
+        return Lists.newArrayList(array);
     }
 
-    public static int getStartIndex(int startIndex, Object[] arrays) {
+    /**
+     * 获取开始的下标 （1）默认为0 （2）如果为负数，或者超过 arrays.length-1，则使用 0 （3）正常返回 startIndex
+     * @param startIndex 开始下标
+     * @param arrays 数组信息
+     * @return 尽可能安全的数组范围。如果为空，则返回 0;
+     */
+    public static int getStartIndex(final int startIndex, final Object[] arrays) {
         if (ArrayUtils.isEmpty(arrays)) {
             return 0;
         }
         if (startIndex < 0 || startIndex > arrays.length - 1) {
             return 0;
         }
+
         return startIndex;
     }
 
-    public static int getEndIndex(int endIndex, Object[] arrays) {
+    /**
+     * 获取开始的下标 （1）默认为0 （2）如果为负数，或者超过 arrays.length-1，则使用 arrays.length-1 （3）正常返回 endIndex
+     * @param endIndex 结束下标
+     * @param arrays 数组信息
+     * @return 尽可能安全的数组范围。如果为空，则返回 0;
+     */
+    public static int getEndIndex(final int endIndex, final Object[] arrays) {
         if (ArrayUtils.isEmpty(arrays)) {
             return 0;
         }
-        int maxIndex = arrays.length - 1;
+        final int maxIndex = arrays.length - 1;
         if (endIndex < 0 || endIndex > maxIndex) {
             return maxIndex;
         }
+
         return endIndex;
     }
 
+    /**
+     * 找到第一个不为 null 的元素
+     * @param objects 对象
+     * @return 不为 null 的元素
+     */
     public static Optional<Object> firstNotNullElem(Object[] objects) {
         if (ArrayUtils.isEmpty(objects)) {
             return Optional.empty();
         }
+
         for (Object elem : objects) {
-            if (!ObjectUtils.isNotNull(elem)) continue;
-            return Optional.of(elem);
+            if (ObjectUtils.isNotNull(elem)) {
+                return Optional.of(elem);
+            }
         }
         return Optional.empty();
     }
 
-    public static Object[] newArray(Object ... objects) {
+    /**
+     * 返回数组信息
+     * @param objects 数组
+     * @return 结果列表
+     */
+    public static Object[] newArray(Object... objects) {
         return objects;
     }
 
-    public static <K, V> List<K> toList(V[] values, Handler<? super V, K> keyFunction) {
+    /**
+     * 可遍历的元素对象的某个元素，转换为列表
+     * @param values 遍历对象数组
+     * @param keyFunction 转换方式
+     * @param <K> k 泛型
+     * @param <V> v 泛型
+     * @return 结果列表
+     */
+    public static <K, V> List<K> toList(final V[] values, Handler<? super V, K> keyFunction) {
         if (ObjectUtils.isNull(values)) {
             return Collections.emptyList();
         }
-        ArrayList list = Lists.newArrayList();
+
+        List<K> list = Lists.newArrayList();
         for (V value : values) {
-            K key = keyFunction.handle(value);
+            final K key = keyFunction.handle(value);
             list.add(key);
         }
         return list;
     }
 
-    public static List toList(Object arrayObject, Handler keyFunction) {
+    /**
+     * long 可遍历的元素对象的某个元素，转换为列表
+     * @param arrayObject 数组对象
+     * @param keyFunction 转换方式
+     * @return 结果列表
+     */
+    @SuppressWarnings("unchecked")
+    public static List toList(final Object arrayObject, Handler keyFunction) {
         if (ObjectUtils.isNull(arrayObject)) {
             return Collections.emptyList();
         }
-        Class<?> arrayClass = arrayObject.getClass();
+
+        // 判断 8 种类型
+        final Class arrayClass = arrayObject.getClass();
         if (boolean[].class == arrayClass) {
-            boolean[] booleans = (boolean[])arrayObject;
+            boolean[] booleans = (boolean[]) arrayObject;
             return ArrayPrimitiveUtils.toList(booleans, keyFunction);
         }
         if (short[].class == arrayClass) {
-            short[] shorts = (short[])arrayObject;
+            short[] shorts = (short[]) arrayObject;
             return ArrayPrimitiveUtils.toList(shorts, keyFunction);
         }
         if (byte[].class == arrayClass) {
-            byte[] bytes = (byte[])arrayObject;
+            byte[] bytes = (byte[]) arrayObject;
             return ArrayPrimitiveUtils.toList(bytes, keyFunction);
         }
         if (int[].class == arrayClass) {
-            int[] ints = (int[])arrayObject;
+            int[] ints = (int[]) arrayObject;
             return ArrayPrimitiveUtils.toList(ints, keyFunction);
         }
         if (float[].class == arrayClass) {
-            float[] floats = (float[])arrayObject;
+            float[] floats = (float[]) arrayObject;
             return ArrayPrimitiveUtils.toList(floats, keyFunction);
         }
         if (double[].class == arrayClass) {
-            double[] doubles = (double[])arrayObject;
+            double[] doubles = (double[]) arrayObject;
             return ArrayPrimitiveUtils.toList(doubles, keyFunction);
         }
         if (char[].class == arrayClass) {
-            char[] chars = (char[])arrayObject;
+            char[] chars = (char[]) arrayObject;
             return ArrayPrimitiveUtils.toList(chars, keyFunction);
         }
         if (long[].class == arrayClass) {
-            long[] longs = (long[])arrayObject;
+            long[] longs = (long[]) arrayObject;
             return ArrayPrimitiveUtils.toList(longs, keyFunction);
         }
-        Object[] objects = (Object[])arrayObject;
+
+        // 直接转换为数组。
+        Object[] objects = (Object[]) arrayObject;
         return ArrayUtils.toList(objects, keyFunction);
     }
 
-    public static Object[] shift(Object[] array, int offset) {
+    /**
+     * 执行平移操作 1. 数组判断空。如果为空，直接返回空 2. 添加偏移量的 mod
+     * @param array 原始数组
+     * @param offset 偏移量 任意整数。
+     * @return 结果
+     */
+    public static Object[] shift(final Object[] array, final int offset) {
         if (ArrayUtils.isEmpty(array)) {
             return array;
         }
-        int arrayLength = array.length;
+
+        final int arrayLength = array.length;
         int actualOffset = offset;
         if (actualOffset < 0) {
             actualOffset += arrayLength;
         }
+
         Object[] newArray = new Object[arrayLength];
-        for (int i = 0; i < arrayLength; ++i) {
+        for (int i = 0; i < arrayLength; i++) {
             int realIndex = (i + actualOffset) % arrayLength;
             newArray[i] = array[realIndex];
         }
+
         return newArray;
     }
 
-    public static <T> T[] createGenericArray(IntFunction<T[]> genericArrayCreator, int arrayLength) {
+    public static <T> T[] createGenericArray(
+            IntFunction<T[]> genericArrayCreator, int arrayLength) {
         return genericArrayCreator.apply(arrayLength);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T[] createGenericArray(Class<T[]> classArrayT, int arrayLength) {
-        return (Object[])Array.newInstance(classArrayT.getComponentType(), arrayLength);
+        return (T[]) Array.newInstance(classArrayT.getComponentType(), arrayLength);
     }
 }
-

@@ -11,7 +11,7 @@ public class CodeUtils {
     public static final char LETTER = 'Z';
 
     public static synchronized String getNextYouBianCode(String code) {
-        Object newcode = "";
+        String newcode = "";
         if (StringUtils.isEmpty(code)) {
             String zimu = "A";
             String num = CodeUtils.getStrNum(1);

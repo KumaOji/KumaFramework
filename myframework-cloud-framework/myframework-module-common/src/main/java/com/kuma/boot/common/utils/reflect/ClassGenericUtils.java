@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Lists
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
 import com.google.common.collect.Lists;
@@ -15,57 +25,100 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+/** class 泛型工具类 */
 public final class ClassGenericUtils {
-    private ClassGenericUtils() {
-    }
 
-    private static List<Type> getGenericInterfaces(Class clazz) {
-        Type superType;
-        HashSet<Type> typeSet = new HashSet<Type>();
-        Object[] types = clazz.getGenericInterfaces();
+    private ClassGenericUtils() {}
+
+    /**
+     * 获取当前类的泛型接口信息
+     * @param clazz 类
+     * @return 泛型接口信息
+     */
+    private static List<Type> getGenericInterfaces(final Class clazz) {
+        Set<Type> typeSet = new HashSet<>();
+
+        // 添加当前类的泛型接口信息
+        Type[] types = clazz.getGenericInterfaces();
         if (ArrayUtils.isNotEmpty(types)) {
-            typeSet.addAll(Lists.newArrayList((Object[])types));
+            typeSet.addAll(Lists.newArrayList(types));
         }
-        if (ObjectUtils.isNotNull(superType = clazz.getGenericSuperclass()) && superType.getClass().isInterface()) {
+
+        // 当前类的泛型父类信息
+        Type superType = clazz.getGenericSuperclass();
+        if (ObjectUtils.isNotNull(superType) && superType.getClass().isInterface()) {
             typeSet.add(superType);
         }
+
         return Lists.newArrayList(typeSet);
     }
 
-    public static Class getGenericClass(Class clazz, Class interfaceClass, int index) {
+    /**
+     * 获取泛型类型
+     * @param clazz 数据类型
+     * @param interfaceClass 接口对应的 class 信息
+     * @param index 泛型的下标志位置
+     * @return 对应的泛型类型
+     */
+    public static Class getGenericClass(
+            final Class clazz, final Class interfaceClass, final int index) {
         List<Type> typeList = ClassGenericUtils.getGenericInterfaces(clazz);
         for (Type type : typeList) {
-            if (!(type instanceof ParameterizedType) || !interfaceClass.equals(((ParameterizedType)type).getRawType())) continue;
-            ParameterizedType p = (ParameterizedType)type;
-            return (Class)p.getActualTypeArguments()[index];
+            if (type instanceof ParameterizedType
+                    && interfaceClass.equals(((ParameterizedType) type).getRawType())) {
+                ParameterizedType p = (ParameterizedType) type;
+                return (Class) p.getActualTypeArguments()[index];
+            }
         }
+
         return Object.class;
     }
 
-    public static Class getGenericClass(Collection<?> list) {
+    /**
+     * 获取元素的泛型
+     * @param list 列表
+     * @return 泛型
+     */
+    public static Class getGenericClass(final Collection<?> list) {
         if (CollectionUtils.isEmpty(list)) {
             return null;
         }
+
         for (Object object : list) {
-            if (!ObjectUtils.isNotNull(object)) continue;
-            return object.getClass();
+            if (ObjectUtils.isNotNull(object)) {
+                return object.getClass();
+            }
         }
         return null;
     }
 
-    public static Class getGenericSupperClass(Class clazz, int index) {
+    /**
+     * 获取当前类对应的泛型
+     * @param clazz 指定类
+     * @param index 索引
+     * @return 默认返回 {@link Object#getClass()}
+     */
+    public static Class getGenericSupperClass(final Class clazz, final int index) {
         Class classType = Object.class;
+
         Type pageVoParserClass = clazz.getGenericSuperclass();
         if (pageVoParserClass instanceof ParameterizedType) {
-            Type[] pageVoClassTypes = ((ParameterizedType)pageVoParserClass).getActualTypeArguments();
-            classType = (Class)pageVoClassTypes[index];
+            Type[] pageVoClassTypes =
+                    ((ParameterizedType) pageVoParserClass).getActualTypeArguments();
+            classType = (Class) pageVoClassTypes[index];
         }
+
         return classType;
     }
 
-    public static Class getGenericSupperClass(Class clazz) {
-        return ClassGenericUtils.getGenericSupperClass(clazz, 0);
+    /**
+     * 获取当前类对应的泛型
+     * @param clazz 指定类
+     * @return 默认返回 {@link Object#getClass()}
+     */
+    public static Class getGenericSupperClass(final Class clazz) {
+        return getGenericSupperClass(clazz, 0);
     }
 }
-

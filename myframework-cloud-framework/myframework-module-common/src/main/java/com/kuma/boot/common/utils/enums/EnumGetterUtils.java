@@ -1,10 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.HashBasedTable
- *  com.google.common.collect.Table
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.enums;
 
 import com.google.common.collect.HashBasedTable;
@@ -15,31 +24,102 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * 枚举工具类
+ */
 public final class EnumGetterUtils {
-    private static Table<Class<?>, Function<?, ?>, Map<?, Enum<?>>> cache = HashBasedTable.create();
+
+    private static Table<Class<?>, Function<?, ?>, Map<?, Enum<?>>> cache;
+
+    static {
+        cache = HashBasedTable.create();
+    }
 
     private EnumGetterUtils() {
+        super();
     }
 
-    public static <E extends Enum<E>, P> E get(Class<E> enumClass, Function<E, P> getterMethodReference, P value) {
-        Map enumMap = (Map)cache.get(enumClass, getterMethodReference);
+    /**
+     * 根据枚举类和属性获取枚举
+     * @param enumClass 枚举类
+     * @param getterMethodReference 属性Getter的Method-Reference
+     * @param value 属性值
+     * @param <E> 枚举类型
+     * @param <P> 属性类型
+     * @return 枚举
+     */
+    @SuppressWarnings("unchecked")
+    public static <E extends Enum<E>, P> E get(
+            Class<E> enumClass, Function<E, P> getterMethodReference, P value) {
+        Map<P, E> enumMap = (Map<P, E>) cache.get(enumClass, getterMethodReference);
         if (enumMap == null) {
-            enumMap = EnumSet.allOf(enumClass).stream().collect(HashMap::new, (m, e) -> m.put(getterMethodReference.apply(e), e), Map::putAll);
-            cache.put(enumClass, getterMethodReference, (Object)enumMap);
+            enumMap =
+                    EnumSet.allOf(enumClass).stream()
+                            .collect(
+                                    HashMap::new,
+                                    (m, e) -> m.put(getterMethodReference.apply(e), e),
+                                    Map::putAll);
+            cache.put(enumClass, getterMethodReference, (Map<?, Enum<?>>) enumMap);
         }
-        return (E)((Enum)enumMap.get(value));
+        return enumMap.get(value);
     }
 
-    public static <E extends Enum<E>, P> E getOrDefault(Class<E> enumClass, Function<E, P> getterMethodReference, P value, E defaultValue) {
-        return (E)((Enum)Optional.ofNullable(EnumGetterUtils.get(enumClass, getterMethodReference, value)).orElse(defaultValue));
+    /**
+     * 根据枚举类和属性获取枚举
+     * @param enumClass 枚举类
+     * @param getterMethodReference 属性Getter的Method-Reference
+     * @param value 属性值
+     * @param defaultValue 默认值
+     * @param <E> 枚举类型
+     * @param <P> 属性类型
+     * @return 枚举
+     */
+    public static <E extends Enum<E>, P> E getOrDefault(
+            Class<E> enumClass, Function<E, P> getterMethodReference, P value, E defaultValue) {
+        return Optional.ofNullable(get(enumClass, getterMethodReference, value))
+                .orElse(defaultValue);
     }
 
-    public static <E extends Enum<E>, P, R> R getEnumPropertyValue(Class<E> enumClass, Function<E, P> keyMethodReference, P key, Function<E, R> valueMethodReference) {
-        return EnumGetterUtils.getEnumPropertyValue(enumClass, keyMethodReference, key, valueMethodReference, null);
+    /**
+     * 根据枚举的某一个属性(输入属性)和值，获取另一个属性(输出属性)的值
+     * @param enumClass 枚举类
+     * @param keyMethodReference 输入属性的Method-Reference
+     * @param key 输入属性值
+     * @param valueMethodReference 输出属性的Method-Reference
+     * @return 输出属性的值 默认为空
+     * @param <E> 枚举类型
+     * @param <P> 输入属性类型
+     * @param <R> 输出属性类型
+     */
+    public static <E extends Enum<E>, P, R> R getEnumPropertyValue(
+            Class<E> enumClass,
+            Function<E, P> keyMethodReference,
+            P key,
+            Function<E, R> valueMethodReference) {
+        return getEnumPropertyValue(enumClass, keyMethodReference, key, valueMethodReference, null);
     }
 
-    public static <E extends Enum<E>, P, R> R getEnumPropertyValue(Class<E> enumClass, Function<E, P> keyMethodReference, P key, Function<E, R> valueMethodReference, R defaultValue) {
-        return Optional.ofNullable(key).map(x -> EnumGetterUtils.get(enumClass, keyMethodReference, x)).map(valueMethodReference).orElse(defaultValue);
+    /**
+     * 根据枚举的某一个属性(输入属性)和值，获取另一个属性(输出属性)的值
+     * @param enumClass 枚举类
+     * @param keyMethodReference 输入属性的Method-Reference
+     * @param key 输入属性值
+     * @param valueMethodReference 输出属性的Method-Reference
+     * @param defaultValue 默认输出属性值
+     * @return 输出属性的值
+     * @param <E> 枚举类型
+     * @param <P> 输入属性类型
+     * @param <R> 输出属性类型
+     */
+    public static <E extends Enum<E>, P, R> R getEnumPropertyValue(
+            Class<E> enumClass,
+            Function<E, P> keyMethodReference,
+            P key,
+            Function<E, R> valueMethodReference,
+            R defaultValue) {
+        return Optional.ofNullable(key)
+                .map(x -> EnumGetterUtils.get(enumClass, keyMethodReference, x))
+                .map(valueMethodReference)
+                .orElse(defaultValue);
     }
 }
-

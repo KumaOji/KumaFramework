@@ -1,29 +1,33 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.lang.Assert
- *  jakarta.annotation.Nullable
- *  org.springframework.http.codec.multipart.Part
- *  org.springframework.util.FileCopyUtils
- *  org.springframework.util.FileSystemUtils
- *  org.springframework.util.PatternMatchUtils
- *  org.springframework.util.StringUtils
- *  org.springframework.web.multipart.MultipartFile
- *  org.springframework.web.server.ServerWebExchange
- *  reactor.core.publisher.Mono
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
 import cn.hutool.core.lang.Assert;
+import com.kuma.boot.common.constant.CommonConstants;
+import com.kuma.boot.common.constant.FileTypeConstants;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.exception.BaseException;
 import com.kuma.boot.common.exception.BootException;
+import com.kuma.boot.common.model.CharPool;
 import com.kuma.boot.common.support.handler.MapHandler;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.collection.MapUtils;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
-import com.kuma.boot.common.utils.io.IoUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import jakarta.annotation.Nullable;
@@ -43,9 +47,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Serial;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
@@ -63,653 +67,1072 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-public final class FileUtils
-extends FileCopyUtils {
-    private FileUtils() {
+/**
+ * 文件工具类 用于获取文件的内容
+ */
+public final class FileUtils extends org.springframework.util.FileCopyUtils {
+
+    private FileUtils() {}
+
+    /**
+     * 从ServerWebExchange读取文件转成Mono Part
+     * @param name 文件参数
+     * @param exchange the exchange
+     * @return the part values
+     */
+    public static reactor.core.publisher.Mono<Part> getPartValues(
+            String name, ServerWebExchange exchange) {
+        return exchange.getMultipartData()
+                .mapNotNull(multiValueMap -> multiValueMap.getFirst(name));
     }
 
-    public static Mono<Part> getPartValues(String name, ServerWebExchange exchange) {
-        return exchange.getMultipartData().mapNotNull(multiValueMap -> (Part)multiValueMap.getFirst((Object)name));
-    }
-
+    /**
+     * 获取文件内容
+     * @param filePath 文件路径
+     * @return 文件不存在或异常等, 直接抛出异常
+     */
     public static String getFileContent(String filePath) {
-        return FileUtils.getFileContent(filePath, "UTF-8");
+        return getFileContent(filePath, CommonConstants.UTF8);
     }
 
-    public static String getFileContent(String filePath, String charset) {
+    /**
+     * 获取文件内容
+     * @param filePath 文件路径
+     * @param charset 文件编码
+     * @return 文件不存在或异常等, 直接抛出异常
+     */
+    public static String getFileContent(String filePath, final String charset) {
         File file = new File(filePath);
         if (file.exists()) {
-            String string;
-            FileInputStream inputStream = new FileInputStream(file);
-            try {
-                string = FileUtils.getFileContent(inputStream, charset);
+            try (InputStream inputStream = new FileInputStream(file)) {
+                return getFileContent(inputStream, charset);
+            } catch (IOException e) {
+                throw new BootException(e);
             }
-            catch (Throwable throwable) {
-                try {
-                    try {
-                        ((InputStream)inputStream).close();
-                    }
-                    catch (Throwable throwable2) {
-                        throwable.addSuppressed(throwable2);
-                    }
-                    throw throwable;
-                }
-                catch (IOException e) {
-                    throw new BootException(e);
-                }
-            }
-            ((InputStream)inputStream).close();
-            return string;
         }
         throw new BootException(filePath + " is not exists!");
     }
 
+    /**
+     * 获取文件内容 默认编码UTF8
+     * @param inputStream 输入流
+     * @return 文件内容
+     */
     public static String getFileContent(InputStream inputStream) {
-        return FileUtils.getFileContent(inputStream, "UTF-8");
+        return getFileContent(inputStream, CommonConstants.UTF8);
     }
 
-    public static String getFileContent(File file, String charset) {
-        String string;
-        FileInputStream inputStream = new FileInputStream(file);
-        try {
-            string = FileUtils.getFileContent(inputStream, charset);
-        }
-        catch (Throwable throwable) {
-            try {
-                try {
-                    ((InputStream)inputStream).close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-            catch (IOException e) {
-                throw new BootException(e);
-            }
-        }
-        ((InputStream)inputStream).close();
-        return string;
-    }
-
-    public static String getFileContent(File file) {
-        String string;
-        FileInputStream inputStream = new FileInputStream(file);
-        try {
-            string = FileUtils.getFileContent(inputStream);
-        }
-        catch (Throwable throwable) {
-            try {
-                try {
-                    ((InputStream)inputStream).close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-            catch (IOException e) {
-                throw new BootException(e);
-            }
-        }
-        ((InputStream)inputStream).close();
-        return string;
-    }
-
-    public static String getFileContent(InputStream inputStream, String charset) {
-        Charset charsetVal = Charset.forName(charset);
-        return FileUtils.getFileContent(inputStream, 0, Integer.MAX_VALUE, charsetVal);
-    }
-
-    public static String getFileContent(InputStream inputStream, int startIndex, int endIndex, Charset charset) {
-        try {
-            endIndex = Math.min(endIndex, inputStream.available());
-            startIndex = Math.max(0, startIndex);
-            inputStream.skip(startIndex);
-            int count = endIndex - startIndex;
-            byte[] bytes = new byte[count];
-            for (int readCount = 0; readCount < count && readCount != -1; readCount += inputStream.read(bytes, readCount, count - readCount)) {
-            }
-            String string = new String(bytes, charset);
-            return string;
-        }
-        catch (IOException e) {
+    /**
+     * 获取文件内容 默认编码UTF8
+     * @param file 文件
+     * @param charset 文件编码
+     * @return 文件内容
+     */
+    public static String getFileContent(final File file, final String charset) {
+        try (InputStream inputStream = new FileInputStream(file)) {
+            return getFileContent(inputStream, charset);
+        } catch (IOException e) {
             throw new BootException(e);
         }
-        finally {
+    }
+
+    /**
+     * 获取文件内容 默认编码UTF8
+     * @param file 文件
+     * @return 文件内容
+     */
+    public static String getFileContent(final File file) {
+        try (InputStream inputStream = new FileInputStream(file)) {
+            return getFileContent(inputStream);
+        } catch (IOException e) {
+            throw new BootException(e);
+        }
+    }
+
+    /**
+     * 获取文件内容
+     * @param inputStream 文件输入流
+     * @param charset 文件编码
+     * @return 文件内容字符串
+     */
+    public static String getFileContent(InputStream inputStream, String charset) {
+        Charset charsetVal = Charset.forName(charset);
+        return getFileContent(inputStream, 0, Integer.MAX_VALUE, charsetVal);
+    }
+
+    /**
+     * 获取文件内容
+     * @param inputStream 输入流
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @param charset 编码
+     * @return 结果
+     */
+    public static String getFileContent(
+            final InputStream inputStream, int startIndex, int endIndex, final Charset charset) {
+        try {
+            // 参数纠正
+            endIndex = Math.min(endIndex, inputStream.available());
+            startIndex = Math.max(0, startIndex);
+
+            // 跳过指定长度
+            inputStream.skip(startIndex);
+
+            // 这个读取的数据可能不正确
+            // InputStream.read(byte[] b) 无法保证读取的结果正确。
+            final int count = endIndex - startIndex;
+            byte[] bytes = new byte[count];
+            // 已经成功读取的字节的个数
+            // -1 也代表结束
+            int readCount = 0;
+            while (readCount < count && readCount != -1) {
+                readCount += inputStream.read(bytes, readCount, count - readCount);
+            }
+
+            return new String(bytes, charset);
+        } catch (IOException e) {
+            throw new BootException(e);
+        } finally {
             try {
                 if (inputStream != null) {
                     inputStream.close();
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LogUtils.error(e);
             }
         }
     }
 
+    /**
+     * 获取文件后缀
+     * @param fileName 文件名称
+     * @return 文件后缀
+     */
     public static String getSuffix(String fileName) {
-        return fileName.substring(fileName.lastIndexOf(46) + 1);
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 
+    /**
+     * 获取指定路径文件的每一行内容
+     * @param filePath 文件路径
+     * @param initLine 初始化行数
+     * @return 内容列表
+     */
     public static List<String> getFileContentEachLine(String filePath, int initLine) {
         File file = new File(filePath);
-        return FileUtils.getFileContentEachLine(file, initLine);
+        return getFileContentEachLine(file, initLine);
     }
 
+    /**
+     * 获取指定路径文件的每一行内容 1.初始化行数默认为0
+     * @param filePath 文件路径
+     * @return 内容列表
+     * @see #getFileContentEachLine(String, int) 获取指定路径文件的每一行内容
+     */
     public static List<String> getFileContentEachLine(String filePath) {
         File file = new File(filePath);
-        return FileUtils.getFileContentEachLine(file, 0);
+        return getFileContentEachLine(file, 0);
     }
 
+    /**
+     * 获取指定文件的每一行内容。并对内容进行trim()操作。
+     * @param filePath 文件路径
+     * @param initLine 初始化行数
+     * @return 内容列表
+     */
     public static List<String> getFileContentEachLineTrim(String filePath, int initLine) {
-        List<String> stringList = FileUtils.getFileContentEachLine(filePath, initLine);
-        LinkedList<String> resultList = new LinkedList<String>();
+        List<String> stringList = getFileContentEachLine(filePath, initLine);
+        List<String> resultList = new LinkedList<>();
+
         for (String string : stringList) {
             resultList.add(string.trim());
         }
+
         return resultList;
     }
 
+    /**
+     * 获取指定文件的每一行内容 默认初始行数为0
+     * @param file 文件
+     * @return 内容列表
+     */
     public static List<String> getFileContentEachLine(File file) {
-        return FileUtils.getFileContentEachLine(file, 0);
+        return getFileContentEachLine(file, 0);
     }
 
+    /**
+     * 获取指定文件的每一行内容 [TWR](http://blog.csdn.net/doctor_who2004/article/details/50901195)
+     * @param file 指定读取文件
+     * @param initLine 初始读取行数
+     * @return 错误返回空列表
+     */
     public static List<String> getFileContentEachLine(File file, int initLine) {
-        LinkedList<String> contentList = new LinkedList<String>();
+        List<String> contentList = new LinkedList<>();
+
         if (!file.exists()) {
             return contentList;
         }
+
+        // 暂时使用此编码
         String charset = "UTF-8";
         try (FileInputStream fileInputStream = new FileInputStream(file);
-             InputStreamReader inputStreamReader = new InputStreamReader((InputStream)fileInputStream, charset);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);){
-            String dataEachLine;
-            int lineNo;
-            for (lineNo = 0; lineNo < initLine; ++lineNo) {
-                String string = bufferedReader.readLine();
+             InputStreamReader inputStreamReader =
+                     new InputStreamReader(fileInputStream, charset);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            // 用于记录行号
+            int lineNo = 0;
+            while (lineNo < initLine) {
+                lineNo++;
+                String ignore = bufferedReader.readLine();
             }
+
+            String dataEachLine; // 每一行的内容
             while ((dataEachLine = bufferedReader.readLine()) != null) {
-                ++lineNo;
-                if (Objects.equals("", dataEachLine)) continue;
+                lineNo++;
+                // 跳过空白行
+                if (Objects.equals("", dataEachLine)) {
+                    continue;
+                }
                 contentList.add(dataEachLine);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
+
         return contentList;
     }
 
+    /**
+     * 获取文件内容的列表
+     * @param file 文件
+     * @param initLine 0 开始
+     * @param endLine 下标从0开始
+     * @param charset 编码
+     * @return string list
+     */
     @Deprecated
-    public static List<String> getFileContentEachLine(File file, int initLine, int endLine, String charset) {
-        LinkedList<String> contentList = new LinkedList<String>();
+    public static List<String> getFileContentEachLine(
+            final File file, final int initLine, final int endLine, final String charset) {
+        List<String> contentList = new LinkedList<>();
+
         if (!file.exists()) {
             return contentList;
         }
+
         try (FileInputStream fileInputStream = new FileInputStream(file);
-             InputStreamReader inputStreamReader = new InputStreamReader((InputStream)fileInputStream, charset);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);){
-            String dataEachLine;
-            int lineNo;
-            for (lineNo = 0; lineNo < initLine; ++lineNo) {
-                String string = bufferedReader.readLine();
+             InputStreamReader inputStreamReader =
+                     new InputStreamReader(fileInputStream, charset);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            // 用于记录行号
+            int lineNo = 0;
+            while (lineNo < initLine) {
+                lineNo++;
+                String ignore = bufferedReader.readLine();
             }
+
+            // 每一行的内容
+            String dataEachLine;
             while ((dataEachLine = bufferedReader.readLine()) != null && lineNo < endLine) {
-                ++lineNo;
+                lineNo++;
                 contentList.add(dataEachLine);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
+
         return contentList;
     }
 
-    public static List<String> readAllLines(File file, String charset, int initLine, int endLine, boolean ignoreEmpty) {
-        List<String> list;
+    /**
+     * 获取每一行的文件内容 （1）如果文件不存在，直接返回空列表。
+     * @param file 文件信息
+     * @param charset 编码
+     * @param initLine 初始化行
+     * @param endLine 结束航
+     * @param ignoreEmpty 是否跳过空白行
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(
+            final File file,
+            final String charset,
+            final int initLine,
+            final int endLine,
+            final boolean ignoreEmpty) {
         ArgUtils.notNull(file, "file");
         ArgUtils.notEmpty(charset, "charset");
         if (!file.exists()) {
             throw new BootException("File not exists!");
         }
-        FileInputStream inputStream = new FileInputStream(file);
-        try {
-            list = FileUtils.readAllLines(inputStream, charset, initLine, endLine, ignoreEmpty);
-        }
-        catch (Throwable throwable) {
-            try {
-                try {
-                    inputStream.close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-            catch (IOException e) {
-                throw new BootException(e);
-            }
-        }
-        inputStream.close();
-        return list;
-    }
 
-    public static List<String> readAllLines(InputStream inputStream, String charset, int initLine, int endLine, boolean ignoreEmpty) {
-        ArgUtils.notNull(inputStream, "inputStream");
-        ArgUtils.notEmpty(charset, "charset");
-        LinkedList<String> contentList = new LinkedList<String>();
-        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);){
-            String dataEachLine;
-            int lineNo;
-            for (lineNo = 0; lineNo < initLine; ++lineNo) {
-                String string = bufferedReader.readLine();
-            }
-            while ((dataEachLine = bufferedReader.readLine()) != null && lineNo < endLine) {
-                ++lineNo;
-                if (ignoreEmpty && StringUtils.isEmpty(dataEachLine)) continue;
-                contentList.add(dataEachLine);
-            }
-        }
-        catch (IOException e) {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return readAllLines(inputStream, charset, initLine, endLine, ignoreEmpty);
+        } catch (IOException e) {
             throw new BootException(e);
         }
-        finally {
+    }
+
+    /**
+     * 获取每一行的文件内容 （1）如果文件不存在，直接返回空列表。
+     * @param inputStream 文件输入流
+     * @param charset 编码
+     * @param initLine 初始化行
+     * @param endLine 结束航
+     * @param ignoreEmpty 是否跳过空白行
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(
+            final InputStream inputStream,
+            final String charset,
+            final int initLine,
+            final int endLine,
+            final boolean ignoreEmpty) {
+        ArgUtils.notNull(inputStream, "inputStream");
+        ArgUtils.notEmpty(charset, "charset");
+
+        List<String> contentList = new LinkedList<>();
+        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, charset);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            // 用于记录行号
+            int lineNo = 0;
+            while (lineNo < initLine) {
+                lineNo++;
+                String ignore = bufferedReader.readLine();
+            }
+
+            // 每一行的内容
+            String dataEachLine;
+            while ((dataEachLine = bufferedReader.readLine()) != null && lineNo < endLine) {
+                lineNo++;
+
+                // 跳过空白行且内容为空，则不进行计入结果
+                if (ignoreEmpty && StringUtils.isEmpty(dataEachLine)) {
+                    // ignore
+                    continue;
+                } else {
+                    contentList.add(dataEachLine);
+                }
+            }
+        } catch (IOException e) {
+            throw new BootException(e);
+        } finally {
             try {
                 inputStream.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LogUtils.error(e);
             }
         }
+
         return contentList;
     }
 
-    public static List<String> readAllLines(InputStream inputStream, String charset, int initLine, int endLine) {
-        return FileUtils.readAllLines(inputStream, charset, initLine, endLine, true);
+    /**
+     * 获取每一行的文件内容 （1）如果文件不存在，直接返回空列表。
+     * @param inputStream 文件输入流
+     * @param charset 编码
+     * @param initLine 初始化行
+     * @param endLine 结束航
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(
+            final InputStream inputStream,
+            final String charset,
+            final int initLine,
+            final int endLine) {
+        return readAllLines(inputStream, charset, initLine, endLine, true);
     }
 
-    public static List<String> readAllLines(InputStream inputStream, String charset, int initLine) {
-        return FileUtils.readAllLines(inputStream, charset, initLine, Integer.MAX_VALUE);
+    /**
+     * 获取每一行的文件内容 （1）如果文件不存在，直接返回空列表。
+     * @param inputStream 文件输入流
+     * @param charset 编码
+     * @param initLine 初始化行
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(
+            final InputStream inputStream, final String charset, final int initLine) {
+        return readAllLines(inputStream, charset, initLine, Integer.MAX_VALUE);
     }
 
-    public static List<String> readAllLines(InputStream inputStream, String charset) {
-        return FileUtils.readAllLines(inputStream, charset, 0);
+    /**
+     * 获取每一行的文件内容 （1）如果文件不存在，直接返回空列表。
+     * @param inputStream 文件输入流
+     * @param charset 编码
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(final InputStream inputStream, final String charset) {
+        return readAllLines(inputStream, charset, 0);
     }
 
-    public static List<String> readAllLines(InputStream inputStream) {
-        return FileUtils.readAllLines(inputStream, "UTF-8");
+    /**
+     * 获取每一行的文件内容 （1）如果文件不存在，直接返回空列表。
+     * @param inputStream 文件输入流
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(final InputStream inputStream) {
+        return readAllLines(inputStream, CommonConstants.UTF8);
     }
 
-    public static List<String> readAllLines(String filePath, String charset, boolean ignoreEmpty) {
+    /**
+     * 获取每一行的文件内容
+     * @param filePath 文件路径
+     * @param charset 文件编码
+     * @param ignoreEmpty 是否跳过空白行
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(
+            final String filePath, final String charset, final boolean ignoreEmpty) {
         File file = new File(filePath);
-        return FileUtils.readAllLines(file, charset, 0, Integer.MAX_VALUE, ignoreEmpty);
+        return readAllLines(file, charset, 0, Integer.MAX_VALUE, ignoreEmpty);
     }
 
-    public static List<String> readAllLines(File file, String charset, boolean ignoreEmpty) {
-        return FileUtils.readAllLines(file, charset, 0, Integer.MAX_VALUE, ignoreEmpty);
+    /**
+     * 获取每一行的文件内容
+     * @param file 文件路径
+     * @param charset 文件编码
+     * @param ignoreEmpty 是否跳过空白行
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(
+            final File file, final String charset, final boolean ignoreEmpty) {
+        return readAllLines(file, charset, 0, Integer.MAX_VALUE, ignoreEmpty);
     }
 
-    public static List<String> readAllLines(File file, String charset) {
-        return FileUtils.readAllLines(file, charset, false);
+    /**
+     * 获取每一行的文件内容
+     * @param file 文件路径
+     * @param charset 文件编码
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(final File file, final String charset) {
+        return readAllLines(file, charset, false);
     }
 
-    public static List<String> readAllLines(File file) {
-        return FileUtils.readAllLines(file, "UTF-8");
+    /**
+     * 获取每一行的文件内容
+     * @param file 文件路径
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(final File file) {
+        return readAllLines(file, CommonConstants.UTF8);
     }
 
-    public static List<String> readAllLines(String filePath, String charset) {
-        return FileUtils.readAllLines(filePath, charset, false);
+    /**
+     * 获取每一行的文件内容
+     * @param filePath 文件路径
+     * @param charset 文件编码
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(final String filePath, final String charset) {
+        return readAllLines(filePath, charset, false);
     }
 
-    public static List<String> readAllLines(String filePath) {
-        return FileUtils.readAllLines(filePath, "UTF-8");
+    /**
+     * 获取每一行的文件内容
+     * @param filePath 文件路径
+     * @return 结果列表
+     */
+    public static List<String> readAllLines(final String filePath) {
+        return readAllLines(filePath, CommonConstants.UTF8);
     }
 
+    /**
+     * 复制文件夹
+     * @param sourceDir 原始文件夹
+     * @param targetDir 目标文件夹
+     * @throws IOException if any
+     */
     public static void copyDir(String sourceDir, String targetDir) throws IOException {
         File file = new File(sourceDir);
-        Object[] filePath = file.list();
-        if (!new File(targetDir).exists()) {
-            new File(targetDir).mkdir();
+        String[] filePath = file.list();
+
+        if (!(new File(targetDir)).exists()) {
+            (new File(targetDir)).mkdir();
         }
+
         if (ArrayUtils.isNotEmpty(filePath)) {
-            for (Object aFilePath : filePath) {
-                if (new File(sourceDir + File.separator + (String)aFilePath).isDirectory()) {
-                    FileUtils.copyDir(sourceDir + File.separator + (String)aFilePath, targetDir + File.separator + (String)aFilePath);
+
+            for (String aFilePath : filePath) {
+                if ((new File(sourceDir + File.separator + aFilePath)).isDirectory()) {
+                    copyDir(
+                            sourceDir + File.separator + aFilePath,
+                            targetDir + File.separator + aFilePath);
                 }
-                if (!new File(sourceDir + File.separator + (String)aFilePath).isFile()) continue;
-                FileUtils.copyFile(sourceDir + File.separator + (String)aFilePath, targetDir + File.separator + (String)aFilePath);
+
+                if (new File(sourceDir + File.separator + aFilePath).isFile()) {
+                    copyFile(
+                            sourceDir + File.separator + aFilePath,
+                            targetDir + File.separator + aFilePath);
+                }
             }
         }
     }
 
+    /**
+     * 复制文件
+     * @param sourceFile 原始路径
+     * @param targetPath 目标路径
+     * @throws IOException if any
+     */
     public static void copyFile(String sourceFile, String targetPath) throws IOException {
         File oldFile = new File(sourceFile);
         File file = new File(targetPath);
+
         try (FileInputStream in = new FileInputStream(oldFile);
-             FileOutputStream out = new FileOutputStream(file);){
-            byte[] buffer = new byte[0x200000];
-            while (in.read(buffer) != -1) {
+             FileOutputStream out = new FileOutputStream(file)) {
+
+            byte[] buffer = new byte[2097152];
+
+            while ((in.read(buffer)) != -1) {
                 out.write(buffer);
             }
         }
     }
 
-    public static void write(String filePath, CharSequence line, OpenOption ... openOptions) {
-        FileUtils.write(filePath, Collections.singletonList(line), openOptions);
+    /**
+     * 写入文件信息 （1）默认 utf-8 编码 （2）默认新建一个文件 （3）默认为一行
+     * @param filePath 文件路径
+     * @param line 行信息
+     * @param openOptions 操作属性
+     */
+    public static void write(
+            final String filePath, final CharSequence line, OpenOption... openOptions) {
+        write(filePath, Collections.singletonList(line), openOptions);
     }
 
-    public static void write(String filePath, Iterable<? extends CharSequence> lines, OpenOption ... openOptions) {
-        FileUtils.write(filePath, lines, "UTF-8", openOptions);
+    /**
+     * 写入文件信息 （1）默认 utf-8 编码 （2）默认新建一个文件
+     * @param filePath 文件路径
+     * @param lines 行信息
+     * @param openOptions 文件选项
+     */
+    public static void write(
+            final String filePath,
+            final Iterable<? extends CharSequence> lines,
+            OpenOption... openOptions) {
+        write(filePath, lines, CommonConstants.UTF8, openOptions);
     }
 
-    public static void write(String filePath, Iterable<? extends CharSequence> lines, String charset, OpenOption ... openOptions) {
+    /**
+     * 写入文件信息
+     * @param filePath 文件路径
+     * @param lines 行信息
+     * @param charset 文件编码
+     * @param openOptions 文件操作选项
+     */
+    public static void write(
+            final String filePath,
+            final Iterable<? extends CharSequence> lines,
+            final String charset,
+            OpenOption... openOptions) {
         try {
-            File parent;
+            // ensure lines is not null before opening file
             ArgUtils.notNull(lines, "charSequences");
             CharsetEncoder encoder = Charset.forName(charset).newEncoder();
-            Path path = Paths.get(filePath, new String[0]);
+            final Path path = Paths.get(filePath);
+
+            // 创建父类文件夹
             Path pathParent = path.getParent();
-            if (pathParent != null && !(parent = pathParent.toFile()).exists()) {
-                parent.mkdirs();
+            // 路径判断空
+            if (pathParent != null) {
+                File parent = pathParent.toFile();
+                if (!parent.exists()) {
+                    parent.mkdirs();
+                }
             }
+
             OutputStream out = path.getFileSystem().provider().newOutputStream(path, openOptions);
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, encoder));){
-                for (CharSequence charSequence : lines) {
-                    writer.append(charSequence);
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, encoder))) {
+                for (CharSequence line : lines) {
+                    writer.append(line);
                     writer.newLine();
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static boolean createFile(String filePath) {
-        boolean mkdirResult;
+    /**
+     * 创建文件 （1）文件路径为空，则直接返回 false （2）如果文件已经存在，则返回 true （3）如果文件不存在，则创建文件夹，然后创建文件。 3.1
+     * 如果父类文件夹创建失败，则直接返回 false.
+     * @param filePath 文件路径
+     * @return 是否成功
+     * @throws BootException 运行时异常，如果创建文件异常。包括的异常为 {@link IOException} 文件异常.
+     */
+    public static boolean createFile(final String filePath) {
         if (StringUtils.isEmpty(filePath)) {
             return false;
         }
-        if (FileUtils.exists(filePath, new LinkOption[0])) {
+
+        if (FileUtils.exists(filePath)) {
             return true;
         }
+
         File file = new File(filePath);
+
+        // 父类文件夹的处理
         File dir = file.getParentFile();
-        if (dir != null && FileUtils.notExists(dir) && !(mkdirResult = dir.mkdirs())) {
-            return false;
+        if (dir != null && FileUtils.notExists(dir)) {
+            boolean mkdirResult = dir.mkdirs();
+            if (!mkdirResult) {
+                return false;
+            }
         }
+        // 创建文件
         try {
             return file.createNewFile();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static boolean exists(String filePath, LinkOption ... options) {
+    /**
+     * 文件是否存在
+     * @param filePath 文件路径
+     * @param options 连接选项
+     * @return 是否存在
+     */
+    public static boolean exists(final String filePath, LinkOption... options) {
         if (StringUtils.isEmpty(filePath)) {
             return false;
         }
-        Path path = Paths.get(filePath, new String[0]);
+
+        Path path = Paths.get(filePath);
         return Files.exists(path, options);
     }
 
-    public static boolean notExists(String filePath, LinkOption ... options) {
-        return !FileUtils.exists(filePath, options);
+    /**
+     * 文件是否不存在
+     * @param filePath 文件路径
+     * @param options 连接选项
+     * @return 是否存在
+     */
+    public static boolean notExists(final String filePath, LinkOption... options) {
+        return !exists(filePath, options);
     }
 
-    public static boolean notExists(File file) {
+    /**
+     * 文件是否不存在
+     * @param file 文件
+     * @return 是否存在
+     */
+    public static boolean notExists(final File file) {
         ArgUtils.notNull(file, "file");
         return !file.exists();
     }
 
-    public static boolean isEmpty(String filePath) {
+    /**
+     * 判断文件是否为空 （1）文件不存在，返回 true （2）文件存在，且 {@link File#length()} 为0，则认为空。
+     * （3）文件存在，且length大于0，则认为不空
+     * @param filePath 文件路径
+     * @return 内容是否为空
+     */
+    public static boolean isEmpty(final String filePath) {
         if (StringUtils.isEmpty(filePath)) {
             return true;
         }
         File file = new File(filePath);
-        return file.length() <= 0L;
+        return file.length() <= 0;
     }
 
-    public static boolean isNotEmpty(String filePath) {
-        return !FileUtils.isEmpty(filePath);
-    }
-
-    /*
-     * Enabled aggressive exception aggregation
+    /**
+     * 内容是否为不空
+     * @param filePath 文件路径
+     * @return 内容是否为不空
      */
-    public static byte[] getFileBytes(File file) {
+    public static boolean isNotEmpty(final String filePath) {
+        return !isEmpty(filePath);
+    }
+
+    /**
+     * 获取文件字节数组
+     * @param file 文件信息
+     * @return 字节数组
+     */
+    public static byte[] getFileBytes(final File file) {
         ArgUtils.notNull(file, "file");
-        try (FileInputStream fis = new FileInputStream(file);){
-            byte[] byArray;
-            try (ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);){
-                int n;
-                byte[] b = new byte[1024];
-                while ((n = fis.read(b)) != -1) {
-                    bos.write(b, 0, n);
-                }
-                byArray = bos.toByteArray();
+
+        try (FileInputStream fis = new FileInputStream(file);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream(1024)) {
+            byte[] b = new byte[1024];
+            int n;
+            while ((n = fis.read(b)) != -1) {
+                bos.write(b, 0, n);
             }
-            return byArray;
-        }
-        catch (IOException e) {
+            return bos.toByteArray();
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static byte[] getFileBytes(String filePath) {
+    /**
+     * 获取文件字节流
+     * @param filePath 文件路径
+     * @return 字节数组
+     */
+    public static byte[] getFileBytes(final String filePath) {
         ArgUtils.notNull(filePath, "filePath");
+
         File file = new File(filePath);
-        return FileUtils.getFileBytes(file);
+        return getFileBytes(file);
     }
 
-    public static void createFile(String filePath, byte[] bytes) {
-        File file = FileUtils.createFileAssertSuccess(filePath);
+    /**
+     * 根据字节信息创建文件
+     * @param filePath 文件路径
+     * @param bytes 字节数组
+     * @see #createFileAssertSuccess 断言创建成功
+     */
+    public static void createFile(final String filePath, final byte[] bytes) {
+        File file = createFileAssertSuccess(filePath);
         try (FileOutputStream fos = new FileOutputStream(file);
-             BufferedOutputStream bos = new BufferedOutputStream(fos);){
+             BufferedOutputStream bos = new BufferedOutputStream(fos); ) {
             bos.write(bytes);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new BootException(e);
         }
     }
 
-    public static File createFileAssertSuccess(String filePath) {
-        boolean mkdirResult;
+    /**
+     * 创建文件
+     * @param filePath 文件路径
+     * @return 文件信息
+     * @throws BootException 运行时异常，如果创建文件异常。包括的异常为 {@link IOException} 文件异常.
+     */
+    public static File createFileAssertSuccess(final String filePath) {
         ArgUtils.notEmpty(filePath, "filePath");
+
+        // 判断文件是否存在
         File file = new File(filePath);
         if (file.exists()) {
             return file;
         }
+
+        // 父类文件夹的处理
         File dir = file.getParentFile();
-        if (FileUtils.notExists(dir) && !(mkdirResult = dir.mkdirs())) {
-            throw new BootException("Parent file create fail " + filePath);
+        if (FileUtils.notExists(dir)) {
+            boolean mkdirResult = dir.mkdirs();
+            if (!mkdirResult) {
+                throw new BootException("Parent file create fail " + filePath);
+            }
         }
+
         try {
+            // 创建文件
             boolean createFile = file.createNewFile();
             if (!createFile) {
                 throw new BootException("Create new file fail for path " + filePath);
             }
             return file;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static void deleteFile(File file) {
-        boolean result;
+    /**
+     * 删除文件
+     * @param file 文件信息
+     */
+    public static void deleteFile(final File file) {
         ArgUtils.notNull(file, "file");
-        if (file.exists() && !(result = file.delete())) {
-            throw new BootException("Delete file fail for path " + file.getAbsolutePath());
+
+        if (file.exists()) {
+            boolean result = file.delete();
+            if (!result) {
+                throw new BootException(
+                        "Delete file fail for path " + file.getAbsolutePath());
+            }
         }
     }
 
-    public static void deleteFile(String filePath) {
+    /**
+     * 删除文件
+     * @param filePath 文件信息
+     */
+    public static void deleteFile(final String filePath) {
         ArgUtils.notEmpty(filePath, "filePath");
         File file = new File(filePath);
-        FileUtils.deleteFile(file);
+        deleteFile(file);
     }
 
-    public static File createTempFile(String name, String suffix) {
+    /**
+     * 创建临时文件
+     * @param name 文件名称
+     * @param suffix 文件后缀
+     * @return 临时文件
+     */
+    public static File createTempFile(final String name, final String suffix) {
         try {
             ArgUtils.notEmpty(name, "prefix");
             ArgUtils.notEmpty(suffix, "suffix");
+
             return File.createTempFile(name, suffix);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static File createTempFile(String nameWithSuffix) {
+    /**
+     * 创建临时文件
+     * @param nameWithSuffix 文件名称全称
+     * @return 临时文件
+     */
+    public static File createTempFile(final String nameWithSuffix) {
         try {
             ArgUtils.notEmpty(nameWithSuffix, "fileName");
             String[] strings = nameWithSuffix.split("\\.");
             return File.createTempFile(strings[0], strings[1]);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static boolean isImage(String string) {
+    /**
+     * 是否为图片格式
+     * @param string 原始字符串
+     * @return 是否为图片
+     */
+    public static boolean isImage(final String string) {
         if (StringUtils.isEmpty(string)) {
             return false;
         }
-        return string.endsWith(".png") || string.endsWith(".jpeg") || string.endsWith(".jpg") || string.endsWith(".gif");
+
+        return string.endsWith(FileTypeConstants.Image.PNG)
+                || string.endsWith(FileTypeConstants.Image.JPEG)
+                || string.endsWith(FileTypeConstants.Image.JPG)
+                || string.endsWith(FileTypeConstants.Image.GIF);
     }
 
-    public static <K, V> Map<K, V> readToMap(InputStream inputStream, String charset, MapHandler<K, V, String> mapHandler) {
+    /**
+     * 将文件内容转换为 map
+     * @param inputStream 输入流
+     * @param charset 文件编码
+     * @param mapHandler 转换实现
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @return 结果
+     */
+    public static <K, V> Map<K, V> readToMap(
+            final InputStream inputStream,
+            final String charset,
+            final MapHandler<K, V, String> mapHandler) {
         List<String> allLines = FileUtils.readAllLines(inputStream, charset);
         return MapUtils.toMap(allLines, mapHandler);
     }
 
-    public static <K, V> Map<K, V> readToMap(String path, String charset, MapHandler<K, V, String> mapHandler) {
+    /**
+     * 将文件内容转换为 map
+     * @param path 文件路径
+     * @param charset 文件编码
+     * @param mapHandler 转换实现
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @return 结果
+     */
+    public static <K, V> Map<K, V> readToMap(
+            final String path, final String charset, final MapHandler<K, V, String> mapHandler) {
         List<String> allLines = FileUtils.readAllLines(path, charset);
         return MapUtils.toMap(allLines, mapHandler);
     }
 
-    public static <K, V> Map<K, V> readToMap(String path, MapHandler<K, V, String> mapHandler) {
-        return FileUtils.readToMap(path, "UTF-8", mapHandler);
+    /**
+     * 将文件内容转换为 map
+     * @param path 文件路径
+     * @param mapHandler 转换实现
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @return 结果
+     */
+    public static <K, V> Map<K, V> readToMap(
+            final String path, final MapHandler<K, V, String> mapHandler) {
+        return readToMap(path, CommonConstants.UTF8, mapHandler);
     }
 
-    public static Map<String, String> readToMap(String path) {
-        return FileUtils.readToMap(path, " ");
+    /**
+     * 将文件内容转换为 map
+     *
+     * <p>
+     * （1）直接拆分。取第一个值和第一个值 （2）默认使用空格分隔
+     * @param path 文件路径
+     * @return 结果
+     */
+    public static Map<String, String> readToMap(final String path) {
+        return readToMap(path, " ");
     }
 
-    public static Map<String, String> readToMap(String path, final String splitter) {
-        return FileUtils.readToMap(path, new MapHandler<String, String, String>(){
+    /**
+     * 将文件内容转换为 map
+     *
+     * <p>
+     * （1）直接拆分。取第一个值和第一个值
+     * @param path 文件路径
+     * @param splitter 分隔符号
+     * @return 结果
+     */
+    public static Map<String, String> readToMap(final String path, final String splitter) {
+        return readToMap(
+                path,
+                new MapHandler<String, String, String>() {
+                    @Override
+                    public String getKey(String o) {
+                        return o.split(splitter)[0];
+                    }
 
-            @Override
-            public String getKey(String o) {
-                return o.split(splitter)[0];
-            }
-
-            @Override
-            public String getValue(String o) {
-                return o.split(splitter)[1];
-            }
-        });
+                    @Override
+                    public String getValue(String o) {
+                        return o.split(splitter)[1];
+                    }
+                });
     }
 
-    public static String getFileName(String path) {
+    /**
+     * 获取文件名称
+     * @param path 完整路径
+     * @return 名称
+     */
+    public static String getFileName(final String path) {
         if (StringUtils.isEmptyTrim(path)) {
-            return "";
+            return StringUtils.EMPTY;
         }
+
         File file = new File(path);
         String name = file.getName();
-        return name.substring(0, name.lastIndexOf(46));
+
+        return name.substring(0, name.lastIndexOf('.'));
     }
 
-    public static String getDirPath(String path) {
-        Path path1 = Paths.get(path, new String[0]);
+    /**
+     * 获取父类路径
+     * @param path 当前路径
+     * @return 父类路径
+     */
+    public static String getDirPath(final String path) {
+        Path path1 = Paths.get(path);
         return path1.getParent().toAbsolutePath().toString() + File.separator;
     }
 
-    public static String trimWindowsSpecialChars(String name) {
+    /**
+     * 移除 windows 中禁止出现的特殊符号名称
+     * @param name 名称
+     * @return 结果
+     */
+    public static String trimWindowsSpecialChars(final String name) {
         if (StringUtils.isEmpty(name)) {
             return name;
         }
+
         return name.replaceAll("[?/\\\\*<>|:\"]", "");
     }
 
-    public static boolean rename(String sourcePath, String targetPath) {
+    /**
+     * 重命名
+     * @param sourcePath 原始路径
+     * @param targetPath 结果路径
+     * @return 重命名结果
+     */
+    public static boolean rename(final String sourcePath, final String targetPath) {
         File sourceFile = new File(sourcePath);
         File targetFile = new File(targetPath);
         return sourceFile.renameTo(targetFile);
     }
 
-    public static void merge(String result, String ... sources) {
+    /**
+     * 文件合并
+     * @param result 结果路径
+     * @param sources 其他待合并文件路径
+     */
+    public static void merge(final String result, final String... sources) {
         ArgUtils.notEmpty(result, "result");
         ArgUtils.notEmpty(sources, "sources");
-        try (FileOutputStream os = new FileOutputStream(result);){
+
+        try (OutputStream os = new FileOutputStream(result)) {
             for (String source : sources) {
-                byte[] bytes = FileUtils.getFileBytes(source);
-                ((OutputStream)os).write(bytes);
+                byte[] bytes = getFileBytes(source);
+                os.write(bytes);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static void merge(String result, byte[] ... byteArrays) {
+    /**
+     * 将指定的数组信息合并到指定的文件中
+     * @param result 结果路径
+     * @param byteArrays 其他待合并文件路径
+     */
+    public static void merge(final String result, final byte[]... byteArrays) {
         ArgUtils.notEmpty(result, "result");
-        ArgUtils.notEmpty((Object[])byteArrays, "byteArrays");
-        try (FileOutputStream os = new FileOutputStream(result);){
+        ArgUtils.notEmpty(byteArrays, "byteArrays");
+
+        try (OutputStream os = new FileOutputStream(result)) {
             for (byte[] bytes : byteArrays) {
-                ((OutputStream)os).write(bytes);
+                os.write(bytes);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static void merge(String result, List<byte[]> byteArrayList) {
+    /**
+     * 将指定的数组信息合并到指定的文件中
+     * @param result 结果路径
+     * @param byteArrayList 其他待合并文件字节数组
+     */
+    public static void merge(final String result, final List<byte[]> byteArrayList) {
         ArgUtils.notEmpty(result, "result");
         ArgUtils.notEmpty(byteArrayList, "byteArrayList");
-        try (FileOutputStream os = new FileOutputStream(result);){
+
+        try (OutputStream os = new FileOutputStream(result)) {
             for (byte[] bytes : byteArrayList) {
-                ((OutputStream)os).write(bytes);
+                os.write(bytes);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static void write(String filePath, byte[] bytes) {
+    /**
+     * 写入字节到文件
+     * @param filePath 文件路径
+     * @param bytes 字节信息
+     */
+    public static void write(final String filePath, final byte[] bytes) {
         ArgUtils.notEmpty(filePath, "filePath");
-        try (FileOutputStream os = new FileOutputStream(filePath);){
-            ((OutputStream)os).write(bytes);
-        }
-        catch (IOException e) {
+
+        try (OutputStream os = new FileOutputStream(filePath)) {
+            os.write(bytes);
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static String escapeWindowsSpecial(String fileName) {
+    /**
+     * 转义 windows 下的特殊字符
+     * @param fileName 文件名称
+     * @return 转义后的字符串
+     */
+    public static String escapeWindowsSpecial(final String fileName) {
         if (StringUtils.isEmpty(fileName)) {
             return fileName;
         }
         return fileName.replaceAll("[\"<>/\\\\|:*?]", "");
     }
 
-    public static boolean createDir(String dir) {
+    /**
+     * 创建文件夹
+     * @param dir 文件夹
+     * @return 结果
+     */
+    public static boolean createDir(final String dir) {
         if (StringUtils.isEmpty(dir)) {
             return false;
         }
+
         File file = new File(dir);
         if (file.isDirectory()) {
             return file.mkdirs();
@@ -717,78 +1140,205 @@ extends FileCopyUtils {
         return false;
     }
 
-    public static void truncate(String filePath) {
-        FileUtils.write(filePath, "", StandardOpenOption.TRUNCATE_EXISTING);
+    /**
+     * 清空文件内容
+     * @param filePath 文件路径
+     */
+    public static void truncate(final String filePath) {
+        FileUtils.write(filePath, StringUtils.EMPTY, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    public static void append(String filePath, String line) {
+    /**
+     * 追加文件内容
+     * @param filePath 文件路径
+     * @param line 文件内容
+     */
+    public static void append(final String filePath, final String line) {
         FileUtils.write(filePath, line, StandardOpenOption.APPEND);
     }
 
-    public static void append(String filePath, Collection<String> collection) {
+    /**
+     * 追加文件内容
+     * @param filePath 文件路径
+     * @param collection 文件内容
+     */
+    public static void append(final String filePath, final Collection<String> collection) {
         FileUtils.write(filePath, collection, StandardOpenOption.APPEND);
     }
 
+    /**
+     * 将文件转成 base64 字符串
+     *
+     * <p>
+     * https://www.cnblogs.com/darkhumor/p/7525392.html
+     * https://blog.csdn.net/phoenix_cat/article/details/84676302
+     * https://blog.csdn.net/myloverisxin/article/details/117530365
+     * https://www.cnblogs.com/yejg1212/p/11926649.html
+     *
+     * <p>
+     * 不同规范编码不同，会导致出现换行符号，但是解码的时候会被忽略。
+     * @param filePath 文件路径
+     * @return base64 字符串
+     */
     public static String fileToBase64(String filePath) {
+        // File file = new File(filePath);
+        //
+        // try(FileInputStream inputFile = new FileInputStream(file)) {
+        // byte[] buffer = new byte[(int)file.length()];
+        // inputFile.read(buffer);
+        // String plainText = new BASE64Encoder().encode(buffer);
+        //
+        // return plainText.replaceAll("\r", "")
+        // .replaceAll("\n", "");
+        // } catch (IOException e) {
+        // throw new RuntimeException(e);
+        // }
         return filePath;
     }
 
+    /**
+     * 将base64字符解码保存文件
+     * @param base64Code base64 内容
+     * @param targetPath 目标文件
+     */
     public static void base64ToFile(String base64Code, String targetPath) {
+        // FileUtil.createFile(targetPath);
+        //
+        // try(FileOutputStream out = new FileOutputStream(targetPath);) {
+        // byte[] buffer = new BASE64Decoder().decodeBuffer(base64Code);
+        // out.write(buffer);
+        // } catch (IOException e) {
+        // throw new RuntimeException(e);
+        // }
     }
 
+    /**
+     * 默认为true
+     *
+     * @author kuma
+     * @version 2021.9
+     * @since 2021-09-02 19:41:13
+     */
+    public static class TrueFilter implements FileFilter, Serializable {
+
+        @Serial private static final long serialVersionUID = -6420452043795072619L;
+
+        public static final TrueFilter TRUE = new TrueFilter();
+
+        @Override
+        public boolean accept(File pathname) {
+            return true;
+        }
+    }
+
+    /**
+     * 扫描目录下的文件
+     * @param path 路径
+     * @return 文件集合
+     */
     public static List<File> list(String path) {
         File file = new File(path);
-        return FileUtils.list(file, (FileFilter)TrueFilter.TRUE);
+        return list(file, TrueFilter.TRUE);
     }
 
-    public static List<File> list(String path, String fileNamePattern) {
+    /**
+     * 扫描目录下的文件
+     * @param path 路径
+     * @param fileNamePattern 文件名 * 号
+     * @return 文件集合
+     */
+    public static List<File> list(String path, final String fileNamePattern) {
         File file = new File(path);
-        return FileUtils.list(file, (File pathname) -> {
-            String fileName = pathname.getName();
-            return PatternMatchUtils.simpleMatch((String)fileNamePattern, (String)fileName);
-        });
+        return list(
+                file,
+                pathname -> {
+                    String fileName = pathname.getName();
+                    return PatternMatchUtils.simpleMatch(fileNamePattern, fileName);
+                });
     }
 
+    /**
+     * 扫描目录下的文件
+     * @param path 路径
+     * @param filter 文件过滤
+     * @return 文件集合
+     */
     public static List<File> list(String path, FileFilter filter) {
         File file = new File(path);
-        return FileUtils.list(file, filter);
+        return list(file, filter);
     }
 
+    /**
+     * 扫描目录下的文件
+     * @param file 文件
+     * @return 文件集合
+     */
     public static List<File> list(File file) {
-        ArrayList<File> fileList = new ArrayList<File>();
-        return FileUtils.list(file, fileList, TrueFilter.TRUE);
+        List<File> fileList = new ArrayList<>();
+        return list(file, fileList, TrueFilter.TRUE);
     }
 
-    public static List<File> list(File file, String fileNamePattern) {
-        ArrayList<File> fileList = new ArrayList<File>();
-        return FileUtils.list(file, fileList, (File pathname) -> {
-            String fileName = pathname.getName();
-            return PatternMatchUtils.simpleMatch((String)fileNamePattern, (String)fileName);
-        });
+    /**
+     * 扫描目录下的文件
+     * @param file 文件
+     * @param fileNamePattern "xxx*", "*xxx", "*xxx*" and "xxx*yyy"
+     * @return 文件集合
+     */
+    public static List<File> list(File file, final String fileNamePattern) {
+        List<File> fileList = new ArrayList<>();
+        return list(
+                file,
+                fileList,
+                pathname -> {
+                    String fileName = pathname.getName();
+                    return PatternMatchUtils.simpleMatch(fileNamePattern, fileName);
+                });
     }
 
-    public static List<File> list(File file, String ... fileNamePatterns) {
-        ArrayList<File> fileList = new ArrayList<File>();
-        return FileUtils.list(file, fileList, (File pathname) -> {
-            String fileName = pathname.getName();
-            return PatternMatchUtils.simpleMatch((String[])fileNamePatterns, (String)fileName);
-        });
+    /**
+     * 扫描目录下的文件
+     * @param file 文件
+     * @param fileNamePatterns "xxx*", "*xxx", "*xxx*" and "xxx*yyy"
+     * @return 文件集合
+     */
+    public static List<File> list(File file, final String... fileNamePatterns) {
+        List<File> fileList = new ArrayList<>();
+        return list(
+                file,
+                fileList,
+                pathname -> {
+                    String fileName = pathname.getName();
+                    return PatternMatchUtils.simpleMatch(fileNamePatterns, fileName);
+                });
     }
 
+    /**
+     * 扫描目录下的文件
+     * @param file 文件
+     * @param filter 文件过滤
+     * @return 文件集合
+     */
     public static List<File> list(File file, FileFilter filter) {
-        ArrayList<File> fileList = new ArrayList<File>();
-        return FileUtils.list(file, fileList, filter);
+        List<File> fileList = new ArrayList<>();
+        return list(file, fileList, filter);
     }
 
+    /**
+     * 扫描目录下的文件
+     * @param file 文件
+     * @param filter 文件过滤
+     * @return 文件集合
+     */
     private static List<File> list(File file, List<File> fileList, FileFilter filter) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files != null) {
                 for (File f : files) {
-                    FileUtils.list(f, fileList, filter);
+                    list(f, fileList, filter);
                 }
             }
         } else {
+            // 过滤文件
             boolean accept = filter.accept(file);
             if (file.exists() && accept) {
                 fileList.add(file);
@@ -797,233 +1347,378 @@ extends FileCopyUtils {
         return fileList;
     }
 
+    /**
+     * 获取文件后缀名
+     * @param path 文件路径
+     * @return {String}
+     */
     @Nullable
     public static String getFilename(@Nullable String path) {
-        return org.springframework.util.StringUtils.getFilename((String)path);
+        return org.springframework.util.StringUtils.getFilename(path);
     }
 
+    /**
+     * 获取文件后缀名 jpg
+     * @param fullName 文件全名
+     * @return {String}
+     */
     @Nullable
     public static String getFileExtension(@Nullable String fullName) {
-        return org.springframework.util.StringUtils.getFilenameExtension((String)fullName);
+        return org.springframework.util.StringUtils.getFilenameExtension(fullName);
     }
 
+    /**
+     * 获取文件后缀名 .jpg
+     * @param fullName 文件全名
+     * @return {String}
+     */
     @Nullable
     public static String getFileExtensionWithDot(@Nullable String fullName) {
         if (fullName == null) {
             return null;
         }
-        int extIndex = fullName.lastIndexOf(46);
+
+        int extIndex = fullName.lastIndexOf(CharPool.DOT);
         if (extIndex == -1) {
             return null;
         }
-        int folderIndex = fullName.lastIndexOf(47);
+
+        int folderIndex = fullName.lastIndexOf(CharPool.SLASH);
         if (folderIndex > extIndex) {
             return null;
         }
+
         return fullName.substring(extIndex);
     }
 
+    /**
+     * 获取文件名，去除后缀名
+     * @param path 文件
+     * @return {String}
+     */
     @Nullable
     public static String getPathWithoutExtension(@Nullable String path) {
         if (path == null) {
             return null;
         }
-        return org.springframework.util.StringUtils.stripFilenameExtension((String)path);
+        return org.springframework.util.StringUtils.stripFilenameExtension(path);
     }
 
+    /**
+     * Returns the path to the system temporary directory.
+     * @return the path to the system temporary directory.
+     */
     public static String getTempDirPath() {
         return System.getProperty("java.io.tmpdir");
     }
 
+    /**
+     * 拼接临时文件目录.
+     * @return 临时文件目录.
+     */
     public static String toTempDirPath(String subDirFile) {
         return FileUtils.toTempDir(subDirFile).getAbsolutePath();
     }
 
+    /**
+     * Returns a {@link File} representing the system temporary directory.
+     * @return the system temporary directory.
+     */
     public static File getTempDir() {
-        return new File(FileUtils.getTempDirPath());
+        return new File(getTempDirPath());
     }
 
+    /**
+     * 拼接临时文件目录.
+     * @return the system temporary directory.
+     */
     public static File toTempDir(String subDirFile) {
-        String fullPath;
-        File fullFilePath;
-        File dir;
         String tempDirPath = FileUtils.getTempDirPath();
-        if (subDirFile.startsWith("/")) {
+        if (subDirFile.startsWith(StrPoolConstants.SLASH)) {
             subDirFile = subDirFile.substring(1);
         }
-        if (!(dir = (fullFilePath = new File(fullPath = tempDirPath.concat(subDirFile))).getParentFile()).exists()) {
+        String fullPath = tempDirPath.concat(subDirFile);
+        File fullFilePath = new File(fullPath);
+        File dir = fullFilePath.getParentFile();
+        if (!dir.exists()) {
             dir.mkdirs();
         }
         return fullFilePath;
     }
 
-    public static String readToString(File file) {
-        return FileUtils.readToString(file, StandardCharsets.UTF_8);
+    /**
+     * Reads the contents of a file into a String. The file is always closed.
+     * @param file the file to read, must not be {@code null}
+     * @return the file contents, never {@code null}
+     */
+    public static String readToString(final File file) {
+        return readToString(file, StandardCharsets.UTF_8);
     }
 
-    public static String readToString(File file, Charset encoding) {
-        String string;
-        block8: {
-            InputStream in = Files.newInputStream(file.toPath(), new OpenOption[0]);
-            try {
-                string = IoUtils.readToString(in, encoding);
-                if (in == null) break block8;
-            }
-            catch (Throwable throwable) {
-                try {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        }
-                        catch (Throwable throwable2) {
-                            throwable.addSuppressed(throwable2);
-                        }
-                    }
-                    throw throwable;
-                }
-                catch (IOException e) {
-                    throw ExceptionUtils.unchecked(e);
-                }
-            }
-            in.close();
+    /**
+     * Reads the contents of a file into a String. The file is always closed.
+     * @param file the file to read, must not be {@code null}
+     * @param encoding the encoding to use, {@code null} means platform default
+     * @return the file contents, never {@code null}
+     */
+    public static String readToString(final File file, final Charset encoding) {
+        try (InputStream in = Files.newInputStream(file.toPath())) {
+            return IoUtils.readToString(in, encoding);
+        } catch (IOException e) {
+            throw ExceptionUtils.unchecked(e);
         }
-        return string;
     }
 
-    public static byte[] readToByteArray(File file) {
+    /**
+     * Reads the contents of a file into a String. The file is always closed.
+     * @param file the file to read, must not be {@code null}
+     * @return the file contents, never {@code null}
+     */
+    public static byte[] readToByteArray(final File file) {
         try {
             return Files.readAllBytes(file.toPath());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
         }
     }
 
-    public static void writeToFile(File file, String data) {
-        FileUtils.writeToFile(file, data, StandardCharsets.UTF_8, false);
+    /**
+     * Writes a String to a file creating the file if it does not exist.
+     * @param file the file to write
+     * @param data the content to write to the file
+     */
+    public static void writeToFile(final File file, final String data) {
+        writeToFile(file, data, StandardCharsets.UTF_8, false);
     }
 
-    public static void writeToFile(File file, String data, boolean append) {
-        FileUtils.writeToFile(file, data, StandardCharsets.UTF_8, append);
+    /**
+     * Writes a String to a file creating the file if it does not exist.
+     * @param file the file to write
+     * @param data the content to write to the file
+     * @param append if {@code true}, then the String will be added to the end of the file
+     * rather than overwriting
+     */
+    public static void writeToFile(final File file, final String data, final boolean append) {
+        writeToFile(file, data, StandardCharsets.UTF_8, append);
     }
 
-    public static void writeToFile(File file, String data, Charset encoding) {
-        FileUtils.writeToFile(file, data, encoding, false);
+    /**
+     * Writes a String to a file creating the file if it does not exist.
+     * @param file the file to write
+     * @param data the content to write to the file
+     * @param encoding the encoding to use, {@code null} means platform default
+     */
+    public static void writeToFile(final File file, final String data, final Charset encoding) {
+        writeToFile(file, data, encoding, false);
     }
 
-    public static void writeToFile(File file, String data, Charset encoding, boolean append) {
-        try (FileOutputStream out = new FileOutputStream(file, append);){
+    /**
+     * Writes a String to a file creating the file if it does not exist.
+     * @param file the file to write
+     * @param data the content to write to the file
+     * @param encoding the encoding to use, {@code null} means platform default
+     * @param append if {@code true}, then the String will be added to the end of the file
+     * rather than overwriting
+     */
+    public static void writeToFile(
+            final File file, final String data, final Charset encoding, final boolean append) {
+        try (OutputStream out = new FileOutputStream(file, append)) {
             IoUtils.write(data, out, encoding);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
         }
     }
 
-    public static void toFile(MultipartFile multipartFile, File file) {
+    /**
+     * 转成file
+     * @param multipartFile MultipartFile
+     * @param file File
+     */
+    public static void toFile(MultipartFile multipartFile, final File file) {
         try {
             FileUtils.toFile(multipartFile.getInputStream(), file);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
         }
     }
 
-    public static void toFile(InputStream in, File file) {
-        try (FileOutputStream out = new FileOutputStream(file);){
-            FileUtils.copy((InputStream)in, (OutputStream)out);
-        }
-        catch (IOException e) {
+    /**
+     * 转成file
+     * @param in InputStream
+     * @param file File
+     */
+    public static void toFile(InputStream in, final File file) {
+        try (OutputStream out = new FileOutputStream(file)) {
+            FileUtils.copy(in, out);
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
         }
     }
 
-    public static void moveFile(File srcFile, File destFile) throws IOException {
-        Assert.notNull((Object)srcFile, (String)"Source must not be null", (Object[])new Object[0]);
-        Assert.notNull((Object)destFile, (String)"Destination must not be null", (Object[])new Object[0]);
+    /**
+     * Moves a file.
+     *
+     * <p>
+     * When the destination file is on another file system, do a "copy and delete".
+     * @param srcFile the file to be moved
+     * @param destFile the destination file
+     * @throws NullPointerException if source or destination is {@code null}
+     * @throws IOException if source or destination is invalid
+     * @throws IOException if an IO error occurs moving the file
+     */
+    public static void moveFile(final File srcFile, final File destFile) throws IOException {
+        Assert.notNull(srcFile, "Source must not be null");
+        Assert.notNull(destFile, "Destination must not be null");
         if (!srcFile.exists()) {
-            throw new FileNotFoundException("Source '" + String.valueOf(srcFile) + "' does not exist");
+            throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
         }
         if (srcFile.isDirectory()) {
-            throw new IOException("Source '" + String.valueOf(srcFile) + "' is a directory");
+            throw new IOException("Source '" + srcFile + "' is a directory");
         }
         if (destFile.exists()) {
-            throw new IOException("Destination '" + String.valueOf(destFile) + "' already exists");
+            throw new IOException("Destination '" + destFile + "' already exists");
         }
         if (destFile.isDirectory()) {
-            throw new IOException("Destination '" + String.valueOf(destFile) + "' is a directory");
+            throw new IOException("Destination '" + destFile + "' is a directory");
         }
-        boolean rename = srcFile.renameTo(destFile);
+        final boolean rename = srcFile.renameTo(destFile);
         if (!rename) {
-            FileUtils.copy((File)srcFile, (File)destFile);
+            FileUtils.copy(srcFile, destFile);
             if (!srcFile.delete()) {
                 FileUtils.deleteQuietly(destFile);
-                throw new IOException("Failed to delete original file '" + String.valueOf(srcFile) + "' after copy to '" + String.valueOf(destFile) + "'");
+                throw new IOException(
+                        "Failed to delete original file '"
+                                + srcFile
+                                + "' after copy to '"
+                                + destFile
+                                + "'");
             }
         }
     }
 
-    public static boolean deleteQuietly(@Nullable File file) {
+    /**
+     * Deletes a file, never throwing an exception. If file is a directory, delete it and
+     * all sub-directories.
+     *
+     * <p>
+     * The difference between File.delete() and this method are:
+     *
+     * <ul>
+     * <li>A directory to be deleted does not have to be empty.
+     * <li>No exceptions are thrown when a file or directory cannot be deleted.
+     * </ul>
+     * @param file file or directory to delete, can be {@code null}
+     * @return {@code true} if the file or directory was deleted, otherwise {@code false}
+     */
+    public static boolean deleteQuietly(@Nullable final File file) {
         if (file == null) {
             return false;
         }
         try {
             if (file.isDirectory()) {
-                FileSystemUtils.deleteRecursively((File)file);
+                FileSystemUtils.deleteRecursively(file);
             }
+        } catch (final Exception ignored) {
         }
-        catch (Exception exception) {
-            // empty catch block
-        }
+
         try {
             return file.delete();
-        }
-        catch (Exception ignored) {
+        } catch (final Exception ignored) {
             return false;
         }
     }
 
+    /**
+     * NIO 按行读取文件
+     * @param path 文件路径
+     * @return 行列表
+     */
     public static List<String> readLines(String path) {
-        return FileUtils.readLines(Paths.get(path, new String[0]));
+        return readLines(Paths.get(path));
     }
 
+    /**
+     * NIO 按行读取文件
+     * @param file 文件
+     * @return 行列表
+     */
     public static List<String> readLines(File file) {
-        return FileUtils.readLines(file.toPath());
+        return readLines(file.toPath());
     }
 
+    /**
+     * NIO 按行读取文件
+     * @param path 文件路径
+     * @return 行列表
+     */
     public static List<String> readLines(Path path) {
-        return FileUtils.readLines(path, StandardCharsets.UTF_8);
+        return readLines(path, StandardCharsets.UTF_8);
     }
 
+    /**
+     * NIO 按行读取文件
+     * @param path 文件路径
+     * @param cs 字符集
+     * @return 行列表
+     */
     public static List<String> readLines(String path, Charset cs) {
-        return FileUtils.readLines(Paths.get(path, new String[0]), cs);
+        return readLines(Paths.get(path), cs);
     }
 
+    /**
+     * NIO 按行读取文件
+     * @param file 文件
+     * @param cs 字符集
+     * @return 行列表
+     */
     public static List<String> readLines(File file, Charset cs) {
-        return FileUtils.readLines(file.toPath(), cs);
+        return readLines(file.toPath(), cs);
     }
 
+    /**
+     * NIO 按行读取文件
+     * @param path 文件路径
+     * @param cs 字符集
+     * @return 行列表
+     */
     public static List<String> readLines(Path path, Charset cs) {
         try {
             return Files.readAllLines(path, cs);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
         }
     }
 
+    /**
+     * 文件是否存在
+     * @param filepath 文件路径
+     * @return boolean
+     * @since 2021-09-02 16:46:10
+     */
     public static boolean existFile(String filepath) {
         File file = new File(filepath);
         return file.exists();
     }
 
+    /**
+     * 获取文件目录路径
+     * @param path 文件路径
+     * @return 文件目录路径
+     * @since 2021-09-02 16:46:03
+     */
     public static String getDirectoryPath(String path) {
         File file = new File(path);
         return file.getAbsolutePath();
     }
 
+    /**
+     * 获取文件目录路径
+     * @param cls cls
+     * @return 文件目录路径
+     * @since 2021-09-02 16:45:57
+     */
     public static String getDirectoryPath(Class<?> cls) {
-        File file = FileUtils.getJarFile(cls);
+        File file = getJarFile(cls);
         if (file == null) {
             return null;
         }
@@ -1033,17 +1728,48 @@ extends FileCopyUtils {
         return file.getAbsolutePath();
     }
 
+    /**
+     * 获取文件
+     * @param cls 类型
+     * @return 文件对象
+     * @since 2021-09-02 16:45:49
+     */
     public static File getJarFile(Class<?> cls) {
         String path = cls.getProtectionDomain().getCodeSource().getLocation().getFile();
         try {
-            path = URLDecoder.decode(path, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
+            // 转换处理中文及空格
+            path = java.net.URLDecoder.decode(path, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
             return null;
         }
         return new File(path);
     }
 
+    // /**
+    // * 获取文件路径
+    // *
+    // * @param paths 路径列表
+    // * @return java.lang.String
+    // * @since 2020/10/15 15:03
+    // * @version 2022.03
+    // */
+    // public String getFilePath(String... paths) {
+    // StringBuilder sb = new StringBuilder();
+    // for (String path : paths) {
+    // sb.append(org.springframework.util.StringUtils.trimTrailingCharacter(path,
+    // File.separatorChar));
+    // sb.append(File.separator);
+    // }
+    // return org.springframework.util.StringUtils.trimTrailingCharacter(sb.toString(),
+    // File.separatorChar);
+    // }
+
+    /**
+     * 创建目录
+     * @param path 文件路径
+     * @return 是否成功
+     * @since 2021-09-02 16:45:40
+     */
     public static Boolean createDirectory(String path) {
         File file = new File(path);
         if (!file.isDirectory()) {
@@ -1051,79 +1777,112 @@ extends FileCopyUtils {
         }
         if (!file.exists()) {
             return file.mkdirs();
+        } else {
+            return false;
         }
-        return false;
     }
 
+    /**
+     * 追加文件内容
+     * @param path 文件路径
+     * @param contents 内容
+     * @since 2021-09-02 16:45:30
+     */
     public static void appendAllText(String path, String contents) {
         try {
+            // 如果文件存在，则追加内容；如果文件不存在，则创建文件
             File f = new File(path);
-            try (FileWriter fw = new FileWriter(f, true);
-                 PrintWriter pw = new PrintWriter(fw);){
-                pw.println(contents);
-                pw.flush();
-                fw.flush();
+            try (FileWriter fw = new FileWriter(f, true)) {
+                try (PrintWriter pw = new PrintWriter(fw)) {
+                    pw.println(contents);
+                    pw.flush();
+                    fw.flush();
+                }
             }
-        }
-        catch (IOException exp) {
-            throw new BaseException("\u8ffd\u52a0\u6587\u4ef6\u5f02\u5e38", (Throwable)exp);
+        } catch (IOException exp) {
+            throw new BaseException("追加文件异常", exp);
         }
     }
 
+    /**
+     * 写文件内容
+     * @param path 文件路径
+     * @param contents 内容
+     * @since 2021-09-02 16:45:20
+     */
     public static void writeAllText(String path, String contents) {
-        block8: {
-            try {
-                File f = new File(path);
-                if (f.exists()) {
-                    f.delete();
-                }
-                if (!f.createNewFile()) break block8;
-                try (BufferedWriter output = new BufferedWriter(new FileWriter(f));){
+        try {
+            File f = new File(path);
+            if (f.exists()) {
+                f.delete();
+            }
+
+            if (f.createNewFile()) {
+                try (BufferedWriter output = new BufferedWriter(new FileWriter(f))) {
                     output.write(contents);
                 }
             }
-            catch (IOException exp) {
-                throw new BaseException("\u5199\u6587\u4ef6\u5f02\u5e38", (Throwable)exp);
-            }
+        } catch (IOException exp) {
+            throw new BaseException("写文件异常", exp);
         }
     }
 
+    /**
+     * 读取文件内容
+     * @param path 文件路径
+     * @return 文件路径
+     * @since 2021-09-02 16:45:10
+     */
     public static String readAllText(String path) {
         try {
             File f = new File(path);
             if (f.exists()) {
+                // 获取文件长度
                 long fileLength = f.length();
-                byte[] fileContent = new byte[(int)fileLength];
-                try (FileInputStream in = new FileInputStream(f);){
+                byte[] fileContent = new byte[(int) fileLength];
+                try (FileInputStream in = new FileInputStream(f)) {
                     in.read(fileContent);
                 }
+                // 返回文件内容,默认编码
                 return new String(fileContent);
+            } else {
+                throw new FileNotFoundException(path);
             }
-            throw new FileNotFoundException(path);
-        }
-        catch (IOException exp) {
-            throw new BaseException("\u8bfb\u6587\u4ef6\u5f02\u5e38", (Throwable)exp);
+        } catch (IOException exp) {
+            throw new BaseException("读文件异常", exp);
         }
     }
 
+    /**
+     * 获取行分隔符
+     * @return 获取行分隔符
+     * @since 2021-09-02 16:45:02
+     */
     public static String lineSeparator() {
         return System.getProperty("line.separator");
     }
 
+    /// **
+    // * 根据文件路径获取文件名
+    // *
+    // * @param filePath 文件路径
+    // * @return 文件路径
+    // * @since 2021-09-02 16:44:55
+    // */
+    // public static String getFileName(String filePath) {
+    // String path = filePath.replace("\\\\", "/");
+    // return path.substring(path.lastIndexOf("/") + 1, path.length());
+    // }
+
+    /**
+     * 根据原图生成规定尺寸的图片
+     * @param url 连接
+     * @param width 宽
+     * @param height 高
+     * @return 缩略图全路径
+     */
     public static String getUrl(String url, Integer width, Integer height) {
+        // 缩略图全路径
         return url + "?x-oss-process=style/" + width + "X" + height;
     }
-
-    public static class TrueFilter
-    implements FileFilter,
-    Serializable {
-        private static final long serialVersionUID = -6420452043795072619L;
-        public static final TrueFilter TRUE = new TrueFilter();
-
-        @Override
-        public boolean accept(File pathname) {
-            return true;
-        }
-    }
 }
-

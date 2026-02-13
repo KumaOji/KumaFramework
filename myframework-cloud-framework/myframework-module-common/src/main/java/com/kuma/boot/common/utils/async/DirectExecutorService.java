@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.annotation.Nonnull
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.async;
 
 import jakarta.annotation.Nonnull;
@@ -12,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -22,82 +31,100 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class DirectExecutorService
-implements ExecutorService {
+/**
+ * The direct executor service directly executes the runnables and the callables in the calling thread.
+ */
+public class DirectExecutorService implements ExecutorService {
+
     private final boolean triggerRejectedExecutionException;
+
     private boolean isShutdown = false;
 
-    DirectExecutorService(boolean triggerRejectedExecutionException) {
+    /**
+     * Creates a new {@link DirectExecutorService} instance.
+     *
+     * @param triggerRejectedExecutionException determines whether proper instance lifecycle management is applied.
+     * Passing {@code false} enables no-op shutdown functionality. Submitting tasks would still work after a shutdown.
+     * Passing {@link true} will align the instance's behavior with the {@link ExecutorService} contract which states
+     * that a {@link RejectedExecutionException} is thrown by any task invoking method if the executor service is shut
+     * down.
+     */
+    DirectExecutorService( boolean triggerRejectedExecutionException ) {
         this.triggerRejectedExecutionException = triggerRejectedExecutionException;
     }
 
     @Override
     public void shutdown() {
-        this.isShutdown = true;
+        isShutdown = true;
     }
 
     @Override
     @Nonnull
     public List<Runnable> shutdownNow() {
-        this.isShutdown = true;
+        isShutdown = true;
         return Collections.emptyList();
     }
 
     @Override
     public boolean isShutdown() {
-        return this.isShutdown;
+        return isShutdown;
     }
 
     @Override
     public boolean isTerminated() {
-        return this.isShutdown;
+        return isShutdown;
     }
 
     @Override
-    public boolean awaitTermination(long timeout, @Nonnull TimeUnit unit) {
-        return this.isShutdown;
+    public boolean awaitTermination( long timeout, @Nonnull TimeUnit unit ) {
+        return isShutdown;
     }
 
     @Override
     @Nonnull
-    public <T> Future<T> submit(@Nonnull Callable<T> task) {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public <T> Future<T> submit( @Nonnull Callable<T> task ) {
+        throwRejectedExecutionExceptionIfShutdown();
+
         try {
             T result = task.call();
-            return new CompletedFuture<T>(result, null);
+
+            return new CompletedFuture<>(result, null);
+        } catch (Exception e) {
+            return new CompletedFuture<>(null, e);
         }
-        catch (Exception e) {
-            return new CompletedFuture<Object>(null, e);
-        }
     }
 
     @Override
     @Nonnull
-    public <T> Future<T> submit(@Nonnull Runnable task, T result) {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public <T> Future<T> submit( @Nonnull Runnable task, T result ) {
+        throwRejectedExecutionExceptionIfShutdown();
+
         task.run();
-        return new CompletedFuture<T>(result, null);
+
+        return new CompletedFuture<>(result, null);
     }
 
     @Override
     @Nonnull
-    public Future<?> submit(@Nonnull Runnable task) {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public Future<?> submit( @Nonnull Runnable task ) {
+        throwRejectedExecutionExceptionIfShutdown();
+
         task.run();
-        return new CompletedFuture<Object>(null, null);
+        return new CompletedFuture<>(null, null);
     }
 
     @Override
     @Nonnull
-    public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks) {
-        this.throwRejectedExecutionExceptionIfShutdown();
-        ArrayList<Future<T>> result = new ArrayList<Future<T>>();
+    public <T> List<Future<T>> invokeAll( @Nonnull Collection<? extends Callable<T>> tasks ) {
+        throwRejectedExecutionExceptionIfShutdown();
+
+        ArrayList<Future<T>> result = new ArrayList<>();
+
         for (Callable<T> task : tasks) {
             try {
-                result.add(new CompletedFuture<T>(task.call(), null));
-            }
-            catch (Exception e) {
-                result.add(new CompletedFuture<Object>(null, e));
+                result.add(new CompletedFuture<>(task.call(), null));
+            } catch (Exception e) {
+                result.add(new CompletedFuture<>(null, e));
             }
         }
         return result;
@@ -105,117 +132,143 @@ implements ExecutorService {
 
     @Override
     @Nonnull
-    public <T> List<Future<T>> invokeAll(@Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit) {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public <T> List<Future<T>> invokeAll(
+            @Nonnull Collection<? extends Callable<T>> tasks,
+            long timeout,
+            @Nonnull TimeUnit unit ) {
+        throwRejectedExecutionExceptionIfShutdown();
+
         long end = System.currentTimeMillis() + unit.toMillis(timeout);
-        Iterator<Callable<T>> iterator = tasks.iterator();
-        ArrayList<Future<T>> result = new ArrayList<Future<T>>();
+        Iterator<? extends Callable<T>> iterator = tasks.iterator();
+        ArrayList<Future<T>> result = new ArrayList<>();
+
         while (end > System.currentTimeMillis() && iterator.hasNext()) {
             Callable<T> callable = iterator.next();
+
             try {
-                result.add(new CompletedFuture<T>(callable.call(), null));
-            }
-            catch (Exception e) {
-                result.add(new CompletedFuture<Object>(null, e));
+                result.add(new CompletedFuture<>(callable.call(), null));
+            } catch (Exception e) {
+                result.add(new CompletedFuture<>(null, e));
             }
         }
+
         while (iterator.hasNext()) {
             iterator.next();
-            result.add(new Future<T>(this){
-                {
-                    Objects.requireNonNull(this$0);
-                }
+            result.add(
+                    new Future<T>() {
+                        @Override
+                        public boolean cancel( boolean mayInterruptIfRunning ) {
+                            return false;
+                        }
 
-                @Override
-                public boolean cancel(boolean mayInterruptIfRunning) {
-                    return false;
-                }
+                        @Override
+                        public boolean isCancelled() {
+                            return true;
+                        }
 
-                @Override
-                public boolean isCancelled() {
-                    return true;
-                }
+                        @Override
+                        public boolean isDone() {
+                            return false;
+                        }
 
-                @Override
-                public boolean isDone() {
-                    return false;
-                }
+                        @Override
+                        public T get() {
+                            throw new CancellationException("Task has been cancelled.");
+                        }
 
-                @Override
-                public T get() {
-                    throw new CancellationException("Task has been cancelled.");
-                }
-
-                @Override
-                public T get(long timeout, @Nonnull TimeUnit unit) {
-                    throw new CancellationException("Task has been cancelled.");
-                }
-            });
+                        @Override
+                        public T get( long timeout, @Nonnull TimeUnit unit ) {
+                            throw new CancellationException("Task has been cancelled.");
+                        }
+                    });
         }
+
         return result;
     }
 
     @Override
     @Nonnull
-    public <T> T invokeAny(@Nonnull Collection<? extends Callable<T>> tasks) throws ExecutionException {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public <T> T invokeAny( @Nonnull Collection<? extends Callable<T>> tasks )
+            throws ExecutionException {
+        throwRejectedExecutionExceptionIfShutdown();
+
         Exception exception = null;
+
         for (Callable<T> task : tasks) {
             try {
                 return task.call();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
+                // try next task
                 exception = e;
             }
         }
+
         throw new ExecutionException("No tasks finished successfully.", exception);
     }
 
     @Override
-    public <T> T invokeAny(@Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit) throws ExecutionException, TimeoutException {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public <T> T invokeAny(
+            @Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit )
+            throws ExecutionException, TimeoutException {
+        throwRejectedExecutionExceptionIfShutdown();
+
         long end = System.currentTimeMillis() + unit.toMillis(timeout);
         Exception exception = null;
-        Iterator<Callable<T>> iterator = tasks.iterator();
+
+        Iterator<? extends Callable<T>> iterator = tasks.iterator();
+
         while (end > System.currentTimeMillis() && iterator.hasNext()) {
             Callable<T> callable = iterator.next();
+
             try {
                 return callable.call();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
+                // ignore exception and try next
                 exception = e;
             }
         }
+
         if (iterator.hasNext()) {
             throw new TimeoutException("Could not finish execution of tasks within time.");
+        } else {
+            throw new ExecutionException("No tasks finished successfully.", exception);
         }
-        throw new ExecutionException("No tasks finished successfully.", exception);
     }
 
     @Override
-    public void execute(@Nonnull Runnable command) {
-        this.throwRejectedExecutionExceptionIfShutdown();
+    public void execute( @Nonnull Runnable command ) {
+        throwRejectedExecutionExceptionIfShutdown();
+
         command.run();
     }
 
     private void throwRejectedExecutionExceptionIfShutdown() {
-        if (this.isShutdown() && this.triggerRejectedExecutionException) {
-            throw new RejectedExecutionException("The ExecutorService is shut down already. No Callables can be executed.");
+        if (isShutdown() && triggerRejectedExecutionException) {
+            throw new RejectedExecutionException(
+                    "The ExecutorService is shut down already. No Callables can be executed.");
         }
     }
 
-    static class CompletedFuture<V>
-    implements Future<V> {
+    /**
+     * CompletedFuture
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    static class CompletedFuture<V> implements Future<V> {
+
         private final V value;
+
         private final Exception exception;
 
-        CompletedFuture(V value, Exception exception) {
+        CompletedFuture( V value, Exception exception ) {
             this.value = value;
             this.exception = exception;
         }
 
         @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
+        public boolean cancel( boolean mayInterruptIfRunning ) {
             return false;
         }
 
@@ -231,16 +284,16 @@ implements ExecutorService {
 
         @Override
         public V get() throws ExecutionException {
-            if (this.exception != null) {
-                throw new ExecutionException(this.exception);
+            if (exception != null) {
+                throw new ExecutionException(exception);
+            } else {
+                return value;
             }
-            return this.value;
         }
 
         @Override
-        public V get(long timeout, @Nonnull TimeUnit unit) throws ExecutionException {
-            return this.get();
+        public V get( long timeout, @Nonnull TimeUnit unit ) throws ExecutionException {
+            return get();
         }
     }
 }
-

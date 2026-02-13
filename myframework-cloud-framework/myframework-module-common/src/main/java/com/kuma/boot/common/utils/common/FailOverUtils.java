@@ -46,7 +46,7 @@ public final class FailOverUtils {
         finally {
             consumer.accept(result);
         }
-        return result.response;
+        return (T) result.response;
     }
 
     public static class Result<T> {

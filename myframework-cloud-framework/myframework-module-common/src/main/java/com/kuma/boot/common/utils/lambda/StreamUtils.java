@@ -1,15 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.collection.CollUtil
- *  cn.hutool.core.map.MapUtil
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.lambda;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.map.MapUtil;
-import com.kuma.boot.common.utils.lambda.EnumerationSpliterator;
+import static java.lang.Math.min;
+import static java.util.Objects.requireNonNull;
+
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +45,7 @@ import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.Spliterators.AbstractSpliterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -42,350 +53,815 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.LongConsumer;
+import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collector.Characteristics;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.StrUtil;
 
+/**
+ * Static utility methods related to {@code Stream} instances.
+ */
 public class StreamUtils {
-    static final Set<Collector.Characteristics> CH_NOID = Collections.emptySet();
 
-    public static <T> Stream<T> stream(Iterable<T> iterable) {
-        return iterable instanceof Collection ? ((Collection)iterable).stream() : StreamSupport.stream(iterable.spliterator(), false);
+    /**
+     * Returns a sequential {@link Stream} of the contents of {@code iterable}, delegating to {@link Collection#stream}
+     * if possible.
+     */
+    public static <T> Stream<T> stream( Iterable<T> iterable ) {
+        return ( iterable instanceof Collection )
+                ? ( (Collection<T>) iterable ).stream()
+                : StreamSupport.stream(iterable.spliterator(), false);
     }
 
-    public static <T> Stream<T> stream(Iterator<T> iterator) {
+    /**
+     * Returns a sequential {@link Stream} of the remaining contents of {@code iterator}. Do not use {@code iterator}
+     * directly after passing it to this method.
+     */
+    public static <T> Stream<T> stream( Iterator<T> iterator ) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
 
-    public static <T> Stream<T> stream(Optional<T> optional) {
+    /**
+     * If a value is present in {@code optional}, returns a stream containing only that element, otherwise returns an
+     * empty stream.
+     */
+    public static <T> Stream<T> stream( Optional<T> optional ) {
         return optional.map(Stream::of).orElseGet(Stream::empty);
     }
 
-    public static IntStream stream(OptionalInt optional) {
+    /**
+     * If a value is present in {@code optional}, returns a stream containing only that element, otherwise returns an
+     * empty stream.
+     *
+     * <p>
+     * <b>Java 9 users:</b> use {@code optional.stream()} instead.
+     */
+    public static IntStream stream( OptionalInt optional ) {
         return optional.isPresent() ? IntStream.of(optional.getAsInt()) : IntStream.empty();
     }
 
-    public static LongStream stream(OptionalLong optional) {
+    /**
+     * If a value is present in {@code optional}, returns a stream containing only that element, otherwise returns an
+     * empty stream.
+     *
+     * <p>
+     * <b>Java 9 users:</b> use {@code optional.stream()} instead.
+     */
+    public static LongStream stream( OptionalLong optional ) {
         return optional.isPresent() ? LongStream.of(optional.getAsLong()) : LongStream.empty();
     }
 
-    public static DoubleStream stream(OptionalDouble optional) {
-        return optional.isPresent() ? DoubleStream.of(optional.getAsDouble()) : DoubleStream.empty();
+    /**
+     * If a value is present in {@code optional}, returns a stream containing only that element, otherwise returns an
+     * empty stream.
+     *
+     * <p>
+     * <b>Java 9 users:</b> use {@code optional.stream()} instead.
+     */
+    public static DoubleStream stream( OptionalDouble optional ) {
+        return optional.isPresent()
+                ? DoubleStream.of(optional.getAsDouble())
+                : DoubleStream.empty();
     }
 
-    public static <A, B, R> Stream<R> zip(Stream<A> streamA, Stream<B> streamB, final BiFunction<? super A, ? super B, R> function) {
+    /**
+     * Returns a stream in which each element is the result of passing the corresponding element of each of
+     * {@code streamA} and {@code streamB} to {@code function}.
+     *
+     * <p>
+     * For example:
+     *
+     * <pre>{@code
+     * Streams.zip(
+     *   Stream.of("foo1", "foo2", "foo3"),
+     *   Stream.of("bar1", "bar2"),
+     *   (arg1, arg2) -> arg1 + ":" + arg2)
+     * }</pre>
+     *
+     * <p>
+     * will return {@code Stream.of("foo1:bar1", "foo2:bar2")}.
+     *
+     * <p>
+     * The resulting stream will only be as long as the shorter of the two input streams; if one stream is longer, its
+     * extra elements will be ignored.
+     *
+     * <p>
+     * Note that if you are calling {@link Stream#forEach} on the resulting stream, you might want to consider using
+     * {@link #forEachPair} instead of this method.
+     *
+     * <p>
+     * <b>Performance note:</b> The resulting stream is not
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a>. This may harm parallel performance.
+     */
+    public static <A, B, R> Stream<R> zip(
+            Stream<A> streamA, Stream<B> streamB, BiFunction<? super A, ? super B, R> function ) {
+        // same as Stream.concat
         boolean isParallel = streamA.isParallel() || streamB.isParallel();
-        Spliterator splitA = streamA.spliterator();
-        Spliterator splitB = streamB.spliterator();
-        int characteristics = splitA.characteristics() & splitB.characteristics() & 0x50;
-        final Iterator itrA = Spliterators.iterator(splitA);
-        final Iterator itrB = Spliterators.iterator(splitB);
-        return (Stream)((Stream)StreamSupport.stream(new Spliterators.AbstractSpliterator<R>(Math.min(splitA.estimateSize(), splitB.estimateSize()), characteristics){
-
-            @Override
-            public boolean tryAdvance(Consumer<? super R> action) {
-                if (itrA.hasNext() && itrB.hasNext()) {
-                    action.accept(function.apply(itrA.next(), itrB.next()));
-                    return true;
-                }
-                return false;
-            }
-        }, isParallel).onClose(streamA::close)).onClose(streamB::close);
+        Spliterator<A> splitA = streamA.spliterator();
+        Spliterator<B> splitB = streamB.spliterator();
+        int characteristics =
+                splitA.characteristics()
+                        & splitB.characteristics()
+                        & ( Spliterator.SIZED | Spliterator.ORDERED );
+        Iterator<A> itrA = Spliterators.iterator(splitA);
+        Iterator<B> itrB = Spliterators.iterator(splitB);
+        return StreamSupport.stream(
+                        new AbstractSpliterator<R>(
+                                min(splitA.estimateSize(), splitB.estimateSize()),
+                                characteristics) {
+                            @Override
+                            public boolean tryAdvance( Consumer<? super R> action ) {
+                                if (itrA.hasNext() && itrB.hasNext()) {
+                                    action.accept(function.apply(itrA.next(), itrB.next()));
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        isParallel)
+                .onClose(streamA::close)
+                .onClose(streamB::close);
     }
 
-    public static <A, B> void forEachPair(Stream<A> streamA, Stream<B> streamB, BiConsumer<? super A, ? super B> consumer) {
+    /**
+     * Invokes {@code consumer} once for each pair of <i>corresponding</i> elements in {@code streamA} and
+     * {@code streamB}. If one stream is longer than the other, the extra elements are silently ignored. Elements passed
+     * to the consumer are guaranteed to come from the same position in their respective source streams. For example:
+     *
+     * <pre>{@code
+     * Streams.forEachPair(
+     *   Stream.of("foo1", "foo2", "foo3"),
+     *   Stream.of("bar1", "bar2"),
+     *   (arg1, arg2) -> LogUtils.info(arg1 + ":" + arg2)
+     * }</pre>
+     *
+     * <p>
+     * will print:
+     *
+     * <pre>{@code
+     * foo1:bar1
+     * foo2:bar2
+     * }</pre>
+     *
+     * <p>
+     * <b>Warning:</b> If either supplied stream is a parallel stream, the same
+     * correspondence between elements will be made, but the order in which those pairs of elements are passed to the
+     * consumer is <i>not</i> defined.
+     *
+     * <p>
+     * Note that many usages of this method can be replaced with simpler calls to {@link #zip}. This method behaves
+     * equivalently to {@linkplain #zip zipping} the stream elements into temporary pair objects and then using
+     * {@link Stream#forEach} on that stream.
+     */
+    public static <A, B> void forEachPair(
+            Stream<A> streamA, Stream<B> streamB, BiConsumer<? super A, ? super B> consumer ) {
         if (streamA.isParallel() || streamB.isParallel()) {
-            StreamUtils.zip(streamA, streamB, TemporaryPair::new).forEach(pair -> consumer.accept(pair.a, pair.b));
+            zip(streamA, streamB, TemporaryPair::new)
+                    .forEach(pair -> consumer.accept(pair.a, pair.b));
         } else {
-            Iterator iterA = streamA.iterator();
-            Iterator iterB = streamB.iterator();
+            Iterator<A> iterA = streamA.iterator();
+            Iterator<B> iterB = streamB.iterator();
             while (iterA.hasNext() && iterB.hasNext()) {
                 consumer.accept(iterA.next(), iterB.next());
             }
         }
     }
 
-    public static <T, R> Stream<R> mapWithIndex(Stream<T> stream, final FunctionWithIndex<? super T, ? extends R> function) {
-        boolean isParallel = stream.isParallel();
-        Spliterator fromSpliterator = stream.spliterator();
-        if (!fromSpliterator.hasCharacteristics(16384)) {
-            final Iterator fromIterator = Spliterators.iterator(fromSpliterator);
-            return (Stream)StreamSupport.stream(new Spliterators.AbstractSpliterator<R>(fromSpliterator.estimateSize(), fromSpliterator.characteristics() & 0x50){
-                long index;
-                {
-                    super(est, additionalCharacteristics);
-                    this.index = 0L;
-                }
+    // Use this carefully - it doesn't implement value semantics
+    /**
+     * TemporaryPair
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    private static class TemporaryPair<A, B> {
 
-                @Override
-                public boolean tryAdvance(Consumer<? super R> action) {
-                    if (fromIterator.hasNext()) {
-                        action.accept(function.apply(fromIterator.next(), this.index++));
-                        return true;
-                    }
-                    return false;
-                }
-            }, isParallel).onClose(stream::close);
+        final A a;
+
+        final B b;
+
+        TemporaryPair( A a, B b ) {
+            this.a = a;
+            this.b = b;
         }
-        class Splitr
-        extends MapWithIndexSpliterator<Spliterator<T>, R, Splitr>
-        implements Consumer<T> {
-            T holder;
-            final /* synthetic */ FunctionWithIndex val$function;
+    }
 
-            Splitr(Spliterator<T> splitr, long index) {
-                this.val$function = var4_3;
+    /**
+     * Returns a stream consisting of the results of applying the given function to the elements of {@code stream} and
+     * their indices in the stream. For example,
+     *
+     * <pre>{@code
+     * mapWithIndex(
+     *     Stream.of("a", "b", "c"),
+     *     (e, index) -> index + ":" + e)
+     * }</pre>
+     *
+     * <p>
+     * would return {@code Stream.of("0:a", "1:b", "2:c")}.
+     *
+     * <p>
+     * The resulting stream is
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> if and only if {@code stream} was efficiently splittable and its underlying spliterator reported
+     * {@link Spliterator#SUBSIZED}. This is generally the case if the underlying stream comes from a data structure
+     * supporting efficient indexed random access, typically an array or list.
+     *
+     * <p>
+     * The order of the resulting stream is defined if and only if the order of the original stream was defined.
+     */
+    public static <T, R> Stream<R> mapWithIndex(
+            Stream<T> stream, FunctionWithIndex<? super T, ? extends R> function ) {
+        boolean isParallel = stream.isParallel();
+        Spliterator<T> fromSpliterator = stream.spliterator();
+
+        if (!fromSpliterator.hasCharacteristics(Spliterator.SUBSIZED)) {
+            Iterator<T> fromIterator = Spliterators.iterator(fromSpliterator);
+            return StreamSupport.stream(
+                            new AbstractSpliterator<R>(
+                                    fromSpliterator.estimateSize(),
+                                    fromSpliterator.characteristics()
+                                            & ( Spliterator.ORDERED | Spliterator.SIZED )) {
+                                long index = 0;
+
+                                @Override
+                                public boolean tryAdvance( Consumer<? super R> action ) {
+                                    if (fromIterator.hasNext()) {
+                                        action.accept(function.apply(fromIterator.next(), index++));
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            },
+                            isParallel)
+                    .onClose(stream::close);
+        }
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-17 10:30:45
+         */
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-19 09:30:45
+         */
+        class Splitr extends MapWithIndexSpliterator<Spliterator<T>, R, Splitr> implements Consumer<T> {
+
+            T holder;
+
+            Splitr( Spliterator<T> splitr, long index ) {
                 super(splitr, index);
             }
 
             @Override
-            public void accept(T t) {
+            public void accept( T t ) {
                 this.holder = t;
             }
 
             @Override
-            public boolean tryAdvance(Consumer<? super R> action) {
-                if (this.fromSpliterator.tryAdvance(this)) {
+            public boolean tryAdvance( Consumer<? super R> action ) {
+                if (fromSpliterator.tryAdvance(this)) {
                     try {
-                        action.accept(this.val$function.apply(StreamUtils.uncheckedCastNullableTToT(this.holder), this.index++));
-                        boolean bl = true;
-                        return bl;
-                    }
-                    finally {
-                        this.holder = null;
+                        // The cast is safe because tryAdvance puts a T into `holder`.
+                        action.accept(function.apply(uncheckedCastNullableTToT(holder), index++));
+                        return true;
+                    } finally {
+                        holder = null;
                     }
                 }
                 return false;
             }
 
             @Override
-            Splitr createSplit(Spliterator<T> from, long i) {
-                return new Splitr(from, i, this.val$function);
+            Splitr createSplit( Spliterator<T> from, long i ) {
+                return new Splitr(from, i);
             }
         }
-        return (Stream)StreamSupport.stream(new Splitr(fromSpliterator, 0L, function), isParallel).onClose(stream::close);
+        return StreamSupport.stream(new Splitr(fromSpliterator, 0), isParallel)
+                .onClose(stream::close);
     }
 
-    public static <R> Stream<R> mapWithIndex(IntStream stream, final IntFunctionWithIndex<R> function) {
+    /**
+     * Returns a stream consisting of the results of applying the given function to the elements of {@code stream} and
+     * their indexes in the stream. For example,
+     *
+     * <pre>{@code
+     * mapWithIndex(
+     *     IntStream.of(10, 11, 12),
+     *     (e, index) -> index + ":" + e)
+     * }</pre>
+     *
+     * <p>
+     * ...would return {@code Stream.of("0:10", "1:11", "2:12")}.
+     *
+     * <p>
+     * The resulting stream is
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> if and only if {@code stream} was efficiently splittable and its underlying spliterator reported
+     * {@link Spliterator#SUBSIZED}. This is generally the case if the underlying stream comes from a data structure
+     * supporting efficient indexed random access, typically an array or list.
+     *
+     * <p>
+     * The order of the resulting stream is defined if and only if the order of the original stream was defined.
+     */
+    public static <R> Stream<R> mapWithIndex( IntStream stream, IntFunctionWithIndex<R> function ) {
         boolean isParallel = stream.isParallel();
         Spliterator.OfInt fromSpliterator = stream.spliterator();
-        if (!fromSpliterator.hasCharacteristics(16384)) {
-            final PrimitiveIterator.OfInt fromIterator = Spliterators.iterator(fromSpliterator);
-            return (Stream)StreamSupport.stream(new Spliterators.AbstractSpliterator<R>(fromSpliterator.estimateSize(), fromSpliterator.characteristics() & 0x50){
-                long index;
-                {
-                    super(est, additionalCharacteristics);
-                    this.index = 0L;
-                }
+        if (!fromSpliterator.hasCharacteristics(Spliterator.SUBSIZED)) {
+            PrimitiveIterator.OfInt fromIterator = Spliterators.iterator(fromSpliterator);
+            return StreamSupport.stream(
+                            new AbstractSpliterator<R>(
+                                    fromSpliterator.estimateSize(),
+                                    fromSpliterator.characteristics()
+                                            & ( Spliterator.ORDERED | Spliterator.SIZED )) {
+                                long index = 0;
 
-                @Override
-                public boolean tryAdvance(Consumer<? super R> action) {
-                    if (fromIterator.hasNext()) {
-                        action.accept(function.apply(fromIterator.nextInt(), this.index++));
-                        return true;
-                    }
-                    return false;
-                }
-            }, isParallel).onClose(stream::close);
+                                @Override
+                                public boolean tryAdvance( Consumer<? super R> action ) {
+                                    if (fromIterator.hasNext()) {
+                                        action.accept(
+                                                function.apply(fromIterator.nextInt(), index++));
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            },
+                            isParallel)
+                    .onClose(stream::close);
         }
-        class Splitr
-        extends MapWithIndexSpliterator<Spliterator.OfInt, R, Splitr>
-        implements IntConsumer,
-        Spliterator<R> {
-            int holder;
-            final /* synthetic */ IntFunctionWithIndex val$function;
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-17 10:30:45
+         */
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-19 09:30:45
+         */
+        class Splitr extends MapWithIndexSpliterator<Spliterator.OfInt, R, Splitr> implements IntConsumer,
+                Spliterator<R> {
 
-            Splitr(Spliterator.OfInt splitr, long index) {
-                this.val$function = var4_3;
+            int holder;
+
+            Splitr( OfInt splitr, long index ) {
                 super(splitr, index);
             }
 
             @Override
-            public void accept(int t) {
+            public void accept( int t ) {
                 this.holder = t;
             }
 
             @Override
-            public boolean tryAdvance(Consumer<? super R> action) {
-                if (((Spliterator.OfInt)this.fromSpliterator).tryAdvance(this)) {
-                    action.accept(this.val$function.apply(this.holder, this.index++));
+            public boolean tryAdvance( Consumer<? super R> action ) {
+                if (fromSpliterator.tryAdvance(this)) {
+                    action.accept(function.apply(holder, index++));
                     return true;
                 }
                 return false;
             }
 
             @Override
-            Splitr createSplit(Spliterator.OfInt from, long i) {
-                return new Splitr(from, i, this.val$function);
+            Splitr createSplit( OfInt from, long i ) {
+                return new Splitr(from, i);
             }
         }
-        return (Stream)StreamSupport.stream(new Splitr(fromSpliterator, 0L, function), isParallel).onClose(stream::close);
+        return StreamSupport.stream(new Splitr(fromSpliterator, 0), isParallel)
+                .onClose(stream::close);
     }
 
-    public static <R> Stream<R> mapWithIndex(LongStream stream, final LongFunctionWithIndex<R> function) {
+    /**
+     * Returns a stream consisting of the results of applying the given function to the elements of {@code stream} and
+     * their indexes in the stream. For example,
+     *
+     * <pre>{@code
+     * mapWithIndex(
+     *     LongStream.of(10, 11, 12),
+     *     (e, index) -> index + ":" + e)
+     * }</pre>
+     *
+     * <p>
+     * ...would return {@code Stream.of("0:10", "1:11", "2:12")}.
+     *
+     * <p>
+     * The resulting stream is
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> if and only if {@code stream} was efficiently splittable and its underlying spliterator reported
+     * {@link Spliterator#SUBSIZED}. This is generally the case if the underlying stream comes from a data structure
+     * supporting efficient indexed random access, typically an array or list.
+     *
+     * <p>
+     * The order of the resulting stream is defined if and only if the order of the original stream was defined.
+     */
+    public static <R> Stream<R> mapWithIndex( LongStream stream, LongFunctionWithIndex<R> function ) {
         boolean isParallel = stream.isParallel();
         Spliterator.OfLong fromSpliterator = stream.spliterator();
-        if (!fromSpliterator.hasCharacteristics(16384)) {
-            final PrimitiveIterator.OfLong fromIterator = Spliterators.iterator(fromSpliterator);
-            return (Stream)StreamSupport.stream(new Spliterators.AbstractSpliterator<R>(fromSpliterator.estimateSize(), fromSpliterator.characteristics() & 0x50){
-                long index;
-                {
-                    super(est, additionalCharacteristics);
-                    this.index = 0L;
-                }
 
-                @Override
-                public boolean tryAdvance(Consumer<? super R> action) {
-                    if (fromIterator.hasNext()) {
-                        action.accept(function.apply(fromIterator.nextLong(), this.index++));
-                        return true;
-                    }
-                    return false;
-                }
-            }, isParallel).onClose(stream::close);
+        if (!fromSpliterator.hasCharacteristics(Spliterator.SUBSIZED)) {
+            PrimitiveIterator.OfLong fromIterator = Spliterators.iterator(fromSpliterator);
+            return StreamSupport.stream(
+                            new AbstractSpliterator<R>(
+                                    fromSpliterator.estimateSize(),
+                                    fromSpliterator.characteristics()
+                                            & ( Spliterator.ORDERED | Spliterator.SIZED )) {
+                                long index = 0;
+
+                                @Override
+                                public boolean tryAdvance( Consumer<? super R> action ) {
+                                    if (fromIterator.hasNext()) {
+                                        action.accept(
+                                                function.apply(fromIterator.nextLong(), index++));
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            },
+                            isParallel)
+                    .onClose(stream::close);
         }
-        class Splitr
-        extends MapWithIndexSpliterator<Spliterator.OfLong, R, Splitr>
-        implements LongConsumer,
-        Spliterator<R> {
-            long holder;
-            final /* synthetic */ LongFunctionWithIndex val$function;
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-17 10:30:45
+         */
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-19 09:30:45
+         */
+        class Splitr extends MapWithIndexSpliterator<Spliterator.OfLong, R, Splitr> implements LongConsumer,
+                Spliterator<R> {
 
-            Splitr(Spliterator.OfLong splitr, long index) {
-                this.val$function = var4_3;
+            long holder;
+
+            Splitr( OfLong splitr, long index ) {
                 super(splitr, index);
             }
 
             @Override
-            public void accept(long t) {
+            public void accept( long t ) {
                 this.holder = t;
             }
 
             @Override
-            public boolean tryAdvance(Consumer<? super R> action) {
-                if (((Spliterator.OfLong)this.fromSpliterator).tryAdvance(this)) {
-                    action.accept(this.val$function.apply(this.holder, this.index++));
+            public boolean tryAdvance( Consumer<? super R> action ) {
+                if (fromSpliterator.tryAdvance(this)) {
+                    action.accept(function.apply(holder, index++));
                     return true;
                 }
                 return false;
             }
 
             @Override
-            Splitr createSplit(Spliterator.OfLong from, long i) {
-                return new Splitr(from, i, this.val$function);
+            Splitr createSplit( OfLong from, long i ) {
+                return new Splitr(from, i);
             }
         }
-        return (Stream)StreamSupport.stream(new Splitr(fromSpliterator, 0L, function), isParallel).onClose(stream::close);
+        return StreamSupport.stream(new Splitr(fromSpliterator, 0), isParallel)
+                .onClose(stream::close);
     }
 
-    public static <R> Stream<R> mapWithIndex(DoubleStream stream, final DoubleFunctionWithIndex<R> function) {
+    /**
+     * Returns a stream consisting of the results of applying the given function to the elements of {@code stream} and
+     * their indexes in the stream. For example,
+     *
+     * <pre>{@code
+     * mapWithIndex(
+     *     DoubleStream.of(0.0, 1.0, 2.0)
+     *     (e, index) -> index + ":" + e)
+     * }</pre>
+     *
+     * <p>
+     * ...would return {@code Stream.of("0:0.0", "1:1.0", "2:2.0")}.
+     *
+     * <p>
+     * The resulting stream is
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> if and only if {@code stream} was efficiently splittable and its underlying spliterator reported
+     * {@link Spliterator#SUBSIZED}. This is generally the case if the underlying stream comes from a data structure
+     * supporting efficient indexed random access, typically an array or list.
+     *
+     * <p>
+     * The order of the resulting stream is defined if and only if the order of the original stream was defined.
+     */
+    public static <R> Stream<R> mapWithIndex(
+            DoubleStream stream, DoubleFunctionWithIndex<R> function ) {
         boolean isParallel = stream.isParallel();
         Spliterator.OfDouble fromSpliterator = stream.spliterator();
-        if (!fromSpliterator.hasCharacteristics(16384)) {
-            final PrimitiveIterator.OfDouble fromIterator = Spliterators.iterator(fromSpliterator);
-            return (Stream)StreamSupport.stream(new Spliterators.AbstractSpliterator<R>(fromSpliterator.estimateSize(), fromSpliterator.characteristics() & 0x50){
-                long index;
-                {
-                    super(est, additionalCharacteristics);
-                    this.index = 0L;
-                }
 
-                @Override
-                public boolean tryAdvance(Consumer<? super R> action) {
-                    if (fromIterator.hasNext()) {
-                        action.accept(function.apply(fromIterator.nextDouble(), this.index++));
-                        return true;
-                    }
-                    return false;
-                }
-            }, isParallel).onClose(stream::close);
+        if (!fromSpliterator.hasCharacteristics(Spliterator.SUBSIZED)) {
+            PrimitiveIterator.OfDouble fromIterator = Spliterators.iterator(fromSpliterator);
+            return StreamSupport.stream(
+                            new AbstractSpliterator<R>(
+                                    fromSpliterator.estimateSize(),
+                                    fromSpliterator.characteristics()
+                                            & ( Spliterator.ORDERED | Spliterator.SIZED )) {
+                                long index = 0;
+
+                                @Override
+                                public boolean tryAdvance( Consumer<? super R> action ) {
+                                    if (fromIterator.hasNext()) {
+                                        action.accept(
+                                                function.apply(fromIterator.nextDouble(), index++));
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            },
+                            isParallel)
+                    .onClose(stream::close);
         }
-        class Splitr
-        extends MapWithIndexSpliterator<Spliterator.OfDouble, R, Splitr>
-        implements DoubleConsumer,
-        Spliterator<R> {
-            double holder;
-            final /* synthetic */ DoubleFunctionWithIndex val$function;
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-17 10:30:45
+         */
+        /**
+         * Splitr
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-19 09:30:45
+         */
+        class Splitr extends MapWithIndexSpliterator<Spliterator.OfDouble, R, Splitr> implements DoubleConsumer,
+                Spliterator<R> {
 
-            Splitr(Spliterator.OfDouble splitr, long index) {
-                this.val$function = var4_3;
+            double holder;
+
+            Splitr( OfDouble splitr, long index ) {
                 super(splitr, index);
             }
 
             @Override
-            public void accept(double t) {
+            public void accept( double t ) {
                 this.holder = t;
             }
 
             @Override
-            public boolean tryAdvance(Consumer<? super R> action) {
-                if (((Spliterator.OfDouble)this.fromSpliterator).tryAdvance(this)) {
-                    action.accept(this.val$function.apply(this.holder, this.index++));
+            public boolean tryAdvance( Consumer<? super R> action ) {
+                if (fromSpliterator.tryAdvance(this)) {
+                    action.accept(function.apply(holder, index++));
                     return true;
                 }
                 return false;
             }
 
             @Override
-            Splitr createSplit(Spliterator.OfDouble from, long i) {
-                return new Splitr(from, i, this.val$function);
+            Splitr createSplit( OfDouble from, long i ) {
+                return new Splitr(from, i);
             }
         }
-        return (Stream)StreamSupport.stream(new Splitr(fromSpliterator, 0L, function), isParallel).onClose(stream::close);
+        return StreamSupport.stream(new Splitr(fromSpliterator, 0), isParallel)
+                .onClose(stream::close);
     }
 
-    public static <T> Optional<T> findLast(Stream<T> stream) {
+    /**
+     * An analogue of {@link Function} also accepting an index.
+     *
+     * <p>
+     * This interface is only intended for use by callers of {@link #mapWithIndex(Stream, FunctionWithIndex)}.
+     *
+     * @since 21.0
+     */
+    public interface FunctionWithIndex<T, R> {
+
+        /**
+         * Applies this function to the given argument and its index within a stream.
+         */
+        R apply( T from, long index );
+    }
+
+    /**
+     * MapWithIndexSpliterator
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    private abstract static class MapWithIndexSpliterator<
+            F extends Spliterator<?>, R, S extends MapWithIndexSpliterator<F, R, S>> implements Spliterator<R> {
+
+        final F fromSpliterator;
+
+        long index;
+
+        MapWithIndexSpliterator( F fromSpliterator, long index ) {
+            this.fromSpliterator = fromSpliterator;
+            this.index = index;
+        }
+
+        abstract S createSplit( F from, long i );
+
+        @Override
+        public S trySplit() {
+            Spliterator<?> splitOrNull = fromSpliterator.trySplit();
+            if (splitOrNull == null) {
+                return null;
+            }
+            @SuppressWarnings("unchecked")
+            F split = (F) splitOrNull;
+            S result = createSplit(split, index);
+            this.index += split.getExactSizeIfKnown();
+            return result;
+        }
+
+        @Override
+        public long estimateSize() {
+            return fromSpliterator.estimateSize();
+        }
+
+        @Override
+        public int characteristics() {
+            return fromSpliterator.characteristics()
+                    & ( Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED );
+        }
+    }
+
+    /**
+     * An analogue of {@link IntFunction} also accepting an index.
+     *
+     * <p>
+     * This interface is only intended for use by callers of {@link #mapWithIndex(IntStream, IntFunctionWithIndex)}.
+     *
+     * @since 21.0
+     */
+    public interface IntFunctionWithIndex<R> {
+
+        /**
+         * Applies this function to the given argument and its index within a stream.
+         */
+        R apply( int from, long index );
+    }
+
+    /**
+     * An analogue of {@link LongFunction} also accepting an index.
+     *
+     * <p>
+     * This interface is only intended for use by callers of {@link #mapWithIndex(LongStream, LongFunctionWithIndex)}.
+     *
+     * @since 21.0
+     */
+    public interface LongFunctionWithIndex<R> {
+
+        /**
+         * Applies this function to the given argument and its index within a stream.
+         */
+        R apply( long from, long index );
+    }
+
+    /**
+     * An analogue of {@link DoubleFunction} also accepting an index.
+     *
+     * <p>
+     * This interface is only intended for use by callers of
+     * {@link #mapWithIndex(DoubleStream, DoubleFunctionWithIndex)}.
+     *
+     * @since 21.0
+     */
+    public interface DoubleFunctionWithIndex<R> {
+
+        /**
+         * Applies this function to the given argument and its index within a stream.
+         */
+        R apply( double from, long index );
+    }
+
+    /**
+     * Returns the last element of the specified stream, or {@link Optional#empty} if the stream is empty.
+     *
+     * <p>
+     * Equivalent to {@code stream.reduce((a, b) -> b)}, but may perform significantly better. This method's runtime
+     * will be between O(log n) and O(n), performing better on
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> streams.
+     *
+     * <p>
+     * If the stream has nondeterministic order, this has equivalent semantics to {@link Stream#findAny} (which you
+     * might as well use).
+     *
+     * @throws NullPointerException if the last element of the stream is null
+     * @see Stream#findFirst()
+     */
+    /*
+     * By declaring <T> instead of <T extends Object>, we declare this method as requiring
+     * a stream whose elements are non-null. However, the method goes out of its way to
+     * still handle nulls in the stream. This means that the method can safely be used
+     * with a stream that contains nulls as long as the *last* element is *not* null.
+     *
+     * (To "go out of its way," the method tracks a `set` bit so that it can distinguish
+     * "the final split has a last element of null, so throw NPE" from "the final split
+     * was empty, so look for an element in the prior one.")
+     */
+    public static <T> Optional<T> findLast( Stream<T> stream ) {
+        /**
+         * OptionalState
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-17 10:30:45
+         */
+        /**
+         * OptionalState
+         *
+         * @author kuma
+         * @version 2026.01
+         * @since 2025-12-19 09:30:45
+         */
         class OptionalState {
+
             boolean set = false;
+
             T value = null;
 
-            OptionalState() {
-            }
-
-            void set(T value) {
+            void set( T value ) {
                 this.set = true;
                 this.value = value;
             }
 
             T get() {
-                return Objects.requireNonNull(this.value);
+                /*
+                 * requireNonNull is safe because we call get() only if we've previously
+                 * called set().
+                 *
+                 * (For further discussion of nullness, see the comment above the method.)
+                 */
+                return requireNonNull(value);
             }
         }
         OptionalState state = new OptionalState();
-        ArrayDeque splits = new ArrayDeque();
+
+        Deque<Spliterator<T>> splits = new ArrayDeque<>();
         splits.addLast(stream.spliterator());
+
         while (!splits.isEmpty()) {
-            Spliterator<Object> prefix;
-            Spliterator<Object> spliterator;
-            block7: {
-                block6: {
-                    spliterator = (Spliterator<Object>)splits.removeLast();
-                    if (spliterator.getExactSizeIfKnown() == 0L) continue;
-                    if (spliterator.hasCharacteristics(16384)) {
-                        while ((prefix = spliterator.trySplit()) != null && prefix.getExactSizeIfKnown() != 0L) {
-                            if (spliterator.getExactSizeIfKnown() != 0L) continue;
-                            spliterator = prefix;
-                            break;
-                        }
-                        spliterator.forEachRemaining(state::set);
-                        return Optional.of(state.get());
+            Spliterator<T> spliterator = splits.removeLast();
+
+            if (spliterator.getExactSizeIfKnown() == 0) {
+                continue; // drop this split
+            }
+
+            // Many spliterators will have trySplits that are SUBSIZED even if they are
+            // not
+            // themselves
+            // SUBSIZED.
+            if (spliterator.hasCharacteristics(Spliterator.SUBSIZED)) {
+                // we can drill down to exactly the smallest nonempty spliterator
+                while (true) {
+                    Spliterator<T> prefix = spliterator.trySplit();
+                    if (prefix == null || prefix.getExactSizeIfKnown() == 0) {
+                        break;
+                    } else if (spliterator.getExactSizeIfKnown() == 0) {
+                        spliterator = prefix;
+                        break;
                     }
-                    prefix = spliterator.trySplit();
-                    if (prefix == null) break block6;
-                    if (prefix.getExactSizeIfKnown() != 0L) break block7;
                 }
+
+                // spliterator is known to be nonempty now
                 spliterator.forEachRemaining(state::set);
-                if (!state.set) continue;
                 return Optional.of(state.get());
+            }
+
+            Spliterator<T> prefix = spliterator.trySplit();
+            if (prefix == null || prefix.getExactSizeIfKnown() == 0) {
+                // we can't split this any further
+                spliterator.forEachRemaining(state::set);
+                if (state.set) {
+                    return Optional.of(state.get());
+                }
+                // fall back to the last split
+                continue;
             }
             splits.addLast(prefix);
             splits.addLast(spliterator);
@@ -393,123 +869,314 @@ public class StreamUtils {
         return Optional.empty();
     }
 
-    public static OptionalInt findLast(IntStream stream) {
-        Optional<Integer> boxedLast = StreamUtils.findLast(stream.boxed());
+    /**
+     * Returns the last element of the specified stream, or {@link OptionalInt#empty} if the stream is empty.
+     *
+     * <p>
+     * Equivalent to {@code stream.reduce((a, b) -> b)}, but may perform significantly better. This method's runtime
+     * will be between O(log n) and O(n), performing better on
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> streams.
+     *
+     * @throws NullPointerException if the last element of the stream is null
+     * @see IntStream#findFirst()
+     */
+    public static OptionalInt findLast( IntStream stream ) {
+        // findLast(Stream) does some allocation, so we might as well box some more
+        Optional<Integer> boxedLast = findLast(stream.boxed());
         return boxedLast.map(OptionalInt::of).orElseGet(OptionalInt::empty);
     }
 
-    public static OptionalLong findLast(LongStream stream) {
-        Optional<Long> boxedLast = StreamUtils.findLast(stream.boxed());
+    /**
+     * Returns the last element of the specified stream, or {@link OptionalLong#empty} if the stream is empty.
+     *
+     * <p>
+     * Equivalent to {@code stream.reduce((a, b) -> b)}, but may perform significantly better. This method's runtime
+     * will be between O(log n) and O(n), performing better on
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> streams.
+     *
+     * @throws NullPointerException if the last element of the stream is null
+     * @see LongStream#findFirst()
+     */
+    public static OptionalLong findLast( LongStream stream ) {
+        // findLast(Stream) does some allocation, so we might as well box some more
+        Optional<Long> boxedLast = findLast(stream.boxed());
         return boxedLast.map(OptionalLong::of).orElseGet(OptionalLong::empty);
     }
 
-    public static OptionalDouble findLast(DoubleStream stream) {
-        Optional<Double> boxedLast = StreamUtils.findLast(stream.boxed());
+    /**
+     * Returns the last element of the specified stream, or {@link OptionalDouble#empty} if the stream is empty.
+     *
+     * <p>
+     * Equivalent to {@code stream.reduce((a, b) -> b)}, but may perform significantly better. This method's runtime
+     * will be between O(log n) and O(n), performing better on
+     * <a href="http://gee.cs.oswego.edu/dl/html/StreamParallelGuidance.html">efficiently
+     * splittable</a> streams.
+     *
+     * @throws NullPointerException if the last element of the stream is null
+     * @see DoubleStream#findFirst()
+     */
+    public static OptionalDouble findLast( DoubleStream stream ) {
+        // findLast(Stream) does some allocation, so we might as well box some more
+        Optional<Double> boxedLast = findLast(stream.boxed());
         return boxedLast.map(OptionalDouble::of).orElseGet(OptionalDouble::empty);
     }
 
-    public static <T> T uncheckedCastNullableTToT(T t) {
+    public static <T> T uncheckedCastNullableTToT( T t ) {
         return t;
     }
 
-    public static <E> List<E> filter(Collection<E> collection, Predicate<E> function) {
+    /**
+     * 将collection过滤
+     *
+     * @param collection 需要转化的集合
+     * @param function 过滤方法
+     * @return 过滤后的list
+     */
+    public static <E> List<E> filter( Collection<E> collection, Predicate<E> function ) {
         if (CollUtil.isEmpty(collection)) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
         return collection.stream().filter(function).toList();
     }
 
-    public static <E> String join(Collection<E> collection, Function<E, String> function) {
-        return StreamUtils.join(collection, function, ",");
+    /**
+     * 将collection拼接
+     *
+     * @param collection 需要转化的集合
+     * @param function 拼接方法
+     * @return 拼接后的list
+     */
+    public static <E> String join( Collection<E> collection, Function<E, String> function ) {
+        return join(collection, function, ",");
     }
 
-    public static <E> String join(Collection<E> collection, Function<E, String> function, CharSequence delimiter) {
+    /**
+     * 将collection拼接
+     *
+     * @param collection 需要转化的集合
+     * @param function 拼接方法
+     * @param delimiter 拼接符
+     * @return 拼接后的list
+     */
+    public static <E> String join(
+            Collection<E> collection, Function<E, String> function, CharSequence delimiter ) {
         if (CollUtil.isEmpty(collection)) {
-            return "";
+            return StrUtil.EMPTY;
         }
-        return collection.stream().map(function).filter(Objects::nonNull).collect(Collectors.joining(delimiter));
+        return collection.stream()
+                .map(function)
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(delimiter));
     }
 
-    public static <E> List<E> sorted(Collection<E> collection, Comparator<E> comparing) {
+    /**
+     * 将collection排序
+     *
+     * @param collection 需要转化的集合
+     * @param comparing 排序方法
+     * @return 排序后的list
+     */
+    public static <E> List<E> sorted( Collection<E> collection, Comparator<E> comparing ) {
         if (CollUtil.isEmpty(collection)) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
         return collection.stream().sorted(comparing).toList();
     }
 
-    public static <V, K> Map<K, V> toIdentityMap(Collection<V> collection, Function<V, K> key) {
+    /**
+     * 将collection转化为类型不变的map<br>
+     * <B>{@code Collection<V> ----> Map<K,V>}</B>
+     *
+     * @param collection 需要转化的集合
+     * @param key V类型转化为K类型的lambda方法
+     * @param <V> collection中的泛型
+     * @param <K> map中的key类型
+     * @return 转化后的map
+     */
+    public static <V, K> Map<K, V> toIdentityMap( Collection<V> collection, Function<V, K> key ) {
         if (CollUtil.isEmpty(collection)) {
             return MapUtil.newHashMap();
         }
-        return collection.stream().collect(Collectors.toMap(key, Function.identity(), (l, r) -> l));
+        return collection.stream().collect(Collectors.toMap(key, Function.identity(), ( l, r ) -> l));
     }
 
-    public static <E, K, V> Map<K, V> toMap(Collection<E> collection, Function<E, K> key, Function<E, V> value) {
+    /**
+     * 将Collection转化为map(value类型与collection的泛型不同)<br>
+     * <B>{@code Collection<E> -----> Map<K,V> }</B>
+     *
+     * @param collection 需要转化的集合
+     * @param key E类型转化为K类型的lambda方法
+     * @param value E类型转化为V类型的lambda方法
+     * @param <E> collection中的泛型
+     * @param <K> map中的key类型
+     * @param <V> map中的value类型
+     * @return 转化后的map
+     */
+    public static <E, K, V> Map<K, V> toMap(
+            Collection<E> collection, Function<E, K> key, Function<E, V> value ) {
         if (CollUtil.isEmpty(collection)) {
             return MapUtil.newHashMap();
         }
-        return collection.stream().collect(Collectors.toMap(key, value, (l, r) -> l));
+        return collection.stream().collect(Collectors.toMap(key, value, ( l, r ) -> l));
     }
 
-    public static <E, K> Map<K, List<E>> groupByKey(Collection<E> collection, Function<E, K> key) {
+    /**
+     * 将collection按照规则(比如有相同的班级id)分类成map<br>
+     * <B>{@code Collection<E> -------> Map<K,List<E>> } </B>
+     *
+     * @param collection 需要分类的集合
+     * @param key 分类的规则
+     * @param <E> collection中的泛型
+     * @param <K> map中的key类型
+     * @return 分类后的map
+     */
+    public static <E, K> Map<K, List<E>> groupByKey( Collection<E> collection, Function<E, K> key ) {
         if (CollUtil.isEmpty(collection)) {
             return MapUtil.newHashMap();
         }
-        return collection.stream().collect(Collectors.groupingBy(key, LinkedHashMap::new, Collectors.toList()));
+        return collection.stream()
+                .collect(Collectors.groupingBy(key, LinkedHashMap::new, Collectors.toList()));
     }
 
-    public static <E, K, U> Map<K, Map<U, List<E>>> groupBy2Key(Collection<E> collection, Function<E, K> key1, Function<E, U> key2) {
+    /**
+     * 将collection按照两个规则(比如有相同的年级id,班级id)分类成双层map<br>
+     * <B>{@code Collection<E> ---> Map<T,Map<U,List<E>>> } </B>
+     *
+     * @param collection 需要分类的集合
+     * @param key1 第一个分类的规则
+     * @param key2 第二个分类的规则
+     * @param <E> 集合元素类型
+     * @param <K> 第一个map中的key类型
+     * @param <U> 第二个map中的key类型
+     * @return 分类后的map
+     */
+    public static <E, K, U> Map<K, Map<U, List<E>>> groupBy2Key(
+            Collection<E> collection, Function<E, K> key1, Function<E, U> key2 ) {
         if (CollUtil.isEmpty(collection)) {
             return MapUtil.newHashMap();
         }
-        return collection.stream().collect(Collectors.groupingBy(key1, LinkedHashMap::new, Collectors.groupingBy(key2, LinkedHashMap::new, Collectors.toList())));
+        return collection.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                key1,
+                                LinkedHashMap::new,
+                                Collectors.groupingBy(
+                                        key2, LinkedHashMap::new, Collectors.toList())));
     }
 
-    public static <E, T, U> Map<T, Map<U, E>> group2Map(Collection<E> collection, Function<E, T> key1, Function<E, U> key2) {
+    /**
+     * 将collection按照两个规则(比如有相同的年级id,班级id)分类成双层map<br>
+     * <B>{@code Collection<E> ---> Map<T,Map<U,E>> } </B>
+     *
+     * @param collection 需要分类的集合
+     * @param key1 第一个分类的规则
+     * @param key2 第二个分类的规则
+     * @param <T> 第一个map中的key类型
+     * @param <U> 第二个map中的key类型
+     * @param <E> collection中的泛型
+     * @return 分类后的map
+     */
+    public static <E, T, U> Map<T, Map<U, E>> group2Map(
+            Collection<E> collection, Function<E, T> key1, Function<E, U> key2 ) {
         if (CollUtil.isEmpty(collection) || key1 == null || key2 == null) {
             return MapUtil.newHashMap();
         }
-        return collection.stream().collect(Collectors.groupingBy(key1, LinkedHashMap::new, Collectors.toMap(key2, Function.identity(), (l, r) -> l)));
+        return collection.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                key1,
+                                LinkedHashMap::new,
+                                Collectors.toMap(key2, Function.identity(), ( l, r ) -> l)));
     }
 
-    public static <E, T> List<T> toList(Collection<E> collection, Function<E, T> function) {
+    /**
+     * 将collection转化为List集合，但是两者的泛型不同<br>
+     * <B>{@code Collection<E> ------> List<T> } </B>
+     *
+     * @param collection 需要转化的集合
+     * @param function collection中的泛型转化为list泛型的lambda表达式
+     * @param <E> collection中的泛型
+     * @param <T> List中的泛型
+     * @return 转化后的list
+     */
+    public static <E, T> List<T> toList( Collection<E> collection, Function<E, T> function ) {
         if (CollUtil.isEmpty(collection)) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
         return collection.stream().map(function).filter(Objects::nonNull).toList();
     }
 
-    public static <E, T> Set<T> toSet(Collection<E> collection, Function<E, T> function) {
+    /**
+     * 将collection转化为Set集合，但是两者的泛型不同<br>
+     * <B>{@code Collection<E> ------> Set<T> } </B>
+     *
+     * @param collection 需要转化的集合
+     * @param function collection中的泛型转化为set泛型的lambda表达式
+     * @param <E> collection中的泛型
+     * @param <T> Set中的泛型
+     * @return 转化后的Set
+     */
+    public static <E, T> Set<T> toSet( Collection<E> collection, Function<E, T> function ) {
         if (CollUtil.isEmpty(collection) || function == null) {
-            return new HashSet();
+            return new HashSet<>();
         }
-        return collection.stream().map(function).filter(Objects::nonNull).collect(Collectors.toSet());
+        return collection.stream()
+                .map(function)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
-    public static <K, X, Y, V> Map<K, V> merge(Map<K, X> map1, Map<K, Y> map2, BiFunction<X, Y, V> merge) {
+    /**
+     * 合并两个相同key类型的map
+     *
+     * @param map1 第一个需要合并的 map
+     * @param map2 第二个需要合并的 map
+     * @param merge 合并的lambda，将key value1 value2合并成最终的类型,注意value可能为空的情况
+     * @param <K> map中的key类型
+     * @param <X> 第一个 map的value类型
+     * @param <Y> 第二个 map的value类型
+     * @param <V> 最终map的value类型
+     * @return 合并后的map
+     */
+    public static <K, X, Y, V> Map<K, V> merge(
+            Map<K, X> map1, Map<K, Y> map2, BiFunction<X, Y, V> merge ) {
         if (MapUtil.isEmpty(map1) && MapUtil.isEmpty(map2)) {
             return MapUtil.newHashMap();
-        }
-        if (MapUtil.isEmpty(map1)) {
+        } else if (MapUtil.isEmpty(map1)) {
             map1 = MapUtil.newHashMap();
         } else if (MapUtil.isEmpty(map2)) {
             map2 = MapUtil.newHashMap();
         }
-        HashSet key = new HashSet();
+        Set<K> key = new HashSet<>();
         key.addAll(map1.keySet());
         key.addAll(map2.keySet());
-        HashMap map = new HashMap();
-        for (Object t : key) {
-            Object y;
-            Object x = map1.get(t);
-            V z = merge.apply(x, y = map2.get(t));
-            if (z == null) continue;
-            map.put(t, z);
+        Map<K, V> map = new HashMap<>();
+        for (K t : key) {
+            X x = map1.get(t);
+            Y y = map2.get(t);
+            V z = merge.apply(x, y);
+            if (z != null) {
+                map.put(t, z);
+            }
         }
         return map;
     }
 
-    public static <E> List<E> getLimitList(List<E> list, Integer pageNum, Integer pageSize) {
+    /**
+     * 利用java8的stream对list进行分页
+     *
+     * <p>
+     * 这种一次性查出来的数据如果相当大，比如1GB、10GB，有可能发生内存溢出。一万条数据（60个字段）大概3MB。建议表数据量在100万条数据内，使用此方法
+     *
+     * @param list 需要分页的list，一般为全量
+     * @param pageNum 当前页
+     * @param pageSize 每页大小
+     * @param <E> 元素
+     * @return list
+     */
+    public static <E> List<E> getLimitList( List<E> list, Integer pageNum, Integer pageSize ) {
         if (list == null || list.size() == 0) {
             return list;
         }
@@ -519,132 +1186,48 @@ public class StreamUtils {
         if (pageSize == null || pageSize < 0) {
             pageSize = 10;
         }
-        return list.stream().skip((long)(pageNum - 1) * (long)pageSize.intValue()).limit(pageSize.intValue()).toList();
+        return list.stream().skip((long) ( pageNum - 1 ) * pageSize).limit(pageSize).toList();
     }
 
+    // *****************************************
+    static final Set<Characteristics> CH_NOID = Collections.emptySet();
+
+    @FunctionalInterface
+    public interface ToBigDecimalFunction<T> {
+
+        BigDecimal applyAsBigDecimal( T value );
+    }
+
+    @SuppressWarnings("unchecked")
     private static <I, R> Function<I, R> castingIdentity() {
-        return i -> i;
+        return i -> (R) i;
     }
 
-    public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(ToBigDecimalFunction<? super T> mapper) {
-        return new CollectorImpl<Object, BigDecimal[], BigDecimal>(() -> new BigDecimal[]{BigDecimal.ZERO}, (a, t) -> {
-            a[0] = a[0].add(mapper.applyAsBigDecimal(t));
-        }, (a, b) -> {
-            a[0] = a[0].add(b[0]);
-            return a;
-        }, a -> a[0], CH_NOID);
-    }
+    /**
+     * CollectorImpl
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    public static class CollectorImpl<T, A, R> implements Collector<T, A, R> {
 
-    public static <T> Collector<T, ?, BigDecimal> maxBy(ToBigDecimalFunction<? super T> mapper) {
-        return new CollectorImpl<Object, BigDecimal[], BigDecimal>(() -> new BigDecimal[]{new BigDecimal(Long.MIN_VALUE)}, (a, t) -> {
-            a[0] = a[0].max(mapper.applyAsBigDecimal(t));
-        }, (a, b) -> {
-            a[0] = a[0].max(b[0]);
-            return a;
-        }, a -> a[0], CH_NOID);
-    }
-
-    public static <T> Collector<T, ?, BigDecimal> minBy(ToBigDecimalFunction<? super T> mapper) {
-        return new CollectorImpl<Object, BigDecimal[], BigDecimal>(() -> new BigDecimal[]{new BigDecimal(Long.MAX_VALUE)}, (a, t) -> {
-            a[0] = a[0].min(mapper.applyAsBigDecimal(t));
-        }, (a, b) -> {
-            a[0] = a[0].min(b[0]);
-            return a;
-        }, a -> a[0], CH_NOID);
-    }
-
-    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(ToBigDecimalFunction<? super T> mapper, int newScale, RoundingMode roundingMode) {
-        return new CollectorImpl<Object, BigDecimal[], BigDecimal>(() -> new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO}, (a, t) -> {
-            a[0] = a[0].add(mapper.applyAsBigDecimal(t));
-            a[1] = a[1].add(BigDecimal.ONE);
-        }, (a, b) -> {
-            a[0] = a[0].add(b[0]);
-            return a;
-        }, a -> a[0].divide(a[1], RoundingMode.HALF_UP).setScale(newScale, roundingMode), CH_NOID);
-    }
-
-    @SafeVarargs
-    public static <K, V> Map<K, List<V>> concat(Map<K, V> ... maps) {
-        if (ObjectUtils.isEmpty((Object[])maps)) {
-            return Collections.emptyMap();
-        }
-        return Arrays.stream(maps).filter(Objects::nonNull).flatMap(map -> map.entrySet().stream()).collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
-    }
-
-    @SafeVarargs
-    public static <T> Stream<T> concat(T[] ... ts) {
-        if (ObjectUtils.isEmpty(ts)) {
-            return Stream.empty();
-        }
-        return Arrays.stream(ts).filter(Objects::nonNull).flatMap(Arrays::stream);
-    }
-
-    @SafeVarargs
-    public static <T, R> Stream<R> zip(Function<Stream<T>, Stream<R>> combinator, Stream<T> ... streams) {
-        return ObjectUtils.isEmpty((Object[])streams) ? Stream.empty() : Stream.of(streams).flatMap(combinator);
-    }
-
-    public static <T> Predicate<T> distinct(Function<? super T, ?> function) {
-        ConcurrentHashMap seen = new ConcurrentHashMap();
-        return t -> seen.putIfAbsent(function.apply(t), Boolean.TRUE) == null;
-    }
-
-    public static <T> Stream<T> convert(Iterator<T> iterator) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 16), false);
-    }
-
-    public static <T> Stream<T> convert(Enumeration<T> enumeration) {
-        return StreamSupport.stream(EnumerationSpliterator.spliteratorUnknownSize(enumeration), false);
-    }
-
-    public static <T, R> Function<T, R> mapWithIndex(int initValue, BiFunction<T, Integer, R> biFunction) {
-        AtomicInteger atomicInteger = new AtomicInteger(initValue);
-        return t -> biFunction.apply(t, atomicInteger.getAndIncrement());
-    }
-
-    public static <T> Consumer<T> forEachWithIndex(int initValue, BiConsumer<T, Integer> biConsumer) {
-        AtomicInteger atomicInteger = new AtomicInteger(initValue);
-        return t -> biConsumer.accept(t, atomicInteger.getAndIncrement());
-    }
-
-    @SafeVarargs
-    public static <T> Stream<T> cartesianProduct(BinaryOperator<T> aggregator, Supplier<Stream<T>> ... streams) {
-        return Arrays.stream(streams).reduce((s1, s2) -> () -> StreamUtils.lambda$cartesianProduct$1((Supplier)s1, (Supplier)s2, aggregator)).orElse(Stream::empty).get();
-    }
-
-    private static /* synthetic */ Stream lambda$cartesianProduct$1(Supplier s1, Supplier s2, BinaryOperator aggregator) {
-        return ((Stream)s1.get()).flatMap(arg_0 -> StreamUtils.lambda$cartesianProduct$2((Supplier)s2, aggregator, arg_0));
-    }
-
-    private static /* synthetic */ Stream lambda$cartesianProduct$2(Supplier s2, BinaryOperator aggregator, Object t1) {
-        return ((Stream)s2.get()).map(t2 -> aggregator.apply(t1, t2));
-    }
-
-    public static interface FunctionWithIndex<T, R> {
-        public R apply(T var1, long var2);
-    }
-
-    public static interface IntFunctionWithIndex<R> {
-        public R apply(int var1, long var2);
-    }
-
-    public static interface LongFunctionWithIndex<R> {
-        public R apply(long var1, long var3);
-    }
-
-    public static interface DoubleFunctionWithIndex<R> {
-        public R apply(double var1, long var3);
-    }
-
-    public static class CollectorImpl<T, A, R>
-    implements Collector<T, A, R> {
         private final Supplier<A> supplier;
-        private final BiConsumer<A, T> accumulator;
-        private final BinaryOperator<A> combiner;
-        private final Function<A, R> finisher;
-        private final Set<Collector.Characteristics> characteristics;
 
-        CollectorImpl(Supplier<A> supplier, BiConsumer<A, T> accumulator, BinaryOperator<A> combiner, Function<A, R> finisher, Set<Collector.Characteristics> characteristics) {
+        private final BiConsumer<A, T> accumulator;
+
+        private final BinaryOperator<A> combiner;
+
+        private final Function<A, R> finisher;
+
+        private final Set<Characteristics> characteristics;
+
+        CollectorImpl(
+                Supplier<A> supplier,
+                BiConsumer<A, T> accumulator,
+                BinaryOperator<A> combiner,
+                Function<A, R> finisher,
+                Set<Characteristics> characteristics ) {
             this.supplier = supplier;
             this.accumulator = accumulator;
             this.combiner = combiner;
@@ -652,83 +1235,248 @@ public class StreamUtils {
             this.characteristics = characteristics;
         }
 
-        CollectorImpl(Supplier<A> supplier, BiConsumer<A, T> accumulator, BinaryOperator<A> combiner, Set<Collector.Characteristics> characteristics) {
-            this(supplier, accumulator, combiner, StreamUtils.castingIdentity(), characteristics);
+        CollectorImpl(
+                Supplier<A> supplier,
+                BiConsumer<A, T> accumulator,
+                BinaryOperator<A> combiner,
+                Set<Characteristics> characteristics ) {
+            this(supplier, accumulator, combiner, castingIdentity(), characteristics);
         }
 
         @Override
         public BiConsumer<A, T> accumulator() {
-            return this.accumulator;
+            return accumulator;
         }
 
         @Override
         public Supplier<A> supplier() {
-            return this.supplier;
+            return supplier;
         }
 
         @Override
         public BinaryOperator<A> combiner() {
-            return this.combiner;
+            return combiner;
         }
 
         @Override
         public Function<A, R> finisher() {
-            return this.finisher;
+            return finisher;
         }
 
         @Override
-        public Set<Collector.Characteristics> characteristics() {
-            return this.characteristics;
+        public Set<Characteristics> characteristics() {
+            return characteristics;
         }
     }
 
-    @FunctionalInterface
-    public static interface ToBigDecimalFunction<T> {
-        public BigDecimal applyAsBigDecimal(T var1);
+    // 求和方法
+    public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(
+            ToBigDecimalFunction<? super T> mapper ) {
+        return new CollectorImpl<>(
+                () -> new BigDecimal[]{BigDecimal.ZERO},
+                ( a, t ) -> {
+                    a[0] = a[0].add(mapper.applyAsBigDecimal(t));
+                },
+                ( a, b ) -> {
+                    a[0] = a[0].add(b[0]);
+                    return a;
+                },
+                a -> a[0],
+                CH_NOID);
     }
 
-    private static class TemporaryPair<A, B> {
-        final A a;
-        final B b;
-
-        TemporaryPair(A a, B b) {
-            this.a = a;
-            this.b = b;
-        }
+    // 求最大值
+    public static <T> Collector<T, ?, BigDecimal> maxBy( ToBigDecimalFunction<? super T> mapper ) {
+        return new CollectorImpl<>(
+                () -> new BigDecimal[]{new BigDecimal(Long.MIN_VALUE)},
+                ( a, t ) -> {
+                    a[0] = a[0].max(mapper.applyAsBigDecimal(t));
+                },
+                ( a, b ) -> {
+                    a[0] = a[0].max(b[0]);
+                    return a;
+                },
+                a -> a[0],
+                CH_NOID);
     }
 
-    private static abstract class MapWithIndexSpliterator<F extends Spliterator<?>, R, S extends MapWithIndexSpliterator<F, R, S>>
-    implements Spliterator<R> {
-        final F fromSpliterator;
-        long index;
+    // 求最小值
+    public static <T> Collector<T, ?, BigDecimal> minBy( ToBigDecimalFunction<? super T> mapper ) {
+        return new CollectorImpl<>(
+                () -> new BigDecimal[]{new BigDecimal(Long.MAX_VALUE)},
+                ( a, t ) -> {
+                    a[0] = a[0].min(mapper.applyAsBigDecimal(t));
+                },
+                ( a, b ) -> {
+                    a[0] = a[0].min(b[0]);
+                    return a;
+                },
+                a -> a[0],
+                CH_NOID);
+    }
 
-        MapWithIndexSpliterator(F fromSpliterator, long index) {
-            this.fromSpliterator = fromSpliterator;
-            this.index = index;
+    // 求平均值
+    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(
+            ToBigDecimalFunction<? super T> mapper, int newScale, RoundingMode roundingMode ) {
+        return new CollectorImpl<>(
+                () -> new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO},
+                ( a, t ) -> {
+                    a[0] = a[0].add(mapper.applyAsBigDecimal(t));
+                    a[1] = a[1].add(BigDecimal.ONE);
+                },
+                ( a, b ) -> {
+                    a[0] = a[0].add(b[0]);
+                    return a;
+                },
+                a -> a[0].divide(a[1], RoundingMode.HALF_UP).setScale(newScale, roundingMode),
+                CH_NOID);
+    }
+
+    /**
+     * Concat map.
+     *
+     * @param <K> the type parameter
+     * @param <V> the type parameter
+     * @param maps the maps
+     * @return the map
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, List<V>> concat( Map<K, V>... maps ) {
+        if (ObjectUtils.isEmpty(maps)) {
+            return Collections.emptyMap();
         }
+        return Arrays.stream(maps)
+                .filter(Objects::nonNull)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(
+                        Collectors.groupingBy(
+                                Map.Entry::getKey,
+                                Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+    }
 
-        abstract S createSplit(F var1, long var2);
-
-        public S trySplit() {
-            Spliterator splitOrNull = this.fromSpliterator.trySplit();
-            if (splitOrNull == null) {
-                return null;
-            }
-            Spliterator split = splitOrNull;
-            S result = this.createSplit(split, this.index);
-            this.index += split.getExactSizeIfKnown();
-            return result;
+    /**
+     * Concat stream.
+     *
+     * @param <T> the type parameter
+     * @param ts the ts
+     * @return the stream
+     */
+    @SafeVarargs
+    public static <T> Stream<T> concat( T[]... ts ) {
+        if (ObjectUtils.isEmpty(ts)) {
+            return Stream.empty();
         }
+        return Arrays.stream(ts).filter(Objects::nonNull).flatMap(Arrays::stream);
+    }
 
-        @Override
-        public long estimateSize() {
-            return this.fromSpliterator.estimateSize();
-        }
+    /**
+     * Zip stream.
+     *
+     * @param <T> the type parameter
+     * @param <R> the type parameter
+     * @param combinator the combinator
+     * @param streams the streams
+     * @return the stream
+     */
+    @SafeVarargs
+    public static <T, R> Stream<R> zip(
+            Function<Stream<T>, Stream<R>> combinator, Stream<T>... streams ) {
+        return ObjectUtils.isEmpty(streams)
+                ? Stream.empty()
+                : Stream.of(streams).flatMap(combinator);
+    }
 
-        @Override
-        public int characteristics() {
-            return this.fromSpliterator.characteristics() & 0x4050;
-        }
+    /**
+     * Distinct predicate.
+     *
+     * @param <T> the type parameter
+     * @param function the function
+     * @return the predicate
+     */
+    public static <T> Predicate<T> distinct( Function<? super T, ?> function ) {
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(function.apply(t), Boolean.TRUE) == null;
+    }
+
+    /**
+     * Convert stream.
+     *
+     * @param <T> the type parameter
+     * @param iterator the iterator
+     * @return the stream
+     */
+    public static <T> Stream<T> convert( Iterator<T> iterator ) {
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
+    }
+
+    /**
+     * Convert stream.
+     *
+     * @param <T> the type parameter
+     * @param enumeration the enumeration
+     * @return the stream
+     */
+    public static <T> Stream<T> convert( Enumeration<T> enumeration ) {
+        return StreamSupport.stream(
+                EnumerationSpliterator.spliteratorUnknownSize(enumeration), false);
+    }
+
+    /**
+     * Map with index function.
+     *
+     * @param <T> the type parameter
+     * @param <R> the type parameter
+     * @param initValue the init value
+     * @param biFunction the bi function
+     * @return the function
+     */
+    public static <T, R> Function<T, R> mapWithIndex(
+            int initValue, BiFunction<T, Integer, R> biFunction ) {
+        AtomicInteger atomicInteger = new AtomicInteger(initValue);
+        return t -> biFunction.apply(t, atomicInteger.getAndIncrement());
+    }
+
+    /**
+     * For each with index consumer.
+     *
+     * @param <T> the type parameter
+     * @param initValue the init value
+     * @param biConsumer the bi consumer
+     * @return the consumer
+     */
+    public static <T> Consumer<T> forEachWithIndex(
+            int initValue, BiConsumer<T, Integer> biConsumer ) {
+        AtomicInteger atomicInteger = new AtomicInteger(initValue);
+        return t -> biConsumer.accept(t, atomicInteger.getAndIncrement());
+    }
+
+    /**
+     * 将多个流进行笛卡尔积
+     *
+     * @param aggregator 乘积函数
+     * @param streams 多个流
+     * @param <T> 流的元素类型
+     * @return 计算后的流
+     */
+    @SafeVarargs
+    public static <T> Stream<T> cartesianProduct(
+            BinaryOperator<T> aggregator, Supplier<Stream<T>>... streams ) {
+        return Arrays.stream(streams)
+                .reduce(
+                        ( s1, s2 ) ->
+                                () ->
+                                        s1.get()
+                                                .flatMap(
+                                                        t1 ->
+                                                                s2.get()
+                                                                        .map(
+                                                                                t2 ->
+                                                                                        aggregator
+                                                                                                .apply(
+                                                                                                        t1,
+                                                                                                        t2))))
+                .orElse(Stream::empty)
+                .get();
     }
 }
-

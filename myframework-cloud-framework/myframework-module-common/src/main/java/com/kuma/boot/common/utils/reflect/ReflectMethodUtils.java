@@ -1,22 +1,30 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Lists
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
 import com.google.common.collect.Lists;
+import com.kuma.boot.common.constant.MethodConstants;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.support.handler.Handler;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
-import com.kuma.boot.common.utils.reflect.TypeUtils;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,243 +36,431 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+/** 反射方法工具类 */
 public final class ReflectMethodUtils {
+
+    private ReflectMethodUtils() {}
+
+    /**
+     * 忽略的方法名称列表 （1）object 默认方法 （2）class 默认方法
+     *
+     * <p>
+     * 可优化方案： 将所有方法写死，放在列表中、 缺点：占地方，无法动态更新。
+     */
     private static final List<String> IGNORE_METHOD_LIST;
 
-    private ReflectMethodUtils() {
-    }
-
-    public static List<String> getIgnoreMethodList() {
-        return IGNORE_METHOD_LIST;
-    }
-
-    public static boolean isIgnoreMethod(String methodName) {
-        return ReflectMethodUtils.getIgnoreMethodList().contains(methodName);
-    }
-
-    public static List<String> getParamTypeNames(Method method) {
-        ArgUtils.notNull(method, "method");
-        Class<?>[] paramTypes = method.getParameterTypes();
-        return ArrayUtils.toList(paramTypes, new Handler<Class<?>, String>(){
-
-            @Override
-            public String handle(Class<?> aClass) {
-                return aClass.getName();
-            }
-        });
-    }
-
-    public static List<String> getParamNames(Method method) {
-        ArgUtils.notNull(method, "method");
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        return ReflectMethodUtils.getParamNames(parameterAnnotations);
-    }
-
-    public static List<String> getParamNames(Annotation[][] parameterAnnotations) {
-        if (ArrayUtils.isEmpty((Object[])parameterAnnotations)) {
-            return Collections.emptyList();
-        }
-        int paramSize = parameterAnnotations.length;
-        ArrayList resultList = Lists.newArrayList();
-        for (int i = 0; i < paramSize; ++i) {
-            Annotation[] annotations = parameterAnnotations[i];
-            String paramName = ReflectMethodUtils.getParamName(i, annotations);
-            resultList.add(paramName);
-        }
-        return resultList;
-    }
-
-    private static String getParamName(int index, Annotation[] annotations) {
-        String defaultName = "arg" + index;
-        if (ArrayUtils.isEmpty(annotations)) {
-            return defaultName;
-        }
-        for (Annotation annotation : annotations) {
-        }
-        return defaultName;
-    }
-
-    public static Class getReturnGenericType(Method method, int index) {
-        Type returnType = method.getGenericReturnType();
-        if (returnType instanceof ParameterizedType) {
-            ParameterizedType type = (ParameterizedType)returnType;
-            Type[] typeArguments = type.getActualTypeArguments();
-            return (Class)typeArguments[index];
-        }
-        return null;
-    }
-
-    public static Class getParamGenericType(Method method, int paramIndex, int genericIndex) {
-        Type[] genericParameterTypes = method.getGenericParameterTypes();
-        Type genericParameterType = genericParameterTypes[paramIndex];
-        if (genericParameterType instanceof ParameterizedType) {
-            ParameterizedType aType = (ParameterizedType)genericParameterType;
-            Type[] parameterArgTypes = aType.getActualTypeArguments();
-            return (Class)parameterArgTypes[genericIndex];
-        }
-        return null;
-    }
-
-    public static Optional<Method> getMethodOptional(Class tClass, Class<? extends Annotation> annotationClass) {
-        Object[] methods = tClass.getMethods();
-        if (ArrayUtils.isEmpty(methods)) {
-            return Optional.empty();
-        }
-        for (Object method : methods) {
-            if (!((AccessibleObject)method).isAnnotationPresent(annotationClass)) continue;
-            return Optional.of(method);
-        }
-        return Optional.empty();
-    }
-
-    public static Object invoke(Object instance, Method method, Object ... args) {
-        ArgUtils.notNull(method, "method");
-        try {
-            return method.invoke(instance, args);
-        }
-        catch (IllegalAccessException | InvocationTargetException e) {
-            throw new BootException(e);
-        }
-    }
-
-    public static Object invoke(Object instance, String methodName, Object ... args) {
-        ArgUtils.notEmpty(methodName, "methodName");
-        try {
-            if (ArrayUtils.isEmpty(args)) {
-                return ReflectMethodUtils.invokeNoArgsMethod(instance, methodName);
-            }
-            Class<?> clazz = instance.getClass();
-            Class[] paramTypes = new Class[args.length];
-            for (int i = 0; i < args.length; ++i) {
-                Object param = args[i];
-                paramTypes[i] = param.getClass();
-            }
-            Method method = ClassUtils.getMethod(clazz, methodName, paramTypes);
-            return method.invoke(instance, args);
-        }
-        catch (IllegalAccessException | InvocationTargetException e) {
-            throw new BootException(e);
-        }
-    }
-
-    public static Object invokeNoArgsMethod(Object instance, Method method) {
-        if (ObjectUtils.isNull(method)) {
-            return null;
-        }
-        String methodName = method.getName();
-        Object[] paramTypes = method.getParameterTypes();
-        if (ArrayUtils.isNotEmpty(paramTypes)) {
-            throw new BootException(methodName + " must be has no params.");
-        }
-        return ReflectMethodUtils.invoke(instance, method, new Object[0]);
-    }
-
-    public static Object invokeNoArgsMethod(Object instance, String methodName) {
-        ArgUtils.notNull(instance, "instance");
-        Class<?> clazz = instance.getClass();
-        Method method = ClassUtils.getMethod(clazz, methodName);
-        return ReflectMethodUtils.invokeNoArgsMethod(instance, method);
-    }
-
-    public static Object invokeFactoryMethod(Class clazz, Method factoryMethod) {
-        ArgUtils.notNull(clazz, "clazz");
-        ArgUtils.notNull(factoryMethod, "factoryMethod");
-        String methodName = factoryMethod.getName();
-        Object[] paramTypes = factoryMethod.getParameterTypes();
-        if (ArrayUtils.isNotEmpty(paramTypes)) {
-            throw new BootException(methodName + " must be has no params.");
-        }
-        if (!Modifier.isStatic(factoryMethod.getModifiers())) {
-            throw new BootException(methodName + " must be static.");
-        }
-        Class<?> returnType = factoryMethod.getReturnType();
-        if (!returnType.isAssignableFrom(clazz)) {
-            throw new BootException(methodName + " must be return " + returnType.getName());
-        }
-        return ReflectMethodUtils.invoke(null, factoryMethod, new Object[0]);
-    }
-
-    public static Class getGenericReturnParamType(Method method, int paramIndex) {
-        ArgUtils.notNull(method, "method");
-        ArgUtils.notNegative(paramIndex, "paramIndex");
-        Type returnType = method.getGenericReturnType();
-        if (ObjectUtils.isNull(returnType)) {
-            return null;
-        }
-        return TypeUtils.getGenericParamType(returnType, paramIndex);
-    }
-
-    public static void invokeSetterMethod(Object instance, String propertyName, Object value) {
-        ArgUtils.notNull(instance, "instance");
-        ArgUtils.notNull(propertyName, "propertyName");
-        if (ObjectUtils.isNull(value)) {
-            return;
-        }
-        Class<?> clazz = instance.getClass();
-        String setMethodName = ReflectMethodUtils.buildSetMethodName(propertyName);
-        Class<?> paramType = value.getClass();
-        try {
-            Method method = clazz.getMethod(setMethodName, paramType);
-            method.invoke(instance, value);
-        }
-        catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new BootException(e);
-        }
-    }
-
-    public static Object invokeGetterMethod(Object instance, String fieldName, Class fieldType) {
-        ArgUtils.notNull(instance, "instance");
-        ArgUtils.notNull(fieldType, "fieldType");
-        ArgUtils.notEmpty(fieldName, "fieldName");
-        Class<?> clazz = instance.getClass();
-        String getMethodName = ReflectMethodUtils.buildGetMethodName(fieldType, fieldName);
-        try {
-            Method method = clazz.getMethod(getMethodName, new Class[0]);
-            return method.invoke(instance, new Object[0]);
-        }
-        catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new BootException(e);
-        }
-    }
-
-    public static Object invokeGetterMethod(Object instance, String fieldName) {
-        return ReflectMethodUtils.invokeGetterMethod(instance, fieldName, String.class);
-    }
-
-    public static Object invokeGetterMethod(Object instance, Field field) {
-        Class<?> fieldType = field.getType();
-        String fieldName = field.getName();
-        return ReflectMethodUtils.invokeGetterMethod(instance, fieldName, fieldType);
-    }
-
-    public static String buildSetMethodName(String propertyName) {
-        ArgUtils.notEmpty(propertyName, "propertyName");
-        return "set" + StringUtils.firstToUpperCase(propertyName);
-    }
-
-    public static String buildGetMethodName(Class fieldType, String propertyName) {
-        ArgUtils.notNull(fieldType, "fieldType");
-        ArgUtils.notEmpty(propertyName, "propertyName");
-        if (Boolean.TYPE.equals(fieldType)) {
-            return "is" + StringUtils.firstToUpperCase(propertyName);
-        }
-        return "get" + StringUtils.firstToUpperCase(propertyName);
-    }
-
-    public static String buildGetMethodName(String propertyName) {
-        return ReflectMethodUtils.buildGetMethodName(String.class, propertyName);
-    }
-
     static {
-        HashSet<String> methodNameSet = new HashSet<String>(64);
+        Set<String> methodNameSet = new HashSet<>(64);
         for (Method method : Object.class.getMethods()) {
             methodNameSet.add(method.getName());
         }
         for (Method method : Class.class.getMethods()) {
             methodNameSet.add(method.getName());
         }
-        IGNORE_METHOD_LIST = new ArrayList<String>(methodNameSet);
+        IGNORE_METHOD_LIST = new ArrayList<>(methodNameSet);
+    }
+
+    /**
+     * 获取忽略的方法列表
+     * @return 忽略方法名称列表
+     */
+    public static List<String> getIgnoreMethodList() {
+        return IGNORE_METHOD_LIST;
+    }
+
+    /**
+     * 是否为应该忽略的方法名称
+     * @param methodName 方法名称
+     * @return 是否
+     */
+    public static boolean isIgnoreMethod(final String methodName) {
+        return getIgnoreMethodList().contains(methodName);
+    }
+
+    /**
+     * 获取方法类型的名称
+     * @param method 方法反射信息
+     * @return 参数列表
+     */
+    public static List<String> getParamTypeNames(final Method method) {
+        ArgUtils.notNull(method, "method");
+
+        Class<?>[] paramTypes = method.getParameterTypes();
+
+        return ArrayUtils.toList(
+                paramTypes,
+                new Handler<Class<?>, String>() {
+                    @Override
+                    public String handle(Class<?> aClass) {
+                        return aClass.getName();
+                    }
+                });
+    }
+
+    /**
+     * 获取参数名称
+     *
+     * <p>
+     * https://blog.csdn.net/revitalizing/article/details/71036970
+     *
+     * <p>
+     */
+    public static List<String> getParamNames(final Method method) {
+        ArgUtils.notNull(method, "method");
+
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        return getParamNames(parameterAnnotations);
+    }
+
+    /**
+     * 获取参数名称列表
+     * @param parameterAnnotations 参数注解
+     * @return 名称列表
+     */
+    public static List<String> getParamNames(final Annotation[][] parameterAnnotations) {
+        if (ArrayUtils.isEmpty(parameterAnnotations)) {
+            return Collections.emptyList();
+        }
+
+        final int paramSize = parameterAnnotations.length;
+        List<String> resultList = Lists.newArrayList();
+        for (int i = 0; i < paramSize; i++) {
+            Annotation[] annotations = parameterAnnotations[i];
+            String paramName = getParamName(i, annotations);
+            resultList.add(paramName);
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 获取参数名称
+     * @param index 参数的下标
+     * @param annotations 注解信息
+     * @return 参数名称
+     */
+    private static String getParamName(final int index, final Annotation[] annotations) {
+        final String defaultName = "arg" + index;
+        if (ArrayUtils.isEmpty(annotations)) {
+            return defaultName;
+        }
+
+        for (Annotation annotation : annotations) {
+            // if(annotation.annotationType().equals(Param.class)) {
+            // Param param = (Param)annotation;
+            // return param.value();
+            // }
+        }
+
+        return defaultName;
+    }
+
+    /**
+     * 获取方法返回值的泛型
+     * @param method 方法
+     * @param index 泛型的下标
+     * @return 返回类型的泛型
+     */
+    public static Class getReturnGenericType(final Method method, final int index) {
+        Type returnType = method.getGenericReturnType();
+        if (returnType instanceof ParameterizedType) {
+            ParameterizedType type = (ParameterizedType) returnType;
+            Type[] typeArguments = type.getActualTypeArguments();
+            return (Class) typeArguments[index];
+        }
+        return null;
+    }
+
+    /**
+     * 获取参数的泛型
+     * @param method 方法
+     * @param paramIndex 方法的下标
+     * @param genericIndex 泛型的下标
+     * @return 对应的类型
+     */
+    public static Class getParamGenericType(
+            final Method method, final int paramIndex, final int genericIndex) {
+        Type[] genericParameterTypes = method.getGenericParameterTypes();
+        Type genericParameterType = genericParameterTypes[paramIndex];
+        if (genericParameterType instanceof ParameterizedType) {
+            ParameterizedType aType = (ParameterizedType) genericParameterType;
+            Type[] parameterArgTypes = aType.getActualTypeArguments();
+            return (Class) parameterArgTypes[genericIndex];
+        }
+        return null;
+    }
+
+    /**
+     * 获取指定注解的方法
+     * @param tClass 类信息
+     * @param annotationClass 注解信息
+     * @return 方法的 optional 信息
+     */
+    public static Optional<Method> getMethodOptional(
+            final Class tClass, final Class<? extends Annotation> annotationClass) {
+        final Method[] methods = tClass.getMethods();
+
+        if (ArrayUtils.isEmpty(methods)) {
+            return Optional.empty();
+        }
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(annotationClass)) {
+                return Optional.of(method);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * 执行反射调用
+     * @param instance 对象实例，为空的时候针对 static 方法
+     * @param method 方法实例
+     * @param args 参数信息
+     * @return 调用结果
+     */
+    public static Object invoke(final Object instance, final Method method, Object... args) {
+        ArgUtils.notNull(method, "method");
+
+        try {
+            return method.invoke(instance, args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BootException(e);
+        }
+    }
+
+    /**
+     * 执行反射调用
+     * @param instance 对象实例，为空的时候针对 static 方法
+     * @param methodName 方法名称
+     * @param args 参数信息
+     * @return 调用结果
+     */
+    public static Object invoke(final Object instance, final String methodName, Object... args) {
+        ArgUtils.notEmpty(methodName, "methodName");
+
+        try {
+            // 1. 如果参数为空
+            if (ArrayUtils.isEmpty(args)) {
+                return invokeNoArgsMethod(instance, methodName);
+            }
+
+            // 2. 如果参数不为空，则需要获取对应的参数列表
+            final Class clazz = instance.getClass();
+            Class<?>[] paramTypes = new Class[args.length];
+            for (int i = 0; i < args.length; i++) {
+                Object param = args[i];
+                paramTypes[i] = param.getClass();
+            }
+
+            Method method = ClassUtils.getMethod(clazz, methodName, paramTypes);
+            return method.invoke(instance, args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BootException(e);
+        }
+    }
+
+    /**
+     * 直接执行调用无参方法
+     * @param instance 实例对象
+     * @param method 方法信息
+     * @return 结果
+     */
+    public static Object invokeNoArgsMethod(final Object instance, final Method method) {
+        // 0. fail-fast
+        if (ObjectUtils.isNull(method)) {
+            return null;
+        }
+
+        // 1. 信息校验
+        final String methodName = method.getName();
+        Class<?>[] paramTypes = method.getParameterTypes();
+        if (ArrayUtils.isNotEmpty(paramTypes)) {
+            throw new BootException(methodName + " must be has no params.");
+        }
+
+        // 2.反射调用
+        return ReflectMethodUtils.invoke(instance, method);
+    }
+
+    /**
+     * 直接执行调用无参方法
+     * @param instance 实例对象
+     * @param methodName 方法名称信息
+     * @return 结果
+     */
+    public static Object invokeNoArgsMethod(final Object instance, final String methodName) {
+        ArgUtils.notNull(instance, "instance");
+
+        final Class clazz = instance.getClass();
+        Method method = ClassUtils.getMethod(clazz, methodName);
+        return invokeNoArgsMethod(instance, method);
+    }
+
+    /**
+     * 直接执行调用无参方法
+     *
+     * <p>
+     * 限制如下： （1）工厂方法必须为静态 （2）工厂方法必须无参 （3）工厂方法必须返回指定对象信息
+     * @param clazz 类信息
+     * @param factoryMethod 工厂方法
+     * @return 对象实例
+     */
+    @SuppressWarnings("unchecked")
+    public static Object invokeFactoryMethod(final Class clazz, final Method factoryMethod) {
+        ArgUtils.notNull(clazz, "clazz");
+        ArgUtils.notNull(factoryMethod, "factoryMethod");
+
+        // 1. 信息校验
+        // 1.1 无参
+        final String methodName = factoryMethod.getName();
+        Class<?>[] paramTypes = factoryMethod.getParameterTypes();
+        if (ArrayUtils.isNotEmpty(paramTypes)) {
+            throw new BootException(methodName + " must be has no params.");
+        }
+        // 1.2 静态
+        if (!Modifier.isStatic(factoryMethod.getModifiers())) {
+            throw new BootException(methodName + " must be static.");
+        }
+        // 1.3 返回值
+        Class returnType = factoryMethod.getReturnType();
+        if (!returnType.isAssignableFrom(clazz)) {
+            throw new BootException(
+                    methodName + " must be return " + returnType.getName());
+        }
+
+        // 2.反射调用
+        return ReflectMethodUtils.invoke(null, factoryMethod);
+    }
+
+    /**
+     * 获取泛型参数类型
+     * @param method 方法信息
+     * @param paramIndex 参数下标
+     * @return 结果
+     */
+    public static Class getGenericReturnParamType(final Method method, final int paramIndex) {
+        ArgUtils.notNull(method, "method");
+        ArgUtils.notNegative(paramIndex, "paramIndex");
+
+        Type returnType = method.getGenericReturnType();
+        if (ObjectUtils.isNull(returnType)) {
+            return null;
+        }
+
+        return TypeUtils.getGenericParamType(returnType, paramIndex);
+    }
+
+    /***
+     * 调用 setter 方法，进行设置值
+     * @param instance 实例信息
+     * @param propertyName 属性名称
+     * @param value 对象值
+     */
+    public static void invokeSetterMethod(
+            final Object instance, final String propertyName, final Object value) {
+        ArgUtils.notNull(instance, "instance");
+        ArgUtils.notNull(propertyName, "propertyName");
+
+        if (ObjectUtils.isNull(value)) {
+            return;
+        }
+
+        final Class<?> clazz = instance.getClass();
+        String setMethodName = buildSetMethodName(propertyName);
+
+        // 反射获取对应的方法
+        final Class<?> paramType = value.getClass();
+        try {
+            Method method = clazz.getMethod(setMethodName, paramType);
+            method.invoke(instance, value);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new BootException(e);
+        }
+    }
+
+    /***
+     * 调用 getter 方法，获取属性值
+     * @param instance 实例信息
+     * @param fieldName 属性名称
+     * @param fieldType 字段类型
+     * @return 结果
+     */
+    public static Object invokeGetterMethod(
+            final Object instance, final String fieldName, final Class fieldType) {
+        ArgUtils.notNull(instance, "instance");
+        ArgUtils.notNull(fieldType, "fieldType");
+        ArgUtils.notEmpty(fieldName, "fieldName");
+
+        final Class<?> clazz = instance.getClass();
+        String getMethodName = buildGetMethodName(fieldType, fieldName);
+
+        // 反射获取对应的方法
+        try {
+            Method method = clazz.getMethod(getMethodName);
+            return method.invoke(instance);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new BootException(e);
+        }
+    }
+
+    /***
+     * 调用 getter 方法，获取属性值
+     * @param instance 实例信息
+     * @param fieldName 属性名称
+     * @return 结果
+     */
+    public static Object invokeGetterMethod(final Object instance, final String fieldName) {
+        return invokeGetterMethod(instance, fieldName, String.class);
+    }
+
+    /***
+     * 调用 getter 方法，获取属性值
+     * @param instance 实例信息
+     * @param field 字段类型
+     * @return 结果
+     */
+    public static Object invokeGetterMethod(final Object instance, final Field field) {
+        final Class<?> fieldType = field.getType();
+        final String fieldName = field.getName();
+
+        return invokeGetterMethod(instance, fieldName, fieldType);
+    }
+
+    /**
+     * 构建设置方法名称
+     * @param propertyName 属性名称
+     * @return set 方法名称
+     */
+    public static String buildSetMethodName(final String propertyName) {
+        ArgUtils.notEmpty(propertyName, "propertyName");
+
+        return MethodConstants.SET_PREFIX + StringUtils.firstToUpperCase(propertyName);
+    }
+
+    /**
+     * 构建设置方法名称 （1）boolean 会变为 isXXX （2）常规都是 getXXX
+     * @param fieldType 字段类型
+     * @param propertyName 属性名称
+     * @return set 方法名称
+     */
+    public static String buildGetMethodName(final Class fieldType, final String propertyName) {
+        ArgUtils.notNull(fieldType, "fieldType");
+        ArgUtils.notEmpty(propertyName, "propertyName");
+
+        if (boolean.class.equals(fieldType)) {
+            return MethodConstants.IS_PREFIX + StringUtils.firstToUpperCase(propertyName);
+        }
+        return MethodConstants.GET_PREFIX + StringUtils.firstToUpperCase(propertyName);
+    }
+
+    /**
+     * 构建设置方法名称 1. 默认使用 getXXX
+     * @param propertyName 属性名称
+     * @return set 方法名称
+     */
+    public static String buildGetMethodName(final String propertyName) {
+        return buildGetMethodName(String.class, propertyName);
     }
 }
-

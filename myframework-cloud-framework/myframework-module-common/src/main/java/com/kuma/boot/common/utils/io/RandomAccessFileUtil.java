@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
 import com.kuma.boot.common.exception.BootException;
@@ -11,42 +24,51 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/** 文件随机访问工具类 */
 public final class RandomAccessFileUtil {
-    private RandomAccessFileUtil() {
+
+    private RandomAccessFileUtil() {}
+
+    /**
+     * 获取文件内容
+     * @param filePath 文件路径
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @return 结果
+     */
+    public static String getFileContent(
+            final String filePath, final int startIndex, final int endIndex) {
+        return getFileContent(filePath, startIndex, endIndex, StandardCharsets.UTF_8);
     }
 
-    public static String getFileContent(String filePath, int startIndex, int endIndex) {
-        return RandomAccessFileUtil.getFileContent(filePath, startIndex, endIndex, StandardCharsets.UTF_8);
-    }
+    /**
+     * 获取文件内容
+     * @param filePath 文件路径
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @param charset 编码
+     * @return 结果
+     */
+    public static String getFileContent(
+            final String filePath,
+            final int startIndex,
+            final int endIndex,
+            final Charset charset) {
+        final int size = endIndex - startIndex;
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(filePath, "r")) {
+            MappedByteBuffer inputBuffer =
+                    randomAccessFile
+                            .getChannel()
+                            .map(FileChannel.MapMode.READ_ONLY, startIndex, size);
 
-    public static String getFileContent(String filePath, int startIndex, int endIndex, Charset charset) {
-        String string;
-        int size = endIndex - startIndex;
-        RandomAccessFile randomAccessFile = new RandomAccessFile(filePath, "r");
-        try {
-            MappedByteBuffer inputBuffer = randomAccessFile.getChannel().map(FileChannel.MapMode.READ_ONLY, startIndex, size);
             byte[] bs = new byte[size];
-            for (int offset = 0; offset < inputBuffer.capacity(); ++offset) {
+            for (int offset = 0; offset < inputBuffer.capacity(); offset++) {
                 bs[offset] = inputBuffer.get(offset);
             }
-            string = new String(bs, charset);
+
+            return new String(bs, charset);
+        } catch (IOException e) {
+            throw new BootException(e);
         }
-        catch (Throwable throwable) {
-            try {
-                try {
-                    randomAccessFile.close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-            catch (IOException e) {
-                throw new BootException(e);
-            }
-        }
-        randomAccessFile.close();
-        return string;
     }
 }
-

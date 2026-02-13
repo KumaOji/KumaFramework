@@ -1,18 +1,31 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Lists
- *  org.jspecify.annotations.Nullable
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
 import com.google.common.collect.Lists;
+import com.kuma.boot.common.constant.CommonConstants;
+import com.kuma.boot.common.constant.FileTypeConstants;
+import com.kuma.boot.common.constant.PathConstants;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.common.ArgUtils;
-import com.kuma.boot.common.utils.io.UrlUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -20,9 +33,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,68 +46,115 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
+import org.springframework.util.ResourceUtils;
 
+/** 路径工具类 */
 public final class PathUtils {
-    public static final Path ROOT_PATH = Paths.get("/", new String[0]);
 
-    private PathUtils() {
-    }
+    private PathUtils() {}
 
-    public static String getRelativePath(Path parentPath, Path path) {
-        String pathStr = path.toString();
+    /** 根路径 */
+    public static final Path ROOT_PATH = Paths.get("/");
+
+    /**
+     * 获取 path 相对于 parentPath 剩余的路径 和 {@link Path#relativize(Path)} 不同，这个结果更加直观。不过性能一般。
+     * @param parentPath 父类路径
+     * @param path 原始路径
+     * @return 相对结果路径
+     */
+    public static String getRelativePath(final Path parentPath, final Path path) {
+        final String pathStr = path.toString();
         if (ObjectUtils.isNull(parentPath)) {
             return pathStr;
         }
+
+        // 认为是根路径
         if (parentPath.toString().length() <= 1) {
             return pathStr;
         }
-        String parentPathStr = parentPath.toString();
+
+        final String parentPathStr = parentPath.toString();
         if (pathStr.startsWith(parentPathStr)) {
             return pathStr.substring(parentPathStr.length() + 1);
         }
         return pathStr;
     }
 
-    public static Path getPublicParentPath(List<Path> pathList) {
+    /**
+     * 获取共有的路径
+     * @param pathList 路径列表
+     * @return 结果
+     */
+    public static Path getPublicParentPath(final List<Path> pathList) {
+        // 直接返回第一个元素的父类路径即可、
         if (pathList.size() == 1) {
-            return PathUtils.getParentPath(pathList.get(0));
+            return getParentPath(pathList.get(0));
         }
-        ArrayList<List<String>> pathStrList = new ArrayList<List<String>>(pathList.size());
+
+        // 获取所有的父类文件夹
+        List<List<String>> pathStrList = new ArrayList<>(pathList.size());
         for (Path path : pathList) {
-            List<String> stringList = CollectionUtils.toStringList(PathUtils.getParentPaths(path));
+            List<String> stringList = CollectionUtils.toStringList(getParentPaths(path));
             pathStrList.add(stringList);
         }
-        List<String> publicParentPathStrs = PathUtils.retainAll(pathStrList);
-        String maxLengthParent = PathUtils.getMaxLength(publicParentPathStrs);
-        return Paths.get(maxLengthParent, new String[0]);
+
+        // 获取共有的父类文件夹
+        List<String> publicParentPathStrs = retainAll(pathStrList);
+
+        // 获取最长的一个作为最大的公共路径
+        String maxLengthParent = getMaxLength(publicParentPathStrs);
+        return Paths.get(maxLengthParent);
     }
 
-    private static String getMaxLength(List<String> stringList) {
-        String result = "";
+    /**
+     * 获取最长的字符串
+     * @param stringList 字符串列表
+     * @return 最长的结果
+     */
+    private static String getMaxLength(final List<String> stringList) {
+        String result = StringUtils.EMPTY;
+
         for (String string : stringList) {
-            if (string.length() <= result.length()) continue;
-            result = string;
+            if (string.length() > result.length()) {
+                result = string;
+            }
         }
         return result;
     }
 
-    public static List<Path> getParentPaths(Path path) {
+    /**
+     * 获取所有的父类路径 1. 不包含本身 2. 递归获取父类，如果父类为 null 则停止（说明到 root 了） 3. 默认 / root 的是所有逻辑的父亲路径，包括
+     * root 文件夹本身。
+     * @param path 当前路径
+     * @return 所有的父类列表
+     */
+    public static List<Path> getParentPaths(final Path path) {
         if (ObjectUtils.isNull(path)) {
             return Collections.emptyList();
         }
-        ArrayList<Path> pathList = new ArrayList<Path>();
+
+        List<Path> pathList = new ArrayList<>();
         Path parentPath = path.getParent();
         while (ObjectUtils.isNotNull(parentPath)) {
             pathList.add(parentPath);
+
             parentPath = parentPath.getParent();
         }
+
+        // 如果列表为空，则默认添加 /
         if (CollectionUtils.isEmpty(pathList)) {
             pathList.add(ROOT_PATH);
         }
+
         return pathList;
     }
 
-    public static Path getParentPath(Path path) {
+    /**
+     * 获取父类路径，避免返回 null 1. 如果为根路径，则依然返回根路径
+     * @param path 路径
+     * @return 结果
+     */
+    public static Path getParentPath(final Path path) {
         Path parentPath = path.getParent();
         if (ObjectUtils.isNull(parentPath)) {
             return ROOT_PATH;
@@ -104,218 +162,355 @@ public final class PathUtils {
         return parentPath;
     }
 
-    public static List<String> retainAll(List<List<String>> collectionList) {
+    /**
+     * 获取所有集合的交集 1. 如果后续参数为空，则直接返回第一个集合。 2. 如果第一个列表为空，则直接返回第一个集合。
+     * @param collectionList 原始对象集合
+     * @return 满足条件的结合
+     */
+    public static List<String> retainAll(final List<List<String>> collectionList) {
         if (CollectionUtils.isEmpty(collectionList)) {
             return Collections.emptyList();
         }
         if (collectionList.size() == 1) {
             return collectionList.get(0);
         }
+
         List<String> result = collectionList.get(0);
-        for (int i = 1; i < collectionList.size(); ++i) {
-            result.retainAll((Collection)collectionList.get(i));
+        for (int i = 1; i < collectionList.size(); i++) {
+            result.retainAll(collectionList.get(i));
         }
+
         return result;
     }
 
-    public static List<Path> getPathList(Path rootPath) {
-        final ArrayList<Path> pathList = new ArrayList<Path>();
+    /**
+     * 递归获取所有对应的文件 1. 如果为文件，直接返回本身 2. 如果为文件夹，则递归获取下面的所有文件信息
+     * @param rootPath 根路径
+     * @return 文件列表
+     */
+    public static List<Path> getPathList(final Path rootPath) {
+        final List<Path> pathList = new ArrayList<>();
+
         try {
-            if (Files.isDirectory(rootPath, new LinkOption[0])) {
-                Files.walkFileTree(rootPath, (FileVisitor<? super Path>)new SimpleFileVisitor<Path>(){
+            if (Files.isDirectory(rootPath)) {
+                Files.walkFileTree(
+                        rootPath,
+                        new SimpleFileVisitor<>() {
+                            @Override
+                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                                    throws IOException {
+                                pathList.add(file);
+                                return FileVisitResult.CONTINUE;
+                            }
 
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        pathList.add(file);
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                        pathList.add(dir);
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
+                            @Override
+                            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+                                    throws IOException {
+                                pathList.add(dir);
+                                return FileVisitResult.CONTINUE;
+                            }
+                        });
             } else {
                 pathList.add(rootPath);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         return pathList;
     }
 
+    /**
+     * 获得对应的PATH列表。
+     * @param dir 文件夹
+     * @param glob 文件正则
+     * @return 路径列表
+     */
     public static List<Path> getPathList(String dir, String glob) {
-        LinkedList<Path> list = new LinkedList<Path>();
-        Path root = Paths.get(dir, new String[0]);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, glob);){
+        List<Path> list = new LinkedList<>();
+        Path root = Paths.get(dir);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, glob)) {
             for (Path path : stream) {
                 list.add(path);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return list;
     }
 
+    /**
+     * 获取指定文件夹下对应的某类型文件
+     * @param dir 文件夹路径
+     * @param glob 文件正则表达式
+     * @return path list
+     */
     public static List<Path> getDirFileNames(String dir, String glob) {
-        LinkedList<Path> list = new LinkedList<Path>();
-        Path root = Paths.get(dir, new String[0]);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, glob);){
+        List<Path> list = new LinkedList<>();
+        Path root = Paths.get(dir);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, glob)) {
             for (Path path : stream) {
                 list.add(path.getFileName());
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return list;
     }
 
+    /**
+     * 获取某一路径下的所有文件
+     * @param dir 文件夹
+     * @return 路径列表
+     * @see #getDirFileNames(String, String) 指定此处的glob为 *.*
+     */
     public static List<Path> getAllDirFileNames(String dir) {
-        return PathUtils.getDirFileNames(dir, "*.*");
+        return getDirFileNames(dir, FileTypeConstants.Glob.ALL);
     }
 
+    /**
+     * 获得列表下对应的文件字符串形式
+     * @param dir 文件夹
+     * @param glob 文件正则
+     * @return 文件名称列表
+     */
     public static List<String> getDirFileNameStrs(String dir, String glob) {
-        LinkedList<String> list = new LinkedList<String>();
-        Path root = Paths.get(dir, new String[0]);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, glob);){
+        List<String> list = new LinkedList<>();
+        Path root = Paths.get(dir);
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, glob)) {
             for (Path path : stream) {
                 list.add(path.getFileName().toString());
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return list;
     }
 
+    /**
+     * 结果不确定
+     * @return 路径
+     * @deprecated (因为结果具有不确定性)
+     */
     @Deprecated
     public static String getPath() {
         return System.getProperty("user.dir");
     }
 
+    /**
+     * 获取的target路径
+     * @return 路径
+     */
     public static String getRootPath() {
         return Class.class.getClass().getResource("/").getPath();
     }
 
+    /** 获取项目根路径。 */
     public static String getAppRootPath() {
         File emptyFile = new File("");
         return emptyFile.getAbsolutePath();
     }
 
+    /**
+     * 获取资源文件默认存放路径。
+     * @return 根路径+/src/main/resources
+     */
     public static String getAppResourcesPath() {
-        return PathUtils.getAppRootPath() + "/src/main/resources";
+        return getAppRootPath() + PathConstants.SRC_MAIN_RESOURCES_PATH;
     }
 
+    /**
+     * 获取测试类
+     * @return 转换后的路径
+     */
     public static String getAppTestResourcesPath() {
-        return PathUtils.getAppRootPath() + "/src/test/resources";
+        return getAppRootPath() + "/src/test/resources";
     }
 
+    /**
+     * 类似getPath(Class), 只是不包含类的路径,而是获取到当前类包的根路径。 如:
+     * filelist:/Users/houbinbin/IT/code/script-generator/script-generator-tool/target/classes/
+     * 转化为: /Users/houbinbin/IT/code/script-generator/script-generator-tool/src/main/java
+     * @param clazz 类
+     * @return 转换后的路径
+     */
     public static String getRootPath(Class clazz) {
-        String uriPath = clazz.getResource("/").toString();
-        return uriPath.replace("filelist:", "").replace("target/classes/", "src/main/java/");
+        String uriPath = clazz.getResource(PathConstants.ROOT_PATH).toString();
+        return uriPath.replace(PathConstants.FILE_PATH_PREFIX, "")
+                .replace(
+                        PathConstants.TARGET_CLASSES_PATH_SUFFIX, PathConstants.SRC_MAIN_JAVA_PATH);
     }
 
+    /**
+     * 直接class.getResource("")拿到的是编译后的路径。 如:
+     * filelist:/Users/houbinbin/IT/code/script-generator/script-generator-tool/target/classes/com/ryo/script-generator/util/
+     * 转化成:
+     * /Users/houbinbin/IT/code/script-generator/script-generator-tool/src/main/java/com/ryo/script-generator/util/
+     * @param clazz 类
+     * @return 转换后的路径
+     */
     public static String getPath(Class clazz) {
         String uriPath = clazz.getResource("").toString();
-        return uriPath.replace("filelist:", "").replace("target/classes/", "src/main/java/");
+        return uriPath.replace(PathConstants.FILE_PATH_PREFIX, "")
+                .replace(
+                        PathConstants.TARGET_CLASSES_PATH_SUFFIX, PathConstants.SRC_MAIN_JAVA_PATH);
     }
 
-    public static String packageToPath(String packagePath) {
+    /**
+     * 将包名称转化为对应的路径 com.github.houbinbin TO: com/github/houbinbin
+     * @param packagePath 包名称
+     * @return 转换后的路径
+     */
+    public static String packageToPath(final String packagePath) {
         return packagePath.replaceAll("\\.", "/");
     }
 
-    public static List<String> readAllLines(String pathStr) {
-        return PathUtils.readAllLines(pathStr, "UTF-8");
+    /**
+     * 读取文件所有行的内容
+     * @param pathStr 路径
+     * @return 列表
+     */
+    public static List<String> readAllLines(final String pathStr) {
+        return readAllLines(pathStr, CommonConstants.UTF8);
     }
 
-    public static List<String> readAllLines(String pathStr, String charset) {
-        return PathUtils.readAllLines(pathStr, charset, 0, Integer.MAX_VALUE);
+    /**
+     * 读取文件所有行的内容
+     * @param pathStr 路径
+     * @param charset 编码
+     * @return 列表
+     */
+    public static List<String> readAllLines(final String pathStr, final String charset) {
+        return readAllLines(pathStr, charset, 0, Integer.MAX_VALUE);
     }
 
-    public static List<String> readAllLines(String pathStr, String charset, int startIndex, int endIndex) {
+    /**
+     * 读取文件所有的行
+     * @param pathStr 路径
+     * @param charset 编码
+     * @param startIndex 开始行下标
+     * @param endIndex 结束行下标
+     * @return 列表内容
+     */
+    public static List<String> readAllLines(
+            final String pathStr, final String charset, final int startIndex, int endIndex) {
         ArgUtils.notEmpty(pathStr, "pathStr");
         ArgUtils.notEmpty(charset, "charset");
         ArgUtils.assertTrue(endIndex >= startIndex, "endIndex >= startIndex");
-        Path path = Paths.get(pathStr, new String[0]);
+
+        Path path = Paths.get(pathStr);
         try {
             List<String> allLines = Files.readAllLines(path, Charset.forName(charset));
-            int size = allLines.size();
+            final int size = allLines.size();
             if (endIndex > size) {
                 endIndex = size;
             }
             return allLines.subList(startIndex, endIndex);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static void writeLines(String pathStr, String ... lines) {
-        ArrayList stringList = Lists.newArrayList((Object[])lines);
-        PathUtils.writeLines(pathStr, stringList, "UTF-8", new OpenOption[0]);
+    /**
+     * 写入行内容到指定列
+     * @param pathStr 路径
+     * @param lines 行内容数组
+     */
+    public static void writeLines(final String pathStr, final String... lines) {
+        List<String> stringList = Lists.newArrayList(lines);
+        writeLines(pathStr, stringList, CommonConstants.UTF8);
     }
 
-    public static void writeLines(String pathStr, Collection<String> lines) {
-        PathUtils.writeLines(pathStr, lines, "UTF-8", new OpenOption[0]);
+    /**
+     * 写入行内容到指定文件
+     * @param pathStr 路径
+     * @param lines 行内容
+     */
+    public static void writeLines(final String pathStr, final Collection<String> lines) {
+        writeLines(pathStr, lines, CommonConstants.UTF8);
     }
 
-    public static void appendLines(String pathStr, String ... lines) {
-        ArrayList stringList = Lists.newArrayList((Object[])lines);
-        PathUtils.writeLines(pathStr, stringList, "UTF-8", StandardOpenOption.APPEND);
+    /**
+     * 行内容添加到到指定列
+     * @param pathStr 路径
+     * @param lines 行内容数组
+     */
+    public static void appendLines(final String pathStr, final String... lines) {
+        List<String> stringList = Lists.newArrayList(lines);
+        writeLines(pathStr, stringList, CommonConstants.UTF8, StandardOpenOption.APPEND);
     }
 
-    public static void appendLines(String pathStr, Collection<String> lines) {
-        PathUtils.writeLines(pathStr, lines, "UTF-8", StandardOpenOption.APPEND);
+    /**
+     * 行内容添加到到指定文件
+     * @param pathStr 路径
+     * @param lines 行内容
+     */
+    public static void appendLines(final String pathStr, final Collection<String> lines) {
+        writeLines(pathStr, lines, CommonConstants.UTF8, StandardOpenOption.APPEND);
     }
 
-    public static void writeLines(String pathStr, Collection<String> lines, String charset, OpenOption ... openOptions) {
+    /**
+     * 写入行内容到指定列
+     * @param pathStr 路径
+     * @param charset 编码
+     * @param lines 行内容
+     * @param openOptions 操作
+     */
+    public static void writeLines(
+            final String pathStr,
+            final Collection<String> lines,
+            final String charset,
+            final OpenOption... openOptions) {
         ArgUtils.notEmpty(pathStr, "pathStr");
         ArgUtils.notEmpty(charset, "charset");
         ArgUtils.notEmpty(lines, "lines");
+
         try {
-            Path path = Paths.get(pathStr, new String[0]);
+            Path path = Paths.get(pathStr);
             Files.write(path, lines, Charset.forName(charset), openOptions);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static @Nullable String getJarPath() {
+    /**
+     * 获取jar包运行时的当前目录
+     * @return {String}
+     */
+    @Nullable
+    public static String getJarPath() {
         try {
-            URL url = PathUtils.class.getResource("/").toURI().toURL();
+            URL url = PathUtils.class.getResource(StrPoolConstants.SLASH).toURI().toURL();
             return PathUtils.toFilePath(url);
-        }
-        catch (Exception e) {
-            String path = PathUtils.class.getResource("").getPath();
+        } catch (Exception e) {
+            String path = PathUtils.class.getResource(StrPoolConstants.EMPTY).getPath();
             return new File(path).getParentFile().getParentFile().getAbsolutePath();
         }
     }
 
-    private static @Nullable String toFilePath(@Nullable URL url) {
+    @Nullable
+    private static String toFilePath(@Nullable URL url) {
         if (url == null) {
             return null;
         }
         String protocol = url.getProtocol();
-        String file = UrlUtils.decode((String)url.getPath(), (Charset)StandardCharsets.UTF_8);
-        if ("file".equals(protocol)) {
+        String file = UrlUtils.decode(url.getPath(), StandardCharsets.UTF_8);
+        if (ResourceUtils.URL_PROTOCOL_FILE.equals(protocol)) {
             return new File(file).getParentFile().getParentFile().getAbsolutePath();
-        }
-        if ("jar".equals(protocol) || "zip".equals(protocol)) {
-            int ipos = file.indexOf("!/");
+        } else if (ResourceUtils.URL_PROTOCOL_JAR.equals(protocol)
+                || ResourceUtils.URL_PROTOCOL_ZIP.equals(protocol)) {
+            int ipos = file.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
             if (ipos > 0) {
                 file = file.substring(0, ipos);
             }
-            if (file.startsWith("file:")) {
-                file = file.substring("file:".length());
+            if (file.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
+                file = file.substring(ResourceUtils.FILE_URL_PREFIX.length());
             }
             return new File(file).getParentFile().getAbsolutePath();
         }
         return file;
     }
 }
-

@@ -1,34 +1,26 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  com.alibaba.ttl.TransmittableThreadLocal
- *  jakarta.servlet.ServletInputStream
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.core.ResolvableType
- *  org.springframework.core.codec.ByteArrayDecoder
- *  org.springframework.core.codec.Decoder
- *  org.springframework.http.HttpHeaders
- *  org.springframework.http.ReactiveHttpInputMessage
- *  org.springframework.http.codec.DecoderHttpMessageReader
- *  org.springframework.http.server.reactive.ServerHttpRequest
- *  org.springframework.util.CollectionUtils
- *  org.springframework.util.LinkedCaseInsensitiveMap
- *  org.springframework.util.StringUtils
- *  org.springframework.web.context.request.RequestAttributes
- *  org.springframework.web.context.request.RequestContextHolder
- *  org.springframework.web.context.request.ServletRequestAttributes
- *  reactor.core.publisher.Mono
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.servlet;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.ttl.TransmittableThreadLocal;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -43,63 +35,119 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.Decoder;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import reactor.core.publisher.Mono;
 
+/**
+ * RequestUtil
+ *
+ * @author kuma
+ * @version 2023.01
+ * @since 2023-01-03 11:33:19
+ */
 public class RequestUtils {
-    private static final String UNKNOWN = "unknown";
-    public static final String IP_INCLUDE_REGEX_KEY = "kuma.boot.core.ip.include.regex";
-    public static final String IP_EXCLUDE_REGEX_KEY = "kuma.boot.core.ip.exclude.regex";
-    public static final String UNKNOWN_STR = "unknown";
-    public static final ThreadLocal<WebContext> WEB_CONTEXT = new TransmittableThreadLocal();
 
+    /**
+     * 未知 UNKNOWN
+     */
+    private static final String UNKNOWN = "unknown";
+
+    /**
+     * 知识产权包括正则表达式关键 IP_INCLUDE_REGEX_KEY
+     */
+    public static final String IP_INCLUDE_REGEX_KEY = "kuma.boot.core.ip.include.regex";
+
+    /**
+     * ip排除regex关键 IP_EXCLUDE_REGEX_KEY
+     */
+    public static final String IP_EXCLUDE_REGEX_KEY = "kuma.boot.core.ip.exclude.regex";
+
+    /**
+     * 未知力量 UNKNOWN_STR
+     */
+    public static final String UNKNOWN_STR = "unknown";
+
+    /**
+     * web上下文 WEB_CONTEXT
+     */
+    public static final ThreadLocal<WebContext> WEB_CONTEXT = new TransmittableThreadLocal<>();
+
+    /**
+     * getContext
+     * @return {@link WebContext }
+     * @since 2023-01-03 11:33:19
+     */
     public static WebContext getContext() {
         return WEB_CONTEXT.get();
     }
 
+    /**
+     * bindContext
+     * @param request request
+     * @param response response
+     * @since 2023-01-03 11:33:19
+     */
     public static void bindContext(HttpServletRequest request, HttpServletResponse response) {
         WEB_CONTEXT.set(new WebContext(request, response));
     }
 
+    /**
+     * clearContext
+     *
+     * @since 2023-01-03 11:33:19
+     */
     public static void clearContext() {
         WEB_CONTEXT.remove();
     }
 
+    /**
+     * getRequest
+     * @return {@link HttpServletRequest }
+     * @since 2023-01-03 11:33:19
+     */
     public static HttpServletRequest getRequest() {
-        WebContext webContext = RequestUtils.getContext();
+        WebContext webContext = getContext();
         if (webContext == null) {
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes != null) {
-                ServletRequestAttributes attributes = (ServletRequestAttributes)requestAttributes;
+                ServletRequestAttributes attributes = (ServletRequestAttributes) requestAttributes;
+                // RequestContextHolder.setRequestAttributes(attributes, true);
                 return attributes.getRequest();
             }
         } else {
             return webContext.request;
         }
+
         return null;
     }
 
+    /**
+     * getResponse
+     * @return {@link HttpServletResponse }
+     * @since 2023-01-03 11:33:19
+     */
     public static HttpServletResponse getResponse() {
-        WebContext webContext = RequestUtils.getContext();
+        WebContext webContext = getContext();
         if (webContext == null) {
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             if (requestAttributes != null) {
-                ServletRequestAttributes attributes = (ServletRequestAttributes)requestAttributes;
+                ServletRequestAttributes attributes = (ServletRequestAttributes) requestAttributes;
+                // RequestContextHolder.setRequestAttributes(attributes, true);
                 return attributes.getResponse();
             }
         } else {
@@ -108,23 +156,65 @@ public class RequestUtils {
         return null;
     }
 
+    /**
+     * Headers http headers.
+     * @param request the request
+     * @return the http headers
+     */
     public static HttpHeaders headers(HttpServletRequest request) {
-        LinkedCaseInsensitiveMap insensitiveMap = new LinkedCaseInsensitiveMap();
-        Enumeration headerNames = request.getHeaderNames();
+        LinkedCaseInsensitiveMap<List<String>> insensitiveMap = new LinkedCaseInsensitiveMap<>();
+        Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
-            String headerName = (String)headerNames.nextElement();
-            Enumeration headers = request.getHeaders(headerName);
+            String headerName = headerNames.nextElement();
+            Enumeration<String> headers = request.getHeaders(headerName);
             insensitiveMap.put(headerName, Collections.list(headers));
         }
-        return new HttpHeaders(CollectionUtils.toMultiValueMap((Map)insensitiveMap));
+        return new HttpHeaders(CollectionUtils.toMultiValueMap(insensitiveMap));
     }
 
+    /**
+     * WebContext
+     *
+     * @author kuma
+     * @version 2023.01
+     * @since 2023-01-03 11:33:20
+     */
+    public static class WebContext {
+
+        /**
+         * 请求 request
+         */
+        private final HttpServletRequest request;
+
+        /**
+         * 响应 response
+         */
+        private final HttpServletResponse response;
+
+        /**
+         * web上下文
+         * @param request 请求
+         * @param response 响应
+         * @since 2023-01-03 11:33:21
+         */
+        public WebContext(HttpServletRequest request, HttpServletResponse response) {
+            this.request = request;
+            this.response = response;
+        }
+    }
+
+    /**
+     * getAllRequestParam
+     * @param request request
+     * @return {@link Map }<{@link String }, {@link String }>
+     * @since 2023-01-03 11:33:19
+     */
     public static Map<String, String> getAllRequestParam(HttpServletRequest request) {
-        HashMap<String, String> res = new HashMap<String, String>();
-        Enumeration temp = request.getParameterNames();
+        Map<String, String> res = new HashMap<>();
+        Enumeration<?> temp = request.getParameterNames();
         if (null != temp) {
             while (temp.hasMoreElements()) {
-                String en = (String)temp.nextElement();
+                String en = (String) temp.nextElement();
                 String value = request.getParameter(en);
                 res.put(en, value);
             }
@@ -132,12 +222,18 @@ public class RequestUtils {
         return res;
     }
 
+    /**
+     * getAllRequestHeaders
+     * @param request request
+     * @return {@link Map }<{@link String }, {@link String }>
+     * @since 2023-01-03 11:33:19
+     */
     public static Map<String, String> getAllRequestHeaders(HttpServletRequest request) {
-        HashMap<String, String> res = new HashMap<String, String>();
-        Enumeration temp = request.getHeaderNames();
+        Map<String, String> res = new HashMap<>();
+        Enumeration<?> temp = request.getHeaderNames();
         if (null != temp) {
             while (temp.hasMoreElements()) {
-                String en = (String)temp.nextElement();
+                String en = (String) temp.nextElement();
                 String value = request.getHeader(en);
                 res.put(en, value);
             }
@@ -145,50 +241,64 @@ public class RequestUtils {
         return res;
     }
 
+    /**
+     * 得到头
+     * @param headerName 标题名称
+     * @return {@link String }
+     * @since 2023-01-03 11:33:19
+     */
     public static String getHeader(String headerName) {
-        HttpServletRequest request = RequestUtils.getRequest();
+        HttpServletRequest request = getRequest();
         return request.getHeader(headerName);
     }
 
+    /**
+     * getBodyString
+     * @param serverHttpRequest serverHttpRequest
+     * @return {@link String }
+     * @since 2023-01-03 11:33:19
+     */
     public static String getBodyString(ServerHttpRequest serverHttpRequest) {
-        DecoderHttpMessageReader httpMessageReader = new DecoderHttpMessageReader((Decoder)new ByteArrayDecoder());
+        HttpMessageReader<byte[]> httpMessageReader =
+                new DecoderHttpMessageReader<>(new ByteArrayDecoder());
         ResolvableType resolvableType = ResolvableType.forClass(byte[].class);
-        Mono mono = httpMessageReader.readMono(resolvableType, (ReactiveHttpInputMessage)serverHttpRequest, Collections.emptyMap());
-        return (String)mono.map(String::new).block();
+        Mono<byte[]> mono =
+                httpMessageReader.readMono(
+                        resolvableType, serverHttpRequest, Collections.emptyMap());
+        return mono.map(String::new).block();
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * getBodyString
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:33:19
      */
     public static String getBodyString(HttpServletRequest request) throws IOException {
         StringBuilder sb = new StringBuilder();
-        ServletInputStream inputStream = null;
+        InputStream inputStream = null;
         BufferedReader reader = null;
         try {
             inputStream = request.getInputStream();
-            reader = new BufferedReader(new InputStreamReader((InputStream)inputStream, StandardCharsets.UTF_8));
+            reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             String line = "";
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LogUtils.error(e);
-        }
-        finally {
+        } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     LogUtils.error(e);
                 }
             }
             if (reader != null) {
                 try {
                     reader.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     LogUtils.error(e);
                 }
             }
@@ -196,31 +306,56 @@ public class RequestUtils {
         return sb.toString().trim();
     }
 
+    /**
+     * getHttpServletRequest
+     * @return {@link HttpServletRequest }
+     * @since 2023-01-03 11:33:19
+     */
     public static HttpServletRequest getHttpServletRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        return requestAttributes == null ? null : ((ServletRequestAttributes)requestAttributes).getRequest();
+        return (requestAttributes == null)
+                ? null
+                : ((ServletRequestAttributes) requestAttributes).getRequest();
     }
 
+    /**
+     * 得到http servlet响应
+     * @return {@link HttpServletResponse }
+     * @since 2023-01-03 11:33:20
+     */
     public static HttpServletResponse getHttpServletResponse() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        return requestAttributes == null ? null : ((ServletRequestAttributes)requestAttributes).getResponse();
+        return (requestAttributes == null)
+                ? null
+                : ((ServletRequestAttributes) requestAttributes).getResponse();
     }
 
+    /**
+     * getHttpServletRequestIpAddress
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getHttpServletRequestIpAddress() {
-        HttpServletRequest request = RequestUtils.getHttpServletRequest();
-        assert (request != null);
-        return RequestUtils.getHttpServletRequestIpAddress(request);
+        HttpServletRequest request = getHttpServletRequest();
+        assert request != null;
+        return getHttpServletRequestIpAddress(request);
     }
 
+    /**
+     * getHttpServletRequestIpAddress
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getHttpServletRequestIpAddress(HttpServletRequest request) {
         String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
         if (ip.contains(",")) {
@@ -229,48 +364,71 @@ public class RequestUtils {
         return "0:0:0:0:0:0:0:1".equals(ip) ? "127.0.0.1" : ip;
     }
 
+    /**
+     * getServerHttpRequestIpAddress
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getServerHttpRequestIpAddress(ServerHttpRequest request) {
         HttpHeaders headers = request.getHeaders();
         String ip = headers.getFirst("x-forwarded-for");
-        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip) && ip.contains(",")) {
-            ip = ip.split(",")[0];
+        if (ip != null && ip.length() != 0 && !UNKNOWN.equalsIgnoreCase(ip)) {
+            if (ip.contains(StrPoolConstants.COMMA)) {
+                ip = ip.split(StrPoolConstants.COMMA)[0];
+            }
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = headers.getFirst("Proxy-Client-IP");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = headers.getFirst("WL-Proxy-Client-IP");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = headers.getFirst("HTTP_CLIENT_IP");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = headers.getFirst("HTTP_X_FORWARDED_FOR");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = headers.getFirst("X-Real-IP");
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
             ip = Objects.requireNonNull(request.getRemoteAddress()).getAddress().getHostAddress();
         }
         return "0:0:0:0:0:0:0:1".equals(ip) ? "127.0.0.1" : ip;
     }
 
+    /**
+     * getRemoteAddr
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getRemoteAddr(HttpServletRequest request) {
-        String ip;
-        block3: {
-            block2: {
-                ip = request.getHeader("X-Forwarded-For");
-                if (!RequestUtils.isEmptyIp(ip)) break block2;
-                ip = request.getHeader("Proxy-Client-IP");
-                if (!RequestUtils.isEmptyIp(ip) || !RequestUtils.isEmptyIp(ip = request.getHeader("WL-Proxy-Client-IP")) || !RequestUtils.isEmptyIp(ip = request.getHeader("HTTP_CLIENT_IP")) || !RequestUtils.isEmptyIp(ip = request.getHeader("HTTP_X_FORWARDED_FOR")) || !"127.0.0.1".equals(ip = request.getRemoteAddr()) && !"0:0:0:0:0:0:0:1".equals(ip)) break block3;
-                ip = RequestUtils.getLocalAddr();
-                break block3;
+        String ip = request.getHeader("X-Forwarded-For");
+        if (isEmptyIp(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+            if (isEmptyIp(ip)) {
+                ip = request.getHeader("WL-Proxy-Client-IP");
+                if (isEmptyIp(ip)) {
+                    ip = request.getHeader("HTTP_CLIENT_IP");
+                    if (isEmptyIp(ip)) {
+                        ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+                        if (isEmptyIp(ip)) {
+                            ip = request.getRemoteAddr();
+                            if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
+                                // 根据网卡取本机配置的IP
+                                ip = getLocalAddr();
+                            }
+                        }
+                    }
+                }
             }
-            if (ip.length() > 15) {
-                String[] ips;
-                for (String strIp : ips = ip.split(",")) {
-                    if (RequestUtils.isEmptyIp(ip)) continue;
+        } else if (ip.length() > 15) {
+            String[] ips = ip.split(",");
+            for (String strIp : ips) {
+                if (!isEmptyIp(ip)) {
                     ip = strIp;
                     break;
                 }
@@ -279,125 +437,204 @@ public class RequestUtils {
         return ip;
     }
 
+    /**
+     * 判断ip地址是否为空
+     * @param ip ip地址
+     * @return boolean
+     * @since 2023-01-03 11:33:20
+     */
     public static boolean isEmptyIp(String ip) {
-        return StrUtil.isEmpty((CharSequence)ip) || "unknown".equalsIgnoreCase(ip);
+        return StrUtil.isEmpty(ip) || UNKNOWN_STR.equalsIgnoreCase(ip);
     }
 
+    /**
+     * 获取本机的IP地址
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getLocalAddr() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
-        }
-        catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             LogUtils.error("InetAddress.getLocalHost()--error", e);
-            return "";
         }
+        return "";
     }
 
+    /**
+     * 获取ip地址
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getIpAddress() {
         String ipExclude = PropertyUtils.getPropertyCache(IP_EXCLUDE_REGEX_KEY, "");
-        if (StringUtils.hasText((String)ipExclude)) {
-            String regex = RequestUtils.buildRegex(ipExclude);
-            return RequestUtils.getIpAddressExMatched(regex);
+        if (org.springframework.util.StringUtils.hasText(ipExclude)) {
+            String regex = buildRegex(ipExclude);
+            return getIpAddressExMatched(regex);
         }
+
         String ipInclude = PropertyUtils.getPropertyCache(IP_INCLUDE_REGEX_KEY, "");
-        if (StringUtils.hasText((String)ipInclude)) {
-            String regex = RequestUtils.buildRegex(ipInclude);
-            return RequestUtils.getIpAddressMatched(regex);
+        if (org.springframework.util.StringUtils.hasText(ipInclude)) {
+            String regex = buildRegex(ipInclude);
+            return getIpAddressMatched(regex);
         }
-        return RequestUtils.getIpAddress0();
+
+        return getIpAddress0();
     }
 
+    /**
+     * 获取ip地址
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getIpAddress0() {
         try {
-            Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> allNetInterfaces =
+                    NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
             while (allNetInterfaces.hasMoreElements()) {
                 NetworkInterface netInterface = allNetInterfaces.nextElement();
-                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp() || netInterface.isPointToPoint()) continue;
-                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress ip = addresses.nextElement();
-                    if (!(ip instanceof Inet4Address)) continue;
-                    return ip.getHostAddress();
+                if (netInterface.isLoopback()
+                        || netInterface.isVirtual()
+                        || !netInterface.isUp()
+                        || netInterface.isPointToPoint()) {
+                } else {
+                    Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        ip = addresses.nextElement();
+                        if (ip instanceof Inet4Address) {
+                            return ip.getHostAddress();
+                        }
+                    }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LogUtils.error(e);
         }
         return "";
     }
 
+    /**
+     * 获取指定网段地址
+     * @param regex 10.0.18 网址前两个或前三个地址段
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getIpAddressMatched(String regex) {
         try {
-            Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> allNetInterfaces =
+                    NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
             while (allNetInterfaces.hasMoreElements()) {
                 NetworkInterface netInterface = allNetInterfaces.nextElement();
-                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) continue;
-                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    String strIp;
-                    InetAddress ip = addresses.nextElement();
-                    if (!(ip instanceof Inet4Address) || !Pattern.matches(regex, strIp = ip.getHostAddress())) continue;
-                    return strIp;
+                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                    continue;
+                } else {
+                    Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        ip = addresses.nextElement();
+                        if (ip instanceof Inet4Address) {
+                            String strIp = ip.getHostAddress();
+                            // 如果匹配网段则返回
+                            if (Pattern.matches(regex, strIp)) {
+                                return strIp;
+                            }
+                        }
+                    }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LogUtils.error(e);
         }
         return "";
     }
 
+    /**
+     * 获取指定网段地址
+     * @param regex 10.0.18 排除地址段，两个或前三个地址段
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getIpAddressExMatched(String regex) {
         try {
-            Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> allNetInterfaces =
+                    NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
             while (allNetInterfaces.hasMoreElements()) {
                 NetworkInterface netInterface = allNetInterfaces.nextElement();
-                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) continue;
-                Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    String strIp;
-                    InetAddress ip = addresses.nextElement();
-                    if (!(ip instanceof Inet4Address) || Pattern.matches(regex, strIp = ip.getHostAddress())) continue;
-                    return strIp;
+                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                    continue;
+                } else {
+                    Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        ip = addresses.nextElement();
+                        if (ip instanceof Inet4Address) {
+                            String strIp = ip.getHostAddress();
+                            // 如果不匹配匹配网段则返回;
+                            if (!Pattern.matches(regex, strIp)) {
+                                return strIp;
+                            }
+                        }
+                    }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LogUtils.error(e);
         }
         return "";
     }
 
+    /**
+     * 构建正则表达式
+     * @param source source
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     private static String buildRegex(String source) {
-        String[] strSource;
         StringBuilder sb = new StringBuilder();
-        for (String s : strSource = source.split(",")) {
+        String[] strSource = source.split(",");
+        for (String s : strSource) {
             sb.append("|(^").append(s).append(".*)");
         }
         String regex = sb.toString();
-        if (!com.kuma.boot.common.utils.lang.StringUtils.isEmpty(regex)) {
+        if (!StringUtils.isEmpty(regex)) {
+            // 去掉开头|号
             return regex.substring(1);
         }
         return "";
     }
 
+    /**
+     * 获取客户端IP地址
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:33:20
+     */
     public static String getRemoteAddr(ServerHttpRequest request) {
-        String ip;
-        block3: {
-            block2: {
-                Map headers = request.getHeaders().toSingleValueMap();
-                ip = (String)headers.get("X-Forwarded-For");
-                if (!RequestUtils.isEmptyIp(ip)) break block2;
-                ip = (String)headers.get("Proxy-Client-IP");
-                if (!RequestUtils.isEmptyIp(ip) || !RequestUtils.isEmptyIp(ip = (String)headers.get("WL-Proxy-Client-IP")) || !RequestUtils.isEmptyIp(ip = (String)headers.get("HTTP_CLIENT_IP")) || !RequestUtils.isEmptyIp(ip = (String)headers.get("HTTP_X_FORWARDED_FOR")) || !"127.0.0.1".equals(ip = request.getRemoteAddress().getAddress().getHostAddress()) && !"0:0:0:0:0:0:0:1".equals(ip)) break block3;
-                ip = RequestUtils.getLocalAddr();
-                break block3;
+        Map<String, String> headers = request.getHeaders().toSingleValueMap();
+        String ip = headers.get("X-Forwarded-For");
+        if (isEmptyIp(ip)) {
+            ip = headers.get("Proxy-Client-IP");
+            if (isEmptyIp(ip)) {
+                ip = headers.get("WL-Proxy-Client-IP");
+                if (isEmptyIp(ip)) {
+                    ip = headers.get("HTTP_CLIENT_IP");
+                    if (isEmptyIp(ip)) {
+                        ip = headers.get("HTTP_X_FORWARDED_FOR");
+                        if (isEmptyIp(ip)) {
+                            ip = request.getRemoteAddress().getAddress().getHostAddress();
+                            if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
+                                // 根据网卡取本机配置的IP
+                                ip = getLocalAddr();
+                            }
+                        }
+                    }
+                }
             }
-            if (ip.length() > 15) {
-                String[] ips;
-                for (String strIp : ips = ip.split(",")) {
-                    if (RequestUtils.isEmptyIp(ip)) continue;
+        } else if (ip.length() > 15) {
+            String[] ips = ip.split(",");
+            for (String strIp : ips) {
+                if (!isEmptyIp(ip)) {
                     ip = strIp;
                     break;
                 }
@@ -406,18 +643,13 @@ public class RequestUtils {
         return ip;
     }
 
+    /**
+     * 排除致动器
+     * @param request 请求
+     * @return boolean
+     * @since 2023-01-03 11:33:20
+     */
     public static boolean excludeActuator(HttpServletRequest request) {
         return request.getRequestURI().startsWith("/actuator");
     }
-
-    public static class WebContext {
-        private final HttpServletRequest request;
-        private final HttpServletResponse response;
-
-        public WebContext(HttpServletRequest request, HttpServletResponse response) {
-            this.request = request;
-            this.response = response;
-        }
-    }
 }
-

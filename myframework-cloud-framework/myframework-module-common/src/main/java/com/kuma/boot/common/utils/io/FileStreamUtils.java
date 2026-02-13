@@ -1,12 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
+import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.support.handler.MapHandler;
 import com.kuma.boot.common.utils.common.RandomUtils;
-import com.kuma.boot.common.utils.io.FileUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -33,281 +46,360 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/** 流工具类 */
 public class FileStreamUtils {
-    private FileStreamUtils() {
-    }
 
+    private FileStreamUtils() {}
+
+    /**
+     * 流转换为字符
+     * @param is 流。注意：这里并不会关闭输入流，需要外部自行处理。
+     * @param charset 编码集合
+     * @return 字符串
+     */
     @Deprecated
     public static String toString(InputStream is, String charset) {
-        String string;
-        ByteArrayOutputStream boa = new ByteArrayOutputStream();
-        try {
+        try (ByteArrayOutputStream boa = new ByteArrayOutputStream()) {
             int len;
             byte[] buffer = new byte[1024];
+
             while ((len = is.read(buffer)) != -1) {
                 boa.write(buffer, 0, len);
             }
-            string = boa.toString(charset);
-        }
-        catch (Throwable throwable) {
-            try {
-                try {
-                    boa.close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-            catch (Exception e) {
-                throw new BootException(e);
-            }
-        }
-        boa.close();
-        return string;
-    }
-
-    @Deprecated
-    public static String toString(InputStream is) {
-        return FileStreamUtils.toString(is, "UTF-8");
-    }
-
-    public static String getFileContent(String path) {
-        return FileStreamUtils.getFileContent(path, "UTF-8");
-    }
-
-    /*
-     * Enabled aggressive exception aggregation
-     */
-    public static String getFileContent(String path, String charset) {
-        try (InputStream inputStream = FileStreamUtils.getInputStream(path);){
-            String string;
-            try (ByteArrayOutputStream boa = new ByteArrayOutputStream();){
-                int len;
-                byte[] buffer = new byte[1024];
-                while ((len = inputStream.read(buffer)) != -1) {
-                    boa.write(buffer, 0, len);
-                }
-                string = boa.toString(charset);
-            }
-            return string;
-        }
-        catch (Exception e) {
+            return boa.toString(charset);
+        } catch (Exception e) {
             throw new BootException(e);
         }
     }
 
-    public static byte[] getFileBytes(String filePath) {
-        InputStream inputStream = FileStreamUtils.getInputStream(filePath);
-        return FileStreamUtils.inputStreamToBytes(inputStream);
+    /**
+     * 流转换为字符
+     * @param is 流。注意：这里并不会关闭输入流，需要外部自行处理。
+     * @return 字符串
+     */
+    @Deprecated
+    public static String toString(InputStream is) {
+        return toString(is, CommonConstants.UTF8);
     }
 
-    public static InputStream getInputStream(String filePath) {
+    /**
+     * 获取文章内容
+     * @param path 路径
+     * @return 文件内容
+     */
+    public static String getFileContent(final String path) {
+        return getFileContent(path, CommonConstants.UTF8);
+    }
+
+    /**
+     * 获取文章内容
+     * @param path 路径
+     * @param charset 字符集合
+     * @return 文件内容
+     */
+    public static String getFileContent(final String path, final String charset) {
+        try (InputStream inputStream = getInputStream(path);
+             ByteArrayOutputStream boa = new ByteArrayOutputStream()) {
+            int len;
+            byte[] buffer = new byte[1024];
+
+            while ((len = inputStream.read(buffer)) != -1) {
+                boa.write(buffer, 0, len);
+            }
+            return boa.toString(charset);
+        } catch (Exception e) {
+            throw new BootException(e);
+        }
+    }
+
+    /**
+     * 获取文件字节流
+     * @param filePath 文件路径
+     * @return 字节流
+     */
+    public static byte[] getFileBytes(final String filePath) {
+        InputStream inputStream = getInputStream(filePath);
+        return inputStreamToBytes(inputStream);
+    }
+
+    /**
+     * 获取文件对应输入流
+     * @param filePath 文件路径
+     * @return 输入流
+     */
+    public static InputStream getInputStream(final String filePath) {
         InputStream inputStream;
         try {
             inputStream = URL.of(URI.create(filePath), null).openStream();
-        }
-        catch (MalformedURLException localMalformedURLException) {
+        } catch (MalformedURLException localMalformedURLException) {
             try {
                 inputStream = new FileInputStream(filePath);
-            }
-            catch (Exception localException2) {
+            } catch (Exception localException2) {
                 ClassLoader localClassLoader = Thread.currentThread().getContextClassLoader();
                 if (localClassLoader == null) {
                     localClassLoader = FileStreamUtils.class.getClassLoader();
                 }
-                if ((inputStream = localClassLoader.getResourceAsStream(filePath)) == null) {
+                inputStream = localClassLoader.getResourceAsStream(filePath);
+                if (inputStream == null) {
                     throw new BootException("Could not find file: " + filePath);
                 }
             }
-        }
-        catch (IOException localIOException1) {
+        } catch (IOException localIOException1) {
             throw new BootException(localIOException1);
         }
+
         return inputStream;
     }
 
-    public static void closeStream(Closeable closeable) {
+    /**
+     * 关闭流
+     * @param closeable 可关闭的信息
+     */
+    public static void closeStream(final Closeable closeable) {
         if (ObjectUtils.isNotNull(closeable)) {
             try {
                 closeable.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new BootException(e);
             }
         }
     }
 
-    public static List<String> readAllLines(String path) {
+    /**
+     * 获取数据内容 例如： /data.txt
+     * @param path resource 下的文件路径
+     * @return 返回数据集合
+     */
+    public static List<String> readAllLines(final String path) {
         InputStream inputStream = FileStreamUtils.class.getResourceAsStream(path);
-        return FileStreamUtils.readAllLines(inputStream, "UTF-8", true);
+        return readAllLines(inputStream, CommonConstants.UTF8, true);
     }
 
-    public static List<String> readAllLines(InputStream is) {
-        return FileStreamUtils.readAllLines(is, "UTF-8", true);
+    /**
+     * 构建数据集合
+     * @param is 文件输入流
+     * @return 返回数据集合
+     */
+    public static List<String> readAllLines(final InputStream is) {
+        return readAllLines(is, CommonConstants.UTF8, true);
     }
 
-    public static List<String> readAllLines(InputStream is, String charset, boolean ignoreEmpty) {
+    /**
+     * 构建数据集合
+     * @param is 文件输入流
+     * @param charset 文件编码
+     * @param ignoreEmpty 是否忽略空白行
+     * @return 返回数据集合
+     */
+    public static List<String> readAllLines(
+            InputStream is, final String charset, final boolean ignoreEmpty) {
         try {
-            ArrayList<String> lines = new ArrayList<String>();
-            BufferedReader e = new BufferedReader(new InputStreamReader(is, Charset.forName(charset)));
+            List<String> lines = new ArrayList<>();
+            BufferedReader e =
+                    new BufferedReader(new InputStreamReader(is, Charset.forName(charset)));
+
             while (e.ready()) {
                 String entry = e.readLine();
-                if (StringUtils.isEmpty(entry) && ignoreEmpty) continue;
+                if (StringUtils.isEmpty(entry) && ignoreEmpty) {
+                    continue;
+                }
                 lines.add(entry);
             }
             return lines;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
     }
 
-    public static String getFileContent(String path, int startIndex, int endIndex) {
-        return FileStreamUtils.getFileContent(path, startIndex, endIndex, StandardCharsets.UTF_8);
+    /**
+     * 获取文件内容
+     * @param path 路径
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @return 结果
+     */
+    public static String getFileContent(
+            final String path, final int startIndex, final int endIndex) {
+        return getFileContent(path, startIndex, endIndex, StandardCharsets.UTF_8);
     }
 
-    public static String getFileContent(String path, int startIndex, int endIndex, Charset charset) {
-        String string;
-        block9: {
-            InputStream inputStream = FileStreamUtils.class.getResourceAsStream(path);
-            try {
-                assert (inputStream != null);
-                string = FileUtils.getFileContent(inputStream, startIndex, endIndex, charset);
-                if (inputStream == null) break block9;
-            }
-            catch (Throwable throwable) {
-                try {
-                    if (inputStream != null) {
-                        try {
-                            inputStream.close();
-                        }
-                        catch (Throwable throwable2) {
-                            throwable.addSuppressed(throwable2);
-                        }
-                    }
-                    throw throwable;
-                }
-                catch (IOException e) {
-                    throw new BootException(e);
-                }
-            }
-            inputStream.close();
+    /**
+     * 获取文件内容
+     * @param path 路径
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @param charset 编码
+     * @return 结果
+     */
+    public static String getFileContent(
+            final String path, final int startIndex, final int endIndex, final Charset charset) {
+        try (InputStream inputStream = FileStreamUtils.class.getResourceAsStream(path)) {
+            assert inputStream != null;
+            return FileUtils.getFileContent(inputStream, startIndex, endIndex, charset);
+        } catch (IOException e) {
+            throw new BootException(e);
         }
-        return string;
     }
 
-    public static File inputStreamToFile(InputStream inputStream, boolean deleteOnExit) {
+    /**
+     * 文件输入流转 file https://www.cnblogs.com/asfeixue/p/9065681.html
+     * @param inputStream 输入流
+     * @param deleteOnExit 退出时删除
+     * @return 文件信息
+     */
+    public static File inputStreamToFile(
+            final InputStream inputStream, final boolean deleteOnExit) {
         if (ObjectUtils.isNull(inputStream)) {
             return null;
         }
+
         try {
             File temp = File.createTempFile(RandomUtils.randomNumber(10), "temp");
+            // 退出时删除
             if (deleteOnExit) {
                 temp.deleteOnExit();
             }
+
+            // 复制文件流信息到 temp 中
             Files.copy(inputStream, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            File file = temp;
-            return file;
-        }
-        catch (IOException e) {
+            return temp;
+        } catch (IOException e) {
             throw new BootException(e);
-        }
-        finally {
+        } finally {
             FileStreamUtils.closeStream(inputStream);
         }
     }
 
-    public static File inputStreamToFile(InputStream inputStream) {
-        return FileStreamUtils.inputStreamToFile(inputStream, false);
+    /**
+     * 文件输入流转 file https://www.cnblogs.com/asfeixue/p/9065681.html
+     * @param inputStream 输入流
+     * @return 文件信息
+     */
+    public static File inputStreamToFile(final InputStream inputStream) {
+        return inputStreamToFile(inputStream, false);
     }
 
-    public static byte[] inputStreamToBytes(InputStream inputStream) {
-        byte[] byArray;
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try {
+    /**
+     * 输入流转为字节流
+     * @param inputStream 输入流
+     * @return 字节数组
+     */
+    public static byte[] inputStreamToBytes(final InputStream inputStream) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             int n = 0;
             while (-1 != (n = inputStream.read(buffer))) {
                 output.write(buffer, 0, n);
             }
-            byArray = output.toByteArray();
+
+            return output.toByteArray();
+        } catch (IOException e) {
+            throw new BootException(e);
         }
-        catch (Throwable throwable) {
-            try {
-                try {
-                    output.close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-            catch (IOException e) {
-                throw new BootException(e);
-            }
-        }
-        output.close();
-        return byArray;
     }
 
-    public static String inputStreamToString(InputStream inputStream, String charsetStr) {
-        byte[] bytes = FileStreamUtils.inputStreamToBytes(inputStream);
+    /**
+     * 输入流转为字符串
+     * @param inputStream 输入流
+     * @param charsetStr 字符编码
+     * @return 字节数组
+     */
+    public static String inputStreamToString(
+            final InputStream inputStream, final String charsetStr) {
+        byte[] bytes = inputStreamToBytes(inputStream);
         Charset charset = Charset.forName(charsetStr);
         return new String(bytes, charset);
     }
 
-    public static String inputStreamToString(InputStream inputStream) {
-        return FileStreamUtils.inputStreamToString(inputStream, "UTF-8");
+    /**
+     * 输入流转为字符串
+     * @param inputStream 输入流
+     * @return 字节数组
+     */
+    public static String inputStreamToString(final InputStream inputStream) {
+        return inputStreamToString(inputStream, CommonConstants.UTF8);
     }
 
-    public static <K, V> Map<K, V> readToMap(String path, String charset, MapHandler<K, V, String> mapHandler) {
+    /**
+     * 将文件内容转换为 map
+     * @param path 文件路径
+     * @param charset 文件编码
+     * @param mapHandler 转换实现
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @return 结果
+     */
+    public static <K, V> Map<K, V> readToMap(
+            final String path, final String charset, final MapHandler<K, V, String> mapHandler) {
         InputStream inputStream = FileStreamUtils.class.getResourceAsStream(path);
         return FileUtils.readToMap(inputStream, charset, mapHandler);
     }
 
-    public static <K, V> Map<K, V> readToMap(String path, MapHandler<K, V, String> mapHandler) {
-        return FileStreamUtils.readToMap(path, "UTF-8", mapHandler);
+    /**
+     * 将文件内容转换为 map
+     * @param path 文件路径
+     * @param mapHandler 转换实现
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @return 结果
+     */
+    public static <K, V> Map<K, V> readToMap(
+            final String path, final MapHandler<K, V, String> mapHandler) {
+        return readToMap(path, CommonConstants.UTF8, mapHandler);
     }
 
-    public static Map<String, String> readToMap(String path, final String splliter) {
-        return FileStreamUtils.readToMap(path, new MapHandler<String, String, String>(){
+    /**
+     * 将文件内容转换为 map
+     * @param path 文件路径
+     * @param splliter 拆分符号
+     * @return 结果
+     */
+    public static Map<String, String> readToMap(final String path, final String splliter) {
+        return readToMap(
+                path,
+                new MapHandler<String, String, String>() {
+                    @Override
+                    public String getKey(String o) {
+                        return o.split(splliter)[0];
+                    }
 
-            @Override
-            public String getKey(String o) {
-                return o.split(splliter)[0];
-            }
-
-            @Override
-            public String getValue(String o) {
-                return o.split(splliter)[1];
-            }
-        });
+                    @Override
+                    public String getValue(String o) {
+                        return o.split(splliter)[1];
+                    }
+                });
     }
 
-    public static void write(Collection<String> lines, OutputStream output, Charset charset) {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, charset));){
+    /**
+     * Writes the set of service class names to a service file.
+     * @param output not {@code null}. Not closed after use.
+     * @param lines a not {@code null Collection} of service class names.
+     * @param charset 文件编码
+     */
+    public static void write(Collection<String> lines, OutputStream output, final Charset charset) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, charset))) {
             for (String service : lines) {
                 writer.write(service);
                 writer.newLine();
             }
             writer.flush();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
-        }
-        finally {
+        } finally {
             try {
                 output.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LogUtils.error(e);
             }
         }
     }
 
+    /**
+     * Writes the set of service class names to a service file.
+     * @param output not {@code null}. Not closed after use.
+     * @param lines a not {@code null Collection} of service class names.
+     */
     public static void write(Collection<String> lines, OutputStream output) {
-        FileStreamUtils.write(lines, output, StandardCharsets.UTF_8);
+        write(lines, output, StandardCharsets.UTF_8);
     }
 }
-

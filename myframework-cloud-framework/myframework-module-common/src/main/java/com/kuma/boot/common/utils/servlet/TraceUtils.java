@@ -1,158 +1,298 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  jakarta.servlet.http.HttpServletRequest
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.servlet;
 
 import cn.hutool.core.util.StrUtil;
-import com.kuma.boot.common.utils.servlet.MdcUtils;
+import com.kuma.boot.common.constant.CommonConstants;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * 链路追踪工具类
+ *
+ * @author kuma
+ * @version 2023.01
+ * @since 2023-01-03 11:32:50
+ */
 public class TraceUtils {
-    private TraceUtils() {
-    }
 
+    /**
+     * 跟踪跑龙套
+     * @return
+     * @since 2023-01-03 11:32:50
+     */
+    private TraceUtils() {}
+
+    /**
+     * 从header和参数中获取traceId 从前端传入数据
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getKmcTraceIdByRequest(HttpServletRequest request) {
-        String traceId = request.getParameter("kmc-trace-id");
-        if (StrUtil.isBlank((CharSequence)traceId)) {
-            traceId = request.getHeader("kmc-trace-id");
+        String traceId = request.getParameter(CommonConstants.KMC_TRACE_ID);
+        if (StrUtil.isBlank(traceId)) {
+            traceId = request.getHeader(CommonConstants.KMC_TRACE_ID);
         }
         return traceId;
     }
 
+    /**
+     * 获取traceId
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getKmcTraceId() {
-        return MdcUtils.get("kmc-trace-id");
+        return MdcUtils.get(CommonConstants.KMC_TRACE_ID);
     }
 
+    /**
+     * 传递traceId至MDC
+     * @param traceId 跟踪ID
+     * @since 2023-01-03 11:32:50
+     */
     public static void setKmcTraceId(String traceId) {
-        MdcUtils.put("kmc-trace-id", traceId);
+        MdcUtils.put(CommonConstants.KMC_TRACE_ID, traceId);
     }
 
+    /**
+     * 删除mdc跟踪id
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeKmcTraceId() {
-        MdcUtils.remove("kmc-trace-id");
+        MdcUtils.remove(CommonConstants.KMC_TRACE_ID);
     }
 
+    /**
+     * 传递tenantId至MDC
+     * @param tenantId 租户id
+     * @since 2023-01-03 11:32:50
+     */
     public static void setKmcTenantId(String tenantId) {
-        MdcUtils.put("kmc-tenant-id", tenantId);
+        MdcUtils.put(CommonConstants.KMC_TENANT_ID, tenantId);
     }
 
+    /**
+     * mdc删除租户id
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeKmcTenantId() {
-        MdcUtils.remove("kmc-tenant-id");
+        MdcUtils.remove(CommonConstants.KMC_TENANT_ID);
     }
 
     public static String getKmcTenantId() {
-        return MdcUtils.get("kmc-tenant-id");
+        return MdcUtils.get(CommonConstants.KMC_TENANT_ID);
     }
 
+    /**
+     * 传递version至MDC
+     * @param version 租户id
+     * @since 2023-01-03 11:32:50
+     */
     public static void setKmcVersion(String version) {
-        MdcUtils.put("kmc-request-version", version);
+        MdcUtils.put(CommonConstants.KMC_REQUEST_VERSION, version);
     }
 
+    /**
+     * mdc删除版本
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeKmcVersion() {
-        MdcUtils.remove("kmc-request-version");
+        MdcUtils.remove(CommonConstants.KMC_REQUEST_VERSION);
     }
 
     public static String getKmcVersion() {
-        return MdcUtils.get("kmc-request-version");
+        return MdcUtils.get(CommonConstants.KMC_REQUEST_VERSION);
     }
 
+    /**
+     * 从header和参数中获取OtlpTraceId从前端传入数据
+     * @param request HttpServletRequest
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getOtlpTraceIdByRequest(HttpServletRequest request) {
-        String otlpTraceId = request.getParameter("X-B3-TraceId");
-        if (StrUtil.isBlank((CharSequence)otlpTraceId)) {
-            otlpTraceId = request.getHeader("X-B3-TraceId");
+        String otlpTraceId = request.getParameter(CommonConstants.OTLP_TRACE_ID);
+        if (StrUtil.isBlank(otlpTraceId)) {
+            otlpTraceId = request.getHeader(CommonConstants.OTLP_TRACE_ID);
         }
         return otlpTraceId;
     }
 
+    /**
+     * 从header和参数中获取otlpSpanId 从前端传入数据
+     * @param request HttpServletRequest
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getOtlpSpanIdByRequest(HttpServletRequest request) {
-        String otlpSpanId = request.getParameter("X-B3-SpanId");
-        if (StrUtil.isBlank((CharSequence)otlpSpanId)) {
-            otlpSpanId = request.getHeader("X-B3-SpanId");
+        String otlpSpanId = request.getParameter(CommonConstants.OTLP_SPANE_ID);
+        if (StrUtil.isBlank(otlpSpanId)) {
+            otlpSpanId = request.getHeader(CommonConstants.OTLP_SPANE_ID);
         }
         return otlpSpanId;
     }
 
+    /**
+     * 传递otlpTraceId至MDC
+     * @param request request
+     * @since 2023-01-03 11:32:50
+     */
     public static void setOtlpTraceId(HttpServletRequest request, String defaultTraceId) {
-        String otlpTraceId = TraceUtils.getOtlpTraceIdByRequest(request);
-        if (otlpTraceId == null) {
+        String otlpTraceId = getOtlpTraceIdByRequest(request);
+        if(otlpTraceId == null){
             otlpTraceId = defaultTraceId;
         }
-        MdcUtils.put("X-B3-TraceId", otlpTraceId);
+        MdcUtils.put(CommonConstants.OTLP_TRACE_ID, otlpTraceId);
     }
 
+    /**
+     * 传递otlpTraceId至MDC
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void setOtlpTraceId(String otlpTraceId) {
-        MdcUtils.put("X-B3-TraceId", otlpTraceId);
+        MdcUtils.put(CommonConstants.OTLP_TRACE_ID, otlpTraceId);
     }
 
+    /**
+     * mdc删除otlp跟踪id
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeOtlpTraceId() {
-        MdcUtils.remove("X-B3-TraceId");
+        MdcUtils.remove(CommonConstants.OTLP_TRACE_ID);
     }
 
     public static String getOtlpTraceId() {
-        return MdcUtils.get("X-B3-TraceId");
+        return MdcUtils.get(CommonConstants.OTLP_TRACE_ID);
     }
 
-    public static void setOtlpSpanId(HttpServletRequest request, String defaultSpanId) {
-        String otlpSpanId = TraceUtils.getOtlpSpanIdByRequest(request);
-        if (otlpSpanId == null) {
+    /**
+     * 传递otlpSpanId至MDC
+     * @param request request
+     * @since 2023-01-03 11:32:50
+     */
+    public static void setOtlpSpanId(HttpServletRequest request,String defaultSpanId) {
+        String otlpSpanId = getOtlpSpanIdByRequest(request);
+        if(otlpSpanId == null){
             otlpSpanId = defaultSpanId;
         }
-        MdcUtils.put("X-B3-SpanId", otlpSpanId);
+        MdcUtils.put(CommonConstants.OTLP_SPANE_ID, otlpSpanId);
     }
 
     public static void setOtlpSpanId(String otlpSpanId) {
-        MdcUtils.put("X-B3-SpanId", otlpSpanId);
+        MdcUtils.put(CommonConstants.OTLP_SPANE_ID, otlpSpanId);
     }
 
+    /**
+     * mdc删除otlp跨度id
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeOtlpSpanId() {
-        MdcUtils.remove("X-B3-SpanId");
+        MdcUtils.remove(CommonConstants.OTLP_SPANE_ID);
     }
 
     public static String getOtlpSpanId() {
-        return MdcUtils.get("X-B3-SpanId");
+        return MdcUtils.get(CommonConstants.OTLP_SPANE_ID);
     }
 
+    /**
+     * 从header和参数中获取traceId 从前端传入数据
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getTraceIdByRequest(HttpServletRequest request) {
-        String traceId = request.getParameter("traceId");
-        if (StrUtil.isBlank((CharSequence)traceId)) {
-            traceId = request.getHeader("traceId");
+        String traceId = request.getParameter(CommonConstants.TRACE_ID);
+        if (StrUtil.isBlank(traceId)) {
+            traceId = request.getHeader(CommonConstants.TRACE_ID);
         }
         return traceId;
     }
 
+    /**
+     * 获取traceId
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getTraceId() {
-        return MdcUtils.get("traceId");
+        return MdcUtils.get(CommonConstants.TRACE_ID);
     }
 
+    /**
+     * 传递traceId至MDC
+     * @param traceId 跟踪ID
+     * @since 2023-01-03 11:32:50
+     */
     public static void setTraceId(String traceId) {
-        MdcUtils.put("traceId", traceId);
+        MdcUtils.put(CommonConstants.TRACE_ID, traceId);
     }
 
+    /**
+     * 删除mdc跟踪id
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeTraceId() {
-        MdcUtils.remove("traceId");
+        MdcUtils.remove(CommonConstants.TRACE_ID);
     }
 
+    /**
+     * 从header和参数中获取traceId 从前端传入数据
+     * @param request request
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getSpanIdByRequest(HttpServletRequest request) {
-        String spanId = request.getParameter("spanId");
-        if (StrUtil.isBlank((CharSequence)spanId)) {
-            spanId = request.getHeader("spanId");
+        String spanId = request.getParameter(CommonConstants.SPANE_ID);
+        if (StrUtil.isBlank(spanId)) {
+            spanId = request.getHeader(CommonConstants.SPANE_ID);
         }
         return spanId;
     }
 
+    /**
+     * 获取traceId
+     * @return {@link String }
+     * @since 2023-01-03 11:32:50
+     */
     public static String getSpanId() {
-        return MdcUtils.get("spanId");
+        return MdcUtils.get(CommonConstants.SPANE_ID);
     }
 
+    /**
+     * 传递traceId至MDC
+     * @param spanId 跟踪ID
+     * @since 2023-01-03 11:32:50
+     */
     public static void setSpanId(String spanId) {
-        MdcUtils.put("spanId", spanId);
+        MdcUtils.put(CommonConstants.SPANE_ID, spanId);
     }
 
+    /**
+     * 删除mdc跟踪id
+     *
+     * @since 2023-01-03 11:32:50
+     */
     public static void removeSpanId() {
-        MdcUtils.remove("spanId");
+        MdcUtils.remove(CommonConstants.SPANE_ID);
     }
 }
-

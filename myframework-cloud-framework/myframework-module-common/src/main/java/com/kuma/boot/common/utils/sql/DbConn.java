@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.sql;
 
 import com.kuma.boot.common.utils.common.TimeWatchUtils;
@@ -13,14 +26,21 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-public final class DbConn
-implements AutoCloseable {
+/**
+ * DbConn
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:04:17
+ */
+public final class DbConn implements AutoCloseable {
+
+    /** conn */
     private Connection conn;
 
     public DbConn(Connection conn) {
@@ -29,181 +49,234 @@ implements AutoCloseable {
 
     public DbConn() {
         try {
-            this.conn = ContextUtils.getBean(DataSource.class, true).getConnection();
-        }
-        catch (Exception e) {
-            throw new DbException("\u83b7\u53d6\u6570\u636e\u5e93\u8fde\u63a5\u5f02\u5e38", "", e);
+            conn = ContextUtils.getBean(DataSource.class, true).getConnection();
+        } catch (Exception e) {
+            throw new DbException("获取数据库连接异常", "", e);
         }
     }
 
     public DbConn(DataSource dataSource) {
         try {
-            this.conn = dataSource.getConnection();
-        }
-        catch (Exception e) {
-            throw new DbException("\u83b7\u53d6\u6570\u636e\u5e93\u8fde\u63a5\u5f02\u5e38", "", e);
+            conn = dataSource.getConnection();
+        } catch (Exception e) {
+            throw new DbException("获取数据库连接异常", "", e);
         }
     }
 
     public DbConn(String url, String user, String password, String driver) {
         try {
+            // 加载数据库驱动
             Class.forName(driver);
-            this.conn = DriverManager.getConnection(url, user, password);
-        }
-        catch (Exception e) {
-            throw new DbException("\u83b7\u53d6\u6570\u636e\u5e93\u8fde\u63a5\u5f02\u5e38", "", e);
+            conn = DriverManager.getConnection(url, user, password);
+        } catch (Exception e) {
+            throw new DbException("获取数据库连接异常", "", e);
         }
     }
 
+    /**
+     * getPrintSql
+     * @return boolean
+     * @since 2021-09-02 20:04:28
+     */
     private boolean getPrintSql() {
         return true;
     }
 
+    /** 关闭数据库连接 */
     @Override
     public void close() {
-        TimeWatchUtils.print(this.getPrintSql(), "[db]close", () -> {
-            try {
-                if (this.conn != null && !this.conn.isClosed()) {
-                    this.conn.close();
-                }
-            }
-            catch (Exception e) {
-                throw new DbException("close", "", e);
-            }
-        });
-    }
-
-    public void beginTransaction(int level) {
-        TimeWatchUtils.print(this.getPrintSql(), "[db]beginTransaction", () -> {
-            try {
-                if (this.conn != null) {
-                    this.conn.setAutoCommit(false);
-                    if (level > 0) {
-                        this.conn.setTransactionIsolation(level);
+        TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]close",
+                () -> {
+                    try {
+                        if (conn != null && !conn.isClosed()) {
+                            conn.close();
+                        }
+                    } catch (Exception e) {
+                        throw new DbException("close", "", e);
                     }
-                }
-            }
-            catch (Exception e) {
-                throw new DbException("beginTransaction", "", e);
-            }
-        });
+                });
     }
 
+    /**
+     * beginTransaction
+     * @param level level
+     * @since 2021-09-02 20:04:33
+     */
+    public void beginTransaction(int level) {
+        TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]beginTransaction",
+                () -> {
+                    try {
+                        if (conn != null) {
+                            conn.setAutoCommit(false);
+                            if (level > 0) {
+                                // Connection.
+                                conn.setTransactionIsolation(level);
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new DbException("beginTransaction", "", e);
+                    }
+                });
+    }
+
+    /**
+     * commit
+     *
+     * @since 2021-09-02 20:04:37
+     */
     public void commit() {
-        TimeWatchUtils.print(this.getPrintSql(), "[db]commit", () -> {
-            try {
-                if (this.conn != null) {
-                    this.conn.commit();
-                    this.conn.setAutoCommit(true);
-                }
-            }
-            catch (Exception e) {
-                throw new DbException("commit", "", e);
-            }
-        });
+        TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]commit",
+                () -> {
+                    try {
+                        if (conn != null) {
+                            conn.commit();
+                            conn.setAutoCommit(true);
+                        }
+                    } catch (Exception e) {
+                        throw new DbException("commit", "", e);
+                    }
+                });
     }
 
+    /**
+     * rollback
+     *
+     * @since 2021-09-02 20:04:39
+     */
     public void rollback() {
-        TimeWatchUtils.print(this.getPrintSql(), "[db]rollback", () -> {
-            try {
-                if (this.conn != null) {
-                    this.conn.rollback();
-                    this.conn.setAutoCommit(true);
-                }
-            }
-            catch (Exception e) {
-                throw new DbException("rollback", "", e);
-            }
-        });
+        TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]rollback",
+                () -> {
+                    try {
+                        if (conn != null) {
+                            conn.rollback();
+                            conn.setAutoCommit(true);
+                        }
+                    } catch (Exception e) {
+                        // 此处不抛异常
+                        throw new DbException("rollback", "", e);
+                    }
+                });
     }
 
-    public int executeSql(String sql, Object[] parameterValues) {
-        return TimeWatchUtils.print(this.getPrintSql(), "[db]" + sql, () -> {
-            try {
-                PreparedStatement statement = this.conn.prepareStatement(sql);
-                this.attachParameterObjects(statement, parameterValues);
-                return statement.executeUpdate();
-            }
-            catch (Exception e) {
-                throw new DbException("executeSql", sql, e);
-            }
-        });
+    /**
+     * executeSql
+     * @param sql sql
+     * @param parameterValues parameterValues
+     * @return int
+     * @since 2021-09-02 20:04:44
+     */
+    public int executeSql(final String sql, final Object[] parameterValues) {
+        return TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]" + sql,
+                () -> {
+                    try {
+                        PreparedStatement statement = conn.prepareStatement(sql);
+                        attachParameterObjects(statement, parameterValues);
+                        return statement.executeUpdate();
+                    } catch (Exception e) {
+                        throw new DbException("executeSql", sql, e);
+                    }
+                });
     }
 
-    public Object executeScalar(String sql, Object[] parameterValues) {
-        Object object;
-        block9: {
+    /**
+     * executeScalar
+     * @param sql sql
+     * @param parameterValues parameterValues
+     * @return {@link Object }
+     * @since 2021-09-02 20:04:48
+     */
+    public Object executeScalar(final String sql, final Object[] parameterValues) {
+        try {
             Object value = null;
-            ResultSet rs = this.executeResultSet(sql, parameterValues);
-            try {
+            try (ResultSet rs = executeResultSet(sql, parameterValues)) {
                 if (rs != null && rs.next()) {
                     value = rs.getObject(1);
                 }
-                object = value;
-                if (rs == null) break block9;
+                return value;
             }
-            catch (Throwable throwable) {
-                try {
-                    if (rs != null) {
-                        try {
-                            rs.close();
-                        }
-                        catch (Throwable throwable2) {
-                            throwable.addSuppressed(throwable2);
-                        }
-                    }
-                    throw throwable;
-                }
-                catch (Exception e) {
-                    throw new DbException("executeScalar", sql, e);
-                }
-            }
-            rs.close();
+        } catch (Exception e) {
+            throw new DbException("executeScalar", sql, e);
         }
-        return object;
     }
 
-    public ResultSet executeResultSet(String sql, Object[] parameterValues) {
-        return TimeWatchUtils.print(this.getPrintSql(), "[db]" + sql, () -> {
-            try {
-                PreparedStatement statement = this.conn.prepareStatement(sql);
-                this.attachParameterObjects(statement, parameterValues);
-                ResultSet rs = statement.executeQuery();
-                return rs;
-            }
-            catch (Exception e) {
-                throw new DbException("executeResultSet", sql, e);
-            }
-        });
+    /**
+     * executeResultSet
+     * @param sql sql
+     * @param parameterValues parameterValues
+     * @return {@link ResultSet }
+     * @since 2021-09-02 20:04:53
+     */
+    public ResultSet executeResultSet(final String sql, final Object[] parameterValues) {
+        return TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]" + sql,
+                () -> {
+                    try {
+                        PreparedStatement statement = conn.prepareStatement(sql);
+                        attachParameterObjects(statement, parameterValues);
+                        ResultSet rs = statement.executeQuery();
+                        // statement.clearParameters();
+                        return rs;
+                    } catch (Exception e) {
+                        throw new DbException("executeResultSet", sql, e);
+                    }
+                });
     }
 
-    public List<Map<String, Object>> executeList(String sql, Object[] parameterValues) {
-        return TimeWatchUtils.print(this.getPrintSql(), "[db]" + sql, () -> {
-            try {
-                PreparedStatement statement = this.conn.prepareStatement(sql);
-                this.attachParameterObjects(statement, parameterValues);
-                List<Map<String, Object>> map = null;
-                try (ResultSet rs = statement.executeQuery();){
-                    map = this.toMapList(rs);
-                }
-                return map;
-            }
-            catch (Exception e) {
-                throw new DbException("executeResultSet", sql, e);
-            }
-        });
+    /**
+     * executeList
+     * @param sql sql
+     * @param parameterValues parameterValues
+     * @return {@link List }
+     * @since 2021-09-02 20:04:57
+     */
+    public List<Map<String, Object>> executeList(final String sql, final Object[] parameterValues) {
+        return TimeWatchUtils.print(
+                getPrintSql(),
+                "[db]" + sql,
+                () -> {
+                    try {
+                        PreparedStatement statement = conn.prepareStatement(sql);
+                        attachParameterObjects(statement, parameterValues);
+                        List<Map<String, Object>> map = null;
+                        try (ResultSet rs = statement.executeQuery()) {
+                            map = toMapList(rs);
+                        }
+                        return map;
+
+                    } catch (Exception e) {
+                        throw new DbException("executeResultSet", sql, e);
+                    }
+                });
     }
 
+    /**
+     * toMapList
+     * @param rs rs
+     * @return {@link List }
+     * @since 2021-09-02 20:05:00
+     */
     public List<Map<String, Object>> toMapList(ResultSet rs) {
         try {
-            ArrayList<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> list = new ArrayList<>();
             if (rs != null && !rs.isClosed()) {
                 ResultSetMetaData meta = rs.getMetaData();
                 int colCount = meta.getColumnCount();
                 int rowsCount = -1;
                 while (rs.next()) {
-                    HashMap<String, Object> map = rowsCount > 0 ? new HashMap<String, Object>(rowsCount) : new HashMap();
-                    for (int i = 1; i <= colCount; ++i) {
+                    HashMap<String, Object> map =
+                            (rowsCount > 0 ? new HashMap<>(rowsCount) : new HashMap<>());
+                    for (int i = 1; i <= colCount; i++) {
                         String key = meta.getColumnName(i);
                         Object value = rs.getObject(i);
                         map.put(key, value);
@@ -213,43 +286,63 @@ implements AutoCloseable {
                 }
             }
             return list;
-        }
-        catch (Exception exp) {
+        } catch (Exception exp) {
             throw new DbException("toMapList", "", exp);
         }
     }
 
-    private void attachParameterObjects(PreparedStatement statement, Object[] values) throws Exception {
+    /**
+     * attachParameterObjects
+     * @param statement statement
+     * @param values values
+     * @since 2021-09-02 20:05:03
+     */
+    private void attachParameterObjects(PreparedStatement statement, Object[] values)
+            throws Exception {
         if (values != null) {
-            for (int i = 0; i < values.length; ++i) {
-                if (values[i] instanceof Date) {
-                    statement.setObject(i + 1, new Timestamp(((Date)values[i]).getTime()));
-                    continue;
+            for (int i = 0; i < values.length; i++) {
+                if (values[i] instanceof java.util.Date) {
+                    statement.setObject(
+                            i + 1, new Timestamp(((java.util.Date) values[i]).getTime()));
+                } else {
+                    statement.setObject(i + 1, values[i]);
                 }
-                statement.setObject(i + 1, values[i]);
             }
         }
     }
 
+    /**
+     * tableIsExist
+     * @param tablename tablename
+     * @return boolean
+     * @since 2021-09-02 20:05:06
+     */
     public boolean tableIsExist(String tablename) {
-        List<Map<String, Object>> ds = this.executeList("Select name from sysobjects where Name=?", new Object[]{tablename});
+        List<Map<String, Object>> ds =
+                executeList("Select name from sysobjects where Name=?", new Object[] {tablename});
         return ds != null && ds.size() != 0;
     }
 
+    /**
+     * DbException
+     *
+     * @version 2021.9
+     * @since 2021-09-02 20:05:11
+     */
+    public static class DbException extends RuntimeException {
+
+        public DbException(String message, String sql, Exception exp) {
+            super(message, exp);
+
+            LogUtils.error("错误sql:" + sql);
+        }
+    }
+
     public Connection getConn() {
-        return this.conn;
+        return conn;
     }
 
     public void setConn(Connection conn) {
         this.conn = conn;
     }
-
-    public static class DbException
-    extends RuntimeException {
-        public DbException(String message, String sql, Exception exp) {
-            super(message, exp);
-            LogUtils.error("\u9519\u8befsql:" + sql, new Object[0]);
-        }
-    }
 }
-

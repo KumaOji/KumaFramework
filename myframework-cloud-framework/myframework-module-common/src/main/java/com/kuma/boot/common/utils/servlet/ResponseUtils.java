@@ -1,27 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.collection.CollUtil
- *  cn.hutool.core.util.StrUtil
- *  jakarta.servlet.http.HttpServletResponse
- *  org.reactivestreams.Publisher
- *  org.springframework.core.io.buffer.DataBuffer
- *  org.springframework.core.io.buffer.DataBufferFactory
- *  org.springframework.core.io.buffer.DataBufferUtils
- *  org.springframework.http.HttpHeaders
- *  org.springframework.http.HttpStatus
- *  org.springframework.http.HttpStatusCode
- *  org.springframework.http.MediaType
- *  org.springframework.http.server.ServerHttpResponse
- *  org.springframework.http.server.reactive.ServerHttpResponse
- *  org.springframework.web.server.ServerWebExchange
- *  reactor.core.publisher.Mono
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.servlet;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
+import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.holder.TenantContextHolder;
 import com.kuma.boot.common.holder.TraceContextHolder;
@@ -29,122 +24,220 @@ import com.kuma.boot.common.holder.VersionContextHolder;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.TraceUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
-import org.reactivestreams.Publisher;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * ResponseUtil
+ *
+ * @author kuma
+ * @version 2023.01
+ * @since 2023-01-03 11:33:15
+ */
 public class ResponseUtils {
-    private ResponseUtils() {
-    }
 
+    private ResponseUtils() {}
+
+    /**
+     * 成功返回数据
+     * @param response response
+     * @param data 数据对象
+     * @since 2023-01-03 11:33:15
+     */
     public static void success(HttpServletResponse response, Object data) throws IOException {
-        Result<Object> result = Result.success(data);
-        ResponseUtils.writeResponse(response, result);
+        Result<?> result = Result.success(data);
+        writeResponse(response, result);
     }
 
+    /**
+     * 失败返回数据
+     * @param response response
+     * @param data 数据对象
+     * @since 2023-01-03 11:33:15
+     */
     public static void fail(HttpServletResponse response, Object data) {
-        Result<String> result = Result.fail(data.toString());
+        Result<?> result = Result.fail(data.toString());
+
         try {
-            ResponseUtils.writeResponse(response, result);
-        }
-        catch (IOException e) {
+            writeResponse(response, result);
+        } catch (IOException e) {
             LogUtils.error(e);
             LogUtils.error(e);
         }
     }
 
+    /**
+     * 成功返回数据
+     * @param response response
+     * @param result 数据对象
+     * @since 2023-01-03 11:33:15
+     */
     public static void result(HttpServletResponse response, Result<?> result) throws IOException {
-        ResponseUtils.writeResponse(response, result);
+        writeResponse(response, result);
     }
 
-    public static void fail(HttpServletResponse response, ResultEnum resultEnum) throws IOException {
-        Result<ResultEnum> result = Result.fail(resultEnum);
-        ResponseUtils.writeResponse(response, result);
+    /**
+     * 失败返回数据
+     * @param response response
+     * @param resultEnum 数据对象
+     * @since 2023-01-03 11:33:15
+     */
+    public static void fail(HttpServletResponse response, ResultEnum resultEnum)
+            throws IOException {
+        Result<String> result = Result.fail(resultEnum);
+        writeResponse(response, result);
     }
 
-    private static void writeResponse(HttpServletResponse response, Result<?> result) throws IOException {
-        response.setContentType("application/json");
+    /**
+     * 通过流返回数据
+     * @param response response
+     * @param result 数据
+     * @since 2023-01-03 11:33:15
+     */
+    private static void writeResponse(HttpServletResponse response, Result<?> result)
+            throws IOException {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.OK.value());
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Type", "application/json;charset=UTF-8");
-        try (PrintWriter writer = response.getWriter();){
-            ((Writer)writer).write(JacksonUtils.toJSONString(result));
-            ((Writer)writer).flush();
+        try (Writer writer = response.getWriter()) {
+            writer.write(JacksonUtils.toJSONString(result));
+            writer.flush();
         }
     }
 
+    /**
+     * webflux成功返回数据
+     * @param exchange exchange
+     * @param data 数据
+     * @return {@link Mono }<{@link Void }>
+     * @since 2023-01-03 11:33:15
+     */
     public static Mono<Void> success(ServerWebExchange exchange, Object data) {
         Result<Object> result = Result.success(data);
-        return ResponseUtils.writeResponse(exchange, result);
+        return writeResponse(exchange, result);
     }
 
+    /**
+     * webflux失败返回数据
+     * @param exchange exchange
+     * @param data 数据
+     * @return {@link Mono }<{@link Void }>
+     * @since 2023-01-03 11:33:15
+     */
     public static Mono<Void> fail(ServerWebExchange exchange, Object data) {
-        Result<String> result = Result.fail(data.toString());
-        return ResponseUtils.writeResponse(exchange, result);
+        Result<Object> result = Result.fail(data.toString());
+        return writeResponse(exchange, result);
     }
 
+    /**
+     * 失败返回数据
+     * @param exchange exchange
+     * @param result 数据
+     * @return {@link Mono }<{@link Void }>
+     * @since 2023-01-03 11:33:15
+     */
     public static Mono<Void> result(ServerWebExchange exchange, Result<?> result) {
-        return ResponseUtils.writeResponse(exchange, result);
+        return writeResponse(exchange, result);
     }
 
+    /**
+     * 失败返回数据
+     * @param exchange exchange
+     * @param resultEnum 状态码
+     * @return {@link Mono }<{@link Void }>
+     * @since 2023-01-03 11:33:15
+     */
     public static Mono<Void> fail(ServerWebExchange exchange, ResultEnum resultEnum) {
-        Result<ResultEnum> result = Result.fail(resultEnum);
-        return ResponseUtils.writeResponse(exchange, result);
+        Result<String> result = Result.fail(resultEnum);
+        return writeResponse(exchange, result);
     }
 
+    /**
+     * 通过流返回数据
+     * @param exchange exchange
+     * @param result 数据
+     * @return {@link Mono }
+     * @since 2021-09-02 15:01:48
+     */
+
+    /**
+     * writeResponse
+     * @param exchange exchange
+     * @param result result
+     * @return {@link Mono }<{@link Void }>
+     * @since 2023-01-03 11:33:15
+     */
     public static Mono<Void> writeResponse(ServerWebExchange exchange, Result<?> result) {
-        org.springframework.http.server.reactive.ServerHttpResponse response = exchange.getResponse();
+        ServerHttpResponse response = exchange.getResponse();
         response.getHeaders().setAccessControlAllowCredentials(true);
         response.getHeaders().setAccessControlAllowOrigin("*");
-        response.setStatusCode((HttpStatusCode)HttpStatus.OK);
+        response.setStatusCode(HttpStatus.OK);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         DataBufferFactory dataBufferFactory = response.bufferFactory();
-        DataBuffer buffer = dataBufferFactory.wrap(JacksonUtils.toJSONString(result).getBytes(Charset.defaultCharset()));
-        return response.writeWith((Publisher)Mono.just((Object)buffer)).doOnSuccess(error -> DataBufferUtils.release((DataBuffer)buffer));
+        DataBuffer buffer =
+                dataBufferFactory.wrap(
+                        JacksonUtils.toJSONString(result).getBytes(Charset.defaultCharset()));
+        return response.writeWith(Mono.just(buffer))
+                .doOnSuccess((error) -> DataBufferUtils.release(buffer));
     }
 
-    public static Mono<Void> writeResponseTextHtml(ServerWebExchange exchange, HttpStatus httpStatus, String result) {
-        org.springframework.http.server.reactive.ServerHttpResponse response = exchange.getResponse();
+    /**
+     * 编写html响应文本
+     * @param exchange 交换
+     * @param httpStatus http状态
+     * @param result 结果
+     * @return {@link Mono }<{@link Void }>
+     * @since 2023-01-03 11:33:15
+     */
+    public static Mono<Void> writeResponseTextHtml(
+            ServerWebExchange exchange, HttpStatus httpStatus, String result) {
+        ServerHttpResponse response = exchange.getResponse();
         response.getHeaders().setAccessControlAllowCredentials(true);
         response.getHeaders().setAccessControlAllowOrigin("*");
-        response.setStatusCode((HttpStatusCode)httpStatus);
+        response.setStatusCode(httpStatus);
         response.getHeaders().setContentType(MediaType.TEXT_HTML);
+
         DataBufferFactory dataBufferFactory = response.bufferFactory();
         DataBuffer buffer = dataBufferFactory.wrap(result.getBytes(Charset.defaultCharset()));
-        return response.writeWith((Publisher)Mono.just((Object)buffer)).doOnSuccess(error -> DataBufferUtils.release((DataBuffer)buffer));
+
+        return response.writeWith(Mono.just(buffer))
+                .doOnSuccess((error) -> DataBufferUtils.release(buffer));
     }
 
-    public static void addResponseHeader(ServerHttpResponse serverHttpResponse) {
+    public static void addResponseHeader(
+            org.springframework.http.server.ServerHttpResponse serverHttpResponse) {
         HttpHeaders headers = serverHttpResponse.getHeaders();
-        ResponseUtils.addHeader(headers, "kmc-tenant-id", TenantContextHolder.getTenant());
-        ResponseUtils.addHeader(headers, "kmc-trace-id", TraceContextHolder.getTraceId());
-        ResponseUtils.addHeader(headers, "X-B3-TraceId", TraceUtils.getOtlpTraceId());
-        ResponseUtils.addHeader(headers, "X-B3-SpanId", TraceUtils.getOtlpSpanId());
-        ResponseUtils.addHeader(headers, "kmc-request-version", VersionContextHolder.getVersion());
+        addHeader(headers, CommonConstants.KMC_TENANT_ID, TenantContextHolder.getTenant());
+        addHeader(headers, CommonConstants.KMC_TRACE_ID, TraceContextHolder.getTraceId());
+        addHeader(headers, CommonConstants.OTLP_TRACE_ID, TraceUtils.getOtlpTraceId());
+        addHeader(headers, CommonConstants.OTLP_SPANE_ID, TraceUtils.getOtlpSpanId());
+        addHeader(headers, CommonConstants.KMC_REQUEST_VERSION, VersionContextHolder.getVersion());
     }
 
-    public static void addResponseHeader(HttpServletResponse httpServletResponse, String key, String value) {
-        if (StrUtil.isBlank((CharSequence)value)) {
+    public static void addResponseHeader(
+            HttpServletResponse httpServletResponse, String key, String value) {
+        if (StrUtil.isBlank(value)) {
             return;
         }
-        Collection headerNames = httpServletResponse.getHeaderNames();
-        if (CollUtil.isEmpty((Collection)headerNames)) {
+
+        Collection<String> headerNames = httpServletResponse.getHeaderNames();
+        if (CollUtil.isEmpty(headerNames)) {
             httpServletResponse.addHeader(key, value);
             return;
         }
@@ -152,8 +245,9 @@ public class ResponseUtils {
             httpServletResponse.addHeader(key, value);
             return;
         }
-        Collection headersValues = httpServletResponse.getHeaders(key);
-        if (CollUtil.isEmpty((Collection)headersValues)) {
+
+        Collection<String> headersValues = httpServletResponse.getHeaders(key);
+        if (CollUtil.isEmpty(headersValues)) {
             httpServletResponse.addHeader(key, value);
             return;
         }
@@ -163,14 +257,19 @@ public class ResponseUtils {
     }
 
     public static void addHeader(HttpHeaders headers, String key, String value) {
-        if (StrUtil.isBlank((CharSequence)value)) {
+        if (StrUtil.isBlank(value)) {
             return;
         }
         if ("N/A".equals(value)) {
             return;
         }
-        List headerValues = headers.get(key);
-        if (CollUtil.isEmpty((Collection)headerValues)) {
+
+        //if (!headers.containsKey(key)) {
+        //    headers.add(key, value);
+        //    return;
+        //}
+        List<String> headerValues = headers.get(key);
+        if (CollUtil.isEmpty(headerValues)) {
             headers.add(key, value);
             return;
         }
@@ -179,4 +278,3 @@ public class ResponseUtils {
         }
     }
 }
-

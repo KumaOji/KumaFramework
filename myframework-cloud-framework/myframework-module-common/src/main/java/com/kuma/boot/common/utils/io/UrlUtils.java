@@ -1,11 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.web.util.UriUtils
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
+import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import java.io.BufferedReader;
@@ -17,37 +28,66 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.web.util.UriUtils;
 
-public class UrlUtils
-extends UriUtils {
+/**
+ * url处理工具类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class UrlUtils extends org.springframework.web.util.UriUtils {
+
+    /**
+     * encode
+     * @param source source
+     * @return sourced String
+     */
     public static String encode(String source) {
-        return UrlUtils.encode((String)source, (Charset)StandardCharsets.UTF_8);
+        return UrlUtils.encode(source, StandardCharsets.UTF_8);
     }
 
+    /**
+     * decode
+     * @param source source
+     * @return decoded String
+     */
     public static String decode(String source) {
-        return UrlUtils.decode((String)source, (Charset)StandardCharsets.UTF_8);
+        return UrlUtils.decode(source, StandardCharsets.UTF_8);
     }
 
-    public static List<String> readAllLines(URL url) {
-        return UrlUtils.readAllLines(url, "UTF-8");
+    /**
+     * 读取每一行的内容
+     * @param url url 信息
+     * @return 结果
+     */
+    public static List<String> readAllLines(final URL url) {
+        return readAllLines(url, CommonConstants.UTF8);
     }
 
-    public static List<String> readAllLines(URL url, String charset) {
+    /**
+     * 读取每一行的内容
+     * @param url url 信息
+     * @param charset 文件编码
+     * @return 结果
+     */
+    public static List<String> readAllLines(final URL url, final String charset) {
         ArgUtils.notNull(url, "url");
         ArgUtils.notEmpty(charset, "charset");
-        ArrayList<String> resultList = new ArrayList<String>();
+
+        List<String> resultList = new ArrayList<>();
+
         try (InputStream is = url.openStream();
-             BufferedReader br = new BufferedReader(new InputStreamReader(is, Charset.forName(charset)));){
+             BufferedReader br =
+                     new BufferedReader(new InputStreamReader(is, Charset.forName(charset)))) {
+            // 按行读取信息
             String line;
             while ((line = br.readLine()) != null) {
                 resultList.add(line);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
         return resultList;
     }
 }
-

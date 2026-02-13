@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  com.google.common.base.Objects
  *  com.google.common.cache.CacheBuilder
@@ -39,7 +39,7 @@ public final class BeanCopyUtils {
         Objects.requireNonNull(source);
         Objects.requireNonNull(target);
         try {
-            BeanCopier beanCopier = (BeanCopier)cache.get((Object)new ClassTuple(source.getClass(), target.getClass()));
+            BeanCopier beanCopier = (BeanCopier)cache.get((ClassTuple) new ClassTuple(source.getClass(), target.getClass()));
             beanCopier.copy(source, target, null);
         }
         catch (ExecutionException e) {

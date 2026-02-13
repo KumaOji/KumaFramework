@@ -1,35 +1,78 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.sql;
 
 import com.kuma.boot.common.exception.BaseException;
 import com.kuma.boot.common.utils.lang.StringUtils;
 
+/**
+ * sql操作工具类
+ *
+ * @author kuma
+ * @version 2022.09
+ * @since 2023-01-03 11:30:29
+ */
 public class SqlUtils {
-    public static final String SQL_REGEX = "select |insert |delete |update |drop |count |exec |chr |mid |master |truncate |char |and |declare ";
+
+    /** sql正则表达式 定义常用的 sql关键字 */
+    public static final String SQL_REGEX =
+            "select |insert |delete |update |dr op |count |exec |chr |mid |master |truncate |char"
+                    + " |and |declare ";
+
+    /** sql模式 仅支持字母、数字、下划线、空格、逗号、小数点（支持多个字段排序） */
     public static final String SQL_PATTERN = "[a-zA-Z0-9_\\ \\,\\.]+";
 
+    /**
+     * 检查字符，防止注入绕过
+     * @param value 价值
+     * @return {@link String }
+     * @since 2023-01-03 11:30:29
+     */
     public static String escapeOrderBySql(String value) {
-        if (StringUtils.isNotEmpty((CharSequence)value) && !SqlUtils.isValidOrderBySql(value)) {
-            throw new BaseException("\u53c2\u6570\u4e0d\u7b26\u5408\u89c4\u8303\uff0c\u4e0d\u80fd\u8fdb\u884c\u67e5\u8be2");
+        if (StringUtils.isNotEmpty(value) && !isValidOrderBySql(value)) {
+            throw new BaseException("参数不符合规范，不能进行查询");
         }
         return value;
     }
 
+    /**
+     * 验证 order by 语法是否符合规范
+     * @param value 价值
+     * @return boolean
+     * @since 2023-01-03 11:30:29
+     */
     public static boolean isValidOrderBySql(String value) {
         return value.matches(SQL_PATTERN);
     }
 
+    /**
+     * SQL关键字检查
+     * @param value 价值
+     * @since 2023-01-03 11:30:29
+     */
     public static void filterKeyword(String value) {
-        String[] sqlKeywords;
         if (StringUtils.isEmpty(value)) {
             return;
         }
-        for (String sqlKeyword : sqlKeywords = StringUtils.split(SQL_REGEX, "\\|")) {
-            if (StringUtils.indexOfIgnoreCase((CharSequence)value, (CharSequence)sqlKeyword) <= -1) continue;
-            throw new BaseException("\u53c2\u6570\u5b58\u5728SQL\u6ce8\u5165\u98ce\u9669");
+        String[] sqlKeywords = StringUtils.split(SQL_REGEX, "\\|");
+        for (String sqlKeyword : sqlKeywords) {
+            if (StringUtils.indexOfIgnoreCase(value, sqlKeyword) > -1) {
+                throw new BaseException("参数存在SQL注入风险");
+            }
         }
     }
 }
-

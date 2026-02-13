@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.lambda;
 
 import java.util.ArrayList;
@@ -9,54 +22,81 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * LambdaBuilder
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
 public class LambdaBuilder<T> {
-    private final Supplier<T> constructor;
-    private final List<Consumer<T>> dInjects = new ArrayList<Consumer<T>>();
-    private Consumer<T> head = t -> {};
 
-    private LambdaBuilder(Supplier<T> constructor) {
+    /**
+     * 存储调用方 指定构造类的 构造器
+     */
+    private final Supplier<T> constructor;
+
+    /**
+     * 存储 指定类 所有需要初始化的类属性
+     */
+    private final List<Consumer<T>> dInjects = new ArrayList<>();
+
+    private Consumer<T> head = t -> {
+    };
+
+    // V2: 构造函数私有化
+    private LambdaBuilder( Supplier<T> constructor ) {
         this.constructor = constructor;
     }
 
-    public static <T> LambdaBuilder<T> builder(Supplier<T> constructor) {
-        return new LambdaBuilder<T>(constructor);
+    public static <T> LambdaBuilder<T> builder( Supplier<T> constructor ) {
+        return new LambdaBuilder<>(constructor);
     }
 
-    public <P1> LambdaBuilder<T> with(DInjectConsumer<T, P1> consumer, P1 p1) {
-        Consumer<Object> c = instance -> consumer.accept(instance, p1);
-        this.head = this.head.andThen(c);
+    public <P1> LambdaBuilder<T> with( DInjectConsumer<T, P1> consumer, P1 p1 ) {
+        Consumer<T> c = instance -> consumer.accept(instance, p1);
+        // dInjects.add(c);
+        head = head.andThen(c);
         return this;
     }
 
-    public <P1> LambdaBuilder<T> with(DInjectConsumer<T, P1> consumer, P1 p1, Predicate<P1> predicate) {
+    public <P1> LambdaBuilder<T> with(
+            DInjectConsumer<T, P1> consumer, P1 p1, Predicate<P1> predicate ) {
         if (null != predicate && !predicate.test(p1)) {
-            throw new RuntimeException(String.format("\u3010%s\u3011\u53c2\u6570\u4e0d\u7b26\u5408\u901a\u7528\u4e1a\u52a1\u89c4\u5219\uff01", p1));
+            throw new RuntimeException(String.format("【%s】参数不符合通用业务规则！", p1));
         }
-        Consumer<Object> c = instance -> consumer.accept(instance, p1);
-        this.head = this.head.andThen(c);
+        Consumer<T> c = instance -> consumer.accept(instance, p1);
+        // dInjects.add(c);
+        head = head.andThen(c);
         return this;
     }
 
-    public <P1, P2> LambdaBuilder<T> with(DInjectConsumer2<T, P1, P2> consumer, P1 p1, P2 p2) {
-        Consumer<Object> c = instance -> consumer.accept(instance, p1, p2);
-        this.head = this.head.andThen(c);
+    public <P1, P2> LambdaBuilder<T> with( DInjectConsumer2<T, P1, P2> consumer, P1 p1, P2 p2 ) {
+        Consumer<T> c = instance -> consumer.accept(instance, p1, p2);
+        // dInjects.add(c);
+        head = head.andThen(c);
         return this;
     }
 
     public T build() {
-        T instance = this.constructor.get();
-        this.head.accept(instance);
+        // 调用supplier 生成类实例
+        T instance = constructor.get();
+        // 调用传入的setter方法，完成属性初始化
+        // dInjects.forEach(dInject -> dInject.accept(instance));
+        head.accept(instance);
+        // 返回 建造完成的类实例
         return instance;
     }
 
     @FunctionalInterface
-    public static interface DInjectConsumer<T, P1> {
-        public void accept(T var1, P1 var2);
+    public interface DInjectConsumer<T, P1> {
+
+        void accept( T t, P1 p1 );
     }
 
     @FunctionalInterface
-    public static interface DInjectConsumer2<T, P1, P2> {
-        public void accept(T var1, P1 var2, P2 var3);
+    public interface DInjectConsumer2<T, P1, P2> {
+
+        void accept( T t, P1 p1, P2 p2 );
     }
 }
-

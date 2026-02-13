@@ -1,16 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.support.tuple.impl.Pair;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import com.kuma.boot.common.utils.reflect.ClassTypeUtils;
-import com.kuma.boot.common.utils.reflect.GenericArrayTypeImpl;
-import com.kuma.boot.common.utils.reflect.ParameterizedTypeImpl;
-import com.kuma.boot.common.utils.reflect.PrimitiveUtils;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -39,75 +48,123 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * Type 工具类
+ *
+ * @see ClassGenericUtils 泛型工具类
+ * @see ClassUtils 类
+ * @see ClassTypeUtils 类型工具类
+ */
 public final class TypeUtils {
-    private TypeUtils() {
-    }
 
+    private TypeUtils() {}
+
+    /**
+     * 创建集合
+     * @param type 类型
+     * @return 集合
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static Collection createCollection(Type type) {
-        return TypeUtils.createCollection(type, 8);
+        return createCollection(type, 8);
     }
 
-    public static Map<Object, Object> createMap(Type type) {
+    /**
+     * 创建一个 map
+     * @param type 类型
+     * @return 结果
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static Map<Object, Object> createMap(final Type type) {
         if (type == Properties.class) {
             return new Properties();
         }
+
         if (type == Hashtable.class) {
-            return new Hashtable<Object, Object>();
+            return new Hashtable();
         }
+
         if (type == IdentityHashMap.class) {
-            return new IdentityHashMap<Object, Object>();
+            return new IdentityHashMap();
         }
+
         if (type == SortedMap.class || type == TreeMap.class) {
-            return new TreeMap<Object, Object>();
+            return new TreeMap();
         }
+
         if (type == ConcurrentMap.class || type == ConcurrentHashMap.class) {
-            return new ConcurrentHashMap<Object, Object>();
+            return new ConcurrentHashMap();
         }
+
         if (type == HashMap.class) {
-            return new HashMap<Object, Object>();
+            return new HashMap();
         }
+
         if (type == LinkedHashMap.class) {
-            return new LinkedHashMap<Object, Object>();
+            return new LinkedHashMap();
         }
+
         if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+
             Type rawType = parameterizedType.getRawType();
-            if (EnumMap.class.equals((Object)rawType)) {
+            if (EnumMap.class.equals(rawType)) {
                 Type[] actualArgs = parameterizedType.getActualTypeArguments();
-                return new EnumMap<Object, Object>((Class)actualArgs[0]);
+                return new EnumMap((Class) actualArgs[0]);
             }
-            return TypeUtils.createMap(rawType);
+
+            return createMap(rawType);
         }
-        Class clazz = (Class)type;
+
+        Class<?> clazz = (Class<?>) type;
         if (clazz.isInterface()) {
-            throw new BootException("unsupport type " + String.valueOf(type));
+            throw new BootException("unsupport type " + type);
         }
+
         if ("java.util.Collections$UnmodifiableMap".equals(clazz.getName())) {
-            return new HashMap<Object, Object>();
+            return new HashMap();
         }
+
         try {
-            return (Map)clazz.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-        }
-        catch (Exception e) {
+            return (Map<Object, Object>) clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
             throw new BootException(e);
         }
     }
 
-    public static Pair<Type, Type> getMapKeyValueType(Type mapType) {
+    /**
+     * 根据 map 的类型，获取对应的 key/value 类型
+     * @param mapType map 类型
+     * @return 结果
+     */
+    public static Pair<Type, Type> getMapKeyValueType(final Type mapType) {
         if (mapType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)mapType;
+            ParameterizedType parameterizedType = (ParameterizedType) mapType;
             Type keyType = parameterizedType.getActualTypeArguments()[0];
-            Object valueType = null;
-            valueType = mapType.getClass().getName().equals("org.springframework.util.LinkedMultiValueMap") ? List.class : parameterizedType.getActualTypeArguments()[1];
+            Type valueType = null;
+            if (mapType.getClass()
+                    .getName()
+                    .equals("org.springframework.util.LinkedMultiValueMap")) {
+                valueType = List.class;
+            } else {
+                valueType = parameterizedType.getActualTypeArguments()[1];
+            }
             return Pair.of(keyType, valueType);
         }
-        Class<Object> objectType = Object.class;
+        final Type objectType = Object.class;
         return Pair.of(objectType, objectType);
     }
 
-    public static Collection createCollection(Type type, int size) {
+    /**
+     * 创建集合
+     * @param type 类型
+     * @param size 集合大小
+     * @return 集合
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static Collection createCollection(Type type, final int size) {
+        Class<?> rawClass = getRawClass(type);
         Collection list;
-        Class rawClass = TypeUtils.getRawClass(type);
         if (rawClass == AbstractCollection.class || rawClass == Collection.class) {
             list = new ArrayList(size);
         } else if (rawClass.isAssignableFrom(HashSet.class)) {
@@ -119,80 +176,114 @@ public final class TypeUtils {
         } else if (rawClass.isAssignableFrom(ArrayList.class)) {
             list = new ArrayList(size);
         } else if (rawClass.isAssignableFrom(EnumSet.class)) {
-            Class itemType = TypeUtils.getGenericType(type);
-            list = EnumSet.noneOf(itemType);
+            Type itemType = getGenericType(type);
+            list = EnumSet.noneOf((Class<Enum>) itemType);
         } else if (rawClass.isAssignableFrom(Queue.class)) {
             list = new LinkedList();
         } else {
             try {
-                list = (Collection)rawClass.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-            }
-            catch (Exception e) {
+                list = (Collection) rawClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
                 throw new BootException(e);
             }
         }
         return list;
     }
 
+    /**
+     * 获取对应的 raw 类型
+     * @param type 类型
+     * @return 结果
+     */
     private static Class<?> getRawClass(Type type) {
-        if (type instanceof Class) {
-            return (Class)type;
+        if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return getRawClass(((ParameterizedType) type).getRawType());
+        } else {
+            throw new UnsupportedOperationException();
         }
+    }
+
+    /**
+     * 获取泛型类型
+     * @param type 类型
+     * @return 元素类型
+     */
+    public static Class getGenericType(final Type type) {
+        Type itemType;
         if (type instanceof ParameterizedType) {
-            return TypeUtils.getRawClass(((ParameterizedType)type).getRawType());
+            itemType = ((ParameterizedType) type).getActualTypeArguments()[0];
+        } else {
+            itemType = Object.class;
         }
-        throw new UnsupportedOperationException();
+
+        return (Class) itemType;
     }
 
-    public static Class getGenericType(Type type) {
-        Object itemType = type instanceof ParameterizedType ? ((ParameterizedType)type).getActualTypeArguments()[0] : Object.class;
-        return itemType;
-    }
-
+    /**
+     * 获取集合元素类型
+     * @param collectionType 集合类型
+     * @return 类型
+     */
     public static Type getCollectionItemType(Type collectionType) {
         if (collectionType instanceof ParameterizedType) {
-            return TypeUtils.getCollectionItemType((ParameterizedType)collectionType);
+            return getCollectionItemType((ParameterizedType) collectionType);
         }
-        if (collectionType instanceof Class) {
-            return TypeUtils.getCollectionItemType((Class)collectionType);
+        if (collectionType instanceof Class<?>) {
+            return getCollectionItemType((Class<?>) collectionType);
         }
         return Object.class;
     }
 
+    /**
+     * 获取集合元素类型
+     * @param clazz 类型
+     * @return 结果
+     */
     private static Type getCollectionItemType(Class<?> clazz) {
-        return clazz.getName().startsWith("java.") ? Object.class : TypeUtils.getCollectionItemType(TypeUtils.getCollectionSuperType(clazz));
+        return clazz.getName().startsWith("java.")
+                ? Object.class
+                : getCollectionItemType(getCollectionSuperType(clazz));
     }
 
     private static Type getCollectionItemType(ParameterizedType parameterizedType) {
         Type rawType = parameterizedType.getRawType();
         Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
         if (rawType == Collection.class) {
-            return TypeUtils.getWildcardTypeUpperBounds(actualTypeArguments[0]);
+            return getWildcardTypeUpperBounds(actualTypeArguments[0]);
         }
-        Class rawClass = (Class)rawType;
-        Map<TypeVariable, Type> actualTypeMap = TypeUtils.createActualTypeMap(rawClass.getTypeParameters(), actualTypeArguments);
-        Type superType = TypeUtils.getCollectionSuperType(rawClass);
+        Class<?> rawClass = (Class<?>) rawType;
+        Map<TypeVariable, Type> actualTypeMap =
+                createActualTypeMap(rawClass.getTypeParameters(), actualTypeArguments);
+        Type superType = getCollectionSuperType(rawClass);
         if (superType instanceof ParameterizedType) {
-            Class<?> superClass = TypeUtils.getRawClass(superType);
-            Type[] superClassTypeParameters = ((ParameterizedType)superType).getActualTypeArguments();
-            return superClassTypeParameters.length > 0 ? TypeUtils.getCollectionItemType(TypeUtils.makeParameterizedType(superClass, superClassTypeParameters, actualTypeMap)) : TypeUtils.getCollectionItemType(superClass);
+            Class<?> superClass = getRawClass(superType);
+            Type[] superClassTypeParameters =
+                    ((ParameterizedType) superType).getActualTypeArguments();
+            return superClassTypeParameters.length > 0
+                    ? getCollectionItemType(
+                    makeParameterizedType(
+                            superClass, superClassTypeParameters, actualTypeMap))
+                    : getCollectionItemType(superClass);
         }
-        return TypeUtils.getCollectionItemType((Class)superType);
+        return getCollectionItemType((Class<?>) superType);
     }
 
     private static Type getWildcardTypeUpperBounds(Type type) {
         if (type instanceof WildcardType) {
-            WildcardType wildcardType = (WildcardType)type;
+            WildcardType wildcardType = (WildcardType) type;
             Type[] upperBounds = wildcardType.getUpperBounds();
             return upperBounds.length > 0 ? upperBounds[0] : Object.class;
         }
         return type;
     }
 
-    private static Map<TypeVariable, Type> createActualTypeMap(TypeVariable[] typeParameters, Type[] actualTypeArguments) {
+    private static Map<TypeVariable, Type> createActualTypeMap(
+            TypeVariable[] typeParameters, Type[] actualTypeArguments) {
         int length = typeParameters.length;
-        HashMap<TypeVariable, Type> actualTypeMap = new HashMap<TypeVariable, Type>(length);
-        for (int i = 0; i < length; ++i) {
+        Map<TypeVariable, Type> actualTypeMap = new HashMap<TypeVariable, Type>(length);
+        for (int i = 0; i < length; i++) {
             actualTypeMap.put(typeParameters[i], actualTypeArguments[i]);
         }
         return actualTypeMap;
@@ -201,21 +292,23 @@ public final class TypeUtils {
     private static Type getCollectionSuperType(Class<?> clazz) {
         Type assignable = null;
         for (Type type : clazz.getGenericInterfaces()) {
-            Class<?> rawClass = TypeUtils.getRawClass(type);
+            Class<?> rawClass = getRawClass(type);
             if (rawClass == Collection.class) {
                 return type;
             }
-            if (!Collection.class.isAssignableFrom(rawClass)) continue;
-            assignable = type;
+            if (Collection.class.isAssignableFrom(rawClass)) {
+                assignable = type;
+            }
         }
         return assignable == null ? clazz.getGenericSuperclass() : assignable;
     }
 
-    private static ParameterizedType makeParameterizedType(Class<?> rawClass, Type[] typeParameters, Map<TypeVariable, Type> actualTypeMap) {
+    private static ParameterizedType makeParameterizedType(
+            Class<?> rawClass, Type[] typeParameters, Map<TypeVariable, Type> actualTypeMap) {
         int length = typeParameters.length;
         Type[] actualTypeArguments = new Type[length];
-        for (int i = 0; i < length; ++i) {
-            actualTypeArguments[i] = TypeUtils.getActualType(typeParameters[i], actualTypeMap);
+        for (int i = 0; i < length; i++) {
+            actualTypeArguments[i] = getActualType(typeParameters[i], actualTypeMap);
         }
         return new ParameterizedTypeImpl(actualTypeArguments, null, rawClass);
     }
@@ -223,111 +316,202 @@ public final class TypeUtils {
     private static Type getActualType(Type typeParameter, Map<TypeVariable, Type> actualTypeMap) {
         if (typeParameter instanceof TypeVariable) {
             return actualTypeMap.get(typeParameter);
-        }
-        if (typeParameter instanceof ParameterizedType) {
-            return TypeUtils.makeParameterizedType(TypeUtils.getRawClass(typeParameter), ((ParameterizedType)typeParameter).getActualTypeArguments(), actualTypeMap);
-        }
-        if (typeParameter instanceof GenericArrayType) {
-            return new GenericArrayTypeImpl(TypeUtils.getActualType(((GenericArrayType)typeParameter).getGenericComponentType(), actualTypeMap));
+        } else if (typeParameter instanceof ParameterizedType) {
+            return makeParameterizedType(
+                    getRawClass(typeParameter),
+                    ((ParameterizedType) typeParameter).getActualTypeArguments(),
+                    actualTypeMap);
+        } else if (typeParameter instanceof GenericArrayType) {
+            return new GenericArrayTypeImpl(
+                    getActualType(
+                            ((GenericArrayType) typeParameter).getGenericComponentType(),
+                            actualTypeMap));
         }
         return typeParameter;
     }
 
-    public static Class getGenericParamType(Type genericType, int paramIndex) {
+    /**
+     * 获取泛型参数类型
+     * @param genericType 类型
+     * @param paramIndex 泛型参数下标
+     * @return 结果
+     */
+    public static Class getGenericParamType(final Type genericType, final int paramIndex) {
         if (ObjectUtils.isNull(genericType)) {
             return null;
         }
+
+        // 如果是泛型参数的类型
         if (genericType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)genericType;
-            Object[] types = parameterizedType.getActualTypeArguments();
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            // 得到泛型里的class类型对象
+            Type[] types = parameterizedType.getActualTypeArguments();
             if (ArrayUtils.isEmpty(types)) {
                 return null;
             }
-            Object type = types[paramIndex];
-            if (ClassTypeUtils.isWildcardGenericType((Type)type)) {
+
+            // 判断是否为通配符(?)
+            Type type = types[paramIndex];
+            if (ClassTypeUtils.isWildcardGenericType(type)) {
+                // WildcardTypeImpl wildcardType = (WildcardTypeImpl)type;
+                //
+                //// lower
+                // Type[] lowerBounds = wildcardType.getLowerBounds();
+                // if(ArrayUtil.isNotEmpty(lowerBounds)) {
+                // return (Class<?>)lowerBounds[0];
+                // }
+                //
+                //// upper
+                // Type[] upperBounds = wildcardType.getUpperBounds();
+                // if(ArrayUtil.isNotEmpty(upperBounds)) {
+                // return (Class<?>)upperBounds[0];
+                // }
+
+                // 默认返回 object 对象类型
                 return Object.class;
             }
-            return (Class)type;
+
+            return (Class<?>) type;
         }
+
+        // 默认返回 object 对象类型
         return null;
     }
 
-    public static Class getGenericParamType(Type genericType) {
-        return TypeUtils.getGenericParamType(genericType, 0);
+    /**
+     * 获取泛型参数类型
+     * @param genericType 类型
+     * @return 结果
+     */
+    public static Class getGenericParamType(final Type genericType) {
+        return getGenericParamType(genericType, 0);
     }
 
+    /**
+     * 转换为指定的数据类型
+     * @param obj 原始数据
+     * @param type 预期类型
+     * @param <T> 结果泛型
+     * @return 结果
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T cast(Object obj, Type type) {
+        // 8 大基本类型的默认值处理
         if (obj == null) {
-            if (ClassTypeUtils.isPrimitive((Class)type)) {
-                return (T)PrimitiveUtils.getDefaultValue((Class)type);
+            if (ClassTypeUtils.isPrimitive((Class) type)) {
+                return (T) PrimitiveUtils.getDefaultValue((Class<T>) type);
             }
             return null;
         }
         if (type instanceof ParameterizedType) {
-            return TypeUtils.cast(obj, (ParameterizedType)type);
+            return (T) cast(obj, (ParameterizedType) type);
         }
         if (obj instanceof String) {
-            String strVal = (String)obj;
+            String strVal = (String) obj;
             if (strVal.length() == 0 || "null".equals(strVal) || "NULL".equals(strVal)) {
                 return null;
             }
-            return (T)strVal;
+
+            return (T) strVal;
         }
-        return (T)obj;
+
+        // 其他情况，直接类型强转。
+        // 后期可以丰富这里的特性。
+        return (T) obj;
     }
 
+    /**
+     * 类型转换
+     * @param obj 原始结果
+     * @param type 类型
+     * @param <T> 泛型
+     * @return 转换后的结果
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static <T> T cast(Object obj, ParameterizedType type) {
-        Type argType;
-        String strVal;
-        Type itemType;
         Type rawTye = type.getRawType();
+
         if (rawTye == List.class || rawTye == ArrayList.class) {
-            itemType = type.getActualTypeArguments()[0];
+            Type itemType = type.getActualTypeArguments()[0];
             if (obj instanceof List) {
-                List listObj = (List)obj;
-                ArrayList<T> arrayList = new ArrayList<T>(listObj.size());
+                List listObj = (List) obj;
+                List arrayList = new ArrayList(listObj.size());
+
                 for (Object item : listObj) {
-                    T itemValue = itemType instanceof Class ? TypeUtils.cast(item, (Class)itemType) : TypeUtils.cast(item, itemType);
+                    Object itemValue;
+                    if (itemType instanceof Class) {
+                        itemValue = cast(item, (Class<T>) itemType);
+                    } else {
+                        itemValue = cast(item, itemType);
+                    }
+
                     arrayList.add(itemValue);
                 }
-                return (T)arrayList;
+                return (T) arrayList;
             }
         }
-        if (rawTye == Set.class || rawTye == HashSet.class || rawTye == TreeSet.class || rawTye == Collection.class || rawTye == List.class || rawTye == ArrayList.class) {
-            itemType = type.getActualTypeArguments()[0];
+
+        if (rawTye == Set.class
+                || rawTye == HashSet.class
+                || rawTye == TreeSet.class
+                || rawTye == Collection.class
+                || rawTye == List.class
+                || rawTye == ArrayList.class) {
+            Type itemType = type.getActualTypeArguments()[0];
             if (obj instanceof Iterable) {
-                AbstractCollection collection = rawTye == Set.class || rawTye == HashSet.class ? new HashSet() : (rawTye == TreeSet.class ? new TreeSet() : new ArrayList());
-                for (Object item : (Iterable)obj) {
-                    T itemValue = itemType instanceof Class ? TypeUtils.cast(item, (Class)itemType) : TypeUtils.cast(item, itemType);
+                Collection collection;
+                if (rawTye == Set.class || rawTye == HashSet.class) {
+                    collection = new HashSet();
+                } else if (rawTye == TreeSet.class) {
+                    collection = new TreeSet();
+                } else {
+                    collection = new ArrayList();
+                }
+                for (Object item : (Iterable) obj) {
+                    Object itemValue;
+                    if (itemType instanceof Class) {
+                        itemValue = cast(item, (Class<T>) itemType);
+                    } else {
+                        itemValue = cast(item, itemType);
+                    }
+
                     collection.add(itemValue);
                 }
-                return (T)collection;
+                return (T) collection;
             }
         }
+
         if (rawTye == Map.class || rawTye == HashMap.class) {
             Type keyType = type.getActualTypeArguments()[0];
             Type valueType = type.getActualTypeArguments()[1];
             if (obj instanceof Map) {
-                HashMap<T, T> map = new HashMap<T, T>();
-                for (Map.Entry entry : ((Map)obj).entrySet()) {
-                    T key = TypeUtils.cast(entry.getKey(), keyType);
-                    T value = TypeUtils.cast(entry.getValue(), valueType);
+                Map map = new HashMap();
+                for (Map.Entry entry : ((Map<?, ?>) obj).entrySet()) {
+                    Object key = cast(entry.getKey(), keyType);
+                    Object value = cast(entry.getValue(), valueType);
                     map.put(key, value);
                 }
-                return (T)map;
+                return (T) map;
             }
         }
-        if (obj instanceof String && (strVal = (String)obj).length() == 0) {
-            return null;
+        if (obj instanceof String) {
+            String strVal = (String) obj;
+            if (strVal.length() == 0) {
+                return null;
+            }
         }
-        if (type.getActualTypeArguments().length == 1 && (argType = type.getActualTypeArguments()[0]) instanceof WildcardType) {
-            return TypeUtils.cast(obj, rawTye);
+        if (type.getActualTypeArguments().length == 1) {
+            Type argType = type.getActualTypeArguments()[0];
+            if (argType instanceof WildcardType) {
+                return (T) cast(obj, rawTye);
+            }
         }
-        if (rawTye == Map.Entry.class && obj instanceof Map && ((Map)obj).size() == 1) {
-            Map.Entry entry = ((Map)obj).entrySet().iterator().next();
-            return (T)entry;
+
+        if (rawTye == Map.Entry.class && obj instanceof Map && ((Map) obj).size() == 1) {
+            Map.Entry entry = (Map.Entry) ((Map) obj).entrySet().iterator().next();
+            return (T) entry;
         }
-        throw new BootException("\u65e0\u6cd5\u8f6c\u6362\u4e3a\u7c7b\u578b\uff1a " + String.valueOf(type));
+
+        throw new BootException("无法转换为类型： " + type);
     }
 }
-
