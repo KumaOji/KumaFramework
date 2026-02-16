@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @author kuma
  */
 @Configuration
+@Lazy
 @EnableCaching
 @ConditionalOnClass(Caffeine.class)
 @EnableConfigurationProperties(CaffeineCacheProperties.class)

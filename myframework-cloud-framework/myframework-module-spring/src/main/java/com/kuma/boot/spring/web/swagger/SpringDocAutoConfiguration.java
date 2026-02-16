@@ -28,13 +28,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
- * SpringDoc OpenAPI 自动配置
+ * SpringDoc OpenAPI 自动配置（@Lazy 延迟加载，优化启动速度）
  *
  * @author kuma
  */
 @Configuration
+@Lazy
 @ConditionalOnWebApplication
 @ConditionalOnClass(OpenAPI.class)
 @EnableConfigurationProperties(SpringDocProperties.class)

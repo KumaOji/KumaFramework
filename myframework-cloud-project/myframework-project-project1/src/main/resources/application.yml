@@ -6,6 +6,8 @@
 # - 默认 schema: blog (kuma.mybatis.default-schema，与 MySQL 库名一致)
 
 spring:
+  profiles:
+    active: dev
   application:
     name: project1
   datasource:
