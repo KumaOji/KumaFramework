@@ -16,21 +16,24 @@
 
 package com.kuma.cloud.project1.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.result.PageResult;
+import com.kuma.boot.datasource.context.SchemaContext;
+import com.kuma.boot.mybatis.page.PageUtils;
+import com.kuma.cloud.project1.mapper.SchemaTableMapper;
+import com.kuma.cloud.project1.model.TableRow;
 import com.kuma.cloud.project1.request.TablePageQuery;
 import com.kuma.cloud.project1.service.SchemaTableService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Schema 表服务实现 - 查询 blog_source 库
+ * Schema 表服务实现 - 使用 Schema 切换 + MyBatis-Plus 查询 blog_source 库
  *
  * @author kuma
  */
@@ -40,49 +43,41 @@ public class SchemaTableServiceImpl implements SchemaTableService {
 
     private static final String SCHEMA_BLOG_SOURCE = "blog_source";
 
-    private final DataSource dataSource;
+    private final SchemaTableMapper schemaTableMapper;
 
     @Override
     public List<String> listTables() {
-        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
-        String sql = "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? ORDER BY TABLE_NAME";
-        List<Map<String, Object>> rows = jdbc.queryForList(sql, SCHEMA_BLOG_SOURCE);
-        List<String> tables = new ArrayList<>();
-        for (Map<String, Object> row : rows) {
-            Object name = row.get("TABLE_NAME");
-            if (name != null) {
-                tables.add(name.toString());
-            }
-        }
-        return tables;
+        return SchemaContext.withSchema(SCHEMA_BLOG_SOURCE,
+                () -> schemaTableMapper.listTables(SCHEMA_BLOG_SOURCE));
     }
 
     @Override
     public PageResult<Map<String, Object>> pageTableData(TablePageQuery query) {
-        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
         String tableName = query.getTableName().trim();
         if (!tableName.matches("^[a-zA-Z0-9_]+$")) {
             throw new IllegalArgumentException("表名格式非法");
         }
         int current = query.getCurrentPage() != null ? query.getCurrentPage() : 1;
         int size = query.getPageSize() != null ? query.getPageSize() : 10;
-        long offset = (current - 1L) * size;
 
-        String orderClause = "";
+        String sort = null;
+        String order = "ASC";
         if (StringUtils.hasText(query.getSort()) && query.getSort().matches("^[a-zA-Z0-9_]+$")) {
-            String order = "asc".equalsIgnoreCase(query.getOrder()) ? "ASC" : "DESC";
-            orderClause = " ORDER BY `" + query.getSort().replace("`", "``") + "` " + order;
+            sort = query.getSort();
+            order = "asc".equalsIgnoreCase(query.getOrder()) ? "ASC" : "DESC";
         }
 
-        String qualifiedTable = SCHEMA_BLOG_SOURCE + ".`" + tableName.replace("`", "``") + "`";
-        String countSql = "SELECT COUNT(*) FROM " + qualifiedTable;
-        Long total = jdbc.queryForObject(countSql, Long.class);
-        if (total == null) total = 0L;
+        final String finalSort = sort;
+        final String finalOrder = order;
 
-        String dataSql = "SELECT * FROM " + qualifiedTable + orderClause + " LIMIT ? OFFSET ?";
-        List<Map<String, Object>> data = jdbc.queryForList(dataSql, size, offset);
+        IPage<TableRow> page = SchemaContext.withSchema(SCHEMA_BLOG_SOURCE, () -> {
+            Page<TableRow> p = new Page<>(current, size);
+            return schemaTableMapper.selectTablePage(p, tableName, finalSort, finalOrder);
+        });
 
-        int totalPage = (int) ((total + size - 1) / size);
-        return PageResult.of(total, totalPage, current, size, data);
+        // TableRow extends Map，强转以满足 PageResult<Map<String, Object>> 接口
+        @SuppressWarnings("unchecked")
+        PageResult<Map<String, Object>> result = (PageResult<Map<String, Object>>) (PageResult<?>) PageUtils.toPageResult(page);
+        return result;
     }
 }

@@ -21,11 +21,13 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 
 /**
  * MyBatis-Plus 配置：分页 + Schema 动态切换
@@ -45,6 +47,7 @@ public class MybatisPlusConfig {
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public SchemaSwitchInterceptor schemaSwitchInterceptor(MybatisPlusProperties properties) {
         SchemaSwitchInterceptor interceptor = new SchemaSwitchInterceptor();
         interceptor.setDefaultSchema(properties.getDefaultSchema());
@@ -52,7 +55,7 @@ public class MybatisPlusConfig {
     }
 
     @Bean
-    public BeanPostProcessor schemaSwitchInterceptorBeanPostProcessor(SchemaSwitchInterceptor schemaSwitchInterceptor) {
+    public static BeanPostProcessor schemaSwitchInterceptorBeanPostProcessor(SchemaSwitchInterceptor schemaSwitchInterceptor) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {

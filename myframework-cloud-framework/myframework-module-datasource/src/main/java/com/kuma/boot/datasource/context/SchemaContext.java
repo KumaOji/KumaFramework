@@ -78,4 +78,21 @@ public final class SchemaContext {
             }
         }
     }
+
+    /**
+     * 在指定 schema 下执行代码并返回结果，执行完后自动恢复
+     */
+    public static <T> T withSchema(String schema, java.util.function.Supplier<T> supplier) {
+        String old = getSchema();
+        try {
+            setSchema(schema);
+            return supplier.get();
+        } finally {
+            if (old != null) {
+                setSchema(old);
+            } else {
+                clearSchema();
+            }
+        }
+    }
 }

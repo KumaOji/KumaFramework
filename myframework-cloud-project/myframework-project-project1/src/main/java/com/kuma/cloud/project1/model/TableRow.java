@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.kuma.cloud.project1.mapper;
+package com.kuma.cloud.project1.model;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.kuma.cloud.project1.entity.Source;
-import org.apache.ibatis.annotations.Mapper;
+import java.util.LinkedHashMap;
 
 /**
- * 资源 Mapper
+ * 动态表查询结果行 - 包装为 Map，避免 MyBatis 对 Map 返回类型要求 @MapKey
  *
  * @author kuma
  */
-@Mapper
-public interface SourceMapper extends BaseMapper<Source> {
+public class TableRow extends LinkedHashMap<String, Object> {
+
+    private static final long serialVersionUID = 1L;
 }
