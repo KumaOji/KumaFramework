@@ -1,0 +1,38 @@
+# Myframework Application 模块 - 通用启动配置
+# 项目引入本模块后，此配置会随 classpath 加载，可被项目自身的 application.yml 覆盖
+
+# ----- Schema 切换 -----
+kuma:
+  schema-switch:
+    enabled: true
+    order: -100
+  mybatis:
+    default-schema: public
+  springdoc:
+    title: API 文档
+    description: RESTful API 接口文档
+    version: 1.0.0
+    license-name: Apache 2.0
+    license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+# ----- 日志 -----
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
+    com.kuma.boot: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+# ----- SpringDoc / Swagger -----
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+    try-it-out-enabled: true

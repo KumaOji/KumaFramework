@@ -11,7 +11,7 @@ dependencies {
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.doc.webmvc
-    api projectLibs.dynamic.datasource.boot3
+    api projectLibs.dynamic.datasource
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
