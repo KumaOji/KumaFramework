@@ -4,9 +4,6 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
-group = 'com.kuma.cloud'
-version = '1.0.0'
-
 def springBootVersion = projectLibs.versions.springboot.get()
 dependencyManagement {
     imports {
@@ -16,8 +13,22 @@ dependencyManagement {
 
 dependencies {
     implementation project(':myframework-cloud-framework:myframework-module-application')
-    runtimeOnly 'com.h2database:h2'
+    runtimeOnly projectLibs.mysql
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
     testImplementation projectLibs.spring.boot.starter.test
+}
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(
+                mysql: [
+                        url    : project.findProperty('spring.datasource.dynamic.datasource.mysql.url') ?: 'jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useServerPrepStatements=true&cachePrepStatements=true&allowPublicKeyRetrieval=true',
+                        username: project.findProperty('spring.datasource.dynamic.datasource.mysql.username') ?: 'root',
+                        password: project.findProperty('spring.datasource.dynamic.datasource.mysql.password') ?: ''
+                ]
+        )
+    }
 }
 
 bootJar {

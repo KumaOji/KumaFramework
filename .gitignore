@@ -10,3 +10,6 @@ temp/
 
 # properties
 gradle.properties
+
+# log
+logs/

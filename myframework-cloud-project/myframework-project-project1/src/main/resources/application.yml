@@ -1,19 +1,23 @@
-# Project1 最简配置
-# 默认数据源: master (dynamic-datasource primary)
-# 默认数据库: H2 内存库 (dev) / MySQL (prod)
+# Project1 配置
+# 数据源账号密码从 gradle.properties 注入
+#
+# Schema 切换默认值：
+# - 默认数据源: mysql (spring.datasource.dynamic.primary)
+# - 默认 schema: blog (kuma.mybatis.default-schema，与 MySQL 库名一致)
 
 spring:
   application:
     name: project1
   datasource:
     dynamic:
-      primary: master
+      primary: mysql
       datasource:
-        master:
-          url: jdbc:h2:mem:project1db
-          driver-class-name: org.h2.Driver
-          username: sa
-          password: ''
-  h2:
-    console:
-      enabled: true
+        mysql:
+          url: ${mysql.url}
+          username: ${mysql.username}
+          password: ${mysql.password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+kuma:
+  mybatis:
+    default-schema: blog

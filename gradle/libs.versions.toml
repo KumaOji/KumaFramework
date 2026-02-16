@@ -9,7 +9,7 @@ mysql = "8.0.32"
 hutool = "5.8.17"
 knife4j = "4.3.0"
 easyexcel = "3.2.1"
-dynamic-datasource = "3.6.0"
+dynamic-datasource = "4.5.0"
 sa-token = "1.35.0.RC"
 spring-doc = "2.1.0"
 spring-redisson = "3.21.3"
@@ -80,7 +80,7 @@ swagger-annotations-jakarta = "2.2.25"
 ## 统一定义依赖
 [libraries]
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
-mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot3-starter", version.ref = "mybatis-plus" }
+mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot4-starter", version.ref = "mybatis-plus" }
 mybatis-core = { module = "org.mybatis:mybatis", version.ref = "mybatis" }
 mybatis-spring = { module = "org.mybatis:mybatis-spring", version.ref = "spring-mybatis" }
 mybatis-spring-boot-starter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "mybatis-spring-boot" }
@@ -97,7 +97,7 @@ hutool-http = { module = "cn.hutool:hutool-http", version.ref = "hutool" }
 easyexcel = { module = "com.alibaba:easyexcel", version.ref = "easyexcel" }
 satoken-core = { module = "cn.dev33:sa-token-core", version.ref = "sa-token" }
 satoken-web = { module = "cn.dev33:sa-token-spring-boot3-starter", version.ref = "sa-token" }
-dynamic-datasource = { module = "com.baomidou:dynamic-datasource-spring-boot-starter", version.ref = "dynamic-datasource" }
+dynamic-datasource = { module = "com.baomidou:dynamic-datasource-spring-boot4-starter", version.ref = "dynamic-datasource" }
 spring-doc-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "spring-doc" }
 spring-doc-webmvc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc" }
 spring-redisson = { module = "org.redisson:redisson-spring-boot-starter", version.ref = "spring-redisson" }

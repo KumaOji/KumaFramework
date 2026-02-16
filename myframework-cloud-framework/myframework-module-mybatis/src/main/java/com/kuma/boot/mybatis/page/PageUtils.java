@@ -19,6 +19,7 @@ package com.kuma.boot.mybatis.page;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kuma.boot.common.model.domain.PageParam;
 import com.kuma.boot.common.model.request.BasePageQuery;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.PageResult;
@@ -51,6 +52,22 @@ public final class PageUtils {
         if (query.getSort() != null && !query.getSort().isBlank()) {
             boolean asc = "asc".equalsIgnoreCase(query.getOrder());
             page.addOrder(asc ? OrderItem.asc(query.getSort()) : OrderItem.desc(query.getSort()));
+        }
+        return page;
+    }
+
+    /**
+     * PageParam 转 MyBatis-Plus Page
+     */
+    public static <T> Page<T> toPage(PageParam pageParam) {
+        if (pageParam == null) {
+            return new Page<>(1, 10);
+        }
+        Page<T> page = new Page<>((long) pageParam.getPage(), pageParam.getSize());
+        if (pageParam.getSorts() != null && !pageParam.getSorts().isEmpty()) {
+            for (PageParam.Sort sort : pageParam.getSorts()) {
+                page.addOrder(sort.isAsc() ? OrderItem.asc(sort.getField()) : OrderItem.desc(sort.getField()));
+            }
         }
         return page;
     }
