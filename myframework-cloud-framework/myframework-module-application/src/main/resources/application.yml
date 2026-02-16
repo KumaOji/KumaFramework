@@ -2,6 +2,13 @@
 # 项目依赖本模块后，此配置会随 classpath 加载，可被项目自身的 application.yml 覆盖
 
 kuma:
+  cache:
+    caffeine:
+      cache-names: default
+      initial-capacity: 100
+      maximum-size: 1000
+      expire-after-write-minutes: 30
+      expire-after-access-minutes: 30
   schema-switch:
     enabled: true
     order: -100
