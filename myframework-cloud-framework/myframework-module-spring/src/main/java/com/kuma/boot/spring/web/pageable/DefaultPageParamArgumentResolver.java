@@ -16,7 +16,7 @@
 
 package com.kuma.boot.spring.web.pageable;
 
-import com.kuma.boot.common.model.domain.PageParam;
+import com.kuma.boot.common.model.request.PageParam;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.common.model.domain;
+package com.kuma.boot.common.constant;
 
 import java.util.Arrays;
 import java.util.HashSet;

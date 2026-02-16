@@ -16,7 +16,7 @@
 
 package com.kuma.boot.spring.config;
 
-import com.kuma.boot.common.util.ObjectId;
+import com.kuma.boot.common.utils.id.IdGeneratorUtils;
 import com.kuma.boot.spring.web.pageable.DefaultPageParamArgumentResolver;
 import com.kuma.boot.spring.web.pageable.PageParamArgumentResolver;
 import com.kuma.boot.spring.web.trace.TraceIdFilter;
@@ -125,7 +125,7 @@ public class WebMvcConfiguration {
         @Bean
         @ConditionalOnMissingBean(TraceIdGenerator.class)
         public TraceIdGenerator traceIdGenerator() {
-            return () -> ObjectId.get().toString();
+            return IdGeneratorUtils::getIdStr;
         }
 
         @Bean

@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  jakarta.validation.constraints.NotNull
  *  org.springframework.format.annotation.DateTimeFormat
@@ -12,8 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public class DateQuery
-implements Serializable {
+public class DateQuery implements Serializable {
     private static final long serialVersionUID = 1L;
     @NotNull
     @DateTimeFormat(pattern="yyyy-MM-dd")

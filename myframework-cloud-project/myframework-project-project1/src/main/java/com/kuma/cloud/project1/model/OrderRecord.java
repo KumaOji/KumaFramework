@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.common.core.constant;
+package com.kuma.cloud.project1.model;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
- * 符号常量
+ * 订单实体 - 对应 db_b.t_order
  *
  * @author kuma
  */
-public final class Symbol {
+@Data
+@TableName("t_order")
+public class OrderRecord {
 
-    private Symbol() {
-    }
-
-    public static final String COMMA = ",";
-    public static final char C_COMMA = ',';
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    private String orderNo;
+    private BigDecimal amount;
+    private LocalDateTime createTime;
 }

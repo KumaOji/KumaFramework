@@ -16,7 +16,7 @@
 
 package com.kuma.boot.spring.config;
 
-import com.kuma.boot.common.model.domain.PageableConstants;
+import com.kuma.boot.common.constant.PageableConstants;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

@@ -16,9 +16,9 @@
 
 package com.kuma.boot.spring.web.pageable;
 
-import com.kuma.boot.common.core.constant.Symbol;
-import com.kuma.boot.common.model.domain.PageParam;
-import com.kuma.boot.common.model.domain.PageableConstants;
+import com.kuma.boot.common.constant.SymbolConstants;
+import com.kuma.boot.common.model.request.PageParam;
+import com.kuma.boot.common.constant.PageableConstants;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -126,8 +126,8 @@ public abstract class PageParamArgumentResolverSupport {
         if (!org.springframework.util.StringUtils.hasText(sortFields) || !org.springframework.util.StringUtils.hasText(sortOrders)) {
             return sorts;
         }
-        String[] fieldArr = sortFields.split(Symbol.COMMA);
-        String[] orderArr = sortOrders.split(Symbol.COMMA);
+        String[] fieldArr = sortFields.split(SymbolConstants.COMMA);
+        String[] orderArr = sortOrders.split(SymbolConstants.COMMA);
         if (fieldArr.length != orderArr.length) {
             return sorts;
         }

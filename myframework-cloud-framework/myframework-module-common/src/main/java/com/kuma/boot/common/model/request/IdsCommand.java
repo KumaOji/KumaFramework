@@ -1,34 +1,51 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  io.swagger.v3.oas.annotations.media.Schema
- *  io.swagger.v3.oas.annotations.media.Schema$RequiredMode
- *  jakarta.validation.constraints.NotEmpty
- *  jakarta.validation.constraints.Size
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
+import jakarta.validation.constraints.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public class IdsCommand
-implements Serializable {
-    private static final long serialVersionUID = 1L;
-    @Schema(description="id\u5217\u8868", requiredMode=Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message="id\u5217\u8868\u4e0d\u80fd\u4e3a\u7a7a")
-    @Size(max=100, message="id\u5217\u8868\u6700\u5927\u4e3a{max}\u6761")
-    private @NotEmpty(message="id\u5217\u8868\u4e0d\u80fd\u4e3a\u7a7a") @Size(max=100, message="id\u5217\u8868\u6700\u5927\u4e3a{max}\u6761") List<Long> ids;
+/**
+ * 查询参数
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2022-03-28 11:24:11
+ */
+public class IdsCommand implements Serializable {
+
+    @Serial private static final long serialVersionUID = 1L;
+
+    /** 当前第几页 */
+    @Schema(description = "id列表", requiredMode = RequiredMode.REQUIRED)
+    @NotEmpty (message = "id列表不能为空")
+    @Size(max = 100, message = "id列表最大为{max}条")
+    private List<Long> ids;
 
     public List<Long> getIds() {
-        return this.ids;
+        return ids;
     }
 
-    public void setIds(List<Long> ids) {
+    public void setIds( List<Long> ids ) {
         this.ids = ids;
     }
 }
-

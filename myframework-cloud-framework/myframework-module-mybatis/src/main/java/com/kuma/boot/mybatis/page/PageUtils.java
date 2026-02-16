@@ -19,7 +19,7 @@ package com.kuma.boot.mybatis.page;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kuma.boot.common.model.domain.PageParam;
+import com.kuma.boot.common.model.request.PageParam;
 import com.kuma.boot.common.model.request.BasePageQuery;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.PageResult;

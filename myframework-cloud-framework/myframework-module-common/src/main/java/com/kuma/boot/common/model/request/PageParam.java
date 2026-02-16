@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.common.model.domain;
+package com.kuma.boot.common.model.request;
 
+import com.kuma.boot.common.constant.PageableConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

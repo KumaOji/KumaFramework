@@ -16,11 +16,10 @@
 
 package com.kuma.boot.spring.web.pageable;
 
-import com.kuma.boot.common.model.domain.PageParam;
+import com.kuma.boot.common.model.request.PageParam;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
