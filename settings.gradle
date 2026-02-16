@@ -39,3 +39,4 @@ gradle.settingsEvaluated {
 }
 
 include 'myframework-cloud-project:myframework-project-project2'
+include 'myframework-cloud-project:myframework-project-project3'

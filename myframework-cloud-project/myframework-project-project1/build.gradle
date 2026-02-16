@@ -1,20 +1,25 @@
 plugins {
     id 'java'
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
 }
 
 group = 'com.kuma.cloud'
 version = '1.0.0'
 
-repositories {
-    mavenCentral()
+def springBootVersion = projectLibs.versions.springboot.get()
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation project(':myframework-cloud-framework:myframework-module-application')
+    runtimeOnly 'com.h2database:h2'
+    testImplementation projectLibs.spring.boot.starter.test
 }
 
-test {
-    useJUnitPlatform()
+bootJar {
+    archiveBaseName = 'project1'
 }

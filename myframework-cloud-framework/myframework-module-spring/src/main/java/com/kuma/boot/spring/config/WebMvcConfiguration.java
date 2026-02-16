@@ -16,17 +16,14 @@
 
 package com.kuma.boot.spring.config;
 
-
-import cn.kuma.blog.framework.ObjectId;
-import cn.kuma.blog.framework.web.pageable.DefaultPageParamArgumentResolver;
-import cn.kuma.blog.framework.web.pageable.PageParamArgumentResolver;
-import cn.kuma.blog.framework.web.schema.SchemaSwitchFilter;
-import cn.kuma.blog.framework.web.trace.TraceIdFilter;
-import cn.kuma.blog.framework.web.trace.TraceIdGenerator;
+import com.kuma.boot.common.util.ObjectId;
+import com.kuma.boot.spring.web.pageable.DefaultPageParamArgumentResolver;
+import com.kuma.boot.spring.web.pageable.PageParamArgumentResolver;
+import com.kuma.boot.spring.web.trace.TraceIdFilter;
+import com.kuma.boot.spring.web.trace.TraceIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -42,11 +39,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 /**
- * @author 曾帅
+ * Web MVC 配置
+ *
+ * @author kuma
  */
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties({ WebProperties.class, PageableProperties.class })
+@EnableConfigurationProperties({WebProperties.class, PageableProperties.class})
 public class WebMvcConfiguration {
 
     private final WebProperties webProperties;
@@ -138,19 +137,6 @@ public class WebMvcConfiguration {
             return registrationBean;
         }
 
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    static class SchemaSwitchConfiguration {
-
-        @Bean
-        @ConditionalOnProperty(name = "schema.filter.enabled", havingValue = "true", matchIfMissing = true)
-        public FilterRegistrationBean<SchemaSwitchFilter> schemaSwitchFilterRegistrationBean() {
-            SchemaSwitchFilter filter = new SchemaSwitchFilter();
-            FilterRegistrationBean<SchemaSwitchFilter> bean = new FilterRegistrationBean<>(filter);
-            bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
-            return bean;
-        }
     }
 
 }
