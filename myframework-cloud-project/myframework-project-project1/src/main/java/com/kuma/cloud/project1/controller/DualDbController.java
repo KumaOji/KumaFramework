@@ -22,9 +22,11 @@ import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.project1.model.Item;
 import com.kuma.cloud.project1.model.OrderRecord;
+import com.kuma.cloud.project1.request.ItemQueryVO;
 import com.kuma.cloud.project1.request.ItemSearchQuery;
 import com.kuma.cloud.project1.service.DualDbService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +69,14 @@ public class DualDbController {
     @GetMapping("/items/page")
     public Result<PageResult<Item>> pageItemsByParam(PageParam pageParam) {
         return Result.success(dualDbService.pageItemsByParam(pageParam));
+    }
+
+    @Operation(summary = "分页查询商品列表", description = "根据条件分页查询商品。支持按名称、价格区间筛选；传入 PageParam 分页参数。")
+    @GetMapping("/items/list")
+    public Result<PageResult<Item>> getItemList(
+            @Parameter(description = "分页参数") PageParam pageParam,
+            @Parameter(description = "查询条件（含 name、minPrice、maxPrice）") ItemQueryVO queryVO) {
+        return Result.success(dualDbService.getItemList(pageParam, queryVO));
     }
 
     @Operation(summary = "分页查询 db_b 订单（PageUtils + selectPage + IPage）")

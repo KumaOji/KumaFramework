@@ -1,1 +1,2 @@
 com.kuma.boot.mybatis.config.MybatisPlusConfig
+com.kuma.boot.mybatis.config.SchemaSwitchConfig

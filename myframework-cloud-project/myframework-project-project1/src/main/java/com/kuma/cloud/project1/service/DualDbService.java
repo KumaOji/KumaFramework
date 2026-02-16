@@ -21,6 +21,7 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.cloud.project1.model.Item;
 import com.kuma.cloud.project1.model.OrderRecord;
+import com.kuma.cloud.project1.request.ItemQueryVO;
 import com.kuma.cloud.project1.request.ItemSearchQuery;
 
 import java.util.List;
@@ -51,6 +52,11 @@ public interface DualDbService {
      * 分页查询 db_a 商品（PageParam，从 URL 参数解析：?page=1&size=10&sort=id,asc）
      */
     PageResult<Item> pageItemsByParam(PageParam pageParam);
+
+    /**
+     * 分页查询 db_a 商品（参考 ArticleController：PageParam + QueryVO）
+     */
+    PageResult<Item> getItemList(PageParam pageParam, ItemQueryVO queryVO);
 
     /**
      * 分页查询 db_b 订单（使用 PageUtils + selectPage + IPage）

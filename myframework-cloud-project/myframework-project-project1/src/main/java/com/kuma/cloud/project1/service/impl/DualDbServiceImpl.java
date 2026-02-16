@@ -30,6 +30,7 @@ import com.kuma.cloud.project1.mapper.ItemMapper;
 import com.kuma.cloud.project1.mapper.OrderRecordMapper;
 import com.kuma.cloud.project1.model.Item;
 import com.kuma.cloud.project1.model.OrderRecord;
+import com.kuma.cloud.project1.request.ItemQueryVO;
 import com.kuma.cloud.project1.request.ItemSearchQuery;
 import com.kuma.cloud.project1.service.DualDbService;
 import lombok.RequiredArgsConstructor;
@@ -78,6 +79,18 @@ public class DualDbServiceImpl implements DualDbService {
         Page<Item> page = PageUtils.toPage(pageParam);
         IPage<Item> result = SchemaContext.withSchema(SCHEMA_DB_A,
                 () -> itemMapper.selectPage(page, Wrappers.lambdaQuery(Item.class)));
+        return PageUtils.toPageResult(result);
+    }
+
+    @Override
+    public PageResult<Item> getItemList(PageParam pageParam, ItemQueryVO queryVO) {
+        Page<Item> page = PageUtils.toPage(pageParam);
+        var wrapper = Wrappers.<Item>lambdaQuery()
+                .like(queryVO != null && StringUtils.hasText(queryVO.getName()), Item::getName, queryVO != null ? queryVO.getName() : null)
+                .ge(queryVO != null && queryVO.getMinPrice() != null, Item::getPrice, queryVO != null ? queryVO.getMinPrice() : null)
+                .le(queryVO != null && queryVO.getMaxPrice() != null, Item::getPrice, queryVO != null ? queryVO.getMaxPrice() : null);
+        IPage<Item> result = SchemaContext.withSchema(SCHEMA_DB_A,
+                () -> itemMapper.selectPage(page, wrapper));
         return PageUtils.toPageResult(result);
     }
 

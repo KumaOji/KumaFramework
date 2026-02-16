@@ -1,5 +1,9 @@
 # Myframework Application 模块 - 通用启动配置
 # 项目依赖本模块后，此配置会随 classpath 加载，可被项目自身的 application.yml 覆盖
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
 kuma:
   cache:

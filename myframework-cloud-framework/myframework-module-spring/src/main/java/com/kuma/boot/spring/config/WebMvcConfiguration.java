@@ -29,6 +29,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -36,6 +38,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -93,6 +96,23 @@ public class WebMvcConfiguration {
 
         CustomWebMvcConfigurer(PageParamArgumentResolver pageParamArgumentResolver) {
             this.pageParamArgumentResolver = pageParamArgumentResolver;
+        }
+
+        @Override
+        public void addFormatters(FormatterRegistry registry) {
+            registry.addConverter(new Converter<String, BigDecimal>() {
+                @Override
+                public BigDecimal convert(String source) {
+                    if (source == null || source.isBlank()) {
+                        return null;
+                    }
+                    try {
+                        return new BigDecimal(source.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            });
         }
 
         /**

@@ -16,10 +16,13 @@
 
 package com.kuma.boot.spring.web.swagger;
 
+import com.kuma.boot.common.model.request.PageParam;
+import com.kuma.boot.spring.web.pageable.PageableRequest;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,6 +39,11 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnClass(OpenAPI.class)
 @EnableConfigurationProperties(SpringDocProperties.class)
 public class SpringDocAutoConfiguration {
+
+    static {
+        // 将 PageParam 在 Swagger 中展开为扁平的 page、size、sort 参数
+        SpringDocUtils.getConfig().replaceParameterObjectWithClass(PageParam.class, PageableRequest.class);
+    }
 
     @Bean
     public OpenAPI openAPI(SpringDocProperties properties) {

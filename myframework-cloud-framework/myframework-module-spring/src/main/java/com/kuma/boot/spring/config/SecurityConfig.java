@@ -21,16 +21,30 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * 最简安全配置 - 放行所有请求（开发/演示用）
+ * <p>业务项目可自行定义 SecurityFilterChain Bean 覆盖此配置
  *
  * @author kuma
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    /**
+     * 提供占位 UserDetailsService，避免 UserDetailsServiceAutoConfiguration 生成随机密码
+     */
+    @Bean
+    @ConditionalOnMissingBean(UserDetailsService.class)
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            throw new UsernameNotFoundException("未配置用户认证");
+        };
+    }
 
     @Bean
     @ConditionalOnMissingBean(SecurityFilterChain.class)

@@ -16,7 +16,9 @@
 
 package com.kuma.boot.mybatis.config;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Role;
 
 /**
  * MyBatis-Plus 扩展配置
@@ -24,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author kuma
  */
 @ConfigurationProperties(prefix = "kuma.mybatis")
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class MybatisPlusProperties {
 
     /**

@@ -29,14 +29,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
-import org.springframework.validation.annotation.ValidationAnnotationUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,6 +93,9 @@ public abstract class PageParamArgumentResolverSupport {
             String sortOrders = request.getParameter(PageableConstants.SORT_ORDERS);
             sorts = getSortList(sortFields, sortOrders);
         }
+        if (sorts.isEmpty()) {
+            sorts = getSortListFromMapStyle(request);
+        }
         pageParam.setSorts(sorts);
 
         return pageParam;
@@ -106,6 +107,81 @@ public abstract class PageParamArgumentResolverSupport {
         } catch (NumberFormatException e) {
             return defaultValue;
         }
+    }
+
+    /**
+     * 解析 sorts[field]=id&sorts[asc]=true 或 sorts[0].field=id&sorts[0].asc=true 或 sorts[0][field]=id 格式
+     * 支持多字段：sorts[0][field]=id&sorts[0][asc]=false&sorts[1][field]=name&sorts[1][asc]=true
+     */
+    protected List<PageParam.Sort> getSortListFromMapStyle(HttpServletRequest request) {
+        List<PageParam.Sort> sorts = new ArrayList<>();
+        java.util.Map<String, String[]> paramMap = request.getParameterMap();
+        // 支持 sorts[0][field], sorts[1][field] 等多组
+        for (int i = 0; i < 16; i++) {
+            String field = i == 0
+                    ? getParam(request, "sorts[field]", "sorts[0].field", "sorts[0][field]")
+                    : getParam(request, "sorts[" + i + "].field", "sorts[" + i + "][field]");
+            if (field == null && i == 0) {
+                field = findParamBySuffix(paramMap, "field");
+            }
+            if (field == null && i > 0) {
+                field = findParamByIndex(paramMap, i, "field");
+            }
+            if (!org.springframework.util.StringUtils.hasText(field)) {
+                break;
+            }
+            String ascStr = i == 0
+                    ? getParam(request, "sorts[asc]", "sorts[0].asc", "sorts[0][asc]")
+                    : getParam(request, "sorts[" + i + "].asc", "sorts[" + i + "][asc]");
+            if (ascStr == null && i == 0) {
+                ascStr = findParamBySuffix(paramMap, "asc");
+            }
+            if (ascStr == null && i > 0) {
+                ascStr = findParamByIndex(paramMap, i, "asc");
+            }
+            String order = Boolean.parseBoolean(ascStr) ? PageableConstants.ASC : "desc";
+            fillValidSort(field.trim(), order, sorts);
+        }
+        return sorts;
+    }
+
+    private static String findParamByIndex(java.util.Map<String, String[]> paramMap, int index, String suffix) {
+        if (paramMap == null) return null;
+        String keyPattern = "sorts[" + index + "]";
+        for (java.util.Map.Entry<String, String[]> e : paramMap.entrySet()) {
+            String key = e.getKey();
+            if (key != null && key.contains(keyPattern) && key.contains(suffix)) {
+                String[] v = e.getValue();
+                if (v != null && v.length > 0 && org.springframework.util.StringUtils.hasText(v[0])) {
+                    return v[0];
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String getParam(HttpServletRequest request, String... names) {
+        for (String name : names) {
+            String value = request.getParameter(name);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private static String findParamBySuffix(java.util.Map<String, String[]> paramMap, String suffix) {
+        if (paramMap == null) return null;
+        for (java.util.Map.Entry<String, String[]> e : paramMap.entrySet()) {
+            String key = e.getKey();
+            if (key != null && key.contains("sorts") && key.contains(suffix)) {
+                String[] v = e.getValue();
+                if (v != null && v.length > 0 && org.springframework.util.StringUtils.hasText(v[0])) {
+                    return v[0];
+                }
+            }
+        }
+        return null;
     }
 
     protected List<PageParam.Sort> getSortList(String[] sort) {
@@ -162,29 +238,15 @@ public abstract class PageParamArgumentResolverSupport {
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory, PageParam pageParam) throws Exception {
         if (binderFactory != null) {
             WebDataBinder binder = binderFactory.createBinder(webRequest, pageParam, "pageParam");
-            validateIfApplicable(binder, parameter);
-            BindingResult bindingResult = binder.getBindingResult();
-
             long size = pageParam.getSize();
             if (size > this.maxPageSize) {
-                bindingResult.addError(new ObjectError("size", "分页条数不能大于" + this.maxPageSize));
-            }
-
-            if (bindingResult.hasErrors() && isBindExceptionRequired(binder, parameter)) {
-                throw new MethodArgumentNotValidException(parameter, bindingResult);
+                binder.getBindingResult().addError(new ObjectError("pageParam", "分页条数不能大于" + this.maxPageSize));
+                if (isBindExceptionRequired(binder, parameter)) {
+                    throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
+                }
             }
             if (mavContainer != null) {
-                mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + "pageParam", bindingResult);
-            }
-        }
-    }
-
-    protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
-        for (Annotation ann : parameter.getParameterAnnotations()) {
-            Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
-            if (validationHints != null) {
-                binder.validate(validationHints);
-                break;
+                mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + "pageParam", binder.getBindingResult());
             }
         }
     }
