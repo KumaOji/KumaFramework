@@ -17,26 +17,28 @@
 package com.kuma.cloud.project1.service;
 
 import com.kuma.boot.common.model.result.PageResult;
-import com.kuma.cloud.project1.entity.Source;
-import com.kuma.cloud.project1.request.SourcePageQuery;
+import com.kuma.cloud.project1.request.TablePageQuery;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * 资源服务
+ * Schema 表服务 - 查看 blog_source 库表及分页查询表数据
  *
  * @author kuma
  */
-public interface SourceService {
+public interface SchemaTableService {
 
     /**
-     * 分页查询资源列表（分页参数在请求体）
+     * 获取 blog_source 库下的所有表名
+     */
+    List<String> listTables();
+
+    /**
+     * 分页查询指定表的数据
      *
-     * @param query 分页查询条件
-     * @return 分页结果
+     * @param query 表名 + 分页参数
+     * @return 分页结果，data 为 List&lt;Map&lt;列名, 值&gt;&gt;
      */
-    PageResult<Source> pageList(SourcePageQuery query);
-
-    /**
-     * 根据ID查询
-     */
-    Source getById(Long id);
+    PageResult<Map<String, Object>> pageTableData(TablePageQuery query);
 }

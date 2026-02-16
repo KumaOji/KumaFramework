@@ -18,39 +18,41 @@ package com.kuma.cloud.project1.controller;
 
 import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.cloud.project1.entity.Source;
-import com.kuma.cloud.project1.request.SourcePageQuery;
-import com.kuma.cloud.project1.service.SourceService;
+import com.kuma.cloud.project1.request.TablePageQuery;
+import com.kuma.cloud.project1.service.SchemaTableService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- * 资源 Controller - 分页参数在请求体中（POST）
+ * Schema 表 Controller - 查看 blog_source 库表及分页查询表数据
  *
  * @author kuma
  */
-@Tag(name = "资源管理", description = "blog_source 库 source 表")
+@Tag(name = "Schema 表", description = "blog_source 库表列表及分页查询")
 @RestController
-@RequestMapping("/api/sources")
+@RequestMapping("/api/schema")
 @RequiredArgsConstructor
-public class SourceController {
+public class SchemaTableController {
 
-    private final SourceService sourceService;
+    private final SchemaTableService schemaTableService;
 
-    @Operation(summary = "分页查询资源列表（请求体）")
-    @PostMapping("/page")
-    public Result<PageResult<Source>> pageList(@Valid @RequestBody SourcePageQuery query) {
-        PageResult<Source> page = sourceService.pageList(query);
-        return Result.success(page);
+    @Operation(summary = "查看 blog_source 库有哪些表")
+    @GetMapping("/tables")
+    public Result<List<String>> listTables() {
+        List<String> tables = schemaTableService.listTables();
+        return Result.success(tables);
     }
 
-    @Operation(summary = "根据ID查询资源")
-    @GetMapping("/{id}")
-    public Result<Source> getById(@PathVariable Long id) {
-        Source source = sourceService.getById(id);
-        return Result.success(source);
+    @Operation(summary = "分页查看指定表的数据（传入表名）")
+    @PostMapping("/table/page")
+    public Result<PageResult<Map<String, Object>>> pageTableData(@Valid @RequestBody TablePageQuery query) {
+        PageResult<Map<String, Object>> page = schemaTableService.pageTableData(query);
+        return Result.success(page);
     }
 }

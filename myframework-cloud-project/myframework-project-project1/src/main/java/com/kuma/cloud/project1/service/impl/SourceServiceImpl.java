@@ -19,12 +19,12 @@ package com.kuma.cloud.project1.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kuma.boot.common.model.domain.PageParam;
 import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.datasource.context.SchemaContext;
 import com.kuma.boot.mybatis.page.PageUtils;
 import com.kuma.cloud.project1.entity.Source;
 import com.kuma.cloud.project1.mapper.SourceMapper;
+import com.kuma.cloud.project1.request.SourcePageQuery;
 import com.kuma.cloud.project1.service.SourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,15 +44,19 @@ public class SourceServiceImpl implements SourceService {
     private final SourceMapper sourceMapper;
 
     @Override
-    public PageResult<Source> pageList(PageParam pageParam, String name) {
+    public PageResult<Source> pageList(SourcePageQuery query) {
         final PageResult<Source>[] result = new PageResult[1];
         SchemaContext.withSchema(SCHEMA_BLOG_SOURCE, () -> {
-            Page<Source> page = PageUtils.toPage(pageParam);
+            int current = query.getCurrentPage() != null ? query.getCurrentPage() : 1;
+            int size = query.getPageSize() != null ? query.getPageSize() : 10;
+            Page<Source> page = PageUtils.toPage(current, size, query.getSort(), query.getOrder());
             LambdaQueryWrapper<Source> wrapper = new LambdaQueryWrapper<>();
-            if (StringUtils.hasText(name)) {
-                wrapper.like(Source::getName, name);
+            if (StringUtils.hasText(query.getName())) {
+                wrapper.like(Source::getName, query.getName());
             }
-            wrapper.orderByDesc(Source::getCreateTime);
+            if (query.getSort() == null || query.getSort().isBlank()) {
+                wrapper.orderByDesc(Source::getCreateTime);
+            }
             IPage<Source> resultPage = sourceMapper.selectPage(page, wrapper);
             result[0] = PageUtils.toPageResult(resultPage);
         });

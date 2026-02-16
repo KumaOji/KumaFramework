@@ -85,6 +85,18 @@ public final class PageUtils {
     }
 
     /**
+     * 当前页、每页条数、排序 转 MyBatis-Plus Page
+     */
+    public static <T> Page<T> toPage(int currentPage, int pageSize, String sort, String order) {
+        Page<T> page = new Page<>(currentPage, pageSize);
+        if (sort != null && !sort.isBlank()) {
+            boolean asc = "asc".equalsIgnoreCase(order);
+            page.addOrder(asc ? OrderItem.asc(sort) : OrderItem.desc(sort));
+        }
+        return page;
+    }
+
+    /**
      * 当前页、每页条数 转 MyBatis-Plus Page
      */
     public static <T> Page<T> toPage(int currentPage, int pageSize) {
