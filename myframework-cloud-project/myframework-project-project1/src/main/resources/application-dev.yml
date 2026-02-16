@@ -1,23 +1,2 @@
-# ========== 开发环境 - 启动优化 ==========
-# 启用：spring.profiles.active=dev
-
-spring:
-  main:
-    lazy-initialization: true
-    banner-mode: off
-    log-startup-info: false
-  datasource:
-    dynamic:
-      datasource:
-        mysql:
-          hikari:
-            minimum-idle: 1
-            maximum-pool-size: 10
-            connection-timeout: 30000
-            idle-timeout: 600000
-            max-lifetime: 1800000
-
-springdoc:
-  packages-to-scan: com.kuma.cloud.project1.controller
-  cache:
-    disabled: false
+# Project1 开发环境 - 覆盖项（启动优化由 application 模块提供）
+# 可在此添加 dev 专用配置，如：不同 DB 地址、日志级别等

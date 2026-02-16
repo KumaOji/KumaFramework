@@ -19,6 +19,7 @@ package com.kuma.boot.spring.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Lazy
 @EnableCaching
 @ConditionalOnClass(Caffeine.class)
+@ConditionalOnProperty(prefix = "spring.cache", name = "type", havingValue = "caffeine", matchIfMissing = false)
 @EnableConfigurationProperties(CaffeineCacheProperties.class)
 public class CaffeineCacheConfig {
 

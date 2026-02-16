@@ -16,7 +16,6 @@ dependencies {
     runtimeOnly projectLibs.mysql
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
-    testImplementation projectLibs.spring.boot.starter.test
 }
 
 processResources {

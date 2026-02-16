@@ -16,11 +16,13 @@
 
 package com.kuma.boot.spring.web.schema;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * Schema 切换 Filter 自动配置
@@ -28,7 +30,9 @@ import org.springframework.context.annotation.Configuration;
  * @author kuma
  */
 @Configuration
+@Lazy
 @ConditionalOnWebApplication
+@ConditionalOnProperty(prefix = "kuma.schema-switch", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(SchemaSwitchProperties.class)
 public class SchemaSwitchFilterAutoConfiguration {
 

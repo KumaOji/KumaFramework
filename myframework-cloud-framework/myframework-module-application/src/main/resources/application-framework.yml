@@ -1,6 +1,5 @@
-# Myframework Application 模块 - 通用启动配置
-# 项目需在 application.yml 首行添加: spring.config.import: optional:classpath:application-framework.yml
-# 详见 application-framework.yml
+# Myframework 框架基础配置（通过 spring.config.import 加载）
+# 项目 application.yml 中未定义的项将使用此配置
 spring:
   main:
     lazy-initialization: true
@@ -36,14 +35,8 @@ mybatis-plus:
 springdoc:
   api-docs:
     enabled: false
-    path: /v3/api-docs
   swagger-ui:
     enabled: false
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-    doc-expansion: none
-    try-it-out-enabled: false
 
 kuma:
   cache:

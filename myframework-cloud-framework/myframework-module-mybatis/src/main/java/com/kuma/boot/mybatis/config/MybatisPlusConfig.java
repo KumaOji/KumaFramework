@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * MyBatis-Plus 配置：分页
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
  * @author kuma
  */
 @Configuration
+@Lazy
 @EnableConfigurationProperties(MybatisPlusProperties.class)
 public class MybatisPlusConfig {
 

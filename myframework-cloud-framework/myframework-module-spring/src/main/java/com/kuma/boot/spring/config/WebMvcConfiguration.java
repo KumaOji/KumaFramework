@@ -28,6 +28,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
@@ -47,6 +48,7 @@ import java.util.List;
  * @author kuma
  */
 @Configuration
+@Lazy
 @RequiredArgsConstructor
 @EnableConfigurationProperties({WebProperties.class, PageableProperties.class})
 public class WebMvcConfiguration {

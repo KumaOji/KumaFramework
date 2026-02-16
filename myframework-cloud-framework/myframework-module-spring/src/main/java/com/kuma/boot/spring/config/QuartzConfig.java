@@ -3,6 +3,7 @@ package com.kuma.boot.spring.config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import javax.sql.DataSource;
@@ -21,6 +22,7 @@ import java.util.Properties;
  * 会覆盖 application.yml 中对应的配置（spring.quartz.startup-delay 等）
  */
 @Configuration
+@Lazy
 @ConditionalOnProperty(name = "spring.quartz.job-store-type", havingValue = "jdbc", matchIfMissing = false)
 public class QuartzConfig {
 

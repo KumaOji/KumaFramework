@@ -1,11 +1,7 @@
-# Project1 配置
-# 数据源账号密码从 gradle.properties 注入
-#
-# Schema 切换默认值：
-# - 默认数据源: mysql (spring.datasource.dynamic.primary)
-# - 默认 schema: blog (kuma.mybatis.default-schema，与 MySQL 库名一致)
-
+# Project1 - 项目配置（框架配置由 application-framework.yml 提供，未定义项使用框架默认值）
 spring:
+  config:
+    import: optional:classpath:application-framework.yml
   profiles:
     active: dev
   application:

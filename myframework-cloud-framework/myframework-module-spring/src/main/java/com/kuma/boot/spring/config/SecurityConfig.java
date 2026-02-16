@@ -19,6 +19,7 @@ package com.kuma.boot.spring.config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,6 +33,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * @author kuma
  */
 @Configuration
+@Lazy
 @EnableWebSecurity
 public class SecurityConfig {
 
