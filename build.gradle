@@ -8,6 +8,12 @@ allprojects {
     version = findProperty('version') ?: '1.0.0'
     group = findProperty('group') ?: 'io.github.kuma'
 
+    configurations.all {
+        resolutionStrategy {
+            force 'org.aspectj:aspectjweaver:1.9.22.1'
+        }
+    }
+
     java {
         sourceCompatibility = JavaVersion.VERSION_25
         targetCompatibility = JavaVersion.VERSION_25

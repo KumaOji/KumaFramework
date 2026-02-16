@@ -71,11 +71,16 @@ snappy-java = "1.1.10.8"
 kryo = "5.6.2"
 jsoup = "1.18.1"
 snakeyaml = "2.2"
+spring-retry = "2.0.14"
+postgresql = "42.7.4"
+jjwt = "0.12.6"
+caffeine = "3.1.8"
+swagger-annotations-jakarta = "2.2.25"
 
 ## 统一定义依赖
 [libraries]
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
-mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot4-starter", version.ref = "mybatis-plus" }
+mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot3-starter", version.ref = "mybatis-plus" }
 mybatis-core = { module = "org.mybatis:mybatis", version.ref = "mybatis" }
 mybatis-spring = { module = "org.mybatis:mybatis-spring", version.ref = "spring-mybatis" }
 mybatis-spring-boot-starter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "mybatis-spring-boot" }
@@ -97,8 +102,11 @@ spring-doc-common = { module = "org.springdoc:springdoc-openapi-starter-common",
 spring-doc-webmvc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc" }
 spring-redisson = { module = "org.redisson:redisson-spring-boot-starter", version.ref = "spring-redisson" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springboot" }
+spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc", version.ref = "springboot" }
 spring-boot-starter-undertow = { module = "org.springframework.boot:spring-boot-starter-undertow", version.ref = "springboot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springboot" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "springboot" }
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springboot" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springboot" }
 cfr = { module = "org.benf:cfr", version.ref = "cfr" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -144,6 +152,24 @@ snappy-java = { module = "org.xerial.snappy:snappy-java", version.ref = "snappy-
 kryo = { module = "com.esotericsoftware:kryo", version.ref = "kryo" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+spring-boot-starter-quartz = { module = "org.springframework.boot:spring-boot-starter-quartz", version.ref = "springboot" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "springboot" }
+spring-boot-starter-websocket = { module = "org.springframework.boot:spring-boot-starter-websocket", version.ref = "springboot" }
+spring-boot-starter-aop = { module = "org.springframework.boot:spring-boot-starter-aop", version.ref = "springboot" }
+spring-boot-starter-retry = { module = "org.springframework.boot:spring-boot-starter-retry", version.ref = "springboot" }
+spring-retry = { module = "org.springframework.retry:spring-retry", version.ref = "spring-retry" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+spring-boot-starter-data-mongodb = { module = "org.springframework.boot:spring-boot-starter-data-mongodb", version.ref = "springboot" }
+spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "springboot" }
+jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
+swagger-annotations-jakarta = { module = "io.swagger.core.v3:swagger-annotations-jakarta", version.ref = "swagger-annotations-jakarta" }
+mybatis-plus-extension = { module = "com.baomidou:mybatis-plus-extension", version.ref = "mybatis-plus" }
+mybatis-plus-jsqlparser = { module = "com.baomidou:mybatis-plus-jsqlparser", version.ref = "mybatis-plus" }
+spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache", version.ref = "springboot" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+spring-test = { module = "org.springframework:spring-test", version.ref = "spring-context" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kuma.blog.main.mapper.ArticleMapper">
+
+    <!-- 根据ID逻辑删除文章 -->
+    <update id="deleteByIdLogic">
+        UPDATE article
+        SET status = 2, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID物理删除文章 -->
+    <delete id="deleteByIdPhysical">
+        DELETE FROM article
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 增加阅读量 -->
+    <update id="incrementViewCount">
+        UPDATE article
+        SET view_count = view_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 增加点赞数 -->
+    <update id="incrementLikeCount">
+        UPDATE article
+        SET like_count = like_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 增加评论数 -->
+    <update id="incrementCommentCount">
+        UPDATE article
+        SET comment_count = comment_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 按分类统计文章数（排除已删除、未分类），按 count 降序 -->
+    <select id="selectCategoryArticleCounts" resultType="cn.kuma.blog.main.domain.VO.CategoryArticleCountVO">
+        SELECT category_id AS categoryId, COUNT(*) AS count
+        FROM article
+        WHERE status != 2 AND category_id IS NOT NULL
+        GROUP BY category_id
+        ORDER BY count DESC
+    </select>
+
+</mapper>

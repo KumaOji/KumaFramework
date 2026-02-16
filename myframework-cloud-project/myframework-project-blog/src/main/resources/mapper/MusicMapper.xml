@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kuma.blog.main.mapper.MusicMapper">
+
+    <!-- 增加播放次数 -->
+    <update id="incrementPlayCount">
+        UPDATE music
+        SET play_count = play_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 增加点赞数 -->
+    <update id="incrementLikeCount">
+        UPDATE music
+        SET like_count = like_count + 1
+        WHERE id = #{id}
+    </update>
+
+</mapper>

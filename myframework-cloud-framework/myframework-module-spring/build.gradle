@@ -5,5 +5,12 @@ plugins {
 description = 'Myframework spring模块'
 
 dependencies {
+    api project(':myframework-cloud-framework:myframework-module-common')
+    api project(':myframework-cloud-framework:myframework-module-mybatis')
+    api project(':myframework-cloud-framework:myframework-module-datasource')
     api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.doc.webmvc
+    api projectLibs.dynamic.datasource
+    compileOnly projectLibs.jakarta.servlet.api
 }

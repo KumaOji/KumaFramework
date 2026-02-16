@@ -23,6 +23,12 @@ bootRun {
 
 dependencies {
     implementation project(':myframework-cloud-framework:myframework-module-infrastruct')
+    implementation projectLibs.spring.boot.autoconfigure
+
+    implementation projectLibs.jjwt.api
+    runtimeOnly projectLibs.jjwt.impl
+    runtimeOnly projectLibs.jjwt.jackson
+    implementation projectLibs.commons.lang3
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

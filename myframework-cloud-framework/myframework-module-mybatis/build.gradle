@@ -5,6 +5,10 @@ plugins {
 description = 'Myframework mybatis模块'
 
 dependencies {
+    api project(':myframework-cloud-framework:myframework-module-common')
+    api project(':myframework-cloud-framework:myframework-module-datasource')
     api projectLibs.mybatis.plus
+    api projectLibs.mybatis.plus.extension
+    api projectLibs.mybatis.plus.jsqlparser
     api projectLibs.mybatis.spring
 }

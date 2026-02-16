@@ -5,5 +5,9 @@ plugins {
 description = 'Myframework 数据源模块'
 
 dependencies {
+    api project(':myframework-cloud-framework:myframework-module-common')
     api projectLibs.mysql
+    api projectLibs.postgresql
+    api projectLibs.spring.boot.starter.jdbc
+    api projectLibs.dynamic.datasource
 }
