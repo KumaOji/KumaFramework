@@ -1,33 +1,52 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
 import com.kuma.boot.common.utils.lang.StringUtils;
 
+/** 文件类型 */
 public enum FileTypeEnum {
+
+    // 文档类型（folder:文件夹 excel:excel doc:word pp:ppt image:图片 archive:其他文档 video:视频）
+    // FOLDER
     xls(".xls", "excel", "excel"),
     xlsx(".xlsx", "excel", "excel"),
     doc(".doc", "doc", "word"),
     docx(".docx", "doc", "word"),
     ppt(".ppt", "pp", "ppt"),
     pptx(".pptx", "pp", "ppt"),
-    gif(".gif", "image", "\u56fe\u7247"),
-    jpg(".jpg", "image", "\u56fe\u7247"),
-    jpeg(".jpeg", "image", "\u56fe\u7247"),
-    png(".png", "image", "\u56fe\u7247"),
-    txt(".txt", "text", "\u6587\u672c"),
-    avi(".avi", "video", "\u89c6\u9891"),
-    mov(".mov", "video", "\u89c6\u9891"),
-    rmvb(".rmvb", "video", "\u89c6\u9891"),
-    rm(".rm", "video", "\u89c6\u9891"),
-    flv(".flv", "video", "\u89c6\u9891"),
-    mp4(".mp4", "video", "\u89c6\u9891"),
-    zip(".zip", "zip", "\u538b\u7f29\u5305"),
+    gif(".gif", "image", "图片"),
+    jpg(".jpg", "image", "图片"),
+    jpeg(".jpeg", "image", "图片"),
+    png(".png", "image", "图片"),
+    txt(".txt", "text", "文本"),
+    avi(".avi", "video", "视频"),
+    mov(".mov", "video", "视频"),
+    rmvb(".rmvb", "video", "视频"),
+    rm(".rm", "video", "视频"),
+    flv(".flv", "video", "视频"),
+    mp4(".mp4", "video", "视频"),
+    zip(".zip", "zip", "压缩包"),
     pdf(".pdf", "pdf", "pdf");
 
     private String type;
+
     private String value;
+
     private String text;
 
     private FileTypeEnum(String type, String value, String text) {
@@ -37,7 +56,7 @@ public enum FileTypeEnum {
     }
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
     public void setType(String type) {
@@ -45,7 +64,7 @@ public enum FileTypeEnum {
     }
 
     public String getValue() {
-        return this.value;
+        return value;
     }
 
     public void setValue(String value) {
@@ -53,7 +72,7 @@ public enum FileTypeEnum {
     }
 
     public String getText() {
-        return this.text;
+        return text;
     }
 
     public void setText(String text) {
@@ -64,11 +83,11 @@ public enum FileTypeEnum {
         if (StringUtils.isEmpty(type)) {
             return null;
         }
-        for (FileTypeEnum val : FileTypeEnum.values()) {
-            if (!val.getType().equals(type)) continue;
-            return val;
+        for (FileTypeEnum val : values()) {
+            if (val.getType().equals(type)) {
+                return val;
+            }
         }
         return null;
     }
 }
-

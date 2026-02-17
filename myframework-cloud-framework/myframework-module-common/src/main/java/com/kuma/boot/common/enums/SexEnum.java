@@ -1,21 +1,46 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
 import com.kuma.boot.common.enums.base.CommonEnum;
 
-public enum SexEnum implements CommonEnum
-{
-    UNKNOWN(0, "UN", "\u672a\u77e5"),
-    MALE(1, "M", "\u7537"),
-    FEMALE(2, "F", "\u5973");
+/**
+ * 用户性别类型
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:27:02
+ */
+public enum SexEnum implements CommonEnum {
+
+    /** 未知 */
+    UNKNOWN(0, "UN","未知" ),
+    /** 男 */
+    MALE(1, "M","男"),
+    /** 女 */
+    FEMALE(2, "F","女");
 
     private final int code;
+
     private final String desc;
+
     private final String value;
 
-    private SexEnum(int code, String value, String desc) {
+    SexEnum(int code, String value, String desc  ) {
         this.code = code;
         this.desc = desc;
         this.value = value;
@@ -23,24 +48,24 @@ public enum SexEnum implements CommonEnum
 
     public String getNameByCode(int code) {
         for (SexEnum result : SexEnum.values()) {
-            if (result.getCode() != code) continue;
-            return result.name().toLowerCase();
+            if (result.getCode() == code) {
+                return result.name().toLowerCase();
+            }
         }
         return null;
     }
 
     @Override
     public String getDesc() {
-        return this.desc;
+        return desc;
     }
 
     @Override
     public int getCode() {
-        return this.code;
+        return code;
     }
 
     public String getValue() {
-        return this.value;
+        return value;
     }
 }
-

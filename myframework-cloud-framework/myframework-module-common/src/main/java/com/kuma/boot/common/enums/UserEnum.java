@@ -1,57 +1,84 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
 import com.kuma.boot.common.enums.base.CommonEnum;
 
-public enum UserEnum implements CommonEnum
-{
-    MEMBER(1, "\u4f1a\u5458"),
-    STORE(2, "\u5546\u5bb6"),
-    MANAGER(3, "\u7ba1\u7406\u5458"),
-    SYSTEM(4, "\u7cfb\u7edf");
+/**
+ * token角色类型
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-22 10:47:30
+ */
+public enum UserEnum implements CommonEnum {
+
+    /** 会员 */
+    MEMBER(1, "会员"),
+    /** 商家 */
+    STORE(2, "商家"),
+    /** 管理员 */
+    MANAGER(3, "管理员"),
+    /** 系统 */
+    SYSTEM(4, "系统");
 
     private final int code;
+
     private final String desc;
 
-    private UserEnum(int code, String desc) {
+    UserEnum(int code, String desc) {
         this.code = code;
         this.desc = desc;
     }
 
     @Override
     public String getDesc() {
-        return this.desc;
+        return desc;
     }
 
     @Override
     public int getCode() {
-        return this.code;
+        return code;
     }
 
     public String getNameByCode(int code) {
         for (UserEnum result : UserEnum.values()) {
-            if (result.getCode() != code) continue;
-            return result.name().toLowerCase();
+            if (result.getCode() == code) {
+                return result.name().toLowerCase();
+            }
         }
         return null;
     }
 
     public static String getByCode(int code) {
         for (UserEnum result : UserEnum.values()) {
-            if (result.getCode() != code) continue;
-            return result.name().toLowerCase();
+            if (result.getCode() == code) {
+                return result.name().toLowerCase();
+            }
         }
         return null;
     }
 
     public static UserEnum getEnumByCode(int code) {
         for (UserEnum result : UserEnum.values()) {
-            if (result.getCode() != code) continue;
-            return result;
+            if (result.getCode() == code) {
+                return result;
+            }
         }
         return null;
     }
 }
-

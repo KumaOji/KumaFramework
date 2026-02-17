@@ -21,8 +21,7 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.util.ClassUtils;
 
-public class AopUtils
-extends org.springframework.aop.support.AopUtils {
+public class AopUtils extends org.springframework.aop.support.AopUtils {
     public static Object getTarget(Object proxy) {
         if (!AopUtils.isAopProxy((Object)proxy)) {
             return proxy;

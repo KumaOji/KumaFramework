@@ -1,34 +1,59 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
 import com.kuma.boot.common.enums.base.CommonEnum;
 
-public enum ClientTypeEnum implements CommonEnum
-{
-    H5(1, "\u79fb\u52a8\u7aef"),
-    PC(2, "PC\u7aef"),
-    WECHAT_MP(3, "\u5c0f\u7a0b\u5e8f\u7aef"),
-    APP(4, "\u79fb\u52a8\u5e94\u7528\u7aef"),
-    UNKNOWN(5, "\u672a\u77e5");
+/**
+ * 客户端类型
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-22 10:48:26
+ */
+public enum ClientTypeEnum implements CommonEnum {
+
+    /** "移动端" */
+    H5(1, "移动端"),
+    /** "PC端" */
+    PC(2, "PC端"),
+    /** "小程序端" */
+    WECHAT_MP(3, "小程序端"),
+    /** "移动应用端" */
+    APP(4, "移动应用端"),
+    /** "未知" */
+    UNKNOWN(5, "未知");
 
     private final int code;
+
     private final String clientName;
 
-    private ClientTypeEnum(int code, String des) {
+    ClientTypeEnum(int code, String des) {
         this.code = code;
         this.clientName = des;
     }
 
     @Override
     public int getCode() {
-        return this.code;
+        return code;
     }
 
     @Override
     public String getDesc() {
-        return this.clientName;
+        return clientName;
     }
 }
-

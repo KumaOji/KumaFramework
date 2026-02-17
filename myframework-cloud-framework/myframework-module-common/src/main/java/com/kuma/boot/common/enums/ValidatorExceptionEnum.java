@@ -1,39 +1,134 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
+import com.kuma.boot.common.constant.RuleConstants;
+import com.kuma.boot.common.constant.ValidatorConstants;
 import com.kuma.boot.common.enums.base.CommonEnum;
 
-public enum ValidatorExceptionEnum implements CommonEnum
-{
-    MISSING_SERVLET_REQUEST_PARAMETER_EXCEPTION("A1501", "Parameter\u4f20\u53c2\uff0c\u8bf7\u6c42\u53c2\u6570\u7f3a\u5931\u5f02\u5e38\uff0c\u53c2\u6570\u540d\uff1a{}\uff0c\u7c7b\u578b\u4e3a\uff1a{}"),
-    HTTP_MESSAGE_CONVERTER_ERROR("A1502", "\u8bf7\u6c42Json\u6570\u636e\u683c\u5f0f\u9519\u8bef\u6216Json\u5b57\u6bb5\u683c\u5f0f\u8f6c\u5316\u95ee\u9898"),
-    HTTP_MEDIA_TYPE_NOT_SUPPORT("A1503", "\u8bf7\u6c42\u7684http media type\u4e0d\u5408\u6cd5"),
-    HTTP_METHOD_NOT_SUPPORT("A1504", "\u5f53\u524d\u63a5\u53e3\u4e0d\u652f\u6301{}\u65b9\u5f0f\u8bf7\u6c42"),
-    NOT_FOUND("A1505", "404\uff1a\u627e\u4e0d\u5230\u8bf7\u6c42\u7684\u8d44\u6e90"),
-    VALIDATED_RESULT_ERROR("A1506", "\u53c2\u6570\u6821\u9a8c\u5931\u8d25\uff0c\u8bf7\u68c0\u67e5\u53c2\u6570\u7684\u4f20\u503c\u662f\u5426\u6b63\u786e\uff0c\u5177\u4f53\u4fe1\u606f\uff1a{}"),
-    TABLE_UNIQUE_VALIDATE_ERROR("A1507", "\u6570\u636e\u5e93\u5b57\u6bb5\u503c\u552f\u4e00\u6027\u6821\u9a8c\u51fa\u9519\uff0c\u5177\u4f53\u4fe1\u606f\uff1a{}"),
-    CAPTCHA_EMPTY("A1508", "\u9a8c\u8bc1\u7801\u53c2\u6570\u4e0d\u80fd\u4e3a\u7a7a"),
-    CAPTCHA_ERROR("A1509", "\u9a8c\u8bc1\u7801\u9519\u8bef"),
-    UNIQUE_VALIDATE_SQL_ERROR("A1510", "\u6570\u636e\u5e93\u552f\u4e00\u6027\u6821\u9a8c\u9519\u8bef\uff0csql\u6267\u884c\u9519\u8bef\uff0c\u5177\u4f53\u4fe1\u606f\uff1a{}"),
-    DRAG_CAPTCHA_ERROR("A1511", "\u62d6\u62fd\u9a8c\u8bc1\u7801\u9519\u8bef");
+/**
+ * 参数校验错误
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-22 10:46:32
+ */
+public enum ValidatorExceptionEnum implements CommonEnum {
 
+    /** Parameter传参，请求参数缺失异常 */
+    MISSING_SERVLET_REQUEST_PARAMETER_EXCEPTION(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "01",
+            "Parameter传参，请求参数缺失异常，参数名：{}，类型为：{}"),
+
+    /** 请求数据经过httpMessageConverter出错 */
+    HTTP_MESSAGE_CONVERTER_ERROR(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "02",
+            "请求Json数据格式错误或Json字段格式转化问题"),
+
+    /** 不受支持的媒体类型 */
+    HTTP_MEDIA_TYPE_NOT_SUPPORT(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "03",
+            "请求的http media type不合法"),
+
+    /** 不受支持的http请求方法 */
+    HTTP_METHOD_NOT_SUPPORT(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "04",
+            "当前接口不支持{}方式请求"),
+
+    /** 404找不到资源 */
+    NOT_FOUND(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "05",
+            "404：找不到请求的资源"),
+
+    /**
+     * 参数校验失败
+     *
+     * <p>
+     * 拦截@Valid和@Validated校验失败返回的错误提示
+     */
+    VALIDATED_RESULT_ERROR(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "06",
+            "参数校验失败，请检查参数的传值是否正确，具体信息：{}"),
+
+    /** 数据库字段值唯一性校验出错，参数不完整 */
+    TABLE_UNIQUE_VALIDATE_ERROR(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "07",
+            "数据库字段值唯一性校验出错，具体信息：{}"),
+
+    /** 验证码为空 */
+    CAPTCHA_EMPTY(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "08",
+            "验证码参数不能为空"),
+
+    /** 验证码错误 */
+    CAPTCHA_ERROR(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "09",
+            "验证码错误"),
+
+    /** 数据库唯一性校验错误，sql执行错误 */
+    UNIQUE_VALIDATE_SQL_ERROR(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "10",
+            "数据库唯一性校验错误，sql执行错误，具体信息：{}"),
+
+    /** 拖拽验证码错误 */
+    DRAG_CAPTCHA_ERROR(
+            RuleConstants.USER_OPERATION_ERROR_TYPE_CODE
+                    + ValidatorConstants.VALIDATOR_EXCEPTION_STEP_CODE
+                    + "11",
+            "拖拽验证码错误");
+
+    /** 错误编码 */
     private final String errorCode;
+
+    /** 提示用户信息 */
     private final String userTip;
 
-    private ValidatorExceptionEnum(String errorCode, String userTip) {
+    ValidatorExceptionEnum(String errorCode, String userTip) {
         this.errorCode = errorCode;
         this.userTip = userTip;
     }
 
     public String getErrorCode() {
-        return this.errorCode;
+        return errorCode;
     }
 
     @Override
     public String getDesc() {
-        return this.errorCode;
+        return errorCode;
     }
 
     @Override
@@ -43,14 +138,14 @@ public enum ValidatorExceptionEnum implements CommonEnum
 
     public String getNameByCode(int code) {
         for (ValidatorExceptionEnum result : ValidatorExceptionEnum.values()) {
-            if (result.getCode() != code) continue;
-            return result.name().toLowerCase();
+            if (result.getCode() == code) {
+                return result.name().toLowerCase();
+            }
         }
         return null;
     }
 
     public String getUserTip() {
-        return this.userTip;
+        return userTip;
     }
 }
-

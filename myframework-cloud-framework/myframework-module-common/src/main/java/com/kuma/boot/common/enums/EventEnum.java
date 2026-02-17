@@ -1,27 +1,51 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
 import java.util.HashMap;
 
+/**
+ * EventEnum
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 21:13:18
+ */
 public enum EventEnum {
-    PropertyCacheUpdateEvent(HashMap.class, "\u5c5e\u6027\u7f13\u5b58\u66f4\u65b0\u4e8b\u4ef6");
 
+    /** 属性缓存更新事件 */
+    PropertyCacheUpdateEvent(HashMap.class, "属性缓存更新事件");
+
+    /** 类 */
     final Class<?> dataClass;
+
+    /** 描述 */
     final String desc;
 
     public Class<?> getDataClass() {
-        return this.dataClass;
+        return dataClass;
     }
 
-    private EventEnum(Class<?> dataClass, String desc) {
+    EventEnum(Class<?> dataClass, String desc) {
         this.desc = desc;
         this.dataClass = dataClass;
     }
 
     public String getDesc() {
-        return this.desc;
+        return desc;
     }
 }
-

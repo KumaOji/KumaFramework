@@ -1,35 +1,60 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.enums;
 
 import com.kuma.boot.common.enums.base.CommonEnum;
 
-public enum RandomEnum implements CommonEnum
-{
-    INT(1, "0123456789"),
-    STRING(2, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"),
-    ALL(3, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+/**
+ * 生成的随机数类型
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public enum RandomEnum implements CommonEnum {
+
+    /** INT STRING ALL */
+    INT(1, RandomEnum.INT_STR),
+    STRING(2, RandomEnum.STR_STR),
+    ALL(3, RandomEnum.ALL_STR);
 
     private final int code;
-    private final String factor;
-    private static final String INT_STR = "0123456789";
-    private static final String STR_STR = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final String ALL_STR = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    private RandomEnum(int code, String factor) {
+    private final String factor;
+
+    RandomEnum(int code, String factor) {
         this.code = code;
         this.factor = factor;
     }
 
     @Override
     public int getCode() {
-        return this.code;
+        return code;
     }
 
     @Override
     public String getDesc() {
-        return this.factor;
+        return factor;
     }
-}
 
+    /** 随机字符串因子 */
+    private static final String INT_STR = "0123456789";
+
+    private static final String STR_STR = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    private static final String ALL_STR = INT_STR + STR_STR;
+}

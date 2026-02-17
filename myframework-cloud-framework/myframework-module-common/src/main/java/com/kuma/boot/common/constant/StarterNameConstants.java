@@ -1,142 +1,294 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.constant;
 
+/**
+ * starter 名称常量
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:42:10
+ */
 public final class StarterNameConstants {
+
+    private StarterNameConstants() {}
+
     public static final String STARTED = "started";
+
     public static final String ACTUATOR_STARTER = "kuma-boot-starter-actuator";
+
     public static final String AGENT_STARTER = "kuma-boot-starter-agent";
+
     public static final String APOLLO_STARTER = "kuma-boot-starter-apollo";
+
     public static final String PROCESSOR_STARTER = "kuma-boot-starter-processor";
+
     public static final String CACHE_COMMON_STARTER = "kuma-boot-starter-cache-common";
+
     public static final String CACHE_CAFFEINE_STARTER = "kuma-boot-starter-cache-caffeine";
+
     public static final String CACHE_HAZELCAST_STARTER = "kuma-boot-starter-cache-hazelcast";
+
     public static final String CACHE_JETCACHE_STARTER = "kuma-boot-starter-cache-jetcache";
+
     public static final String CACHE_REDIS_STARTER = "kuma-boot-starter-cache-redis";
+
     public static final String CANAL_STARTER = "kuma-boot-starter-canal";
+
     public static final String CAPTCHA_STARTER = "kuma-boot-starter-captcha";
+
     public static final String COMMON_STARTER = "kuma-boot-starter-common";
+
     public static final String CORE_STARTER = "kuma-boot-starter-core";
+
     public static final String DATA_COMMON_STARTER = "kuma-boot-starter-data-common";
+
     public static final String DATASOURCE_STARTER = "kuma-boot-starter-datasource";
-    public static final String DATA_ELASTICSEARCH_STARTER = "kuma-boot-starter-data-elasticsearch";
+
+    public static final String DATA_ELASTICSEARCH_STARTER =
+            "kuma-boot-starter-data-elasticsearch";
+
     public static final String DATA_JPA_STARTER = "kuma-boot-starter-data-jpa";
+
     public static final String DATA_MONGODB_STARTER = "kuma-boot-starter-data-mongodb";
+
     public static final String DATA_MYBATIS_STARTER = "kuma-boot-starter-data-mybatis";
+
     public static final String DATA_P6SPY_STARTER = "kuma-boot-starter-data-p6spy";
-    public static final String DATA_SHARDINGSPHERE_STARTER = "kuma-boot-starter-data-shardingsphere";
+
+    public static final String DATA_SHARDINGSPHERE_STARTER =
+            "kuma-boot-starter-data-shardingsphere";
+
     public static final String DDD_STARTER = "kuma-boot-starter-ddd";
+
     public static final String DINGTALK_STARTER = "kuma-boot-starter-dingtalk";
+
     public static final String DUBBO_STARTER = "kuma-boot-starter-dubbo";
+
     public static final String ELK_STARTER = "kuma-boot-starter-elk";
+
     public static final String ENCRYPT_STARTER = "kuma-boot-starter-encrypt";
+
     public static final String EVENTBUS_STARTER = "kuma-boot-starter-eventbus";
+
     public static final String FLOWENGINE_STARTER = "kuma-boot-starter-flowengine";
+
     public static final String GRPC_STARTER = "kuma-boot-starter-grpc";
+
     public static final String IDEMPOTENT_STARTER = "kuma-boot-starter-idempotent";
+
     public static final String IDGENERATOR_STARTER = "kuma-boot-starter-idgenerator";
+
     public static final String IP2REGION_STARTER = "kuma-boot-starter-ip2region";
+
     public static final String JOB_COMMON_STARTER = "kuma-boot-starter-job-common";
+
     public static final String JOB_ELASTIC_STARTER = "kuma-boot-starter-job-elastic";
+
     public static final String JOB_POWERJOB_STARTER = "kuma-boot-starter-job-powerjob";
+
     public static final String JOB_QUARTZ_STARTER = "kuma-boot-starter-job-quartz";
+
     public static final String JOB_SCHEDULE_STARTER = "kuma-boot-starter-job-schedule";
+
     public static final String JOB_SNAIL_STARTER = "kuma-boot-starter-job-snail";
+
     public static final String JOB_XXL_STARTER = "kuma-boot-starter-job-xxl";
+
     public static final String LAYTPL_STARTER = "kuma-boot-starter-laytpl";
+
     public static final String LOCK_STARTER = "kuma-boot-starter-lock";
+
     public static final String LOGGER_STARTER = "kuma-boot-starter-logger";
+
     public static final String MAIL_STARTER = "kuma-boot-starter-mail";
+
     public static final String METRICS_STARTER = "kuma-boot-starter-metrics";
+
     public static final String MICROMETER_STARTER = "kuma-boot-starter-tracer";
+
     public static final String MONITOR_STARTER = "kuma-boot-starter-monitor";
+
     public static final String MQ_COMMON_STARTER = "kuma-boot-starter-mq-common";
+
     public static final String MQ_KAFKA_STARTER = "kuma-boot-starter-mq-kafka";
+
     public static final String MQ_PULSAR_STARTER = "kuma-boot-starter-mq-pulsar";
+
     public static final String MQ_RABBITMQ_STARTER = "kuma-boot-starter-mq-rabbitmq";
+
     public static final String MQ_ROCKETMQ_STARTER = "kuma-boot-starter-mq-rocketmq";
+
     public static final String MQTT_STARTER = "kuma-boot-starter-mqtt";
+
     public static final String NETTY_STARTER = "kuma-boot-starter-netty";
+
     public static final String OFFICE_STARTER = "kuma-boot-starter-office";
+
     public static final String OPENAPI_STARTER = "kuma-boot-starter-openapi";
+
     public static final String PAY_COMMON_STARTER = "kuma-boot-starter-pay-common";
+
     public static final String PAY_ALIPAY_STARTER = "kuma-boot-starter-pay-alipay";
+
     public static final String PAY_WXPAY_STARTER = "kuma-boot-starter-pay-wxpay";
+
     public static final String PINYIN_STARTER = "kuma-boot-starter-pinyin";
+
     public static final String PLUGIN_STARTER = "kuma-boot-starter-plugin";
+
     public static final String PROMETHEUS_STARTER = "kuma-boot-starter-prometheus";
+
     public static final String RATELIMIT_STARTER = "kuma-boot-starter-ratelimit";
+
     public static final String RETRY_STARTER = "kuma-boot-starter-retry";
+
     public static final String RXJAVA_STARTER = "kuma-boot-starter-rxjava";
+
     public static final String SECURITY_COMMON_STARTER = "kuma-boot-starter-security-common";
+
     public static final String SECURITY_JUSTAUTH_STARTER = "kuma-boot-starter-security-justauth";
+
     public static final String SECURITY_SATOKEN_STARTER = "kuma-boot-starter-security-satoken";
-    public static final String SECURITY_SPRINGSECURITY_STARTER = "kuma-boot-starter-security-spring";
+
+    public static final String SECURITY_SPRINGSECURITY_STARTER =
+            "kuma-boot-starter-security-spring";
+
     public static final String SEATA_STARTER = "kuma-boot-starter-seata";
+
     public static final String SENSITIVE_STARTER = "kuma-boot-starter-sensitive";
+
     public static final String SENTINEL_STARTER = "kuma-boot-starter-sentinel";
+
     public static final String SKYWALKING_STARTER = "kuma-boot-starter-skywalking";
+
     public static final String SPRINGDOC_STARTER = "kuma-boot-starter-springdoc";
+
     public static final String STATEMACHINE_STARTER = "kuma-boot-starter-statemachine";
+
     public static final String TEST_STARTER = "kuma-boot-starter-test";
+
     public static final String THIRD_CLIENT_STARTER = "kuma-boot-starter-third-client";
+
     public static final String THREADPOOL_STARTER = "kuma-boot-starter-threadpool";
+
     public static final String TOTP_STARTER = "kuma-boot-starter-totp";
+
     public static final String TRANSLATION_STARTER = "kuma-boot-starter-translation";
+
     public static final String USERAGENT_STARTER = "kuma-boot-starter-useragent";
+
     public static final String WEB_STARTER = "kuma-boot-starter-web";
+
     public static final String WEBAGG_STARTER = "kuma-boot-starter-webagg";
+
     public static final String WEBSOCKET_STARTER = "kuma-boot-starter-websocket";
+
     public static final String WEBSOCKET_NETTY_STARTER = "kuma-boot-starter-websocket-netty";
+
     public static final String XSS_STARTER = "kuma-boot-starter-xss";
+
     public static final String ZOOKEEPER_STARTER = "kuma-boot-starter-zookeeper";
+
     public static final String SMS_ALIYUN_STARTER = "kuma-boot-starter-sms-aliyun";
+
     public static final String SMS_BAIDUCLOUD_STARTER = "kuma-boot-starter-sms-baiducloud";
+
     public static final String SMS_CHINAMOBILE_STARTER = "kuma-boot-starter-sms-chinamobile";
+
     public static final String SMS_COMMON_STARTER = "kuma-boot-starter-sms-common";
+
     public static final String SMS_HUAWEICLOUD_STARTER = "kuma-boot-starter-sms-huaweicloud";
+
     public static final String SMS_JDCLOUD_STARTER = "kuma-boot-starter-sms-jdcloud";
+
     public static final String SMS_JPUSH_STARTER = "kuma-boot-starter-sms-jpush";
+
     public static final String SMS_NETEASE_STARTER = "kuma-boot-starter-sms-netease";
+
     public static final String SMS_TENCENT_STARTER = "kuma-boot-starter-sms-tencent";
+
     public static final String SMS_TENCENTV3_STARTER = "kuma-boot-starter-sms-tencentv3";
+
     public static final String SMS_QINIU_STARTER = "kuma-boot-starter-sms-qiniu";
+
     public static final String SMS_UPYUN_STARTER = "kuma-boot-starter-sms-upyun";
+
     public static final String SMS_YUNPIAN_STARTER = "kuma-boot-starter-sms-yunpian";
+
     public static final String OSS_ALI_STARTER = "kuma-boot-starter-oss-ali";
+
     public static final String OSS_AWS_STARTER = "kuma-boot-starter-oss-aws";
+
     public static final String OSS_COMMON_STARTER = "kuma-boot-starter-oss-common";
+
     public static final String OSS_BAIDU_STARTER = "kuma-boot-starter-oss-baidu";
+
     public static final String OSS_FASTDFS_STARTER = "kuma-boot-starter-oss-fastdfs";
+
     public static final String OSS_FTP_STARTER = "kuma-boot-starter-oss-ftp";
+
     public static final String OSS_HUAWEI_STARTER = "kuma-boot-starter-oss-huawei";
+
     public static final String OSS_JD_STARTER = "kuma-boot-starter-oss-jd";
+
     public static final String OSS_JDBC_STARTER = "kuma-boot-starter-oss-jdbc";
+
     public static final String OSS_JINSHAN_STARTER = "kuma-boot-starter-oss-jinshan";
+
     public static final String OSS_LOCAL_STARTER = "kuma-boot-starter-oss-local";
+
     public static final String OSS_MINIO_STARTER = "kuma-boot-starter-oss-minio";
+
     public static final String OSS_NGINX_STARTER = "kuma-boot-starter-oss-nginx";
+
     public static final String OSS_PINGAN_STARTER = "kuma-boot-starter-oss-pingan";
+
     public static final String OSS_QINGYUN_STARTER = "kuma-boot-starter-oss-qingyun";
+
     public static final String OSS_QINIU_STARTER = "kuma-boot-starter-oss-qiniu";
+
     public static final String OSS_SFTP_STARTER = "kuma-boot-starter-oss-sftp";
+
     public static final String OSS_TENCENT_STARTER = "kuma-boot-starter-oss-tencent";
+
     public static final String OSS_UCLOUD_STARTER = "kuma-boot-starter-oss-ucloud";
+
     public static final String OSS_UP_STARTER = "kuma-boot-starter-oss-up";
+
     public static final String OSS_WANGYI_STARTER = "kuma-boot-starter-oss-wangyi";
+
     public static final String ALIBABA_CLOUD_STARTER = "kuma-cloud-starter-alibaba";
+
     public static final String BOOTSTRAP_CLOUD_STARTER = "kuma-cloud-starter-bootstrap";
+
     public static final String HUAWEI_CLOUD_STARTER = "kuma-cloud-starter-huawei";
+
     public static final String OPENFEIGN_CLOUD_STARTER = "kuma-cloud-starter-openfeign";
+
     public static final String SEATA_CLOUD_STARTER = "kuma-cloud-starter-seata";
+
     public static final String SENTINEL_CLOUD_STARTER = "kuma-cloud-starter-sentinel";
+
     public static final String STREAM_CLOUD_STARTER = "kuma-cloud-starter-stream";
+
     public static final String TENCENT_CLOUD_STARTER = "kuma-cloud-starter-tencent";
+
     public static final String KMC_CLOUD_STARTER = "kuma-cloud-starter-kmc";
+
     public static final String ZOOKEEPER_CLOUD_STARTER = "kuma-cloud-starter-zookeeper";
-
-    private StarterNameConstants() {
-    }
 }
-

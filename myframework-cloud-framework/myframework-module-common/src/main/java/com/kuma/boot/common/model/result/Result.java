@@ -177,8 +177,8 @@ public class Result<T> implements Serializable {
                 .message(message)
                 .timestamp(Instant.now().toEpochMilli())
                 .requestId(
-                        StrUtil.isNotBlank(TraceUtils.getTtcTraceId())
-                                ? TraceUtils.getTtcTraceId()
+                        StrUtil.isNotBlank(TraceUtils.getKmcTraceId())
+                                ? TraceUtils.getKmcTraceId()
                                 : IdGeneratorUtils.getIdStr())
                 .build();
     }

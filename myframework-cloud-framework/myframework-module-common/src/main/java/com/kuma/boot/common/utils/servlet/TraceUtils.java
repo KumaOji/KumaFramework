@@ -42,7 +42,7 @@ public class TraceUtils {
      * @return {@link String }
      * @since 2023-01-03 11:32:50
      */
-    public static String getTtcTraceIdByRequest(HttpServletRequest request) {
+    public static String getKmcTraceIdByRequest(HttpServletRequest request) {
         String traceId = request.getParameter(CommonConstants.KMC_TRACE_ID);
         if (StrUtil.isBlank(traceId)) {
             traceId = request.getHeader(CommonConstants.KMC_TRACE_ID);
@@ -55,7 +55,7 @@ public class TraceUtils {
      * @return {@link String }
      * @since 2023-01-03 11:32:50
      */
-    public static String getTtcTraceId() {
+    public static String getKmcTraceId() {
         return MdcUtils.get(CommonConstants.KMC_TRACE_ID);
     }
 
@@ -64,7 +64,7 @@ public class TraceUtils {
      * @param traceId 跟踪ID
      * @since 2023-01-03 11:32:50
      */
-    public static void setTtcTraceId(String traceId) {
+    public static void setKmcTraceId(String traceId) {
         MdcUtils.put(CommonConstants.KMC_TRACE_ID, traceId);
     }
 
@@ -73,7 +73,7 @@ public class TraceUtils {
      *
      * @since 2023-01-03 11:32:50
      */
-    public static void removeTtcTraceId() {
+    public static void removeKmcTraceId() {
         MdcUtils.remove(CommonConstants.KMC_TRACE_ID);
     }
 
@@ -82,7 +82,7 @@ public class TraceUtils {
      * @param tenantId 租户id
      * @since 2023-01-03 11:32:50
      */
-    public static void setTtcTenantId(String tenantId) {
+    public static void setKmcTenantId(String tenantId) {
         MdcUtils.put(CommonConstants.KMC_TENANT_ID, tenantId);
     }
 
@@ -91,11 +91,11 @@ public class TraceUtils {
      *
      * @since 2023-01-03 11:32:50
      */
-    public static void removeTtcTenantId() {
+    public static void removeKmcTenantId() {
         MdcUtils.remove(CommonConstants.KMC_TENANT_ID);
     }
 
-    public static String getTtcTenantId() {
+    public static String getKmcTenantId() {
         return MdcUtils.get(CommonConstants.KMC_TENANT_ID);
     }
 
@@ -104,7 +104,7 @@ public class TraceUtils {
      * @param version 租户id
      * @since 2023-01-03 11:32:50
      */
-    public static void setTtcVersion(String version) {
+    public static void setKmcVersion(String version) {
         MdcUtils.put(CommonConstants.KMC_REQUEST_VERSION, version);
     }
 
@@ -113,11 +113,11 @@ public class TraceUtils {
      *
      * @since 2023-01-03 11:32:50
      */
-    public static void removeTtcVersion() {
+    public static void removeKmcVersion() {
         MdcUtils.remove(CommonConstants.KMC_REQUEST_VERSION);
     }
 
-    public static String getTtcVersion() {
+    public static String getKmcVersion() {
         return MdcUtils.get(CommonConstants.KMC_REQUEST_VERSION);
     }
 
