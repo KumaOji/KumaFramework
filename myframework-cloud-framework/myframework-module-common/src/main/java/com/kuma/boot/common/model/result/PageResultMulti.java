@@ -1,34 +1,74 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  io.swagger.v3.oas.annotations.media.Schema
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.model.result;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-@Schema(description="\u5206\u9875\u7ed3\u679c\u5bf9\u8c61")
-public class PageResultMulti<R>
-implements Serializable {
+/**
+ * 返回分页实体类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:09:19
+ */
+@Schema(description = "分页结果对象")
+public class PageResultMulti<R> implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = -275582248840137389L;
-    @Schema(description="\u603b\u6761\u6570")
+
+    /**
+     * 总条数
+     */
+    @Schema(description = "总条数")
     private long totalSize;
-    @Schema(description="\u603b\u9875\u6570")
+
+    /**
+     * 总页数
+     */
+    @Schema(description = "总页数")
     private int totalPage;
-    @Schema(description="\u5f53\u524d\u7b2c\u51e0\u9875")
+
+    /**
+     * 当前第几页
+     */
+    @Schema(description = "当前第几页")
     private int currentPage;
-    @Schema(description="\u6bcf\u9875\u663e\u793a\u6761\u6570")
+
+    /**
+     * 每页显示条数
+     */
+    @Schema(description = "每页显示条数")
     private int pageSize;
-    @Schema(description="\u8fd4\u56de\u6570\u636e")
+
+    /**
+     * 返回数据
+     */
+    @Schema(description = "返回数据")
     private List<R> data;
 
     public PageResultMulti() {
     }
 
-    public PageResultMulti(long totalSize, int totalPage, int currentPage, int pageSize, List<R> data) {
+    public PageResultMulti(
+            long totalSize, int totalPage, int currentPage, int pageSize, List<R> data ) {
         this.totalSize = totalSize;
         this.totalPage = totalPage;
         this.currentPage = currentPage;
@@ -36,98 +76,167 @@ implements Serializable {
         this.data = data;
     }
 
-    public static <R> PageResultMulti<R> of(long totalSize, int totalPage, int currentPage, int pageSize, List<R> data) {
-        return (PageResultMulti<R>) PageResultMulti.builder().totalSize(totalSize).totalPage(totalPage).currentPage(currentPage).pageSize(pageSize).data((List<Object>) data).build();
+    // /**
+    // * convertJpaPage
+    // *
+    // * @param page page
+    // * @param <R> R
+    // * @return {@link PageResultClass }
+    // * @since 2021-09-02 19:10:45
+    // */
+    // public static <R, T> PageResultClass<R> convertJpaPage(Page<T> page, Class<R> r) {
+    // List<T> records = page.getContent();
+    // List<R> collect = Optional.of(records).orElse(new ArrayList<>()).stream()
+    // .filter(Objects::nonNull)
+    // .map(t -> BeanUtil.toBean(t, r))
+    // .toList();
+    //
+    // return of(page.getTotalElements(), page.getTotalPages(), page.getNumber(),
+    // page.getSize(), collect);
+    // }
+    //
+    // /**
+    // * convertMybatisPage
+    // *
+    // * @param page page
+    // * @param <R> R
+    // * @return {@link PageResultClass }
+    // * @since 2021-09-02 19:10:49
+    // */
+    // public static <R, T> PageResultClass<R> convertMybatisPage(IPage<T> page, Class<R>
+    // r) {
+    // List<T> records = page.getRecords();
+    // List<R> collect = Optional.ofNullable(records).orElse(new ArrayList<>()).stream()
+    // .filter(Objects::nonNull)
+    // .map(t -> BeanUtil.toBean(t, r))
+    // .toList();
+    //
+    // return of(page.getTotal(), (int) page.getPages(), (int) page.getCurrent(), (int)
+    // page.getSize(), collect);
+    // }
+
+    /**
+     * of
+     *
+     * @param totalSize totalSize
+     * @param totalPage totalPage
+     * @param currentPage currentPage
+     * @param pageSize pageSize
+     * @param data data
+     * @param <R> R
+     * @return {@link PageResultMulti }
+     * @since 2021-09-02 19:11:10
+     */
+    public static <R> PageResultMulti<R> of(
+            long totalSize, int totalPage, int currentPage, int pageSize, List<R> data ) {
+        return PageResultMulti.<R>builder()
+                .totalSize(totalSize)
+                .totalPage(totalPage)
+                .currentPage(currentPage)
+                .pageSize(pageSize)
+                .data(data)
+                .build();
     }
 
     public long getTotalSize() {
-        return this.totalSize;
+        return totalSize;
     }
 
-    public void setTotalSize(long totalSize) {
+    public void setTotalSize( long totalSize ) {
         this.totalSize = totalSize;
     }
 
     public int getTotalPage() {
-        return this.totalPage;
+        return totalPage;
     }
 
-    public void setTotalPage(int totalPage) {
+    public void setTotalPage( int totalPage ) {
         this.totalPage = totalPage;
     }
 
     public int getCurrentPage() {
-        return this.currentPage;
+        return currentPage;
     }
 
-    public void setCurrentPage(int currentPage) {
+    public void setCurrentPage( int currentPage ) {
         this.currentPage = currentPage;
     }
 
     public int getPageSize() {
-        return this.pageSize;
+        return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize( int pageSize ) {
         this.pageSize = pageSize;
     }
 
     public List<R> getData() {
-        return this.data;
+        return data;
     }
 
-    public void setData(List<R> data) {
+    public void setData( List<R> data ) {
         this.data = data;
     }
 
     public static <R> PageModelBuilder<R> builder() {
-        return new PageModelBuilder();
+        return new PageModelBuilder<>();
     }
 
+    /**
+     * PageModelBuilder
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
     public static final class PageModelBuilder<R> {
+
         private long totalSize;
+
         private int totalPage;
+
         private int currentPage;
+
         private int pageSize;
+
         private List<R> data;
 
         private PageModelBuilder() {
         }
 
-        public PageModelBuilder<R> totalSize(long totalSize) {
+        public PageModelBuilder<R> totalSize( long totalSize ) {
             this.totalSize = totalSize;
             return this;
         }
 
-        public PageModelBuilder<R> totalPage(int totalPage) {
+        public PageModelBuilder<R> totalPage( int totalPage ) {
             this.totalPage = totalPage;
             return this;
         }
 
-        public PageModelBuilder<R> currentPage(int currentPage) {
+        public PageModelBuilder<R> currentPage( int currentPage ) {
             this.currentPage = currentPage;
             return this;
         }
 
-        public PageModelBuilder<R> pageSize(int pageSize) {
+        public PageModelBuilder<R> pageSize( int pageSize ) {
             this.pageSize = pageSize;
             return this;
         }
 
-        public PageModelBuilder<R> data(List<R> data) {
+        public PageModelBuilder<R> data( List<R> data ) {
             this.data = data;
             return this;
         }
 
         public PageResultMulti<R> build() {
-            PageResultMulti<R> pageModel = new PageResultMulti<R>();
-            pageModel.setTotalSize(this.totalSize);
-            pageModel.setTotalPage(this.totalPage);
-            pageModel.setCurrentPage(this.currentPage);
-            pageModel.setPageSize(this.pageSize);
-            pageModel.setData(this.data);
+            PageResultMulti<R> pageModel = new PageResultMulti<>();
+            pageModel.setTotalSize(totalSize);
+            pageModel.setTotalPage(totalPage);
+            pageModel.setCurrentPage(currentPage);
+            pageModel.setPageSize(pageSize);
+            pageModel.setData(data);
             return pageModel;
         }
     }
 }
-

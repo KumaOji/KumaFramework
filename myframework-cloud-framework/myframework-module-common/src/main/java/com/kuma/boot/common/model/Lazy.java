@@ -1,54 +1,79 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.model;
 
 import java.io.Serializable;
 import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
 
-public class Lazy<T>
-implements Supplier<T>,
-Serializable {
-    private transient @Nullable Supplier<? extends T> supplier;
-    private volatile @Nullable T value;
+/**
+ * Holder of a value that is computed lazy.
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class Lazy<T> implements Supplier<T>, Serializable {
 
-    public static <T> Lazy<T> of(Supplier<T> supplier) {
-        return new Lazy<T>(supplier);
+    @Nullable private transient Supplier<? extends T> supplier;
+
+    @Nullable private volatile T value;
+
+    /**
+     * Creates new instance of Lazy.
+     * @param supplier Supplier
+     * @param <T> 泛型标记
+     * @return Lazy
+     */
+    public static <T> Lazy<T> of(final Supplier<T> supplier) {
+        return new Lazy<>(supplier);
     }
 
-    private Lazy(Supplier<T> supplier) {
+    private Lazy(final Supplier<T> supplier) {
         this.supplier = supplier;
     }
 
+    /**
+     * Returns the value. Value will be computed on first call.
+     * @return lazy value
+     */
+    @Nullable
     @Override
-    public @Nullable T get() {
-        return this.supplier == null ? this.value : this.computeValue();
+    public T get() {
+        return (supplier == null) ? value : computeValue();
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    private synchronized @Nullable T computeValue() {
-        T result = this.value;
+    @Nullable
+    private synchronized T computeValue() {
+        T result = value;
         if (null == result) {
-            Lazy lazy = this;
-            synchronized (lazy) {
-                result = this.value;
+            synchronized (this) {
+                result = value;
                 if (null == result) {
-                    Supplier<T> s = (Supplier<T>) this.supplier;
+                    final Supplier<? extends T> s = supplier;
                     if (s == null) {
                         throw new RuntimeException("supplier is null");
                     }
-                    this.value = s.get();
-                    this.supplier = null;
+                    value = s.get();
+                    supplier = null;
                 }
             }
         }
-        return this.value;
+
+        return value;
     }
 }
-

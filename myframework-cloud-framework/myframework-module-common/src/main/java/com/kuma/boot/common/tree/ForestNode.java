@@ -1,15 +1,36 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.tree;
 
-import com.kuma.boot.common.tree.INode;
-import com.kuma.boot.common.tree.TreeNode;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 森林节点
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-03 08:05:01
+ */
 public class ForestNode extends TreeNode {
+
     private static final long serialVersionUID = -5188222097134746118L;
+
+    /** 节点内容 */
     private Object content;
 
     public ForestNode(Long id, Long parentId, Object content) {
@@ -22,13 +43,19 @@ public class ForestNode extends TreeNode {
         this.content = content;
     }
 
-    public ForestNode(Long id, Long parentId, List<INode> children, Boolean hasChildren, Object content, Integer sort) {
+    public ForestNode(
+            Long id,
+            Long parentId,
+            List<INode> children,
+            Boolean hasChildren,
+            Object content,
+            Integer sort) {
         super(id, parentId, children, hasChildren, sort);
         this.content = content;
     }
 
     public Object getContent() {
-        return this.content;
+        return content;
     }
 
     public void setContent(Object content) {
@@ -37,7 +64,7 @@ public class ForestNode extends TreeNode {
 
     @Override
     public String toString() {
-        return "ForestNode{content=" + String.valueOf(this.content) + "} " + super.toString();
+        return "ForestNode{" + "content=" + content + "} " + super.toString();
     }
 
     @Override
@@ -45,19 +72,18 @@ public class ForestNode extends TreeNode {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        ForestNode that = (ForestNode)o;
-        return Objects.equals(this.content, that.content);
+        ForestNode that = (ForestNode) o;
+        return Objects.equals(content, that.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), this.content);
+        return Objects.hash(super.hashCode(), content);
     }
 }
-

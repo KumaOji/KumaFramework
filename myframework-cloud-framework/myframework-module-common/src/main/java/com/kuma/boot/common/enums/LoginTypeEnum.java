@@ -20,7 +20,6 @@ import com.kuma.boot.common.enums.base.CommonEnum;
 import java.util.Arrays;
 
 /**
- * @see LoginPlatformEnum
  *
  * String s = "b端用户 -> 用户+密码登录 手机号码+短信登录 用户+密码+验证码登录";
  *

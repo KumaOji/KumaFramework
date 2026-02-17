@@ -1,21 +1,48 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.exception;
 
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.enums.StatusEnum;
 import com.kuma.boot.common.model.Code;
+import java.io.Serial;
 import java.io.Serializable;
 
-public class BaseException
-extends RuntimeException
-implements Serializable {
+/**
+ * 基础异常
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:29:47
+ */
+public class BaseException extends RuntimeException implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = 6610083281801529147L;
+
+    /**
+     * 异常码
+     */
     private Code code = ResultEnum.FAILED.code();
+
     private StatusEnum status = StatusEnum.FAILURE;
 
     public BaseException() {
+        super();
     }
 
     public BaseException(String message) {
@@ -30,7 +57,9 @@ implements Serializable {
         super(message, e);
     }
 
-    protected BaseException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected BaseException(String message, Throwable cause,
+                            boolean enableSuppression,
+                            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
@@ -72,6 +101,7 @@ implements Serializable {
         this.code = code;
     }
 
+
     public BaseException(StatusEnum status, Code code, Throwable e) {
         super(e);
         this.status = status;
@@ -96,7 +126,7 @@ implements Serializable {
     }
 
     public Code getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(Code code) {
@@ -104,7 +134,7 @@ implements Serializable {
     }
 
     public StatusEnum getStatus() {
-        return this.status;
+        return status;
     }
 
     public void setStatus(StatusEnum status) {
@@ -116,4 +146,3 @@ implements Serializable {
         return super.getMessage();
     }
 }
-

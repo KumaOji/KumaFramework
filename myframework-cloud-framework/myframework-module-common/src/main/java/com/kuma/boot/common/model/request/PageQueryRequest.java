@@ -1,16 +1,32 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  io.swagger.v3.oas.annotations.media.Schema
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.model.request;
 
-import com.kuma.boot.common.model.request.RequestBase;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description="\u8fd4\u56de\u7ed3\u679c\u5bf9\u8c61")
-public class PageQueryRequest<T>
-extends RequestBase {
-}
+/**
+ * 返回实体类
+ *
+ * @author kuma
+ * @version 2023.04
+ * @since 2023-05-10 15:50:14
+ */
+@Schema(description = "返回结果对象")
+public class PageQueryRequest<T> extends RequestBase {
 
+
+}

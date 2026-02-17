@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.extension;
 
 import java.lang.reflect.Field;
@@ -16,122 +29,156 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/** 反射工具集 */
+@SuppressWarnings("unchecked")
 public class ReflectionUtils {
+
     public static <T> T newProxyInstance(Class<T> clazz, InvocationHandler handler) {
-        return (T)Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), handler);
+        return (T) Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), handler);
     }
 
-    public static void setField(Object destObj, Field field, Object ... argument) throws IllegalArgumentException, IllegalAccessException {
-        ReflectionUtils.setAccessible(field);
+    public static void setField(Object destObj, Field field, Object... argument)
+            throws IllegalArgumentException, IllegalAccessException {
+        setAccessible(field);
         field.set(destObj, argument);
     }
 
-    public static void setField(Object destObj, String fieldName, Object ... argument) throws IllegalArgumentException, IllegalAccessException, SecurityException {
-        Field field = ReflectionUtils.getDeclaredField(destObj, fieldName);
-        ReflectionUtils.setField(destObj, field, argument);
+    public static void setField(Object destObj, String fieldName, Object... argument)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException {
+        Field field = getDeclaredField(destObj, fieldName);
+        setField(destObj, field, argument);
     }
 
-    public static Object getField(Object destObj, Field field) throws IllegalArgumentException, IllegalAccessException {
-        ReflectionUtils.setAccessible(field);
+    public static Object getField(Object destObj, Field field)
+            throws IllegalArgumentException, IllegalAccessException {
+        setAccessible(field);
         return field.get(destObj);
     }
 
-    public static Object getField(Object destObj, String fieldName) throws IllegalArgumentException, IllegalAccessException, SecurityException {
-        Field field = ReflectionUtils.getDeclaredField(destObj, fieldName);
-        return ReflectionUtils.getField(destObj, field);
+    public static Object getField(Object destObj, String fieldName)
+            throws IllegalArgumentException, IllegalAccessException, SecurityException {
+        Field field = getDeclaredField(destObj, fieldName);
+        return getField(destObj, field);
     }
 
-    public static Field getDeclaredFields(Class<?> clazz, String fieldName) throws SecurityException {
-        List<Field> fields = ReflectionUtils.getDeclaredFields(clazz);
+    public static Field getDeclaredFields(Class<?> clazz, String fieldName)
+            throws SecurityException {
+        List<Field> fields = getDeclaredFields(clazz);
         for (Field field : fields) {
-            if (!field.getName().equals(fieldName)) continue;
-            return field;
+            if (field.getName().equals(fieldName)) {
+                return field;
+            }
         }
         return null;
     }
 
-    public static Field getDeclaredField(Object destObj, String fieldName) throws SecurityException {
-        return ReflectionUtils.getDeclaredFields(destObj.getClass(), fieldName);
+    public static Field getDeclaredField(Object destObj, String fieldName)
+            throws SecurityException {
+        return getDeclaredFields(destObj.getClass(), fieldName);
     }
 
     public static List<Field> getDeclaredFields(Class<?> clazz) {
-        ArrayList<Field> fields = new ArrayList<Field>();
-        for (Class<?> tempClass = clazz; tempClass != null; tempClass = tempClass.getSuperclass()) {
+        List<Field> fields = new ArrayList<>();
+        Class<?> tempClass = clazz;
+        while (tempClass != null) {
             fields.addAll(Arrays.asList(tempClass.getDeclaredFields()));
+            tempClass = tempClass.getSuperclass();
         }
         return fields;
     }
 
-    public static Object invokeMethod(Object object, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        Method method = ReflectionUtils.getDeclaredMethod(object.getClass(), methodName, parameterTypes);
-        ReflectionUtils.setAccessible(method);
+    public static Object invokeMethod(
+            Object object, String methodName, Class<?>[] parameterTypes, Object[] parameters)
+            throws SecurityException,
+            IllegalAccessException,
+            IllegalArgumentException,
+            InvocationTargetException {
+        Method method = getDeclaredMethod(object.getClass(), methodName, parameterTypes);
+        setAccessible(method);
         return method.invoke(object, parameters);
     }
 
-    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?> ... parameterTypes) throws SecurityException {
-        List<Method> methodList = ReflectionUtils.getDeclaredMethods(clazz);
+    public static Method getDeclaredMethod(
+            Class<?> clazz, String methodName, Class<?>... parameterTypes)
+            throws SecurityException {
+        List<Method> methodList = getDeclaredMethods(clazz);
         for (Method method : methodList) {
-            if (!method.getName().equals(methodName)) continue;
-            if (parameterTypes.length == 0 || method.getParameterTypes() == null) {
-                return method;
+            if (method.getName().equals(methodName)) {
+                if (parameterTypes.length == 0 || method.getParameterTypes() == null) {
+                    return method;
+                }
+                if (parameterTypes
+                        .getClass()
+                        .isAssignableFrom(method.getParameterTypes().getClass())) {
+                    return method;
+                }
             }
-            if (!parameterTypes.getClass().isAssignableFrom(method.getParameterTypes().getClass())) continue;
-            return method;
         }
         return null;
     }
 
+    /**
+     * 获取实际的泛型类型
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public static <T> Class<T> getActualTypeArgument(Class<?> clazz) {
         Type type = clazz.getGenericSuperclass();
         if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
-            return (Class)parameterizedType.getActualTypeArguments()[0];
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            return (Class<T>) parameterizedType.getActualTypeArguments()[0];
         }
         throw new RuntimeException();
     }
 
-    public static Method getSetter(Class<?> clazz, Field field, Class<?> ... parameterTypes) throws SecurityException {
+    public static Method getSetter(Class<?> clazz, Field field, Class<?>... parameterTypes)
+            throws SecurityException {
         String fieldName = field.getName();
-        String methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        return ReflectionUtils.getDeclaredMethod(clazz, methodName, parameterTypes);
+        String methodName =
+                "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        return getDeclaredMethod(clazz, methodName, parameterTypes);
     }
 
-    public static Method getGetter(Class<?> clazz, Field field) throws SecurityException {
+    public static Method getGetter(Class<?> clazz, final Field field) throws SecurityException {
         String fieldName = field.getName();
-        String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        return ReflectionUtils.getDeclaredMethod(clazz, methodName, new Class[0]);
+        String methodName =
+                "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        return getDeclaredMethod(clazz, methodName);
     }
 
     public static List<Method> getDeclaredMethods(Class<?> clazz) {
-        ArrayList<Method> methodList = new ArrayList<Method>();
-        for (Class<?> tempClass = clazz; tempClass != null; tempClass = tempClass.getSuperclass()) {
+        List<Method> methodList = new ArrayList<>();
+        Class<?> tempClass = clazz;
+        while (tempClass != null) {
             methodList.addAll(Arrays.asList(tempClass.getDeclaredMethods()));
+            tempClass = tempClass.getSuperclass();
         }
         return methodList;
     }
 
-    public static <T> Class<T> getSuperClassGenricType(Class<?> clazz, int index) {
+    public static <T> Class<T> getSuperClassGenricType(Class<?> clazz, final int index) {
         Type genType = clazz.getGenericSuperclass();
         if (!(genType instanceof ParameterizedType)) {
             return (Class<T>) Object.class;
         }
-        Type[] params = ((ParameterizedType)genType).getActualTypeArguments();
+        Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
         if (index >= params.length || index < 0 || !(params[index] instanceof Class)) {
             return (Class<T>) Object.class;
         }
-        return (Class)params[index];
+        return (Class<T>) params[index];
     }
 
     public static void setAccessible(Field field) {
         Class<?> cls = field.getDeclaringClass();
-        if (!(ReflectionUtils.isPublic(field) && ReflectionUtils.isPublic(cls) && !ReflectionUtils.isFinal(field) || field.canAccess(null))) {
+        if ((!isPublic(field) || !isPublic(cls) || isFinal(field)) && !field.canAccess(null)) {
             field.setAccessible(true);
         }
     }
 
     public static void setAccessible(Method method) {
         Class<?> cls = method.getDeclaringClass();
-        if (!(ReflectionUtils.isPublic(method) && ReflectionUtils.isPublic(cls) || method.canAccess(null))) {
+        if ((!isPublic(method) || !isPublic(cls)) && !method.canAccess(null)) {
             method.setAccessible(true);
         }
     }
@@ -192,27 +239,39 @@ public class ReflectionUtils {
         while (cls.isArray()) {
             cls = cls.getComponentType();
         }
-        return ReflectionUtils.isPrimitive(cls);
+        return isPrimitive(cls);
     }
 
     public static boolean isPrimitive(Class<?> cls) {
-        return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls);
+        return cls.isPrimitive()
+                || cls == String.class
+                || cls == Boolean.class
+                || cls == Character.class
+                || Number.class.isAssignableFrom(cls)
+                || Date.class.isAssignableFrom(cls);
     }
 
     public static boolean isSetter(Method method) {
-        return method.getName().startsWith("set") && method.getParameterTypes().length == 1 && ReflectionUtils.isPublic(method);
+        return method.getName().startsWith("set")
+                && method.getParameterTypes().length == 1
+                && isPublic(method);
     }
 
     public static boolean isGetter(Method method) {
-        return method.getName().startsWith("get") && method.getParameterTypes().length == 1 && ReflectionUtils.isPublic(method);
+        return method.getName().startsWith("get")
+                && method.getParameterTypes().length == 1
+                && isPublic(method);
     }
 
     public static String getSetterProperty(Method method) {
-        return method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
+        return method.getName().length() > 3
+                ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4)
+                : "";
     }
 
     public static String getGetterProperty(Method method) {
-        return method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
+        return method.getName().length() > 3
+                ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4)
+                : "";
     }
 }
-

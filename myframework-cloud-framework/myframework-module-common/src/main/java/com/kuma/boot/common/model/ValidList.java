@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.Valid
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.model;
 
 import jakarta.validation.Valid;
@@ -13,13 +23,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ValidList<E>
-implements List<E> {
-    @Valid
-    private List<E> list = new ArrayList();
+/**
+ * 可被校验的List
+ *
+ * {@snippet :
+ * import jakarta.validation.Valid;
+ * @PostMapping("/preOrder")
+ * public Result<T> doSomething(@RequestBody @Valid ValidList<OrderDTO> list) throws Exception {
+ *     return orderService.doSomething(list);
+ * }
+ * }
+ * <p>
+ *
+ * @param <E>
+ * [{"userId":"1","productCode":"A102","num":1},{"userId":"1","productCode":"A103","num":2}]
+ */
+public class ValidList<E> implements List<E> {
 
-    public ValidList() {
-    }
+    @Valid private List<E> list = new ArrayList<>();
+
+    public ValidList() {}
 
     public ValidList(List<E> list) {
         this.list = list;
@@ -27,125 +50,124 @@ implements List<E> {
 
     @Override
     public int size() {
-        return this.list.size();
+        return list.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return this.list.isEmpty();
+        return list.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return this.list.contains(o);
+        return list.contains(o);
     }
 
     @Override
     public Iterator<E> iterator() {
-        return this.list.iterator();
+        return list.iterator();
     }
 
     @Override
     public Object[] toArray() {
-        return this.list.toArray();
+        return list.toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        return this.list.toArray(a);
+        return list.toArray(a);
     }
 
     @Override
     public boolean add(E e) {
-        return this.list.add(e);
+        return list.add(e);
     }
 
     @Override
     public boolean remove(Object o) {
-        return this.list.remove(o);
+        return list.remove(o);
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return this.list.containsAll(c);
+        return list.containsAll(c);
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        return this.list.addAll(c);
+        return list.addAll(c);
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        return this.list.addAll(index, c);
+        return list.addAll(index, c);
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return this.list.removeAll(c);
+        return list.removeAll(c);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return this.list.retainAll(c);
+        return list.retainAll(c);
     }
 
     @Override
     public void clear() {
-        this.list.clear();
+        list.clear();
     }
 
     @Override
     public E get(int index) {
-        return this.list.get(index);
+        return list.get(index);
     }
 
     @Override
     public E set(int index, E element) {
-        return this.list.set(index, element);
+        return list.set(index, element);
     }
 
     @Override
     public void add(int index, E element) {
-        this.list.add(index, element);
+        list.add(index, element);
     }
 
     @Override
     public E remove(int index) {
-        return this.list.remove(index);
+        return list.remove(index);
     }
 
     @Override
     public int indexOf(Object o) {
-        return this.list.indexOf(o);
+        return list.indexOf(o);
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        return this.list.lastIndexOf(o);
+        return list.lastIndexOf(o);
     }
 
     @Override
     public ListIterator<E> listIterator() {
-        return this.list.listIterator();
+        return list.listIterator();
     }
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        return this.list.listIterator(index);
+        return list.listIterator(index);
     }
 
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        return this.list.subList(fromIndex, toIndex);
+        return list.subList(fromIndex, toIndex);
     }
 
     public List<E> getList() {
-        return this.list;
+        return list;
     }
 
     public void setList(List<E> list) {
         this.list = list;
     }
 }
-

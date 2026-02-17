@@ -1,24 +1,52 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.tree;
 
-import com.kuma.boot.common.tree.INode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 树根节点
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:28:02
+ */
 public class TreeNode implements INode {
+
+    /** 主键ID */
     protected Long id;
+
+    /** 父节点ID */
     protected Long parentId;
-    protected List<? extends INode> children = new ArrayList<INode>();
+
+    /** 子孙节点 */
+    protected List<? extends INode> children = new ArrayList<>();
+
+    /** 是否有子孙节点 */
     private Boolean hasChildren = false;
+
     private Integer sort = 0;
 
-    public TreeNode() {
-    }
+    public TreeNode() {}
 
-    public TreeNode(Long id, Long parentId, List<INode> children, Boolean hasChildren, Integer sort) {
+    public TreeNode(
+            Long id, Long parentId, List<INode> children, Boolean hasChildren, Integer sort) {
         this.id = id;
         this.parentId = parentId;
         this.children = children;
@@ -28,34 +56,50 @@ public class TreeNode implements INode {
 
     @Override
     public Boolean getHasChildren() {
-        if (this.children.size() > 0) {
+        if (children.size() > 0) {
             return true;
+        } else {
+            return this.hasChildren;
         }
-        return this.hasChildren;
     }
 
+    @Override
     public String toString() {
-        return "TreeNode{id=" + this.id + ", parentId=" + this.parentId + ", children=" + String.valueOf(this.children) + ", hasChildren=" + this.hasChildren + "}";
+        return "TreeNode{"
+                + "id="
+                + id
+                + ", parentId="
+                + parentId
+                + ", children="
+                + children
+                + ", hasChildren="
+                + hasChildren
+                + '}';
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TreeNode treeNode = (TreeNode)o;
-        return Objects.equals(this.id, treeNode.id) && Objects.equals(this.parentId, treeNode.parentId) && Objects.equals(this.children, treeNode.children) && Objects.equals(this.hasChildren, treeNode.hasChildren);
+        TreeNode treeNode = (TreeNode) o;
+        return Objects.equals(id, treeNode.id)
+                && Objects.equals(parentId, treeNode.parentId)
+                && Objects.equals(children, treeNode.children)
+                && Objects.equals(hasChildren, treeNode.hasChildren);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hash(this.id, this.parentId, this.children, this.hasChildren);
+        return Objects.hash(id, parentId, children, hasChildren);
     }
 
     @Override
     public Long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(Long id) {
@@ -64,7 +108,7 @@ public class TreeNode implements INode {
 
     @Override
     public Long getParentId() {
-        return this.parentId;
+        return parentId;
     }
 
     public void setParentId(Long parentId) {
@@ -85,11 +129,10 @@ public class TreeNode implements INode {
     }
 
     public Integer getSort() {
-        return this.sort;
+        return sort;
     }
 
     public void setSort(Integer sort) {
         this.sort = Objects.isNull(sort) ? 0 : sort;
     }
 }
-
