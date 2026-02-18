@@ -1,9 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.date;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.regex.RegexUtils;
 import java.util.AbstractMap;
 import java.util.Calendar;
@@ -14,23 +26,77 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.kuma.boot.common.utils.lang.StringUtils;
 
+/**
+ * 时间字符串解析器 1.初始化 将格式yyyy-MM-dd替换为正则(\d{1,4}-\d{1,2}-\d{1,2})并标识1对应年2对应月3对应日 2.解析 如果正则能匹配
+ * 则将相应的group提取出来并将对应的field设置成提取出来的数字 这个轮子的好处是线程安全 并且不会抛ParseException 无法解析时返回null
+ * 不足在于只要形似时间即可 无法对真实性进行判断
+ */
 public final class DateParser {
-    private static final Map<String, Map.Entry<Pattern, Map<Integer, Integer>>> patternAndIndexMapCache = new ConcurrentHashMap<String, Map.Entry<Pattern, Map<Integer, Integer>>>();
-    private static final Map<String, Integer> fieldMap = new LinkedHashMap<String, Integer>();
+
+    /**
+     * 正则的缓存 格式串 -> 正则+位置 例如 yyyyMMdd -> [(\d{1,4})(\d{1,2})(\d{1,2}), {1: year, 2: month,
+     * 3:date}]
+     */
+    private static final Map<String, Map.Entry<Pattern, Map<Integer, Integer>>>
+            patternAndIndexMapCache = new ConcurrentHashMap<>();
+
+    /**
+     * 标识符对应的字段
+     */
+    private static final Map<String, Integer> fieldMap = new LinkedHashMap<>();
+
+    static {
+        fieldMap.put("yyyy", Calendar.YEAR);
+        fieldMap.put("MM", Calendar.MONTH);
+        fieldMap.put("dd", Calendar.DATE);
+        fieldMap.put("HH", Calendar.HOUR_OF_DAY);
+        fieldMap.put("a", Calendar.AM_PM);
+        fieldMap.put("hh", Calendar.HOUR);
+        fieldMap.put("mm", Calendar.MINUTE);
+        fieldMap.put("ss", Calendar.SECOND);
+        fieldMap.put("SSS", Calendar.MILLISECOND);
+    }
+
+    /**
+     * format的长度 如果传入的字符串长度大于当前可识别长度 则认为无法解析
+     */
     private final int length;
+
+    /**
+     * 格式
+     */
     private final String format;
+
+    /**
+     * 转换后的正则对象
+     */
     private final Pattern pattern;
+
+    /**
+     * 上下午
+     */
     private Boolean amPm;
+
+    /**
+     * 记录每一个占位符对应的字段 用于匹配后替换
+     */
     private final Map<Integer, Integer> indexMap;
 
+    /**
+     * 使用指定格式构造
+     * @param format 格式
+     * @see java.text.SimpleDateFormat#SimpleDateFormat(String)
+     */
     public DateParser(String format) {
         if (StringUtils.isBlank(format)) {
             throw new IllegalArgumentException();
         }
         this.format = format;
         this.length = format.length();
-        Map.Entry<Pattern, Map<Integer, Integer>> patternAndIndexMap = this.getPatternAndIndexMap(format);
+        Map.Entry<Pattern, Map<Integer, Integer>> patternAndIndexMap =
+                getPatternAndIndexMap(format);
         this.pattern = patternAndIndexMap.getKey();
         this.indexMap = patternAndIndexMap.getValue();
     }
@@ -40,72 +106,119 @@ public final class DateParser {
         this.amPm = amPm;
     }
 
+    /**
+     * 获取格式串对应的正则和位置
+     * @param format 格式串
+     * @return 正则
+     */
     private Map.Entry<Pattern, Map<Integer, Integer>> getPatternAndIndexMap(String format) {
-        Map.Entry patternAndIndexMap = patternAndIndexMapCache.get(format);
+        Map.Entry<Pattern, Map<Integer, Integer>> patternAndIndexMap =
+                patternAndIndexMapCache.get(format);
         if (patternAndIndexMap == null) {
-            patternAndIndexMap = patternAndIndexMapCache.computeIfAbsent(format, this::generatePatternAndIndexMap);
+            patternAndIndexMap =
+                    patternAndIndexMapCache.computeIfAbsent(
+                            format, this::generatePatternAndIndexMap);
         }
         return patternAndIndexMap;
     }
 
+    /**
+     * 格式串转换为正则和位置
+     * @param format 格式串
+     * @return 正则
+     */
     private Map.Entry<Pattern, Map<Integer, Integer>> generatePatternAndIndexMap(String format) {
+        // 先转义
         format = RegexUtils.escape(format);
+
+        // 正则的group是从1开始
         int groupIndex = 1;
-        LinkedHashMap<Integer, Integer> indexMap = new LinkedHashMap<Integer, Integer>();
+        // 记录分组位置对应Calendar字段
+        Map<Integer, Integer> indexMap = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : fieldMap.entrySet()) {
             String field = entry.getKey();
-            if (!format.contains(field)) continue;
-            format = format.replace(field, "(\\d{1," + field.length() + "})");
-            indexMap.put(groupIndex++, entry.getValue());
+            if (format.contains(field)) {
+                // yyyy替换为(\d{1,4}) MM替换为(\d{1,2})
+                format = format.replace(field, "(" + "\\d{1," + field.length() + "})");
+                // 记录分组位置对应的是哪个字段 比如group1对应的是YEAR
+                indexMap.put(groupIndex++, entry.getValue());
+            }
         }
-        return new AbstractMap.SimpleImmutableEntry<Pattern, Map<Integer, Integer>>(Pattern.compile(format), indexMap);
+        return new AbstractMap.SimpleImmutableEntry<>(Pattern.compile(format), indexMap);
     }
 
+    /**
+     * 解析
+     * @param str 字符串
+     * @return 返回非空表示可以解析 空表示无法解析
+     */
     public Date parse(String str) {
         if (str == null) {
             return null;
         }
-        if (str.length() > this.length) {
+
+        if (str.length() > length) {
             return null;
         }
-        Matcher matcher = this.pattern.matcher(str);
+
+        Matcher matcher = pattern.matcher(str);
         if (!matcher.matches()) {
             return null;
         }
+
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
-        if (this.amPm != null) {
-            calendar.set(9, this.amPm != false ? 0 : 1);
+
+        if (amPm != null) {
+            calendar.set(Calendar.AM_PM, amPm ? Calendar.AM : Calendar.PM);
         }
-        for (Map.Entry<Integer, Integer> entry : this.indexMap.entrySet()) {
+
+        for (Map.Entry<Integer, Integer> entry : indexMap.entrySet()) {
             String value = matcher.group(entry.getKey());
+            // 将记录的位置上的字段替换为提取出的值
             int number = Integer.parseInt(value);
-            if (entry.getValue() == 2) {
-                --number;
+            // CalendarAPI的month是从0开始的
+            if (entry.getValue() == Calendar.MONTH) {
+                number--;
             }
             calendar.set(entry.getValue(), number);
         }
+
         return calendar.getTime();
     }
 
+    /**
+     * 格式化
+     * @param date 时间
+     * @return 格式化后的字符串
+     */
     public String format(Date date) {
-        return this.format(date, true);
+        return format(date, true);
     }
 
+    /**
+     * 格式化
+     * @param date 时间
+     * @param zeroPadding 是否补零
+     * @return 格式化后的字符串
+     */
     String format(Date date, boolean zeroPadding) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
+
         StringBuilder stringBuilder = new StringBuilder(this.format);
         for (Map.Entry<String, Integer> entry : fieldMap.entrySet()) {
             String format = entry.getKey();
             int value = entry.getValue();
-            int index = 0;
-            while ((index = stringBuilder.indexOf(format, index)) >= 0) {
+            for (int index = 0; (index = stringBuilder.indexOf(format, index)) >= 0; ) {
                 int number = calendar.get(value);
-                if (value == 2) {
-                    ++number;
+                if (value == Calendar.MONTH) {
+                    number++;
                 }
-                String str = zeroPadding ? String.format("%0" + format.length() + "d", number) : Integer.toString(number);
+                String str =
+                        zeroPadding
+                                ? String.format("%0" + format.length() + "d", number)
+                                : Integer.toString(number);
                 stringBuilder.replace(index, index + format.length(), str);
                 index += format.length();
             }
@@ -114,34 +227,23 @@ public final class DateParser {
     }
 
     public Boolean getAmPm() {
-        return this.amPm;
+        return amPm;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DateParser that = (DateParser)o;
-        return this.format.equals(that.format);
+        DateParser that = (DateParser) o;
+        return format.equals(that.format);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hash(this.format);
-    }
-
-    static {
-        fieldMap.put("yyyy", 1);
-        fieldMap.put("MM", 2);
-        fieldMap.put("dd", 5);
-        fieldMap.put("HH", 11);
-        fieldMap.put("a", 9);
-        fieldMap.put("hh", 10);
-        fieldMap.put("mm", 12);
-        fieldMap.put("ss", 13);
-        fieldMap.put("SSS", 14);
+        return Objects.hash(format);
     }
 }
-

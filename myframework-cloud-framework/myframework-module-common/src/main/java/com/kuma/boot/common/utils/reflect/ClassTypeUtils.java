@@ -1,112 +1,252 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
+// import com.sun.org.apache.xpath.internal.Arg;
+// import sun.reflect.generics.reflectiveObjects.WildcardTypeImpl;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/** class 类型工具类 */
 public final class ClassTypeUtils {
-    private static final Class[] BASE_TYPE_CLASS = new Class[]{String.class, Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class, Void.class, Object.class, Class.class};
 
-    private ClassTypeUtils() {
-    }
+    private ClassTypeUtils() {}
 
-    public static boolean isMap(Class<?> clazz) {
+    /** 常见的基础对象类型 */
+    private static final Class[] BASE_TYPE_CLASS =
+            new Class[] {
+                    String.class,
+                    Boolean.class,
+                    Character.class,
+                    Byte.class,
+                    Short.class,
+                    Integer.class,
+                    Long.class,
+                    Float.class,
+                    Double.class,
+                    Void.class,
+                    Object.class,
+                    Class.class
+            };
+
+    /**
+     * 是否为 map class 类型
+     * @param clazz 对象类型
+     * @return 是否为 map class
+     */
+    public static boolean isMap(final Class<?> clazz) {
         return Map.class.isAssignableFrom(clazz);
     }
 
-    public static boolean isArray(Class<?> clazz) {
+    /**
+     * 是否为 数组 class 类型
+     * @param clazz 对象类型
+     * @return 是否为 数组 class
+     */
+    public static boolean isArray(final Class<?> clazz) {
         return clazz.isArray();
     }
 
-    public static boolean isCollection(Class<?> clazz) {
+    /**
+     * 是否为 Collection class 类型
+     * @param clazz 对象类型
+     * @return 是否为 Collection class
+     */
+    public static boolean isCollection(final Class<?> clazz) {
         return Collection.class.isAssignableFrom(clazz);
     }
 
-    public static boolean isIterable(Class<?> clazz) {
+    /**
+     * 是否为 Iterable class 类型
+     * @param clazz 对象类型
+     * @return 是否为 数组 class
+     */
+    public static boolean isIterable(final Class<?> clazz) {
         return Iterable.class.isAssignableFrom(clazz);
     }
 
+    /**
+     * 是否为基本类型 1. 8大基本类型 2. 常见的值类型
+     * @param clazz 对象类型
+     * @return 是否为基本类型
+     */
     public static boolean isBase(Class<?> clazz) {
         if (clazz.isPrimitive()) {
             return true;
         }
         for (Class baseClazz : BASE_TYPE_CLASS) {
-            if (!baseClazz.equals(clazz)) continue;
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isEnum(Class<?> clazz) {
-        ArgUtils.notNull(clazz, "clazz");
-        return clazz.isEnum();
-    }
-
-    public static boolean isAbstract(Class<?> clazz) {
-        return Modifier.isAbstract(clazz.getModifiers());
-    }
-
-    public static boolean isAbstractOrInterface(Class<?> clazz) {
-        return ClassTypeUtils.isAbstract(clazz) || clazz.isInterface();
-    }
-
-    public static boolean isJavaBean(Class<?> clazz) {
-        return null != clazz && !clazz.isInterface() && !ClassTypeUtils.isAbstract(clazz) && !clazz.isEnum() && !clazz.isArray() && !clazz.isAnnotation() && !clazz.isSynthetic() && !clazz.isPrimitive() && !ClassTypeUtils.isIterable(clazz) && !ClassTypeUtils.isMap(clazz);
-    }
-
-    public static boolean isJdk(Class<?> clazz) {
-        return clazz != null && clazz.getClassLoader() == null;
-    }
-
-    public static boolean isBean(Class<?> clazz) {
-        if (ClassTypeUtils.isJavaBean(clazz)) {
-            Method[] methods;
-            for (Method method : methods = clazz.getMethods()) {
-                if (method.getParameterTypes().length != 1 || !method.getName().startsWith("set")) continue;
+            if (baseClazz.equals(clazz)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static Class getListType(Field field) {
-        ParameterizedType listGenericType = (ParameterizedType)field.getGenericType();
-        Type[] listActualTypeArguments = listGenericType.getActualTypeArguments();
-        return (Class)listActualTypeArguments[0];
+    /**
+     * 是否为枚举
+     * @param clazz 类型
+     * @return 枚举
+     */
+    public static boolean isEnum(Class<?> clazz) {
+        ArgUtils.notNull(clazz, "clazz");
+        return clazz.isEnum();
     }
 
-    public static boolean isWildcardGenericType(Type type) {
+    /**
+     * 是否为抽象类
+     * @param clazz 类
+     * @return 是否为抽象类
+     */
+    public static boolean isAbstract(Class<?> clazz) {
+        return Modifier.isAbstract(clazz.getModifiers());
+    }
+
+    /**
+     * 是抽象类或者接口
+     * @param clazz 类信息
+     * @return 是否
+     */
+    public static boolean isAbstractOrInterface(Class<?> clazz) {
+        return isAbstract(clazz) || clazz.isInterface();
+    }
+
+    /**
+     * 是否为标准的类<br>
+     * 这个类必须：
+     *
+     * <pre>
+     * 0、不为 null
+     * 1、非接口
+     * 2、非抽象类
+     * 3、非Enum枚举
+     * 4、非数组
+     * 5、非注解
+     * 6、非原始类型（int, long等）
+     * 7、非集合 Iterable
+     * 8、非 Map.clas
+     * 9、非 JVM 生成类
+     * </pre>
+     * @param clazz 类
+     * @return 是否为标准类
+     */
+    public static boolean isJavaBean(Class<?> clazz) {
+        return null != clazz
+                && !clazz.isInterface()
+                && !isAbstract(clazz)
+                && !clazz.isEnum()
+                && !clazz.isArray()
+                && !clazz.isAnnotation()
+                && !clazz.isSynthetic()
+                && !clazz.isPrimitive()
+                && !isIterable(clazz)
+                && !isMap(clazz);
+    }
+
+    /**
+     * 判断一个类是JDK 自带的类型 jdk 自带的类，classLoader 是为空的。
+     * @param clazz 类
+     * @return 是否为 java 类
+     */
+    public static boolean isJdk(Class<?> clazz) {
+        return clazz != null && clazz.getClassLoader() == null;
+    }
+
+    /**
+     * 判断是否为Bean对象<br>
+     * 判定方法是是否存在只有一个参数的setXXX方法
+     * @param clazz 待测试类
+     * @return 是否为Bean对象
+     */
+    public static boolean isBean(Class<?> clazz) {
+        if (ClassTypeUtils.isJavaBean(clazz)) {
+            final Method[] methods = clazz.getMethods();
+            for (Method method : methods) {
+                if (method.getParameterTypes().length == 1 && method.getName().startsWith("set")) {
+                    // 检测包含标准的setXXX方法即视为标准的JavaBean
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
-    public static boolean isList(Class clazz) {
+    /**
+     * 获取列表字段对应的类型
+     * @param field 字段
+     * @return 返回对应的 class 类型
+     */
+    public static Class getListType(Field field) {
+        ParameterizedType listGenericType = (ParameterizedType) field.getGenericType();
+        Type[] listActualTypeArguments = listGenericType.getActualTypeArguments();
+        return (Class) listActualTypeArguments[0];
+    }
+
+    /**
+     * 是否为通配符泛型
+     * @param type 类型
+     * @return 是否
+     */
+    public static boolean isWildcardGenericType(final Type type) {
+        // final Class clazz = type.getClass();
+        // return WildcardTypeImpl.class.equals(clazz);
+        return false;
+    }
+
+    /**
+     * 是否为列表
+     * @param clazz 类型
+     * @return 结果
+     */
+    public static boolean isList(final Class clazz) {
         return List.class.isAssignableFrom(clazz);
     }
 
-    public static boolean isSet(Class clazz) {
+    /**
+     * 是否为 set
+     * @param clazz 类型
+     * @return 结果
+     */
+    public static boolean isSet(final Class clazz) {
         return Set.class.isAssignableFrom(clazz);
     }
 
-    public static boolean isPrimitive(Class clazz) {
+    /**
+     * 是否为基本类型
+     * @param clazz 对象类型
+     * @return 是否
+     */
+    public static boolean isPrimitive(final Class clazz) {
         return clazz.isPrimitive();
     }
 
-    public static boolean isPrimitive(Object object) {
+    /**
+     * 是否为基本类型
+     * @param object 对象
+     * @return 是否
+     */
+    public static boolean isPrimitive(final Object object) {
         if (ObjectUtils.isNull(object)) {
             return false;
         }
-        return ClassTypeUtils.isPrimitive(object.getClass());
+        return isPrimitive(object.getClass());
     }
 }
-

@@ -1,169 +1,288 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.slf4j.LoggerFactory
- *  org.slf4j.spi.LocationAwareLogger
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.log;
 
+import com.kuma.boot.common.constant.CommonConstants;
+import com.kuma.boot.common.constant.StarterNameConstants;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
+/**
+ * LogUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 16:34:50
+ */
 public class LogUtils {
-    private static final Object[] EMPTY_ARRAY = new Object[0];
+
+    private LogUtils() {}
+
+    /** 空数组 */
+    private static final Object[] EMPTY_ARRAY = new Object[] {};
+
+    /** 全类名 */
     private static final String FQDN = LogUtils.class.getName();
 
-    private LogUtils() {
-    }
-
+    /**
+     * 获取栈中类信息
+     * @return {@link LocationAwareLogger }
+     * @since 2021-09-02 16:34:58
+     */
     public static LocationAwareLogger getLocationAwareLogger() {
         StackTraceElement[] stackTraceElement = Thread.currentThread().getStackTrace();
         StackTraceElement frame = stackTraceElement[stackTraceElement.length - 1];
-        return (LocationAwareLogger)LoggerFactory.getLogger((String)(frame.getClassName() + "-" + frame.getMethodName().split("\\$")[0] + "-" + frame.getLineNumber()));
+
+        return (LocationAwareLogger)
+                LoggerFactory.getLogger(
+                        frame.getClassName()
+                                + "-"
+                                + frame.getMethodName().split("\\$")[0]
+                                + "-"
+                                + frame.getLineNumber());
     }
 
-    public static void debug(String msg, Object ... arguments) {
-        if (LogUtils.isDebugEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 10, msg, arguments, null);
+    /**
+     * Debug级别日志
+     * @param msg msg
+     * @param arguments 参数
+     * @since 2021-09-02 16:35:04
+     */
+    public static void debug(String msg, Object... arguments) {
+        if (isDebugEnabled()) {
+            // if (arguments != null && arguments.length > 0) {
+            // msg = MessageFormatter.format(msg, arguments).getMessage();
+            // }
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.DEBUG_INT, msg, arguments, null);
         }
     }
 
-    public static void info(String msg, Object ... arguments) {
-        if (LogUtils.isInfoEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 20, msg, arguments, null);
+    /**
+     * Info级别日志
+     * @param msg msg
+     * @param arguments 参数
+     * @since 2021-09-02 16:35:18
+     */
+    public static void info(String msg, Object... arguments) {
+        if (isInfoEnabled()) {
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.INFO_INT, msg, arguments, null);
         }
     }
 
-    public static void started(Class<?> cls, String project, String ... message) {
+    /**
+     * started
+     * @param cls cls
+     * @param project project
+     * @param message message
+     * @since 2021-09-02 16:35:32
+     */
+    public static void started(Class<?> cls, String project, String... message) {
         StringBuilder sb = new StringBuilder();
         sb.append("[").append(project).append("] ");
         sb.append("[").append(cls.getName()).append("] ");
+
         if (message.length > 0) {
             sb.append(Arrays.toString(message)).append(" ");
         }
-        sb.append("started");
-        LogUtils.info(sb.toString(), new Object[0]);
+
+        sb.append(StarterNameConstants.STARTED);
+
+        info(sb.toString());
     }
 
-    public static void warn(String msg, Object ... arguments) {
-        if (LogUtils.isWarnEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 30, msg, arguments, null);
+    /**
+     * Warn级别日志
+     * @param msg msg
+     * @param arguments 参数
+     * @since 2021-09-02 16:35:37
+     */
+    public static void warn(String msg, Object... arguments) {
+        if (isWarnEnabled()) {
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.WARN_INT, msg, arguments, null);
         }
     }
 
-    public static void trace(String msg, Object ... arguments) {
-        if (LogUtils.isTraceEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 0, msg, arguments, null);
+    /**
+     * Warn级别日志
+     * @param msg msg
+     * @param arguments 参数
+     * @since 2021-09-02 16:35:37
+     */
+    public static void trace(String msg, Object... arguments) {
+        if (isTraceEnabled()) {
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.TRACE_INT, msg, arguments, null);
         }
     }
 
-    public static void error(Throwable error, String msg, Object ... arguments) {
-        if (LogUtils.isErrorEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 40, msg, arguments, error);
+    /**
+     * error
+     * @param error error
+     * @param msg msg
+     * @param arguments arguments
+     * @since 2021-09-02 16:35:43
+     */
+    public static void error(Throwable error, String msg, Object... arguments) {
+        if (isErrorEnabled()) {
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.ERROR_INT, msg, arguments, error);
         }
     }
 
+    /**
+     * Error级别日志
+     * @param error error
+     * @since 2021-09-02 16:35:51
+     */
     public static void error(Throwable error) {
-        if (LogUtils.isErrorEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 40, null, EMPTY_ARRAY, error);
+        if (isErrorEnabled()) {
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.ERROR_INT, null, EMPTY_ARRAY, error);
         }
     }
 
-    public static void error(String msg, Object ... arguments) {
-        if (LogUtils.isErrorEnabled()) {
-            LogUtils.getLocationAwareLogger().log(null, FQDN, 40, msg, arguments, null);
+    /**
+     * Error级别日志
+     * @param msg msg
+     * @param arguments 参数
+     * @since 2021-09-02 16:35:57
+     */
+    public static void error(String msg, Object... arguments) {
+        if (isErrorEnabled()) {
+            getLocationAwareLogger()
+                    .log(null, FQDN, LocationAwareLogger.ERROR_INT, msg, arguments, null);
         }
     }
 
-    /*
-     * Enabled aggressive exception aggregation
+    /**
+     * 异常堆栈转字符串
+     * @param e e
+     * @return {@link String }
+     * @since 2021-09-02 16:36:06
      */
     public static String exceptionToString(Exception e) {
         if (e == null) {
-            return "\u65e0\u5177\u4f53\u5f02\u5e38\u4fe1\u606f";
+            return "无具体异常信息";
         }
-        try (StringWriter sw = new StringWriter();){
-            PrintWriter pw = new PrintWriter(sw);
-            try {
-                e.printStackTrace(pw);
-                String string = sw.toString();
-                pw.close();
-                return string;
-            }
-            catch (Throwable throwable) {
-                try {
-                    pw.close();
-                }
-                catch (Throwable throwable2) {
-                    throwable.addSuppressed(throwable2);
-                }
-                throw throwable;
-            }
-        }
-        catch (Exception ex) {
+        try (StringWriter sw = new StringWriter();
+             PrintWriter pw = new PrintWriter(sw); ) {
+            e.printStackTrace(pw);
+            return sw.toString();
+        } catch (Exception ex) {
             return "";
         }
     }
 
+    /**
+     * 获取堆栈信息
+     * @param throwable throwable
+     * @return {@link String }
+     * @since 2021-09-02 16:36:12
+     */
     public static String getStackTrace(Throwable throwable) {
         StringWriter sw = new StringWriter();
-        try (PrintWriter pw = new PrintWriter(sw);){
+        try (PrintWriter pw = new PrintWriter(sw)) {
             throwable.printStackTrace(pw);
-            String string = sw.toString();
-            return string;
+            return sw.toString();
         }
     }
 
+    /**
+     * 获取操作类型
+     * @param methodName 方法名称
+     * @return int
+     * @since 2021-09-02 16:36:19
+     */
     public static int getRequestType(String methodName) {
         if (methodName.startsWith("get")) {
-            return 1;
+            return CommonConstants.OPERATE_TYPE_GET;
         }
         if (methodName.startsWith("query")) {
-            return 1;
+            return CommonConstants.OPERATE_TYPE_GET;
         }
         if (methodName.startsWith("find")) {
-            return 1;
+            return CommonConstants.OPERATE_TYPE_GET;
         }
         if (methodName.startsWith("select")) {
-            return 1;
+            return CommonConstants.OPERATE_TYPE_GET;
         }
         if (methodName.startsWith("add")) {
-            return 2;
+            return CommonConstants.OPERATE_TYPE_SAVE;
         }
         if (methodName.startsWith("save")) {
-            return 2;
+            return CommonConstants.OPERATE_TYPE_SAVE;
         }
         if (methodName.startsWith("update")) {
-            return 3;
+            return CommonConstants.OPERATE_TYPE_UPDATE;
         }
         if (methodName.startsWith("delete")) {
-            return 4;
+            return CommonConstants.OPERATE_TYPE_DELETE;
         }
-        return 1;
+        return CommonConstants.OPERATE_TYPE_GET;
     }
 
+    /**
+     * isDebugEnabled
+     * @return boolean
+     * @since 2021-09-02 17:11:49
+     */
     public static boolean isDebugEnabled() {
-        return LogUtils.getLocationAwareLogger().isDebugEnabled();
+        return getLocationAwareLogger().isDebugEnabled();
     }
 
+    /**
+     * isInfoEnabled
+     * @return boolean
+     * @since 2021-09-02 17:11:53
+     */
     public static boolean isInfoEnabled() {
-        return LogUtils.getLocationAwareLogger().isInfoEnabled();
+        return getLocationAwareLogger().isInfoEnabled();
     }
 
+    /**
+     * isInfoEnabled
+     * @return boolean
+     * @since 2021-09-02 17:11:53
+     */
     public static boolean isTraceEnabled() {
-        return LogUtils.getLocationAwareLogger().isTraceEnabled();
+        return getLocationAwareLogger().isTraceEnabled();
     }
 
+    /**
+     * isErrorEnabled
+     * @return boolean
+     * @since 2021-09-02 17:11:56
+     */
     public static boolean isErrorEnabled() {
-        return LogUtils.getLocationAwareLogger().isErrorEnabled();
+        return getLocationAwareLogger().isErrorEnabled();
     }
 
+    /**
+     * isWarnEnabled
+     * @return boolean
+     * @since 2021-09-02 17:11:58
+     */
     public static boolean isWarnEnabled() {
-        return LogUtils.getLocationAwareLogger().isWarnEnabled();
+        return getLocationAwareLogger().isWarnEnabled();
     }
 }
-

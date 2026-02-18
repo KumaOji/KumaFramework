@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,10 @@ public final class ReflectMethodUtils {
      * https://blog.csdn.net/revitalizing/article/details/71036970
      *
      * <p>
+     * （1）如果没有指定对应的注解信息，则直接返回 argIndex 比如：arg0 arg1
+     * @param method 方法信息
+     * @return 方法名称列表
+     * @see Param 参数注解
      */
     public static List<String> getParamNames(final Method method) {
         ArgUtils.notNull(method, "method");

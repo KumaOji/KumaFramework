@@ -1,19 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.bean.BeanUtil
- *  cn.hutool.core.bean.copier.CopyOptions
- *  cn.hutool.core.util.ArrayUtil
- *  cn.hutool.core.util.ReflectUtil
- *  jakarta.annotation.Nullable
- *  org.springframework.beans.BeansException
- *  org.springframework.cglib.core.CodeGenerationException
- *  org.springframework.core.convert.Property
- *  org.springframework.core.convert.TypeDescriptor
- *  org.springframework.util.ReflectionUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
+
+import static cn.hutool.core.util.ReflectUtil.getConstructor;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
@@ -27,7 +30,6 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import jakarta.annotation.Nullable;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -41,158 +43,271 @@ import org.springframework.cglib.core.CodeGenerationException;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
 
-public class ReflectionUtils
-extends org.springframework.util.ReflectionUtils {
+/**
+ * ReflectionUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 15:02:23
+ */
+public class ReflectionUtils extends org.springframework.util.ReflectionUtils {
+
+    /**
+     * 获取 Bean 的所有 get方法
+     * @param type 类
+     * @return PropertyDescriptor数组
+     */
     public static PropertyDescriptor[] getBeanGetters(Class<?> type) {
-        return ReflectionUtils.getPropertyDescriptors(type, true, false);
+        return getPropertyDescriptors(type, true, false);
     }
 
+    /**
+     * 获取 Bean 的所有 set方法
+     * @param type 类
+     * @return PropertyDescriptor数组
+     */
     public static PropertyDescriptor[] getBeanSetters(Class<?> type) {
-        return ReflectionUtils.getPropertyDescriptors(type, false, true);
+        return getPropertyDescriptors(type, false, true);
     }
 
-    public static PropertyDescriptor[] getPropertyDescriptors(Class<?> type, boolean read, boolean write) {
+    /**
+     * 获取 Bean 的所有 PropertyDescriptor
+     * @param type 类
+     * @param read 读取方法
+     * @param write 写方法
+     * @return PropertyDescriptor数组
+     */
+    public static PropertyDescriptor[] getPropertyDescriptors(
+            Class<?> type, boolean read, boolean write) {
         try {
             PropertyDescriptor[] all = BeanUtil.getPropertyDescriptors(type);
             if (read && write) {
                 return all;
-            }
-            ArrayList<PropertyDescriptor> properties = new ArrayList<PropertyDescriptor>(all.length);
-            for (PropertyDescriptor pd : all) {
-                if (read && pd.getReadMethod() != null) {
-                    properties.add(pd);
-                    continue;
+            } else {
+                List<PropertyDescriptor> properties = new ArrayList<>(all.length);
+                for (PropertyDescriptor pd : all) {
+                    if (read && pd.getReadMethod() != null) {
+                        properties.add(pd);
+                    } else if (write && pd.getWriteMethod() != null) {
+                        properties.add(pd);
+                    }
                 }
-                if (!write || pd.getWriteMethod() == null) continue;
-                properties.add(pd);
+                return properties.toArray(new PropertyDescriptor[0]);
             }
-            return properties.toArray(new PropertyDescriptor[0]);
-        }
-        catch (BeansException ex) {
-            throw new CodeGenerationException((Throwable)ex);
+        } catch (BeansException ex) {
+            throw new CodeGenerationException(ex);
         }
     }
 
+    /**
+     * 获取 bean 的属性信息
+     * @param propertyType 类型
+     * @param propertyName 属性名
+     * @return {Property}
+     */
     @Nullable
     public static Property getProperty(Class<?> propertyType, String propertyName) {
-        PropertyDescriptor propertyDescriptor = BeanUtil.getPropertyDescriptor(propertyType, (String)propertyName);
+        PropertyDescriptor propertyDescriptor =
+                BeanUtil.getPropertyDescriptor(propertyType, propertyName);
         if (propertyDescriptor == null) {
             return null;
         }
-        return ReflectionUtils.getProperty(propertyType, propertyDescriptor, propertyName);
+        return getProperty(propertyType, propertyDescriptor, propertyName);
     }
 
-    public static Property getProperty(Class<?> propertyType, PropertyDescriptor propertyDescriptor, String propertyName) {
+    /**
+     * 获取 bean 的属性信息
+     * @param propertyType 类型
+     * @param propertyDescriptor PropertyDescriptor
+     * @param propertyName 属性名
+     * @return {Property}
+     */
+    public static Property getProperty(
+            Class<?> propertyType, PropertyDescriptor propertyDescriptor, String propertyName) {
         Method readMethod = propertyDescriptor.getReadMethod();
         Method writeMethod = propertyDescriptor.getWriteMethod();
         return new Property(propertyType, readMethod, writeMethod, propertyName);
     }
 
+    /**
+     * 获取 bean 的属性信息
+     * @param propertyType 类型
+     * @param propertyName 属性名
+     * @return {Property}
+     */
     @Nullable
     public static TypeDescriptor getTypeDescriptor(Class<?> propertyType, String propertyName) {
-        Property property = ReflectionUtils.getProperty(propertyType, propertyName);
+        Property property = getProperty(propertyType, propertyName);
         if (property == null) {
             return null;
         }
         return new TypeDescriptor(property);
     }
 
-    public static TypeDescriptor getTypeDescriptor(Class<?> propertyType, PropertyDescriptor propertyDescriptor, String propertyName) {
+    /**
+     * 获取 类属性信息
+     * @param propertyType 类型
+     * @param propertyDescriptor PropertyDescriptor
+     * @param propertyName 属性名
+     * @return {Property}
+     */
+    public static TypeDescriptor getTypeDescriptor(
+            Class<?> propertyType, PropertyDescriptor propertyDescriptor, String propertyName) {
         Method readMethod = propertyDescriptor.getReadMethod();
         Method writeMethod = propertyDescriptor.getWriteMethod();
         Property property = new Property(propertyType, readMethod, writeMethod, propertyName);
         return new TypeDescriptor(property);
     }
 
+    /**
+     * 获取 类属性
+     * @param clazz 类信息
+     * @param fieldName 属性名
+     * @return Field
+     */
     @Nullable
     public static Field getField(Class<?> clazz, String fieldName) {
         while (clazz != Object.class) {
             try {
                 return clazz.getDeclaredField(fieldName);
-            }
-            catch (NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass();
             }
         }
         return null;
     }
 
+    /**
+     * 获取 所有 field 属性上的注解
+     * @param clazz 类
+     * @param fieldName 属性名
+     * @param annotationClass 注解
+     * @param <T> 注解泛型
+     * @return 注解
+     */
     @Nullable
-    public static <T extends Annotation> T getAnnotation(Class<?> clazz, String fieldName, Class<T> annotationClass) {
-        Field field = ReflectionUtils.getField(clazz, fieldName);
+    public static <T extends Annotation> T getAnnotation(
+            Class<?> clazz, String fieldName, Class<T> annotationClass) {
+        Field field = getField(clazz, fieldName);
         if (field == null) {
             return null;
         }
         return field.getAnnotation(annotationClass);
     }
 
+    /**
+     * 重写 setField 的方法，用于处理 setAccessible 的问题
+     * @param field Field
+     * @param target Object
+     * @param value value
+     */
     public static void setField(Field field, @Nullable Object target, @Nullable Object value) {
-        ReflectionUtils.makeAccessible((Field)field);
-        org.springframework.util.ReflectionUtils.setField((Field)field, (Object)target, (Object)value);
+        makeAccessible(field);
+        org.springframework.util.ReflectionUtils.setField(field, target, value);
     }
 
+    /**
+     * 重写 setField 的方法，用于处理 setAccessible 的问题
+     * @param field Field
+     * @param target Object
+     * @return value
+     */
     @Nullable
     public static Object getField(Field field, @Nullable Object target) {
-        ReflectionUtils.makeAccessible((Field)field);
-        return org.springframework.util.ReflectionUtils.getField((Field)field, (Object)target);
+        makeAccessible(field);
+        return org.springframework.util.ReflectionUtils.getField(field, target);
     }
 
+    /**
+     * 重写 setField 的方法，用于处理 setAccessible 的问题
+     * @param fieldName Field name
+     * @param target Object
+     * @return value
+     */
     @Nullable
     public static Object getField(String fieldName, @Nullable Object target) {
         if (target == null) {
             return null;
         }
         Class<?> targetClass = target.getClass();
-        Field field = ReflectionUtils.getField(targetClass, fieldName);
+        Field field = getField(targetClass, fieldName);
         if (field == null) {
-            throw new IllegalArgumentException(fieldName + " not in" + String.valueOf(targetClass));
+            throw new IllegalArgumentException(fieldName + " not in" + targetClass);
         }
-        return ReflectionUtils.getField(field, target);
+        return getField(field, target);
     }
 
+    /**
+     * 重写 invokeMethod 的方法，用于处理 setAccessible 的问题
+     * @param method Method
+     * @param target Object
+     * @return value
+     */
     @Nullable
     public static Object invokeMethod(Method method, @Nullable Object target) {
-        return ReflectionUtils.invokeMethod(method, target, new Object[0]);
+        return invokeMethod(method, target, new Object[0]);
     }
 
+    /**
+     * 重写 invokeMethod 的方法，用于处理 setAccessible 的问题
+     * @param method Method
+     * @param target Object
+     * @param args args
+     * @return value
+     */
     @Nullable
-    public static Object invokeMethod(Method method, @Nullable Object target, Object ... args) {
-        ReflectionUtils.makeAccessible((Method)method);
-        return org.springframework.util.ReflectionUtils.invokeMethod((Method)method, (Object)target, (Object[])args);
+    public static Object invokeMethod(
+            Method method, @Nullable Object target, @Nullable Object... args) {
+        makeAccessible(method);
+        return org.springframework.util.ReflectionUtils.invokeMethod(method, target, args);
     }
 
-    private ReflectionUtils() {
-    }
+    private ReflectionUtils() {}
 
+    /**
+     * classForName
+     * @param type 类型
+     * @return 类型
+     * @since 2021-09-02 15:02:32
+     */
     public static Class<?> classForName(String type) {
         try {
             return Class.forName(type);
-        }
-        catch (Exception exp) {
+        } catch (Exception exp) {
             throw new BaseException(exp.getMessage());
         }
     }
 
+    /**
+     * 类型
+     * @param type 类型
+     * @return 类型
+     * @since 2021-09-02 15:02:39
+     */
     public static Class<?> tryClassForName(String type) {
         try {
             return Class.forName(type);
-        }
-        catch (Exception exp) {
+        } catch (Exception exp) {
             return null;
         }
     }
 
+    /**
+     * 获取类中方法
+     * @param cls 类
+     * @param methodName 方法名
+     * @return 对象方法
+     * @since 2021-09-02 15:02:47
+     */
     public static Method findMethod(Class<?> cls, String methodName) {
         Method find = null;
         while (cls != null) {
-            Method[][] methodArrayArray = new Method[][]{cls.getMethods(), cls.getDeclaredMethods()};
-            int n = methodArrayArray.length;
-            block1: for (int i = 0; i < n; ++i) {
-                Method[] methods;
-                for (Method method : methods = methodArrayArray[i]) {
-                    if (!method.getName().equalsIgnoreCase(methodName)) continue;
-                    find = method;
-                    continue block1;
+            for (Method[] methods : new Method[][] {cls.getMethods(), cls.getDeclaredMethods()}) {
+                for (Method method : methods) {
+                    if (method.getName().equalsIgnoreCase(methodName)) {
+                        find = method;
+                        break;
+                    }
                 }
             }
             cls = cls.getSuperclass();
@@ -200,18 +315,37 @@ extends org.springframework.util.ReflectionUtils {
         return find;
     }
 
-    public static Object findEnumObjByName(Class<?> cls, String methodName, String name) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    /**
+     * 通过枚举名称获取枚举对象
+     * @param cls 枚举类
+     * @param methodName 方法名称
+     * @param name name 枚举名称 区分大小写 必须完全一样
+     * @return 对象方法
+     * @since 2021-09-15 15:56:01
+     */
+    public static Object findEnumObjByName(Class<?> cls, String methodName, String name)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Object[] objects = cls.getEnumConstants();
-        Method method = cls.getMethod(methodName, new Class[0]);
+        Method method = cls.getMethod(methodName);
         for (Object object : objects) {
-            Object invoke = method.invoke(object, new Object[0]);
-            if (!invoke.equals(name)) continue;
-            return object;
+            Object invoke = method.invoke(object);
+            if (invoke.equals(name)) {
+                return object;
+            }
         }
         return null;
     }
 
-    public static Method findMethod0(Class<?> cls, String methodName, Class<?> ... argsTypes) throws NoSuchMethodException, SecurityException {
+    /**
+     * 获取类中方法
+     * @param cls 类型
+     * @param methodName 方法名
+     * @param argsTypes 参数类型
+     * @return 对象方法
+     * @since 2021-09-02 15:03:01
+     */
+    public static Method findMethod0(Class<?> cls, String methodName, Class<?>... argsTypes)
+            throws NoSuchMethodException, SecurityException {
         Method find = null;
         if (cls != null) {
             find = cls.getMethod(methodName, argsTypes);
@@ -219,90 +353,140 @@ extends org.springframework.util.ReflectionUtils {
         return find;
     }
 
-    public static <T> T tryCallMethod(Object obj, String methodName, Object[] param, T defaultValue) {
+    /**
+     * 调用对象方法
+     * @param obj 对象
+     * @param methodName 方法名
+     * @param param 参数
+     * @param defaultValue 默认值
+     * @return 对象数据
+     * @since 2021-09-02 15:03:09
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T tryCallMethod(
+            Object obj, String methodName, Object[] param, T defaultValue) {
         try {
-            Method method;
-            if (obj != null && (method = ReflectionUtils.findMethod(obj.getClass(), methodName)) != null) {
-                if (!method.canAccess(obj)) {
-                    method.setAccessible(true);
+            if (obj != null) {
+                Method method = findMethod(obj.getClass(), methodName);
+                if (method != null) {
+                    // 对于静态成员和构造函数，则obj必须为null
+                    if (!method.canAccess(obj)) {
+                        method.setAccessible(true);
+                    }
+                    return (T) method.invoke(obj, param);
                 }
-                return (T)method.invoke(obj, param);
             }
             return defaultValue;
-        }
-        catch (Exception exp) {
+        } catch (Exception exp) {
             LogUtils.error(exp);
             return defaultValue;
         }
     }
 
+    /**
+     * 调用对象方法
+     * @param obj 对象
+     * @param methodName 方法名
+     * @param param 参数
+     * @return 对象数据
+     * @since 2021-09-02 15:03:17
+     */
     public static Object callMethod(Object obj, String methodName, Object[] param) {
         try {
-            Method find = ReflectionUtils.findMethod(obj.getClass(), methodName);
+            Method find = findMethod(obj.getClass(), methodName);
             if (find != null) {
                 return find.invoke(obj, param);
             }
-            throw new Exception("\u672a\u627e\u5230\u65b9\u6cd5" + StringUtils.nullToEmpty((CharSequence)methodName));
-        }
-        catch (Exception exp) {
+            throw new Exception("未找到方法" + StringUtils.nullToEmpty(methodName));
+        } catch (Exception exp) {
             LogUtils.error(exp);
             throw new BaseException(exp.getMessage());
         }
     }
 
+    /**
+     * 调用对象方法
+     * @param clazz 类型
+     * @param methodName 方法名
+     * @param params 参数
+     * @return 对象数据
+     * @since 2021-09-02 15:03:25
+     */
     public static Object callMethod(Class<?> clazz, String methodName, Object[] params) {
         try {
-            Method find = ReflectionUtils.findMethod(clazz, methodName);
+            Method find = findMethod(clazz, methodName);
             if (find != null) {
                 return find.invoke(null, params);
             }
-            throw new Exception("\u672a\u627e\u5230\u65b9\u6cd5" + StringUtils.nullToEmpty((CharSequence)methodName));
-        }
-        catch (Exception exp) {
+            throw new Exception("未找到方法" + StringUtils.nullToEmpty(methodName));
+        } catch (Exception exp) {
             LogUtils.error(exp);
             throw new BaseException(exp.getMessage());
         }
     }
 
-    public static Object callMethodWithParams(Class<?> clazz, String methodName, Object[] params, Class<?> ... paramTypes) {
+    /**
+     * 调用对象方法
+     * @param clazz 类型
+     * @param methodName 方法名
+     * @param params 参数
+     * @param paramTypes 参数类型
+     * @return 对象数据
+     * @since 2021-09-02 15:03:38
+     */
+    public static Object callMethodWithParams(
+            Class<?> clazz, String methodName, Object[] params, Class<?>... paramTypes) {
         try {
-            Method find = ReflectionUtils.findMethod0(clazz, methodName, paramTypes);
+            Method find = findMethod0(clazz, methodName, paramTypes);
             if (find != null) {
                 return find.invoke(null, params);
             }
-            throw new Exception("\u672a\u627e\u5230\u65b9\u6cd5" + StringUtils.nullToEmpty((CharSequence)methodName));
-        }
-        catch (Exception exp) {
+            throw new Exception("未找到方法" + StringUtils.nullToEmpty(methodName));
+        } catch (Exception exp) {
             LogUtils.error(exp);
             throw new BaseException(exp.getMessage());
         }
     }
 
-    public static Object callMethodWithParams(Object object, String methodName, Object[] params, Class<?> ... paramTypes) {
+    /**
+     * 调用对象方法
+     * @param object 对象
+     * @param methodName 方法名
+     * @param params 参数
+     * @param paramTypes 参数类型
+     * @return 对象数据
+     * @since 2021-09-02 15:03:48
+     */
+    public static Object callMethodWithParams(
+            Object object, String methodName, Object[] params, Class<?>... paramTypes) {
         try {
-            Method find = ReflectionUtils.findMethod0(object.getClass(), methodName, paramTypes);
+            Method find = findMethod0(object.getClass(), methodName, paramTypes);
             if (find != null) {
                 return find.invoke(object, params);
             }
-            throw new Exception("\u672a\u627e\u5230\u65b9\u6cd5" + StringUtils.nullToEmpty((CharSequence)methodName));
-        }
-        catch (Exception exp) {
+            throw new Exception("未找到方法" + StringUtils.nullToEmpty(methodName));
+        } catch (Exception exp) {
             LogUtils.error(exp);
             throw new BaseException(exp.getMessage());
         }
     }
 
+    /**
+     * 获取字段
+     * @param cls 类型
+     * @param name 字段名称
+     * @return 字段
+     * @since 2021-09-02 15:03:57
+     */
     public static Field findField(Class<?> cls, String name) {
         Field find = null;
         while (cls != null) {
-            Field[][] fieldArrayArray = new Field[][]{cls.getFields(), cls.getDeclaredFields()};
-            int n = fieldArrayArray.length;
-            for (int i = 0; i < n; ++i) {
-                Field[] fields;
-                for (Field field : fields = fieldArrayArray[i]) {
-                    if (!field.getName().equalsIgnoreCase(name)) continue;
-                    find = field;
-                    return find;
+            for (Field[] fields : new Field[][] {cls.getFields(), cls.getDeclaredFields()}) {
+                for (Field field : fields) {
+                    if (field.getName().equalsIgnoreCase(name)) {
+                        find = field;
+                        return find;
+                    }
                 }
             }
             cls = cls.getSuperclass();
@@ -310,15 +494,23 @@ extends org.springframework.util.ReflectionUtils {
         return find;
     }
 
+    /**
+     * 查询record
+     * @param cls 类型
+     * @param name 名称
+     * @return record类型
+     * @since 2022-03-28 11:23:44
+     */
     public static RecordComponent findRecord(Class<?> cls, String name) {
         RecordComponent find = null;
         while (cls != null) {
             RecordComponent[] recordComponents = cls.getRecordComponents();
             if (recordComponents.length != 0) {
                 for (RecordComponent recordComponent : recordComponents) {
-                    if (!recordComponent.getName().equalsIgnoreCase(name)) continue;
-                    find = recordComponent;
-                    return find;
+                    if (recordComponent.getName().equalsIgnoreCase(name)) {
+                        find = recordComponent;
+                        return find;
+                    }
                 }
             }
             cls = cls.getSuperclass();
@@ -326,194 +518,319 @@ extends org.springframework.util.ReflectionUtils {
         return find;
     }
 
+    /**
+     * 获取字段值
+     * @param obj 对象
+     * @param name 字段名称
+     * @return 字段值
+     * @since 2021-09-02 15:04:04
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object obj, String name) {
         try {
-            Field find = ReflectionUtils.findField(obj.getClass(), name);
+            Field find = findField(obj.getClass(), name);
             if (find != null) {
                 if (!find.canAccess(obj)) {
                     find.setAccessible(true);
                 }
-                return (T)find.get(obj);
+                return (T) find.get(obj);
             }
-            throw new Exception("\u672a\u627e\u5230\u5b57\u6bb5" + StringUtils.nullToEmpty((CharSequence)name));
-        }
-        catch (Exception e) {
+            throw new Exception("未找到字段" + StringUtils.nullToEmpty(name));
+        } catch (Exception e) {
             LogUtils.error(e);
             throw new BaseException(e.getMessage());
         }
     }
 
+    /**
+     * 获取字段值
+     * @param obj 对象
+     * @param name 字段名称
+     * @param defaultValue 默认值
+     * @return 字段值
+     * @since 2021-09-02 15:04:13
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T tryGetFieldValue(Object obj, String name, T defaultValue) {
         try {
-            Field find;
-            if (obj != null && (find = ReflectionUtils.findField(obj.getClass(), name)) != null) {
-                if (!find.canAccess(obj)) {
-                    find.setAccessible(true);
+            if (obj != null) {
+                Field find = findField(obj.getClass(), name);
+                if (find != null) {
+                    if (!find.canAccess(obj)) {
+                        find.setAccessible(true);
+                    }
+                    return (T) find.get(obj);
                 }
-                return (T)find.get(obj);
             }
             return defaultValue;
-        }
-        catch (Exception exp) {
+        } catch (Exception exp) {
             return defaultValue;
         }
     }
 
+    /**
+     * 获取静态字段
+     * @param cls 对象全路径
+     * @param name 字段名称
+     * @param defaultValue 默认值
+     * @return 静态字段值
+     * @since 2021-09-02 15:04:21
+     */
     public static <T> T tryGetStaticFieldValue(String cls, String name, T defaultValue) {
         try {
-            return ReflectionUtils.tryGetStaticFieldValue(Class.forName(cls), name, defaultValue);
-        }
-        catch (Exception exp) {
+            return tryGetStaticFieldValue(Class.forName(cls), name, defaultValue);
+        } catch (Exception exp) {
             LogUtils.error(exp);
             return defaultValue;
         }
     }
 
+    /**
+     * 获取静态字段
+     * @param cls 类型
+     * @param name 字段名称
+     * @param defaultValue 默认值
+     * @return 静态字段值
+     * @since 2021-09-02 15:04:28
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T tryGetStaticFieldValue(Class<?> cls, String name, T defaultValue) {
         try {
-            Field find;
-            if (cls != null && (find = ReflectionUtils.findField(cls, name)) != null) {
-                if (!find.canAccess(null)) {
-                    find.setAccessible(true);
+            if (cls != null) {
+                Field find = findField(cls, name);
+                if (find != null) {
+                    if (!find.canAccess(null)) {
+                        find.setAccessible(true);
+                    }
+                    return (T) find.get(cls);
                 }
-                return (T)find.get(cls);
             }
             return defaultValue;
-        }
-        catch (Exception exp) {
+        } catch (Exception exp) {
             LogUtils.error(exp);
             return defaultValue;
         }
     }
 
+    /**
+     * 设置字段
+     * @param field 字段
+     * @param obj 对象
+     * @param value 值
+     * @since 2021-09-02 15:04:36
+     */
+    @SuppressWarnings("unchecked")
     public static void setFieldValue(Field field, Object obj, Object value) {
         try {
             if (!field.canAccess(obj)) {
                 field.setAccessible(true);
             }
             field.set(obj, value);
-        }
-        catch (Exception exception) {
-            // empty catch block
+        } catch (Exception ignored) {
         }
     }
 
+    /**
+     * copyPropertiesIfRecord 主要用于 复制dto对象到t对象中
+     * @param t 实体
+     * @param dto dto
+     * @return 实体对象
+     * @since 2021-10-20 09:19:45
+     */
     public static <T, DTO> T copyPropertiesIfRecord(T t, DTO dto) {
         if (dto.getClass().isRecord()) {
-            Field[] fields;
-            for (Field field : fields = dto.getClass().getDeclaredFields()) {
-                if ("serialVersionUID".equals(field.getName())) continue;
-                T value = ReflectionUtils.tryGetValue(dto, field.getName());
-                Field field1 = ReflectionUtils.findField(t.getClass(), field.getName());
-                if (!Objects.nonNull(field1) || !Objects.nonNull(value)) continue;
-                ReflectionUtils.setFieldValue(field1, t, value);
+            Field[] fields = dto.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                if (!"serialVersionUID".equals(field.getName())) {
+                    Object value = ReflectionUtils.tryGetValue(dto, field.getName());
+                    Field field1 = ReflectionUtils.findField(t.getClass(), field.getName());
+                    if (Objects.nonNull(field1) && Objects.nonNull(value)) {
+                        ReflectionUtils.setFieldValue(field1, t, value);
+                    }
+                }
             }
         } else {
-            BeanUtil.copyProperties(dto, t, (CopyOptions)CopyOptions.create().setIgnoreNullValue(true));
+            BeanUtil.copyProperties(dto, t, CopyOptions.create().setIgnoreNullValue(true));
         }
         return t;
     }
 
+    /**
+     * copyDataIfRecord 主要用于复制t对象到vo对象中
+     * @param clazz vo对象class
+     * @param t t
+     * @return vo对象
+     * @since 2021-10-20 10:42:23
+     */
     public static <T, VO> VO copyPropertiesIfRecord(Class<VO> clazz, T t) {
-        Object vo;
+        VO vo;
         if (clazz.isRecord()) {
             Field[] fields = clazz.getDeclaredFields();
-            ArrayList<Object> params = new ArrayList<>();
-            ArrayList<Field> fieldList = new ArrayList<>();
+            List<Object> params = new ArrayList<>();
+            List<Field> fieldList = new ArrayList<>();
+
             for (Field field : fields) {
-                if ("serialVersionUID".equals(field.getName())) continue;
-                T value = ReflectionUtils.tryGetValue(t, field.getName());
-                params.add(value);
-                fieldList.add(field);
+                if (!"serialVersionUID".equals(field.getName())) {
+                    Object value = ReflectionUtils.tryGetValue(t, field.getName());
+                    params.add(value);
+                    fieldList.add(field);
+                }
             }
-            vo = ReflectionUtils.newInstance(fieldList, clazz, params.toArray());
+
+            vo = newInstance(fieldList, clazz, params.toArray());
         } else {
             vo = ReflectUtil.newInstanceIfPossible(clazz);
-            BeanUtil.copyProperties(t, (Object)vo, (CopyOptions)CopyOptions.create().setIgnoreNullValue(true));
+            BeanUtil.copyProperties(t, vo, CopyOptions.create().setIgnoreNullValue(true));
         }
-        return (VO)vo;
+        return vo;
     }
 
-    public static <T> T newInstance(List<Field> fields, Class<T> clazz, Object ... params) throws BootException {
-        if (ArrayUtil.isEmpty((Object[])params)) {
-            Constructor constructor = ReflectUtil.getConstructor(clazz, (Class[])new Class[0]);
+    /**
+     * 构造实例
+     * @param fields 字段
+     * @param clazz 类型
+     * @param params 参数
+     * @return 对象
+     * @since 2022-03-28 11:19:22
+     */
+    public static <T> T newInstance(List<Field> fields, Class<T> clazz, Object... params)
+            throws BootException {
+        if (ArrayUtil.isEmpty(params)) {
+            final Constructor<T> constructor = getConstructor(clazz);
             try {
-                return (T) constructor.newInstance(new Object[0]);
-            }
-            catch (Exception e) {
+                return constructor.newInstance();
+            } catch (Exception e) {
                 throw new BootException("Instance class [{}] error!");
             }
         }
-        Class[] paramTypes = ReflectionUtils.getClasses(fields);
-        Constructor constructor = ReflectUtil.getConstructor(clazz, (Class[])paramTypes);
+
+        final Class<?>[] paramTypes = getClasses(fields);
+        final Constructor<T> constructor = ReflectUtil.getConstructor(clazz, paramTypes);
         if (null == constructor) {
-            throw new BootException("No Constructor matched for parameter types: [{}]");
+            throw new BootException(
+                    "No Constructor matched for parameter types: [{}]");
         }
         try {
-            return (T) constructor.newInstance(params);
-        }
-        catch (Exception e) {
+            return constructor.newInstance(params);
+        } catch (Exception e) {
             throw new BootException("Instance class [{}] error!");
         }
     }
 
+    /**
+     * 获取字段类型列表
+     * @param fields 字段列表
+     * @return 字段类型列表
+     * @since 2022-03-28 11:18:46
+     */
     public static Class<?>[] getClasses(List<Field> fields) {
-        Class[] classes = new Class[fields.size()];
-        for (int i = 0; i < fields.size(); ++i) {
+        Class<?>[] classes = new Class<?>[fields.size()];
+        for (int i = 0; i < fields.size(); i++) {
             Field field = fields.get(i);
             classes[i] = field.getType();
         }
         return classes;
     }
 
+    /**
+     * 校验字段是否存在
+     * @param dtoClass dto类型
+     * @param entityClass 实体类型
+     * @return 结果
+     * @since 2021-10-13 17:36:08
+     */
     public static Boolean checkField(Class<?> dtoClass, Class<?> entityClass) {
-        Field field;
-        String filedName;
         Field[] declaredFields = dtoClass.getDeclaredFields();
         RecordComponent[] recordComponents = dtoClass.getRecordComponents();
-        if (declaredFields.length == 0 && (Objects.isNull(recordComponents) || recordComponents.length == 0)) {
-            throw new BusinessException("\u5b57\u6bb5\u53c2\u6570\u4e0d\u5b58\u5728");
+
+        if (declaredFields.length == 0) {
+            if (Objects.isNull(recordComponents) || recordComponents.length == 0) {
+                throw new BusinessException("字段参数不存在");
+            }
         }
+
         if (declaredFields.length != 0) {
-            for (AnnotatedElement annotatedElement : declaredFields) {
-                filedName = ((Field)annotatedElement).getName();
-                if ("serialVersionUID".equals(filedName) || !Objects.isNull(field = ReflectionUtils.findField(entityClass, filedName))) continue;
-                throw new BusinessException(filedName + "\u5b57\u6bb5\u503c\u9519\u8bef");
+            for (Field declaredField : declaredFields) {
+                String filedName = declaredField.getName();
+
+                if (!"serialVersionUID".equals(filedName)) {
+                    Field field = ReflectionUtils.findField(entityClass, filedName);
+                    if (Objects.isNull(field)) {
+                        throw new BusinessException(filedName + "字段值错误");
+                    }
+                }
             }
         }
+
         if (Objects.nonNull(recordComponents) && recordComponents.length != 0) {
-            for (AnnotatedElement annotatedElement : recordComponents) {
-                filedName = ((RecordComponent)annotatedElement).getName();
-                if ("serialVersionUID".equals(filedName) || !Objects.isNull(field = ReflectionUtils.findField(entityClass, filedName))) continue;
-                throw new BusinessException(filedName + "\u5b57\u6bb5\u503c\u9519\u8bef");
+            for (RecordComponent recordComponent : recordComponents) {
+                String filedName = recordComponent.getName();
+                if (!"serialVersionUID".equals(filedName)) {
+                    Field field = ReflectionUtils.findField(entityClass, filedName);
+                    if (Objects.isNull(field)) {
+                        throw new BusinessException(filedName + "字段值错误");
+                    }
+                }
             }
         }
+
         return true;
     }
 
+    /**
+     * 校验字段
+     * @param filedName 字段名称
+     * @param entityClass 实体类
+     * @return {@link Boolean }
+     * @since 2021-10-13 17:36:08
+     */
     public static Boolean checkField(String filedName, Class<?> entityClass) {
-        Field field;
-        if (!"serialVersionUID".equals(filedName) && Objects.isNull(field = ReflectionUtils.findField(entityClass, filedName))) {
-            throw new BusinessException(filedName + "\u5b57\u6bb5\u503c\u9519\u8bef");
+        if (!"serialVersionUID".equals(filedName)) {
+            Field field = ReflectionUtils.findField(entityClass, filedName);
+            if (Objects.isNull(field)) {
+                throw new BusinessException(filedName + "字段值错误");
+            }
         }
+
         return true;
     }
 
+    /**
+     * 获取值
+     * @param obj 对象
+     * @param path 路径
+     * @param deft 默认值
+     * @return 字段值
+     * @since 2021-09-02 15:04:43
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T tryGetValue(Object obj, String path, T deft) {
         if (obj == null || path == null || path.length() == 0) {
             return deft;
         }
         Object object = obj;
         for (String name : path.split("\\.")) {
-            if (object == null) break;
-            Object value = ReflectionUtils.tryGetFieldValue(object, name, null);
-            object = value == null ? ReflectionUtils.tryCallMethod(object, name, null, null) : value;
+            if (object == null) {
+                break;
+            }
+            Object value = tryGetFieldValue(object, name, null);
+            if (value == null) {
+                object = tryCallMethod(object, name, null, null);
+            } else {
+                object = value;
+            }
         }
-        return (T)(object == null ? deft : object);
+        return object == null ? deft : (T) object;
     }
 
+    /**
+     * 获取字段值
+     * @param obj 对象
+     * @param path 路径
+     * @return 字段值
+     * @since 2021-09-02 15:04:53
+     */
     public static <T> T tryGetValue(Object obj, String path) {
-        return ReflectionUtils.tryGetValue(obj, path, null);
+        return tryGetValue(obj, path, null);
     }
 }
-

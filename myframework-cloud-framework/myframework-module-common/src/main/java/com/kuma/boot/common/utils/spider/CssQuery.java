@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.spider;
 
 import java.lang.annotation.Documented;
@@ -10,21 +23,57 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(value={ElementType.FIELD, ElementType.TYPE})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * xml CssQuery
+ *
+ * @author kuma
+ * @version 2022.09
+ * @since 2023-01-03 11:30:38
+ */
+@Target({ElementType.FIELD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 public @interface CssQuery {
-    public static final int DEFAULT_REGEX_GROUP = 0;
 
-    public String value();
+    /**
+     * CssQuery
+     * @return {@link String }
+     * @since 2023-01-03 11:30:38
+     */
+    String value();
 
-    public String attr() default "";
+    /**
+     * 读取的 dom attr
+     *
+     * <p>
+     * attr：元素对于的 attr 的值 html：整个元素的html text：元素内文本 allText：多个元素的文本值
+     * @return {@link String }
+     * @since 2023-01-03 11:30:38
+     */
+    String attr() default "";
 
-    public String regex() default "";
+    /**
+     * 正则，用于对 attr value 处理
+     * @return {@link String }
+     * @since 2023-01-03 11:30:38
+     */
+    String regex() default "";
 
-    public int regexGroup() default 0;
+    /** 默认regex组 默认的正则 group */
+    int DEFAULT_REGEX_GROUP = 0;
 
-    public boolean inner() default false;
+    /**
+     * 正则 group，默认为 0
+     * @return int
+     * @since 2023-01-03 11:30:39
+     */
+    int regexGroup() default DEFAULT_REGEX_GROUP;
+
+    /**
+     * 嵌套的内部模型：默认 false
+     * @return boolean
+     * @since 2023-01-03 11:30:39
+     */
+    boolean inner() default false;
 }
-

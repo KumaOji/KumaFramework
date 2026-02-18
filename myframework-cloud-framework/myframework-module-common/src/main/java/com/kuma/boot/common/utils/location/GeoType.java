@@ -1,14 +1,46 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.location;
 
-import com.kuma.boot.common.utils.location.GeoPoint;
-import com.kuma.boot.common.utils.location.GeoUtil;
-
+/**
+ * 各坐标系之间的转换工具类
+ * <p>
+ * 参考：<a href="https://github.com/JourWon/coordinate-transform">coordinate-transform</a>
+ * <p>
+ * WGS84坐标系：即地球坐标系，国际上通用的坐标系。设备一般包含GPS芯片或者北斗芯片获取的经纬度为WGS84地理坐标系。
+ * 谷歌地图采用的是WGS84地理坐标系（中国范围除外,谷歌中国地图采用的是GCJ02地理坐标系。)
+ * <p>
+ * GCJ02坐标系：即火星坐标系，WGS84坐标系经加密后的坐标系。
+ * 出于国家安全考虑，国内所有导航电子地图必须使用国家测绘局制定的加密坐标系统，即将一个真实的经纬度坐标加密成一个不正确的经纬度坐标。
+ * <p>
+ * BD09坐标系：即百度坐标系，GCJ02坐标系经加密后的坐标系。搜狗坐标系、图吧坐标系等，估计也是在GCJ02基础上加密而成的。
+ * <p>
+ * 高德MapABC地图API 火星坐标 腾讯搜搜地图API 火星坐标 阿里云地图API 火星坐标 灵图51ditu地图API 火星坐标
+ * <p>
+ * 百度地图API 百度坐标 搜狐搜狗地图API 搜狗坐标 图吧MapBar地图API 图吧坐标
+ *
+ * @author JourWon、hutool、L.cm
+ */
 public enum GeoType {
-    WGS84("WGS84", "\u5730\u7403\u5750\u6807\u7cfb\uff0c\u56fd\u9645\u901a\u7528\u5750\u6807\u7cfb"){
 
+    /**
+     * WGS84
+     */
+    WGS84("WGS84", "地球坐标系，国际通用坐标系") {
         @Override
         public GeoPoint toWGS84(double lon, double lat) {
             return new GeoPoint(lon, lat);
@@ -23,10 +55,8 @@ public enum GeoType {
         public GeoPoint toBD09(double lon, double lat) {
             return GeoUtil.wgs84ToBd09(lon, lat);
         }
-    }
-    ,
-    GCJ02("GCJ02", "\u706b\u661f\u5750\u6807\u7cfb\uff0c\u9ad8\u5fb7\u3001\u817e\u8baf\u3001\u963f\u91cc\u7b49\u4f7f\u7528"){
-
+    },
+    GCJ02("GCJ02", "火星坐标系，高德、腾讯、阿里等使用") {
         @Override
         public GeoPoint toWGS84(double lon, double lat) {
             return GeoUtil.gcj02ToWgs84(lon, lat);
@@ -41,10 +71,8 @@ public enum GeoType {
         public GeoPoint toBD09(double lon, double lat) {
             return GeoUtil.gcj02ToBd09(lon, lat);
         }
-    }
-    ,
-    BD09("BD09", "\u767e\u5ea6\u5750\u6807\u7cfb\uff0c\u767e\u5ea6\u3001\u641c\u72d7\u7b49\u4f7f\u7528"){
-
+    },
+    BD09("BD09", "百度坐标系，百度、搜狗等使用") {
         @Override
         public GeoPoint toWGS84(double lon, double lat) {
             return GeoUtil.bd09toWgs84(lon, lat);
@@ -62,25 +90,43 @@ public enum GeoType {
     };
 
     private final String type;
+
     private final String desc;
 
-    private GeoType(String type, String desc) {
+    GeoType(String type, String desc) {
         this.type = type;
         this.desc = desc;
     }
 
-    public abstract GeoPoint toWGS84(double var1, double var3);
+    /**
+     * 转换成 地球坐标系
+     * @param lon lon
+     * @param lat lat
+     * @return GeoPoint
+     */
+    public abstract GeoPoint toWGS84(double lon, double lat);
 
-    public abstract GeoPoint toGCJ02(double var1, double var3);
+    /**
+     * 转换成 火星坐标系
+     * @param lon lon
+     * @param lat lat
+     * @return GeoPoint
+     */
+    public abstract GeoPoint toGCJ02(double lon, double lat);
 
-    public abstract GeoPoint toBD09(double var1, double var3);
+    /**
+     * 转换成 百度坐标系
+     * @param lon lon
+     * @param lat lat
+     * @return GeoPoint
+     */
+    public abstract GeoPoint toBD09(double lon, double lat);
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
     public String getDesc() {
-        return this.desc;
+        return desc;
     }
 }
-

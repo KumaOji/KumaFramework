@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.network;
 
 import java.net.DatagramSocket;
@@ -12,84 +25,114 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * IP地址的工具类
+ */
 public final class IpAddressUtils {
+
+    /**
+     * 根据网卡获取IP
+     * @return IP集合
+     */
     public static List<Inet4Address> getLocalIp4AddressFromNetworkInterface() {
-        ArrayList<Inet4Address> addresses = new ArrayList<Inet4Address>(1);
+        List<Inet4Address> addresses = new ArrayList<>(1);
         try {
             Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
             if (e != null) {
                 while (e.hasMoreElements()) {
                     NetworkInterface n = e.nextElement();
-                    if (!IpAddressUtils.isValidInterface(n)) continue;
+                    if (!isValidInterface(n)) {
+                        continue;
+                    }
                     Enumeration<InetAddress> ee = n.getInetAddresses();
                     while (ee.hasMoreElements()) {
                         InetAddress i = ee.nextElement();
-                        if (!IpAddressUtils.isValidAddress(i)) continue;
-                        addresses.add((Inet4Address)i);
+                        if (isValidAddress(i)) {
+                            addresses.add((Inet4Address) i);
+                        }
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (e instanceof RuntimeException) {
-                throw (RuntimeException)e;
+                throw (RuntimeException) e;
             }
             throw new RuntimeException(e);
         }
         return addresses;
     }
 
+    /**
+     * 过滤回环网卡、点对点网卡、非活动网卡
+     * @param ni 网卡
+     * @return 如果满足要求则true，否则false
+     */
     private static boolean isValidInterface(NetworkInterface ni) {
         try {
             return !ni.isLoopback() && !ni.isPointToPoint() && ni.isUp() && !ni.isVirtual();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * 判断是否是IPv4，并且内网地址并过滤回环地址.
+     */
     private static boolean isValidAddress(InetAddress address) {
-        return address instanceof Inet4Address && address.isSiteLocalAddress() && !address.isLoopbackAddress();
+        return address instanceof Inet4Address
+                && address.isSiteLocalAddress()
+                && !address.isLoopbackAddress();
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
+    /**
+     * 通过Socket获取IP
+     * @return IP
      */
     public static Optional<Inet4Address> getIpBySocket() {
-        try (DatagramSocket socket = new DatagramSocket();){
+        try (final DatagramSocket socket = new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
             if (socket.getLocalAddress() instanceof Inet4Address) {
-                Optional<Inet4Address> optional = Optional.of((Inet4Address)socket.getLocalAddress());
-                return optional;
+                return Optional.of((Inet4Address) socket.getLocalAddress());
             }
-            Optional<Inet4Address> optional = Optional.empty();
-            return optional;
-        }
-        catch (Exception e) {
+            return Optional.empty();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * 获取IP地址 如果本地只有一个网络地址就使用该的地址 否则(多个的情况) 获取外网地址
+     * @return IP
+     */
     public static Optional<Inet4Address> getLocalIp4Address() {
-        List<Inet4Address> ipByNi = IpAddressUtils.getLocalIp4AddressFromNetworkInterface();
+        final List<Inet4Address> ipByNi = getLocalIp4AddressFromNetworkInterface();
         if (ipByNi.size() != 1) {
-            Optional<Inet4Address> ipBySocketOpt = IpAddressUtils.getIpBySocket();
+            final Optional<Inet4Address> ipBySocketOpt = getIpBySocket();
             if (ipBySocketOpt.isPresent()) {
                 return ipBySocketOpt;
+            } else {
+                return ipByNi.isEmpty() ? Optional.empty() : Optional.of(ipByNi.get(0));
             }
-            return ipByNi.isEmpty() ? Optional.empty() : Optional.of(ipByNi.get(0));
         }
         return Optional.of(ipByNi.get(0));
     }
 
+    /**
+     * 获取IP地址
+     * @return IP
+     */
     public static String getLocalIp() {
-        return IpAddressUtils.getLocalIp4Address().map(Inet4Address::getHostAddress).orElseThrow(() -> new UnsupportedOperationException("\u65e0\u6cd5\u83b7\u53d6\u672c\u5730IP"));
+        return getLocalIp4Address()
+                .map(Inet4Address::getHostAddress)
+                .orElseThrow(() -> new UnsupportedOperationException("无法获取本地IP"));
     }
 
+    /**
+     * 获取IP地址
+     * @param defaultIp 如果没获取到，使用默认的
+     * @return IP
+     */
     public static String getLocalIp(String defaultIp) {
-        return IpAddressUtils.getLocalIp4Address().map(Inet4Address::getHostAddress).orElse(defaultIp);
+        return getLocalIp4Address().map(Inet4Address::getHostAddress).orElse(defaultIp);
     }
 }
-

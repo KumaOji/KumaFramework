@@ -1,12 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Sets
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
 import com.google.common.collect.Sets;
+import com.kuma.boot.common.constant.FileProtocolConstants;
+import com.kuma.boot.common.constant.PackageConstants;
+import com.kuma.boot.common.constant.PunctuationConstants;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.common.ArgUtils;
@@ -20,96 +33,157 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/** 包工具类 */
 public final class PackageUtils {
-    public static String getPackageName(Class clazz) {
+
+    /**
+     * 获取包名称
+     * @param clazz 类
+     * @return 包名称
+     */
+    public static String getPackageName(final Class clazz) {
         return clazz.getPackage().getName();
     }
 
-    public static String getSlimPackageName(String fullPackageName) {
+    /**
+     * 获取简化包名称 1. 针对 com.github.kuma.PackageUtil 简化为 c.g.h.PackageUtil
+     * @param fullPackageName 包名称
+     * @return 包名称
+     */
+    public static String getSlimPackageName(final String fullPackageName) {
         if (StringUtils.isEmpty(fullPackageName)) {
             return fullPackageName;
         }
+
+        // 简化
         String[] strings = fullPackageName.split("\\.");
-        ArrayList<Object> newList = new ArrayList<Object>(strings.length);
-        for (int i = 0; i < strings.length - 1; ++i) {
+        // 如果只有1
+        List<String> newList = new ArrayList<>(strings.length);
+        for (int i = 0; i < strings.length - 1; i++) {
             String text = strings[i];
-            String firstChar = "" + text.charAt(0);
+            String firstChar = text.charAt(0) + "";
             newList.add(firstChar);
         }
+        // 添加最后一个元素
         newList.add(strings[strings.length - 1]);
+
         return StringUtils.join(newList, ".");
     }
 
-    public static boolean isSamePackage(String packageName, Class clazz) {
-        String targetPackage = PackageUtils.getPackageName(clazz);
+    /**
+     * 是否在同一个包下
+     * @param packageName 包名称
+     * @param clazz 目标类
+     * @return 是否
+     */
+    public static boolean isSamePackage(final String packageName, final Class clazz) {
+        final String targetPackage = getPackageName(clazz);
         return packageName.equals(targetPackage);
     }
 
-    public static boolean isJavaLangPackage(Class clazz) {
-        String packageName = PackageUtils.getPackageName(clazz);
-        return "java.lang".equals(packageName);
+    /**
+     * 是否为 java.lang 包的类，不包含子包
+     * @param clazz 类信息
+     * @return 是否
+     */
+    public static boolean isJavaLangPackage(final Class clazz) {
+        final String packageName = getPackageName(clazz);
+        return PackageConstants.JAVA_LANG.equals(packageName);
     }
 
-    public static Set<String> scanPackageClassNameSet(String packageName) {
+    /**
+     * 扫描包中对应的类集合
+     * @param packageName 包名称
+     * @return 结果列表
+     */
+    public static Set<String> scanPackageClassNameSet(final String packageName) {
         ArgUtils.notEmpty(packageName, "packageNames");
-        HashSet classNameSet = Sets.newHashSet();
+
+        Set<String> classNameSet = Sets.newHashSet();
         String packageDirName = packageName.replace('.', '/');
+
         try {
-            Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+            Enumeration<URL> dirs =
+                    Thread.currentThread().getContextClassLoader().getResources(packageDirName);
             while (dirs.hasMoreElements()) {
                 URL url = dirs.nextElement();
                 String protocol = url.getProtocol();
-                if ("file".equals(protocol)) {
-                    Object[] files;
+
+                // 文件处理
+                if (FileProtocolConstants.FILE.equals(protocol)) {
                     String filePath = URLDecoder.decode(url.getFile(), StandardCharsets.UTF_8);
                     File file = new File(filePath);
-                    if (!file.isDirectory() || !ArrayUtils.isNotEmpty(files = file.listFiles())) continue;
-                    for (Object entry : files) {
-                        PackageUtils.recursiveFile(packageName, (File)entry, classNameSet);
+
+                    // 递归处理下面的文件明细
+                    if (file.isDirectory()) {
+                        File[] files = file.listFiles();
+                        if (ArrayUtils.isNotEmpty(files)) {
+                            for (File entry : files) {
+                                recursiveFile(packageName, entry, classNameSet);
+                            }
+                        }
                     }
-                    continue;
-                }
-                if ("jar".equals(protocol)) {
-                    JarURLConnection jarURLConnection = (JarURLConnection)url.openConnection();
+                } else if (FileProtocolConstants.JAR.equals(protocol)) {
+                    JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
                     JarFile jarFile = jarURLConnection.getJarFile();
                     Enumeration<JarEntry> jarEntryEnumeration = jarFile.entries();
                     jarEntryEnumeration.nextElement();
                     while (jarEntryEnumeration.hasMoreElements()) {
                         JarEntry jarEntry = jarEntryEnumeration.nextElement();
+
                         jarEntry.isDirectory();
-                        LogUtils.info("jar " + jarEntry.getName(), new Object[0]);
+                        LogUtils.info("jar " + jarEntry.getName());
                     }
-                    continue;
+                } else {
+                    // jar 处理
+                    System.err.println("Not support protocol: " + protocol);
                 }
-                System.err.println("Not support protocol: " + protocol);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new BootException(e);
         }
+
         return classNameSet;
     }
 
-    private static void recursiveFile(String packageNamePrefix, File file, Set<String> classNameSet) {
+    /**
+     * 递归处理文件信息
+     *
+     * <p>
+     * （1）如果是文件夹
+     *
+     * <p>
+     * （2）如果是文件 跳过特殊标志的信息 $ 这个怎么处理？ Proxy.isProxyClass(XXX)
+     * @param packageNamePrefix 包名称前缀
+     * @param file 根路径
+     * @param classNameSet 类的全称信息集合
+     */
+    private static void recursiveFile(
+            String packageNamePrefix, final File file, final Set<String> classNameSet) {
+        // 如果是文件
         if (file.isFile()) {
+            // 比较简单的方式是获取对应的 class 全称。
             String fileName = file.getName().split("\\.")[0];
-            String className = (String)packageNamePrefix + "." + fileName;
+            String className = packageNamePrefix + PunctuationConstants.DOT + fileName;
+
             classNameSet.add(className);
-        } else if (file.isDirectory()) {
-            Object[] files = file.listFiles();
-            String dirName = file.getName();
-            packageNamePrefix = (String)packageNamePrefix + "." + dirName;
-            if (ArrayUtils.isNotEmpty(files)) {
-                for (Object fileEntry : files) {
-                    PackageUtils.recursiveFile((String)packageNamePrefix, (File)fileEntry, classNameSet);
+        } else {
+            if (file.isDirectory()) {
+                File[] files = file.listFiles();
+                String dirName = file.getName();
+                packageNamePrefix = packageNamePrefix + PunctuationConstants.DOT + dirName;
+                if (ArrayUtils.isNotEmpty(files)) {
+                    for (File fileEntry : files) {
+                        // 递归处理
+                        recursiveFile(packageNamePrefix, fileEntry, classNameSet);
+                    }
                 }
             }
         }
     }
 }
-

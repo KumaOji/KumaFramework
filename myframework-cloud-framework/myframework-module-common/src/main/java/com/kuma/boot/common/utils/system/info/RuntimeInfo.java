@@ -1,38 +1,96 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.system.info;
 
 import java.io.Serializable;
 
-public class RuntimeInfo
-implements Serializable {
+/**
+ * 运行时信息，包括内存总大小、已用大小、可用大小等
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:26:16
+ */
+public class RuntimeInfo implements Serializable {
+
     private final transient Runtime currentRuntime = Runtime.getRuntime();
 
+    /**
+     * 获得运行时对象
+     *
+     * @since 2021-09-02 19:26:20
+     */
     public final Runtime getRuntime() {
-        return this.currentRuntime;
+        return currentRuntime;
     }
 
+    /**
+     * 获得JVM最大可用内存
+     *
+     * @since 2021-09-02 19:26:20
+     */
     public final long getMaxMemory() {
-        return this.currentRuntime.maxMemory();
+        return currentRuntime.maxMemory();
     }
 
+    /**
+     * 获得JVM已分配内存
+     *
+     * @since 2021-09-02 19:26:20
+     */
     public final long getTotalMemory() {
-        return this.currentRuntime.totalMemory();
+        return currentRuntime.totalMemory();
     }
 
+    /**
+     * 获得JVM已分配内存中的剩余空间
+     *
+     * @since 2021-09-02 19:26:20
+     */
     public final long getFreeMemory() {
-        return this.currentRuntime.freeMemory();
+        return currentRuntime.freeMemory();
     }
 
+    /**
+     * 获得JVM最大可用内存
+     *
+     * @since 2021-09-02 19:26:20
+     */
     public final long getUsableMemory() {
-        return this.currentRuntime.maxMemory() - this.currentRuntime.totalMemory() + this.currentRuntime.freeMemory();
+        return currentRuntime.maxMemory()
+                - currentRuntime.totalMemory()
+                + currentRuntime.freeMemory();
     }
 
+    @Override
     public String toString() {
+
         StringBuilder builder = new StringBuilder();
-        builder.append("Runtime:         ").append(this.getRuntime()).append("\nMax Memory:      ").append(this.getMaxMemory()).append("\nTotal Memory:    ").append(this.getTotalMemory()).append("\nFree Memory:     ").append(this.getFreeMemory()).append("\nUsable Memory:   ").append(this.getUsableMemory());
+        builder.append("Runtime:         ")
+                .append(getRuntime())
+                .append("\nMax Memory:      ")
+                .append(getMaxMemory())
+                .append("\nTotal Memory:    ")
+                .append(getTotalMemory())
+                .append("\nFree Memory:     ")
+                .append(getFreeMemory())
+                .append("\nUsable Memory:   ")
+                .append(getUsableMemory());
+
         return builder.toString();
     }
 }
-

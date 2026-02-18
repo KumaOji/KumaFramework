@@ -77,6 +77,7 @@ jjwt = "0.12.6"
 caffeine = "3.1.8"
 swagger-annotations-jakarta = "2.2.25"
 javax-json-api = "1.1.4"
+javax-json-impl = "1.1.4"
 
 ## 统一定义依赖
 [libraries]
@@ -148,6 +149,7 @@ jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jack
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-datatype-jsr353 = { module = "tools.jackson.datatype:jackson-datatype-jsr353", version.ref = "jackson" }
 javax-json-api = { module = "javax.json:javax.json-api", version.ref = "javax-json-api" }
+javax-json-impl = { module = "org.glassfish:javax.json", version.ref = "javax-json-impl" }
 orika-core = { module = "ma.glasnost.orika:orika-core", version.ref = "orika" }
 hessian = { module = "com.caucho:hessian", version.ref = "hessian" }
 transmittable-thread-local = { module = "com.alibaba:transmittable-thread-local", version.ref = "transmittable-thread-local" }

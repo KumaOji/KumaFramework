@@ -1,18 +1,48 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.spel;
 
 import java.lang.reflect.Method;
 
+/**
+ * ExpressionRootObject
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
 public class ExpressionRootObject {
+
     private final Method method;
+
     private final Object[] args;
+
     private final Object target;
+
     private final Class<?> targetClass;
+
     private final Method targetMethod;
 
-    public ExpressionRootObject(Method method, Object[] args, Object target, Class<?> targetClass, Method targetMethod) {
+    public ExpressionRootObject(
+            Method method,
+            Object[] args,
+            Object target,
+            Class<?> targetClass,
+            Method targetMethod) {
         this.method = method;
         this.args = args;
         this.target = target;
@@ -21,23 +51,22 @@ public class ExpressionRootObject {
     }
 
     public Method getMethod() {
-        return this.method;
+        return method;
     }
 
     public Object[] getArgs() {
-        return this.args;
+        return args;
     }
 
     public Object getTarget() {
-        return this.target;
+        return target;
     }
 
     public Class<?> getTargetClass() {
-        return this.targetClass;
+        return targetClass;
     }
 
     public Method getTargetMethod() {
-        return this.targetMethod;
+        return targetMethod;
     }
 }
-

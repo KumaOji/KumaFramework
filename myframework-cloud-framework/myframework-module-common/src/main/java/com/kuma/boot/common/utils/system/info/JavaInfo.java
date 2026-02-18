@@ -1,32 +1,76 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.system.info;
 
 import java.io.Serializable;
 
-public class JavaInfo
-implements Serializable {
+/**
+ * JavaInfo
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:22:37
+ */
+public class JavaInfo implements Serializable {
+
     private final String JAVA_VERSION = System.getProperty("java.version", null);
+
     private final String JAVA_VENDOR = System.getProperty("java.vendor", null);
+
     private final String JAVA_VENDOR_URL = System.getProperty("java.vendor.url", null);
 
+    /**
+     * 取得当前Java impl的版本
+     * @return 属性值，如果不能取得（因为Java安全限制）或值不存在，则返回null
+     * @since 2021-09-02 19:22:49
+     */
     public final String getVersion() {
-        return this.JAVA_VERSION;
+        return JAVA_VERSION;
     }
 
+    /**
+     * 取得当前Java impl.的厂商
+     * @return 属性值，如果不能取得（因为Java安全限制）或值不存在，则返回null
+     * @since 2021-09-02 19:22:49
+     */
     public final String getVendor() {
-        return this.JAVA_VENDOR;
+        return JAVA_VENDOR;
     }
 
+    /**
+     * 取得当前Java impl.的厂商网站的URL
+     * @return 属性值，如果不能取得（因为Java安全限制）或值不存在，则返回null
+     * @since 2021-09-02 19:22:49
+     */
     public final String getVendorURL() {
-        return this.JAVA_VENDOR_URL;
+        return JAVA_VENDOR_URL;
     }
 
+    @Override
     public final String toString() {
+
         StringBuilder builder = new StringBuilder();
-        builder.append("Java Version:    ").append(this.getVersion()).append("\nJava Vendor:     ").append(this.getVendor()).append("\nJava Vendor URL: ").append(this.getVendorURL());
+        builder.append("Java Version:    ")
+                .append(getVersion())
+                .append("\nJava Vendor:     ")
+                .append(getVendor())
+                .append("\nJava Vendor URL: ")
+                .append(getVendorURL());
+
         return builder.toString();
     }
 }
-

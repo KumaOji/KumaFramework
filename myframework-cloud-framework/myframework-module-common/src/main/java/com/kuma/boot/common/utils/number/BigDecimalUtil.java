@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.number;
 
 import java.math.BigDecimal;
@@ -10,71 +23,109 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/** BigDecimal相关的工具类 */
 public class BigDecimalUtil {
+
+    /** 价钱保留几位小数 */
     public static final int CURRENCY_DECIMAL_PLACES = 2;
 
-    public static BigDecimal add(BigDecimal first, BigDecimal ... lastArgs) {
+    /**
+     * 加法
+     * @param first 加数
+     * @param lastArgs 加数
+     * @return 结果
+     */
+    public static BigDecimal add(BigDecimal first, BigDecimal... lastArgs) {
+
         int argsLength = lastArgs.length;
         BigDecimal result = new BigDecimal("0.00");
         if (first != null) {
             result = result.add(first);
         }
-        for (int i = 0; i < argsLength; ++i) {
+        for (int i = 0; i < argsLength; i++) {
             lastArgs[i] = lastArgs[i] == null ? new BigDecimal("0.00") : lastArgs[i];
             result = result.add(lastArgs[i]);
         }
-        result = result.setScale(2, RoundingMode.UP);
+        result = result.setScale(CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
         return result;
     }
 
-    public static BigDecimal subtract(BigDecimal first, BigDecimal ... lastArgs) {
+    /**
+     * 减法
+     * @param first 被减数
+     * @param lastArgs 减数
+     * @return 结果
+     */
+    public static BigDecimal subtract(BigDecimal first, BigDecimal... lastArgs) {
+
         int argsLength = lastArgs.length;
         BigDecimal result = new BigDecimal("0.00");
         if (first != null) {
             result = result.add(first);
         }
-        for (int i = 0; i < argsLength; ++i) {
+        for (int i = 0; i < argsLength; i++) {
             lastArgs[i] = lastArgs[i] == null ? new BigDecimal("0.00") : lastArgs[i];
             result = result.subtract(lastArgs[i]);
         }
-        result = result.setScale(2, RoundingMode.UP);
+        result = result.setScale(CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
         return result;
     }
 
-    public static BigDecimal multiply(BigDecimal first, BigDecimal ... lastArgs) {
+    /**
+     * 乘法
+     * @param first 乘数
+     * @param lastArgs 乘数
+     * @return 结果
+     */
+    public static BigDecimal multiply(BigDecimal first, BigDecimal... lastArgs) {
+
         int argsLength = lastArgs.length;
         BigDecimal result = new BigDecimal("0.00");
         if (first != null) {
             result = result.add(first);
         }
-        for (int i = 0; i < argsLength; ++i) {
+        for (int i = 0; i < argsLength; i++) {
             if (result.compareTo(new BigDecimal("0.00")) == 0) {
                 return result;
             }
             lastArgs[i] = lastArgs[i] == null ? new BigDecimal("0.00") : lastArgs[i];
             result = result.multiply(lastArgs[i]);
         }
-        result = result.setScale(2, RoundingMode.UP);
+        result = result.setScale(CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
         return result;
     }
 
-    public static BigDecimal divide(BigDecimal first, BigDecimal ... lastArgs) {
+    /**
+     * 除法
+     * @param first 被除数
+     * @param lastArgs 除数
+     * @return 结果
+     */
+    public static BigDecimal divide(BigDecimal first, BigDecimal... lastArgs) {
+
         int argsLength = lastArgs.length;
         BigDecimal result = new BigDecimal("0.00");
         if (first != null) {
             result = result.add(first);
         }
-        for (int i = 0; i < argsLength; ++i) {
+        for (int i = 0; i < argsLength; i++) {
             if (result.compareTo(new BigDecimal("0.00")) == 0) {
                 return result;
             }
             lastArgs[i] = lastArgs[i] == null ? new BigDecimal("1.00") : lastArgs[i];
-            result = result.divide(lastArgs[i], 2, RoundingMode.UP);
+            result = result.divide(lastArgs[i], CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
         }
-        result = result.setScale(2, RoundingMode.UP);
+        result = result.setScale(CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
         return result;
     }
 
+    /**
+     * 比较大小 first > last =1 / first == last = 0 / first < last = -1
+     * @param first 数字1
+     * @param last 数字2
+     * @return int
+     * @since 2022-09-19 16:34:20
+     */
     public static int compareTo(BigDecimal first, BigDecimal last) {
         BigDecimal newFirst = BigDecimal.ZERO;
         BigDecimal newLast = BigDecimal.ZERO;
@@ -87,32 +138,71 @@ public class BigDecimalUtil {
         return newFirst.compareTo(newLast);
     }
 
+    /**
+     * 获取两位小数的Zero
+     * @return 两位小数的Zero
+     */
     public static BigDecimal getZero() {
+
         BigDecimal result = new BigDecimal("0.00");
-        result = result.setScale(2, RoundingMode.UP);
+        result = result.setScale(CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
         return result;
     }
 
+    /**
+     * 字符串转BigDecimal两位小数
+     * @param first 要转换的字符串
+     * @return BigDecimal两位小数
+     */
     public static BigDecimal convertStringToBigDecimal(String first) {
-        return BigDecimal.valueOf(Double.parseDouble(first)).setScale(2, RoundingMode.UP);
+
+        return BigDecimal.valueOf(Double.parseDouble(first))
+                .setScale(CURRENCY_DECIMAL_PLACES, RoundingMode.UP);
     }
 
+    /**
+     * BigDecimal转字符串
+     * @param first 要转换的bigDecimal
+     * @return 转换后的字符串
+     */
     public static String toString(BigDecimal first) {
+
         NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.US);
         if (first == null) {
             return currency.format(new BigDecimal("0.00"));
+        } else {
+            return currency.format(first);
         }
-        return currency.format(first);
     }
 
-    public static <E> Map<E, BigDecimal> averageNumber(BigDecimal totalNumber, Map<E, BigDecimal> items) {
-        return BigDecimalUtil.averageNumber(totalNumber, items, 2, RoundingMode.UP);
+    /**
+     * 按比例拆分,用于价格拆分的场景
+     * @param totalNumber 需要拆分的价格
+     * @param items 需要拆分的项，以及每项所占的比例
+     * @return 拆分后每项的价格
+     */
+    public static <E> Map<E, BigDecimal> averageNumber(
+            BigDecimal totalNumber, Map<E, BigDecimal> items) {
+        return averageNumber(totalNumber, items, 2, RoundingMode.UP);
     }
 
-    public static <E> Map<E, BigDecimal> averageNumber(BigDecimal totalNumber, Map<E, BigDecimal> items, int scale, RoundingMode roundingMode) {
+    /**
+     * 按比例拆分给定的数字,用于价格拆分的场景
+     * @param totalNumber 需要拆分的价格
+     * @param items 需要拆分的项，key 为每项的唯一标识，value为每项的数字
+     * @param scale 需要保留的位数
+     * @param roundingMode 舍入模式
+     * @return 拆分后每项的数字
+     */
+    public static <E> Map<E, BigDecimal> averageNumber(
+            BigDecimal totalNumber,
+            Map<E, BigDecimal> items,
+            int scale,
+            RoundingMode roundingMode) {
         BigDecimal number = items.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal remainderNumber = totalNumber;
-        LinkedHashMap<E, BigDecimal> result = new LinkedHashMap<E, BigDecimal>();
+        Map<E, BigDecimal> result = new LinkedHashMap<>();
+
         int i = 1;
         for (Map.Entry<E, BigDecimal> entry : items.entrySet()) {
             if (i == items.entrySet().size()) {
@@ -121,13 +211,16 @@ public class BigDecimalUtil {
             }
             BigDecimal value = BigDecimal.ZERO;
             if (BigDecimal.ZERO.compareTo(number) != 0) {
-                value = totalNumber.multiply(entry.getValue()).divide(number, scale, roundingMode);
+                value =
+                        (totalNumber.multiply(entry.getValue()))
+                                .divide(number, scale, roundingMode);
             }
+
             result.put(entry.getKey(), value);
             remainderNumber = remainderNumber.subtract(value);
-            ++i;
+            i += 1;
         }
+
         return result;
     }
 }
-

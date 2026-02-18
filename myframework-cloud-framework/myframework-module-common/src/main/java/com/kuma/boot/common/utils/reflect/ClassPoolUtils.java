@@ -1,39 +1,54 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  javassist.ClassPath
- *  javassist.ClassPool
- *  javassist.LoaderClassPath
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
-import javassist.ClassPath;
 import javassist.ClassPool;
 import javassist.LoaderClassPath;
 
+/**
+ * ClassPoolUtil v
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 17:44:33
+ */
 public class ClassPoolUtils {
+
+    private ClassPoolUtils() {}
+
+    /** instance */
     public static volatile ClassPool instance;
 
-    private ClassPoolUtils() {
-    }
-
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
+    /**
+     * 获取对象池
+     * @return 对象池
+     * @since 2021-09-02 17:44:24
      */
     public static ClassPool getInstance() {
-        if (instance != null) return instance;
-        Class<ClassPoolUtils> clazz = ClassPoolUtils.class;
-        synchronized (ClassPoolUtils.class) {
-            if (instance != null) return instance;
-            ClassPool aDefault = ClassPool.getDefault();
-            aDefault.appendClassPath((ClassPath)new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
-            instance = aDefault;
-            // ** MonitorExit[var0] (shouldn't be in output)
-            return instance;
+        if (instance == null) {
+            synchronized (ClassPoolUtils.class) {
+                if (instance == null) {
+                    ClassPool aDefault = ClassPool.getDefault();
+                    aDefault.appendClassPath(
+                            new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+                    instance = aDefault;
+                }
+            }
         }
+        return instance;
     }
 }
-

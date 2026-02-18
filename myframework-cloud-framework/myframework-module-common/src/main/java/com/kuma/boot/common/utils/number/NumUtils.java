@@ -1,7 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.number;
+
+// import com.sun.org.apache.bcel.internal.classfile.ClassParser;
 
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.utils.collection.ArrayPrimitiveUtils;
@@ -13,172 +28,267 @@ import com.kuma.boot.common.utils.reflect.PrimitiveUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Optional;
 
+/** 数字工具类 */
 public final class NumUtils {
+
+    private NumUtils() {}
+
+    /** 16 进制数组 */
     public static final char[] HEX_CHARS = "1234567890abcdefABCDEF".toCharArray();
 
-    private NumUtils() {
-    }
-
-    public static int getMin(int current, int other) {
+    /**
+     * 获取较小的结果
+     * @param current 当前值
+     * @param other 其他值
+     * @return 较小的值
+     */
+    public static int getMin(final int current, final int other) {
         return Math.min(current, other);
     }
 
-    public static int getMax(int current, int other) {
+    /**
+     * 获取较大的结果
+     * @param current 当前值
+     * @param other 其他值
+     * @return 较大的值
+     */
+    public static int getMax(final int current, final int other) {
         return Math.max(current, other);
     }
 
-    public static Optional<Integer> toInteger(String string) {
+    /**
+     * 转为 int
+     * @param string 原始字符串
+     * @return 结果
+     */
+    public static Optional<Integer> toInteger(final String string) {
         if (StringUtils.isEmpty(string)) {
             return Optional.empty();
         }
+
         try {
             Integer integer = Integer.valueOf(string);
             return Optional.of(integer);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return Optional.empty();
         }
     }
 
-    public static Integer toIntegerThrows(String string) {
+    /**
+     * 字符串转化为整形 （1）如果参数不合法，直接抛出异常
+     * @param string 字符串
+     * @return 结果
+     */
+    public static Integer toIntegerThrows(final String string) {
         ArgUtils.notEmpty(string, "string");
+
         try {
             return Integer.valueOf(string);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static int toInteger(String string, int defaultValue) {
+    /**
+     * 转换为整形 （1）如果参数不合法，直接使用默认值
+     * @param string 字符串
+     * @param defaultValue 默认值
+     * @return 结果
+     */
+    public static int toInteger(final String string, final int defaultValue) {
         try {
             return Integer.parseInt(string);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
 
-    public static Optional<Long> toLong(String string) {
+    /**
+     * 转为 Long
+     * @param string 原始字符串
+     * @return 结果
+     */
+    public static Optional<Long> toLong(final String string) {
         if (StringUtils.isEmpty(string)) {
             return Optional.empty();
         }
+
         try {
             Long aLong = Long.valueOf(string);
             return Optional.of(aLong);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return Optional.empty();
         }
     }
 
-    public static Optional<Double> toDouble(String string) {
+    /**
+     * 转为 Double
+     * @param string 原始字符串
+     * @return 结果
+     */
+    public static Optional<Double> toDouble(final String string) {
         if (StringUtils.isEmpty(string)) {
             return Optional.empty();
         }
+
         try {
             Double aDouble = Double.valueOf(string);
             return Optional.of(aDouble);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return Optional.empty();
         }
     }
 
-    public static boolean isHex(String string) {
-        char[] chars;
+    /**
+     * 是否为 16 进制信息
+     * @param string 结果
+     * @return 是否
+     */
+    public static boolean isHex(final String string) {
         if (StringUtils.isEmpty(string)) {
             return false;
         }
-        for (char c : chars = string.toCharArray()) {
-            if (ArrayPrimitiveUtils.indexOf(HEX_CHARS, c) >= 0) continue;
-            return false;
+        char[] chars = string.toCharArray();
+        for (char c : chars) {
+            if (ArrayPrimitiveUtils.indexOf(HEX_CHARS, c) < 0) {
+                return false;
+            }
         }
         return true;
     }
 
-    public static Long parseLong(Object object) {
+    /**
+     * 将对象转换为 Long
+     * @param object 对象
+     * @return Long 如果信息为 null，直接返回 null
+     * @throws ClassCastException 类型转换异常
+     * @see CharSequence
+     * @see BigDecimal
+     * @see BigInteger
+     * @see Integer
+     * @see Short
+     * @see Byte
+     * @see Long
+     */
+    public static Long parseLong(final Object object) {
         if (ObjectUtils.isNull(object)) {
             return null;
         }
-        Class<?> valueClass = object.getClass();
-        if (object instanceof Byte || valueClass == Byte.TYPE) {
-            Byte aByte = (Byte)object;
+
+        final Class valueClass = object.getClass();
+        if (object instanceof Byte || valueClass == byte.class) {
+            Byte aByte = (Byte) object;
             return aByte.longValue();
         }
-        if (object instanceof Short || valueClass == Short.TYPE) {
-            Short aShort = (Short)object;
+        if (object instanceof Short || valueClass == short.class) {
+            Short aShort = (Short) object;
             return aShort.longValue();
         }
-        if (object instanceof Integer || valueClass == Integer.TYPE) {
-            Integer integer = (Integer)object;
+        if (object instanceof Integer || valueClass == int.class) {
+            Integer integer = (Integer) object;
             return integer.longValue();
         }
         if (object instanceof Long) {
-            return (Long)object;
+            return (Long) object;
         }
         if (object instanceof CharSequence) {
-            CharSequence charSequence = (CharSequence)object;
+            CharSequence charSequence = (CharSequence) object;
             return Long.parseLong(charSequence.toString());
         }
         if (object instanceof BigInteger) {
-            BigInteger bigInteger = (BigInteger)object;
+            BigInteger bigInteger = (BigInteger) object;
             return bigInteger.longValue();
         }
         if (object instanceof BigDecimal) {
-            BigDecimal bigDecimal = (BigDecimal)object;
+            BigDecimal bigDecimal = (BigDecimal) object;
             return bigDecimal.longValue();
         }
-        throw new ClassCastException("Class cast exception for parse long with object: " + String.valueOf(object));
+
+        throw new ClassCastException("Class cast exception for parse long with object: " + object);
     }
 
-    public static String getNumFormat(Number number, String format) {
+    /**
+     * 获取数字格式化
+     * @param number 数字
+     * @param format 格式化
+     * @return 结果
+     */
+    public static String getNumFormat(final Number number, final String format) {
         ArgUtils.notNull(number, "number");
         ArgUtils.notEmpty(format, "format");
-        DecimalFormat numberFormat = new DecimalFormat(format);
+
+        NumberFormat numberFormat = new DecimalFormat(format);
         return numberFormat.format(number);
     }
 
-    public static <T> T getFormatNum(String number, String format, Class<T> numberClazz) {
+    /**
+     * 获取格式化数字
+     * @param number 数字
+     * @param format 格式化
+     * @param numberClazz 数字类型
+     * @param <T> 泛型
+     * @return 结果
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getFormatNum(
+            final String number, final String format, final Class<T> numberClazz) {
         ArgUtils.notNull(number, "number");
         ArgUtils.notEmpty(format, "format");
-        DecimalFormat numberFormat = new DecimalFormat(format);
+
+        NumberFormat numberFormat = new DecimalFormat(format);
         try {
-            Number numValue = numberFormat.parse(number);
+            final Number numValue = numberFormat.parse(number);
             if (BigDecimal.class == numberClazz) {
-                return (T)BigDecimal.valueOf((Double)numValue);
+                return (T) BigDecimal.valueOf((Double) numValue);
             }
             if (BigInteger.class == numberClazz) {
-                return (T)BigInteger.valueOf((Long)numValue);
+                return (T) BigInteger.valueOf((Long) numValue);
             }
-            if (Float.class == numberClazz || Float.TYPE == numberClazz) {
-                // empty if block
-            }
-            return (T)numValue;
-        }
-        catch (ParseException e) {
+            if (Float.class == numberClazz || float.class == numberClazz) {}
+
+            // int short byte
+
+            return (T) numValue;
+        } catch (ParseException e) {
             throw new BootException(e);
         }
     }
 
-    public static Number getFormatNum(String number, String format) {
-        return NumUtils.getFormatNum(number, format, Number.class);
+    /**
+     * 获取格式化数字
+     * @param number 数字
+     * @param format 格式化
+     * @return 结果
+     */
+    public static Number getFormatNum(final String number, final String format) {
+        return getFormatNum(number, format, Number.class);
     }
 
-    public static Object getFormatNumCast(String numberStr, String format, Class numberClazz) {
+    /**
+     * 获取类型转换后的金额
+     * @param numberStr 数字字符串
+     * @param format 格式化
+     * @param numberClazz 数字类型
+     * @return 转换后的类型
+     */
+    public static Object getFormatNumCast(
+            final String numberStr, final String format, final Class numberClazz) {
         ArgUtils.notEmpty(numberStr, "numberStr");
         ArgUtils.notEmpty(format, "format");
         ArgUtils.notNull(numberClazz, "numberClazz");
+
         Class actualClazz = numberClazz;
         if (ClassTypeUtils.isPrimitive(actualClazz)) {
             actualClazz = PrimitiveUtils.getReferenceType(numberClazz);
         }
-        DecimalFormat numberFormat = new DecimalFormat(format);
+
+        NumberFormat numberFormat = new DecimalFormat(format);
         try {
-            Number numValue = numberFormat.parse(numberStr);
+            final Number numValue = numberFormat.parse(numberStr);
             if (Integer.class == actualClazz) {
                 return numValue.intValue();
             }
@@ -186,7 +296,7 @@ public final class NumUtils {
                 return numValue.longValue();
             }
             if (Float.class == actualClazz) {
-                return Float.valueOf(numValue.floatValue());
+                return numValue.floatValue();
             }
             if (Double.class == actualClazz) {
                 return numValue.doubleValue();
@@ -197,31 +307,43 @@ public final class NumUtils {
             if (Byte.class == actualClazz) {
                 return numValue.byteValue();
             }
+
             if (BigDecimal.class == actualClazz) {
-                return BigDecimal.valueOf((Double)numValue);
+                return BigDecimal.valueOf((Double) numValue);
             }
             if (BigInteger.class == actualClazz) {
-                return BigInteger.valueOf((Long)numValue);
+                return BigInteger.valueOf((Long) numValue);
             }
+
             return numValue;
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             throw new BootException(e);
         }
     }
 
-    public static BigInteger toBigInteger(BigDecimal bigDecimal) {
+    /**
+     * 转换为 bigInteger
+     * @param bigDecimal 数字
+     * @return 结果
+     */
+    public static BigInteger toBigInteger(final BigDecimal bigDecimal) {
         if (null == bigDecimal) {
             return null;
         }
+
         return bigDecimal.toBigInteger();
     }
 
-    public static BigDecimal parseBigDecimal(BigInteger bigInteger) {
+    /**
+     * 转换为浮点型
+     * @param bigInteger 整数
+     * @return 浮点金额
+     */
+    public static BigDecimal parseBigDecimal(final BigInteger bigInteger) {
         if (null == bigInteger) {
             return null;
         }
+
         return new BigDecimal(bigInteger);
     }
 }
-

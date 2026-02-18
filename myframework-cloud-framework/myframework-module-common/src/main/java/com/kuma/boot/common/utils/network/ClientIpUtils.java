@@ -1,38 +1,38 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.servlet.http.HttpServletRequest
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.network;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
 import java.util.List;
+import com.kuma.boot.common.utils.lang.StringUtils;
 
+/**
+ * 客户端IP地址获取工具
+ */
 public final class ClientIpUtils {
-    private static final List<String> POSSIBLE_PROXY_HEADER_KEYS = new LinkedList<String>();
 
-    private ClientIpUtils() {
-    }
-
-    public static String getClientIp(HttpServletRequest request) {
-        int index;
-        String realIp = request.getRemoteAddr();
-        for (String key : POSSIBLE_PROXY_HEADER_KEYS) {
-            String header = request.getHeader(key);
-            if (!StringUtils.isNotEmpty((CharSequence)header) || "unknown".equalsIgnoreCase(header)) continue;
-            realIp = header;
-            break;
-        }
-        if ((index = realIp.indexOf(44)) >= 0) {
-            realIp = realIp.substring(0, index);
-        }
-        return realIp;
-    }
+    /**
+     * 代理可能加入的header
+     */
+    private static final List<String> POSSIBLE_PROXY_HEADER_KEYS;
 
     static {
+        POSSIBLE_PROXY_HEADER_KEYS = new LinkedList<>();
         POSSIBLE_PROXY_HEADER_KEYS.add("X-Forwarded-For");
         POSSIBLE_PROXY_HEADER_KEYS.add("Proxy-Client-IP");
         POSSIBLE_PROXY_HEADER_KEYS.add("WL-Proxy-Client-IP");
@@ -45,5 +45,27 @@ public final class ClientIpUtils {
         POSSIBLE_PROXY_HEADER_KEYS.add("HTTP_VIA");
         POSSIBLE_PROXY_HEADER_KEYS.add("REMOTE_ADDR");
     }
-}
 
+    private ClientIpUtils() {}
+
+    /**
+     * 获取客户端IP
+     * @param request servlet的request
+     * @return 客户端IP 兜底是 request.getRemoteAddr()
+     */
+    public static String getClientIp(HttpServletRequest request) {
+        String realIp = request.getRemoteAddr();
+        for (String key : POSSIBLE_PROXY_HEADER_KEYS) {
+            String header = request.getHeader(key);
+            if (StringUtils.isNotEmpty(header) && !"unknown".equalsIgnoreCase(header)) {
+                realIp = header;
+                break;
+            }
+        }
+        int index = realIp.indexOf(',');
+        if (index >= 0) {
+            realIp = realIp.substring(0, index);
+        }
+        return realIp;
+    }
+}

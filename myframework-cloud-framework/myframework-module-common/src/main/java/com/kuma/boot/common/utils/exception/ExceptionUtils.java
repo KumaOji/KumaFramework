@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -421,7 +421,7 @@ public class ExceptionUtils {
      * <p>
      * Currently considered fatal exceptions are Virtual Machine errors indicating that
      * the JVM is corrupted, like {@link InternalError}, {@link UnknownError}, and
-     * {@link java.util.zip.ZipError} (a special case of InternalError). The exception is
+     * {} (a special case of InternalError). The exception is
      * also treated as a fatal error, because when a thread is forcefully stopped, there
      * is a high chance that parts of the system are in an inconsistent state.
      * @param t The exception to check.

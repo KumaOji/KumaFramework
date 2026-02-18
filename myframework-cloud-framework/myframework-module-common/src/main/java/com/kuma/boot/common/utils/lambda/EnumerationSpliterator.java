@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.lambda;
 
 import java.util.Enumeration;
@@ -9,23 +22,42 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
 
-public class EnumerationSpliterator<T>
-extends Spliterators.AbstractSpliterator<T> {
+/**
+ * <p>
+ * EnumerationSpliterator
+ * </p>
+ *
+ * @param <T> the type parameter
+ */
+public class EnumerationSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
+
     private final Enumeration<T> enumeration;
 
+    /**
+     * Instantiates a new Enumeration spliterator.
+     * @param enumeration the enumeration
+     * @param additionalCharacteristics the additional characteristics
+     */
     protected EnumerationSpliterator(Enumeration<T> enumeration, int additionalCharacteristics) {
         super(Long.MAX_VALUE, additionalCharacteristics);
         this.enumeration = enumeration;
     }
 
+    /**
+     * Spliterator unknown size spliterator.
+     * @param <T> the type parameter
+     * @param enumeration the enumeration
+     * @return the spliterator
+     */
     public static <T> Spliterator<T> spliteratorUnknownSize(Enumeration<T> enumeration) {
-        return new EnumerationSpliterator<T>(Objects.requireNonNull(enumeration), 16);
+        return new EnumerationSpliterator<>(
+                Objects.requireNonNull(enumeration), Spliterator.ORDERED);
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        if (this.enumeration.hasMoreElements()) {
-            action.accept(this.enumeration.nextElement());
+        if (enumeration.hasMoreElements()) {
+            action.accept(enumeration.nextElement());
             return true;
         }
         return false;
@@ -33,9 +65,8 @@ extends Spliterators.AbstractSpliterator<T> {
 
     @Override
     public void forEachRemaining(Consumer<? super T> action) {
-        while (this.enumeration.hasMoreElements()) {
-            action.accept(this.enumeration.nextElement());
+        while (enumeration.hasMoreElements()) {
+            action.accept(enumeration.nextElement());
         }
     }
 }
-

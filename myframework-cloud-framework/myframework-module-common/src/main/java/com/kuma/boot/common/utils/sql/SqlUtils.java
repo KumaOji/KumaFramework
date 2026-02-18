@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class SqlUtils {
 
     /** sql正则表达式 定义常用的 sql关键字 */
     public static final String SQL_REGEX =
-            "select |insert |delete |update |dr op |count |exec |chr |mid |master |truncate |char"
+            "select |insert |delete |update |drop |count |exec |chr |mid |master |truncate |char"
                     + " |and |declare ";
 
     /** sql模式 仅支持字母、数字、下划线、空格、逗号、小数点（支持多个字段排序） */

@@ -1,17 +1,37 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.number;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class DecimalNum
-extends Number {
+/**
+ * 浮点型数据计算
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class DecimalNum extends Number {
+
     private BigDecimal value;
 
     public BigDecimal getValue() {
-        return this.value;
+        return value;
     }
 
     public DecimalNum() {
@@ -22,138 +42,293 @@ extends Number {
         this.value = decimal;
     }
 
+    /**
+     * 构造 DecimalNum
+     * @param decimal decimal
+     * @return DecimalNum
+     */
     public static DecimalNum of(BigDecimal decimal) {
         return new DecimalNum(decimal);
     }
 
+    /**
+     * 构造 DecimalNum
+     * @param decimal decimal
+     * @return DecimalNum
+     */
     public static DecimalNum of(String decimal) {
-        return DecimalNum.of(new BigDecimal(decimal));
+        return of(new BigDecimal(decimal));
     }
 
+    /**
+     * 构造 DecimalNum
+     * @param decimal decimal
+     * @return DecimalNum
+     */
     public static DecimalNum of(double decimal) {
-        return DecimalNum.of(BigDecimal.valueOf(decimal));
+        return of(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 构造 DecimalNum
+     * @param decimal decimal
+     * @return DecimalNum
+     */
     public static DecimalNum of(long decimal) {
-        return DecimalNum.of(BigDecimal.valueOf(decimal));
+        return of(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 加
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum add(String decimal) {
-        return this.add(new BigDecimal(decimal));
+        return add(new BigDecimal(decimal));
     }
 
+    /**
+     * 加
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum add(long decimal) {
-        return this.add(BigDecimal.valueOf(decimal));
+        return add(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 加
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum add(double decimal) {
-        return this.add(BigDecimal.valueOf(decimal));
+        return add(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 加
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum add(BigDecimal decimal) {
-        this.value = this.value.add(decimal);
+        this.value = value.add(decimal);
         return this;
     }
 
+    /**
+     * 减
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum subtract(String decimal) {
-        return this.subtract(new BigDecimal(decimal));
+        return subtract(new BigDecimal(decimal));
     }
 
+    /**
+     * 减
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum subtract(long decimal) {
-        return this.subtract(BigDecimal.valueOf(decimal));
+        return subtract(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 减
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum subtract(double decimal) {
-        return this.subtract(BigDecimal.valueOf(decimal));
+        return subtract(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 减
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum subtract(BigDecimal decimal) {
-        this.value = this.value.subtract(decimal);
+        this.value = value.subtract(decimal);
         return this;
     }
 
+    /**
+     * 乘
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum multiply(String decimal) {
-        return this.multiply(new BigDecimal(decimal));
+        return multiply(new BigDecimal(decimal));
     }
 
+    /**
+     * 乘
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum multiply(long decimal) {
-        return this.multiply(BigDecimal.valueOf(decimal));
+        return multiply(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 乘
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum multiply(double decimal) {
-        return this.multiply(BigDecimal.valueOf(decimal));
+        return multiply(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 乘
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum multiply(BigDecimal decimal) {
-        this.value = this.value.multiply(decimal);
+        this.value = value.multiply(decimal);
         return this;
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum divide(String decimal) {
-        return this.divide(new BigDecimal(decimal));
+        return divide(new BigDecimal(decimal));
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @param roundingMode 随机模型
+     * @return DecimalNum
+     */
     public DecimalNum divide(String decimal, RoundingMode roundingMode) {
-        return this.divide(new BigDecimal(decimal), roundingMode);
+        return divide(new BigDecimal(decimal), roundingMode);
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum divide(long decimal) {
-        return this.divide(BigDecimal.valueOf(decimal));
+        return divide(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @param roundingMode 随机模型
+     * @return DecimalNum
+     */
     public DecimalNum divide(long decimal, RoundingMode roundingMode) {
-        return this.divide(BigDecimal.valueOf(decimal), roundingMode);
+        return divide(BigDecimal.valueOf(decimal), roundingMode);
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum divide(double decimal) {
-        return this.divide(BigDecimal.valueOf(decimal));
+        return divide(BigDecimal.valueOf(decimal));
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @param roundingMode 随机模型
+     * @return DecimalNum
+     */
     public DecimalNum divide(double decimal, RoundingMode roundingMode) {
-        return this.divide(BigDecimal.valueOf(decimal), roundingMode);
+        return divide(BigDecimal.valueOf(decimal), roundingMode);
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @return DecimalNum
+     */
     public DecimalNum divide(BigDecimal decimal) {
-        this.value = this.value.divide(decimal);
+        this.value = value.divide(decimal);
         return this;
     }
 
+    /**
+     * 除
+     * @param decimal 小数
+     * @param roundingMode 随机模型
+     * @return DecimalNum
+     */
     public DecimalNum divide(BigDecimal decimal, RoundingMode roundingMode) {
-        this.value = this.value.divide(decimal, roundingMode);
+        this.value = value.divide(decimal, roundingMode);
         return this;
     }
 
+    /**
+     * 设置小数位数
+     * @param scale 小数位数
+     * @return DecimalNum
+     */
     public DecimalNum scale(int scale) {
-        return this.scale(scale, RoundingMode.HALF_EVEN);
+        return scale(scale, RoundingMode.HALF_EVEN);
     }
 
+    /**
+     * 设置小数位数
+     * @param scale 小数位数
+     * @param roundingMode 模式
+     * @return DecimalNum
+     */
     public DecimalNum scale(int scale, RoundingMode roundingMode) {
-        this.value = this.value.setScale(scale, roundingMode);
+        this.value = value.setScale(scale, roundingMode);
         return this;
     }
 
+    /**
+     * intValue
+     * @return 转为 int 值
+     */
     @Override
     public int intValue() {
-        return this.value.intValue();
+        return value.intValue();
     }
 
+    /**
+     * longValue
+     * @return 转为 long 值
+     */
     @Override
     public long longValue() {
-        return this.value.longValue();
+        return value.longValue();
     }
 
+    /**
+     * floatValue
+     * @return 转为 float 值
+     */
     @Override
     public float floatValue() {
-        return this.value.floatValue();
+        return value.floatValue();
     }
 
+    /**
+     * doubleValue
+     * @return 转为 double 值
+     */
     @Override
     public double doubleValue() {
-        return this.value.doubleValue();
+        return value.doubleValue();
     }
 
+    /**
+     * toString
+     * @return 转为字符串
+     */
+    @Override
     public String toString() {
-        return this.value.toString();
+        return value.toString();
     }
 }
-

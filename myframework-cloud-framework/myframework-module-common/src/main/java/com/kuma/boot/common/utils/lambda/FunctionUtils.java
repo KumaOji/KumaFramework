@@ -1,20 +1,57 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.lambda;
 
 import java.util.function.Function;
 
+/**
+ * 函数的工具类
+ *
+ */
 public final class FunctionUtils {
-    private FunctionUtils() {
-    }
 
+    private FunctionUtils() {}
+
+    /**
+     * 组合两个函数 y=f(u) u=g(x) 为复合函数 y=f'(x) a和b组合 会先调用b 再拿b的结果调用a
+     * @param fnY 函数1 也就是y的函数
+     * @param fnU 函数2 也就是u的函数
+     * @return 函数1和函数2组成的复合函数
+     * @param <X> 函数2的自变量类型
+     * @param <U> 函数2的值类型 也是函数1的自变量类型
+     * @param <Y> 函数1的值类型 也是最终复合函数的值类型
+     */
     public static <X, U, Y> Function<X, Y> compose(Function<U, Y> fnY, Function<X, U> fnU) {
         return fnY.compose(fnU);
     }
 
-    public static <X, U, V, Y> Function<X, Y> compose(Function<V, Y> fnY, Function<U, V> fnV, Function<X, U> fnU) {
+    /**
+     * 组合三个函数 y=f(v) v=g(u) u=h(x) 为复合函数 y=f'(x)
+     * @param fnY 函数1 也就是y的函数
+     * @param fnV 函数2 也就是v的函数
+     * @param fnU 函数3 也就是u的函数
+     * @return 三个函数组成的复合函数
+     * @param <X> 函数3的自变量类型
+     * @param <U> 函数3的值类型 也是函数2的自变量类型
+     * @param <V> 函数2的值类型 也是函数1的自变量类型
+     * @param <Y> 函数1的值类型 也是最终复合函数的值类型
+     */
+    public static <X, U, V, Y> Function<X, Y> compose(
+            Function<V, Y> fnY, Function<U, V> fnV, Function<X, U> fnU) {
         return fnY.compose(fnV).compose(fnU);
     }
 }
-

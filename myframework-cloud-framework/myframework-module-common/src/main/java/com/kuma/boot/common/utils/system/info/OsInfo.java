@@ -1,162 +1,352 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.system.info;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import java.io.Serializable;
+import com.kuma.boot.common.utils.lang.StringUtils;
 
-public class OsInfo
-implements Serializable {
+/**
+ * OsInfo
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:24:14
+ */
+public class OsInfo implements Serializable {
+
     private final String OS_VERSION = System.getProperty("os.version", null);
+
     private final String OS_ARCH = System.getProperty("os.arch", null);
+
     private final String OS_NAME = System.getProperty("os.name", null);
-    private final boolean IS_OS_AIX = this.getOSMatches("AIX");
-    private final boolean IS_OS_HP_UX = this.getOSMatches("HP-UX");
-    private final boolean IS_OS_IRIX = this.getOSMatches("Irix");
-    private final boolean IS_OS_LINUX = this.getOSMatches("Linux") || this.getOSMatches("LINUX");
-    private final boolean IS_OS_MAC = this.getOSMatches("Mac");
-    private final boolean IS_OS_MAC_OSX = this.getOSMatches("Mac OS X");
-    private final boolean IS_OS_OS2 = this.getOSMatches("OS/2");
-    private final boolean IS_OS_SOLARIS = this.getOSMatches("Solaris");
-    private final boolean IS_OS_SUN_OS = this.getOSMatches("SunOS");
-    private final boolean IS_OS_WINDOWS = this.getOSMatches("Windows");
-    private final boolean IS_OS_WINDOWS_2000 = this.getOSMatches("Windows", "5.0");
-    private final boolean IS_OS_WINDOWS_95 = this.getOSMatches("Windows 9", "4.0");
-    private final boolean IS_OS_WINDOWS_98 = this.getOSMatches("Windows 9", "4.1");
-    private final boolean IS_OS_WINDOWS_ME = this.getOSMatches("Windows", "4.9");
-    private final boolean IS_OS_WINDOWS_NT = this.getOSMatches("Windows NT");
-    private final boolean IS_OS_WINDOWS_XP = this.getOSMatches("Windows", "5.1");
-    private final boolean IS_OS_WINDOWS_7 = this.getOSMatches("Windows", "6.1");
-    private final boolean IS_OS_WINDOWS_8 = this.getOSMatches("Windows", "6.2");
-    private final boolean IS_OS_WINDOWS_8_1 = this.getOSMatches("Windows", "6.3");
-    private final boolean IS_OS_WINDOWS_10 = this.getOSMatches("Windows", "10.0");
+
+    private final boolean IS_OS_AIX = getOSMatches("AIX");
+
+    private final boolean IS_OS_HP_UX = getOSMatches("HP-UX");
+
+    private final boolean IS_OS_IRIX = getOSMatches("Irix");
+
+    private final boolean IS_OS_LINUX = getOSMatches("Linux") || getOSMatches("LINUX");
+
+    private final boolean IS_OS_MAC = getOSMatches("Mac");
+
+    private final boolean IS_OS_MAC_OSX = getOSMatches("Mac OS X");
+
+    private final boolean IS_OS_OS2 = getOSMatches("OS/2");
+
+    private final boolean IS_OS_SOLARIS = getOSMatches("Solaris");
+
+    private final boolean IS_OS_SUN_OS = getOSMatches("SunOS");
+
+    private final boolean IS_OS_WINDOWS = getOSMatches("Windows");
+
+    private final boolean IS_OS_WINDOWS_2000 = getOSMatches("Windows", "5.0");
+
+    private final boolean IS_OS_WINDOWS_95 = getOSMatches("Windows 9", "4.0");
+
+    private final boolean IS_OS_WINDOWS_98 = getOSMatches("Windows 9", "4.1");
+
+    private final boolean IS_OS_WINDOWS_ME = getOSMatches("Windows", "4.9");
+
+    private final boolean IS_OS_WINDOWS_NT = getOSMatches("Windows NT");
+
+    private final boolean IS_OS_WINDOWS_XP = getOSMatches("Windows", "5.1");
+
+    private final boolean IS_OS_WINDOWS_7 = getOSMatches("Windows", "6.1");
+
+    private final boolean IS_OS_WINDOWS_8 = getOSMatches("Windows", "6.2");
+
+    private final boolean IS_OS_WINDOWS_8_1 = getOSMatches("Windows", "6.3");
+
+    private final boolean IS_OS_WINDOWS_10 = getOSMatches("Windows", "10.0");
+
+    // 由于改变file.encoding属性并不会改变系统字符编码，为了保持一致，通过LocaleUtil取系统默认编码。
     private final String FILE_SEPARATOR = System.getProperty("file.separator", null);
+
     private final String LINE_SEPARATOR = System.getProperty("line.separator", null);
+
     private final String PATH_SEPARATOR = System.getProperty("path.separator", null);
 
+    /**
+     * 取得当前OS的架构
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final String getArch() {
-        return this.OS_ARCH;
+        return OS_ARCH;
     }
 
+    /**
+     * 取得当前OS的名称
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final String getName() {
-        return this.OS_NAME;
+        return OS_NAME;
     }
 
+    /**
+     * 取得当前OS的版本
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final String getVersion() {
-        return this.OS_VERSION;
+        return OS_VERSION;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isAix() {
-        return this.IS_OS_AIX;
+        return IS_OS_AIX;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isHpUx() {
-        return this.IS_OS_HP_UX;
+        return IS_OS_HP_UX;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isIrix() {
-        return this.IS_OS_IRIX;
+        return IS_OS_IRIX;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isLinux() {
-        return this.IS_OS_LINUX;
+        return IS_OS_LINUX;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isMac() {
-        return this.IS_OS_MAC;
+        return IS_OS_MAC;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isMacOsX() {
-        return this.IS_OS_MAC_OSX;
+        return IS_OS_MAC_OSX;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isOs2() {
-        return this.IS_OS_OS2;
+        return IS_OS_OS2;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isSolaris() {
-        return this.IS_OS_SOLARIS;
+        return IS_OS_SOLARIS;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isSunOS() {
-        return this.IS_OS_SUN_OS;
+        return IS_OS_SUN_OS;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindows() {
-        return this.IS_OS_WINDOWS;
+        return IS_OS_WINDOWS;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindows2000() {
-        return this.IS_OS_WINDOWS_2000;
+        return IS_OS_WINDOWS_2000;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindows95() {
-        return this.IS_OS_WINDOWS_95;
+        return IS_OS_WINDOWS_95;
     }
 
+    /** 判断当前OS的类型 */
     public final boolean isWindows98() {
-        return this.IS_OS_WINDOWS_98;
+        return IS_OS_WINDOWS_98;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindowsME() {
-        return this.IS_OS_WINDOWS_ME;
+        return IS_OS_WINDOWS_ME;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindowsNT() {
-        return this.IS_OS_WINDOWS_NT;
+        return IS_OS_WINDOWS_NT;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindowsXP() {
-        return this.IS_OS_WINDOWS_XP;
+        return IS_OS_WINDOWS_XP;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindows7() {
-        return this.IS_OS_WINDOWS_7;
+        return IS_OS_WINDOWS_7;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindoows8() {
-        return this.IS_OS_WINDOWS_8;
+        return IS_OS_WINDOWS_8;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindows8_1() {
-        return this.IS_OS_WINDOWS_8_1;
+        return IS_OS_WINDOWS_8_1;
     }
 
+    /**
+     * 判断当前OS的类型
+     *
+     * @since 2021-09-02 19:24:22
+     */
     public final boolean isWindows10() {
-        return this.IS_OS_WINDOWS_10;
+        return IS_OS_WINDOWS_10;
     }
 
+    /**
+     * 匹配OS名称
+     * @param osNamePrefix osNamePrefix
+     * @return boolean
+     * @since 2021-09-02 19:25:38
+     */
     private boolean getOSMatches(String osNamePrefix) {
-        if (StringUtils.isBlank(this.OS_NAME)) {
+        if (StringUtils.isBlank(OS_NAME)) {
             return false;
         }
-        return this.OS_NAME.startsWith(osNamePrefix);
+
+        return OS_NAME.startsWith(osNamePrefix);
     }
 
+    /**
+     * 匹配OS名称
+     * @param osNamePrefix osNamePrefix
+     * @param osVersionPrefix osVersionPrefix
+     * @return boolean
+     * @since 2021-09-02 19:25:43
+     */
     private boolean getOSMatches(String osNamePrefix, String osVersionPrefix) {
-        if (StringUtils.isAnyBlank(this.OS_NAME, this.OS_VERSION)) {
+        if (StringUtils.isAnyBlank(OS_NAME, (OS_VERSION))) {
             return false;
         }
-        return this.OS_NAME.startsWith(osNamePrefix) && this.OS_VERSION.startsWith(osVersionPrefix);
+
+        return OS_NAME.startsWith(osNamePrefix) && OS_VERSION.startsWith(osVersionPrefix);
     }
 
+    /**
+     * 取得OS的文件路径的分隔符
+     *
+     * @since 2021-09-02 19:25:43
+     */
     public final String getFileSeparator() {
-        return this.FILE_SEPARATOR;
+        return FILE_SEPARATOR;
     }
 
+    /**
+     * 取得OS的文本文件换行符
+     *
+     * @since 2021-09-02 19:25:43
+     */
     public final String getLineSeparator() {
-        return this.LINE_SEPARATOR;
+        return LINE_SEPARATOR;
     }
 
+    /** 取得OS的搜索路径分隔符 */
     public final String getPathSeparator() {
-        return this.PATH_SEPARATOR;
+        return PATH_SEPARATOR;
     }
 
+    @Override
     public final String toString() {
+
         StringBuilder builder = new StringBuilder();
-        builder.append("OS Arch:         ").append(this.getArch()).append("\nOS Name:         ").append(this.getName()).append("\nOS Version:      ").append(this.getVersion());
+        builder.append("OS Arch:         ")
+                .append(getArch())
+                .append("\nOS Name:         ")
+                .append(getName())
+                .append("\nOS Version:      ")
+                .append(getVersion());
+
         return builder.toString();
     }
 }
-

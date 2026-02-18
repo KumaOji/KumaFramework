@@ -1,19 +1,28 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.util.ObjectUtil
- *  org.jspecify.annotations.Nullable
- *  org.springframework.util.ObjectUtils
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.lang;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.support.handler.Handler;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.collection.MapUtils;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.reflect.ClassTypeUtils;
 import com.kuma.boot.common.utils.reflect.ClassUtils;
 import com.kuma.boot.common.utils.reflect.ReflectFieldUtils;
@@ -26,324 +35,836 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+
 import org.jspecify.annotations.Nullable;
 
-public final class ObjectUtils
-extends org.springframework.util.ObjectUtils {
+/** Object 工具类 */
+public final class ObjectUtils extends org.springframework.util.ObjectUtils {
+
+    /**
+     * 判断对象为null
+     * @param object 对象
+     * @return 对象是否为空
+     */
+    // public static boolean isNull(@Nullable Object object) {
+    // return Objects.isNull(object);
+    // }
+
+    /**
+     * 判断对象不为null
+     * @param object 对象
+     * @return 对象是否不为空
+     */
+    // public static boolean isNotNull(@Nullable Object object) {
+    // return Objects.nonNull(object);
+    // }
+
+    /**
+     * 判断对象为true
+     * @param object 对象
+     * @return 对象是否为true
+     */
     public static boolean isTrue(@Nullable Boolean object) {
         return Boolean.TRUE.equals(object);
     }
 
+    /**
+     * 判断对象为false
+     * @param object 对象
+     * @return 对象是否为false
+     */
     public static boolean isFalse(@Nullable Boolean object) {
         return object == null || Boolean.FALSE.equals(object);
     }
 
+    /**
+     * 判断数组不为空
+     * @param array 数组
+     * @return 数组是否为空
+     */
     public static boolean isNotEmpty(@Nullable Object[] array) {
-        return !ObjectUtils.isEmpty((Object[])array);
+        return !isEmpty(array);
     }
 
+    /**
+     * 判断对象不为空
+     * @param obj 数组
+     * @return 数组是否为空
+     */
+    // public static boolean isNotEmpty(@Nullable Object obj) {
+    // return !ObjectUtil.isEmpty(obj);
+    // }
+
+    /**
+     * 对象 eq
+     * @param o1 Object
+     * @param o2 Object
+     * @return 是否eq
+     */
     public static boolean equals(@Nullable Object o1, @Nullable Object o2) {
         return Objects.equals(o1, o2);
     }
 
+    /**
+     * 比较两个对象是否不相等。<br>
+     * @param o1 对象1
+     * @param o2 对象2
+     * @return 是否不eq
+     */
     public static boolean isNotEqual(Object o1, Object o2) {
         return !Objects.equals(o1, o2);
     }
 
+    /**
+     * 返回对象的 hashCode
+     * @param obj Object
+     * @return hashCode
+     */
     public static int hashCode(@Nullable Object obj) {
         return Objects.hashCode(obj);
     }
 
+    /**
+     * 如果对象为null，返回默认值
+     * @param object Object
+     * @param defaultValue 默认值
+     * @return Object
+     */
     public static Object defaultIfNull(@Nullable Object object, Object defaultValue) {
         return object != null ? object : defaultValue;
     }
 
-    public static @Nullable String toStr(@Nullable Object object) {
-        return ObjectUtils.toStr(object, null);
+    /**
+     * 强转string
+     * @param object Object
+     * @return String
+     */
+    @Nullable
+    public static String toStr(@Nullable Object object) {
+        return toStr(object, null);
     }
 
-    public static @Nullable String toStr(@Nullable Object object, @Nullable String defaultValue) {
+    /**
+     * 强转string
+     * @param object Object
+     * @param defaultValue 默认值
+     * @return String
+     */
+    @Nullable
+    public static String toStr(@Nullable Object object, @Nullable String defaultValue) {
         if (null == object) {
             return defaultValue;
         }
         if (object instanceof CharSequence) {
-            return ((CharSequence)object).toString();
+            return ((CharSequence) object).toString();
         }
         return String.valueOf(object);
     }
 
+    /**
+     * 对象转为 int （支持 String 和 Number），默认: 0
+     * @param object Object
+     * @return int
+     */
     public static int toInt(@Nullable Object object) {
-        return ObjectUtils.toInt(object, 0);
+        return toInt(object, 0);
     }
 
+    /**
+     * 对象转为 int （支持 String 和 Number）
+     * @param object Object
+     * @param defaultValue 默认值
+     * @return int
+     */
     public static int toInt(@Nullable Object object, int defaultValue) {
         if (object instanceof Number) {
-            return ((Number)object).intValue();
+            return ((Number) object).intValue();
         }
         if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
+            String value = ((CharSequence) object).toString();
             try {
                 return Integer.parseInt(value);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
                 return defaultValue;
             }
         }
         return defaultValue;
     }
 
+    /**
+     * 对象转为 long （支持 String 和 Number），默认: 0L
+     * @param object Object
+     * @return long
+     */
     public static long toLong(@Nullable Object object) {
-        return ObjectUtils.toLong(object, 0L);
+        return toLong(object, 0L);
     }
 
+    /**
+     * 对象转为 long （支持 String 和 Number），默认: 0L
+     * @param object Object
+     * @return long
+     */
     public static long toLong(@Nullable Object object, long defaultValue) {
         if (object instanceof Number) {
-            return ((Number)object).longValue();
+            return ((Number) object).longValue();
         }
         if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
+            String value = ((CharSequence) object).toString();
             try {
                 return Long.parseLong(value);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
                 return defaultValue;
             }
         }
         return defaultValue;
     }
 
+    /**
+     * 对象转为 Float
+     * @param object Object
+     * @return 结果
+     */
     public static float toFloat(@Nullable Object object) {
-        return ObjectUtils.toFloat(object, 0.0f);
+        return toFloat(object, 0.0f);
     }
 
+    /**
+     * 对象转为 Float
+     * @param object Object
+     * @param defaultValue float
+     * @return 结果
+     */
     public static float toFloat(@Nullable Object object, float defaultValue) {
         if (object instanceof Number) {
-            return ((Number)object).floatValue();
+            return ((Number) object).floatValue();
         }
         if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
+            String value = ((CharSequence) object).toString();
             try {
                 return Float.parseFloat(value);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 return defaultValue;
             }
         }
         return defaultValue;
     }
 
+    /**
+     * 对象转为 Double
+     * @param object Object
+     * @return 结果
+     */
     public static double toDouble(@Nullable Object object) {
-        return ObjectUtils.toDouble(object, 0.0);
+        return toDouble(object, 0.0d);
     }
 
+    /**
+     * 对象转为 Double
+     * @param object Object
+     * @param defaultValue double
+     * @return 结果
+     */
     public static double toDouble(@Nullable Object object, double defaultValue) {
         if (object instanceof Number) {
-            return ((Number)object).doubleValue();
+            return ((Number) object).doubleValue();
         }
         if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
+            String value = ((CharSequence) object).toString();
             try {
                 return Double.parseDouble(value);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 return defaultValue;
             }
         }
         return defaultValue;
     }
 
+    /**
+     * 对象转为 Byte
+     * @param object Object
+     * @return 结果
+     */
     public static byte toByte(@Nullable Object object) {
-        return ObjectUtils.toByte(object, (byte)0);
+        return toByte(object, (byte) 0);
     }
 
+    /**
+     * 对象转为 Byte
+     * @param object Object
+     * @param defaultValue byte
+     * @return 结果
+     */
     public static byte toByte(@Nullable Object object, byte defaultValue) {
         if (object instanceof Number) {
-            return ((Number)object).byteValue();
+            return ((Number) object).byteValue();
         }
         if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
+            String value = ((CharSequence) object).toString();
             try {
                 return Byte.parseByte(value);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 return defaultValue;
             }
         }
         return defaultValue;
     }
 
+    /**
+     * 对象转为 Short
+     * @param object Object
+     * @return 结果
+     */
     public static short toShort(@Nullable Object object) {
-        return ObjectUtils.toShort(object, (short)0);
+        return toShort(object, (short) 0);
     }
 
+    /**
+     * 对象转为 Short
+     * @param object Object
+     * @param defaultValue short
+     * @return 结果
+     */
     public static short toShort(@Nullable Object object, short defaultValue) {
         if (object instanceof Number) {
-            return ((Number)object).byteValue();
+            return ((Number) object).byteValue();
         }
         if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
+            String value = ((CharSequence) object).toString();
             try {
                 return Short.parseShort(value);
-            }
-            catch (NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 return defaultValue;
             }
         }
         return defaultValue;
     }
 
-    public static @Nullable Boolean toBoolean(@Nullable Object object) {
-        return ObjectUtils.toBoolean(object, null);
+    /**
+     * 对象转为 Boolean
+     * @param object Object
+     * @return 结果
+     */
+    @Nullable
+    public static Boolean toBoolean(@Nullable Object object) {
+        return toBoolean(object, null);
     }
 
-    public static @Nullable Boolean toBoolean(@Nullable Object object, @Nullable Boolean defaultValue) {
+    /**
+     * 对象转为 Boolean，支持 1、0，y、yes、n、no，on、off，true、false
+     * @param object Object
+     * @param defaultValue 默认值
+     * @return 结果
+     */
+    @Nullable
+    public static Boolean toBoolean(@Nullable Object object, @Nullable Boolean defaultValue) {
         if (object instanceof Boolean) {
-            return (Boolean)object;
-        }
-        if (object instanceof CharSequence) {
-            String value = ((CharSequence)object).toString();
-            if ("true".equalsIgnoreCase(value) || "y".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value) || "1".equalsIgnoreCase(value)) {
+            return (Boolean) object;
+        } else if (object instanceof CharSequence) {
+            String value = ((CharSequence) object).toString();
+            if (StrPoolConstants.TRUE.equalsIgnoreCase(value)
+                    || StrPoolConstants.Y.equalsIgnoreCase(value)
+                    || StrPoolConstants.YES.equalsIgnoreCase(value)
+                    || StrPoolConstants.ON.equalsIgnoreCase(value)
+                    || StrPoolConstants.ONE.equalsIgnoreCase(value)) {
                 return true;
-            }
-            if ("false".equalsIgnoreCase(value) || "n".equalsIgnoreCase(value) || "no".equalsIgnoreCase(value) || "off".equalsIgnoreCase(value) || "0".equalsIgnoreCase(value)) {
+            } else if (StrPoolConstants.FALSE.equalsIgnoreCase(value)
+                    || StrPoolConstants.N.equalsIgnoreCase(value)
+                    || StrPoolConstants.NO.equalsIgnoreCase(value)
+                    || StrPoolConstants.OFF.equalsIgnoreCase(value)
+                    || StrPoolConstants.ZERO.equalsIgnoreCase(value)) {
                 return false;
             }
         }
         return defaultValue;
     }
 
-    public static <R> List<R> toList(Object object, Handler<Object, R> handler) {
-        if (ObjectUtils.isNull(object)) {
+    /**
+     * 判断两个对象是否不相同 1.如果不是同一种类型,则返回true
+     * @param except 期望值
+     * @param real 实际值
+     * @return 两个对象是否不同
+     */
+    // public static boolean isNotEquals(Object except, Object real) {
+    // return !isEquals(except, real);
+    // }
+
+    /**
+     * 判断两个对象是否为同一对象 instanceof isInstance isAssignableFrom
+     *
+     * <p>
+     * 注意：任何一个元素为 null，则认为是不同类型。
+     * @param one 第一个元素
+     * @param two 第二个元素
+     * @return 是否为同一对象
+     */
+    // public static boolean isSameType(Object one, Object two) {
+    // if (com.kuma.boot.common.utils.common.ObjectUtil.isNull(one)
+    // || com.kuma.boot.common.utils.common.ObjectUtil.isNull(two)) {
+    // return false;
+    // }
+    // Class clazzOne = one.getClass();
+    //
+    // return clazzOne.isInstance(two);
+    // }
+
+    /**
+     * 不是同一个类型
+     * @param one 第一个元素
+     * @param two 第二个元素
+     * @return 是否为不同对象
+     */
+    // public static boolean isNotSameType(Object one, Object two) {
+    // return !isSameType(one, two);
+    // }
+
+    /**
+     * 判断当前对象是否为空 - 对象为空 - 空字符串 - 空集合/map - 空数组 - 自定义空类型
+     * @param object 对象
+     * @return 是否为空
+     */
+    // public static boolean isNull(Object object) {
+    // return null == object;
+    // }
+
+    /**
+     * 判断对象是否非null
+     * @param object 元素
+     * @return {@code true} 非空
+     */
+    // public static boolean isNotNull(Object object) {
+    // return !isNull(object);
+    // }
+
+    /**
+     * 判断内容是否为空 - 空字符串 - 空集合/map - 空数组 - 自定义空类型
+     * @param object 对象
+     * @return 是否为空
+     */
+    // public static boolean isEmpty(Object object) {
+    // if (isNull(object)) {
+    // return true;
+    // }
+    //
+    // if (object instanceof String) {
+    // String string = (String) object;
+    // return StringUtil.isEmpty(string);
+    // }
+    // if (object instanceof Collection) {
+    // Collection collection = (Collection) object;
+    // return CollectionUtil.isEmpty(collection);
+    // }
+    // if (object instanceof Map) {
+    // Map map = (Map) object;
+    // return MapUtil.isEmpty(map);
+    // }
+    // if (object.getClass().isArray()) {
+    // return Array.getLength(object) == 0;
+    // }
+    //
+    // return false;
+    // }
+
+    /**
+     * 判断对象是否非空
+     * @param object 对象
+     * @return 是否非空
+     */
+    // public static boolean isNotEmpty(Object object) {
+    // return !isEmpty(object);
+    // }
+
+    /**
+     * 判断两个对象是否相同 1.如果不是同一种类型,则直接返回false
+     * @param except 期望值
+     * @param real 实际值
+     * @return 两个对象是否相同
+     */
+    // public static boolean isEquals(Object except, Object real) {
+    // //1. 不是同一种类型
+    // if (isNotSameType(except, real)) {
+    // return false;
+    // }
+    //
+    // final Class exceptClass = except.getClass();
+    // final Class realClass = except.getClass();
+    //
+    // //2. 基本类型
+    // if (exceptClass.isPrimitive()
+    // && realClass.isPrimitive()
+    // && except != real) {
+    // return false;
+    // }
+    //
+    // //3. 数组
+    // if (ClassTypeUtil.isArray(exceptClass)
+    // && ClassTypeUtil.isArray(realClass)) {
+    // Object[] exceptArray = (Object[]) except;
+    // Object[] realArray = (Object[]) real;
+    // return Arrays.equals(exceptArray, realArray);
+    // }
+    //
+    // //3. Collection
+    //
+    // //4. map
+    // if (ClassTypeUtil.isMap(exceptClass) && ClassTypeUtil.isMap(realClass)) {
+    // Map exceptMap = (Map) except;
+    // Map realMap = (Map) real;
+    // return exceptMap.equals(realMap);
+    // }
+    //
+    // return except.equals(real);
+    // }
+
+    /**
+     * 判断两个对象是否不相同 1.如果不是同一种类型,则返回true
+     * @param except 期望值
+     * @param real 实际值
+     * @return 两个对象是否不同
+     */
+    // public static boolean isNotEquals(Object except, Object real) {
+    // return !isEquals(except, real);
+    // }
+
+    /**
+     * 对象转字符串
+     * @param object 对象
+     * @return 结果
+     */
+    // public static String objectToString(final Object object) {
+    // return objectToString(object, null);
+    // }
+
+    /**
+     * 对象转字符串
+     * @param object 对象
+     * @param defaultValue 默认值，原始对象为 null 时返回。
+     * @return 结果
+     */
+    // public static String objectToString(final Object object,
+    // final String defaultValue) {
+    // if (isNull(object)) {
+    // return defaultValue;
+    // }
+    // return object.toString();
+    // }
+
+    /**
+     * 判断所有参数皆为null
+     * @param object 对象
+     * @param others 其他参数
+     * @return 是否都为空
+     */
+    // public static boolean isNull(final Object object, final Object... others) {
+    // if (ObjectUtil.isNull(object)) {
+    // // 其他列表不为空，则遍历
+    // if (isNotEmpty(others)) {
+    // for (Object other : others) {
+    // if (isNotNull(other)) {
+    // return false;
+    // }
+    // }
+    // return true;
+    // }
+    // return true;
+    // }
+    // return false;
+    // }
+
+    /**
+     * 判断两个元素是否相等或者都为 Null
+     * @param left 元素1
+     * @param right 元素2
+     * @return 是否相等或者都为 Null
+     */
+    // public static boolean isEqualsOrNull(final Object left, final Object right) {
+    // if (isNull(left, right)) {
+    // return true;
+    // }
+    // if (isNull(left) || isNull(right)) {
+    // return false;
+    // }
+    // return isEquals(left, right);
+    // }
+
+    /**
+     * 可遍历的元素对象的某个元素，转换为列表
+     * @param object 可遍历对象
+     * @param handler 转换方式
+     * @param <R> R 泛型
+     * @return 结果列表
+     */
+    @SuppressWarnings("unchecked")
+    public static <R> List<R> toList(final Object object, Handler<Object, R> handler) {
+        if (isNull(object)) {
             return Collections.emptyList();
         }
-        Class<?> clazz = object.getClass();
+
+        final Class clazz = object.getClass();
+
+        // 集合
         if (ClassTypeUtils.isCollection(clazz)) {
-            Collection collection = (Collection)object;
+            Collection collection = (Collection) object;
             return CollectionUtils.toList(collection, handler);
         }
+
+        // 数组
         if (clazz.isArray()) {
             return ArrayUtils.toList(object, handler);
         }
-        throw new UnsupportedOperationException("Not support foreach() for class: " + clazz.getName());
+
+        throw new UnsupportedOperationException(
+                "Not support foreach() for class: " + clazz.getName());
     }
 
+    /**
+     * 获取实体对象对应的 class 信息
+     * @param object 实例对象
+     * @return 对象 class 信息
+     */
+    // public static Class getClass(final Object object) {
+    // if (com.kuma.boot.common.utils.common.ObjectUtil.isNull(object)) {
+    // return null;
+    // }
+    // return object.getClass();
+    // }
+
+    /**
+     * empty 转换为 null
+     * @param object 对象
+     */
     public static void emptyToNull(Object object) {
         if (null == object) {
             return;
         }
+
         List<Field> fieldList = ClassUtils.getAllFieldList(object.getClass());
         for (Field field : fieldList) {
             Object value = ReflectFieldUtils.getValue(field, object);
-            if (!ObjectUtils.isEmpty(value)) continue;
-            ReflectFieldUtils.setValue(field, object, null);
+            if (isEmpty(value)) {
+                ReflectFieldUtils.setValue(field, object, null);
+            }
         }
     }
 
+    /**
+     * 基于反射的属性拷贝
+     * @param source 源头
+     * @param target 目标
+     */
     public static void copyProperties(Object source, Object target) {
         if (source == null || target == null) {
             return;
         }
+
         Map<String, Field> sourceFieldMap = ClassUtils.getAllFieldMap(source.getClass());
         Map<String, Field> targetFieldMap = ClassUtils.getAllFieldMap(target.getClass());
+
+        // 遍历
         for (Map.Entry<String, Field> entry : sourceFieldMap.entrySet()) {
             String sourceFieldName = entry.getKey();
             Field sourceField = entry.getValue();
             Field targetField = targetFieldMap.get(sourceFieldName);
-            if (targetField == null || !ClassUtils.isAssignable(sourceField.getType(), targetField.getType())) continue;
-            Object sourceVal = ReflectFieldUtils.getValue(sourceField, source);
-            ReflectFieldUtils.setValue(targetField, target, sourceVal);
+
+            if (targetField == null) {
+                continue;
+            }
+
+            if (ClassUtils.isAssignable(sourceField.getType(), targetField.getType())) {
+                Object sourceVal = ReflectFieldUtils.getValue(sourceField, source);
+                ReflectFieldUtils.setValue(targetField, target, sourceVal);
+            }
         }
     }
 
+    /**
+     * 是否为相同的值 null null 被认为相同
+     * @param valueOne 第一个
+     * @param valueTwo 第二个
+     * @return 是否
+     */
+    // public static boolean isSameValue(Object valueOne, Object valueTwo) {
+    // if (valueOne == null && valueTwo == null) {
+    // return true;
+    // }
+    //
+    // if (valueOne == null || valueTwo == null) {
+    // return false;
+    // }
+    //
+    // return valueOne.equals(valueTwo);
+    // }
+
+    /**
+     * 判断两个对象是否为同一对象 instanceof isInstance isAssignableFrom
+     *
+     * <p>
+     * 注意：任何一个元素为 null，则认为是不同类型。
+     * @param one 第一个元素
+     * @param two 第二个元素
+     * @return 是否为同一对象
+     */
     public static boolean isSameType(Object one, Object two) {
         if (ObjectUtils.isNull(one) || ObjectUtils.isNull(two)) {
             return false;
         }
-        Class<?> clazzOne = one.getClass();
+        Class clazzOne = one.getClass();
+
         return clazzOne.isInstance(two);
     }
 
+    /**
+     * 不是同一个类型
+     * @param one 第一个元素
+     * @param two 第二个元素
+     * @return 是否为不同对象
+     */
     public static boolean isNotSameType(Object one, Object two) {
-        return !ObjectUtils.isSameType(one, two);
+        return !isSameType(one, two);
     }
 
+    /**
+     * 判断当前对象是否为空 - 对象为空 - 空字符串 - 空集合/map - 空数组 - 自定义空类型
+     * @param object 对象
+     * @return 是否为空
+     */
     public static boolean isNull(Object object) {
         return null == object;
     }
 
+    /**
+     * 判断对象是否非null
+     * @param object 元素
+     * @return {@code true} 非空
+     */
     public static boolean isNotNull(Object object) {
-        return !ObjectUtils.isNull(object);
+        return !isNull(object);
     }
 
+    /**
+     * 判断内容是否为空 - 空字符串 - 空集合/map - 空数组 - 自定义空类型
+     * @param object 对象
+     * @return 是否为空
+     */
     public static boolean isEmpty(Object object) {
-        if (ObjectUtils.isNull(object)) {
+        if (isNull(object)) {
             return true;
         }
+
         if (object instanceof String) {
-            String string = (String)object;
+            String string = (String) object;
             return StringUtils.isEmpty(string);
         }
         if (object instanceof Collection) {
-            Collection collection = (Collection)object;
+            Collection collection = (Collection) object;
             return CollectionUtils.isEmpty(collection);
         }
         if (object instanceof Map) {
-            Map map = (Map)object;
+            Map map = (Map) object;
             return MapUtils.isEmpty(map);
         }
         if (object.getClass().isArray()) {
             return Array.getLength(object) == 0;
         }
+
         return false;
     }
 
+    /**
+     * 判断对象是否非空
+     * @param object 对象
+     * @return 是否非空
+     */
     public static boolean isNotEmpty(Object object) {
-        return !ObjectUtils.isEmpty(object);
+        return !isEmpty(object);
     }
 
+    /**
+     * 判断两个对象是否相同 1.如果不是同一种类型,则直接返回false
+     * @param except 期望值
+     * @param real 实际值
+     * @return 两个对象是否相同
+     */
     public static boolean isEquals(Object except, Object real) {
-        if (ObjectUtils.isNotSameType(except, real)) {
+        // 1. 不是同一种类型
+        if (isNotSameType(except, real)) {
             return false;
         }
-        Class<?> exceptClass = except.getClass();
-        Class<?> realClass = except.getClass();
+
+        final Class exceptClass = except.getClass();
+        final Class realClass = except.getClass();
+
+        // 2. 基本类型
         if (exceptClass.isPrimitive() && realClass.isPrimitive() && except != real) {
             return false;
         }
+
+        // 3. 数组
         if (ClassTypeUtils.isArray(exceptClass) && ClassTypeUtils.isArray(realClass)) {
-            Object[] exceptArray = (Object[])except;
-            Object[] realArray = (Object[])real;
+            Object[] exceptArray = (Object[]) except;
+            Object[] realArray = (Object[]) real;
             return Arrays.equals(exceptArray, realArray);
         }
+
+        // 3. Collection
+
+        // 4. map
         if (ClassTypeUtils.isMap(exceptClass) && ClassTypeUtils.isMap(realClass)) {
-            Map exceptMap = (Map)except;
-            Map realMap = (Map)real;
+            Map exceptMap = (Map) except;
+            Map realMap = (Map) real;
             return exceptMap.equals(realMap);
         }
+
         return except.equals(real);
     }
 
+    /**
+     * 判断两个对象是否不相同 1.如果不是同一种类型,则返回true
+     * @param except 期望值
+     * @param real 实际值
+     * @return 两个对象是否不同
+     */
     public static boolean isNotEquals(Object except, Object real) {
-        return !ObjectUtils.isEquals(except, real);
+        return !isEquals(except, real);
     }
 
-    public static String objectToString(Object object) {
-        return ObjectUtils.objectToString(object, null);
+    /**
+     * 对象转字符串
+     * @param object 对象
+     * @return 结果
+     */
+    public static String objectToString(final Object object) {
+        return objectToString(object, null);
     }
 
-    public static String objectToString(Object object, String defaultValue) {
+    /**
+     * 对象转字符串
+     * @param object 对象
+     * @param defaultValue 默认值，原始对象为 null 时返回。
+     * @return 结果
+     */
+    public static String objectToString(final Object object, final String defaultValue) {
         if (ObjectUtils.isNull(object)) {
             return defaultValue;
         }
         return object.toString();
     }
 
-    public static boolean isNull(Object object, Object ... others) {
+    /**
+     * 判断所有参数皆为null
+     * @param object 对象
+     * @param others 其他参数
+     * @return 是否都为空
+     * @see #isNull(Object) 增强版本
+     */
+    public static boolean isNull(final Object object, final Object... others) {
         if (ObjectUtils.isNull(object)) {
+            // 其他列表不为空，则遍历
             if (ArrayUtils.isNotEmpty(others)) {
                 for (Object other : others) {
-                    if (!ObjectUtils.isNotNull(other)) continue;
-                    return false;
+                    if (ObjectUtils.isNotNull(other)) {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -352,50 +873,162 @@ extends org.springframework.util.ObjectUtils {
         return false;
     }
 
-    public static boolean isEqualsOrNull(Object left, Object right) {
-        if (ObjectUtils.isNull(left, right)) {
+    /**
+     * 判断两个元素是否相等或者都为 Null
+     * @param left 元素1
+     * @param right 元素2
+     * @return 是否相等或者都为 Null
+     */
+    public static boolean isEqualsOrNull(final Object left, final Object right) {
+        if (isNull(left, right)) {
             return true;
         }
-        if (ObjectUtils.isNull(left) || ObjectUtils.isNull(right)) {
+        if (isNull(left) || isNull(right)) {
             return false;
         }
-        return ObjectUtils.isEquals(left, right);
+        return isEquals(left, right);
     }
 
+    /// **
+    // * 可遍历的元素对象的某个元素，转换为列表
+    // *
+    // * @param object 可遍历对象
+    // * @param handler 转换方式
+    // * @param <R> R 泛型
+    // * @return 结果列表
+    // */
+    @SuppressWarnings("unchecked")
+    // public static <R> List<R> toList(final Object object, IHandler<Object, R> handler)
+    // {
+    // if (ObjectUtil.isNull(object)) {
+    // return Collections.emptyList();
+    // }
+    //
+    // final Class clazz = object.getClass();
+    //
+    // // 集合
+    // if (ClassTypeUtil.isCollection(clazz)) {
+    // Collection collection = (Collection) object;
+    // return CollectionUtil.toList(collection, handler);
+    // }
+    //
+    // // 数组
+    // if (clazz.isArray()) {
+    // return ArrayUtil.toList(object, handler);
+    // }
+    //
+    // throw new UnsupportedOperationException(
+    // "Not support foreach() for class: " + clazz.getName());
+    // }
+
+    /**
+     * 获取实体对象对应的 class 信息
+     * @param object 实例对象
+     * @return 对象 class 信息
+     */
+    // public static Class getClass(final Object object) {
+    // if (ObjectUtil.isNull(object)) {
+    // return null;
+    // }
+    // return object.getClass();
+    // }
+
+    /**
+     * empty 转换为 null
+     * @param object 对象
+     */
+    // public static void emptyToNull(Object object) {
+    // if (null == object) {
+    // return;
+    // }
+    //
+    // List<Field> fieldList = ClassUtil.getAllFieldList(object.getClass());
+    // for (Field field : fieldList) {
+    // Object value = ReflectFieldUtil.getValue(field, object);
+    // if (ObjectUtil.isEmpty(value)) {
+    // ReflectFieldUtil.setValue(field, object, null);
+    // }
+    // }
+    // }
+
+    /**
+     * 基于反射的属性拷贝
+     * @param source 源头
+     * @param target 目标
+     */
+    // public static void copyProperties(Object source, Object target) {
+    // if (source == null || target == null) {
+    // return;
+    // }
+    //
+    // Map<String, Field> sourceFieldMap = ClassUtil.getAllFieldMap(source.getClass());
+    // Map<String, Field> targetFieldMap = ClassUtil.getAllFieldMap(target.getClass());
+    //
+    // // 遍历
+    // for (Map.Entry<String, Field> entry : sourceFieldMap.entrySet()) {
+    // String sourceFieldName = entry.getKey();
+    // Field sourceField = entry.getValue();
+    // Field targetField = targetFieldMap.get(sourceFieldName);
+    //
+    // if (targetField == null) {
+    // continue;
+    // }
+    //
+    // if (ClassUtil.isAssignable(sourceField.getType(), targetField.getType())) {
+    // Object sourceVal = ReflectFieldUtil.getValue(sourceField, source);
+    // ReflectFieldUtil.setValue(targetField, target, sourceVal);
+    // }
+    // }
+    // }
+
+    /**
+     * 是否为相同的值 null null 被认为相同
+     * @param valueOne 第一个
+     * @param valueTwo 第二个
+     * @return 是否
+     */
     public static boolean isSameValue(Object valueOne, Object valueTwo) {
         if (valueOne == null && valueTwo == null) {
             return true;
         }
+
         if (valueOne == null || valueTwo == null) {
             return false;
         }
+
         return valueOne.equals(valueTwo);
     }
 
-    public static <T> void ifEmpty(T obj, Consumer<T> consumer) {
-        if (ObjectUtil.isEmpty(obj)) {
+    public static  <T> void ifEmpty(T obj, Consumer<T> consumer ){
+        if(ObjectUtil.isEmpty(obj)){
             consumer.accept(obj);
         }
     }
 
     public static <T> void ifNotEmpty(T obj, Consumer<T> consumer) {
-        if (ObjectUtil.isNotEmpty(obj)) {
+        if(ObjectUtil.isNotEmpty(obj)){
             consumer.accept(obj);
         }
     }
 
     public static <T> void ifNull(T obj, Consumer<T> consumer) {
-        if (ObjectUtil.isNull(obj)) {
+        if(ObjectUtil.isNull(obj)){
             consumer.accept(obj);
         }
     }
 
     public static <T> void ifNotNull(T obj, Consumer<T> consumer) {
-        if (ObjectUtil.isNotNull(obj)) {
+        if(ObjectUtil.isNotNull(obj)){
             consumer.accept(obj);
         }
     }
 
+    /**
+     * 对象不允许为空.
+     * @param obj 对象
+     * @param <T> 泛型
+     * @return 对象
+     */
     public static <T> T requireNotNull(T obj) {
         if (obj == null) {
             throw new NullPointerException();
@@ -403,4 +1036,3 @@ extends org.springframework.util.ObjectUtils {
         return obj;
     }
 }
-

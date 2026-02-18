@@ -1,85 +1,133 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
- *  org.springframework.aop.support.AopUtils
- *  org.springframework.beans.factory.BeanFactory
- *  org.springframework.context.expression.AnnotatedElementKey
- *  org.springframework.context.expression.BeanFactoryResolver
- *  org.springframework.context.expression.CachedExpressionEvaluator
- *  org.springframework.context.expression.CachedExpressionEvaluator$ExpressionKey
- *  org.springframework.context.expression.MethodBasedEvaluationContext
- *  org.springframework.expression.BeanResolver
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.expression.Expression
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.spel;
 
-import com.kuma.boot.common.utils.spel.ExpressionRootObject;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.jspecify.annotations.Nullable;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
-import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.jspecify.annotations.Nullable;
 
-public class ExpressionEvaluator
-extends CachedExpressionEvaluator {
-    private final Map<CachedExpressionEvaluator.ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<CachedExpressionEvaluator.ExpressionKey, Expression>(64);
-    private final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<AnnotatedElementKey, Method>(64);
+/**
+ * 缓存 spEl 提高性能
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class ExpressionEvaluator extends CachedExpressionEvaluator {
 
-    public EvaluationContext createContext(Method method, Object[] args, Object target, Class<?> targetClass, @Nullable BeanFactory beanFactory) {
-        Method targetMethod = this.getTargetMethod(targetClass, method);
-        ExpressionRootObject rootObject = new ExpressionRootObject(method, args, target, targetClass, targetMethod);
-        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext((Object)rootObject, targetMethod, args, this.getParameterNameDiscoverer());
+    private final Map<ExpressionKey, Expression> expressionCache = new ConcurrentHashMap<>(64);
+
+    private final Map<AnnotatedElementKey, Method> methodCache = new ConcurrentHashMap<>(64);
+
+    /**
+     * Create an {@link EvaluationContext}.
+     * @param method the method
+     * @param args the method arguments
+     * @param target the target object
+     * @param targetClass the target class
+     * @return the evaluation context
+     */
+    public EvaluationContext createContext(
+            Method method,
+            Object[] args,
+            Object target,
+            Class<?> targetClass,
+            @Nullable BeanFactory beanFactory) {
+        Method targetMethod = getTargetMethod(targetClass, method);
+        ExpressionRootObject rootObject =
+                new ExpressionRootObject(method, args, target, targetClass, targetMethod);
+        MethodBasedEvaluationContext evaluationContext =
+                new MethodBasedEvaluationContext(
+                        rootObject, targetMethod, args, getParameterNameDiscoverer());
         if (beanFactory != null) {
-            evaluationContext.setBeanResolver((BeanResolver)new BeanFactoryResolver(beanFactory));
+            evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
         }
         return evaluationContext;
     }
 
-    public EvaluationContext createContext(Method method, Object[] args, Class<?> targetClass, Object rootObject, @Nullable BeanFactory beanFactory) {
-        Method targetMethod = this.getTargetMethod(targetClass, method);
-        MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(rootObject, targetMethod, args, this.getParameterNameDiscoverer());
+    /**
+     * Create an {@link EvaluationContext}.
+     * @param method the method
+     * @param args the method arguments
+     * @param rootObject rootObject
+     * @param targetClass the target class
+     * @return the evaluation context
+     */
+    public EvaluationContext createContext(
+            Method method,
+            Object[] args,
+            Class<?> targetClass,
+            Object rootObject,
+            @Nullable BeanFactory beanFactory) {
+        Method targetMethod = getTargetMethod(targetClass, method);
+        MethodBasedEvaluationContext evaluationContext =
+                new MethodBasedEvaluationContext(
+                        rootObject, targetMethod, args, getParameterNameDiscoverer());
         if (beanFactory != null) {
-            evaluationContext.setBeanResolver((BeanResolver)new BeanFactoryResolver(beanFactory));
+            evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
         }
         return evaluationContext;
     }
 
-    public @Nullable Object eval(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
-        return this.eval(expression, methodKey, evalContext, null);
+    @Nullable
+    public Object eval(
+            String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+        return eval(expression, methodKey, evalContext, null);
     }
 
-    public <T> @Nullable T eval(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext, @Nullable Class<T> valueType) {
-        return (T)this.getExpression(this.expressionCache, methodKey, expression).getValue(evalContext, valueType);
+    @Nullable
+    public <T> T eval(
+            String expression,
+            AnnotatedElementKey methodKey,
+            EvaluationContext evalContext,
+            @Nullable Class<T> valueType) {
+        return getExpression(this.expressionCache, methodKey, expression)
+                .getValue(evalContext, valueType);
     }
 
-    public @Nullable String evalAsText(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
-        return this.eval(expression, methodKey, evalContext, String.class);
+    @Nullable
+    public String evalAsText(
+            String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+        return eval(expression, methodKey, evalContext, String.class);
     }
 
-    public boolean evalAsBool(String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
-        return Boolean.TRUE.equals(this.eval(expression, methodKey, evalContext, Boolean.class));
+    public boolean evalAsBool(
+            String expression, AnnotatedElementKey methodKey, EvaluationContext evalContext) {
+        return Boolean.TRUE.equals(eval(expression, methodKey, evalContext, Boolean.class));
     }
 
     private Method getTargetMethod(Class<?> targetClass, Method method) {
-        AnnotatedElementKey methodKey = new AnnotatedElementKey((AnnotatedElement)method, targetClass);
-        return this.methodCache.computeIfAbsent(methodKey, key -> AopUtils.getMostSpecificMethod((Method)method, (Class)targetClass));
+        AnnotatedElementKey methodKey = new AnnotatedElementKey(method, targetClass);
+        return methodCache.computeIfAbsent(
+                methodKey, (key) -> AopUtils.getMostSpecificMethod(method, targetClass));
     }
 
+    /** Clear all caches. */
     public void clear() {
         this.expressionCache.clear();
         this.methodCache.clear();
     }
 }
-

@@ -1,10 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
- *  org.springframework.util.StreamUtils
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.io;
 
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
@@ -16,64 +25,90 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.StreamUtils;
 
-public class IoUtils
-extends StreamUtils {
+/**
+ * IOUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class IoUtils extends org.springframework.util.StreamUtils {
+
+    /**
+     * closeQuietly
+     * @param closeable 自动关闭
+     */
     public static void closeQuietly(@Nullable Closeable closeable) {
         if (closeable == null) {
             return;
         }
         if (closeable instanceof Flushable) {
             try {
-                ((Flushable)((Object)closeable)).flush();
-            }
-            catch (IOException iOException) {
-                // empty catch block
+                ((Flushable) closeable).flush();
+            } catch (IOException ignored) {
+                // ignore
             }
         }
         try {
             closeable.close();
-        }
-        catch (IOException iOException) {
-            // empty catch block
+        } catch (IOException ignored) {
+            // ignore
         }
     }
 
+    /**
+     * InputStream to String utf-8
+     * @param input the <code>InputStream</code> to read from
+     * @return the requested String
+     */
     public static String readToString(InputStream input) {
-        return IoUtils.readToString(input, StandardCharsets.UTF_8);
+        return readToString(input, StandardCharsets.UTF_8);
     }
 
+    /**
+     * InputStream to String
+     * @param input the <code>InputStream</code> to read from
+     * @param charset the <code>Charset</code>
+     * @return the requested String
+     */
     public static String readToString(@Nullable InputStream input, Charset charset) {
         try {
-            String string = IoUtils.copyToString((InputStream)input, (Charset)charset);
-            return string;
-        }
-        catch (IOException e) {
+            return IoUtils.copyToString(input, charset);
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
-        }
-        finally {
+        } finally {
             IoUtils.closeQuietly(input);
         }
     }
 
     public static byte[] readToByteArray(@Nullable InputStream input) {
         try {
-            byte[] byArray = IoUtils.copyToByteArray((InputStream)input);
-            return byArray;
-        }
-        catch (IOException e) {
+            return IoUtils.copyToByteArray(input);
+        } catch (IOException e) {
             throw ExceptionUtils.unchecked(e);
-        }
-        finally {
+        } finally {
             IoUtils.closeQuietly(input);
         }
     }
 
-    public static void write(@Nullable String data, OutputStream output, Charset encoding) throws IOException {
+    /**
+     * Writes chars from a <code>String</code> to bytes on an <code>OutputStream</code>
+     * using the specified character encoding.
+     *
+     * <p>
+     * This method uses {@link String#getBytes(String)}.
+     * @param data the <code>String</code> to write, null ignored
+     * @param output the <code>OutputStream</code> to write to
+     * @param encoding the encoding to use, null means platform default
+     * @throws NullPointerException if output is null
+     * @throws IOException if an I/O error occurs
+     */
+    public static void write(
+            @Nullable final String data, final OutputStream output, final Charset encoding)
+            throws IOException {
         if (data != null) {
             output.write(data.getBytes(encoding));
         }
     }
 }
-

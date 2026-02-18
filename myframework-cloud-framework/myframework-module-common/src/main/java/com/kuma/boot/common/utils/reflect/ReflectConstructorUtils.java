@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
 import com.kuma.boot.common.exception.BootException;
@@ -8,18 +21,25 @@ import com.kuma.boot.common.utils.common.ArgUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+/** 反射构造器工具类 */
 public final class ReflectConstructorUtils {
-    private ReflectConstructorUtils() {
-    }
 
-    public static <T> T newInstance(Constructor<T> constructor, Object ... args) {
+    private ReflectConstructorUtils() {}
+
+    /**
+     * 根据构造器初始化对象实例
+     * @param constructor 构造器
+     * @param args 参数
+     * @param <T> 泛型
+     * @return 结果
+     */
+    public static <T> T newInstance(final Constructor<T> constructor, final Object... args) {
         ArgUtils.notNull(constructor, "constructor");
+
         try {
             return constructor.newInstance(args);
-        }
-        catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new BootException(e);
         }
     }
 }
-

@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.exception;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -10,8 +23,18 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
-public class IgnoreSerIdObjectInputStream
-extends ObjectInputStream {
+/**
+ * 忽略序列化 id 的 jdk 对象序列化
+ *
+ * <p>
+ * 参考：https://stackoverflow.com/questions/1816559/make-java-runtime-ignore-serialversionuids
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class IgnoreSerIdObjectInputStream extends ObjectInputStream {
+
     public IgnoreSerIdObjectInputStream(byte[] bytes) throws IOException {
         this(new ByteArrayInputStream(bytes));
     }
@@ -22,25 +45,34 @@ extends ObjectInputStream {
 
     @Override
     protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
-        Class<?> localClass;
+        // initially streams descriptor
         ObjectStreamClass resultClassDescriptor = super.readClassDescriptor();
+        // the class in the local JVM that this descriptor represents.
+        Class<?> localClass;
         try {
             localClass = Class.forName(resultClassDescriptor.getName());
-        }
-        catch (ClassNotFoundException e) {
-            LogUtils.warn("No local class for " + resultClassDescriptor.getName(), new Object[0]);
+        } catch (ClassNotFoundException e) {
+            LogUtils.warn("No local class for " + resultClassDescriptor.getName());
             return resultClassDescriptor;
         }
+
         ObjectStreamClass localClassDescriptor = ObjectStreamClass.lookup(localClass);
+        // only if class implements serializable
         if (localClassDescriptor != null) {
             long localSerId = localClassDescriptor.getSerialVersionUID();
             long streamSerId = resultClassDescriptor.getSerialVersionUID();
+            // check for serialVersionUID mismatch.
             if (streamSerId != localSerId) {
-                LogUtils.warn("Overriding serialized class {} version mismatch: local serialVersionUID = {} stream serialVersionUID = {}", localClass, localSerId, streamSerId);
+                LogUtils.warn(
+                        "Overriding serialized class {} version mismatch: local serialVersionUID ="
+                                + " {} stream serialVersionUID = {}",
+                        localClass,
+                        localSerId,
+                        streamSerId);
+                // Use local class descriptor for deserialization
                 resultClassDescriptor = localClassDescriptor;
             }
         }
         return resultClassDescriptor;
     }
 }
-

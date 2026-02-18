@@ -1,16 +1,32 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.reflect;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-public class ParameterizedTypeImpl
-implements ParameterizedType {
+/** 自定义参数化类型实现 */
+public class ParameterizedTypeImpl implements ParameterizedType {
+
     private final Type[] actualTypeArguments;
+
     private final Type ownerType;
+
     private final Type rawType;
 
     public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType) {
@@ -21,41 +37,45 @@ implements ParameterizedType {
 
     @Override
     public Type[] getActualTypeArguments() {
-        return this.actualTypeArguments;
+        return actualTypeArguments;
     }
 
     @Override
     public Type getOwnerType() {
-        return this.ownerType;
+        return ownerType;
     }
 
     @Override
     public Type getRawType() {
-        return this.rawType;
+        return rawType;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ParameterizedTypeImpl that = (ParameterizedTypeImpl)o;
-        if (!Arrays.equals(this.actualTypeArguments, that.actualTypeArguments)) {
+
+        ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
+
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(actualTypeArguments, that.actualTypeArguments)) {
             return false;
         }
-        if (this.ownerType != null ? !this.ownerType.equals(that.ownerType) : that.ownerType != null) {
+        if (ownerType != null ? !ownerType.equals(that.ownerType) : that.ownerType != null) {
             return false;
         }
-        return this.rawType != null ? this.rawType.equals(that.rawType) : that.rawType == null;
+        return rawType != null ? rawType.equals(that.rawType) : that.rawType == null;
     }
 
+    @Override
     public int hashCode() {
-        int result = this.actualTypeArguments != null ? Arrays.hashCode(this.actualTypeArguments) : 0;
-        result = 31 * result + (this.ownerType != null ? this.ownerType.hashCode() : 0);
-        result = 31 * result + (this.rawType != null ? this.rawType.hashCode() : 0);
+        int result = actualTypeArguments != null ? Arrays.hashCode(actualTypeArguments) : 0;
+        result = 31 * result + (ownerType != null ? ownerType.hashCode() : 0);
+        result = 31 * result + (rawType != null ? rawType.hashCode() : 0);
         return result;
     }
 }
-

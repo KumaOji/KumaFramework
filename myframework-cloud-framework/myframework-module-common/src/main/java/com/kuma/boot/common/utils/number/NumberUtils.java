@@ -1,14 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.annotation.Nullable
- *  org.springframework.util.NumberUtils
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.number;
 
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
@@ -20,131 +28,278 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import com.kuma.boot.common.utils.lang.StringUtils;
 
-public class NumberUtils
-extends org.springframework.util.NumberUtils {
-    public static final byte[] DIGITS = new byte[]{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90};
-    private static final String[] hanArr = new String[]{"\u96f6", "\u4e00", "\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d"};
-    private static final String[] unitArr = new String[]{"\u5341", "\u767e", "\u5343", "\u4e07", "\u5341", "\u767d", "\u5343", "\u4ebf", "\u5341", "\u767e", "\u5343"};
+/**
+ * NumberUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 16:32:13
+ */
+public class NumberUtils extends org.springframework.util.NumberUtils {
 
-    private NumberUtils() {
-    }
+    private NumberUtils() {}
 
-    public static int toInt(String str) {
+    /**
+     * Convert a <code>String</code> to an <code>int</code>, returning <code>zero</code>
+     * if the conversion fails.
+     *
+     * <p>
+     * If the string is <code>null</code>, <code>zero</code> is returned.
+     *
+     * <pre>
+     *   NumberUtil.toInt(null) = 0
+     *   NumberUtil.toInt("")   = 0
+     *   NumberUtil.toInt("1")  = 1
+     * </pre>
+     * @param str the string to convert, may be null
+     * @return the int represented by the string, or <code>zero</code> if conversion fails
+     */
+    public static int toInt(final String str) {
         return ObjectUtils.toInt(str, 0);
     }
 
-    public static int toInt(@Nullable String str, int defaultValue) {
+    /**
+     * Convert a <code>String</code> to an <code>int</code>, returning a default value if
+     * the conversion fails.
+     *
+     * <p>
+     * If the string is <code>null</code>, the default value is returned.
+     *
+     * <pre>
+     *   NumberUtil.toInt(null, 1) = 1
+     *   NumberUtil.toInt("", 1)   = 1
+     *   NumberUtil.toInt("1", 0)  = 1
+     * </pre>
+     * @param str the string to convert, may be null
+     * @param defaultValue the default value
+     * @return the int represented by the string, or the default if conversion fails
+     */
+    public static int toInt(@Nullable final String str, final int defaultValue) {
         return ObjectUtils.toInt(str, defaultValue);
     }
 
-    public static long toLong(String str) {
+    /**
+     * Convert a <code>String</code> to a <code>long</code>, returning <code>zero</code>
+     * if the conversion fails.
+     *
+     * <p>
+     * If the string is <code>null</code>, <code>zero</code> is returned.
+     *
+     * <pre>
+     *   NumberUtil.toLong(null) = 0L
+     *   NumberUtil.toLong("")   = 0L
+     *   NumberUtil.toLong("1")  = 1L
+     * </pre>
+     * @param str the string to convert, may be null
+     * @return the long represented by the string, or <code>0</code> if conversion fails
+     */
+    public static long toLong(final String str) {
         return ObjectUtils.toLong(str, 0L);
     }
 
-    public static long toLong(@Nullable String str, long defaultValue) {
+    /**
+     * Convert a <code>String</code> to a <code>long</code>, returning a default value if
+     * the conversion fails.
+     *
+     * <p>
+     * If the string is <code>null</code>, the default value is returned.
+     *
+     * <pre>
+     *   NumberUtil.toLong(null, 1L) = 1L
+     *   NumberUtil.toLong("", 1L)   = 1L
+     *   NumberUtil.toLong("1", 0L)  = 1L
+     * </pre>
+     * @param str the string to convert, may be null
+     * @param defaultValue the default value
+     * @return the long represented by the string, or the default if conversion fails
+     */
+    public static long toLong(@Nullable final String str, final long defaultValue) {
         return ObjectUtils.toLong(str, defaultValue);
     }
 
+    /** All possible chars for representing a number as a String */
+    public static final byte[] DIGITS = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+            'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+            'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+    };
+
+    /**
+     * 将 long 转短字符串 为 62 进制
+     * @param i 数字
+     * @return 短字符串
+     */
     public static String to62Str(long i) {
         int radix = DIGITS.length;
         byte[] buf = new byte[65];
         int charPos = 64;
-        for (i = -i; i <= (long)(-radix); i /= (long)radix) {
-            buf[charPos--] = DIGITS[(int)(-(i % (long)radix))];
+        i = -i;
+        while (i <= -radix) {
+            buf[charPos--] = DIGITS[(int) (-(i % radix))];
+            i = i / radix;
         }
-        buf[charPos] = DIGITS[(int)(-i)];
-        return new String(buf, charPos, 65 - charPos, StandardCharsets.UTF_8);
+        buf[charPos] = DIGITS[(int) (-i)];
+        return new String(buf, charPos, (65 - charPos), StandardCharsets.UTF_8);
     }
 
+    /** hanArr */
+    private static final String[] hanArr = {"零", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
+
+    /** unitArr */
+    private static final String[] unitArr = {"十", "百", "千", "万", "十", "白", "千", "亿", "十", "百", "千"};
+
+    /**
+     * 数字转double
+     * @param number number
+     * @param scale scale
+     * @return double
+     * @since 2021-09-02 16:32:28
+     */
     public static double scale(Number number, int scale) {
         if (Objects.nonNull(number)) {
             try {
                 BigDecimal bg = BigDecimal.valueOf(number.doubleValue());
                 return bg.setScale(scale, RoundingMode.HALF_UP).doubleValue();
-            }
-            catch (Exception e) {
-                return 0.0;
+            } catch (Exception e) {
+                // todo 需要判断NAN
+                // LogUtil.error(e);
+                return 0;
             }
         }
-        return 0.0;
+        return 0;
     }
 
+    /**
+     * String转成int的值， 若无法转换，默认返回0
+     * @param string string
+     * @return int
+     * @since 2021-09-02 16:33:31
+     */
     public static int stoi(String string) {
-        return NumberUtils.stoi(string, 0);
+        return stoi(string, 0);
     }
 
+    /**
+     * stoi
+     * @param string string
+     * @param defaultValue defaultValue
+     * @return int
+     * @since 2021-09-02 16:33:43
+     */
     public static int stoi(String string, int defaultValue) {
-        int id;
-        if (string == null || string.equalsIgnoreCase("") || string.equals("null")) {
+        if ((string == null) || (string.equalsIgnoreCase("") || (string.equals("null")))) {
             return defaultValue;
         }
+        int id;
         try {
             id = Integer.parseInt(string);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LogUtils.error(e);
             return defaultValue;
         }
         return id;
     }
 
+    /**
+     * String转成long的值， 若无法转换，默认返回0
+     * @param string string
+     * @return long
+     * @since 2021-09-02 16:33:50
+     */
     public static long stol(String string) {
-        return NumberUtils.stol(string, 0L);
+        return stol(string, 0);
     }
 
+    /**
+     * stol
+     * @param string string
+     * @param defaultValue defaultValue
+     * @return long
+     * @since 2021-09-02 16:33:53
+     */
     public static long stol(String string, long defaultValue) {
-        long ret;
-        if (string == null || string.equalsIgnoreCase("")) {
+        if ((string == null) || (string.equalsIgnoreCase(""))) {
             return defaultValue;
         }
+        long ret;
         try {
             ret = Long.parseLong(string);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LogUtils.error(e);
             return defaultValue;
         }
+
         return ret;
     }
 
+    /**
+     * String转成double的值， 若无法转换，默认返回0.00
+     * @param string string
+     * @return double
+     * @since 2021-09-02 16:34:04
+     */
     public static double stod(String string) {
-        return NumberUtils.stod(string, 0.0);
+        return stod(string, 0.00);
     }
 
+    /**
+     * stod
+     * @param string string
+     * @param defaultValue defaultValue
+     * @return double
+     * @since 2021-09-02 16:34:07
+     */
     public static double stod(String string, double defaultValue) {
-        double ret;
-        if (string == null || string.equalsIgnoreCase("")) {
+        if ((string == null) || (string.equalsIgnoreCase(""))) {
             return defaultValue;
         }
+        double ret;
         try {
             ret = Double.parseDouble(string);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LogUtils.error(e);
             return defaultValue;
         }
+
         return ret;
     }
 
+    /**
+     * 将整数转成中文表示
+     * @param number number
+     * @return 中文
+     * @since 2021-09-02 16:34:12
+     */
     public static String toChineseNum(int number) {
         String numStr = String.valueOf(number);
         StringBuilder result = new StringBuilder();
         int numLen = numStr.length();
-        for (int i = 0; i < numLen; ++i) {
+        for (int i = 0; i < numLen; i++) {
             int num = numStr.charAt(i) - 48;
             if (i != numLen - 1 && num != 0) {
                 result.append(hanArr[num]).append(unitArr[numLen - 2 - i]);
-                if (number < 10 || number >= 20) continue;
-                result = new StringBuilder(result.substring(1));
-                continue;
+                if (number >= 10 && number < 20) {
+                    result = new StringBuilder(result.substring(1));
+                }
+            } else {
+                if (!(number >= 10 && number % 10 == 0)) {
+                    result.append(hanArr[num]);
+                }
             }
-            if (number >= 10 && number % 10 == 0) continue;
-            result.append(hanArr[num]);
         }
         return result.toString();
     }
 
+    /**
+     * 获取一个属于[min, max)中的随机数
+     * @param min min
+     * @param max max
+     * @return int
+     * @since 2021-09-02 16:34:18
+     */
     public static int random(int min, int max) {
         return new Random().nextInt(max - min) + min;
     }
@@ -153,68 +308,134 @@ extends org.springframework.util.NumberUtils {
         return flowPrice.compareTo(actualRefundPrice);
     }
 
-    private static <T> Optional<T> parseNumber(String str, Predicate<String> validateFn, Function<String, T> parseFn) {
+    /**
+     * 解析字符串为数值 兼容前后有空格的情况
+     * @param str 字符串
+     * @param validateFn 校验是否可解析的函数
+     * @param parseFn 解析为具体类型的函数
+     * @return 具体类型的对象
+     * @param <T> 返回数值的类型
+     */
+    private static <T> Optional<T> parseNumber(
+            String str, Predicate<String> validateFn, Function<String, T> parseFn) {
+        // 校验参数
         Objects.requireNonNull(validateFn);
         Objects.requireNonNull(parseFn);
+
+        // 参数非法返回empty
         if (StringUtils.isEmpty(str)) {
             return Optional.empty();
         }
-        if ((str = str.trim()).length() == 0) {
+
+        // trim后校验是否为空串
+        str = str.trim();
+        if (str.length() == 0) {
             return Optional.empty();
         }
+
+        // 校验失败返回empty
         if (!validateFn.test(str)) {
             return Optional.empty();
         }
+
+        // 校验成功正常返回
         return Optional.of(parseFn.apply(str));
     }
 
+    /**
+     * 解析字符串为Long
+     * @param value 字符串
+     * @return 数字，可能会失败，失败不会抛异常，除非越界
+     */
     public static Optional<Long> parseLong(String value) {
-        return NumberUtils.parseNumber(value, NumberUtils::isInteger, Long::parseLong);
+        return parseNumber(value, NumberUtils::isInteger, Long::parseLong);
     }
 
+    /**
+     * 解析字符串为Integer
+     * @param value 字符串
+     * @return 数字，可能会失败，失败不会抛异常，除非越界
+     */
     public static Optional<Integer> parseInteger(String value) {
-        return NumberUtils.parseLong(value).map(Math::toIntExact);
+        return parseLong(value).map(Math::toIntExact);
     }
 
+    /**
+     * 解析字符串为BigInteger
+     * @param value 字符串
+     * @return 数字，可能会失败，失败不会抛异常，除非越界
+     */
     public static Optional<BigInteger> parseBigInteger(String value) {
-        return NumberUtils.parseNumber(value, NumberUtils::isInteger, BigInteger::new);
+        return parseNumber(value, NumberUtils::isInteger, BigInteger::new);
     }
 
+    /**
+     * 解析字符串为Double
+     * @param value 字符串
+     * @return 数字，可能会失败，失败不会抛异常，除非越界
+     */
     public static Optional<Double> parseDouble(String value) {
-        return NumberUtils.parseNumber(value, NumberUtils::isDecimal, Double::parseDouble);
+        return parseNumber(value, NumberUtils::isDecimal, Double::parseDouble);
     }
 
+    /**
+     * 解析字符串为Float
+     * @param value 字符串
+     * @return 数字，可能会失败，失败不会抛异常，除非越界
+     */
     public static Optional<Float> parseFloat(String value) {
-        return NumberUtils.parseNumber(value, NumberUtils::isDecimal, Float::parseFloat);
+        return parseNumber(value, NumberUtils::isDecimal, Float::parseFloat);
     }
 
+    /**
+     * 解析字符串为BigDecimal
+     * @param value 字符串
+     * @return 数字，可能会失败，失败不会抛异常
+     */
     public static Optional<BigDecimal> parseBigDecimal(String value) {
-        return NumberUtils.parseNumber(value, NumberUtils::isDecimal, BigDecimal::new);
+        return parseNumber(value, NumberUtils::isDecimal, BigDecimal::new);
     }
 
+    /**
+     * 是否为整数
+     * @param str 字符串
+     * @return 是否为整数
+     */
     private static boolean isInteger(String str) {
-        int len = str.length();
-        for (int i = 0; i < len; ++i) {
+        for (int i = 0, len = str.length(); i < len; i++) {
             char ch = str.charAt(i);
-            if (Character.isDigit(ch) || i == 0 && ch == '-') continue;
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean isDecimal(String str) {
-        int len = str.length();
-        boolean point = false;
-        for (int i = 0; i < len; ++i) {
-            char ch = str.charAt(i);
-            if (Character.isDigit(ch) || i == 0 && ch == '-') continue;
-            if (i > 0 && ch == '.' && !point) {
-                point = true;
+            // 数字或者第一位是负号
+            if (Character.isDigit(ch) || (i == 0 && ch == '-')) {
                 continue;
             }
             return false;
         }
         return true;
     }
-}
 
+    /**
+     * 是否为小数或整数
+     * @param str 字符串
+     * @return 是否为小数或整数
+     */
+    private static boolean isDecimal(String str) {
+        for (int i = 0, len = str.length(), point = 0; i < len; i++) {
+            char ch = str.charAt(i);
+            // 数字或者第一位是负号
+            if (Character.isDigit(ch) || (i == 0 && ch == '-')) {
+                continue;
+            }
+            // 非第一位是点号
+            if (i > 0 && ch == '.') {
+                // 前面没出现过点号
+                if (point == 0) {
+                    // 标记已出现过点号
+                    point = 1;
+                    continue;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+}
