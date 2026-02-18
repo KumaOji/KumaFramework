@@ -16,6 +16,8 @@
 
 package com.kuma.boot.datasource.context;
 
+import java.util.function.Supplier;
+
 /**
  * Schema 上下文
  * 用于在同一数据源下动态切换 schema（MySQL 数据库 / PostgreSQL schema）
@@ -82,7 +84,7 @@ public final class SchemaContext {
     /**
      * 在指定 schema 下执行代码并返回结果，执行完后自动恢复
      */
-    public static <T> T withSchema(String schema, java.util.function.Supplier<T> supplier) {
+    public static <T> T withSchema(String schema, Supplier<T> supplier) {
         String old = getSchema();
         try {
             setSchema(schema);

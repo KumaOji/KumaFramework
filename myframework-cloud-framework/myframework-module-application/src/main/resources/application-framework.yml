@@ -16,6 +16,16 @@ spring:
             minimum-idle: 1
             maximum-pool-size: 10
             connection-timeout: 10000
+        postgresql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
+#        postgresql_2:
+#          hikari:
+#            minimum-idle: 1
+#            maximum-pool-size: 10
+#            connection-timeout: 10000
 
 logging:
   config: classpath:logback-spring.xml

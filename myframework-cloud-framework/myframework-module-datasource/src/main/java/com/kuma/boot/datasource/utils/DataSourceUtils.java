@@ -16,7 +16,10 @@
 
 package com.kuma.boot.datasource.utils;
 
+import com.kuma.boot.common.utils.sql.DbConn;
 import com.kuma.boot.datasource.config.DataSourceConstants;
+
+import javax.sql.DataSource;
 
 /**
  * 数据源工具类
@@ -26,6 +29,80 @@ import com.kuma.boot.datasource.config.DataSourceConstants;
 public final class DataSourceUtils {
 
     private DataSourceUtils() {
+    }
+
+    /**
+     * 从 DataSource 创建 DbConn
+     *
+     * @param dataSource 数据源
+     * @return DbConn 连接封装，需在 try-with-resources 中关闭
+     */
+    public static DbConn createDbConn(DataSource dataSource) {
+        return new DbConn(dataSource);
+    }
+
+    /**
+     * 创建 MySQL 数据库连接
+     *
+     * @param host     主机
+     * @param port     端口，默认 3306
+     * @param database 数据库名
+     * @param user     用户名
+     * @param password 密码
+     * @return DbConn 连接封装，需在 try-with-resources 中关闭
+     */
+    public static DbConn createDbConnForMysql(
+            String host, int port, String database, String user, String password) {
+        return createDbConnForMysql(host, port, database, user, password, null);
+    }
+
+    /**
+     * 创建 MySQL 数据库连接
+     *
+     * @param host     主机
+     * @param port     端口，默认 3306
+     * @param database 数据库名
+     * @param user     用户名
+     * @param password 密码
+     * @param params   额外 URL 参数，如 useSSL=false&serverTimezone=Asia/Shanghai
+     * @return DbConn 连接封装，需在 try-with-resources 中关闭
+     */
+    public static DbConn createDbConnForMysql(
+            String host, int port, String database, String user, String password, String params) {
+        String url = buildMysqlUrl(host, port, database, params);
+        return new DbConn(url, user, password, DataSourceConstants.MYSQL_DRIVER);
+    }
+
+    /**
+     * 创建 PostgreSQL 数据库连接
+     *
+     * @param host     主机
+     * @param port     端口，默认 5432
+     * @param database 数据库名
+     * @param user     用户名
+     * @param password 密码
+     * @return DbConn 连接封装，需在 try-with-resources 中关闭
+     */
+    public static DbConn createDbConnForPostgresql(
+            String host, int port, String database, String user, String password) {
+        return createDbConnForPostgresql(host, port, database, user, password, null);
+    }
+
+    /**
+     * 创建 PostgreSQL 数据库连接
+     *
+     * @param host     主机
+     * @param port     端口，默认 5432
+     * @param database 数据库名
+     * @param user     用户名
+     * @param password 密码
+     * @param params   额外 URL 参数
+     * @return DbConn 连接封装，需在 try-with-resources 中关闭
+     */
+    public static DbConn createDbConnForPostgresql(
+            String host, int port, String database, String user, String password, String params) {
+        String url = buildPostgresqlUrl(host, port, database, params);
+        return new DbConn(url, user, password, DataSourceConstants.POSTGRESQL_DRIVER);
     }
 
     /**

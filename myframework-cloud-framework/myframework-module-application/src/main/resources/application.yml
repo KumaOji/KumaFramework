@@ -11,7 +11,6 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
-      - com.kuma.boot.spring.web.swagger.SpringDocAutoConfiguration
   datasource:
     dynamic:
       datasource:
@@ -20,6 +19,16 @@ spring:
             minimum-idle: 1
             maximum-pool-size: 10
             connection-timeout: 10000
+        postgresql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
+#        postgresql_2:
+#          hikari:
+#            minimum-idle: 1
+#            maximum-pool-size: 10
+#            connection-timeout: 10000
 
 logging:
   config: classpath:logback-spring.xml
@@ -35,10 +44,10 @@ mybatis-plus:
 
 springdoc:
   api-docs:
-    enabled: false
+    enabled: true
     path: /v3/api-docs
   swagger-ui:
-    enabled: false
+    enabled: true
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha

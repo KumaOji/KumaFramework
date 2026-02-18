@@ -6,9 +6,9 @@ description = 'Myframework spring模块'
 
 dependencies {
     api project(':myframework-cloud-framework:myframework-module-common')
-    api projectLibs.hutool.core
     api project(':myframework-cloud-framework:myframework-module-mybatis')
     api project(':myframework-cloud-framework:myframework-module-datasource')
+    api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.doc.webmvc
