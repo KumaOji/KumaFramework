@@ -17,16 +17,19 @@
 package com.kuma.cloud.project1;
 
 import com.kuma.boot.application.Application;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Project1 启动类
+ * <p>project1 无 Mapper 时，仅扫描 com.kuma.boot 以消除 MyBatis 警告</p>
  *
  * @author kuma
  */
 @SpringBootApplication(scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project1"})
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project1"})
+@MapperScan(basePackages = "com.kuma.boot.mybatis.mapper")
 public class Project1Application extends Application {
 
     public static void main(String[] args) {

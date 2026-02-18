@@ -9,7 +9,7 @@ build/
 temp/
 
 # properties
-gradle.properties
+/gradle.properties
 
 # log
 logs/
