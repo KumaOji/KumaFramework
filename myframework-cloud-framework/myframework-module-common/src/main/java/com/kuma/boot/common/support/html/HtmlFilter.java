@@ -1,12 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.lang.Console
- *  cn.hutool.core.map.SafeConcurrentHashMap
- *  cn.hutool.core.util.CharUtil
+ * Copyright (c) 2013-2025 Hutool Team and hutool.cn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.html;
+
 
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.map.SafeConcurrentHashMap;
@@ -20,21 +29,42 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * HTML过滤器，用于去除XSS(Cross Site Scripting) 漏洞隐患。
+ *
+ * <p>
+ * 此类中的方法非线程安全
+ * </p>
+ *
+ * <pre>
+ *     String clean = new HTMLFilter().filter(input);
+ * </pre>
+ * <p>
+ * 此类来自：http://xss-html-filter.sf.net
+ *
+ * @author Joseph O'Connell
+ * @author Cal Hendersen
+ * @author Michael Semb Wever
+ */
 public final class HtmlFilter {
-    private static final int REGEX_FLAGS_SI = 34;
-    private static final Pattern P_COMMENTS = Pattern.compile("<!--(.*?)-->", 32);
-    private static final Pattern P_COMMENT = Pattern.compile("^!--(.*)--$", 34);
-    private static final Pattern P_TAGS = Pattern.compile("<(.*?)>", 32);
-    private static final Pattern P_END_TAG = Pattern.compile("^/([a-z0-9]+)", 34);
-    private static final Pattern P_START_TAG = Pattern.compile("^([a-z0-9]+)(.*?)(/?)$", 34);
-    private static final Pattern P_QUOTED_ATTRIBUTES = Pattern.compile("([a-z0-9]+)=([\"'])(.*?)\\2", 34);
-    private static final Pattern P_UNQUOTED_ATTRIBUTES = Pattern.compile("([a-z0-9]+)(=)([^\"\\s']+)", 34);
-    private static final Pattern P_PROTOCOL = Pattern.compile("^([^:]+):", 34);
+
+    /**
+     * regex flag union representing /si modifiers in php
+     **/
+    private static final int REGEX_FLAGS_SI = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
+    private static final Pattern P_COMMENTS = Pattern.compile("<!--(.*?)-->", Pattern.DOTALL);
+    private static final Pattern P_COMMENT = Pattern.compile("^!--(.*)--$", REGEX_FLAGS_SI);
+    private static final Pattern P_TAGS = Pattern.compile("<(.*?)>", Pattern.DOTALL);
+    private static final Pattern P_END_TAG = Pattern.compile("^/([a-z0-9]+)", REGEX_FLAGS_SI);
+    private static final Pattern P_START_TAG = Pattern.compile("^([a-z0-9]+)(.*?)(/?)$", REGEX_FLAGS_SI);
+    private static final Pattern P_QUOTED_ATTRIBUTES = Pattern.compile("([a-z0-9]+)=([\"'])(.*?)\\2", REGEX_FLAGS_SI);
+    private static final Pattern P_UNQUOTED_ATTRIBUTES = Pattern.compile("([a-z0-9]+)(=)([^\"\\s']+)", REGEX_FLAGS_SI);
+    private static final Pattern P_PROTOCOL = Pattern.compile("^([^:]+):", REGEX_FLAGS_SI);
     private static final Pattern P_ENTITY = Pattern.compile("&#(\\d+);?");
     private static final Pattern P_ENTITY_UNICODE = Pattern.compile("&#x([0-9a-f]+);?");
     private static final Pattern P_ENCODE = Pattern.compile("%([0-9a-f]{2});?");
     private static final Pattern P_VALID_ENTITIES = Pattern.compile("&([^&;]*)(?=(;|&|$))");
-    private static final Pattern P_VALID_QUOTES = Pattern.compile("(>|^)([^<]+?)(<|$)", 32);
+    private static final Pattern P_VALID_QUOTES = Pattern.compile("(>|^)([^<]+?)(<|$)", Pattern.DOTALL);
     private static final Pattern P_END_ARROW = Pattern.compile("^>");
     private static final Pattern P_BODY_TO_END = Pattern.compile("<([^>]*?)(?=<|$)");
     private static final Pattern P_XML_CONTENT = Pattern.compile("(^|>)([^<]*?)(?=>)");
@@ -45,342 +75,498 @@ public final class HtmlFilter {
     private static final Pattern P_LEFT_ARROW = Pattern.compile("<");
     private static final Pattern P_RIGHT_ARROW = Pattern.compile(">");
     private static final Pattern P_BOTH_ARROWS = Pattern.compile("<>");
-    private static final ConcurrentMap<String, Pattern> P_REMOVE_PAIR_BLANKS = new SafeConcurrentHashMap();
-    private static final ConcurrentMap<String, Pattern> P_REMOVE_SELF_BLANKS = new SafeConcurrentHashMap();
+
+    // @xxx could grow large... maybe use sesat's ReferenceMap
+    private static final ConcurrentMap<String, Pattern> P_REMOVE_PAIR_BLANKS = new SafeConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Pattern> P_REMOVE_SELF_BLANKS = new SafeConcurrentHashMap<>();
+
+    /**
+     * set of allowed html elements, along with allowed attributes for each element
+     **/
     private final Map<String, List<String>> vAllowed;
-    private final Map<String, Integer> vTagCounts = new HashMap<String, Integer>();
+    /**
+     * counts of open tags for each (allowable) html element
+     **/
+    private final Map<String, Integer> vTagCounts = new HashMap<>();
+
+    /**
+     * html elements which must always be self-closing (e.g. "&lt;img /&gt;")
+     **/
     private final String[] vSelfClosingTags;
+    /**
+     * html elements which must always have separate opening and closing tags (e.g. "&lt;b&gt;&lt;/b&gt;")
+     **/
     private final String[] vNeedClosingTags;
+    /**
+     * set of disallowed html elements
+     **/
     private final String[] vDisallowed;
+    /**
+     * attributes which should be checked for valid protocols
+     **/
     private final String[] vProtocolAtts;
+    /**
+     * allowed protocols
+     **/
     private final String[] vAllowedProtocols;
+    /**
+     * tags which should be removed if they contain no content (e.g. "&lt;b&gt;&lt;/b&gt;" or "&lt;b /&gt;")
+     **/
     private final String[] vRemoveBlanks;
+    /**
+     * entities allowed within html markup
+     **/
     private final String[] vAllowedEntities;
+    /**
+     * flag determining whether comments are allowed in input String.
+     */
     private final boolean stripComment;
     private final boolean encodeQuotes;
     private boolean vDebug = false;
+    /**
+     * flag determining whether to try to make tags when presented with "unbalanced" angle brackets (e.g. "&lt;b text &lt;/b&gt;" becomes "&lt;b&gt; text &lt;/g&gt;").
+     * If set to false, unbalanced angle brackets will be
+     * html escaped.
+     */
     private final boolean alwaysMakeTags;
 
+    /**
+     * Default constructor.
+     */
     public HtmlFilter() {
-        this.vAllowed = new HashMap<String, List<String>>();
-        ArrayList<String> a_atts = new ArrayList<String>();
+        vAllowed = new HashMap<>();
+
+        final ArrayList<String> a_atts = new ArrayList<>();
         a_atts.add("href");
         a_atts.add("target");
-        this.vAllowed.put("a", a_atts);
-        ArrayList<String> img_atts = new ArrayList<String>();
+        vAllowed.put("a", a_atts);
+
+        final ArrayList<String> img_atts = new ArrayList<>();
         img_atts.add("src");
         img_atts.add("width");
         img_atts.add("height");
         img_atts.add("alt");
-        this.vAllowed.put("img", img_atts);
-        ArrayList no_atts = new ArrayList();
-        this.vAllowed.put("b", no_atts);
-        this.vAllowed.put("strong", no_atts);
-        this.vAllowed.put("i", no_atts);
-        this.vAllowed.put("em", no_atts);
-        this.vAllowed.put("p", no_atts);
-        this.vSelfClosingTags = new String[]{"img"};
-        this.vNeedClosingTags = new String[]{"a", "b", "strong", "i", "em"};
-        this.vDisallowed = new String[0];
-        this.vAllowedProtocols = new String[]{"http", "mailto", "https"};
-        this.vProtocolAtts = new String[]{"src", "href"};
-        this.vRemoveBlanks = new String[]{"a", "b", "strong", "i", "em"};
-        this.vAllowedEntities = new String[]{"amp", "gt", "lt", "quot"};
-        this.stripComment = true;
-        this.encodeQuotes = true;
-        this.alwaysMakeTags = true;
+        vAllowed.put("img", img_atts);
+
+        final ArrayList<String> no_atts = new ArrayList<>();
+        vAllowed.put("b", no_atts);
+        vAllowed.put("strong", no_atts);
+        vAllowed.put("i", no_atts);
+        vAllowed.put("em", no_atts);
+        // issue#3433
+        vAllowed.put("p", no_atts);
+
+        vSelfClosingTags = new String[]{"img"};
+        vNeedClosingTags = new String[]{"a", "b", "strong", "i", "em"};
+        vDisallowed = new String[]{};
+        vAllowedProtocols = new String[]{"http", "mailto", "https"}; // no ftp.
+        vProtocolAtts = new String[]{"src", "href"};
+        vRemoveBlanks = new String[]{"a", "b", "strong", "i", "em"};
+        vAllowedEntities = new String[]{"amp", "gt", "lt", "quot"};
+        stripComment = true;
+        encodeQuotes = true;
+        alwaysMakeTags = true;
     }
 
-    public HtmlFilter(boolean debug) {
+    /**
+     * Set debug flag to true. Otherwise use default settings. See the default constructor.
+     *
+     * @param debug turn debug on with a true argument
+     */
+    public HtmlFilter(final boolean debug) {
         this();
-        this.vDebug = debug;
+        vDebug = debug;
+
     }
 
-    public HtmlFilter(Map<String, Object> conf) {
-        assert (conf.containsKey("vAllowed")) : "configuration requires vAllowed";
-        assert (conf.containsKey("vSelfClosingTags")) : "configuration requires vSelfClosingTags";
-        assert (conf.containsKey("vNeedClosingTags")) : "configuration requires vNeedClosingTags";
-        assert (conf.containsKey("vDisallowed")) : "configuration requires vDisallowed";
-        assert (conf.containsKey("vAllowedProtocols")) : "configuration requires vAllowedProtocols";
-        assert (conf.containsKey("vProtocolAtts")) : "configuration requires vProtocolAtts";
-        assert (conf.containsKey("vRemoveBlanks")) : "configuration requires vRemoveBlanks";
-        assert (conf.containsKey("vAllowedEntities")) : "configuration requires vAllowedEntities";
-        this.vAllowed = Collections.unmodifiableMap((HashMap)conf.get("vAllowed"));
-        this.vSelfClosingTags = (String[])conf.get("vSelfClosingTags");
-        this.vNeedClosingTags = (String[])conf.get("vNeedClosingTags");
-        this.vDisallowed = (String[])conf.get("vDisallowed");
-        this.vAllowedProtocols = (String[])conf.get("vAllowedProtocols");
-        this.vProtocolAtts = (String[])conf.get("vProtocolAtts");
-        this.vRemoveBlanks = (String[])conf.get("vRemoveBlanks");
-        this.vAllowedEntities = (String[])conf.get("vAllowedEntities");
-        this.stripComment = conf.containsKey("stripComment") ? (Boolean)conf.get("stripComment") : true;
-        this.encodeQuotes = conf.containsKey("encodeQuotes") ? (Boolean)conf.get("encodeQuotes") : true;
-        this.alwaysMakeTags = conf.containsKey("alwaysMakeTags") ? (Boolean)conf.get("alwaysMakeTags") : true;
+    /**
+     * Map-parameter configurable constructor.
+     *
+     * @param conf map containing configuration. keys match field names.
+     */
+    @SuppressWarnings("unchecked")
+    public HtmlFilter(final Map<String, Object> conf) {
+
+        assert conf.containsKey("vAllowed") : "configuration requires vAllowed";
+        assert conf.containsKey("vSelfClosingTags") : "configuration requires vSelfClosingTags";
+        assert conf.containsKey("vNeedClosingTags") : "configuration requires vNeedClosingTags";
+        assert conf.containsKey("vDisallowed") : "configuration requires vDisallowed";
+        assert conf.containsKey("vAllowedProtocols") : "configuration requires vAllowedProtocols";
+        assert conf.containsKey("vProtocolAtts") : "configuration requires vProtocolAtts";
+        assert conf.containsKey("vRemoveBlanks") : "configuration requires vRemoveBlanks";
+        assert conf.containsKey("vAllowedEntities") : "configuration requires vAllowedEntities";
+
+        vAllowed = Collections.unmodifiableMap((HashMap<String, List<String>>) conf.get("vAllowed"));
+        vSelfClosingTags = (String[]) conf.get("vSelfClosingTags");
+        vNeedClosingTags = (String[]) conf.get("vNeedClosingTags");
+        vDisallowed = (String[]) conf.get("vDisallowed");
+        vAllowedProtocols = (String[]) conf.get("vAllowedProtocols");
+        vProtocolAtts = (String[]) conf.get("vProtocolAtts");
+        vRemoveBlanks = (String[]) conf.get("vRemoveBlanks");
+        vAllowedEntities = (String[]) conf.get("vAllowedEntities");
+        stripComment = conf.containsKey("stripComment") ? (Boolean) conf.get("stripComment") : true;
+        encodeQuotes = conf.containsKey("encodeQuotes") ? (Boolean) conf.get("encodeQuotes") : true;
+        alwaysMakeTags = conf.containsKey("alwaysMakeTags") ? (Boolean) conf.get("alwaysMakeTags") : true;
     }
 
     private void reset() {
-        this.vTagCounts.clear();
+        vTagCounts.clear();
     }
 
-    private void debug(String msg) {
-        if (this.vDebug) {
-            Console.log((Object)msg);
+    private void debug(final String msg) {
+        if (vDebug) {
+            Console.log(msg);
         }
     }
 
-    public static String htmlSpecialChars(String s) {
+
+    // ---------------------------------------------------------------
+    // my versions of some PHP library functions
+
+    /**
+     * HTML特殊字符替换
+     *
+     * @param s HTML
+     * @return 替换后的HTML
+     */
+    public static String htmlSpecialChars(final String s) {
         String result = s;
-        result = HtmlFilter.regexReplace(P_AMP, "&amp;", result);
-        result = HtmlFilter.regexReplace(P_QUOTE, "&quot;", result);
-        result = HtmlFilter.regexReplace(P_LEFT_ARROW, "&lt;", result);
-        result = HtmlFilter.regexReplace(P_RIGHT_ARROW, "&gt;", result);
+        result = regexReplace(P_AMP, "&amp;", result);
+        result = regexReplace(P_QUOTE, "&quot;", result);
+        result = regexReplace(P_LEFT_ARROW, "&lt;", result);
+        result = regexReplace(P_RIGHT_ARROW, "&gt;", result);
         return result;
     }
 
-    public String filter(String input) {
-        this.reset();
+    // ---------------------------------------------------------------
+
+    /**
+     * given a user submitted input String, filter out any invalid or restricted html.
+     *
+     * @param input text (i.e. submitted by a user) than may contain html
+     * @return "clean" version of input, with only valid, whitelisted html elements allowed
+     */
+    public String filter(final String input) {
+        reset();
         String s = input;
-        this.debug("************************************************");
-        this.debug("              INPUT: " + input);
-        s = this.escapeComments(s);
-        this.debug("     escapeComments: " + s);
-        s = this.balanceHTML(s);
-        this.debug("        balanceHTML: " + s);
-        s = this.checkTags(s);
-        this.debug("          checkTags: " + s);
-        s = this.processRemoveBlanks(s);
-        this.debug("processRemoveBlanks: " + s);
-        s = this.validateEntities(s);
-        this.debug("    validateEntites: " + s);
-        this.debug("************************************************\n\n");
+
+        debug("************************************************");
+        debug("              INPUT: " + input);
+
+        s = escapeComments(s);
+        debug("     escapeComments: " + s);
+
+        s = balanceHTML(s);
+        debug("        balanceHTML: " + s);
+
+        s = checkTags(s);
+        debug("          checkTags: " + s);
+
+        s = processRemoveBlanks(s);
+        debug("processRemoveBlanks: " + s);
+
+        s = validateEntities(s);
+        debug("    validateEntites: " + s);
+
+        debug("************************************************\n\n");
         return s;
     }
 
+    /**
+     * flag determining whether to try to make tags when presented with "unbalanced" angle brackets (e.g. "&lt;b text &lt;/b&gt;" becomes "&lt;b&gt; text &lt;/g&gt;").
+     * If set to false, unbalanced angle brackets will be
+     * html escaped.
+     *
+     * @return alwaysMakeTags
+     */
     public boolean isAlwaysMakeTags() {
-        return this.alwaysMakeTags;
+        return alwaysMakeTags;
     }
 
+    /**
+     * flag determining whether comments are allowed in input String.
+     *
+     * @return stripComment
+     */
     public boolean isStripComments() {
-        return this.stripComment;
+        return stripComment;
     }
 
-    private String escapeComments(String s) {
-        Matcher m = P_COMMENTS.matcher(s);
-        StringBuffer buf = new StringBuffer();
+    private String escapeComments(final String s) {
+        final Matcher m = P_COMMENTS.matcher(s);
+        final StringBuffer buf = new StringBuffer();
         if (m.find()) {
-            String match = m.group(1);
-            m.appendReplacement(buf, Matcher.quoteReplacement("<!--" + HtmlFilter.htmlSpecialChars(match) + "-->"));
+            final String match = m.group(1); // (.*?)
+            m.appendReplacement(buf, Matcher.quoteReplacement("<!--" + htmlSpecialChars(match) + "-->"));
         }
         m.appendTail(buf);
+
         return buf.toString();
     }
 
     private String balanceHTML(String s) {
-        if (this.alwaysMakeTags) {
-            s = HtmlFilter.regexReplace(P_END_ARROW, "", s);
-            s = HtmlFilter.regexReplace(P_BODY_TO_END, "<$1>", s);
-            s = HtmlFilter.regexReplace(P_XML_CONTENT, "$1<$2", s);
+        if (alwaysMakeTags) {
+            //
+            // try and form html
+            //
+            s = regexReplace(P_END_ARROW, "", s);
+            s = regexReplace(P_BODY_TO_END, "<$1>", s);
+            s = regexReplace(P_XML_CONTENT, "$1<$2", s);
+
         } else {
-            s = HtmlFilter.regexReplace(P_STRAY_LEFT_ARROW, "&lt;$1", s);
-            s = HtmlFilter.regexReplace(P_STRAY_RIGHT_ARROW, "$1$2&gt;<", s);
-            s = HtmlFilter.regexReplace(P_BOTH_ARROWS, "", s);
+            //
+            // escape stray brackets
+            //
+            s = regexReplace(P_STRAY_LEFT_ARROW, "&lt;$1", s);
+            s = regexReplace(P_STRAY_RIGHT_ARROW, "$1$2&gt;<", s);
+
+            //
+            // the last regexp causes '<>' entities to appear
+            // (we need to do a lookahead assertion so that the last bracket can
+            // be used in the next pass of the regexp)
+            //
+            s = regexReplace(P_BOTH_ARROWS, "", s);
         }
+
         return s;
     }
 
     private String checkTags(String s) {
-        Matcher m = P_TAGS.matcher(s);
-        StringBuffer buf = new StringBuffer();
+        final Matcher m = P_TAGS.matcher(s);
+
+        final StringBuffer buf = new StringBuffer();
         while (m.find()) {
             String replaceStr = m.group(1);
-            replaceStr = this.processTag(replaceStr);
+            replaceStr = processTag(replaceStr);
             m.appendReplacement(buf, Matcher.quoteReplacement(replaceStr));
         }
         m.appendTail(buf);
-        StringBuilder sBuilder = new StringBuilder(buf.toString());
-        for (String key : this.vTagCounts.keySet()) {
-            for (int ii = 0; ii < this.vTagCounts.get(key); ++ii) {
+
+        // these get tallied in processTag
+        // (remember to reset before subsequent calls to filter method)
+        final StringBuilder sBuilder = new StringBuilder(buf.toString());
+        for (final String key : vTagCounts.keySet()) {
+            for (int ii = 0; ii < vTagCounts.get(key); ii++) {
                 sBuilder.append("</").append(key).append(">");
             }
         }
         s = sBuilder.toString();
+
         return s;
     }
 
-    private String processRemoveBlanks(String s) {
+    private String processRemoveBlanks(final String s) {
         String result = s;
-        for (String tag : this.vRemoveBlanks) {
+        for (final String tag : vRemoveBlanks) {
             if (!P_REMOVE_PAIR_BLANKS.containsKey(tag)) {
                 P_REMOVE_PAIR_BLANKS.putIfAbsent(tag, Pattern.compile("<" + tag + "(\\s[^>]*)?></" + tag + ">"));
             }
-            result = HtmlFilter.regexReplace((Pattern)P_REMOVE_PAIR_BLANKS.get(tag), "", result);
+            result = regexReplace(P_REMOVE_PAIR_BLANKS.get(tag), "", result);
             if (!P_REMOVE_SELF_BLANKS.containsKey(tag)) {
                 P_REMOVE_SELF_BLANKS.putIfAbsent(tag, Pattern.compile("<" + tag + "(\\s[^>]*)?/>"));
             }
-            result = HtmlFilter.regexReplace((Pattern)P_REMOVE_SELF_BLANKS.get(tag), "", result);
+            result = regexReplace(P_REMOVE_SELF_BLANKS.get(tag), "", result);
         }
+
         return result;
     }
 
-    private static String regexReplace(Pattern regex_pattern, String replacement, String s) {
-        Matcher m = regex_pattern.matcher(s);
+    private static String regexReplace(final Pattern regex_pattern, final String replacement, final String s) {
+        final Matcher m = regex_pattern.matcher(s);
         return m.replaceAll(replacement);
     }
 
-    private String processTag(String s) {
-        String name;
+    private String processTag(final String s) {
+        // ending tags
         Matcher m = P_END_TAG.matcher(s);
-        if (m.find() && this.allowed(name = m.group(1).toLowerCase()) && !HtmlFilter.inArray(name, this.vSelfClosingTags) && this.vTagCounts.containsKey(name)) {
-            this.vTagCounts.put(name, this.vTagCounts.get(name) - 1);
-            return "</" + name + ">";
+        if (m.find()) {
+            final String name = m.group(1).toLowerCase();
+            if (allowed(name)) {
+                if (!inArray(name, vSelfClosingTags)) {
+                    if (vTagCounts.containsKey(name)) {
+                        vTagCounts.put(name, vTagCounts.get(name) - 1);
+                        return "</" + name + ">";
+                    }
+                }
+            }
         }
+
+        // starting tags
         m = P_START_TAG.matcher(s);
         if (m.find()) {
-            name = m.group(1).toLowerCase();
-            String body = m.group(2);
+            final String name = m.group(1).toLowerCase();
+            final String body = m.group(2);
             String ending = m.group(3);
-            if (this.allowed(name)) {
-                StringBuilder params = new StringBuilder();
-                Matcher m2 = P_QUOTED_ATTRIBUTES.matcher(body);
-                Matcher m3 = P_UNQUOTED_ATTRIBUTES.matcher(body);
-                ArrayList<String> paramNames = new ArrayList<String>();
-                ArrayList<String> paramValues = new ArrayList<String>();
+
+            if (allowed(name)) {
+                final StringBuilder params = new StringBuilder();
+
+                final Matcher m2 = P_QUOTED_ATTRIBUTES.matcher(body);
+                final Matcher m3 = P_UNQUOTED_ATTRIBUTES.matcher(body);
+                final List<String> paramNames = new ArrayList<>();
+                final List<String> paramValues = new ArrayList<>();
                 while (m2.find()) {
-                    paramNames.add(m2.group(1));
-                    paramValues.add(m2.group(3));
+                    paramNames.add(m2.group(1)); // ([a-z0-9]+)
+                    paramValues.add(m2.group(3)); // (.*?)
                 }
                 while (m3.find()) {
-                    paramNames.add(m3.group(1));
-                    paramValues.add(m3.group(3));
+                    paramNames.add(m3.group(1)); // ([a-z0-9]+)
+                    paramValues.add(m3.group(3)); // ([^\"\\s']+)
                 }
-                for (int ii = 0; ii < paramNames.size(); ++ii) {
-                    String paramName = ((String)paramNames.get(ii)).toLowerCase();
-                    String paramValue = (String)paramValues.get(ii);
-                    if (!this.allowedAttribute(name, paramName)) continue;
-                    if (HtmlFilter.inArray(paramName, this.vProtocolAtts)) {
-                        paramValue = this.processParamProtocol(paramValue);
+
+                String paramName, paramValue;
+                for (int ii = 0; ii < paramNames.size(); ii++) {
+                    paramName = paramNames.get(ii).toLowerCase();
+                    paramValue = paramValues.get(ii);
+
+                    if (allowedAttribute(name, paramName)) {
+                        if (inArray(paramName, vProtocolAtts)) {
+                            paramValue = processParamProtocol(paramValue);
+                        }
+                        params.append(CharUtil.SPACE).append(paramName).append("=\"").append(paramValue).append("\"");
                     }
-                    params.append(' ').append(paramName).append("=\"").append(paramValue).append("\"");
                 }
-                if (HtmlFilter.inArray(name, this.vSelfClosingTags)) {
+
+                if (inArray(name, vSelfClosingTags)) {
                     ending = " /";
                 }
-                if (HtmlFilter.inArray(name, this.vNeedClosingTags)) {
+
+                if (inArray(name, vNeedClosingTags)) {
                     ending = "";
                 }
+
                 if (ending == null || ending.isEmpty()) {
-                    if (this.vTagCounts.containsKey(name)) {
-                        this.vTagCounts.put(name, this.vTagCounts.get(name) + 1);
+                    if (vTagCounts.containsKey(name)) {
+                        vTagCounts.put(name, vTagCounts.get(name) + 1);
                     } else {
-                        this.vTagCounts.put(name, 1);
+                        vTagCounts.put(name, 1);
                     }
                 } else {
                     ending = " /";
                 }
-                return "<" + name + String.valueOf(params) + ending + ">";
+                return "<" + name + params + ending + ">";
+            } else {
+                return "";
             }
-            return "";
         }
+
+        // comments
         m = P_COMMENT.matcher(s);
-        if (!this.stripComment && m.find()) {
+        if (!stripComment && m.find()) {
             return "<" + m.group() + ">";
         }
+
         return "";
     }
 
     private String processParamProtocol(String s) {
-        String protocol;
-        Matcher m = P_PROTOCOL.matcher((CharSequence)(s = this.decodeEntities((String)s)));
-        if (m.find() && !HtmlFilter.inArray(protocol = m.group(1), this.vAllowedProtocols) && ((String)(s = "#" + ((String)s).substring(protocol.length() + 1))).startsWith("#//")) {
-            s = "#" + ((String)s).substring(3);
+        s = decodeEntities(s);
+        final Matcher m = P_PROTOCOL.matcher(s);
+        if (m.find()) {
+            final String protocol = m.group(1);
+            if (!inArray(protocol, vAllowedProtocols)) {
+                // bad protocol, turn into local anchor link instead
+                s = "#" + s.substring(protocol.length() + 1);
+                if (s.startsWith("#//")) {
+                    s = "#" + s.substring(3);
+                }
+            }
         }
+
         return s;
     }
 
     private String decodeEntities(String s) {
-        int decimal;
-        String match;
         StringBuffer buf = new StringBuffer();
+
         Matcher m = P_ENTITY.matcher(s);
         while (m.find()) {
-            match = m.group(1);
-            decimal = Integer.decode(match);
-            m.appendReplacement(buf, Matcher.quoteReplacement(CharUtil.toString((char)((char)decimal))));
+            final String match = m.group(1);
+            final int decimal = Integer.decode(match);
+            m.appendReplacement(buf, Matcher.quoteReplacement(CharUtil.toString((char) decimal)));
         }
         m.appendTail(buf);
         s = buf.toString();
+
         buf = new StringBuffer();
         m = P_ENTITY_UNICODE.matcher(s);
         while (m.find()) {
-            match = m.group(1);
-            decimal = Integer.parseInt(match, 16);
-            m.appendReplacement(buf, Matcher.quoteReplacement(CharUtil.toString((char)((char)decimal))));
+            final String match = m.group(1);
+            final int decimal = Integer.parseInt(match, 16);
+            m.appendReplacement(buf, Matcher.quoteReplacement(CharUtil.toString((char) decimal)));
         }
         m.appendTail(buf);
         s = buf.toString();
+
         buf = new StringBuffer();
         m = P_ENCODE.matcher(s);
         while (m.find()) {
-            match = m.group(1);
-            decimal = Integer.parseInt(match, 16);
-            m.appendReplacement(buf, Matcher.quoteReplacement(CharUtil.toString((char)((char)decimal))));
+            final String match = m.group(1);
+            final int decimal = Integer.parseInt(match, 16);
+            m.appendReplacement(buf, Matcher.quoteReplacement(CharUtil.toString((char) decimal)));
         }
         m.appendTail(buf);
         s = buf.toString();
-        s = this.validateEntities(s);
+
+        s = validateEntities(s);
         return s;
     }
 
-    private String validateEntities(String s) {
-        StringBuffer buf = new StringBuffer();
-        Matcher m = P_VALID_ENTITIES.matcher(s);
+    private String validateEntities(final String s) {
+        final StringBuffer buf = new StringBuffer();
+
+        // validate entities throughout the string
+        final Matcher m = P_VALID_ENTITIES.matcher(s);
         while (m.find()) {
-            String one = m.group(1);
-            String two = m.group(2);
-            m.appendReplacement(buf, Matcher.quoteReplacement(this.checkEntity(one, two)));
+            final String one = m.group(1); // ([^&;]*)
+            final String two = m.group(2); // (?=(;|&|$))
+            m.appendReplacement(buf, Matcher.quoteReplacement(checkEntity(one, two)));
         }
         m.appendTail(buf);
-        return this.encodeQuotes(buf.toString());
+
+        return encodeQuotes(buf.toString());
     }
 
-    private String encodeQuotes(String s) {
-        if (this.encodeQuotes) {
-            StringBuffer buf = new StringBuffer();
-            Matcher m = P_VALID_QUOTES.matcher(s);
+    private String encodeQuotes(final String s) {
+        if (encodeQuotes) {
+            final StringBuffer buf = new StringBuffer();
+            final Matcher m = P_VALID_QUOTES.matcher(s);
             while (m.find()) {
-                String one = m.group(1);
-                String two = m.group(2);
-                String three = m.group(3);
-                m.appendReplacement(buf, Matcher.quoteReplacement(one + HtmlFilter.regexReplace(P_QUOTE, "&quot;", two) + three));
+                final String one = m.group(1); // (>|^)
+                final String two = m.group(2); // ([^<]+?)
+                final String three = m.group(3); // (<|$)
+                m.appendReplacement(buf, Matcher.quoteReplacement(one + regexReplace(P_QUOTE, "&quot;", two) + three));
             }
             m.appendTail(buf);
             return buf.toString();
+        } else {
+            return s;
         }
-        return s;
     }
 
-    private String checkEntity(String preamble, String term) {
-        return ";".equals(term) && this.isValidEntity(preamble) ? "&" + preamble : "&amp;" + preamble;
+    private String checkEntity(final String preamble, final String term) {
+
+        return ";".equals(term) && isValidEntity(preamble) ? '&' + preamble : "&amp;" + preamble;
     }
 
-    private boolean isValidEntity(String entity) {
-        return HtmlFilter.inArray(entity, this.vAllowedEntities);
+    private boolean isValidEntity(final String entity) {
+        return inArray(entity, vAllowedEntities);
     }
 
-    private static boolean inArray(String s, String[] array) {
-        for (String item : array) {
-            if (item == null || !item.equals(s)) continue;
-            return true;
+    private static boolean inArray(final String s, final String[] array) {
+        for (final String item : array) {
+            if (item != null && item.equals(s)) {
+                return true;
+            }
         }
         return false;
     }
 
-    private boolean allowed(String name) {
-        return (this.vAllowed.isEmpty() || this.vAllowed.containsKey(name)) && !HtmlFilter.inArray(name, this.vDisallowed);
+    private boolean allowed(final String name) {
+        return (vAllowed.isEmpty() || vAllowed.containsKey(name)) && !inArray(name, vDisallowed);
     }
 
-    private boolean allowedAttribute(String name, String paramName) {
-        return this.allowed(name) && (this.vAllowed.isEmpty() || this.vAllowed.get(name).contains(paramName));
+    private boolean allowedAttribute(final String name, final String paramName) {
+        return allowed(name) && (vAllowed.isEmpty() || vAllowed.get(name).contains(paramName));
     }
 }
-

@@ -1,38 +1,53 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.hash.core;
 
-import com.kuma.boot.common.support.hash.api.HashCode;
-import com.kuma.boot.common.support.hash.core.HashCodeCRC;
-import com.kuma.boot.common.support.hash.core.HashCodeFnv;
-import com.kuma.boot.common.support.hash.core.HashCodeJdk;
-import com.kuma.boot.common.support.hash.core.HashCodeKetama;
-import com.kuma.boot.common.support.hash.core.HashCodeMurmur;
 import com.kuma.boot.common.support.instance.Instances;
+import com.kuma.boot.common.support.hash.api.HashCode;
 
+/**
+ * HasheCodes
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
 public final class HasheCodes {
+
     private HasheCodes() {
     }
 
     public static HashCode crc() {
-        return Instances.singleton(HashCodeCRC.class);
+        return (HashCode) Instances.singleton(HashCodeCRC.class);
     }
 
     public static HashCode fnv() {
-        return Instances.singleton(HashCodeFnv.class);
+        return (HashCode) Instances.singleton(HashCodeFnv.class);
     }
 
     public static HashCode jdk() {
-        return Instances.singleton(HashCodeJdk.class);
+        return (HashCode) Instances.singleton(HashCodeJdk.class);
     }
 
     public static HashCode ketama() {
-        return Instances.singleton(HashCodeKetama.class);
+        return (HashCode) Instances.singleton(HashCodeKetama.class);
     }
 
     public static HashCode murmur() {
-        return Instances.singleton(HashCodeMurmur.class);
+        return (HashCode) Instances.singleton(HashCodeMurmur.class);
     }
 }
-

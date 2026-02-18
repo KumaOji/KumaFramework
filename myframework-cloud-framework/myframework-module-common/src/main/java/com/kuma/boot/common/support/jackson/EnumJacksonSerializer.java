@@ -16,16 +16,18 @@
 
 package com.kuma.boot.common.support.jackson;
 
-import com.kuma.boot.common.enums.base.CommonEnum;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;
-
+import com.kuma.boot.common.enums.base.CommonEnum;
 
 /**
  * 继承了BaseEnum接口的枚举值，将会统一按照以下格式序列化 { "code": "XX", "desc": "xxx" }
  *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:20:18
  */
 public class EnumJacksonSerializer extends StdSerializer<CommonEnum> {
 

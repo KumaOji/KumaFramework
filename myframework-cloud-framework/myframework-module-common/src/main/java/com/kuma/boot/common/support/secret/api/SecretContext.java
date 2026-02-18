@@ -1,23 +1,24 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package com.kuma.boot.common.support.secret.api;
 
 public interface SecretContext {
-    public SecretContext source(byte[] var1);
+    SecretContext source(byte[] var1);
 
-    public byte[] source();
+    byte[] source();
 
-    public String sourceText();
+    String sourceText();
 
-    public SecretContext key(byte[] var1);
+    SecretContext key(byte[] var1);
 
-    public byte[] key();
+    byte[] key();
 
-    public String keyText();
+    String keyText();
 
-    public SecretContext charset(String var1);
+    SecretContext charset(String var1);
 
-    public String charset();
+    String charset();
 }
-

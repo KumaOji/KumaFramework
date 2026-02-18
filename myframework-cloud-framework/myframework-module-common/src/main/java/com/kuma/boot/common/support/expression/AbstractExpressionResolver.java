@@ -1,22 +1,42 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.expression;
 
-import com.kuma.boot.common.support.expression.Context;
-import com.kuma.boot.common.support.expression.ContextFactory;
-import com.kuma.boot.common.support.expression.DefaultContextFactory;
-import com.kuma.boot.common.support.expression.ExpressionResolver;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class AbstractExpressionResolver
-implements ExpressionResolver {
+/**
+ * 使用{@link ContextFactory}解析或者合并成{@link Context}
+ *
+ * @author livk
+ * @see ContextFactory
+ * @see Context
+ */
+public abstract class AbstractExpressionResolver implements ExpressionResolver {
+
+    /**
+     * The Context resolver.
+     */
     protected final ContextFactory contextFactory;
 
     protected AbstractExpressionResolver(ContextFactory contextFactory) {
-        this.contextFactory = Objects.requireNonNull(contextFactory, "ContextFactory must not be null");
+        this.contextFactory =
+                Objects.requireNonNull(contextFactory, "ContextFactory must not be null");
     }
 
     protected AbstractExpressionResolver() {
@@ -26,13 +46,13 @@ implements ExpressionResolver {
     @Override
     public final <T> T evaluate(String value, Map<String, ?> contextMap, Class<T> returnType) {
         Context context = Context.create(contextMap);
-        return this.evaluate(value, context, returnType);
+        return evaluate(value, context, returnType);
     }
 
     @Override
     public final <T> T evaluate(String value, Method method, Object[] args, Class<T> returnType) {
-        Context context = this.contextFactory.create(method, args);
-        return this.evaluate(value, context, returnType);
+        Context context = contextFactory.create(method, args);
+        return evaluate(value, context, returnType);
     }
 
     @Override
@@ -50,4 +70,3 @@ implements ExpressionResolver {
         return ExpressionResolver.super.evaluate(value, method, args);
     }
 }
-

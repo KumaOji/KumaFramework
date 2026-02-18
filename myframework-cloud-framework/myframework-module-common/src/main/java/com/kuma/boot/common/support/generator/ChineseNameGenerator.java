@@ -1,14 +1,65 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.generator;
 
 import com.kuma.boot.common.support.generator.base.GenericGenerator;
 import com.kuma.boot.common.support.generator.util.ChineseCharUtils;
 
-public class ChineseNameGenerator
-extends GenericGenerator {
-    private static final String[] FIRST_NAMES = new String[]{"\u674e", "\u738b", "\u5f20", "\u5218", "\u9648", "\u6768", "\u9ec4", "\u8d75", "\u5468", "\u5434", "\u5f90", "\u5b59", "\u6731", "\u9a6c", "\u80e1", "\u90ed", "\u6797", "\u4f55", "\u9ad8", "\u6881", "\u90d1", "\u7f57", "\u5b8b", "\u8c22", "\u5510", "\u97e9", "\u66f9", "\u8bb8", "\u9093", "\u8427", "\u51af", "\u66fe", "\u7a0b", "\u8521", "\u5f6d", "\u6f58", "\u8881", "\u65bc", "\u8463", "\u4f59", "\u82cf", "\u53f6", "\u5415", "\u9b4f", "\u848b", "\u7530", "\u675c", "\u4e01", "\u6c88", "\u59dc", "\u8303", "\u6c5f", "\u5085", "\u949f", "\u5362", "\u6c6a", "\u6234", "\u5d14", "\u4efb", "\u9646", "\u5ed6", "\u59da", "\u65b9", "\u91d1", "\u90b1", "\u590f", "\u8c2d", "\u97e6", "\u8d3e", "\u90b9", "\u77f3", "\u718a", "\u5b5f", "\u79e6", "\u960e", "\u859b", "\u4faf", "\u96f7", "\u767d", "\u9f99", "\u6bb5", "\u90dd", "\u5b54", "\u90b5", "\u53f2", "\u6bdb", "\u5e38", "\u4e07", "\u987e", "\u8d56", "\u6b66", "\u5eb7", "\u8d3a", "\u4e25", "\u5c39", "\u94b1", "\u65bd", "\u725b", "\u6d2a", "\u9f9a", "\u4e1c\u65b9", "\u590f\u4faf", "\u8bf8\u845b", "\u5c09\u8fdf", "\u7687\u752b", "\u5b87\u6587", "\u9c9c\u4e8e", "\u897f\u95e8", "\u53f8\u9a6c", "\u72ec\u5b64", "\u516c\u5b59", "\u6155\u5bb9", "\u8f69\u8f95", "\u5de6\u4e18", "\u6b27\u9633", "\u7687\u752b", "\u4e0a\u5b98", "\u95fe\u4e18", "\u4ee4\u72d0"};
+/*
+ * ChineseNameGenerator
+ * @author kuma
+ * @version 2023.12
+ * @since 2023-12-18 15:08:55
+ */
+/**
+ * ChineseNameGenerator
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public class ChineseNameGenerator extends GenericGenerator {
+
+    private static final String[] FIRST_NAMES =
+            new String[]{
+                    "李", "王", "张", "刘", "陈", "杨", "黄", "赵", "周", "吴", "徐", "孙", "朱", "马", "胡", "郭",
+                    "林",
+                    "何", "高", "梁", "郑", "罗", "宋", "谢", "唐", "韩", "曹", "许", "邓", "萧", "冯", "曾", "程",
+                    "蔡",
+                    "彭", "潘", "袁", "於", "董", "余", "苏", "叶", "吕", "魏", "蒋", "田", "杜", "丁", "沈", "姜",
+                    "范",
+                    "江", "傅", "钟", "卢", "汪", "戴", "崔", "任", "陆", "廖", "姚", "方", "金", "邱", "夏", "谭",
+                    "韦",
+                    "贾", "邹", "石", "熊", "孟", "秦", "阎", "薛", "侯", "雷", "白", "龙", "段", "郝", "孔", "邵",
+                    "史",
+                    "毛", "常", "万", "顾", "赖", "武", "康", "贺", "严", "尹", "钱", "施", "牛", "洪", "龚", "东方",
+                    "夏侯", "诸葛", "尉迟", "皇甫", "宇文", "鲜于", "西门", "司马", "独孤", "公孙", "慕容", "轩辕",
+                    "左丘", "欧阳",
+                    "皇甫", "上官", "闾丘", "令狐"
+            };
+
+    /*
+     * "欧阳", "太史", "端木", "上官", "司马", "东方", "独孤", "南宫", "万俟", "闻人", "夏侯", "诸葛", "尉迟", "公羊",
+     * "赫连", "澹台", "皇甫", "宗政", "濮阳", "公冶", "太叔", "申屠", "公孙", "慕容", "仲孙", "钟离", "长孙", "宇文",
+     * "司徒", "鲜于", "司空", "闾丘", "子车", "亓官", "司寇", "巫马", "公西", "颛孙", "壤驷", "公良", "漆雕", "乐正",
+     * "宰父", "谷梁", "拓跋", "夹谷", "轩辕", "令狐", "段干", "百里", "呼延", "东郭", "南门", "羊舌", "微生", "公户",
+     * "公玉", "公仪", "梁丘", "公仲", "公上", "公门", "公山", "公坚", "左丘", "公伯", "西门", "公祖", "第五", "公乘",
+     * "贯丘", "公皙", "南荣", "东里", "东宫", "仲长", "子书", "子桑", "即墨", "达奚", "褚师", "吴铭"
+     */
     private static final ChineseNameGenerator INSTANCE = new ChineseNameGenerator();
 
     private ChineseNameGenerator() {
@@ -20,15 +71,18 @@ extends GenericGenerator {
 
     @Override
     public String generate() {
-        return this.genFirstName() + ChineseCharUtils.genRandomLengthChineseChars(1, 2);
+        // 姓名暂时还是两到三字，比较常见些
+        return genFirstName() + ChineseCharUtils.genRandomLengthChineseChars(1, 2);
     }
 
     private String genFirstName() {
-        return FIRST_NAMES[this.getRandomInstance().nextInt(FIRST_NAMES.length)];
+        return FIRST_NAMES[getRandomInstance().nextInt(FIRST_NAMES.length)];
     }
 
+    /**
+     * 生成带有生僻名字部分的姓名
+     */
     public String generateOdd() {
-        return this.genFirstName() + ChineseCharUtils.getOneOddChar();
+        return genFirstName() + ChineseCharUtils.getOneOddChar();
     }
 }
-

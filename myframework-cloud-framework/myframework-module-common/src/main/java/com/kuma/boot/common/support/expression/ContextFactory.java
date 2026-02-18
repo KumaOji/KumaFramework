@@ -1,23 +1,55 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.expression;
 
-import com.kuma.boot.common.support.expression.Context;
-import com.kuma.boot.common.support.expression.DefaultContextFactory;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+/**
+ * 上下键创建工厂
+ *
+ * @author livk
+ * @see DefaultContextFactory
+ *
+ */
 @FunctionalInterface
 public interface ContextFactory {
-    public static final ContextFactory DEFAULT_FACTORY = new DefaultContextFactory();
 
-    public Context create(Method var1, Object[] var2);
+    ContextFactory DEFAULT_FACTORY = new DefaultContextFactory();
 
-    @Deprecated(since="1.4.2", forRemoval=true)
-    default public Context merge(Method method, Object[] args, Map<String, ?> expandMap) {
-        Context context = this.create(method, args);
+    /**
+     * 根据方法与参数创建上下文
+     * @param method the method
+     * @param args the args
+     * @return the context
+     */
+    Context create(Method method, Object[] args);
+
+    /**
+     * 合并上下文
+     * @param method the method
+     * @param args the args
+     * @param expandMap the expand map
+     * @return the map
+     * @deprecated use {@link Context#putAll(Map)}
+     */
+    @Deprecated(since = "1.4.2", forRemoval = true)
+    default Context merge(Method method, Object[] args, Map<String, ?> expandMap) {
+        Context context = create(method, args);
         return context.putAll(expandMap);
     }
 }
-

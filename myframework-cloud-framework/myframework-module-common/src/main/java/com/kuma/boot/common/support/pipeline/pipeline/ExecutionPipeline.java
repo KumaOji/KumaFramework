@@ -1,17 +1,17 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.common.support.pipeline.pipeline;
 
-import com.kuma.boot.common.support.pipeline.pipeline.FailureStrategy;
-import com.kuma.boot.common.support.pipeline.pipeline.Pipeline;
-import com.kuma.boot.common.support.pipeline.pipeline.PipelineContext;
-import com.kuma.boot.common.support.pipeline.pipeline.PipelineNode;
+
 import com.kuma.boot.common.utils.log.LogUtils;
+
 import java.util.List;
 
-public class ExecutionPipeline<T>
-implements Pipeline<T> {
+/**
+ * 执行管道实现
+ *
+ * @param <T> 数据类型
+ */
+public class ExecutionPipeline<T> implements Pipeline<T> {
+
     private final List<PipelineNode<T>> nodes;
     private final String name;
 
@@ -22,38 +22,48 @@ implements Pipeline<T> {
 
     @Override
     public PipelineContext<T> execute(T data) {
-        LogUtils.info("Pipeline [{}] started with {} nodes", this.name, this.nodes.size());
-        PipelineContext<T> context = new PipelineContext<T>(data);
-        for (PipelineNode<T> node : this.nodes) {
+        LogUtils.info("Pipeline [{}] started with {} nodes", name, nodes.size());
+
+        PipelineContext<T> context = new PipelineContext<>(data);
+
+        for (PipelineNode<T> node : nodes) {
             if (context.isInterrupted()) {
-                LogUtils.info("Pipeline [{}] interrupted: {}", this.name, context.getInterruptReason());
+                LogUtils.info("Pipeline [{}] interrupted: {}", name, context.getInterruptReason());
                 break;
             }
-            this.executeNode(node, context);
+
+            executeNode(node, context);
         }
-        LogUtils.info("Pipeline [{}] completed. Executed: {}, Failures: {}", this.name, context.getExecutedNodes().size(), context.getFailures().size());
+
+        LogUtils.info("Pipeline [{}] completed. Executed: {}, Failures: {}",
+                name, context.getExecutedNodes().size(), context.getFailures().size());
+
         return context;
     }
 
     private void executeNode(PipelineNode<T> node, PipelineContext<T> context) {
         String nodeName = node.getName();
         LogUtils.debug("Executing node: {}", nodeName);
+
         try {
             node.execute(context);
             context.markNodeExecuted(nodeName);
             LogUtils.debug("Node [{}] executed successfully", nodeName);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LogUtils.error("Node [{}] execution failed", nodeName, e);
+
             FailureStrategy strategy = node.getFailureStrategy();
             context.recordFailure(nodeName, e.getMessage(), e);
+
             switch (strategy) {
-                case STOP: {
+                case STOP:
                     context.interrupt("Node [" + nodeName + "] failed with STOP strategy");
                     break;
-                }
+                case CONTINUE:
+                case SKIP:
+                    // 继续执行下一个节点
+                    break;
             }
         }
     }
 }
-

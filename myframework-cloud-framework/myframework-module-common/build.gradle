@@ -33,6 +33,7 @@ dependencies {
     implementation projectLibs.jackson.annotations
     implementation projectLibs.jackson.core
     implementation projectLibs.jackson.databind
+    implementation projectLibs.jackson.datatype.jsr353
     implementation projectLibs.transmittable.thread.local
     implementation projectLibs.snappy.java
     implementation projectLibs.kryo

@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Lists
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.tuple.impl;
 
 import com.google.common.collect.Lists;
@@ -16,12 +26,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public abstract class AbstractTuple
-implements ITuple {
+/**
+ * 元组抽象父类
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-27 17:12:14
+ */
+public abstract class AbstractTuple implements ITuple {
+
+    /** 列表信息 */
     private final List<Object> valueList;
 
-    protected AbstractTuple(Object ... objects) {
-        this.valueList = Lists.newArrayList((Object[])objects);
+    /**
+     * 构造器
+     * @param objects 元素数组
+     */
+    protected AbstractTuple(Object... objects) {
+        this.valueList = Lists.newArrayList(objects);
     }
 
     @Override
@@ -46,7 +68,7 @@ implements ITuple {
 
     @Override
     public Object[] toArray() {
-        return ArrayUtils.toArray(this.valueList);
+        return ArrayUtils.toArray(valueList);
     }
 
     @Override
@@ -141,7 +163,6 @@ implements ITuple {
 
     @Override
     public List<Object> toList() {
-        return Collections.unmodifiableList(new ArrayList<Object>(this.valueList));
+        return Collections.unmodifiableList(new ArrayList<>(this.valueList));
     }
 }
-

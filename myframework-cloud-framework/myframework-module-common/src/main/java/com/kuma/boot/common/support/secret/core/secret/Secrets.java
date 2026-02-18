@@ -1,55 +1,56 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package com.kuma.boot.common.support.secret.core.secret;
+
 
 import com.kuma.boot.common.support.instance.Instances;
 import com.kuma.boot.common.support.secret.api.Secret;
-import com.kuma.boot.common.support.secret.core.secret.AesSecret;
-import com.kuma.boot.common.support.secret.core.secret.Base64Secret;
-import com.kuma.boot.common.support.secret.core.secret.CaesarShiftSecret;
-import com.kuma.boot.common.support.secret.core.secret.DesSecret;
-import com.kuma.boot.common.support.secret.core.secret.RsaSecret;
-import com.kuma.boot.common.support.secret.core.secret.SimpleSubstitutionSecret;
-import com.kuma.boot.common.support.secret.core.secret.SingleAddSecret;
-import com.kuma.boot.common.support.secret.core.secret.Sm4Secret;
-import com.kuma.boot.common.support.secret.core.secret.TripleDesSecret;
 
+/**
+ * Secrets
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
 public final class Secrets {
+
     public static Secret caesarShift() {
-        return Instances.singleton(CaesarShiftSecret.class);
+        return (Secret) Instances.singleton(CaesarShiftSecret.class);
     }
 
     public static Secret simpleSubstitution() {
-        return Instances.singleton(SimpleSubstitutionSecret.class);
+        return (Secret) Instances.singleton(SimpleSubstitutionSecret.class);
     }
 
     public static Secret singleAdd() {
-        return Instances.singleton(SingleAddSecret.class);
+        return (Secret) Instances.singleton(SingleAddSecret.class);
     }
 
     public static Secret des() {
-        return Instances.singleton(DesSecret.class);
+        return (Secret) Instances.singleton(DesSecret.class);
     }
 
     public static Secret tripleDes() {
-        return Instances.singleton(TripleDesSecret.class);
+        return (Secret) Instances.singleton(TripleDesSecret.class);
     }
 
     public static Secret sm4() {
-        return Instances.singleton(Sm4Secret.class);
+        return (Secret) Instances.singleton(Sm4Secret.class);
     }
 
     public static Secret aes() {
-        return Instances.singleton(AesSecret.class);
+        return (Secret) Instances.singleton(AesSecret.class);
     }
 
     public static Secret base64() {
-        return Instances.singleton(Base64Secret.class);
+        return (Secret) Instances.singleton(Base64Secret.class);
     }
 
     public static Secret rsa() {
-        return Instances.singleton(RsaSecret.class);
+        return (Secret) Instances.singleton(RsaSecret.class);
     }
 }
-

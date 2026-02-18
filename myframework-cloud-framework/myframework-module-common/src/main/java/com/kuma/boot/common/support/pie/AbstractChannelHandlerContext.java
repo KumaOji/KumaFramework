@@ -1,84 +1,102 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.pie;
 
-import com.kuma.boot.common.support.pie.Channel;
-import com.kuma.boot.common.support.pie.ChannelHandler;
-import com.kuma.boot.common.support.pie.ChannelHandlerContext;
-import com.kuma.boot.common.support.pie.ChannelPipeline;
-import com.kuma.boot.common.support.pie.DefaultChannelPipeline;
-import com.kuma.boot.common.support.pie.ObjectUtil;
+/**
+ * 抽象ChannelHandlerContext
+ *
+ */
+public abstract class AbstractChannelHandlerContext implements ChannelHandlerContext {
 
-public abstract class AbstractChannelHandlerContext
-implements ChannelHandlerContext {
     volatile AbstractChannelHandlerContext next;
+
     volatile AbstractChannelHandlerContext prev;
+
     private DefaultChannelPipeline pipeline;
+
     private String name;
 
-    AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, String name, Class<? extends ChannelHandler> handlerClass) {
-        this.name = (String)ObjectUtil.checkNotNull(name, "name");
+    AbstractChannelHandlerContext(
+            DefaultChannelPipeline pipeline,
+            String name,
+            Class<? extends ChannelHandler> handlerClass) {
+        this.name = (String) ObjectUtil.checkNotNull(name, "name");
         this.pipeline = pipeline;
     }
 
     @Override
     public Channel channel() {
-        return this.pipeline.channel();
+        return pipeline.channel();
     }
 
     @Override
     public ChannelPipeline pipeline() {
-        return this.pipeline;
+        return pipeline;
     }
 
     @Override
     public ChannelHandlerContext fireExceptionCaught(Throwable cause, Object in, Object out) {
-        AbstractChannelHandlerContext.invokeExceptionCaught(this.next, cause, in, out);
+        invokeExceptionCaught(this.next, cause, in, out);
         return this;
     }
 
     @Override
     public ChannelHandlerContext fireChannelProcess(Object in, Object out) {
-        AbstractChannelHandlerContext.invokeChannelProcess(this.next, in, out);
+        invokeChannelProcess(this.next, in, out);
         return this;
     }
 
-    private void invokeExceptionCaught(Throwable cause, Object in, Object out) {
+    private void invokeExceptionCaught(final Throwable cause, Object in, Object out) {
         try {
-            this.handler().exceptionCaught(this, cause, in, out);
-        }
-        catch (Throwable throwable) {
-            // empty catch block
+            handler().exceptionCaught(this, cause, in, out);
+        } catch (Throwable error) {
+
         }
     }
 
     private void invokeChannelProcess(Object in, Object out) {
         try {
-            this.handler().channelProcess(this, in, out);
-        }
-        catch (Throwable throwable) {
-            this.invokeExceptionCaught(throwable, in, out);
+            handler().channelProcess(this, in, out);
+        } catch (Throwable throwable) {
+            invokeExceptionCaught(throwable, in, out);
         }
     }
 
-    static void invokeExceptionCaught(AbstractChannelHandlerContext next, Throwable cause, Object in, Object out) {
+    static void invokeExceptionCaught(
+            final AbstractChannelHandlerContext next,
+            final Throwable cause,
+            Object in,
+            Object out) {
         next.invokeExceptionCaught(cause, in, out);
     }
 
-    static void invokeChannelProcess(AbstractChannelHandlerContext next, Object in, Object out) {
+    static void invokeChannelProcess(
+            final AbstractChannelHandlerContext next, Object in, Object out) {
         next.invokeChannelProcess(in, out);
     }
 
     @Override
     public ChannelHandlerContext process(Object in, Object out) {
+
         try {
-            this.handler().channelProcess(this, in, out);
-        }
-        catch (Throwable t) {
-            this.invokeExceptionCaught(t, in, out);
+            handler().channelProcess(this, in, out);
+        } catch (Throwable t) {
+            invokeExceptionCaught(t, in, out);
         }
         return this;
     }
 }
-

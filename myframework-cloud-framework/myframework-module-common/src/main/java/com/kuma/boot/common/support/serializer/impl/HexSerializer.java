@@ -1,46 +1,61 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.codec.DecoderException
- *  org.apache.commons.codec.binary.Hex
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.serializer.impl;
 
 import com.kuma.boot.common.support.serializer.Serializer;
+import com.kuma.boot.common.support.serializer.SerializerConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
-public class HexSerializer
-implements Serializer {
+/**
+ * HexSerializer
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public class HexSerializer implements Serializer {
+
     @Override
     public String name() {
-        return "hex";
+        return SerializerConstants.HEX;
     }
 
     @Override
-    public byte[] serialize(Object o) {
+    public byte[] serialize( Object o ) {
         if (o == null) {
             return new byte[0];
         }
-        if (o instanceof String) {
-            String source = (String)o;
+        // 只能转换字符串
+        if (o instanceof String source) {
             char[] chars = source.toCharArray();
             try {
-                return Hex.decodeHex((char[])chars);
-            }
-            catch (DecoderException e) {
+                return Hex.decodeHex(chars);
+            } catch (DecoderException e) {
                 return new byte[0];
             }
         }
-        LogUtils.error("hex \u53ea\u652f\u6301\u5b57\u7b26\u4e32\u5e8f\u5217\u5316 ", new Object[0]);
+        LogUtils.error("hex 只支持字符串序列化 ");
         return new byte[0];
     }
 
     @Override
-    public Object deserialize(byte[] bytes, ClassLoader classLoader) {
-        return new String(Hex.encodeHex((byte[])bytes));
+    public Object deserialize( byte[] bytes, ClassLoader classLoader ) {
+        return new String(Hex.encodeHex(bytes));
     }
 }
-

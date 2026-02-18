@@ -1,21 +1,36 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.net.ntp.NTPUDPClient
- *  org.apache.commons.net.ntp.TimeInfo
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.ntp;
 
-import com.kuma.boot.common.support.ntp.NtpException;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.net.InetAddress;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
+/**
+ * ntp 校时服务
+ */
 public class Ntp {
+
     private final long diff;
 
+    /**
+     * 计算时差
+     */
     public static long diff(String host) {
         try {
             NTPUDPClient client = new NTPUDPClient();
@@ -23,28 +38,29 @@ public class Ntp {
             long systemMillis = System.currentTimeMillis();
             long ntpMillis = time.getMessage().getTransmitTimeStamp().getTime();
             return ntpMillis - systemMillis;
-        }
-        catch (Exception e) {
-            throw new NtpException("ntp\u521d\u59cb\u5316\u5f02\u5e38!", e);
+        } catch (Exception e) {
+            throw new NtpException("ntp初始化异常!", e);
         }
     }
 
     public Ntp(String host) {
         try {
-            this.diff = Ntp.diff(host);
-            LogUtils.warn("\u6388\u65f6\u4e2d\u5fc3\u65f6\u95f4\u4e0e\u7cfb\u7edf\u65f6\u95f4\u5dee\u4e3a {} \u6beb\u79d2", this.diff);
-        }
-        catch (Exception e) {
-            throw new NtpException("ntp\u521d\u59cb\u5316\u5f02\u5e38!", e);
+            diff = diff(host);
+            LogUtils.warn("授时中心时间与系统时间差为 {} 毫秒", diff);
+        } catch (Exception e) {
+            throw new NtpException("ntp初始化异常!", e);
         }
     }
 
     public long currentMillis() {
-        return System.currentTimeMillis() + this.diff;
+        return System.currentTimeMillis() + diff;
     }
 
+    /**
+     * 切换授时中心
+     * @return 返回新的ntp实例
+     */
     public Ntp use(String host) {
         return new Ntp(host);
     }
 }
-

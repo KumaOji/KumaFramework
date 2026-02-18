@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.serializer.impl;
 
 import java.io.IOException;
@@ -8,23 +21,30 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
-public class CustomObjectInputStream
-extends ObjectInputStream {
+/**
+ * CustomObjectInputStream
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public class CustomObjectInputStream extends ObjectInputStream {
+
     private final ClassLoader classLoader;
 
-    public CustomObjectInputStream(InputStream in, ClassLoader classLoader) throws IOException {
+    public CustomObjectInputStream( InputStream in, ClassLoader classLoader ) throws IOException {
         super(in);
         this.classLoader = classLoader;
     }
 
     @Override
-    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+    protected Class<?> resolveClass( ObjectStreamClass desc )
+            throws IOException, ClassNotFoundException {
         String name = desc.getName();
-        Class<?> aClass = this.classLoader.loadClass(name);
+        Class<?> aClass = classLoader.loadClass(name);
         if (aClass != null) {
             return aClass;
         }
         return super.resolveClass(desc);
     }
 }
-

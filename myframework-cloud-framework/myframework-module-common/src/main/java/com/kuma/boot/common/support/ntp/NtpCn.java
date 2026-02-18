@@ -1,21 +1,48 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.ntp;
 
-import com.kuma.boot.common.support.ntp.Ntp;
-
+/**
+ * 中国 ntp 类
+ */
 public class NtpCn {
+
+    /**
+     * time.7x24s.com 中国国家授时中心, 使用域名请求超时的话, 解析IP,然后直接请IP
+     */
     public static final String DEFAULT_TIME_SERVER = "time.7x24s.com";
+
+    /**
+     * 上海解析出来的ip
+     */
     public static final String DEFAULT_TIME_SERVER_SH_IP = "203.107.6.88";
-    private static final Ntp INSTANCE = new Ntp("203.107.6.88");
+
+    private static final Ntp INSTANCE = new Ntp(DEFAULT_TIME_SERVER_SH_IP);
 
     public static long currentTimeMillis() {
         return INSTANCE.currentMillis();
     }
 
+    /**
+     * 几秒后的毫秒级时间戳
+     * @param seconds 秒
+     * @return 时间戳
+     */
     public static long plusSeconds(long seconds) {
-        return NtpCn.currentTimeMillis() + seconds * 1000L;
+        return currentTimeMillis() + (seconds * 1000);
     }
 }
-

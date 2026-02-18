@@ -1,34 +1,50 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.hash.core;
 
+import com.kuma.boot.common.support.instance.Instances;
 import com.kuma.boot.common.support.hash.api.HashResult;
 import com.kuma.boot.common.support.hash.api.HashResultHandler;
-import com.kuma.boot.common.support.hash.core.Base64HashResultHandler;
-import com.kuma.boot.common.support.hash.core.BytesHashResultHandler;
-import com.kuma.boot.common.support.hash.core.DefaultHashResultHandler;
-import com.kuma.boot.common.support.hash.core.HexHashResultHandler;
-import com.kuma.boot.common.support.instance.Instances;
 
+/**
+ * HashResultHandlers
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
 public final class HashResultHandlers {
+
     private HashResultHandlers() {
     }
 
     public static HashResultHandler<String> hex() {
-        return Instances.singleton(HexHashResultHandler.class);
+        return (HashResultHandler) Instances.singleton(HexHashResultHandler.class);
     }
 
     public static HashResultHandler<String> base64() {
-        return Instances.singleton(Base64HashResultHandler.class);
+        return (HashResultHandler) Instances.singleton(Base64HashResultHandler.class);
     }
 
     public static HashResultHandler<HashResult> defaults() {
-        return Instances.singleton(DefaultHashResultHandler.class);
+        return (HashResultHandler) Instances.singleton(DefaultHashResultHandler.class);
     }
 
     public static HashResultHandler<byte[]> bytes() {
-        return Instances.singleton(BytesHashResultHandler.class);
+        return (HashResultHandler) Instances.singleton(BytesHashResultHandler.class);
     }
 }
-

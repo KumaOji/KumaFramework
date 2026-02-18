@@ -1,91 +1,91 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.pie;
 
-import com.kuma.boot.common.support.pie.AbstractChannelHandlerContext;
-import com.kuma.boot.common.support.pie.Channel;
-import com.kuma.boot.common.support.pie.ChannelHandler;
-import com.kuma.boot.common.support.pie.ChannelHandlerContext;
-import com.kuma.boot.common.support.pie.ChannelPipeline;
-import com.kuma.boot.common.support.pie.DefaultChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DefaultChannelPipeline
-implements ChannelPipeline {
+/**
+ * ChannelPipeline默认实现
+ *
+ */
+public class DefaultChannelPipeline implements ChannelPipeline {
+
     AbstractChannelHandlerContext head;
+
     AbstractChannelHandlerContext tail;
-    private static final String HEAD_NAME = DefaultChannelPipeline.generateName0(HeadContext.class);
-    private static final String TAIL_NAME = DefaultChannelPipeline.generateName0(TailContext.class);
+
+    private static final String HEAD_NAME = generateName0(HeadContext.class);
+
+    private static final String TAIL_NAME = generateName0(TailContext.class);
+
     private Channel channel;
 
-    protected DefaultChannelPipeline(Channel channel) {
+    protected DefaultChannelPipeline( Channel channel ) {
         this.channel = channel;
-        this.tail = new TailContext(this);
-        this.head = new HeadContext(this);
-        this.head.next = this.tail;
-        this.tail.prev = this.head;
+        tail = new TailContext(this);
+        head = new HeadContext(this);
+        head.next = tail;
+        tail.prev = head;
     }
 
-    @Override
-    public ChannelPipeline addLast(String name, ChannelHandler handler) {
-        AbstractChannelHandlerContext prev;
-        DefaultChannelHandlerContext newCtx = new DefaultChannelHandlerContext(this, name, handler);
-        newCtx.prev = prev = this.tail.prev;
-        newCtx.next = this.tail;
+    public ChannelPipeline addLast( String name, ChannelHandler handler ) {
+        AbstractChannelHandlerContext newCtx =
+                new DefaultChannelHandlerContext(this, name, handler);
+        AbstractChannelHandlerContext prev = tail.prev;
+        newCtx.prev = prev;
+        newCtx.next = tail;
         prev.next = newCtx;
-        this.tail.prev = newCtx;
+        tail.prev = newCtx;
         return this;
     }
 
-    @Override
     public Channel channel() {
-        return this.channel;
+        return channel;
     }
 
     @Override
-    public ChannelPipeline fireExceptionCaught(Throwable cause, Object in, Object out) {
-        AbstractChannelHandlerContext.invokeExceptionCaught(this.head, cause, in, out);
+    public ChannelPipeline fireExceptionCaught( Throwable cause, Object in, Object out ) {
+        AbstractChannelHandlerContext.invokeExceptionCaught(head, cause, in, out);
         return this;
     }
 
     @Override
-    public ChannelPipeline fireChannelProcess(Object in, Object out) {
-        AbstractChannelHandlerContext.invokeChannelProcess(this.head, in, out);
+    public ChannelPipeline fireChannelProcess( Object in, Object out ) {
+        AbstractChannelHandlerContext.invokeChannelProcess(head, in, out);
         return this;
     }
 
-    private static String generateName0(Class<?> handlerType) {
+    private static String generateName0( Class<?> handlerType ) {
         return handlerType.getSimpleName() + "#0";
     }
 
-    @Override
-    public ChannelPipeline process(Object in, Object out) {
-        this.head.process(in, out);
-        return this;
-    }
+    /**
+     * TailContext
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    static final class TailContext extends AbstractChannelHandlerContext implements ChannelHandler {
 
-    @Override
-    public ChannelHandlerContext head() {
-        return this.head;
-    }
-
-    @Override
-    public ChannelHandlerContext tail() {
-        return this.tail;
-    }
-
-    static final class TailContext
-    extends AbstractChannelHandlerContext
-    implements ChannelHandler {
         private Logger logger = LoggerFactory.getLogger(TailContext.class);
 
-        TailContext(DefaultChannelPipeline pipeline) {
+        TailContext( DefaultChannelPipeline pipeline ) {
             super(pipeline, TAIL_NAME, TailContext.class);
         }
 
@@ -95,26 +95,35 @@ implements ChannelPipeline {
         }
 
         @Override
-        public void channelProcess(ChannelHandlerContext ctx, Object in, Object out) throws Exception {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("tail:channelProcess:there is no more handler");
+        public void channelProcess( ChannelHandlerContext ctx, Object in, Object out )
+                throws Exception {
+            if (logger.isDebugEnabled()) {
+                logger.debug("tail:channelProcess:there is no more handler");
             }
         }
 
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause, Object in, Object out) throws Exception {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("tail:exceptionCaught:there is no more handler");
+        public void exceptionCaught(
+                ChannelHandlerContext ctx, Throwable cause, Object in, Object out )
+                throws Exception {
+            if (logger.isDebugEnabled()) {
+                logger.debug("tail:exceptionCaught:there is no more handler");
             }
         }
     }
 
-    static final class HeadContext
-    extends AbstractChannelHandlerContext
-    implements ChannelHandler {
+    /**
+     * HeadContext
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    static final class HeadContext extends AbstractChannelHandlerContext implements ChannelHandler {
+
         private Logger logger = LoggerFactory.getLogger(HeadContext.class);
 
-        HeadContext(DefaultChannelPipeline pipeline) {
+        HeadContext( DefaultChannelPipeline pipeline ) {
             super(pipeline, HEAD_NAME, HeadContext.class);
         }
 
@@ -124,17 +133,35 @@ implements ChannelPipeline {
         }
 
         @Override
-        public void channelProcess(ChannelHandlerContext ctx, Object in, Object out) throws Exception {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("head:channelProcess");
+        public void channelProcess( ChannelHandlerContext ctx, Object in, Object out )
+                throws Exception {
+            if (logger.isDebugEnabled()) {
+                logger.debug("head:channelProcess");
             }
             ctx.fireChannelProcess(in, out);
         }
 
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause, Object in, Object out) throws Exception {
-            this.logger.info("head:exceptionCaught");
+        public void exceptionCaught(
+                ChannelHandlerContext ctx, Throwable cause, Object in, Object out )
+                throws Exception {
+            logger.info("head:exceptionCaught");
         }
     }
-}
 
+    @Override
+    public ChannelPipeline process( Object in, Object out ) {
+        head.process(in, out);
+        return this;
+    }
+
+    @Override
+    public ChannelHandlerContext head() {
+        return head;
+    }
+
+    @Override
+    public ChannelHandlerContext tail() {
+        return tail;
+    }
+}

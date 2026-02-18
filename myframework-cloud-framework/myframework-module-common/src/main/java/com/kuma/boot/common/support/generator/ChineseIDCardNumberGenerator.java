@@ -1,117 +1,154 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.date.DateTime
- *  cn.hutool.core.util.RandomUtil
- *  com.google.common.collect.Maps
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.generator;
 
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.util.RandomUtil;
 import com.google.common.collect.Maps;
-import com.kuma.boot.common.support.generator.ChineseAreaList;
 import com.kuma.boot.common.support.generator.base.GenericGenerator;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import com.kuma.boot.common.utils.lang.StringUtils;
+import cn.hutool.core.util.RandomUtil;
 
-public class ChineseIDCardNumberGenerator
-extends GenericGenerator {
+/**
+ * 身份证号码 1、号码的结构 公民身份号码是特征组合码，由十七位数字本体码和一位校验码组成。排列顺序从左至右依次为：六位数字地址码，
+ * 八位数字出生日期码，三位数字顺序码和一位数字校验码。 2、地址码(前六位数） 表示编码对象常住户口所在县(市、旗、区)的行政区划代码，按GB/T2260的规定执行。
+ * 3、出生日期码（第七位至十四位） 表示编码对象出生的年、月、日，按GB/T7408的规定执行，年、月、日代码之间不用分隔符。 4、顺序码（第十五位至十七位）
+ * 表示在同一地址码所标识的区域范围内，对同年、同月、同日出生的人编定的顺序号， 顺序码的奇数分配给男性，偶数分配给女性。 5、校验码（第十八位数）
+ * （1）十七位数字本体码加权求和公式 S = Sum(Ai * Wi), i = 0, ... , 16 ，先对前17位数字的权求和 Ai:表示第i位置上的身份证号码数字值
+ * Wi:表示第i位置上的加权因子 Wi: 7 9 10 5 8 4 2 1 6 3 7 9 10 5 8 4 2 （2）计算模 Y = mod(S, 11)
+ * （3）通过模得到对应的校验码 Y: 0 1 2 3 4 5 6 7 8 9 10 校验码: 1 0 X 9 8 7 6 5 4 3 2
+ */
+/*
+ * ChineseIDCardNumberGenerator
+ *
+ * @author kuma
+ *
+ * @version 2023.12
+ *
+ * @since 2023-12-18 15:08:01
+ */
+public class ChineseIDCardNumberGenerator extends GenericGenerator {
+
     private static final GenericGenerator INSTANCE = new ChineseIDCardNumberGenerator();
 
-    private ChineseIDCardNumberGenerator() {
-    }
+    private ChineseIDCardNumberGenerator() {}
 
     public static GenericGenerator getInstance() {
         return INSTANCE;
     }
 
+    /** 生成签发机关：XXX公安局/XX区分局 Authority */
     public static String generateIssueOrg() {
-        return ChineseAreaList.cityNameList.get(RandomUtil.randomInt((int)0, (int)ChineseAreaList.cityNameList.size())) + "\u516c\u5b89\u5c40\u67d0\u67d0\u5206\u5c40";
+        return ChineseAreaList.cityNameList.get(
+                RandomUtil.randomInt(0, ChineseAreaList.cityNameList.size()))
+                + "公安局某某分局";
     }
 
+    /** 生成有效期限：20150906-20350906 Valid Through */
     public static String generateValidPeriod() {
-        DateTime beginDate = new DateTime(ChineseIDCardNumberGenerator.randomDate());
+        DateTime beginDate = new DateTime(randomDate());
         String formater = "yyyyMMdd";
-        beginDate.toCalendar().set(1, beginDate.year() + 20);
+        beginDate.toCalendar().set(Calendar.YEAR, beginDate.year() + 20);
         return beginDate.toString(formater) + "-" + beginDate.toString(formater);
     }
 
     @Override
     public String generate() {
-        Map<String, String> code = ChineseIDCardNumberGenerator.getAreaCode();
-        String areaCode = code.keySet().toArray(new String[0])[RandomUtil.randomInt((int)0, (int)code.size())] + StringUtils.leftPad("" + (RandomUtil.randomInt((int)0, (int)9998) + 1), 4, "0");
-        String birthday = new SimpleDateFormat("yyyyMMdd").format(ChineseIDCardNumberGenerator.randomDate());
-        String randomCode = String.valueOf(1000 + RandomUtil.randomInt((int)0, (int)999)).substring(1);
+        Map<String, String> code = getAreaCode();
+        String areaCode =
+                code.keySet().toArray(new String[0])[RandomUtil.randomInt(0, code.size())]
+                        + StringUtils.leftPad((RandomUtil.randomInt(0, 9998) + 1) + "", 4, "0");
+
+        String birthday = new SimpleDateFormat("yyyyMMdd").format(randomDate());
+        String randomCode = String.valueOf(1000 + RandomUtil.randomInt(0, 999)).substring(1);
         String pre = areaCode + birthday + randomCode;
-        String verifyCode = ChineseIDCardNumberGenerator.getVerifyCode(pre);
+        String verifyCode = getVerifyCode(pre);
+
         return pre + verifyCode;
     }
 
     public static Date randomDate() {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(1970, 1, 1);
+        calendar.set(1970, Calendar.FEBRUARY, 1);
         long earlierDate = calendar.getTime().getTime();
-        calendar.set(2000, 1, 1);
+        calendar.set(2000, Calendar.FEBRUARY, 1);
         long laterDate = calendar.getTime().getTime();
-        long chosenDate = RandomUtil.randomLong((long)earlierDate, (long)laterDate);
+
+        long chosenDate = RandomUtil.randomLong(earlierDate, laterDate);
+
         return new Date(chosenDate);
     }
 
     private static String getVerifyCode(String cardId) {
-        String[] valCodeArr = new String[]{"1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"};
-        String[] wi = new String[]{"7", "9", "10", "5", "8", "4", "2", "1", "6", "3", "7", "9", "10", "5", "8", "4", "2"};
+        String[] valCodeArr = {"1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"};
+        String[] wi = {
+                "7", "9", "10", "5", "8", "4", "2", "1", "6", "3", "7", "9", "10", "5", "8", "4", "2"
+        };
         int tmp = 0;
-        for (int i = 0; i < wi.length; ++i) {
+        for (int i = 0; i < wi.length; i++) {
             tmp += Integer.parseInt(String.valueOf(cardId.charAt(i))) * Integer.parseInt(wi[i]);
         }
+
         int modValue = tmp % 11;
+
         return valCodeArr[modValue];
     }
 
     private static Map<String, String> getAreaCode() {
-        HashMap map = Maps.newHashMap();
-        map.put("11", "\u5317\u4eac");
-        map.put("12", "\u5929\u6d25");
-        map.put("13", "\u6cb3\u5317");
-        map.put("14", "\u5c71\u897f");
-        map.put("15", "\u5185\u8499\u53e4");
-        map.put("21", "\u8fbd\u5b81");
-        map.put("22", "\u5409\u6797");
-        map.put("23", "\u9ed1\u9f99\u6c5f");
-        map.put("31", "\u4e0a\u6d77");
-        map.put("32", "\u6c5f\u82cf");
-        map.put("33", "\u6d59\u6c5f");
-        map.put("34", "\u5b89\u5fbd");
-        map.put("35", "\u798f\u5efa");
-        map.put("36", "\u6c5f\u897f");
-        map.put("37", "\u5c71\u4e1c");
-        map.put("41", "\u6cb3\u5357");
-        map.put("42", "\u6e56\u5317");
-        map.put("43", "\u6e56\u5357");
-        map.put("44", "\u5e7f\u4e1c");
-        map.put("45", "\u5e7f\u897f");
-        map.put("46", "\u6d77\u5357");
-        map.put("50", "\u91cd\u5e86");
-        map.put("51", "\u56db\u5ddd");
-        map.put("52", "\u8d35\u5dde");
-        map.put("53", "\u4e91\u5357");
-        map.put("54", "\u897f\u85cf");
-        map.put("61", "\u9655\u897f");
-        map.put("62", "\u7518\u8083");
-        map.put("63", "\u9752\u6d77");
-        map.put("64", "\u5b81\u590f");
-        map.put("65", "\u65b0\u7586");
-        map.put("71", "\u53f0\u6e7e");
-        map.put("81", "\u9999\u6e2f");
-        map.put("82", "\u6fb3\u95e8");
-        map.put("91", "\u56fd\u5916");
+        final Map<String, String> map = Maps.newHashMap();
+        map.put("11", "北京");
+        map.put("12", "天津");
+        map.put("13", "河北");
+        map.put("14", "山西");
+        map.put("15", "内蒙古");
+        map.put("21", "辽宁");
+        map.put("22", "吉林");
+        map.put("23", "黑龙江");
+        map.put("31", "上海");
+        map.put("32", "江苏");
+        map.put("33", "浙江");
+        map.put("34", "安徽");
+        map.put("35", "福建");
+        map.put("36", "江西");
+        map.put("37", "山东");
+        map.put("41", "河南");
+        map.put("42", "湖北");
+        map.put("43", "湖南");
+        map.put("44", "广东");
+        map.put("45", "广西");
+        map.put("46", "海南");
+        map.put("50", "重庆");
+        map.put("51", "四川");
+        map.put("52", "贵州");
+        map.put("53", "云南");
+        map.put("54", "西藏");
+        map.put("61", "陕西");
+        map.put("62", "甘肃");
+        map.put("63", "青海");
+        map.put("64", "宁夏");
+        map.put("65", "新疆");
+        map.put("71", "台湾");
+        map.put("81", "香港");
+        map.put("82", "澳门");
+        map.put("91", "国外");
+
         return map;
     }
 }
-

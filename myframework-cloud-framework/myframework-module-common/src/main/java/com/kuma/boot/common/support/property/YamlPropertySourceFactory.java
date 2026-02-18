@@ -1,14 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.beans.factory.config.YamlPropertiesFactoryBean
- *  org.springframework.core.env.PropertiesPropertySource
- *  org.springframework.core.env.PropertySource
- *  org.springframework.core.io.Resource
- *  org.springframework.core.io.support.EncodedResource
- *  org.springframework.core.io.support.PropertySourceFactory
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.property;
 
 import java.io.FileNotFoundException;
@@ -17,32 +22,59 @@ import java.util.Properties;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
 
-public class YamlPropertySourceFactory
-implements PropertySourceFactory {
-    public PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
-        Properties propertiesFromYaml = this.loadYamlIntoProperties(resource);
+/**
+ * 加载yml格式的自定义配置文件
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:29:15
+ */
+public class YamlPropertySourceFactory implements PropertySourceFactory {
+
+    public YamlPropertySourceFactory() {}
+
+    @Override
+    public PropertySource<?> createPropertySource(String name, EncodedResource resource)
+            throws IOException {
+        Properties propertiesFromYaml = loadYamlIntoProperties(resource);
         String sourceName = name != null ? name : resource.getResource().getFilename();
         return new PropertiesPropertySource(sourceName, propertiesFromYaml);
+
+        // YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+        // factory.setResources(encodedResource.getResource());
+        // Properties properties = factory.getObject();
+        // if (Objects.isNull(properties)
+        // || StringUtils.isBlank(encodedResource.getResource().getFilename())) {
+        // return null;
+        // }
+        // return new
+        // PropertiesPropertySource(encodedResource.getResource().getFilename(),
+        // properties);
     }
 
-    private Properties loadYamlIntoProperties(EncodedResource resource) throws FileNotFoundException {
+    /**
+     * loadYamlIntoProperties
+     * @param resource resource
+     * @return {@link Properties }
+     * @author kuma
+     * @since 2021-09-02 19:29:21
+     */
+    private Properties loadYamlIntoProperties(EncodedResource resource)
+            throws FileNotFoundException {
         try {
             YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-            factory.setResources(new Resource[]{resource.getResource()});
+            factory.setResources(resource.getResource());
             factory.afterPropertiesSet();
             return factory.getObject();
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
             Throwable cause = e.getCause();
             if (cause instanceof FileNotFoundException) {
-                throw (FileNotFoundException)e.getCause();
+                throw (FileNotFoundException) e.getCause();
             }
             throw e;
         }
     }
 }
-

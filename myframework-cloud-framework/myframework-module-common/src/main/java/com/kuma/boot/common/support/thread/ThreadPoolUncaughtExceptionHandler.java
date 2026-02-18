@@ -1,26 +1,47 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.thread;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 
-public class ThreadPoolUncaughtExceptionHandler
-implements Thread.UncaughtExceptionHandler {
+/**
+ * ThreadPoolUncaughtExceptionHandler
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public class ThreadPoolUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+
     private final Thread.UncaughtExceptionHandler lastUncaughtExceptionHandler;
 
-    public ThreadPoolUncaughtExceptionHandler(Thread.UncaughtExceptionHandler lastUncaughtExceptionHandler) {
+    public ThreadPoolUncaughtExceptionHandler(
+            Thread.UncaughtExceptionHandler lastUncaughtExceptionHandler ) {
         this.lastUncaughtExceptionHandler = lastUncaughtExceptionHandler;
     }
 
     @Override
-    public void uncaughtException(Thread t, Throwable e) {
+    public void uncaughtException( Thread t, Throwable e ) {
         if (e != null) {
-            LogUtils.error(e, "[\u8b66\u544a] [{}] \u6355\u83b7\u9519\u8bef", Thread.currentThread().getName());
+            LogUtils.error(e, "[警告] [{}] 捕获错误", Thread.currentThread().getName());
         }
-        if (this.lastUncaughtExceptionHandler != null) {
-            this.lastUncaughtExceptionHandler.uncaughtException(t, e);
+
+        if (lastUncaughtExceptionHandler != null) {
+            lastUncaughtExceptionHandler.uncaughtException(t, e);
         }
     }
 }
-

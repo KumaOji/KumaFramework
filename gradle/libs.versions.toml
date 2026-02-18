@@ -40,13 +40,13 @@ bouncycastle = "1.78.1"
 xk-time = "3.2.4"
 reactor-core = "3.7.4"
 reactivestreams = "1.0.4"
-spring-core = "6.2.6"
-spring-context = "6.2.6"
-spring-beans = "6.2.6"
-spring-aop = "6.2.6"
-spring-web = "6.2.6"
-spring-webflux = "6.2.6"
-spring-expression = "6.2.6"
+spring-core = "7.0.3"
+spring-context = "7.0.3"
+spring-beans = "7.0.3"
+spring-aop = "7.0.3"
+spring-web = "7.0.3"
+spring-webflux = "7.0.3"
+spring-expression = "7.0.3"
 jakarta-servlet-api = "6.0.0"
 jakarta-validation-api = "3.0.2"
 swagger-annotations = "2.2.29"
@@ -63,7 +63,7 @@ groovy = "4.0.21"
 javassist = "3.30.2-GA"
 jakarta-annotation-api = "3.0.0"
 aspectjweaver = "1.9.22.1"
-spring-context-support = "6.2.6"
+spring-context-support = "7.0.3"
 orika = "1.5.4"
 hessian = "4.0.66"
 transmittable-thread-local = "2.14.5"
@@ -145,6 +145,7 @@ aspectjweaver = { module = "org.aspectj:aspectjweaver", version.ref = "aspectjwe
 spring-context-support = { module = "org.springframework:spring-context-support", version.ref = "spring-context-support" }
 jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr353 = { module = "tools.jackson.datatype:jackson-datatype-jsr353", version.ref = "jackson" }
 orika-core = { module = "ma.glasnost.orika:orika-core", version.ref = "orika" }
 hessian = { module = "com.caucho:hessian", version.ref = "hessian" }
 transmittable-thread-local = { module = "com.alibaba:transmittable-thread-local", version.ref = "transmittable-thread-local" }

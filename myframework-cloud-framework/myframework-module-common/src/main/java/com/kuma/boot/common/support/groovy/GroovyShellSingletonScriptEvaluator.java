@@ -12,6 +12,8 @@ import groovy.lang.Script;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -51,13 +53,14 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
                 this.config)) {
             this.loader = (GroovyClassLoader) parentLoader;
         } else {
-            this.loader = new GroovyClassLoader(parentLoader, this.config);
+            this.loader = this.doPrivileged(() -> new GroovyClassLoader(parentLoader, this.config));
         }
         this.groovyShell = new GroovyCacheShell(loader, this.config);
     }
 
     @Override
     public Object evaluate( ScriptSource script, Map<String, Object> arguments ) throws ScriptCompilationException {
+        //GroovyCacheShell groovyShell = new GroovyCacheShell(this.getGroovyClassLoader()，this.getConfig())；
         GroovyCodeSource gcs = this.convert(script);
         try {
             return this.groovyShell.evaluate(gcs, new Binding(arguments));
@@ -71,14 +74,11 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
         try {
             text = script.getScriptAsString();
         } catch (IOException e) {
-            throw new ScriptCompilationException(script, "Cannot access Groovy script", e);
+            throw new ScriptCompilationException(script, "Cannot access Groovyoovy script", e);
         }
 
-        String fileName = null;
-        if (script instanceof ResourceScriptSource resourceScript) {
-            var resource = resourceScript.getResource();
-            fileName = (resource != null) ? resource.getFilename() : null;
-        }
+        String fileName = ( script instanceof ResourceScriptSource ?
+                ( (ResourceScriptSource) script ).getResource().getFilename() : null );
         if (null == fileName) {
             fileName = StringUtils.join("Script_Ext_",
                     DigestUtils.md5DigestAsHex(text.getBytes(StandardCharsets.UTF_8)), ".groovy");
@@ -87,8 +87,9 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
     }
 
     protected GroovyCodeSource convert( String text, String fileName ) {
-        GroovyCodeSource gcs = new GroovyCodeSource(text, fileName, "/groovy/script");
-        // 使用缓存是关键。虽然 new GroovyCodeSource() 默认 cache 是 true，这里仍显式设置一次以突出重点。
+        GroovyCodeSource gcs = AccessController.doPrivileged(
+                (PrivilegedAction<GroovyCodeSource>) () -> new GroovyCodeSource(text, fileName, "/groovy/script"));
+        //使用缓存是关键.虽然newv GroovyCodeSource()默认cache是true，这里还是显示的再设置一次，为了突出重点.
         gcs.setCachable(Boolean.TRUE);
         return gcs;
     }
@@ -99,6 +100,10 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
 
     public CompilerConfiguration getConfig() {
         return config;
+    }
+
+    private <T> T doPrivileged( PrivilegedAction<T> action ) {
+        return AccessController.doPrivileged(action);
     }
 
     /**
@@ -114,7 +119,7 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
             super(parent, config);
         }
 
-        protected Class<?> parseClass( final GroovyCodeSource codeSource ) throws CompilationFailedException {
+        protected Class parseClass( final GroovyCodeSource codeSource ) throws CompilationFailedException {
             return super.getClassLoader().parseClass(codeSource);
         }
 

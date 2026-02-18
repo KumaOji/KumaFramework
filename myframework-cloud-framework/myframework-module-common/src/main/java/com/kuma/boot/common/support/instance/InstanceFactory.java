@@ -1,10 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.instance;
 
+import com.kuma.boot.common.constant.PunctuationConstants;
 import com.kuma.boot.common.exception.BootException;
-import com.kuma.boot.common.support.instance.Instance;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -12,101 +25,160 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class InstanceFactory
-implements Instance {
-    private final Map<String, Object> singletonMap = new ConcurrentHashMap<String, Object>();
-    private ThreadLocal<Map<String, Object>> mapThreadLocal = new ThreadLocal();
+/**
+ * 实例化工厂类
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-27 17:10:28
+ */
+public final class InstanceFactory implements Instance {
 
-    private InstanceFactory() {
+    private InstanceFactory() {}
+
+    /** 单例 map 对象 1. key 是 class 的全称 */
+    private final Map<String, Object> singletonMap = new ConcurrentHashMap<>();
+
+    /** 线程内的 map 对象 */
+    private ThreadLocal<Map<String, Object>> mapThreadLocal = new ThreadLocal<>();
+
+    /** 静态内部类实现单例 */
+    private static class SingletonHolder {
+
+        private static final InstanceFactory INSTANCE_FACTORY = new InstanceFactory();
     }
 
+    /**
+     * 获取单例对象
+     * @return 实例化对象
+     */
     public static InstanceFactory getInstance() {
         return SingletonHolder.INSTANCE_FACTORY;
     }
 
+    /**
+     * 静态方法单例
+     * @param tClass 类信息
+     * @param <T> 泛型
+     * @return 结果
+     */
     public static <T> T singletion(Class<T> tClass) {
-        return InstanceFactory.getInstance().singleton(tClass);
+        return getInstance().singleton(tClass);
     }
 
-    public static <T> T singletion(Class<T> tClass, String groupName) {
-        return InstanceFactory.getInstance().singleton(tClass, groupName);
+    /**
+     * 静态方法单例
+     * @param tClass 类信息
+     * @param groupName 分组名称
+     * @param <T> 泛型
+     * @return 结果
+     */
+    public static <T> T singletion(Class<T> tClass, final String groupName) {
+        return getInstance().singleton(tClass, groupName);
     }
 
     @Override
     public <T> T singleton(Class<T> tClass, String groupName) {
-        return this.getSingleton(tClass, groupName, this.singletonMap);
+        return getSingleton(tClass, groupName, singletonMap);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T singleton(Class<T> tClass) {
         this.notNull(tClass);
-        return this.getSingleton(tClass, this.singletonMap);
+
+        return this.getSingleton(tClass, singletonMap);
     }
 
     @Override
     public <T> T threadLocal(Class<T> tClass) {
         this.notNull(tClass);
-        Map<String, Object> map = this.mapThreadLocal.get();
+
+        // 1. 校验 map 是否存在
+        Map<String, Object> map = mapThreadLocal.get();
         if (ObjectUtils.isNull(map)) {
-            map = new ConcurrentHashMap<String, Object>();
+            map = new ConcurrentHashMap<>();
         }
+
+        // 2. 获取对象
         T instance = this.getSingleton(tClass, map);
-        this.mapThreadLocal.set(map);
+
+        // 3. 更新 threadLocal
+        mapThreadLocal.set(map);
+
         return instance;
     }
 
     @Override
     public <T> T multiple(Class<T> tClass) {
         this.notNull(tClass);
+
         try {
-            return tClass.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
-        }
-        catch (IllegalAccessException | InstantiationException | NoSuchMethodException e) {
+            return tClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
             throw new BootException(e);
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             LogUtils.error(e);
-            throw new BootException("\u7c7b\u578b\u5f02\u5e38");
         }
+        throw new BootException("类型异常");
     }
 
     @Override
     public <T> T threadSafe(Class<T> tClass) {
+        // if(tClass.isAnnotationPresent(ThreadSafe.class)) {
+        // return this.singleton(tClass);
+        // }
+        // return this.multiple(tClass);
+
         return this.singleton(tClass);
     }
 
-    private <T> T getSingleton(Class<T> tClass, Map<String, Object> instanceMap) {
+    /**
+     * 获取单例对象
+     * @param tClass class 类型
+     * @param instanceMap 实例化对象 map
+     * @return 单例对象
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getSingleton(final Class<T> tClass, final Map<String, Object> instanceMap) {
         this.notNull(tClass);
-        String fullClassName = tClass.getName();
-        Object instance = instanceMap.get(fullClassName);
+
+        final String fullClassName = tClass.getName();
+        T instance = (T) instanceMap.get(fullClassName);
         if (ObjectUtils.isNull(instance)) {
             instance = this.multiple(tClass);
             instanceMap.put(fullClassName, instance);
         }
-        return (T)instance;
+        return instance;
     }
 
-    private <T> T getSingleton(Class<T> tClass, String group, Map<String, Object> instanceMap) {
+    /**
+     * 获取单例对象
+     * @param tClass 查询 tClass
+     * @param group 分组信息
+     * @param instanceMap 实例化对象 map
+     * @return 单例对象
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getSingleton(
+            final Class<T> tClass, final String group, final Map<String, Object> instanceMap) {
         this.notNull(tClass);
         ArgUtils.notEmpty(group, "key");
-        String fullClassName = tClass.getName() + "-" + group;
-        Object instance = instanceMap.get(fullClassName);
+
+        final String fullClassName = tClass.getName() + PunctuationConstants.MIDDLE_LINE + group;
+        T instance = (T) instanceMap.get(fullClassName);
         if (ObjectUtils.isNull(instance)) {
             instance = this.multiple(tClass);
             instanceMap.put(fullClassName, instance);
         }
-        return (T)instance;
+        return instance;
     }
 
-    private void notNull(Class tClass) {
+    /**
+     * 断言参数不可为 null
+     * @param tClass class 信息
+     */
+    private void notNull(final Class tClass) {
         ArgUtils.notNull(tClass, "class");
     }
-
-    private static class SingletonHolder {
-        private static final InstanceFactory INSTANCE_FACTORY = new InstanceFactory();
-
-        private SingletonHolder() {
-        }
-    }
 }
-

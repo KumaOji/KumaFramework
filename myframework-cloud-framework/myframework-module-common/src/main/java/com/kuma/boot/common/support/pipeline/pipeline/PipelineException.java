@@ -1,10 +1,10 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.common.support.pipeline.pipeline;
 
-public class PipelineException
-extends Exception {
+/**
+ * 管道执行异常
+ */
+public class PipelineException extends Exception {
+
     private final String nodeName;
 
     public PipelineException(String nodeName, String message) {
@@ -18,7 +18,6 @@ extends Exception {
     }
 
     public String getNodeName() {
-        return this.nodeName;
+        return nodeName;
     }
 }
-

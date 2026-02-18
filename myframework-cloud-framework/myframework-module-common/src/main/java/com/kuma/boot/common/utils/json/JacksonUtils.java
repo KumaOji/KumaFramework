@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.kuma.boot.common.exception.BaseException;
 import com.kuma.boot.common.support.function.CheckedConsumer;
 import com.kuma.boot.common.support.jackson.JacksonModule;
+import tools.jackson.datatype.jsr353.JSR353Module;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
 import com.kuma.boot.common.utils.io.FileUtils;
@@ -623,6 +624,7 @@ public final class JacksonUtils {
                 .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
                 .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
                 .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA))
+                .addModule(new JSR353Module())
                 .addModule(new JacksonModule())
                 .build();
 

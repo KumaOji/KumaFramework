@@ -1,76 +1,95 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.pipeline;
 
-import com.kuma.boot.common.support.pipeline.Pipeline;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DefaultPipeline<T>
-implements Pipeline<T> {
-    private final LinkedList<T> list = new LinkedList();
+/**
+ * 默认的管道实现
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-27 17:10:57
+ */
+public class DefaultPipeline<T> implements Pipeline<T> {
+
+    /** 创建一个内部的链表 */
+    private final LinkedList<T> list = new LinkedList<>();
 
     @Override
     public Pipeline<T> addLast(T t) {
-        this.list.addLast(t);
+        list.addLast(t);
         return this;
     }
 
     @Override
     public Pipeline<T> addFirst(T t) {
-        this.list.addFirst(t);
+        list.addFirst(t);
         return this;
     }
 
     @Override
     public Pipeline<T> set(int index, T t) {
-        this.list.set(index, t);
+        list.set(index, t);
         return this;
     }
 
     @Override
     public Pipeline<T> removeLast() {
-        this.list.removeLast();
+        list.removeLast();
         return this;
     }
 
     @Override
     public Pipeline<T> removeFirst() {
-        this.list.removeFirst();
+        list.removeFirst();
         return this;
     }
 
     @Override
     public Pipeline<T> remove(int index) {
-        this.list.remove(index);
+        list.remove(index);
         return this;
     }
 
     @Override
     public T get(int index) {
-        return this.list.get(index);
+        return list.get(index);
     }
 
     @Override
     public T getFirst() {
-        return this.list.getFirst();
+        return list.getFirst();
     }
 
     @Override
     public T getLast() {
-        return this.list.getLast();
+        return list.getLast();
     }
 
     @Override
     public List<T> list() {
-        return Collections.unmodifiableList(this.list);
+        return Collections.unmodifiableList(list);
     }
 
     @Override
     public List<T> slice(int startIndex, int endIndex) {
-        return this.list.subList(startIndex, endIndex);
+        return list.subList(startIndex, endIndex);
     }
 }
-

@@ -1,20 +1,33 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.pie;
 
-import com.kuma.boot.common.support.pie.Channel;
-import com.kuma.boot.common.support.pie.ChannelPipeline;
-import com.kuma.boot.common.support.pie.DefaultChannelPipeline;
-import java.util.Objects;
+/**
+ * 抽象通道
+ *
+ */
+public abstract class AbstractChannel implements Channel {
 
-public abstract class AbstractChannel
-implements Channel {
     private DefaultChannelPipeline pipeline;
-    private Channel.ChannelProcessor processor = new DefaultChannelProcessorImpl(this);
+
+    private ChannelProcessor processor = new DefaultChannelProcessorImpl();
 
     protected AbstractChannel() {
-        this.pipeline = this.newChannelPipeline();
+        pipeline = newChannelPipeline();
     }
 
     protected DefaultChannelPipeline newChannelPipeline() {
@@ -23,29 +36,26 @@ implements Channel {
 
     @Override
     public ChannelPipeline pipeline() {
-        return this.pipeline;
+        return pipeline;
     }
 
-    @Override
-    public Channel process(Object inWrapper, Object outWrapper) {
-        this.processor.doProcess(inWrapper, outWrapper);
+    public Channel process( Object inWrapper, Object outWrapper ) {
+        processor.doProcess(inWrapper, outWrapper);
         return this;
     }
 
-    private class DefaultChannelProcessorImpl
-    implements Channel.ChannelProcessor {
-        final /* synthetic */ AbstractChannel this$0;
-
-        private DefaultChannelProcessorImpl(AbstractChannel abstractChannel) {
-            AbstractChannel abstractChannel2 = abstractChannel;
-            Objects.requireNonNull(abstractChannel2);
-            this.this$0 = abstractChannel2;
-        }
+    /**
+     * DefaultChannelProcessorImpl
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    private class DefaultChannelProcessorImpl implements ChannelProcessor {
 
         @Override
-        public void doProcess(Object inWrapper, Object outWrapper) {
-            this.this$0.pipeline.process(inWrapper, outWrapper);
+        public void doProcess( Object inWrapper, Object outWrapper ) {
+            pipeline.process(inWrapper, outWrapper);
         }
     }
 }
-

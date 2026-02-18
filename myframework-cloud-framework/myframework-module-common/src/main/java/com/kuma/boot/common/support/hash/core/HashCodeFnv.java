@@ -1,21 +1,42 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.hash.core;
 
 import com.kuma.boot.common.support.hash.core.AbstractHashCode;
 
-public class HashCodeFnv
-extends AbstractHashCode {
+/**
+ * HashCodeFnv
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public class HashCodeFnv extends AbstractHashCode {
+
     private static final long FNV_32_INIT = 2166136261L;
     private static final int FNV_32_PRIME = 16777619;
 
-    @Override
-    public int doHash(String text) {
+    public int doHash( String text ) {
         int hash = -2128831035;
+
         for (int i = 0; i < text.length(); ++i) {
-            hash = (hash ^ text.charAt(i)) * 16777619;
+            hash = ( hash ^ text.charAt(i) ) * 16777619;
         }
+
         hash += hash << 13;
         hash ^= hash >> 7;
         hash += hash << 3;
@@ -25,4 +46,3 @@ extends AbstractHashCode {
         return hash;
     }
 }
-

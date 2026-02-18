@@ -1,25 +1,54 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.serializer;
 
 import com.kuma.boot.common.extension.ExtensionLoader;
-import com.kuma.boot.common.support.serializer.Serializer;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The Data Serializer Factory.
+ *
+ * @author kuma
+ */
 public enum SerializerFactory {
+
+    /**
+     * 序列化
+     */
     SF;
 
-    Map<String, Serializer> serializerMap = new HashMap<String, Serializer>();
+    /**
+     * 序列化map
+     */
+    Map<String, Serializer> serializerMap = new HashMap<>();
 
-    private SerializerFactory() {
-        ExtensionLoader<Serializer> extensionLoader = ExtensionLoader.getExtensionLoader(Serializer.class);
-        this.serializerMap = extensionLoader.getExtensionMap();
+    SerializerFactory() {
+        ExtensionLoader<Serializer> extensionLoader =
+                ExtensionLoader.getExtensionLoader(Serializer.class);
+        serializerMap = extensionLoader.getExtensionMap();
     }
 
+    /**
+     * The get compress @SPI value is {#name} extension.
+     * @param name
+     * @return
+     */
     public Serializer getExtension(String name) {
-        return this.serializerMap.get(name);
+        return serializerMap.get(name);
     }
 }
-

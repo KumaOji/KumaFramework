@@ -1,16 +1,27 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.common.support.pipeline.pipeline;
 
-import com.kuma.boot.common.support.pipeline.pipeline.PipelineBuilder;
-import com.kuma.boot.common.support.pipeline.pipeline.PipelineContext;
-
+/**
+ * 管道接口
+ *
+ * @param <T> 数据类型
+ */
 public interface Pipeline<T> {
-    public PipelineContext<T> execute(T var1);
 
-    public static <T> PipelineBuilder<T> builder() {
-        return new PipelineBuilder();
+    /**
+     * 执行管道
+     *
+     * @param data 输入数据
+     * @return 执行结果上下文
+     */
+    PipelineContext<T> execute(T data);
+
+    /**
+     * 创建管道构建器
+     *
+     * @param <T> 数据类型
+     * @return 构建器
+     */
+    static <T> PipelineBuilder<T> builder() {
+        return new PipelineBuilder<>();
     }
 }
-

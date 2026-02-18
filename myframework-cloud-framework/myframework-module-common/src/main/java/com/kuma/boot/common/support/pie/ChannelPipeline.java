@@ -1,25 +1,38 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.pie;
 
-import com.kuma.boot.common.support.pie.Channel;
-import com.kuma.boot.common.support.pie.ChannelHandler;
-import com.kuma.boot.common.support.pie.ChannelHandlerContext;
-
+/**
+ * ChannelPipeline
+ *
+ */
 public interface ChannelPipeline {
-    public ChannelPipeline process(Object var1, Object var2);
 
-    public ChannelPipeline addLast(String var1, ChannelHandler var2);
+    ChannelPipeline process(Object in, Object out);
 
-    public Channel channel();
+    ChannelPipeline addLast(String name, ChannelHandler handler);
 
-    public ChannelPipeline fireExceptionCaught(Throwable var1, Object var2, Object var3);
+    Channel channel();
 
-    public ChannelPipeline fireChannelProcess(Object var1, Object var2);
+    ChannelPipeline fireExceptionCaught(Throwable cause, Object in, Object out);
 
-    public ChannelHandlerContext head();
+    ChannelPipeline fireChannelProcess(Object in, Object out);
 
-    public ChannelHandlerContext tail();
+    ChannelHandlerContext head();
+
+    ChannelHandlerContext tail();
 }
-

@@ -1,21 +1,43 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonFormat$Shape
- *  tools.jackson.core.JacksonException
- *  tools.jackson.core.JsonParser
- *  tools.jackson.core.JsonToken
- *  tools.jackson.databind.DeserializationContext
- *  tools.jackson.databind.DeserializationFeature
- *  tools.jackson.databind.cfg.DatatypeFeature
- *  tools.jackson.databind.cfg.DateTimeFeature
- *  tools.jackson.databind.ext.javatime.deser.JSR310DateTimeDeserializerBase
- *  tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.jackson;
 
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_FORMAT;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_FORMAT_EN;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_FORMAT_EN_MATCHES;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_FORMAT_MATCHES;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_TIME_FORMAT;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_TIME_FORMAT_EN;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_TIME_FORMAT_EN_MATCHES;
+import static com.kuma.boot.common.utils.date.DateUtils.DEFAULT_DATE_TIME_FORMAT_MATCHES;
+import static com.kuma.boot.common.utils.date.DateUtils.SLASH_DATE_FORMAT;
+import static com.kuma.boot.common.utils.date.DateUtils.SLASH_DATE_FORMAT_MATCHES;
+import static com.kuma.boot.common.utils.date.DateUtils.SLASH_DATE_TIME_FORMAT;
+import static com.kuma.boot.common.utils.date.DateUtils.SLASH_DATE_TIME_FORMAT_MATCHES;
+import static tools.jackson.databind.cfg.DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.JsonTokenId;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
+
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,27 +45,47 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.JsonToken;
-import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.cfg.DatatypeFeature;
-import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.ext.javatime.deser.JSR310DateTimeDeserializerBase;
 
-public class LocalDateTimeDeserializer
-extends JSR310DateTimeDeserializerBase<LocalDateTime> {
-    private static final long serialVersionUID = 1L;
-    public static final LocalDateTimeDeserializer INSTANCE = new LocalDateTimeDeserializer();
-    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-    private static final DateTimeFormatter DEFAULT_DATE_FORMAT_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter DEFAULT_DATE_FORMAT_EN_DTF = DateTimeFormatter.ofPattern("yyyy\u5e74MM\u6708dd\u65e5");
-    private static final DateTimeFormatter SLASH_DATE_FORMAT_DTF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-    private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMAT_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMAT_EN_DTF = DateTimeFormatter.ofPattern("");
-    private static final DateTimeFormatter SLASH_DATE_TIME_FORMAT_DTF = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+/**
+ * 字段类型是LocalDateTime时，可以按照以下6种格式反序列化： 1. yyyy-MM-dd 2. yyyy年MM月dd日 3. yyyy/MM/dd 4.
+ * yyyy-MM-dd HH:mm:ss 5. yyyy年MM月dd日HH时mm分ss秒 6. yyyy/MM/dd HH:mm:ss
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:21:26
+ */
+public class LocalDateTimeDeserializer extends JSR310DateTimeDeserializerBase<LocalDateTime> {
 
+    private static final long serialVersionUID = 1L;
+
+    /** INSTANCE */
+    public static final LocalDateTimeDeserializer INSTANCE = new LocalDateTimeDeserializer();
+
+    /** DEFAULT_FORMATTER */
+    private static final DateTimeFormatter DEFAULT_FORMATTER =
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+    /** 以下是支持的6种参数格式 */
+    private static final DateTimeFormatter DEFAULT_DATE_FORMAT_DTF =
+            DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+
+    private static final DateTimeFormatter DEFAULT_DATE_FORMAT_EN_DTF =
+            DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT_EN);
+
+    private static final DateTimeFormatter SLASH_DATE_FORMAT_DTF =
+            DateTimeFormatter.ofPattern(SLASH_DATE_FORMAT);
+
+    private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMAT_DTF =
+            DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT);
+
+    private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMAT_EN_DTF =
+            DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT_EN);
+
+    private static final DateTimeFormatter SLASH_DATE_TIME_FORMAT_DTF =
+            DateTimeFormatter.ofPattern(SLASH_DATE_TIME_FORMAT);
+
+    @Override
     protected JSR310DateTimeDeserializerBase<LocalDateTime> withShape(JsonFormat.Shape shape) {
         return this;
     }
@@ -57,83 +99,106 @@ extends JSR310DateTimeDeserializerBase<LocalDateTime> {
     }
 
     protected LocalDateTimeDeserializer(LocalDateTimeDeserializer base, Boolean leniency) {
-        super((JSR310DateTimeDeserializerBase)base, leniency);
+        super(base, leniency);
     }
 
+    @Override
     protected LocalDateTimeDeserializer withLeniency(Boolean leniency) {
         return new LocalDateTimeDeserializer(this, leniency);
     }
 
-    protected JSR310DateTimeDeserializerBase<LocalDateTime> withDateFormat(DateTimeFormatter formatter) {
-        return new LocalDateTimeDeserializer(formatter);
+    @Override
+    protected JSR310DateTimeDeserializerBase<LocalDateTime> withDateFormat(
+            DateTimeFormatter formatter) {
+        return new tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer(formatter);
     }
 
+    /**
+     * convert
+     * @param source source
+     * @return {@link LocalDateTime }
+     * @since 2021-09-02 19:22:08
+     */
     private LocalDateTime convert(String source) {
-        if (source.matches("^\\d{4}-\\d{1,2}-\\d{1,2}$")) {
-            return LocalDateTime.of(LocalDate.parse(source, DEFAULT_DATE_FORMAT_DTF), LocalTime.MIN);
+        if (source.matches(DEFAULT_DATE_FORMAT_MATCHES)) {
+            return LocalDateTime.of(
+                    LocalDate.parse(source, DEFAULT_DATE_FORMAT_DTF), LocalTime.MIN);
         }
-        if (source.matches("^\\d{4}\u5e74\\d{1,2}\u6708\\d{1,2}\u65e5$")) {
-            return LocalDateTime.of(LocalDate.parse(source, DEFAULT_DATE_FORMAT_EN_DTF), LocalTime.MIN);
+        if (source.matches(DEFAULT_DATE_FORMAT_EN_MATCHES)) {
+            return LocalDateTime.of(
+                    LocalDate.parse(source, DEFAULT_DATE_FORMAT_EN_DTF), LocalTime.MIN);
         }
-        if (source.matches("^\\d{4}/\\d{1,2}/\\d{1,2}$")) {
+        if (source.matches(SLASH_DATE_FORMAT_MATCHES)) {
             return LocalDateTime.of(LocalDate.parse(source, SLASH_DATE_FORMAT_DTF), LocalTime.MIN);
         }
-        if (source.matches("^\\d{4}-\\d{1,2}-\\d{1,2} {1}\\d{1,2}:\\d{1,2}:\\d{1,2}$")) {
+        if (source.matches(DEFAULT_DATE_TIME_FORMAT_MATCHES)) {
             return LocalDateTime.parse(source, DEFAULT_DATE_TIME_FORMAT_DTF);
         }
-        if (source.matches("^\\d{4}\u5e74\\d{1,2}\u6708\\d{1,2}\u65e5\\d{1,2}\u65f6\\d{1,2}\u5206\\d{1,2}\u79d2$")) {
+        if (source.matches(DEFAULT_DATE_TIME_FORMAT_EN_MATCHES)) {
             return LocalDateTime.parse(source, DEFAULT_DATE_TIME_FORMAT_EN_DTF);
         }
-        if (source.matches("^\\d{4}/\\d{1,2}/\\d{1,2} {1}\\d{1,2}:\\d{1,2}:\\d{1,2}$")) {
+        if (source.matches(SLASH_DATE_TIME_FORMAT_MATCHES)) {
             return LocalDateTime.parse(source, SLASH_DATE_TIME_FORMAT_DTF);
         }
         return null;
     }
 
-    public LocalDateTime deserialize(JsonParser parser, DeserializationContext context) throws JacksonException {
-        if (parser.hasTokenId(6)) {
+    @Override
+    public LocalDateTime deserialize(JsonParser parser, DeserializationContext context)
+            throws JacksonException {
+        // 字符串
+        if (parser.hasTokenId(JsonTokenId.ID_STRING)) {
             String string = parser.getText().trim();
             if (string.length() == 0) {
                 return null;
             }
+
             try {
-                if (this._formatter == null) {
-                    return this.convert(string);
+                if (_formatter == null) {
+                    return convert(string);
                 }
-                if (this._formatter == DEFAULT_FORMATTER) {
+                if (_formatter == DEFAULT_FORMATTER) {
+                    // JavaScript by default includes time and zone in JSON serialized
+                    // Dates
+                    // (UTC/ISO instant format).
                     if (string.length() > 10 && string.charAt(10) == 'T') {
                         if (string.endsWith("Z")) {
                             return LocalDateTime.ofInstant(Instant.parse(string), ZoneOffset.UTC);
+                        } else {
+                            return LocalDateTime.parse(string, DEFAULT_FORMATTER);
                         }
-                        return LocalDateTime.parse(string, DEFAULT_FORMATTER);
                     }
-                    return this.convert(string);
+                    return convert(string);
                 }
+
                 return LocalDateTime.parse(string, this._formatter);
-            }
-            catch (DateTimeException e) {
-                return (LocalDateTime)this._handleDateTimeException(context, e, string);
+            } catch (DateTimeException e) {
+                return _handleDateTimeException(context, e, string);
             }
         }
+        // 数组
         if (parser.isExpectedStartArrayToken()) {
             JsonToken t = parser.nextToken();
             if (t == JsonToken.END_ARRAY) {
                 return null;
             }
-            if ((t == JsonToken.VALUE_STRING || t == JsonToken.VALUE_EMBEDDED_OBJECT) && context.isEnabled(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)) {
-                LocalDateTime parsed = this.deserialize(parser, context);
+            if ((t == JsonToken.VALUE_STRING || t == JsonToken.VALUE_EMBEDDED_OBJECT)
+                    && context.isEnabled(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)) {
+                final LocalDateTime parsed = deserialize(parser, context);
                 if (parser.nextToken() != JsonToken.END_ARRAY) {
-                    this.handleMissingEndArrayForSingle(parser, context);
+                    handleMissingEndArrayForSingle(parser, context);
                 }
                 return parsed;
             }
             if (t == JsonToken.VALUE_NUMBER_INT) {
                 LocalDateTime result;
+
                 int year = parser.getIntValue();
                 int month = parser.nextIntValue(-1);
                 int day = parser.nextIntValue(-1);
                 int hour = parser.nextIntValue(-1);
                 int minute = parser.nextIntValue(-1);
+
                 t = parser.nextToken();
                 if (t == JsonToken.END_ARRAY) {
                     result = LocalDateTime.of(year, month, day, hour, minute);
@@ -144,26 +209,42 @@ extends JSR310DateTimeDeserializerBase<LocalDateTime> {
                         result = LocalDateTime.of(year, month, day, hour, minute, second);
                     } else {
                         int partialSecond = parser.getIntValue();
-                        if (partialSecond < 1000 && !context.isEnabled((DatatypeFeature) DateTimeFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)) {
-                            partialSecond *= 1000000;
+                        if (partialSecond < 1_000
+                                && !context.isEnabled(
+                                READ_DATE_TIMESTAMPS_AS_NANOSECONDS)) {
+                            // value is milliseconds, convert it to nanoseconds
+                            partialSecond *= 1_000_000;
                         }
                         if (parser.nextToken() != JsonToken.END_ARRAY) {
-                            throw context.wrongTokenException(parser, this.handledType(), JsonToken.END_ARRAY, "Expected array to end");
+                            throw context.wrongTokenException(
+                                    parser,
+                                    handledType(),
+                                    JsonToken.END_ARRAY,
+                                    "Expected array to end");
                         }
-                        result = LocalDateTime.of(year, month, day, hour, minute, second, partialSecond);
+                        result =
+                                LocalDateTime.of(
+                                        year, month, day, hour, minute, second, partialSecond);
                     }
                 }
                 return result;
             }
-            context.reportInputMismatch(this.handledType(), "Unexpected token (%s) within Array, expected VALUE_NUMBER_INT", new Object[]{t});
+            context.reportInputMismatch(
+                    handledType(),
+                    "Unexpected token (%s) within Array, expected VALUE_NUMBER_INT",
+                    t);
         }
+        // 数字
         if (parser.hasToken(JsonToken.VALUE_NUMBER_INT)) {
-            return Instant.ofEpochMilli(parser.getLongValue()).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
+            return Instant.ofEpochMilli(parser.getLongValue())
+                    .atZone(ZoneOffset.ofHours(8))
+                    .toLocalDateTime();
         }
+        // 没看懂这个是啥
         if (parser.hasToken(JsonToken.VALUE_EMBEDDED_OBJECT)) {
-            return (LocalDateTime)parser.getEmbeddedObject();
+            return (LocalDateTime) parser.getEmbeddedObject();
         }
-        return (LocalDateTime)this._handleUnexpectedToken(context, parser, "\u5f53\u524d\u53c2\u6570\u9700\u8981\u6570\u7ec4\u3001\u5b57\u7b26\u4e32\u3001\u65f6\u95f4\u6233\u3002", new Object[0]);
+
+        return _handleUnexpectedToken(context, parser, "当前参数需要数组、字符串、时间戳。");
     }
 }
-

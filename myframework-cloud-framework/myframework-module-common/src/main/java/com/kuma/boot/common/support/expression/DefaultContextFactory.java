@@ -1,18 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.google.common.collect.Maps
- *  org.springframework.core.DefaultParameterNameDiscoverer
- *  org.springframework.core.ParameterNameDiscoverer
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.expression;
 
+import static com.kuma.boot.common.utils.lang.StringUtils.isEmpty;
+
 import com.google.common.collect.Maps;
-import com.kuma.boot.common.support.expression.Context;
-import com.kuma.boot.common.support.expression.ContextFactory;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,23 +27,31 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
+/**
+ * {@link Context}默认解析工厂
+ * <p>
+ * 使用spring DefaultParameterNameDiscoverer进行解析
+ *
+ * @author livk
+ * @see DefaultParameterNameDiscoverer
+ */
 class DefaultContextFactory implements ContextFactory {
-    private final Map<Method, String[]> parameterNamesCache = new ConcurrentHashMap<Method, String[]>(64);
-    private final ParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
 
-    DefaultContextFactory() {
-    }
+    private final Map<Method, String[]> parameterNamesCache = new ConcurrentHashMap<>(64);
+
+    private final ParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
 
     @Override
     public Context create(Method method, Object[] args) {
-        Assert.notNull((Object)method, (String)"method not be null");
-        String[] parameterNames = this.parameterNamesCache.computeIfAbsent(method, this::parseParameterNames);
-        if (StringUtils.isEmpty(parameterNames)) {
+        Assert.notNull(method, "method not be null");
+        String[] parameterNames =
+                this.parameterNamesCache.computeIfAbsent(method, this::parseParameterNames);
+        if (isEmpty(parameterNames)) {
             return Context.create();
         }
-        HashMap map = Maps.newHashMapWithExpectedSize((int)parameterNames.length);
+        HashMap<String, Object> map = Maps.newHashMapWithExpectedSize(parameterNames.length);
         if (args != null && parameterNames.length == args.length) {
-            for (int i = 0; i < parameterNames.length; ++i) {
+            for (int i = 0; i < parameterNames.length; i++) {
                 map.put(parameterNames[i], args[i]);
             }
         }
@@ -45,8 +59,7 @@ class DefaultContextFactory implements ContextFactory {
     }
 
     private String[] parseParameterNames(Method method) {
-        String[] parameterNames = this.discoverer.getParameterNames(method);
-        return parameterNames == null ? new String[]{} : parameterNames;
+        String[] parameterNames = discoverer.getParameterNames(method);
+        return parameterNames == null ? new String[0] : parameterNames;
     }
 }
-
