@@ -2697,7 +2697,7 @@ public final class StringUtils extends StrUtil {
      * toCapitalizeCamelCase("hello_world") == "HelloWorld" toUnderScoreCase("helloWorld")
      * = "hello_world"
      */
-    static String toUnderScoreCase(String s) {
+    public static String toUnderScoreCase(String s) {
         if (s == null) {
             return null;
         }
