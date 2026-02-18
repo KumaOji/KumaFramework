@@ -16,7 +16,9 @@
 
 package com.kuma.boot.datasource.utils;
 
+import com.kuma.boot.common.model.Callable;
 import com.kuma.boot.common.utils.sql.DbConn;
+import com.kuma.boot.common.utils.sql.DbUtils;
 import com.kuma.boot.datasource.config.DataSourceConstants;
 
 import javax.sql.DataSource;
@@ -181,5 +183,46 @@ public final class DataSourceUtils {
      */
     public static boolean isPostgresqlUrl(String url) {
         return url != null && url.startsWith(DataSourceConstants.POSTGRESQL_URL_PREFIX);
+    }
+
+    // ==================== DbUtils 事务/连接 委托 ====================
+
+    /**
+     * 使用 DataSource 获取 DbConn 并执行，自动关闭连接
+     */
+    public static <T> T get(DataSource dataSource, Callable.Func1<T, DbConn> action) {
+        return DbUtils.get(dataSource, action);
+    }
+
+    /**
+     * 使用 DataSource 获取 DbConn 并执行，自动关闭连接（无返回值）
+     */
+    public static void call(DataSource dataSource, Callable.Action1<DbConn> action) {
+        DbUtils.call(dataSource, action);
+    }
+
+    /**
+     * 若有线程内同一数据源事务则复用，否则新建连接执行
+     */
+    public static <T> T transactionGet(DataSource dataSource, Callable.Func1<T, DbConn> action) {
+        return DbUtils.transactionGet(dataSource, action);
+    }
+
+    /**
+     * 若有线程内同一数据源事务则复用，否则新建连接执行（无返回值）
+     */
+    public static void transactionCall(DataSource dataSource, Callable.Action1<DbConn> action) {
+        DbUtils.transactionCall(dataSource, action);
+    }
+
+    /**
+     * 在指定事务隔离级别下执行
+     *
+     * @param dataSource 数据源
+     * @param level      事务隔离级别，如 Connection.TRANSACTION_READ_COMMITTED
+     * @param action     执行逻辑
+     */
+    public static void transaction(DataSource dataSource, int level, Callable.Action0 action) {
+        DbUtils.transaction(dataSource, level, action);
     }
 }

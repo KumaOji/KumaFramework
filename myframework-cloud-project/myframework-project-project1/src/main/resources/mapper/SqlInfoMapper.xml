@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kuma.cloud.project1.mapper.SqlInfoMapper">
+
+    <!-- MySQL: 获取当前数据库 -->
+    <select id="getMysqlCurrentDatabase" resultType="java.lang.String">
+        SELECT DATABASE()
+    </select>
+
+    <!-- PostgreSQL: 获取当前 schema -->
+    <select id="getPostgresqlCurrentSchema" resultType="java.lang.String">
+        SELECT current_schema()
+    </select>
+</mapper>

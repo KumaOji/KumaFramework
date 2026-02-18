@@ -19,6 +19,7 @@ package com.kuma.boot.mybatis.utils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.kuma.boot.common.model.request.BasePageQuery;
+import com.kuma.boot.common.utils.sql.SqlUtils;
 
 import java.util.Collection;
 
@@ -74,6 +75,96 @@ public final class MybatisUtils {
             wrapper.between(column, start, end);
         }
         return wrapper;
+    }
+
+    /**
+     * 构建 ge 条件，null 不添加
+     */
+    public static <T, R extends Comparable<R>> LambdaQueryWrapper<T> geIfNotNull(
+            LambdaQueryWrapper<T> wrapper, SFunction<T, R> column, R value) {
+        if (value != null) {
+            wrapper.ge(column, value);
+        }
+        return wrapper;
+    }
+
+    /**
+     * 构建 le 条件，null 不添加
+     */
+    public static <T, R extends Comparable<R>> LambdaQueryWrapper<T> leIfNotNull(
+            LambdaQueryWrapper<T> wrapper, SFunction<T, R> column, R value) {
+        if (value != null) {
+            wrapper.le(column, value);
+        }
+        return wrapper;
+    }
+
+    /**
+     * 构建 gt 条件，null 不添加
+     */
+    public static <T, R extends Comparable<R>> LambdaQueryWrapper<T> gtIfNotNull(
+            LambdaQueryWrapper<T> wrapper, SFunction<T, R> column, R value) {
+        if (value != null) {
+            wrapper.gt(column, value);
+        }
+        return wrapper;
+    }
+
+    /**
+     * 构建 lt 条件，null 不添加
+     */
+    public static <T, R extends Comparable<R>> LambdaQueryWrapper<T> ltIfNotNull(
+            LambdaQueryWrapper<T> wrapper, SFunction<T, R> column, R value) {
+        if (value != null) {
+            wrapper.lt(column, value);
+        }
+        return wrapper;
+    }
+
+    /**
+     * 构建 ne 条件，null 不添加
+     */
+    public static <T, R> LambdaQueryWrapper<T> neIfNotNull(
+            LambdaQueryWrapper<T> wrapper, SFunction<T, R> column, R value) {
+        if (value != null) {
+            wrapper.ne(column, value);
+        }
+        return wrapper;
+    }
+
+    /**
+     * 构建 notIn 条件，空集合不添加
+     */
+    public static <T, R> LambdaQueryWrapper<T> notInIfNotEmpty(
+            LambdaQueryWrapper<T> wrapper, SFunction<T, R> column, Collection<R> values) {
+        if (values != null && !values.isEmpty()) {
+            wrapper.notIn(column, values);
+        }
+        return wrapper;
+    }
+
+    /**
+     * 校验 ORDER BY 字段，防止 SQL 注入（用于动态 ORDER BY）
+     *
+     * @param value 排序字段，如 "id,desc"
+     * @return 原值，非法则抛异常
+     */
+    public static String escapeOrderBySql(String value) {
+        return SqlUtils.escapeOrderBySql(value);
+    }
+
+    /**
+     * 验证 ORDER BY 语法是否符合规范
+     */
+    public static boolean isValidOrderBySql(String value) {
+        return SqlUtils.isValidOrderBySql(value);
+    }
+
+    /**
+     * SQL 关键字检查，存在危险关键字则抛异常
+     */
+    public static void filterKeyword(String value) {
+        SqlUtils.filterKeyword(value);
     }
 
     /**
