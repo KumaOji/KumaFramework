@@ -1,0 +1,96 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.boot.core.autoconfigure.properties;
+
+import com.kuma.boot.core.enums.KmcEnvEnum;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+
+/**
+ * CoreProperties
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:43:31
+ */
+@RefreshScope
+@ConfigurationProperties(prefix = CoreProperties.PREFIX)
+public class CoreProperties {
+
+    public static final String PREFIX = "kuma.boot.core";
+
+    /**
+     * 核心环境变量
+     */
+    private KmcEnvEnum env;
+    /**
+     * 是否开启核心属性配置
+     */
+    private boolean enabled = true;
+    /**
+     * 是否开启自定义收集器
+     */
+    private boolean collectHookEnabled = true;
+    /**
+     * 是否开启配置刷新上下文监听
+     */
+    private boolean contextRestartEnabled = false;
+    /**
+     * 刷新上下文监听等待时间
+     */
+    private int contextRestartTimespan = 10;
+
+    public KmcEnvEnum getEnv() {
+        return env;
+    }
+
+    public void setEnv(KmcEnvEnum env) {
+        this.env = env;
+    }
+
+    public boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean getCollectHookEnabled() {
+        return collectHookEnabled;
+    }
+
+    public void setCollectHookEnabled(boolean collectHookEnabled) {
+        this.collectHookEnabled = collectHookEnabled;
+    }
+
+    public boolean getContextRestartEnabled() {
+        return contextRestartEnabled;
+    }
+
+    public void setContextRestartEnabled(boolean contextRestartEnabled) {
+        this.contextRestartEnabled = contextRestartEnabled;
+    }
+
+    public int getContextRestartTimespan() {
+        return contextRestartTimespan;
+    }
+
+    public void setContextRestartTimespan(int contextRestartTimespan) {
+        this.contextRestartTimespan = contextRestartTimespan;
+    }
+}

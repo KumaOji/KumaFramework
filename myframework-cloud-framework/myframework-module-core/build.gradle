@@ -2,3 +2,16 @@ plugins {
     id 'java-library'
 }
 
+description = 'Myframework 核心模块'
+
+dependencies {
+    api project(':myframework-cloud-framework:myframework-module-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.aop
+    api projectLibs.aspectjweaver
+    api projectLibs.spring.cloud.context
+    api projectLibs.slf4j.api
+    api projectLibs.taobao.text.ui
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
