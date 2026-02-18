@@ -71,7 +71,7 @@ public class AsyncProperties {
     private Integer awaitTerminationSeconds = 5;
 
     /** 线程池前缀 */
-    private String threadNamePrefix = "ttc-async-executor";
+    private String threadNamePrefix = "kmc-async-executor";
 
     private boolean checkHealth = true;
 

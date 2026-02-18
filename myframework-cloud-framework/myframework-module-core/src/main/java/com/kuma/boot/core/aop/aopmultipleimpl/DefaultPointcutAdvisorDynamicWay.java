@@ -10,8 +10,10 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.adapter.AdvisorAdapter;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 
 import java.lang.reflect.Method;
 
@@ -25,9 +27,11 @@ import java.lang.reflect.Method;
 public class DefaultPointcutAdvisorDynamicWay {
 
     @Configuration
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public static class WebmvcConfig {
 
         @Bean
+        @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
         public Pointcut customPointCut() {
             GreetingDynamicPointcut greetingDynamicPointcut = new GreetingDynamicPointcut();
             // 动态配置只需要把这里的execution 字符串替换成自己从配置文件中获取的配置即可。
@@ -37,12 +41,14 @@ public class DefaultPointcutAdvisorDynamicWay {
         }
 
         @Bean
+        @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
         GreetingAdvice getAdvice() {
             return new GreetingAdvice();
         }
 
         // ②
         @Bean
+        @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
         DefaultPointcutAdvisor defaultPointcutAdvisor() {
             DefaultPointcutAdvisor defaultPointcutAdvisor = new DefaultPointcutAdvisor();
             defaultPointcutAdvisor.setPointcut(customPointCut());

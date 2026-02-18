@@ -2,6 +2,8 @@ package com.kuma.boot.core.runtime.bootstrap;
 
 import org.springframework.boot.bootstrap.BootstrapRegistry;
 import org.springframework.boot.bootstrap.BootstrapRegistryInitializer;
+import org.springframework.boot.context.config.ConfigDataLoader;
+import org.springframework.boot.context.config.ConfigDataLocationResolver;
 
 /**
  * KmcBootstrapRegistryInitializer
@@ -10,7 +12,7 @@ import org.springframework.boot.bootstrap.BootstrapRegistryInitializer;
  * @version 2026.01
  * @since 2025-12-19 09:30:45
  */
-public class KmcBo KmcBootstrapRegistryInitializer ents BootstrapRegistryInitializer {
+public class KmcBootstrapRegistryInitializer implements BootstrapRegistryInitializer {
 
     @Override
     public void initialize( BootstrapRegistry registry ) {

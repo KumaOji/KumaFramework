@@ -48,7 +48,7 @@ import static com.kuma.boot.common.constant.CommonConstants.ENV;
  */
 public class StartupSpringApplication extends SpringApplication {
 
-    public static final String DEFAULT_BANNER_LOCATION = "ttc-banner.txt";
+    public static final String DEFAULT_BANNER_LOCATION = "kmc-banner.txt";
 
     private final List<com.kuma.boot.core.startup.BaseStat> initializerStartupStatList = new ArrayList<>();
 
@@ -114,7 +114,7 @@ public class StartupSpringApplication extends SpringApplication {
         super.configureEnvironment(environment, args);
 //		if(isKmcBanner){
 //			environment.getPropertySources().addFirst(
-//				new MapPropertySource("ttcPropertySource",
+//				new MapPropertySource("kmcPropertySource",
 //					Collections.singletonMap("spring.banner.location", "xxxxxxx.txt"))
 //			);
 //		}

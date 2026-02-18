@@ -80,7 +80,7 @@ public class ShutdownHooks {
             } catch (Exception e) {
                 LogUtils.error(" 进程关闭事件回调处理出错", e);
             }
-        },"ttc-shutdown"));
+        },"kmc-shutdown"));
     }
 
 

@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-/** <b>ttc扩展属性配置文件加载器</b><br>
+/** <b>kmc扩展属性配置文件加载器</b><br>
  * <ul>
  * <li>默认扩展属性配置文件：{@linkplain #DEFAULT_EXTENDED_PROPERTIES_FILE_PATH}</li>
  * <li>可通过 JVM 启动参数 {@linkplain #EXTENDED_PROPERTIES_FILE_KEY} 指定扩展属性配置文件路径</li>
@@ -53,13 +53,13 @@ public class ExtendedPropertiesFilePostProcessor implements EnvironmentPostProce
 
         if(!(new File(filePath).isFile())) {
             if(!hasPrintLog) {
-                logger.warn(String.format("ttc ignore extended properties file (File Not Exist) -> '%s'", filePath));
+                logger.warn(String.format("kmc ignore extended properties file (File Not Exist) -> '%s'", filePath));
             }
             return;
         }
 
         if(!hasPrintLog) {
-            logger.info("ttc load extended properties file -> " + filePath);
+            logger.info("kmc load extended properties file -> " + filePath);
         }
 
         String resolvedLocation = "file:" + environment.resolveRequiredPlaceholders(filePath);

@@ -247,7 +247,7 @@ public class KmcSpringApplicationRunListener implements SpringApplicationRunList
     private void defaultSetting() {
         Locale.setDefault(Locale.SIMPLIFIED_CHINESE);
 
-        PropertyUtils.setProperty("ttc-cloud", Boolean.TRUE.toString(), "");
+        PropertyUtils.setProperty("kmc-cloud", Boolean.TRUE.toString(), "");
         PropertyUtils.setProperty("spring.aop.proxy-target-class", Boolean.TRUE.toString(), "");
         PropertyUtils.setProperty("server.server-header", Boolean.TRUE.toString(), "");
         PropertyUtils.setProperty("logging.register-shutdown-hook", Boolean.TRUE.toString(), "");

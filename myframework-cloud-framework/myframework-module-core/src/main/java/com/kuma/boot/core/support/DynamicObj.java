@@ -19,7 +19,6 @@ package com.kuma.boot.core.support;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import com.kuma.boot.common.exception.BaseException;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 动态对象动态访问 动态方式:a.@index.字段.c方式访问对象

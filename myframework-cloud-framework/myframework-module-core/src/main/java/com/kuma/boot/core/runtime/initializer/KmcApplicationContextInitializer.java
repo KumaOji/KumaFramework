@@ -84,10 +84,10 @@ public class KmcApplicationContextInitializer
 
                 setProperty(CommonConstants.SPRING_APP_NAME_KEY, applicationName, "[kuma boot 环境变量]");
 
-                for (KmcEnvEnum ttcEnvEnum : KmcEnvEnum.values()) {
-                    if (ttcEnvEnum.toString().equalsIgnoreCase(env)) {
+                for (KmcEnvEnum kmcEnvEnum : KmcEnvEnum.values()) {
+                    if (kmcEnvEnum.toString().equalsIgnoreCase(env)) {
                         // 设置apollo env环境变量
-                        setProperty(ENV, ttcEnvEnum.getName(), "[kuma boot 环境变量]");
+                        setProperty(ENV, kmcEnvEnum.getName(), "[kuma boot 环境变量]");
                     }
                 }
             }

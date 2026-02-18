@@ -1,0 +1,8 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+com.kuma.boot.core.runtime.aot.KmcRuntimeHints
+
+org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor=\
+com.kuma.boot.core.runtime.aot.KmcBeanFactoryInitializationAotProcessor
+
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
+com.kuma.boot.core.runtime.aot.KmcBeanRegistrationAotProcessor

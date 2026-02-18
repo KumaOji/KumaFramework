@@ -8,9 +8,11 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 
 /**
  * DefaultPointcutAdvisorWay
@@ -23,6 +25,7 @@ public class DefaultPointcutAdvisorWay {
 
     @Configuration
     @ConditionalOnProperty(name = "aop.exception.pointcut", matchIfMissing = true)
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public static class ServiceAopConfig {
 
         // 带任何参数的service包下的接口
@@ -35,6 +38,7 @@ public class DefaultPointcutAdvisorWay {
          * 异常的切面
          */
         @Bean
+        @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
         public Advisor defaultPointcutAdvisor2() {
             //AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
             //pointcut.setExpression(traceExecution);

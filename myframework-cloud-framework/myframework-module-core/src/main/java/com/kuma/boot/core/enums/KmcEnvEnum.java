@@ -16,7 +16,6 @@
 
 package com.kuma.boot.core.enums;
 
-import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 

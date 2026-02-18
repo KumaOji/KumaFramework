@@ -124,7 +124,7 @@ public class KmcCommandLineRunner implements CommandLineRunner, ApplicationConte
                 }
             });
 
-            thread.setName("ttc-context-refresh-thread");
+            thread.setName("kmc-context-refresh-thread");
             thread.setDaemon(false);
             thread.start();
         }

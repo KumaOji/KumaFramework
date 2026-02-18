@@ -23,26 +23,26 @@ import org.springframework.core.env.MapPropertySource;
 public class CoreUtils {
 
     public static MapPropertySource getVersionSource( Class<?> sourceClass, Environment environment ) {
-        return new MapPropertySource("ttc_boot_info", getVersionsMap(sourceClass, environment));
+        return new MapPropertySource("kmc_boot_info", getVersionsMap(sourceClass, environment));
     }
 
     public static MapPropertySource getUrlSource() {
-        return new MapPropertySource("ttc_website_info", getUrlMap());
+        return new MapPropertySource("kmc_website_info", getUrlMap());
     }
 
     public static Map<String, Object> getUrlMap() {
         Map<String, Object> versions = new HashMap<>();
-        versions.put("ttc.website.url", "https://kumacloud.top");
-        versions.put("ttc.website.initializr.url", "https://start.kumacloud.top");
-        versions.put("ttc.website.blog.url", "https://blog.kumacloud.top");
-        versions.put("ttc.website.m.url", "https://m.kumacloud.top");
-        versions.put("ttc.website.datav.url", "https://datav.kumacloud.top");
-        versions.put("ttc.website.manager.url", "https://manager.kumacloud.top");
-        versions.put("ttc.website.merchant.url", "https://merchant.kumacloud.top");
-        versions.put("ttc.website.open.url", "https://open.kumacloud.top");
-        versions.put("ttc.website.backend.url", "https://backend.kumacloud.top");
-        versions.put("ttc.website.gitee.url", "https://gitee.com/dtbox/kuma-cloud-project");
-        versions.put("ttc.website.github.url", "https://github.com/kuma/kuma-cloud-project");
+        versions.put("kmc.website.url", "https://kumacloud.top");
+        versions.put("kmc.website.initializr.url", "https://start.kumacloud.top");
+        versions.put("kmc.website.blog.url", "https://blog.kumacloud.top");
+        versions.put("kmc.website.m.url", "https://m.kumacloud.top");
+        versions.put("kmc.website.datav.url", "https://datav.kumacloud.top");
+        versions.put("kmc.website.manager.url", "https://manager.kumacloud.top");
+        versions.put("kmc.website.merchant.url", "https://merchant.kumacloud.top");
+        versions.put("kmc.website.open.url", "https://open.kumacloud.top");
+        versions.put("kmc.website.backend.url", "https://backend.kumacloud.top");
+        versions.put("kmc.website.gitee.url", "https://gitee.com/dtbox/kuma-cloud-project");
+        versions.put("kmc.website.github.url", "https://github.com/kuma/kuma-cloud-project");
         return versions;
     }
 
@@ -59,7 +59,7 @@ public class CoreUtils {
         versions.put("application.formatted-version", getVersionString(appVersion, true));
         versions.put("spring-boot.formatted-version", getVersionString(bootVersion, true));
 
-        versions.put("ttc-boot.version",
+        versions.put("kmc-boot.version",
                 getVersionString(KmcVersion.getVersion(), false));
         versions.put("spring.version", getVersionString(SpringVersion.getVersion(), false));
         versions.put("spring-cloud.version",
