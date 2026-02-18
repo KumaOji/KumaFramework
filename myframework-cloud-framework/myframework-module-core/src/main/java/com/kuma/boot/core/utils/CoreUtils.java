@@ -32,17 +32,17 @@ public class CoreUtils {
 
     public static Map<String, Object> getUrlMap() {
         Map<String, Object> versions = new HashMap<>();
-        versions.put("kmc.website.url", "https://kumacloud.top");
-        versions.put("kmc.website.initializr.url", "https://start.kumacloud.top");
-        versions.put("kmc.website.blog.url", "https://blog.kumacloud.top");
-        versions.put("kmc.website.m.url", "https://m.kumacloud.top");
-        versions.put("kmc.website.datav.url", "https://datav.kumacloud.top");
-        versions.put("kmc.website.manager.url", "https://manager.kumacloud.top");
-        versions.put("kmc.website.merchant.url", "https://merchant.kumacloud.top");
-        versions.put("kmc.website.open.url", "https://open.kumacloud.top");
-        versions.put("kmc.website.backend.url", "https://backend.kumacloud.top");
-        versions.put("kmc.website.gitee.url", "https://gitee.com/dtbox/kuma-cloud-project");
-        versions.put("kmc.website.github.url", "https://github.com/kuma/kuma-cloud-project");
+        versions.put("kmc.website.url", "NULL");
+        versions.put("kmc.website.initializr.url", "NULL");
+        versions.put("kmc.website.blog.url", "NULL");
+        versions.put("kmc.website.m.url", "NULL");
+        versions.put("kmc.website.datav.url", "NULL");
+        versions.put("kmc.website.manager.url", "NULL");
+        versions.put("kmc.website.merchant.url", "NULL");
+        versions.put("kmc.website.open.url", "NULL");
+        versions.put("kmc.website.backend.url", "NULL");
+        versions.put("kmc.website.gitee.url", "NULL");
+        versions.put("kmc.website.github.url", "NULL");
         return versions;
     }
 
