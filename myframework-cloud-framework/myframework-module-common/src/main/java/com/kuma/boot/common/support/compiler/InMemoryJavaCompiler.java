@@ -1,6 +1,22 @@
+/*
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.common.support.compiler;
 
-import java.io.ByteArrayOutputStream;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -8,76 +24,133 @@ import java.util.Collections;
 import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaCompiler;
-import javax.tools.JavaFileManager;
+import javax.tools.JavaCompiler.CompilationTask;
 import javax.tools.JavaFileObject;
+import javax.tools.JavaFileObject.Kind;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+import org.springframework.util.FastByteArrayOutputStream;
 
+/**
+ * 内存的代码编译器，参考自 oracle jdk
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
 public class InMemoryJavaCompiler {
+
+    /**
+     * JavaCompiler
+     */
     private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
 
-    public static byte[] compile(String className, CharSequence sourceCode) {
+    /**
+     * Compiles the class with the given name and source code.
+     *
+     * @param className The name of the class
+     * @param sourceCode The source code for the class with name {@code className}
+     * @return The resulting byte code from the compilation
+     * @throws IllegalArgumentException if the compilation did not succeed
+     */
+    public static byte[] compile( String className, CharSequence sourceCode ) {
         MemoryJavaFileObject file = new MemoryJavaFileObject(className, sourceCode);
-        JavaCompiler.CompilationTask task = InMemoryJavaCompiler.getCompilationTask(file);
-        if (!task.call().booleanValue()) {
-            throw new IllegalArgumentException("Could not compile " + className + " with source code :\t" + String.valueOf(sourceCode));
+        CompilationTask task = getCompilationTask(file);
+
+        if (!task.call()) {
+            throw new IllegalArgumentException(
+                    "Could not compile " + className + " with source code :\t" + sourceCode);
         }
+
         return file.getByteCode();
     }
 
-    private static JavaCompiler.CompilationTask getCompilationTask(MemoryJavaFileObject file) {
-        return COMPILER.getTask(null, new FileManagerWrapper(file), null, null, null, Collections.singletonList(file));
+    private static CompilationTask getCompilationTask( MemoryJavaFileObject file ) {
+        return COMPILER.getTask(
+                null,
+                new FileManagerWrapper(file),
+                null,
+                null,
+                null,
+                Collections.singletonList(file));
     }
 
-    private static class MemoryJavaFileObject
-    extends SimpleJavaFileObject {
-        private final String className;
-        private final CharSequence sourceCode;
-        private final ByteArrayOutputStream byteCode;
+    /**
+     * MemoryJavaFileObject
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    private static class MemoryJavaFileObject extends SimpleJavaFileObject {
 
-        public MemoryJavaFileObject(String className, CharSequence sourceCode) {
-            super(URI.create("string:///" + className.replace(".", "/") + JavaFileObject.Kind.SOURCE.extension), JavaFileObject.Kind.SOURCE);
+        private final String className;
+
+        private final CharSequence sourceCode;
+
+        private final FastByteArrayOutputStream byteCode;
+
+        public MemoryJavaFileObject( String className, CharSequence sourceCode ) {
+            super(
+                    URI.create(
+                            "string:///"
+                                    + className.replace(
+                                    StrPoolConstants.DOT, StrPoolConstants.SLASH)
+                                    + Kind.SOURCE.extension),
+                    Kind.SOURCE);
             this.className = className;
             this.sourceCode = sourceCode;
-            this.byteCode = new ByteArrayOutputStream();
+            this.byteCode = new FastByteArrayOutputStream();
         }
 
         @Override
-        public CharSequence getCharContent(boolean ignoreEncodingErrors) {
-            return this.sourceCode;
+        public CharSequence getCharContent( boolean ignoreEncodingErrors ) {
+            return sourceCode;
         }
 
         @Override
         public OutputStream openOutputStream() throws IOException {
-            return this.byteCode;
+            return byteCode;
         }
 
         public byte[] getByteCode() {
-            return this.byteCode.toByteArray();
+            return byteCode.toByteArray();
         }
 
         public String getClassName() {
-            return this.className;
+            return className;
         }
     }
 
-    private static class FileManagerWrapper
-    extends ForwardingJavaFileManager<StandardJavaFileManager> {
+    /**
+     * FileManagerWrapper
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-17 10:30:45
+     */
+    private static class FileManagerWrapper extends ForwardingJavaFileManager<StandardJavaFileManager> {
+
         private final MemoryJavaFileObject file;
 
-        public FileManagerWrapper(MemoryJavaFileObject file) {
+        public FileManagerWrapper( MemoryJavaFileObject file ) {
             super(COMPILER.getStandardFileManager(null, null, null));
             this.file = file;
         }
 
         @Override
-        public JavaFileObject getJavaFileForOutput(JavaFileManager.Location location, String className, JavaFileObject.Kind kind, FileObject sibling) throws IOException {
-            if (!this.file.getClassName().equals(className)) {
-                throw new IOException("Expected class with name " + this.file.getClassName() + ", but got " + className);
+        public JavaFileObject getJavaFileForOutput(
+                Location location, String className, Kind kind, FileObject sibling )
+                throws IOException {
+            if (!file.getClassName().equals(className)) {
+                throw new IOException(
+                        "Expected class with name "
+                                + file.getClassName()
+                                + ", but got "
+                                + className);
             }
-            return this.file;
+            return file;
         }
     }
 }
-

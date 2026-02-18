@@ -1,126 +1,433 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.SDFrame;
 import com.kuma.boot.common.support.dataframe.iframe.function.SetFunction;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI2;
 import com.kuma.boot.common.support.dataframe.iframe.window.Window;
 import java.math.BigDecimal;
 import java.util.function.Function;
 
+/**
+ * @author caizhihao
+ * @param <T>
+ */
 public interface OverSDFrame<T> {
-    public SDFrame<FI2<T, Integer>> overRowNumber(Window<T> var1);
 
-    public SDFrame<FI2<T, Integer>> overRowNumber();
+    /**
+     * rowNumber window function
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, Integer>> overRowNumber(Window<T> overParam);
 
-    public SDFrame<T> overRowNumberS(SetFunction<T, Integer> var1, Window<T> var2);
+    /**
+     * rowNumber window function
+     */
+    SDFrame<FI2<T, Integer>> overRowNumber();
 
-    public SDFrame<T> overRowNumberS(SetFunction<T, Integer> var1);
+    /**
+     * rowNumber window function set the function result to the setFunction
+     * @param setFunction function result accept
+     * @param overParam window param
+     */
+    SDFrame<T> overRowNumberS(SetFunction<T, Integer> setFunction, Window<T> overParam);
 
-    public SDFrame<FI2<T, Integer>> overRank(Window<T> var1);
+    /**
+     * rowNumber window function set the function result to the setFunction
+     * @param setFunction function result accept
+     */
+    SDFrame<T> overRowNumberS(SetFunction<T, Integer> setFunction);
 
-    public SDFrame<T> overRankS(SetFunction<T, Integer> var1, Window<T> var2);
+    /**
+     * rank window function
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, Integer>> overRank(Window<T> overParam);
 
-    public SDFrame<FI2<T, Integer>> overDenseRank(Window<T> var1);
+    /**
+     * rank window function set the function result to the setFunction
+     * @param setFunction function result accept
+     * @param overParam window param
+     */
+    SDFrame<T> overRankS(SetFunction<T, Integer> setFunction, Window<T> overParam);
 
-    public SDFrame<T> overDenseRankS(SetFunction<T, Integer> var1, Window<T> var2);
+    /**
+     * dense rank window function
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, Integer>> overDenseRank(Window<T> overParam);
 
-    public SDFrame<FI2<T, BigDecimal>> overPercentRank(Window<T> var1);
+    /**
+     * dense rank window function set the function result to the setFunction
+     * @param setFunction function result accept
+     * @param overParam window param
+     */
+    SDFrame<T> overDenseRankS(SetFunction<T, Integer> setFunction, Window<T> overParam);
 
-    public SDFrame<T> overPercentRankS(SetFunction<T, BigDecimal> var1, Window<T> var2);
+    /**
+     * Percent rank window function
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, BigDecimal>> overPercentRank(Window<T> overParam);
 
-    public SDFrame<FI2<T, BigDecimal>> overCumeDist(Window<T> var1);
+    /**
+     * Percent rank window function set the function result to the setFunction
+     * @param setFunction function result accept
+     * @param overParam window param
+     */
+    SDFrame<T> overPercentRankS(SetFunction<T, BigDecimal> setFunction, Window<T> overParam);
 
-    public SDFrame<T> overCumeDistS(SetFunction<T, BigDecimal> var1, Window<T> var2);
+    /**
+     * Cume Dist window function
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, BigDecimal>> overCumeDist(Window<T> overParam);
 
-    public <F> SDFrame<FI2<T, F>> overLag(Window<T> var1, Function<T, F> var2, int var3);
+    /**
+     * Cume Dist window function set the function result to the setFunction
+     * @param setFunction function result accept
+     * @param overParam window param
+     */
+    SDFrame<T> overCumeDistS(SetFunction<T, BigDecimal> setFunction, Window<T> overParam);
 
-    public <F> SDFrame<T> overLagS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3, int var4);
+    /**
+     * Lag window function get the value of the first n rows of the current row
+     * @param overParam window param
+     * @param field field value
+     * @param n first n rows
+     */
+    <F> SDFrame<FI2<T, F>> overLag(Window<T> overParam, Function<T, F> field, int n);
 
-    public <F> SDFrame<FI2<T, F>> overLag(Function<T, F> var1, int var2);
+    /**
+     * Lag window function get the value of the first n rows of the current row
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     * @param n first n rows
+     */
+    <F> SDFrame<T> overLagS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n);
 
-    public <F> SDFrame<T> overLagS(SetFunction<T, F> var1, Function<T, F> var2, int var3);
+    /**
+     * Lag window function get the value of the first n rows of the current row
+     * @param field field value
+     * @param n first n rows
+     */
+    <F> SDFrame<FI2<T, F>> overLag(Function<T, F> field, int n);
 
-    public <F> SDFrame<FI2<T, F>> overLead(Window<T> var1, Function<T, F> var2, int var3);
+    /**
+     * Lag window function get the value of the first n rows of the current row
+     * @param setFunction function result accept
+     * @param field field value
+     * @param n first n rows
+     */
+    <F> SDFrame<T> overLagS(SetFunction<T, F> setFunction, Function<T, F> field, int n);
 
-    public <F> SDFrame<T> overLeadS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3, int var4);
+    /**
+     * lead window function get the value of the last n rows of the current row
+     * @param overParam window param
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<FI2<T, F>> overLead(Window<T> overParam, Function<T, F> field, int n);
 
-    public <F> SDFrame<FI2<T, F>> overLead(Function<T, F> var1, int var2);
+    /**
+     * lead window function get the value of the last n rows of the current row
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<T> overLeadS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n);
 
-    public <F> SDFrame<T> overLeadS(SetFunction<T, F> var1, Function<T, F> var2, int var3);
+    /**
+     * lead window function get the value of the last n rows of the current row
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<FI2<T, F>> overLead(Function<T, F> field, int n);
 
-    public <F> SDFrame<FI2<T, F>> overNthValue(Window<T> var1, Function<T, F> var2, int var3);
+    /**
+     * lead window function get the value of the last n rows of the current row
+     * @param setFunction function result accept
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<T> overLeadS(SetFunction<T, F> setFunction, Function<T, F> field, int n);
 
-    public <F> SDFrame<T> overNthValueS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3, int var4);
+    /**
+     * NthValue window function get the Nth row within the window range
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<FI2<T, F>> overNthValue(Window<T> overParam, Function<T, F> field, int n);
 
-    public <F> SDFrame<FI2<T, F>> overNthValue(Function<T, F> var1, int var2);
+    /**
+     * NthValue window function get the Nth row within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<T> overNthValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field, int n);
 
-    public <F> SDFrame<T> overNthValueS(SetFunction<T, F> var1, Function<T, F> var2, int var3);
+    /**
+     * NthValue window function get the Nth row within the window range
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<FI2<T, F>> overNthValue(Function<T, F> field, int n);
 
-    public <F> SDFrame<FI2<T, F>> overFirstValue(Window<T> var1, Function<T, F> var2);
+    /**
+     * NthValue window function get the Nth row within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> SDFrame<T> overNthValueS(SetFunction<T, F> setFunction, Function<T, F> field, int n);
 
-    public <F> SDFrame<T> overFirstValueS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3);
+    /**
+     * FirstValue window function get the first row within the window range
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, F>> overFirstValue(Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, F>> overFirstValue(Function<T, F> var1);
+    /**
+     * FirstValue window function get the first row within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<T> overFirstValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<T> overFirstValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * FirstValue window function get the first row within the window range
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, F>> overFirstValue(Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, F>> overLastValue(Window<T> var1, Function<T, F> var2);
+    /**
+     * FirstValue window function get the first row within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> SDFrame<T> overFirstValueS(SetFunction<T, F> setFunction, Function<T, F> field);
 
-    public <F> SDFrame<T> overLastValueS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3);
+    /**
+     * LastValue window function get the last row within the window range
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, F>> overLastValue(Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, F>> overLastValue(Function<T, F> var1);
+    /**
+     * LastValue window function get the last row within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<T> overLastValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<T> overLastValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * LastValue window function get the last row within the window range
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, F>> overLastValue(Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, BigDecimal>> overSum(Window<T> var1, Function<T, F> var2);
+    /**
+     * LastValue window function get the last row within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> SDFrame<T> overLastValueS(SetFunction<T, F> setFunction, Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, BigDecimal>> overSum(Function<T, F> var1);
+    /**
+     * Sum window function calculate the sum within the window range
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, BigDecimal>> overSum(Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<T> overSumS(SetFunction<T, BigDecimal> var1, Window<T> var2, Function<T, F> var3);
+    /**
+     * Sum window function calculate the sum within the window range
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, BigDecimal>> overSum(Function<T, F> field);
 
-    public <F> SDFrame<T> overSumS(SetFunction<T, BigDecimal> var1, Function<T, F> var2);
+    /**
+     * Sum window function calculate the sum within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<T> overSumS(
+            SetFunction<T, BigDecimal> setFunction, Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, BigDecimal>> overAvg(Window<T> var1, Function<T, F> var2);
+    /**
+     * Sum window function calculate the sum within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> SDFrame<T> overSumS(SetFunction<T, BigDecimal> setFunction, Function<T, F> field);
 
-    public <F> SDFrame<FI2<T, BigDecimal>> overAvg(Function<T, F> var1);
+    /**
+     * avg window function calculate the avg value within the window range
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, BigDecimal>> overAvg(Window<T> overParam, Function<T, F> field);
 
-    public <F> SDFrame<T> overAvgS(SetFunction<T, BigDecimal> var1, Window<T> var2, Function<T, F> var3);
+    /**
+     * avg window function calculate the avg value within the window range
+     * @param field field value
+     */
+    <F> SDFrame<FI2<T, BigDecimal>> overAvg(Function<T, F> field);
 
-    public <F> SDFrame<T> overAvgS(SetFunction<T, BigDecimal> var1, Function<T, F> var2);
+    /**
+     * avg window function calculate the avg value within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     */
+    <F> SDFrame<T> overAvgS(
+            SetFunction<T, BigDecimal> setFunction, Window<T> overParam, Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMaxValue(Window<T> var1, Function<T, F> var2);
+    /**
+     * avg window function calculate the avg value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> SDFrame<T> overAvgS(SetFunction<T, BigDecimal> setFunction, Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMaxValue(Function<T, F> var1);
+    /**
+     * max window function calculate the max value within the window range
+     * @param overParam window param
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMaxValue(
+            Window<T> overParam, Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<T> overMaxValueS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3);
+    /**
+     * max window function calculate the max value within the window range
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMaxValue(Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<T> overMaxValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * max window function calculate the max value within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<T> overMaxValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMinValue(Window<T> var1, Function<T, F> var2);
+    /**
+     * max window function calculate the max value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<T> overMaxValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMinValue(Function<T, F> var1);
+    /**
+     * min window function calculate the min value within the window range
+     * @param overParam window param
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMinValue(
+            Window<T> overParam, Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<T> overMinValueS(SetFunction<T, F> var1, Window<T> var2, Function<T, F> var3);
+    /**
+     * min window function calculate the min value within the window range
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<FI2<T, F>> overMinValue(Function<T, F> field);
 
-    public <F extends Comparable<? super F>> SDFrame<T> overMinValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * min window function calculate the min value within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<T> overMinValueS(
+            SetFunction<T, F> setFunction, Window<T> overParam, Function<T, F> field);
 
-    public SDFrame<FI2<T, Integer>> overCount(Window<T> var1);
+    /**
+     * min window function calculate the min value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> SDFrame<T> overMinValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field);
 
-    public SDFrame<FI2<T, Integer>> overCount();
+    /**
+     * count window function calculate the count within the window range
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, Integer>> overCount(Window<T> overParam);
 
-    public SDFrame<T> overCountS(SetFunction<T, Integer> var1, Window<T> var2);
+    /**
+     * count window function calculate the count within the window range
+     */
+    SDFrame<FI2<T, Integer>> overCount();
 
-    public SDFrame<T> overCountS(SetFunction<T, Integer> var1);
+    /**
+     * count window function calculate the count within the window range
+     * @param setFunction function result accept
+     * @param overParam window param
+     */
+    SDFrame<T> overCountS(SetFunction<T, Integer> setFunction, Window<T> overParam);
 
-    public SDFrame<FI2<T, Integer>> overNtile(int var1);
+    /**
+     * count window function calculate the count within the window range
+     * @param setFunction function result accept
+     */
+    SDFrame<T> overCountS(SetFunction<T, Integer> setFunction);
 
-    public SDFrame<FI2<T, Integer>> overNtile(Window<T> var1, int var2);
+    /**
+     * Ntile window function assign bucket numbers evenly to windows, starting from 1
+     * @param n size of buckets
+     */
+    SDFrame<FI2<T, Integer>> overNtile(int n);
 
-    public SDFrame<T> overNtileS(SetFunction<T, Integer> var1, Window<T> var2, int var3);
+    /**
+     * Ntile window function assign bucket numbers evenly to windows, starting from 1
+     * @param n size of buckets
+     * @param overParam window param
+     */
+    SDFrame<FI2<T, Integer>> overNtile(Window<T> overParam, int n);
 
-    public SDFrame<T> overNtileS(SetFunction<T, Integer> var1, int var2);
+    /**
+     * Ntile window function assign bucket numbers evenly to windows, starting from 1
+     * @param setFunction function result accept
+     * @param n size of buckets
+     * @param overParam window param
+     */
+    SDFrame<T> overNtileS(SetFunction<T, Integer> setFunction, Window<T> overParam, int n);
+
+    /**
+     * Ntile window function assign bucket numbers evenly to windows, starting from 1
+     * @param setFunction function result accept
+     * @param n size of buckets
+     */
+    SDFrame<T> overNtileS(SetFunction<T, Integer> setFunction, int n);
 }
-

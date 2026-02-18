@@ -44,6 +44,9 @@ import org.apache.commons.io.IOUtils;
 /**
  * 压缩文件夹工具类
  *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 17:39:13
  */
 public class CompressUtil {
 

@@ -1,102 +1,233 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.JDFrame;
 import com.kuma.boot.common.support.dataframe.iframe.function.SetFunction;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI2;
 import java.math.BigDecimal;
 import java.util.function.Function;
 
-public interface WindowJDFrame<T>
-extends JDFrame<T> {
-    @Override
-    public JDFrame<FI2<T, Integer>> overRowNumber();
+/**
+ * @author caizhihao
+ * @param <T>
+ */
+public interface WindowJDFrame<T> extends JDFrame<T> {
 
-    @Override
-    public WindowJDFrame<T> overRowNumberS(SetFunction<T, Integer> var1);
+    /**
+     * rowNumber window function
+     */
+    JDFrame<FI2<T, Integer>> overRowNumber();
 
-    public JDFrame<FI2<T, Integer>> overRank();
+    /**
+     * rowNumber window function set the function result to the setFunction
+     * @param setFunction function result accept
+     */
+    WindowJDFrame<T> overRowNumberS(SetFunction<T, Integer> setFunction);
 
-    public WindowJDFrame<T> overRankS(SetFunction<T, Integer> var1);
+    /**
+     * rank window function
+     */
+    JDFrame<FI2<T, Integer>> overRank();
 
-    public JDFrame<FI2<T, Integer>> overDenseRank();
+    /**
+     * rank window function set the function result to the setFunction
+     * @param setFunction function result accept
+     */
+    WindowJDFrame<T> overRankS(SetFunction<T, Integer> setFunction);
 
-    public WindowJDFrame<T> overDenseRankS(SetFunction<T, Integer> var1);
+    /**
+     * dense rank window function set the function result to the setFunction
+     */
+    JDFrame<FI2<T, Integer>> overDenseRank();
 
-    public JDFrame<FI2<T, BigDecimal>> overPercentRank();
+    /**
+     * dense rank window function set the function result to the setFunction
+     * @param setFunction function result accept
+     */
+    WindowJDFrame<T> overDenseRankS(SetFunction<T, Integer> setFunction);
 
-    public WindowJDFrame<T> overPercentRankS(SetFunction<T, BigDecimal> var1);
+    /**
+     * Percent rank window function set the function result to the setFunction
+     */
+    JDFrame<FI2<T, BigDecimal>> overPercentRank();
 
-    public JDFrame<FI2<T, BigDecimal>> overCumeDist();
+    /**
+     * Percent rank window function set the function result to the setFunction
+     * @param setFunction function result accept
+     */
+    WindowJDFrame<T> overPercentRankS(SetFunction<T, BigDecimal> setFunction);
 
-    public WindowJDFrame<T> overCumeDistS(SetFunction<T, BigDecimal> var1);
+    /**
+     * Cume Dist window function set the function result to the setFunction
+     */
+    JDFrame<FI2<T, BigDecimal>> overCumeDist();
 
-    @Override
-    public <F> JDFrame<FI2<T, F>> overLag(Function<T, F> var1, int var2);
+    /**
+     * Cume Dist window function set the function result to the setFunction
+     * @param setFunction function result accept
+     */
+    WindowJDFrame<T> overCumeDistS(SetFunction<T, BigDecimal> setFunction);
 
-    @Override
-    public <F> WindowJDFrame<T> overLagS(SetFunction<T, F> var1, Function<T, F> var2, int var3);
+    /**
+     * Lag window function get the value of the first n rows of the current row
+     * @param field field value
+     * @param n first n rows
+     */
+    <F> JDFrame<FI2<T, F>> overLag(Function<T, F> field, int n);
 
-    @Override
-    public <F> JDFrame<FI2<T, F>> overLead(Function<T, F> var1, int var2);
+    /**
+     * Lag window function get the value of the first n rows of the current row
+     * @param setFunction function result accept
+     * @param field field value
+     * @param n first n rows
+     */
+    <F> WindowJDFrame<T> overLagS(SetFunction<T, F> setFunction, Function<T, F> field, int n);
 
-    @Override
-    public <F> WindowJDFrame<T> overLeadS(SetFunction<T, F> var1, Function<T, F> var2, int var3);
+    /**
+     * lead window function get the value of the last n rows of the current row
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> JDFrame<FI2<T, F>> overLead(Function<T, F> field, int n);
 
-    @Override
-    public <F> JDFrame<FI2<T, F>> overNthValue(Function<T, F> var1, int var2);
+    /**
+     * lead window function get the value of the last n rows of the current row
+     * @param setFunction function result accept
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> WindowJDFrame<T> overLeadS(SetFunction<T, F> setFunction, Function<T, F> field, int n);
 
-    @Override
-    public <F> WindowJDFrame<T> overNthValueS(SetFunction<T, F> var1, Function<T, F> var2, int var3);
+    /**
+     * NthValue window function get the Nth row within the window range
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> JDFrame<FI2<T, F>> overNthValue(Function<T, F> field, int n);
 
-    @Override
-    public <F> JDFrame<FI2<T, F>> overFirstValue(Function<T, F> var1);
+    /**
+     * NthValue window function get the Nth row within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     * @param n last n rows
+     */
+    <F> WindowJDFrame<T> overNthValueS(SetFunction<T, F> setFunction, Function<T, F> field, int n);
 
-    @Override
-    public <F> WindowJDFrame<T> overFirstValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * FirstValue window function get the first row within the window range
+     * @param field field value
+     */
+    <F> JDFrame<FI2<T, F>> overFirstValue(Function<T, F> field);
 
-    @Override
-    public <F> JDFrame<FI2<T, F>> overLastValue(Function<T, F> var1);
+    /**
+     * FirstValue window function get the first row within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> WindowJDFrame<T> overFirstValueS(SetFunction<T, F> setFunction, Function<T, F> field);
 
-    @Override
-    public <F> WindowJDFrame<T> overLastValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * LastValue window function get the last row within the window range
+     * @param field field value
+     */
+    <F> JDFrame<FI2<T, F>> overLastValue(Function<T, F> field);
 
-    @Override
-    public <F> JDFrame<FI2<T, BigDecimal>> overSum(Function<T, F> var1);
+    /**
+     * LastValue window function get the last row within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> WindowJDFrame<T> overLastValueS(SetFunction<T, F> setFunction, Function<T, F> field);
 
-    @Override
-    public <F> WindowJDFrame<T> overSumS(SetFunction<T, BigDecimal> var1, Function<T, F> var2);
+    /**
+     * sum window function calculate the sum value within the window range
+     * @param field field value
+     */
+    <F> JDFrame<FI2<T, BigDecimal>> overSum(Function<T, F> field);
 
-    @Override
-    public <F> JDFrame<FI2<T, BigDecimal>> overAvg(Function<T, F> var1);
+    /**
+     * sum window function calculate the sum value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> WindowJDFrame<T> overSumS(SetFunction<T, BigDecimal> setFunction, Function<T, F> field);
 
-    @Override
-    public <F> WindowJDFrame<T> overAvgS(SetFunction<T, BigDecimal> var1, Function<T, F> var2);
+    /**
+     * avg window function calculate the avg value within the window range
+     * @param field field value
+     */
+    <F> JDFrame<FI2<T, BigDecimal>> overAvg(Function<T, F> field);
 
-    @Override
-    public <F extends Comparable<? super F>> JDFrame<FI2<T, F>> overMaxValue(Function<T, F> var1);
+    /**
+     * avg window function calculate the avg value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F> WindowJDFrame<T> overAvgS(SetFunction<T, BigDecimal> setFunction, Function<T, F> field);
 
-    @Override
-    public <F extends Comparable<? super F>> WindowJDFrame<T> overMaxValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * max window function calculate the max value within the window range
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> JDFrame<FI2<T, F>> overMaxValue(Function<T, F> field);
 
-    @Override
-    public <F extends Comparable<? super F>> JDFrame<FI2<T, F>> overMinValue(Function<T, F> var1);
+    /**
+     * max window function calculate the max value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> WindowJDFrame<T> overMaxValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field);
 
-    @Override
-    public <F extends Comparable<? super F>> WindowJDFrame<T> overMinValueS(SetFunction<T, F> var1, Function<T, F> var2);
+    /**
+     * min window function calculate the min value within the window range
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> JDFrame<FI2<T, F>> overMinValue(Function<T, F> field);
 
-    @Override
-    public JDFrame<FI2<T, Integer>> overCount();
+    /**
+     * min window function calculate the min value within the window range
+     * @param setFunction function result accept
+     * @param field field value
+     */
+    <F extends Comparable<? super F>> WindowJDFrame<T> overMinValueS(
+            SetFunction<T, F> setFunction, Function<T, F> field);
 
-    @Override
-    public WindowJDFrame<T> overCountS(SetFunction<T, Integer> var1);
+    /**
+     * count window function calculate the count within the window range
+     */
+    JDFrame<FI2<T, Integer>> overCount();
 
-    @Override
-    public JDFrame<FI2<T, Integer>> overNtile(int var1);
+    /**
+     * count window function calculate the count within the window range
+     * @param setFunction function result accept
+     */
+    WindowJDFrame<T> overCountS(SetFunction<T, Integer> setFunction);
 
-    @Override
-    public WindowJDFrame<T> overNtileS(SetFunction<T, Integer> var1, int var2);
+    /**
+     * Ntile window function assign bucket numbers evenly to windows, starting from 1
+     * @param n size of buckets
+     */
+    JDFrame<FI2<T, Integer>> overNtile(int n);
+
+    /**
+     * Ntile window function assign bucket numbers evenly to windows, starting from 1
+     * @param setFunction function result accept
+     * @param n size of buckets
+     */
+    WindowJDFrame<T> overNtileS(SetFunction<T, Integer> setFunction, int n);
 }
-

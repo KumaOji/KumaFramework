@@ -1,136 +1,243 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.cron.util;
 
 import com.kuma.boot.common.support.cron.pojo.TimeOfDay;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * DateUtil
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
 public class DateUtil {
+
     public static final String SDF_DATETIME = "yyyy-MM-dd HH:mm:ss";
+
     public static final String SDF_DATETIME_SHORT = "yyyyMMddHHmmss";
+
     public static final String SDF_DATETIME_MS = "yyyyMMddHHmmssSSS";
+
     public static final String SDF_DATE = "yyyy-MM-dd";
 
-    public static Date toDate(String dateStr) {
-        return DateUtil.toDate(dateStr, null);
+    /**
+     * 字符串转日期
+     *
+     * @param dateStr 日期字符串
+     * @return 日期 yyyy-MM-dd HH:mm:ss
+     */
+    public static Date toDate( String dateStr ) {
+        return toDate(dateStr, null);
     }
 
-    public static String toStr(Date date) {
-        return DateUtil.toStr(date, SDF_DATETIME);
+    /**
+     * 日期转字符串
+     *
+     * @param date 日期
+     * @return 字符串 yyyy-MM-dd HH:mm:ss
+     */
+    public static String toStr( Date date ) {
+        return toStr(date, SDF_DATETIME);
     }
 
-    public static String toStr(Date date, String format) {
+    /**
+     * 日期转字符串
+     *
+     * @param date 日期
+     * @param format 格式化字符串
+     * @return 字符串
+     */
+    public static String toStr( Date date, String format ) {
+        SimpleDateFormat sdf;
         if (null != format && !"".equals(format)) {
-            SimpleDateFormat sdf = new SimpleDateFormat(format);
+            sdf = new SimpleDateFormat(format);
+            return sdf.format(date);
+        } else {
+            sdf = new SimpleDateFormat(SDF_DATETIME);
             return sdf.format(date);
         }
-        SimpleDateFormat sdf = new SimpleDateFormat(SDF_DATETIME);
-        return sdf.format(date);
     }
 
-    public static Date toDate(String dateStr, String pattern) {
+    /**
+     * 字符串转日期
+     *
+     * @param dateStr 日期字符串
+     * @param pattern 格式化字符串
+     * @return 日期
+     */
+    public static Date toDate( String dateStr, String pattern ) {
         try {
             if (null != pattern && !"".equals(pattern)) {
                 return new SimpleDateFormat(pattern).parse(dateStr);
+            } else {
+                return new SimpleDateFormat(SDF_DATETIME).parse(dateStr);
             }
-            return new SimpleDateFormat(SDF_DATETIME).parse(dateStr);
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static int day(Date date) {
+    /**
+     * 计算某一天是一个月的哪一天
+     *
+     * @param date 日期
+     * @return 1-31
+     */
+    public static int day( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.day(cal);
+        return day(cal);
     }
 
-    public static int day(Calendar calendar) {
-        return calendar.get(5);
+    public static int day( Calendar calendar ) {
+        return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    public static int week(Date date) {
+    /**
+     * 计算某一天是星期几
+     *
+     * @param date 日期
+     * @return 星期几,星期1是1,星期天是0 0-6
+     */
+    public static int week( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.week(cal);
+        return week(cal);
     }
 
-    public static int week(Calendar calendar) {
-        return calendar.get(7) - 1;
+    public static int week( Calendar calendar ) {
+        return calendar.get(Calendar.DAY_OF_WEEK) - 1;
     }
 
-    public static int month(Date date) {
+    /**
+     * 计算某一天的月份
+     *
+     * @param date 日期
+     * @return 月份,1开始
+     */
+    public static int month( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.month(cal);
+        return month(cal);
     }
 
-    public static int month(Calendar calendar) {
-        return calendar.get(2) + 1;
+    public static int month( Calendar calendar ) {
+        return calendar.get(Calendar.MONTH) + 1;
     }
 
-    public static int year(Date date) {
+    /**
+     * 计算某一天的年
+     *
+     * @param date 日期
+     * @return 年
+     */
+    public static int year( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.year(cal);
+        return year(cal);
     }
 
-    public static int year(Calendar calendar) {
-        return calendar.get(1);
+    public static int year( Calendar calendar ) {
+        return calendar.get(Calendar.YEAR);
     }
 
-    public static int hour(Date date) {
+    /**
+     * 计算某一天的时
+     *
+     * @param date 日期
+     * @return 时 0-23
+     */
+    public static int hour( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.hour(cal);
+        return hour(cal);
     }
 
-    public static int hour(Calendar calendar) {
-        return calendar.get(11);
+    public static int hour( Calendar calendar ) {
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
-    public static int minute(Date date) {
+    /**
+     * 计算某一天的分
+     *
+     * @param date 日期
+     * @return 秒 0-59
+     */
+    public static int minute( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.minute(cal);
+        return minute(cal);
     }
 
-    public static int minute(Calendar calendar) {
-        return calendar.get(12);
+    public static int minute( Calendar calendar ) {
+        return calendar.get(Calendar.MINUTE);
     }
 
-    public static int second(Date date) {
+    /**
+     * 计算某一天的秒
+     *
+     * @param date 日期
+     * @return 秒 0-59
+     */
+    public static int second( Date date ) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        return DateUtil.second(cal);
+        return second(cal);
     }
 
-    public static int second(Calendar calendar) {
-        return calendar.get(13);
+    public static int second( Calendar calendar ) {
+        return calendar.get(Calendar.SECOND);
     }
 
-    public static boolean equalsWithTolerance(TimeOfDay one, TimeOfDay two, Integer seconds) {
+    /**
+     * 计算两个时分秒时间的差距是否在给定的容忍范围内
+     *
+     * @param one 比较的一方
+     * @param two 比较的另外一方
+     * @param seconds 容忍范围
+     * @return true if in the range of seconds or false if out of the range
+     */
+    public static boolean equalsWithTolerance( TimeOfDay one, TimeOfDay two, Integer seconds ) {
+        // 秒数为0退化为equals
         if (null == seconds || 0 == seconds) {
             return one.equals(two);
         }
-        return DateUtil.distance(one, two) <= (long)seconds.intValue();
+        // 秒数是否在给定的容忍范围内
+        return distance(one, two) <= seconds;
     }
 
-    public static long distance(TimeOfDay one, TimeOfDay two) {
+    public static long distance( TimeOfDay one, TimeOfDay two ) {
         Calendar calendar1 = Calendar.getInstance();
-        calendar1.set(11, one.getHour());
-        calendar1.set(12, one.getMinute());
-        calendar1.set(13, one.getSecond());
+        calendar1.set(Calendar.HOUR_OF_DAY, one.getHour());
+        calendar1.set(Calendar.MINUTE, one.getMinute());
+        calendar1.set(Calendar.SECOND, one.getSecond());
+
         Calendar calendar2 = Calendar.getInstance();
-        calendar2.set(11, two.getHour());
-        calendar2.set(12, two.getMinute());
-        calendar2.set(13, two.getSecond());
-        return Math.abs(calendar1.getTimeInMillis() / 1000L - calendar2.getTimeInMillis() / 1000L);
+        calendar2.set(Calendar.HOUR_OF_DAY, two.getHour());
+        calendar2.set(Calendar.MINUTE, two.getMinute());
+        calendar2.set(Calendar.SECOND, two.getSecond());
+
+        // 秒数是否在给定的容忍范围内
+        return Math.abs(calendar1.getTimeInMillis() / 1000 - calendar2.getTimeInMillis() / 1000);
     }
 }
-

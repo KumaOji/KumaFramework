@@ -1,65 +1,116 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.collections4.CollectionUtils
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.blockchain;
 
-import com.kuma.boot.common.support.blockchain.Block;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 
+/**
+ * BlockChain
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:40:25
+ */
 public class BlockChain {
-    private static final List<Block> BLOCK_CHAIN = new ArrayList<Block>();
+
+    private BlockChain() {}
+
+    /** BLOCK_CHAIN */
+    private static final List<Block> BLOCK_CHAIN = new ArrayList<>();
+
+    /** DIFFICULTY */
     private static final int DIFFICULTY = 5;
 
-    private BlockChain() {
-    }
-
+    /**
+     * 开采块链
+     * @param data data
+     * @return {@link String }
+     * @since 2021-09-02 19:40:42
+     */
     public static String minedBlockChain(String data) {
-        String hash = BLOCK_CHAIN.isEmpty() ? BlockChain.addBlock(new Block(data, "0")) : BlockChain.addBlock(new Block(data, BlockChain.BLOCK_CHAIN.get((int)(BlockChain.BLOCK_CHAIN.size() - 1)).hash));
+        String hash;
+        if (BLOCK_CHAIN.isEmpty()) {
+            hash = addBlock(new Block(data, "0"));
+        } else {
+            hash = addBlock(new Block(data, BLOCK_CHAIN.get(BLOCK_CHAIN.size() - 1).hash));
+        }
         return hash;
     }
 
+    /**
+     * 解析块链
+     * @param blockHash blockHash
+     * @return {@link String }
+     * @since 2021-09-02 19:40:46
+     */
     public static String decryptBlockchain(String blockHash) {
         if ("ALL".equalsIgnoreCase(blockHash)) {
             return JacksonUtils.toJSONString(BLOCK_CHAIN);
+        } else {
+            List<Block> blockList =
+                    BLOCK_CHAIN.parallelStream().filter(b -> b.hash.equals(blockHash)).toList();
+            if (CollectionUtils.isNotEmpty(blockList)) {
+                return JacksonUtils.toJSONString(blockList);
+            } else {
+                return null;
+            }
         }
-        List<Block> blockList = BLOCK_CHAIN.parallelStream().filter(b -> b.hash.equals(blockHash)).toList();
-        if (CollectionUtils.isNotEmpty(blockList)) {
-            return JacksonUtils.toJSONString(blockList);
-        }
-        return null;
     }
 
+    /**
+     * 检查区块链的完整性
+     * @return {@link Boolean }
+     * @since 2021-09-02 19:40:54
+     */
     public static Boolean isChainValid() {
-        String hashTarget = new String(new char[5]).replace('\u0000', '0');
-        for (int i = 1; i < BLOCK_CHAIN.size(); ++i) {
-            Block currentBlock = BLOCK_CHAIN.get(i);
-            Block previousBlock = BLOCK_CHAIN.get(i - 1);
+        Block currentBlock;
+        Block previousBlock;
+        String hashTarget = new String(new char[DIFFICULTY]).replace('\0', '0');
+
+        // 循环通过区块链来检查散列
+        for (int i = 1; i < BLOCK_CHAIN.size(); i++) {
+            currentBlock = BLOCK_CHAIN.get(i);
+            previousBlock = BLOCK_CHAIN.get(i - 1);
+            // 比较注册Hash散列和计算哈希
             if (!currentBlock.hash.equals(currentBlock.calculateHash())) {
-                LogUtils.warn("\u5f53\u524d\u7684Hash\u6563\u5217\u4e0d\u76f8\u7b49", new Object[0]);
+                LogUtils.warn("当前的Hash散列不相等");
                 return false;
             }
+            // 比较以前的Hash散列和注册的以前的Hash散列
             if (!previousBlock.hash.equals(currentBlock.previousHash)) {
-                LogUtils.warn("\u4ee5\u524d\u7684Hash\u6563\u5217\u4e0d\u76f8\u7b49", new Object[0]);
+                LogUtils.warn("以前的Hash散列不相等");
                 return false;
             }
-            if (currentBlock.hash.substring(0, 5).equals(hashTarget)) continue;
-            LogUtils.warn("\u5f53\u524d\u5757\u94fe\u8fd8\u6ca1\u6709\u88ab\u5f00\u91c7", new Object[0]);
-            return false;
+            // 检查哈希是否已开采
+            if (!currentBlock.hash.substring(0, DIFFICULTY).equals(hashTarget)) {
+                LogUtils.warn("当前块链还没有被开采");
+                return false;
+            }
         }
         return true;
     }
 
     private static String addBlock(Block block) {
-        String hash = block.mineBlock(5);
+        String hash = block.mineBlock(DIFFICULTY);
         BLOCK_CHAIN.add(block);
         return hash;
     }
 }
-

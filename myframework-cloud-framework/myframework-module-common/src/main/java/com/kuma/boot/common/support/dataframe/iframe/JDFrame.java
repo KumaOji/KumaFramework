@@ -1,10 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.ConfigurableJDFrame;
-import com.kuma.boot.common.support.dataframe.iframe.WindowJDFrame;
 import com.kuma.boot.common.support.dataframe.iframe.function.ConsumerIndex;
 import com.kuma.boot.common.support.dataframe.iframe.function.ListToOneFunction;
 import com.kuma.boot.common.support.dataframe.iframe.function.ReplenishFunction;
@@ -25,172 +36,451 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface JDFrame<T>
-extends ConfigurableJDFrame<T> {
-    public static <R> JDFrame<R> read(List<R> list) {
-        return new JDFrameImpl<R>(list);
+/**
+ * JDFrame The operations before and after are discontinuous, and all operations take
+ * effect in real time. Even after executing the termination operation, they can still be
+ * reused without the need to re read to generate a stream
+ *
+ * @author caizhihao
+ */
+public interface JDFrame<T> extends ConfigurableJDFrame<T> {
+
+    /**
+     * Convert a list to JDFrame
+     */
+    static <R> JDFrame<R> read(List<R> list) {
+        return new JDFrameImpl<>(list);
     }
 
-    public static <K, V> JDFrame<FI2<K, V>> read(Map<K, V> map) {
-        return new JDFrameImpl<FI2<K, V>>(FrameUtil.toListFI2(map));
+    /**
+     * Convert a map to JDFrame
+     */
+    static <K, V> JDFrame<FI2<K, V>> read(Map<K, V> map) {
+        return new JDFrameImpl<>(FrameUtil.toListFI2(map));
     }
 
-    public static <K, J, V> JDFrame<FI3<K, J, V>> readMap(Map<K, Map<J, V>> map) {
-        return new JDFrameImpl<FI3<K, J, V>>(FrameUtil.toListFI3(map));
+    /**
+     * Convert a map to JDFrame
+     */
+    static <K, J, V> JDFrame<FI3<K, J, V>> readMap(Map<K, Map<J, V>> map) {
+        return new JDFrameImpl<>(FrameUtil.toListFI3(map));
     }
 
-    @Override
-    public <R> JDFrame<R> from(Stream<R> var1);
+    /**
+     * Convert to other JDFrame
+     */
+    <R> JDFrame<R> from(Stream<R> data);
 
-    @Override
-    public JDFrame<T> forEachDo(Consumer<? super T> var1);
+    /**
+     * Performs the given action for each element of the Iterable until all elements have
+     * been processed or the action throws an exception.
+     */
+    JDFrame<T> forEachDo(Consumer<? super T> action);
 
-    @Override
-    public JDFrame<T> forEachParallel(Consumer<? super T> var1);
+    /**
+     * such as {@link #forEachDo(Consumer)} , but is parallel to forEach
+     */
+    JDFrame<T> forEachParallel(Consumer<? super T> action);
 
-    @Override
-    public JDFrame<T> forEachDo(ConsumerIndex<? super T> var1);
+    /**
+     * Performs the given action for each element of the Iterable until all elements have
+     * been processed or the action throws an exception.
+     */
+    JDFrame<T> forEachDo(ConsumerIndex<? super T> action);
 
-    @Override
-    public JDFrame<T> defaultScale(int var1);
+    /**
+     * =========================== Frame Setting =====================================
+     **/
+    /**
+     * Set default decimal places
+     */
+    JDFrame<T> defaultScale(int scale);
 
-    @Override
-    public JDFrame<T> defaultScale(int var1, RoundingMode var2);
+    /**
+     * Set default decimal places
+     */
+    JDFrame<T> defaultScale(int scale, RoundingMode roundingMode);
 
-    @Override
-    public void show();
+    /**
+     * =========================== Frame Info =====================================
+     **/
+    /**
+     * print the 10 row to the console
+     *
+     */
+    void show();
 
-    @Override
-    public void show(int var1);
+    /**
+     * print the n row to the console
+     */
+    void show(int n);
 
-    @Override
-    public List<String> columns();
+    /**
+     * Get column headers
+     */
+    List<String> columns();
 
-    @Override
-    public <R> List<R> col(Function<T, R> var1);
+    /**
+     * Get a column value
+     */
+    <R> List<R> col(Function<T, R> function);
 
-    @Override
-    public <R> JDFrame<R> map(Function<T, R> var1);
+    /**
+     * =========================== Frame Convert =====================================
+     */
+    /**
+     * convert to the new Frame
+     * @param map convert operation
+     * @return the new Frame
+     * @param <R> the new Frame type
+     */
+    <R> JDFrame<R> map(Function<T, R> map);
 
-    @Override
-    public <R> JDFrame<R> mapParallel(Function<T, R> var1);
+    /**
+     * parallel convert to the new Frame
+     * @param map convert operation
+     * @return the new Frame
+     * @param <R> the new Frame type
+     */
+    <R> JDFrame<R> mapParallel(Function<T, R> map);
 
-    @Override
-    public <R extends Number> JDFrame<T> mapPercent(Function<T, R> var1, SetFunction<T, BigDecimal> var2, int var3);
+    /**
+     * Percentage convert you can convert the value of a certain field to a percentage,
+     * Then assign a value to a certain column through SetFunction
+     * @param get need percentage convert field
+     * @param set field for storing percentage values
+     * @param scale percentage retain decimal places
+     * @param <R> the percentage field type
+     */
+    <R extends Number> JDFrame<T> mapPercent(
+            Function<T, R> get, SetFunction<T, BigDecimal> set, int scale);
 
-    @Override
-    public <R extends Number> JDFrame<T> mapPercent(Function<T, R> var1, SetFunction<T, BigDecimal> var2);
+    /**
+     * Percentage convert such as {@link IFrame#mapPercent(Function, SetFunction, int)},
+     * but default scale is 2
+     * @param get need percentage convert field
+     * @param set field for storing percentage values
+     */
+    <R extends Number> JDFrame<T> mapPercent(Function<T, R> get, SetFunction<T, BigDecimal> set);
 
-    @Override
-    public JDFrame<List<T>> partition(int var1);
+    /**
+     * partition cut the matrix into multiple small matrices, with each matrix size n
+     * @param n size of each zone
+     */
+    JDFrame<List<T>> partition(int n);
 
-    @Override
-    public JDFrame<FI2<T, Integer>> addRowNumberCol();
+    /**
+     * ddd ordinal column
+     * @return FI2(T,Number)
+     */
+    JDFrame<FI2<T, Integer>> addRowNumberCol();
 
-    @Override
-    public JDFrame<FI2<T, Integer>> addRowNumberCol(Sorter<T> var1);
+    /**
+     * Sort by comparator first, then add ordinal columns
+     * @param sorter the sort comparator
+     */
+    JDFrame<FI2<T, Integer>> addRowNumberCol(Sorter<T> sorter);
 
-    @Override
-    public JDFrame<T> addRowNumberCol(SetFunction<T, Integer> var1);
+    /**
+     * Add a numbered column to a specific column
+     * @param set specific column
+     */
+    JDFrame<T> addRowNumberCol(SetFunction<T, Integer> set);
 
-    @Override
-    public JDFrame<T> addRowNumberCol(Sorter<T> var1, SetFunction<T, Integer> var2);
+    /**
+     * Add a numbered column to a specific column
+     * @param sorter the sorter
+     * @param set specific column
+     */
+    JDFrame<T> addRowNumberCol(Sorter<T> sorter, SetFunction<T, Integer> set);
 
-    @Override
-    public JDFrame<FI2<T, Integer>> addRankCol(Sorter<T> var1);
+    /**
+     * Add ranking columns by comparator Ranking logic, the same value means the Ranking
+     * is the same. This is different from {@link #addRowNumberCol}
+     * @param sorter the ranking comparator
+     */
+    JDFrame<FI2<T, Integer>> addRankCol(Sorter<T> sorter);
 
-    @Override
-    public JDFrame<T> addRankCol(Sorter<T> var1, SetFunction<T, Integer> var2);
+    /**
+     * Add ranking column to a certain column by Comparator
+     * @param sorter the ranking sorter
+     * @param set certain column
+     */
+    JDFrame<T> addRankCol(Sorter<T> sorter, SetFunction<T, Integer> set);
 
-    @Override
-    public JDFrame<FI2<T, String>> explodeString(Function<T, String> var1, String var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     * @param getFunction wait to explode field
+     * @param delimiter split delimiter, support regex
+     */
+    JDFrame<FI2<T, String>> explodeString(Function<T, String> getFunction, String delimiter);
 
-    @Override
-    public JDFrame<T> explodeString(Function<T, String> var1, SetFunction<T, String> var2, String var3);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     * @param delimiter split delimiter, support regex
+     */
+    JDFrame<T> explodeString(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction, String delimiter);
 
-    @Override
-    public JDFrame<FI2<T, String>> explodeJsonArray(Function<T, String> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is JSON string array
+     * @param getFunction wait to explode field
+     */
+    JDFrame<FI2<T, String>> explodeJsonArray(Function<T, String> getFunction);
 
-    @Override
-    public JDFrame<T> explodeJsonArray(Function<T, String> var1, SetFunction<T, String> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is JSON string array
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     */
+    JDFrame<T> explodeJsonArray(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction);
 
-    @Override
-    public <E> JDFrame<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is collection
+     * @param getFunction wait to explode field
+     */
+    <E> JDFrame<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> getFunction);
 
-    @Override
-    public <E> JDFrame<T> explodeCollection(Function<T, ? extends Collection<E>> var1, SetFunction<T, E> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is collection
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     */
+    <E> JDFrame<T> explodeCollection(
+            Function<T, ? extends Collection<E>> getFunction, SetFunction<T, E> setFunction);
 
-    @Override
-    public <E> JDFrame<FI2<T, E>> explodeCollectionArray(Function<T, ?> var1, Class<E> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is array or collection
+     * @param getFunction wait to explode field
+     * @param elementClass the array or collection element class
+     */
+    <E> JDFrame<FI2<T, E>> explodeCollectionArray(
+            Function<T, ?> getFunction, Class<E> elementClass);
 
-    @Override
-    public <E> JDFrame<T> explodeCollectionArray(Function<T, ?> var1, SetFunction<T, E> var2, Class<E> var3);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is array or collection
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     * @param elementClass the array or collection element class
+     */
+    <E> JDFrame<T> explodeCollectionArray(
+            Function<T, ?> getFunction, SetFunction<T, E> setFunction, Class<E> elementClass);
 
-    @Override
-    public JDFrame<T> sortDesc(Comparator<T> var1);
+    /**
+     * =========================== Sort Frame =====================================
+     **/
 
-    @Override
-    public <R extends Comparable<? super R>> JDFrame<T> sortDesc(Function<T, R> var1);
+    /**
+     * Descending order
+     * @param comparator comparator
+     */
+    JDFrame<T> sortDesc(Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> sortAsc(Comparator<T> var1);
+    /**
+     * Descending order by field
+     * @param function sort field
+     * @param <R> the sort field type
+     */
+    <R extends Comparable<? super R>> JDFrame<T> sortDesc(Function<T, R> function);
 
-    @Override
-    public <R extends Comparable<R>> JDFrame<T> sortAsc(Function<T, R> var1);
+    /**
+     * Ascending order
+     * @param comparator comparator
+     */
+    JDFrame<T> sortAsc(Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> cutFirst(int var1);
+    /**
+     * Ascending order
+     * @param function sort field
+     */
+    <R extends Comparable<R>> JDFrame<T> sortAsc(Function<T, R> function);
 
-    @Override
-    public JDFrame<T> cutLast(int var1);
+    /** =========================== Cut Frame ===================================== **/
 
-    @Override
-    public JDFrame<T> cut(Integer var1, Integer var2);
+    /**
+     * Cut the top n element
+     * @param n the top n
+     */
+    JDFrame<T> cutFirst(int n);
 
-    @Override
-    public JDFrame<T> cutPage(int var1, int var2);
+    /**
+     * Cut the last n element
+     * @param n the last n
+     */
+    JDFrame<T> cutLast(int n);
 
-    @Override
-    public JDFrame<T> cutFirstRank(Sorter<T> var1, int var2);
+    /**
+     * cut elements within the scope
+     */
+    JDFrame<T> cut(Integer startIndex, Integer endIndex);
 
-    @Override
-    public T head();
+    /**
+     * cut paginated data
+     * @param page The current page number is considered as the first page, regardless of
+     * whether it is passed as 0 or 1
+     * @param pageSize page size
+     */
+    JDFrame<T> cutPage(int page, int pageSize);
 
-    @Override
-    public List<T> head(int var1);
+    /**
+     * Cut the top N rankings data The same value is considered to have the same ranking
+     * @param sorter the ranking sorter
+     * @param n the top n
+     */
+    JDFrame<T> cutFirstRank(Sorter<T> sorter, int n);
 
-    @Override
-    public T tail();
+    /** =========================== View Frame ===================================== **/
 
-    @Override
-    public List<T> tail(int var1);
+    /**
+     * Get the first element
+     */
+    T head();
 
-    @Override
-    public JDFrame<T> distinct();
+    /**
+     * Get the first n elements
+     */
+    List<T> head(int n);
 
-    @Override
-    public <R extends Comparable<R>> JDFrame<T> distinct(Function<T, R> var1);
+    /**
+     * Get the last element
+     */
+    T tail();
 
-    @Override
-    public <R extends Comparable<R>> JDFrame<T> distinct(Function<T, R> var1, ListToOneFunction<T> var2);
+    /**
+     * Get the last n elements
+     */
+    List<T> tail(int n);
 
-    @Override
-    public JDFrame<T> distinct(Comparator<T> var1);
+    /**
+     * =========================== Distinct Frame =====================================
+     **/
 
-    @Override
-    public JDFrame<T> distinct(Comparator<T> var1, ListToOneFunction<T> var2);
+    /**
+     * distinct by T value
+     */
+    JDFrame<T> distinct();
 
-    public WindowJDFrame<T> window(Window<T> var1);
+    /**
+     * distinct by field value
+     * @param function the field
+     * @param <R> field value type
+     */
+    <R extends Comparable<R>> JDFrame<T> distinct(Function<T, R> function);
 
-    public WindowJDFrame<T> window();
+    /**
+     * distinct by field value
+     * @param function the field
+     * @param listOneFunction When there are more than one repeated element, this method
+     * will be called back, and customization will determine which element to choose
+     * @param <R> field value type
+     */
+    <R extends Comparable<R>> JDFrame<T> distinct(
+            Function<T, R> function, ListToOneFunction<T> listOneFunction);
 
-    @Override
-    public <C> JDFrame<T> replenish(Function<T, C> var1, List<C> var2, Function<C, T> var3);
+    /**
+     * distinct by comparator
+     * @param comparator the comparator
+     */
+    JDFrame<T> distinct(Comparator<T> comparator);
 
-    @Override
-    public <G, C> JDFrame<T> replenish(Function<T, G> var1, Function<T, C> var2, List<C> var3, ReplenishFunction<G, C, T> var4);
+    /**
+     * distinct by comparator
+     * @param comparator the comparator
+     * @param function When there are more than one repeated element, this method will be
+     * called back, and customization will determine which element to choose
+     */
+    JDFrame<T> distinct(Comparator<T> comparator, ListToOneFunction<T> function);
 
-    @Override
-    public <G, C> JDFrame<T> replenish(Function<T, G> var1, Function<T, C> var2, ReplenishFunction<G, C, T> var3);
+    /**
+     * =========================== Window Function =====================================
+     **/
+
+    /**
+     * open a window
+     * @param window window param
+     */
+    WindowJDFrame<T> window(Window<T> window);
+
+    /**
+     * open a empty window
+     */
+    WindowJDFrame<T> window();
+
+    /** =========================== Other ===================================== **/
+
+    /**
+     * Summarize all collectDim values, calculate the difference between them, and then
+     * add the missing difference to the Frame through getEmptyObject
+     *
+     */
+    <C> JDFrame<T> replenish(
+            Function<T, C> collectDim, List<C> allDim, Function<C, T> getEmptyObject);
+
+    /**
+     * Calculate the difference in groups and then add the difference to that group
+     *
+     * according to the groupDim dimension, and then summarize all collectDim fields
+     * within each group After summarizing, calculate the difference sets with
+     * allAbscissa, which are the entries that need to be supplemented. Then, generate
+     * empty objects according to the ReplenishFunction logic and add them to the group
+     * @param groupDim Dimension fields for grouping
+     * @param collectDim Data fields collected within the group
+     * @param allDim All dimensions that need to be displayed within the group
+     * @param getEmptyObject Logic for generating empty objects
+     * @param <G> The type of grouping
+     * @param <C> type of collection within the group
+     *
+     * The set supplemented by @ return
+     */
+    <G, C> JDFrame<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            List<C> allDim,
+            ReplenishFunction<G, C, T> getEmptyObject);
+
+    /**
+     * such as {@link IFrame#replenish(Function, Function, List, ReplenishFunction)}, but
+     * can not Specify allDim， will auto generate allDim, The default allDim is the value
+     * of all collectDim fields in the set
+     * @param groupDim Dimension fields for grouping
+     * @param collectDim Data fields collected within the group
+     * @param getEmptyObject Logic for generating empty objects
+     * @param <G> The type of grouping
+     * @param <C> type of collection within the group
+     */
+    <G, C> JDFrame<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            ReplenishFunction<G, C, T> getEmptyObject);
 }
-

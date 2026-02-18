@@ -25,6 +25,8 @@ import java.util.function.Function;
  * support null value to compare. if values is null sort to the end in sort desc if values
  * is null sort to the start in sort asc
  *
+ * @author caizhihao
+ * @param <T>
  */
 public interface NullComparator<T> extends Comparator<T> {
 

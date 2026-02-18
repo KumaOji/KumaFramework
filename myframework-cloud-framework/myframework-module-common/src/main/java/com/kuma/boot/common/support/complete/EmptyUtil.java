@@ -5,6 +5,8 @@ import java.util.*;
 /**
  * 判断空工具
  *
+ * @author HeHui
+ * @since 2024-11-26 09:38
  */
 public class EmptyUtil {
 

@@ -1,57 +1,86 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.aopalliance.aop.Advice
- *  org.aopalliance.intercept.MethodInvocation
- *  org.jspecify.annotations.NonNull
- *  org.springframework.aop.IntroductionInterceptor
- *  org.springframework.aop.support.AbstractPointcutAdvisor
- *  org.springframework.core.GenericTypeResolver
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.aop;
 
-import com.kuma.boot.common.support.aop.AnnotationTarget;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
-import org.jspecify.annotations.NonNull;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.Ordered;
+import org.jspecify.annotations.NonNull;
 import org.springframework.util.Assert;
 
+/**
+ * 注解型切点处理器
+ *
+ * @param <A> 注解
+ * @author livk
+ */
 public abstract class AnnotationAbstractPointcutAdvisor<A extends Annotation>
-extends AbstractPointcutAdvisor
-implements IntroductionInterceptor {
-    protected final Class<A> annotationType = (Class<A>) GenericTypeResolver.resolveTypeArgument(((Object)((Object)this)).getClass(), AnnotationAbstractPointcutAdvisor.class);
+        extends AbstractPointcutAdvisor implements IntroductionInterceptor {
 
-    public @NonNull Object invoke(@NonNull MethodInvocation invocation) throws Throwable {
-        Assert.notNull(this.annotationType, (String)"annotationType must not be null");
+    /**
+     * 切点注解类型
+     */
+    @SuppressWarnings("unchecked")
+    protected final Class<A> annotationType =
+            (Class<A>)
+                    GenericTypeResolver.resolveTypeArgument(
+                            this.getClass(), AnnotationAbstractPointcutAdvisor.class);
+
+    @NonNull
+    @Override
+    public Object invoke(@NonNull MethodInvocation invocation) throws Throwable {
+        Assert.notNull(annotationType, "annotationType must not be null");
         Method method = invocation.getMethod();
-        AnnotationTarget<A> target = AnnotationTarget.of(this.annotationType);
+        AnnotationTarget<A> target = AnnotationTarget.of(annotationType);
         A annotation = target.getAnnotation(method);
         if (annotation == null && invocation.getThis() != null) {
             annotation = target.getAnnotation(invocation.getThis().getClass());
         }
-        return this.invoke(invocation, annotation);
+        return invoke(invocation, annotation);
     }
 
+    @Override
     public int getOrder() {
         int order = super.getOrder();
-        return order == Integer.MAX_VALUE ? 0x7FFFFFFE : order;
+        return order == Ordered.LOWEST_PRECEDENCE ? Ordered.LOWEST_PRECEDENCE - 1 : order;
     }
 
-    protected abstract Object invoke(MethodInvocation var1, A var2) throws Throwable;
+    /**
+     * 执行拦截的方法
+     * @param invocation 方法相关信息
+     * @param annotation 注解信息
+     * @return 方法返回结果 object
+     * @throws Throwable the throwable
+     */
+    protected abstract Object invoke(MethodInvocation invocation, A annotation) throws Throwable;
 
+    @Override
     public boolean implementsInterface(@NonNull Class<?> intf) {
-        return intf.isAssignableFrom(((Object)((Object)this)).getClass());
+        return intf.isAssignableFrom(this.getClass());
     }
 
-    public @NonNull Advice getAdvice() {
+    @NonNull
+    @Override
+    public Advice getAdvice() {
         return this;
     }
 }
-

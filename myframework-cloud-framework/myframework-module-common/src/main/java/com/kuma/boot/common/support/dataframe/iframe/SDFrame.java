@@ -1,10 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.ConfigurableSDFrame;
-import com.kuma.boot.common.support.dataframe.iframe.WindowSDFrame;
 import com.kuma.boot.common.support.dataframe.iframe.function.ConsumerIndex;
 import com.kuma.boot.common.support.dataframe.iframe.function.ListToOneFunction;
 import com.kuma.boot.common.support.dataframe.iframe.function.ReplenishFunction;
@@ -25,172 +36,452 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface SDFrame<T>
-extends ConfigurableSDFrame<T> {
-    public static <R> SDFrame<R> read(List<R> list) {
-        return new SDFrameImpl<R>(list);
+/**
+ * Stream DataFrame The operations before and after are continuous, consistent with the
+ * stream flow, and some operations terminate the execution of the operation. The stream
+ * cannot be reused and needs to be re read to generate the stream, making it suitable for
+ * serial use
+ *
+ * @author caizhihao
+ */
+public interface SDFrame<T> extends ConfigurableSDFrame<T> {
+
+    /**
+     * Convert a list to SDFrame
+     */
+    static <R> SDFrame<R> read(List<R> list) {
+        return new SDFrameImpl<>(list);
     }
 
-    public static <K, V> SDFrame<FI2<K, V>> read(Map<K, V> map) {
-        return new SDFrameImpl<FI2<K, V>>(FrameUtil.toListFI2(map));
+    /**
+     * Convert a map to SDFrame
+     */
+    static <K, V> SDFrame<FI2<K, V>> read(Map<K, V> map) {
+        return new SDFrameImpl<>(FrameUtil.toListFI2(map));
     }
 
-    public static <K, J, V> SDFrame<FI3<K, J, V>> readMap(Map<K, Map<J, V>> map) {
-        return new SDFrameImpl<FI3<K, J, V>>(FrameUtil.toListFI3(map));
+    /**
+     * Convert a map to SDFrame
+     */
+    static <K, J, V> SDFrame<FI3<K, J, V>> readMap(Map<K, Map<J, V>> map) {
+        return new SDFrameImpl<>(FrameUtil.toListFI3(map));
     }
 
-    @Override
-    public <R> SDFrame<R> from(Stream<R> var1);
+    /**
+     * Convert to other SDFrame
+     */
+    <R> SDFrame<R> from(Stream<R> data);
 
-    @Override
-    public SDFrame<T> forEachDo(Consumer<? super T> var1);
+    /**
+     * Performs the given action for each element of the Iterable until all elements have
+     * been processed or the action throws an exception.
+     */
+    SDFrame<T> forEachDo(Consumer<? super T> action);
 
-    @Override
-    public SDFrame<T> forEachParallel(Consumer<? super T> var1);
+    /**
+     * such as {@link #forEachDo(Consumer)} , but is parallel to forEach
+     */
+    SDFrame<T> forEachParallel(Consumer<? super T> action);
 
-    @Override
-    public SDFrame<T> forEachDo(ConsumerIndex<? super T> var1);
+    /**
+     * Performs the given action for each element of the Iterable until all elements have
+     * been processed or the action throws an exception.
+     */
+    SDFrame<T> forEachDo(ConsumerIndex<? super T> action);
 
-    @Override
-    public SDFrame<T> defaultScale(int var1);
+    /**
+     * =========================== Frame Setting =====================================
+     **/
 
-    @Override
-    public SDFrame<T> defaultScale(int var1, RoundingMode var2);
+    /**
+     * Set default decimal places
+     */
+    SDFrame<T> defaultScale(int scale);
 
-    @Override
-    public void show();
+    /**
+     * Set default decimal places
+     */
+    SDFrame<T> defaultScale(int scale, RoundingMode roundingMode);
 
-    @Override
-    public void show(int var1);
+    /**
+     * =========================== Frame Info =====================================
+     **/
+    /**
+     * print the 10 row to the console
+     *
+     */
+    void show();
 
-    @Override
-    public List<String> columns();
+    /**
+     * print the n row to the console
+     */
+    void show(int n);
 
-    @Override
-    public <R> List<R> col(Function<T, R> var1);
+    /**
+     * Get column headers
+     */
+    List<String> columns();
 
-    @Override
-    public <R> SDFrame<R> map(Function<T, R> var1);
+    /**
+     * Get a column value
+     */
+    <R> List<R> col(Function<T, R> function);
 
-    @Override
-    public <R> SDFrame<R> mapParallel(Function<T, R> var1);
+    /**
+     * =========================== Frame Convert =====================================
+     */
+    /**
+     * convert to the new Frame
+     * @param map convert operation
+     * @return the new Frame
+     * @param <R> the new Frame type
+     */
+    <R> SDFrame<R> map(Function<T, R> map);
 
-    @Override
-    public <R extends Number> SDFrame<T> mapPercent(Function<T, R> var1, SetFunction<T, BigDecimal> var2, int var3);
+    /**
+     * parallel convert to the new Frame
+     * @param map convert operation
+     * @return the new Frame
+     * @param <R> the new Frame type
+     */
+    <R> SDFrame<R> mapParallel(Function<T, R> map);
 
-    @Override
-    public <R extends Number> SDFrame<T> mapPercent(Function<T, R> var1, SetFunction<T, BigDecimal> var2);
+    /**
+     * Percentage convert you can convert the value of a certain field to a percentage,
+     * Then assign a value to a certain column through SetFunction
+     * @param get need percentage convert field
+     * @param set field for storing percentage values
+     * @param scale percentage retain decimal places
+     * @param <R> the percentage field type
+     */
+    <R extends Number> SDFrame<T> mapPercent(
+            Function<T, R> get, SetFunction<T, BigDecimal> set, int scale);
 
-    @Override
-    public SDFrame<List<T>> partition(int var1);
+    /**
+     * Percentage convert such as {@link IFrame#mapPercent(Function, SetFunction, int)},
+     * but default scale is 2
+     * @param get need percentage convert field
+     * @param set field for storing percentage values
+     */
+    <R extends Number> SDFrame<T> mapPercent(Function<T, R> get, SetFunction<T, BigDecimal> set);
 
-    @Override
-    public SDFrame<FI2<T, Integer>> addRowNumberCol();
+    /**
+     * partition cut the matrix into multiple small matrices, with each matrix size n
+     * @param n size of each zone
+     */
+    SDFrame<List<T>> partition(int n);
 
-    @Override
-    public SDFrame<FI2<T, Integer>> addRowNumberCol(Sorter<T> var1);
+    /**
+     * ddd ordinal column
+     * @return FI2(T,Number)
+     */
+    SDFrame<FI2<T, Integer>> addRowNumberCol();
 
-    @Override
-    public SDFrame<T> addRowNumberCol(SetFunction<T, Integer> var1);
+    /**
+     * Sort by comparator first, then add ordinal columns
+     * @param sorter the sort
+     */
+    SDFrame<FI2<T, Integer>> addRowNumberCol(Sorter<T> sorter);
 
-    @Override
-    public SDFrame<T> addRowNumberCol(Sorter<T> var1, SetFunction<T, Integer> var2);
+    /**
+     * Add a numbered column to a specific column
+     * @param set specific column
+     */
+    SDFrame<T> addRowNumberCol(SetFunction<T, Integer> set);
 
-    @Override
-    public SDFrame<FI2<T, Integer>> addRankCol(Sorter<T> var1);
+    /**
+     * Add a numbered column to a specific column
+     * @param sorter the sorter
+     * @param set specific column
+     */
+    SDFrame<T> addRowNumberCol(Sorter<T> sorter, SetFunction<T, Integer> set);
 
-    @Override
-    public SDFrame<T> addRankCol(Sorter<T> var1, SetFunction<T, Integer> var2);
+    /**
+     * Add ranking columns by comparator Ranking logic, the same value means the Ranking
+     * is the same. This is different from {@link #addRowNumberCol}
+     * @param sorter the ranking sorter
+     */
+    SDFrame<FI2<T, Integer>> addRankCol(Sorter<T> sorter);
 
-    @Override
-    public SDFrame<FI2<T, String>> explodeString(Function<T, String> var1, String var2);
+    /**
+     * Add ranking column to a certain column by Comparator
+     * @param sorter the ranking comparator
+     * @param set certain column
+     */
+    SDFrame<T> addRankCol(Sorter<T> sorter, SetFunction<T, Integer> set);
 
-    @Override
-    public SDFrame<T> explodeString(Function<T, String> var1, SetFunction<T, String> var2, String var3);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     * @param getFunction wait to explode field
+     * @param delimiter split delimiter, support regex
+     */
+    SDFrame<FI2<T, String>> explodeString(Function<T, String> getFunction, String delimiter);
 
-    @Override
-    public SDFrame<FI2<T, String>> explodeJsonArray(Function<T, String> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     * @param getFunction wait to explode field
+     * @param setFunction Fill in the fields of the segmented text.
+     * @param delimiter split delimiter, support regex
+     */
+    SDFrame<T> explodeString(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction, String delimiter);
 
-    @Override
-    public SDFrame<T> explodeJsonArray(Function<T, String> var1, SetFunction<T, String> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is JSON string array
+     * @param getFunction wait to explode field
+     */
+    SDFrame<FI2<T, String>> explodeJsonArray(Function<T, String> getFunction);
 
-    @Override
-    public <E> SDFrame<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is JSON string array
+     * @param getFunction wait to explode field
+     */
+    SDFrame<T> explodeJsonArray(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction);
 
-    @Override
-    public <E> SDFrame<T> explodeCollection(Function<T, ? extends Collection<E>> var1, SetFunction<T, E> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is collection
+     * @param getFunction wait to explode field
+     */
+    <E> SDFrame<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> getFunction);
 
-    @Override
-    public <E> SDFrame<FI2<T, E>> explodeCollectionArray(Function<T, ?> var1, Class<E> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is collection
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     */
+    <E> SDFrame<T> explodeCollection(
+            Function<T, ? extends Collection<E>> getFunction, SetFunction<T, E> setFunction);
 
-    @Override
-    public <E> SDFrame<T> explodeCollectionArray(Function<T, ?> var1, SetFunction<T, E> var2, Class<E> var3);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is array or collection
+     * @param getFunction wait to explode field
+     * @param elementClass the array or collection element class
+     */
+    <E> SDFrame<FI2<T, E>> explodeCollectionArray(
+            Function<T, ?> getFunction, Class<E> elementClass);
 
-    @Override
-    public SDFrame<T> sortDesc(Comparator<T> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is array or collection
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     * @param elementClass the array or collection element class
+     */
+    <E> SDFrame<T> explodeCollectionArray(
+            Function<T, ?> getFunction, SetFunction<T, E> setFunction, Class<E> elementClass);
 
-    @Override
-    public <R extends Comparable<? super R>> SDFrame<T> sortDesc(Function<T, R> var1);
+    /**
+     * =========================== Sort Frame =====================================
+     **/
 
-    @Override
-    public SDFrame<T> sortAsc(Comparator<T> var1);
+    /**
+     * Descending order
+     * @param comparator comparator
+     */
+    SDFrame<T> sortDesc(Comparator<T> comparator);
 
-    @Override
-    public <R extends Comparable<R>> SDFrame<T> sortAsc(Function<T, R> var1);
+    /**
+     * Descending order by field
+     * @param function sort field
+     * @param <R> the sort field type
+     */
+    <R extends Comparable<? super R>> SDFrame<T> sortDesc(Function<T, R> function);
 
-    @Override
-    public SDFrame<T> cutFirst(int var1);
+    /**
+     * Ascending order
+     * @param comparator comparator
+     */
+    SDFrame<T> sortAsc(Comparator<T> comparator);
 
-    @Override
-    public SDFrame<T> cutLast(int var1);
+    /**
+     * Ascending order
+     * @param function sort field
+     */
+    <R extends Comparable<R>> SDFrame<T> sortAsc(Function<T, R> function);
 
-    @Override
-    public SDFrame<T> cut(Integer var1, Integer var2);
+    /** =========================== Cut Frame ===================================== **/
 
-    @Override
-    public SDFrame<T> cutPage(int var1, int var2);
+    /**
+     * Cut the top n element
+     * @param n the top n
+     */
+    SDFrame<T> cutFirst(int n);
 
-    @Override
-    public SDFrame<T> cutFirstRank(Sorter<T> var1, int var2);
+    /**
+     * Cut the last n element
+     * @param n the last n
+     */
+    SDFrame<T> cutLast(int n);
 
-    @Override
-    public T head();
+    /**
+     * cut elements within the scope
+     */
+    SDFrame<T> cut(Integer startIndex, Integer endIndex);
 
-    @Override
-    public List<T> head(int var1);
+    /**
+     * cut paginated data
+     * @param page The current page number is considered as the first page, regardless of
+     * whether it is passed as 0 or 1
+     * @param pageSize page size
+     */
+    SDFrame<T> cutPage(int page, int pageSize);
 
-    @Override
-    public T tail();
+    /**
+     * Cut the top N rankings data The same value is considered to have the same ranking
+     * @param sorter the ranking sorter
+     * @param n the top n
+     */
+    SDFrame<T> cutFirstRank(Sorter<T> sorter, int n);
 
-    @Override
-    public List<T> tail(int var1);
+    /** =========================== View Frame ===================================== **/
 
-    @Override
-    public SDFrame<T> distinct();
+    /**
+     * Get the first element
+     */
+    T head();
 
-    @Override
-    public <R extends Comparable<R>> SDFrame<T> distinct(Function<T, R> var1);
+    /**
+     * Get the first n elements
+     */
+    List<T> head(int n);
 
-    @Override
-    public <R extends Comparable<R>> SDFrame<T> distinct(Function<T, R> var1, ListToOneFunction<T> var2);
+    /**
+     * Get the last element
+     */
+    T tail();
 
-    @Override
-    public SDFrame<T> distinct(Comparator<T> var1);
+    /**
+     * Get the last n elements
+     */
+    List<T> tail(int n);
 
-    @Override
-    public SDFrame<T> distinct(Comparator<T> var1, ListToOneFunction<T> var2);
+    /**
+     * =========================== Distinct Frame =====================================
+     **/
 
-    public WindowSDFrame<T> window(Window<T> var1);
+    /**
+     * distinct by T value
+     */
+    SDFrame<T> distinct();
 
-    public WindowSDFrame<T> window();
+    /**
+     * distinct by field value
+     * @param function the field
+     * @param <R> field value type
+     */
+    <R extends Comparable<R>> SDFrame<T> distinct(Function<T, R> function);
 
-    @Override
-    public <C> SDFrame<T> replenish(Function<T, C> var1, List<C> var2, Function<C, T> var3);
+    /**
+     * distinct by field value
+     * @param function the field
+     * @param listOneFunction When there are more than one repeated element, this method
+     * will be called back, and customization will determine which element to choose
+     * @param <R> field value type
+     */
+    <R extends Comparable<R>> SDFrame<T> distinct(
+            Function<T, R> function, ListToOneFunction<T> listOneFunction);
 
-    @Override
-    public <G, C> SDFrame<T> replenish(Function<T, G> var1, Function<T, C> var2, List<C> var3, ReplenishFunction<G, C, T> var4);
+    /**
+     * distinct by comparator
+     * @param comparator the comparator
+     */
+    SDFrame<T> distinct(Comparator<T> comparator);
 
-    @Override
-    public <G, C> SDFrame<T> replenish(Function<T, G> var1, Function<T, C> var2, ReplenishFunction<G, C, T> var3);
+    /**
+     * distinct by comparator
+     * @param comparator the comparator
+     * @param function When there are more than one repeated element, this method will be
+     * called back, and customization will determine which element to choose
+     */
+    SDFrame<T> distinct(Comparator<T> comparator, ListToOneFunction<T> function);
+
+    /**
+     * =========================== Window Function =====================================
+     **/
+
+    /**
+     * open a window
+     * @param window window param
+     */
+    WindowSDFrame<T> window(Window<T> window);
+
+    /**
+     * open a empty window
+     */
+    WindowSDFrame<T> window();
+
+    /** =========================== Other ===================================== **/
+
+    /**
+     * Summarize all collectDim values, calculate the difference between them, and then
+     * add the missing difference to the Frame through getEmptyObject
+     *
+     */
+    <C> SDFrame<T> replenish(
+            Function<T, C> collectDim, List<C> allDim, Function<C, T> getEmptyObject);
+
+    /**
+     * Calculate the difference in groups and then add the difference to that group
+     *
+     * according to the groupDim dimension, and then summarize all collectDim fields
+     * within each group After summarizing, calculate the difference sets with
+     * allAbscissa, which are the entries that need to be supplemented. Then, generate
+     * empty objects according to the ReplenishFunction logic and add them to the group
+     * @param groupDim Dimension fields for grouping
+     * @param collectDim Data fields collected within the group
+     * @param allDim All dimensions that need to be displayed within the group
+     * @param getEmptyObject Logic for generating empty objects
+     * @param <G> The type of grouping
+     * @param <C> type of collection within the group
+     *
+     * The set supplemented by @ return
+     */
+    <G, C> SDFrame<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            List<C> allDim,
+            ReplenishFunction<G, C, T> getEmptyObject);
+
+    /**
+     * such as {@link IFrame#replenish(Function, Function, List, ReplenishFunction)}, but
+     * can not Specify allDim， will auto generate allDim, The default allDim is the value
+     * of all collectDim fields in the set
+     * @param groupDim Dimension fields for grouping
+     * @param collectDim Data fields collected within the group
+     * @param getEmptyObject Logic for generating empty objects
+     * @param <G> The type of grouping
+     * @param <C> type of collection within the group
+     */
+    <G, C> SDFrame<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            ReplenishFunction<G, C, T> getEmptyObject);
 }
-

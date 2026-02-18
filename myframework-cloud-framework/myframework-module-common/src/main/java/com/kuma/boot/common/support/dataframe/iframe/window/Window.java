@@ -1,10 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe.window;
 
-import com.kuma.boot.common.support.dataframe.iframe.window.Sorter;
-import com.kuma.boot.common.support.dataframe.iframe.window.WindowBuilder;
 import com.kuma.boot.common.support.dataframe.iframe.window.round.Range;
 import com.kuma.boot.common.support.dataframe.iframe.window.round.WindowRange;
 import java.util.Arrays;
@@ -12,82 +23,192 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Window building tool can specify window partition information, window range, and window
+ * sorting
+ *
+ * @author caizhiao
+ */
 public interface Window<T> {
+
+    /**
+     * open a Window by partitioning based on provided fields
+     * @param groupField group fields
+     */
     @SafeVarargs
-    public static <T> Window<T> groupBy(Function<T, ?> ... groupField) {
-        return new WindowBuilder<T>(Arrays.asList(groupField));
+    static <T> Window<T> groupBy(Function<T, ?>... groupField) {
+        return new WindowBuilder<>(Arrays.asList(groupField));
     }
 
-    public static <T, U extends Comparable<? super U>> Window<T> sortAscBy(Function<T, U> sortField) {
-        return new WindowBuilder<T>(Sorter.sortAscBy(sortField));
+    /**
+     * open a Window by ascending sort
+     * @param sortField sort fields
+     */
+    static <T, U extends Comparable<? super U>> Window<T> sortAscBy(Function<T, U> sortField) {
+        return new WindowBuilder<>(Sorter.sortAscBy(sortField));
     }
 
-    public static <T, U extends Comparable<? super U>> Window<T> sortDescBy(Function<T, U> sortField) {
-        return new WindowBuilder<T>(Sorter.sortDescBy(sortField));
+    /**
+     * open a Window by descending order
+     * @param sortField sort fields
+     */
+    static <T, U extends Comparable<? super U>> Window<T> sortDescBy(Function<T, U> sortField) {
+        return new WindowBuilder<>(Sorter.sortDescBy(sortField));
     }
 
-    public static <T> Window<T> sortBy(Comparator<T> comparator) {
-        return new WindowBuilder<T>(Sorter.toSorter(comparator));
+    /**
+     * open a Window by Comparator
+     * @param comparator window sort comparator
+     */
+    static <T> Window<T> sortBy(Comparator<T> comparator) {
+        return new WindowBuilder<>(Sorter.toSorter(comparator));
     }
 
-    public static <T> Window<T> sortBy(Sorter<T> sorter) {
-        return new WindowBuilder<T>(sorter);
+    /**
+     * open a Window by Sorter
+     * @param sorter window sorter
+     */
+    static <T> Window<T> sortBy(Sorter<T> sorter) {
+        return new WindowBuilder<>(sorter);
     }
 
-    public static <T> Window<T> roundBetweenBy(WindowRange start, WindowRange end) {
-        return new WindowBuilder(start, end);
+    /**
+     * open a Window by window range this range is form start to end
+     * @param start start range
+     * @param end end range
+     */
+    static <T> Window<T> roundBetweenBy(WindowRange start, WindowRange end) {
+        return new WindowBuilder<>(start, end);
     }
 
-    public static <T> Window<T> roundBefore2CurrentRowBy(int n) {
-        return new WindowBuilder(Range.BEFORE(n), Range.CURRENT_ROW);
+    /**
+     * open a Window by window range this range is form the first n lines of the current
+     * row to the current row
+     * @param n The first n lines of the current row
+     */
+    static <T> Window<T> roundBefore2CurrentRowBy(int n) {
+        return new WindowBuilder<>(Range.BEFORE(n), Range.CURRENT_ROW);
     }
 
-    public static <T> Window<T> roundCurrentRow2AfterBy(int n) {
-        return new WindowBuilder(Range.CURRENT_ROW, Range.AFTER(n));
+    /**
+     * open a Window by window range this range is form the current row to the last n row
+     * of the current row
+     * @param n the last n row of the current row
+     */
+    static <T> Window<T> roundCurrentRow2AfterBy(int n) {
+        return new WindowBuilder<>(Range.CURRENT_ROW, Range.AFTER(n));
     }
 
-    public static <T> Window<T> roundCurrentRow2EndRowBy() {
-        return new WindowBuilder(Range.CURRENT_ROW, Range.END_ROW);
+    /**
+     * open a Window by window range this range is form the current row to the end row
+     */
+    static <T> Window<T> roundCurrentRow2EndRowBy() {
+        return new WindowBuilder<>(Range.CURRENT_ROW, Range.END_ROW);
     }
 
-    public static <T> Window<T> roundStartRow2CurrentRowBy() {
-        return new WindowBuilder(Range.START_ROW, Range.CURRENT_ROW);
+    /**
+     * open a Window by window range this range is form the start row to the current row
+     */
+    static <T> Window<T> roundStartRow2CurrentRowBy() {
+        return new WindowBuilder<>(Range.START_ROW, Range.CURRENT_ROW);
     }
 
-    public static <T> Window<T> roundAllRowBy() {
-        return new WindowBuilder(Range.START_ROW, Range.END_ROW);
+    /**
+     * open a Window by window range this range is window all row
+     */
+    static <T> Window<T> roundAllRowBy() {
+        return new WindowBuilder<>(Range.START_ROW, Range.END_ROW);
     }
 
-    public static <T> Window<T> roundBeforeAfterBy(int before, int after) {
-        return new WindowBuilder(Range.BEFORE(before), Range.AFTER(after));
+    /**
+     * open a Window by window range this range is from before n row of current row to
+     * after n row of current row
+     * @param before before n row of current row
+     * @param after after n row of current row
+     */
+    static <T> Window<T> roundBeforeAfterBy(int before, int after) {
+        return new WindowBuilder<>(Range.BEFORE(before), Range.AFTER(after));
     }
 
-    public <U extends Comparable<? super U>> Window<T> sortAsc(Function<T, U> var1);
+    /**
+     * Sort windows in ascending order according to specified fields
+     * @param sortField sort field
+     */
+    <U extends Comparable<? super U>> Window<T> sortAsc(Function<T, U> sortField);
 
-    public <U extends Comparable<? super U>> Window<T> sortDesc(Function<T, U> var1);
+    /**
+     * Sort windows in descending order according to specified fields
+     * @param sortField sort field
+     */
+    <U extends Comparable<? super U>> Window<T> sortDesc(Function<T, U> sortField);
 
-    public Window<T> sort(Comparator<T> var1);
+    /**
+     * sort window by Comparator
+     * @param comparator sort comparator
+     */
+    Window<T> sort(Comparator<T> comparator);
 
-    public Window<T> roundBetween(WindowRange var1, WindowRange var2);
+    /**
+     * Specify window range
+     * @param start window start range
+     * @param end window end range
+     */
+    Window<T> roundBetween(WindowRange start, WindowRange end);
 
-    public Window<T> roundBefore2CurrentRow(int var1);
+    /**
+     * Specify window range this range is form the first n lines of the current row to the
+     * current row
+     * @param n The first n lines of the current row
+     */
+    Window<T> roundBefore2CurrentRow(int n);
 
-    public Window<T> roundCurrentRow2After(int var1);
+    /**
+     * Specify window range this range is form the current row to the last n row of the
+     * current row
+     * @param n the last n row of the current row
+     */
+    Window<T> roundCurrentRow2After(int n);
 
-    public Window<T> roundCurrentRow2EndRow();
+    /**
+     * Specify window range this range is form the current row to the end row
+     */
+    Window<T> roundCurrentRow2EndRow();
 
-    public Window<T> roundStartRow2CurrentRow();
+    /**
+     * Specify window range this range is form the start row to the current row
+     */
+    Window<T> roundStartRow2CurrentRow();
 
-    public Window<T> roundAllRow();
+    /**
+     * Specify window range this range is window all row
+     */
+    Window<T> roundAllRow();
 
-    public Window<T> roundBeforeAfter(int var1, int var2);
+    /**
+     * Specify window range this range is from before n row of current row to after n row
+     * of current row
+     * @param before before n row of current row
+     * @param after after n row of current row
+     */
+    Window<T> roundBeforeAfter(int before, int after);
 
-    public List<Function<T, ?>> partitions();
+    /**
+     * get partitions info
+     */
+    List<Function<T, ?>> partitions();
 
-    public Comparator<T> getComparator();
+    /**
+     * get window comparator
+     */
+    Comparator<T> getComparator();
 
-    public WindowRange getStartRange();
+    /**
+     * get window start range
+     */
+    WindowRange getStartRange();
 
-    public WindowRange getEndRange();
+    /**
+     * get window end range
+     */
+    WindowRange getEndRange();
 }
-

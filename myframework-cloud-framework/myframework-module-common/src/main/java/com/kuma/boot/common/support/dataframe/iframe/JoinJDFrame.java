@@ -1,60 +1,186 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.IFrame;
-import com.kuma.boot.common.support.dataframe.iframe.JDFrame;
-import com.kuma.boot.common.support.dataframe.iframe.JoinIFrame;
+import com.kuma.boot.common.support.dataframe.iframe.support.DefaultJoin;
 import com.kuma.boot.common.support.dataframe.iframe.support.Join;
 import com.kuma.boot.common.support.dataframe.iframe.support.JoinOn;
 import com.kuma.boot.common.support.dataframe.iframe.support.VoidJoin;
 
-public interface JoinJDFrame<T>
-extends JoinIFrame<T> {
-    @Override
-    public <R, K> JDFrame<R> join(IFrame<K> var1, JoinOn<T, K> var2, Join<T, K, R> var3);
+public interface JoinJDFrame<T> extends JoinIFrame<T> {
 
-    @Override
-    public <R, K> JDFrame<R> joinOnce(IFrame<K> var1, JoinOn<T, K> var2, Join<T, K, R> var3);
+    /**
+     * inner join Frame
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> join(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join);
 
-    @Override
-    public <R, K> JDFrame<R> join(IFrame<K> var1, JoinOn<T, K> var2);
+    /**
+     * inner join Frame If successfully associated with other Frame record, it will only
+     * be associated once
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> joinOnce(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join);
 
-    @Override
-    public <K> JDFrame<T> joinVoid(IFrame<K> var1, JoinOn<T, K> var2, VoidJoin<T, K> var3);
+    /**
+     * inner join Frame such as {@link IFrame#join(IFrame, JoinOn, Join)}, but the default
+     * Join is {@link DefaultJoin}, it will automatically map to a new Frame based on the
+     * same name
+     * @param other other frame
+     * @param on connection conditions
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> join(IFrame<K> other, JoinOn<T, K> on);
 
-    @Override
-    public <K> JDFrame<T> joinOnceVoid(IFrame<K> var1, JoinOn<T, K> var2, VoidJoin<T, K> var3);
+    /**
+     * just Execute inner join operation， will not change the data of the frame
+     * @param other other frame
+     * @param on connection conditions
+     * @param <K> other Frame type
+     */
+    <K> JDFrame<T> joinVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join);
 
-    @Override
-    public <R, K> JDFrame<R> leftJoin(IFrame<K> var1, JoinOn<T, K> var2, Join<T, K, R> var3);
+    /**
+     * just Execute inner join operation， will not change the data of the frame If
+     * successfully associated with other Frame record, it will only be associated once
+     * @param other other frame
+     * @param on connection conditions
+     * @param <K> other Frame type
+     */
+    <K> JDFrame<T> joinOnceVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join);
 
-    @Override
-    public <R, K> JDFrame<R> leftJoinOnce(IFrame<K> var1, JoinOn<T, K> var2, Join<T, K, R> var3);
+    /**
+     * left join Frame if connection conditions false, The callback value K for Join will
+     * be null， always keep T
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> leftJoin(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join);
 
-    @Override
-    public <R, K> JDFrame<R> leftJoin(IFrame<K> var1, JoinOn<T, K> var2);
+    /**
+     * left join Frame if connection conditions false, The callback value K for Join will
+     * be null， always keep T If successfully associated with other Frame record, it will
+     * only be associated once
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> leftJoinOnce(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join);
 
-    @Override
-    public <K> JDFrame<T> leftJoinVoid(IFrame<K> var1, JoinOn<T, K> var2, VoidJoin<T, K> var3);
+    /**
+     * left join Frame such as {@link IFrame#leftJoin(IFrame, JoinOn, Join)}, but the
+     * default Join is {@link DefaultJoin},
+     * @param other other frame
+     * @param on connection conditions
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> leftJoin(IFrame<K> other, JoinOn<T, K> on);
 
-    @Override
-    public <K> JDFrame<T> leftJoinOnceVoid(IFrame<K> var1, JoinOn<T, K> var2, VoidJoin<T, K> var3);
+    /**
+     * just Execute left join operation， will not change the data of the frame if
+     * connection conditions false, The callback value K for Join will be null， always
+     * keep T
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <K> other Frame type
+     */
+    <K> JDFrame<T> leftJoinVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join);
 
-    @Override
-    public <R, K> JDFrame<R> rightJoin(IFrame<K> var1, JoinOn<T, K> var2, Join<T, K, R> var3);
+    /**
+     * just Execute left join operation， will not change the data of the frame if
+     * connection conditions false, The callback value K for Join will be null， always
+     * keep T If successfully associated with other Frame record, it will only be
+     * associated once
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <K> other Frame type
+     */
+    <K> JDFrame<T> leftJoinOnceVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join);
 
-    @Override
-    public <R, K> JDFrame<R> rightJoinOnce(IFrame<K> var1, JoinOn<T, K> var2, Join<T, K, R> var3);
+    /**
+     * right join Frame if connection conditions false, The callback value T for Join will
+     * be null， always keep K
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> rightJoin(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join);
 
-    @Override
-    public <R, K> JDFrame<R> rightJoin(IFrame<K> var1, JoinOn<T, K> var2);
+    /**
+     * right join Frame if connection conditions false, The callback value T for Join will
+     * be null， always keep K If successfully associated with other Frame record, it will
+     * only be associated once
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> rightJoinOnce(IFrame<K> other, JoinOn<T, K> on, Join<T, K, R> join);
 
-    @Override
-    public <K> JDFrame<T> rightJoinVoid(IFrame<K> var1, JoinOn<T, K> var2, VoidJoin<T, K> var3);
+    /**
+     * right join Frame such as {@link IFrame#rightJoin(IFrame, JoinOn, Join)}, but the
+     * default Join is {@link DefaultJoin},
+     * @param other other frame
+     * @param on connection conditions
+     * @param <R> new Frame type
+     * @param <K> other Frame type
+     */
+    <R, K> JDFrame<R> rightJoin(IFrame<K> other, JoinOn<T, K> on);
 
-    @Override
-    public <K> JDFrame<T> rightJoinOnceVoid(IFrame<K> var1, JoinOn<T, K> var2, VoidJoin<T, K> var3);
+    /**
+     * just Execute right join operation， will not change the data of the frame if
+     * connection conditions false, The callback value T for Join will be null， always
+     * keep K
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <K> other Frame type
+     */
+    <K> JDFrame<T> rightJoinVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join);
+
+    /**
+     * just Execute right join operation， will not change the data of the frame if
+     * connection conditions false, The callback value T for Join will be null， always
+     * keep K If successfully associated with other Frame record, it will only be
+     * associated once
+     * @param other other frame
+     * @param on connection conditions
+     * @param join Connection logic
+     * @param <K> other Frame type
+     */
+    <K> JDFrame<T> rightJoinOnceVoid(IFrame<K> other, JoinOn<T, K> on, VoidJoin<T, K> join);
 }
-

@@ -1,86 +1,153 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.cron.parser;
 
-import com.kuma.boot.common.support.cron.parser.CronParser;
 import com.kuma.boot.common.support.cron.pojo.CronField;
 import com.kuma.boot.common.support.cron.pojo.CronPosition;
 import com.kuma.boot.common.support.cron.pojo.TimeOfDay;
 import com.kuma.boot.common.support.cron.util.CompareUtil;
 import com.kuma.boot.common.support.cron.util.CronUtil;
 import com.kuma.boot.common.support.cron.util.DateUtil;
+
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-public class DayBasedCronParser
-implements CronParser {
+/**
+ * DayBasedCronParser
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
+ */
+public class DayBasedCronParser implements CronParser {
+
     private static final int CRON_LEN_YEAR = 7;
+
+    /**
+     * 以下字段在构造之后就不会变了
+     */
     private final String expression;
+
     private final TimeZone timeZone;
+
     private final List<CronField> cronFields;
+
     private final CronField fieldSecond;
+
     private final CronField fieldMinute;
+
     private final CronField fieldHour;
+
     private final CronField fieldDay;
+
     private final CronField fieldMonth;
+
     private final CronField fieldWeek;
+
     private final CronField fieldYear;
 
-    public DayBasedCronParser(String expression) {
+    public DayBasedCronParser( String expression ) {
         this(expression, TimeZone.getDefault());
     }
 
-    public DayBasedCronParser(String expression, TimeZone timeZone) {
+    public DayBasedCronParser( String expression, TimeZone timeZone ) {
         this.expression = expression;
         this.timeZone = timeZone;
-        this.cronFields = CronUtil.convertCronField(expression);
-        this.fieldSecond = this.cronFields.get(CronPosition.SECOND.ordinal());
-        this.fieldMinute = this.cronFields.get(CronPosition.MINUTE.ordinal());
-        this.fieldHour = this.cronFields.get(CronPosition.HOUR.ordinal());
-        this.fieldDay = this.cronFields.get(CronPosition.DAY.ordinal());
-        this.fieldMonth = this.cronFields.get(CronPosition.MONTH.ordinal());
-        this.fieldWeek = this.cronFields.get(CronPosition.WEEK.ordinal());
-        this.fieldYear = 7 == this.cronFields.size() ? this.cronFields.get(CronPosition.YEAR.ordinal()) : null;
-    }
+        cronFields = CronUtil.convertCronField(expression);
 
-    @Override
-    public Date next(Date date) {
-        List<Integer> listYear;
-        Integer calYear;
-        Integer year;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(this.timeZone);
-        calendar.setTime(date);
-        calendar.add(13, 1);
-        if (null != this.fieldYear && !(year = Integer.valueOf(DateUtil.year(calendar))).equals(calYear = CompareUtil.findNext(year, listYear = this.fieldYear.points()))) {
-            calendar.set(1, calYear);
+        fieldSecond = cronFields.get(CronPosition.SECOND.ordinal());
+        fieldMinute = cronFields.get(CronPosition.MINUTE.ordinal());
+        fieldHour = cronFields.get(CronPosition.HOUR.ordinal());
+        fieldDay = cronFields.get(CronPosition.DAY.ordinal());
+        fieldMonth = cronFields.get(CronPosition.MONTH.ordinal());
+        fieldWeek = cronFields.get(CronPosition.WEEK.ordinal());
+        /// 如果包含年域
+        if (CRON_LEN_YEAR == cronFields.size()) {
+            fieldYear = cronFields.get(CronPosition.YEAR.ordinal());
+        } else {
+            fieldYear = null;
         }
-        return CronUtil.doNext(calendar, this.fieldSecond, this.fieldMinute, this.fieldHour, this.fieldDay, this.fieldMonth, this.fieldWeek, this.fieldYear);
     }
 
+    /**
+     * 思路： 1、找到所有时分秒的组合并按照时分秒排序 2、给定的时分秒在以上集合之前、之后处理 3、给定时时分秒在以上集合中找到一个最小的位置 4、day+1循环直到找到满足月、星期的那一天 5、或者在列表中找到最小的即可
+     */
     @Override
-    public List<TimeOfDay> timesOfDay(Date date) {
+    public Date next( Date date ) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(this.timeZone);
+        calendar.setTimeZone(timeZone);
+        // 基准线,至少从下一秒开始
         calendar.setTime(date);
+        calendar.add(Calendar.SECOND, 1);
+
+        if (null != fieldYear) {
+            Integer year = DateUtil.year(calendar);
+            List<Integer> listYear = fieldYear.points();
+            Integer calYear = CompareUtil.findNext(year, listYear);
+            if (!year.equals(calYear)) {
+                calendar.set(Calendar.YEAR, calYear);
+            }
+        }
+
+        return CronUtil.doNext(
+                calendar,
+                fieldSecond,
+                fieldMinute,
+                fieldHour,
+                fieldDay,
+                fieldMonth,
+                fieldWeek,
+                fieldYear);
+    }
+
+    /**
+     * 思路：1、切割cron表达式 2、转换每个域 3、计算执行时间点（关键算法，解析cron表达式） 4、计算某一天的哪些时间点执行
+     */
+    @Override
+    public List<TimeOfDay> timesOfDay( Date date ) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(timeZone);
+        calendar.setTime(date);
+
         int year = DateUtil.year(calendar);
         int week = DateUtil.week(calendar);
         int month = DateUtil.month(calendar);
         int day = DateUtil.day(calendar);
-        if (null != this.fieldYear && !CronUtil.satisfy(year, this.fieldYear)) {
+        /// 如果包含年域
+        if (null != fieldYear) {
+            if (!CronUtil.satisfy(year, fieldYear)) {
+                return Collections.emptyList();
+            }
+        }
+
+        /// 今天不执行就直接返回空
+        if (!CronUtil.satisfy(week, fieldWeek)
+                || !CronUtil.satisfy(month, fieldMonth)
+                || !CronUtil.satisfy(day, fieldDay)) {
             return Collections.emptyList();
         }
-        if (!(CronUtil.satisfy(week, this.fieldWeek) && CronUtil.satisfy(month, this.fieldMonth) && CronUtil.satisfy(day, this.fieldDay))) {
-            return Collections.emptyList();
-        }
-        CronField fieldHour = this.cronFields.get(CronPosition.HOUR.ordinal());
-        CronField fieldMinute = this.cronFields.get(CronPosition.MINUTE.ordinal());
-        CronField fieldSecond = this.cronFields.get(CronPosition.SECOND.ordinal());
+
+        CronField fieldHour = cronFields.get(CronPosition.HOUR.ordinal());
+        CronField fieldMinute = cronFields.get(CronPosition.MINUTE.ordinal());
+        CronField fieldSecond = cronFields.get(CronPosition.SECOND.ordinal());
+
         return CronUtil.timesOfDay(fieldHour, fieldMinute, fieldSecond);
     }
 }
-

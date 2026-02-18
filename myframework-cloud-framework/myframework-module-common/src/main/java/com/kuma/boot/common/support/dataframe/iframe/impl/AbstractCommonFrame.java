@@ -33,6 +33,9 @@ import java.util.*;
 /**
  * AbstractCommonFrame
  *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-17 10:30:45
  */
 public abstract class AbstractCommonFrame<T> implements IFrame<T> {
 

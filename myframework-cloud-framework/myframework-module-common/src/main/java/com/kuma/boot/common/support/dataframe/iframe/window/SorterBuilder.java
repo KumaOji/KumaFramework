@@ -1,14 +1,29 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe.window;
 
-import com.kuma.boot.common.support.dataframe.iframe.window.Sorter;
 import java.util.Comparator;
 import java.util.function.Function;
 
-public class SorterBuilder<T>
-implements Sorter<T> {
+/**
+ * @author caizhiao
+ */
+public class SorterBuilder<T> implements Sorter<T> {
+
     protected Comparator<T> comparator;
 
     public SorterBuilder(Comparator<T> comparator) {
@@ -20,27 +35,37 @@ implements Sorter<T> {
         return null;
     }
 
-    @Override
     public <U extends Comparable<? super U>> Sorter<T> sortAsc(Function<T, U> sortField) {
-        this.comparator = this.comparator == null ? Comparator.comparing(sortField) : this.comparator.thenComparing(sortField);
+        if (this.comparator == null) {
+            this.comparator = Comparator.comparing(sortField);
+        } else {
+            this.comparator = this.comparator.thenComparing(sortField);
+        }
         return this;
     }
 
-    @Override
     public <U extends Comparable<? super U>> Sorter<T> sortDesc(Function<T, U> sortField) {
-        this.comparator = this.comparator == null ? Comparator.comparing(sortField).reversed() : this.comparator.thenComparing(Comparator.comparing(sortField).reversed());
+        if (this.comparator == null) {
+            this.comparator = Comparator.comparing(sortField).reversed();
+        } else {
+            this.comparator =
+                    this.comparator.thenComparing(Comparator.comparing(sortField).reversed());
+        }
         return this;
     }
 
     @Override
     public Sorter<T> sort(Comparator<T> comparator) {
-        this.comparator = this.comparator == null ? comparator : this.comparator.thenComparing(comparator);
+        if (this.comparator == null) {
+            this.comparator = comparator;
+        } else {
+            this.comparator = this.comparator.thenComparing(comparator);
+        }
         return this;
     }
 
     @Override
     public int compare(T o1, T o2) {
-        return this.comparator.compare(o1, o2);
+        return comparator.compare(o1, o2);
     }
 }
-

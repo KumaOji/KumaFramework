@@ -1,10 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.GroupIFrame;
-import com.kuma.boot.common.support.dataframe.iframe.SDFrame;
 import com.kuma.boot.common.support.dataframe.iframe.function.NumberFunction;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI2;
 import com.kuma.boot.common.support.dataframe.iframe.item.FI3;
@@ -14,78 +25,218 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.Function;
 
-public interface GroupSDFrame<T>
-extends GroupIFrame<T> {
-    @Override
-    public <K> SDFrame<FI2<K, List<T>>> group(Function<? super T, ? extends K> var1);
+/**
+ * @author caizhihao
+ * @param <T>
+ */
+public interface GroupSDFrame<T> extends GroupIFrame<T> {
 
-    @Override
-    public <K, R extends Number> SDFrame<FI2<K, BigDecimal>> groupBySum(Function<T, K> var1, NumberFunction<T, R> var2);
+    /**
+     * Group list
+     * @param key group field
+     */
+    <K> SDFrame<FI2<K, List<T>>> group(Function<? super T, ? extends K> key);
 
-    @Override
-    public <K, J, R extends Number> SDFrame<FI3<K, J, BigDecimal>> groupBySum(Function<T, K> var1, Function<T, J> var2, NumberFunction<T, R> var3);
+    /**
+     * Group summation
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, R extends Number> SDFrame<FI2<K, BigDecimal>> groupBySum(
+            Function<T, K> key, NumberFunction<T, R> value);
 
-    @Override
-    public <K, J, H, R extends Number> SDFrame<FI4<K, J, H, BigDecimal>> groupBySum(Function<T, K> var1, Function<T, J> var2, Function<T, H> var3, NumberFunction<T, R> var4);
+    /**
+     * Group summation
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, R extends Number> SDFrame<FI3<K, J, BigDecimal>> groupBySum(
+            Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value);
 
-    @Override
-    public <K> SDFrame<FI2<K, Long>> groupByCount(Function<T, K> var1);
+    /**
+     * Group summation
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param key3 third level group field
+     * @param value Aggregated field
+     */
+    <K, J, H, R extends Number> SDFrame<FI4<K, J, H, BigDecimal>> groupBySum(
+            Function<T, K> key,
+            Function<T, J> key2,
+            Function<T, H> key3,
+            NumberFunction<T, R> value);
 
-    @Override
-    public <K, J> SDFrame<FI3<K, J, Long>> groupByCount(Function<T, K> var1, Function<T, J> var2);
+    /**
+     * Group count
+     * @param key group field
+     */
+    <K> SDFrame<FI2<K, Long>> groupByCount(Function<T, K> key);
 
-    @Override
-    public <K, J, H> SDFrame<FI4<K, J, H, Long>> groupByCount(Function<T, K> var1, Function<T, J> var2, Function<T, H> var3);
+    /**
+     * Group count
+     * @param key group field
+     * @param key2 secondary level group field
+     */
+    <K, J> SDFrame<FI3<K, J, Long>> groupByCount(Function<T, K> key, Function<T, J> key2);
 
-    @Override
-    public <K, R extends Number> SDFrame<FI3<K, BigDecimal, Long>> groupBySumCount(Function<T, K> var1, NumberFunction<T, R> var2);
+    /**
+     * Group count
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param key3 third level group field
+     */
+    <K, J, H> SDFrame<FI4<K, J, H, Long>> groupByCount(
+            Function<T, K> key, Function<T, J> key2, Function<T, H> key3);
 
-    @Override
-    public <K, J, R extends Number> SDFrame<FI4<K, J, BigDecimal, Long>> groupBySumCount(Function<T, K> var1, Function<T, J> var2, NumberFunction<T, R> var3);
+    /**
+     * Group sum and count together
+     * @param key group field
+     * @param value Aggregated field
+     * @return FItem3(key, Sum, Count)
+     */
+    <K, R extends Number> SDFrame<FI3<K, BigDecimal, Long>> groupBySumCount(
+            Function<T, K> key, NumberFunction<T, R> value);
 
-    @Override
-    public <K, R extends Number> SDFrame<FI2<K, BigDecimal>> groupByAvg(Function<T, K> var1, NumberFunction<T, R> var2);
+    /**
+     * Group sum and count together
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     * @return FItem4(key, ke2,Sum, Count)
+     */
+    <K, J, R extends Number> SDFrame<FI4<K, J, BigDecimal, Long>> groupBySumCount(
+            Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value);
 
-    @Override
-    public <K, J, R extends Number> SDFrame<FI3<K, J, BigDecimal>> groupByAvg(Function<T, K> var1, Function<T, J> var2, NumberFunction<T, R> var3);
+    /**
+     * Group average
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, R extends Number> SDFrame<FI2<K, BigDecimal>> groupByAvg(
+            Function<T, K> key, NumberFunction<T, R> value);
 
-    @Override
-    public <K, J, H, R extends Number> SDFrame<FI4<K, J, H, BigDecimal>> groupByAvg(Function<T, K> var1, Function<T, J> var2, Function<T, H> var3, NumberFunction<T, R> var4);
+    /**
+     * Group average
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, R extends Number> SDFrame<FI3<K, J, BigDecimal>> groupByAvg(
+            Function<T, K> key, Function<T, J> key2, NumberFunction<T, R> value);
 
-    @Override
-    public <K, V extends Comparable<? super V>> SDFrame<FI2<K, T>> groupByMax(Function<T, K> var1, Function<T, V> var2);
+    /**
+     * Group average
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param key3 third level group field
+     * @param value Aggregated field
+     */
+    <K, J, H, R extends Number> SDFrame<FI4<K, J, H, BigDecimal>> groupByAvg(
+            Function<T, K> key,
+            Function<T, J> key2,
+            Function<T, H> key3,
+            NumberFunction<T, R> value);
 
-    @Override
-    public <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, T>> groupByMax(Function<T, K> var1, Function<T, J> var2, Function<T, V> var3);
+    /**
+     * Group max
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, V extends Comparable<? super V>> SDFrame<FI2<K, T>> groupByMax(
+            Function<T, K> key, Function<T, V> value);
 
-    @Override
-    public <K, V extends Comparable<? super V>> SDFrame<FI2<K, V>> groupByMaxValue(Function<T, K> var1, Function<T, V> var2);
+    /**
+     * Group max
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, T>> groupByMax(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value);
 
-    @Override
-    public <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, V>> groupByMaxValue(Function<T, K> var1, Function<T, J> var2, Function<T, V> var3);
+    /**
+     * Group max value
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, V extends Comparable<? super V>> SDFrame<FI2<K, V>> groupByMaxValue(
+            Function<T, K> key, Function<T, V> value);
 
-    @Override
-    public <K, V extends Comparable<? super V>> SDFrame<FI2<K, T>> groupByMin(Function<T, K> var1, Function<T, V> var2);
+    /**
+     * Group max value
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, V>> groupByMaxValue(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value);
 
-    @Override
-    public <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, T>> groupByMin(Function<T, K> var1, Function<T, J> var2, Function<T, V> var3);
+    /**
+     * Group min
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, V extends Comparable<? super V>> SDFrame<FI2<K, T>> groupByMin(
+            Function<T, K> key, Function<T, V> value);
 
-    @Override
-    public <K, V extends Comparable<? super V>> SDFrame<FI2<K, V>> groupByMinValue(Function<T, K> var1, Function<T, V> var2);
+    /**
+     * Group min
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, T>> groupByMin(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value);
 
-    @Override
-    public <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, V>> groupByMinValue(Function<T, K> var1, Function<T, J> var2, Function<T, V> var3);
+    /**
+     * Group min value
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, V extends Comparable<? super V>> SDFrame<FI2<K, V>> groupByMinValue(
+            Function<T, K> key, Function<T, V> value);
 
-    @Override
-    public <K, V extends Comparable<? super V>> SDFrame<FI2<K, MaxMin<V>>> groupByMaxMinValue(Function<T, K> var1, Function<T, V> var2);
+    /**
+     * Group min value
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, V>> groupByMinValue(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value);
 
-    @Override
-    public <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, MaxMin<V>>> groupByMaxMinValue(Function<T, K> var1, Function<T, J> var2, Function<T, V> var3);
+    /**
+     * Group max and min value
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, V extends Comparable<? super V>> SDFrame<FI2<K, MaxMin<V>>> groupByMaxMinValue(
+            Function<T, K> key, Function<T, V> value);
 
-    @Override
-    public <K, V extends Comparable<? super V>> SDFrame<FI2<K, MaxMin<T>>> groupByMaxMin(Function<T, K> var1, Function<T, V> var2);
+    /**
+     * Group max and min value
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, MaxMin<V>>> groupByMaxMinValue(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value);
 
-    @Override
-    public <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, MaxMin<T>>> groupByMaxMin(Function<T, K> var1, Function<T, J> var2, Function<T, V> var3);
+    /**
+     * Group max and min element
+     * @param key group field
+     * @param value Aggregated field
+     */
+    <K, V extends Comparable<? super V>> SDFrame<FI2<K, MaxMin<T>>> groupByMaxMin(
+            Function<T, K> key, Function<T, V> value);
+
+    /**
+     * Group max and min element
+     * @param key group field
+     * @param key2 secondary level group field
+     * @param value Aggregated field
+     */
+    <K, J, V extends Comparable<? super V>> SDFrame<FI3<K, J, MaxMin<T>>> groupByMaxMin(
+            Function<T, K> key, Function<T, J> key2, Function<T, V> value);
 }
-

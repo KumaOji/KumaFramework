@@ -1,13 +1,21 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.GroupIFrame;
-import com.kuma.boot.common.support.dataframe.iframe.JoinIFrame;
-import com.kuma.boot.common.support.dataframe.iframe.OperationIFrame;
-import com.kuma.boot.common.support.dataframe.iframe.SummaryFrame;
-import com.kuma.boot.common.support.dataframe.iframe.WhereIFrame;
 import com.kuma.boot.common.support.dataframe.iframe.function.ConsumerIndex;
 import com.kuma.boot.common.support.dataframe.iframe.function.ListToOneFunction;
 import com.kuma.boot.common.support.dataframe.iframe.function.ReplenishFunction;
@@ -24,139 +32,523 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * A Simple DataFrame Stream API Interface define
+ *
+ * @author caizhihao
+ */
 public interface IFrame<T>
-extends SummaryFrame<T>,
-WhereIFrame<T>,
-JoinIFrame<T>,
-GroupIFrame<T>,
-OperationIFrame<T>,
-Iterable<T> {
-    public List<T> toLists();
+        extends SummaryFrame<T>,
+        WhereIFrame<T>,
+        JoinIFrame<T>,
+        GroupIFrame<T>,
+        OperationIFrame<T>,
+        Iterable<T> {
 
-    public T[] toArray();
+    /**
+     * Convert to list
+     * @return the list
+     */
+    List<T> toLists();
 
-    public T[] toArray(Class<T> var1);
+    /**
+     * Convert to Array
+     * @return the Array， if Frame is empty will return null rather than empty array
+     */
+    T[] toArray();
 
-    public <K, V> Map<K, V> toMap(Function<? super T, ? extends K> var1, Function<? super T, ? extends V> var2);
+    /**
+     * Convert to Array
+     * @param elementClass the array element class type
+     * @return the Array， Even if the Frame is empty, it will return an empty array
+     * instead of null
+     */
+    T[] toArray(Class<T> elementClass);
 
-    public <K, K2, V> Map<K, Map<K2, V>> toMap(Function<? super T, ? extends K> var1, Function<? super T, ? extends K2> var2, Function<? super T, ? extends V> var3);
+    /**
+     * Convert to Map
+     * @param keyMapper a mapping function to produce keys
+     * @param valueMapper a mapping function to produce values
+     */
+    <K, V> Map<K, V> toMap(
+            Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends V> valueMapper);
 
-    public Stream<T> stream();
+    /**
+     * Convert to Map
+     * @param keyMapper a mapping function to produce first keys
+     * @param key2Mapper a mapping function to produce second keys
+     * @param valueMapper a mapping function to produce values
+     */
+    <K, K2, V> Map<K, Map<K2, V>> toMap(
+            Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends K2> key2Mapper,
+            Function<? super T, ? extends V> valueMapper);
 
-    public <R> IFrame<R> from(Stream<R> var1);
+    /**
+     * get stream
+     * @return the stream
+     */
+    Stream<T> stream();
 
-    public IFrame<T> forEachDo(Consumer<? super T> var1);
+    /**
+     * Convert to other IFrame
+     */
+    <R> IFrame<R> from(Stream<R> data);
 
-    public IFrame<T> forEachParallel(Consumer<? super T> var1);
+    /**
+     * Performs the given action for each element of the Iterable until all elements have
+     * been processed or the action throws an exception.
+     */
+    IFrame<T> forEachDo(Consumer<? super T> action);
 
-    public IFrame<T> forEachDo(ConsumerIndex<? super T> var1);
+    /**
+     * such as {@link #forEachDo(Consumer)} , but is parallel to forEach
+     */
+    IFrame<T> forEachParallel(Consumer<? super T> action);
 
-    public boolean contains(T var1);
+    /**
+     * Performs the given action for each element of the Iterable until all elements have
+     * been processed or the action throws an exception.
+     */
+    IFrame<T> forEachDo(ConsumerIndex<? super T> action);
 
-    public <U> boolean containsValue(Function<T, U> var1, U var2);
+    /**
+     * traverse each element determine whether the specified object is included
+     * @param other specified object
+     */
+    boolean contains(T other);
 
-    public <U> String joining(Function<T, U> var1, CharSequence var2, CharSequence var3, CharSequence var4);
+    /**
+     * traverse each element determine whether the specified object value is included
+     * @param valueFunction field value
+     */
+    <U> boolean containsValue(Function<T, U> valueFunction, U value);
 
-    public <U> String joining(Function<T, U> var1, CharSequence var2);
+    /**
+     * Concatenate the values of the fields according to the specified delimiter and
+     * prefix ,suffix
+     * @param joinField splicing fields
+     * @param delimiter the delimiter to be used between each element
+     * @param prefix the sequence of characters to be used at the beginning of the joined
+     * result
+     * @param suffix the sequence of characters to be used at the end of the joined result
+     *
+     */
+    <U> String joining(
+            Function<T, U> joinField,
+            CharSequence delimiter,
+            CharSequence prefix,
+            CharSequence suffix);
 
-    public IFrame<T> defaultScale(int var1);
+    /**
+     * Concatenate the values of the fields according to the specified delimiter
+     * @param joinField splicing fields
+     * @param delimiter the delimiter to be used between each element
+     *
+     */
+    <U> String joining(Function<T, U> joinField, CharSequence delimiter);
 
-    public IFrame<T> defaultScale(int var1, RoundingMode var2);
+    /**
+     * =========================== Frame Setting =====================================
+     **/
+    /**
+     * Set default decimal places
+     */
+    IFrame<T> defaultScale(int scale);
 
-    public void show();
+    /**
+     * Set default decimal places
+     */
+    IFrame<T> defaultScale(int scale, RoundingMode roundingMode);
 
-    public void show(int var1);
+    /**
+     * =========================== Frame Info =====================================
+     **/
+    /**
+     * print the 10 row to the console
+     *
+     */
+    void show();
 
-    public List<String> columns();
+    /**
+     * print the n row to the console
+     */
+    void show(int n);
 
-    public <R> List<R> col(Function<T, R> var1);
+    /**
+     * Get column headers
+     */
+    List<String> columns();
 
-    public List<T> page(int var1, int var2);
+    /**
+     * Get a column value
+     */
+    <R> List<R> col(Function<T, R> function);
 
-    public boolean isEmpty();
+    /**
+     * Get paginated data
+     * @param page The current page number is considered as the first page, regardless of
+     * whether it is passed as 0 or 1
+     * @param pageSize page size
+     */
+    List<T> page(int page, int pageSize);
 
-    public boolean isNotEmpty();
+    /**
+     * If the number of rows is 0, it is empty
+     */
+    boolean isEmpty();
 
-    public <R> IFrame<R> map(Function<T, R> var1);
+    /**
+     * If the number of rows is greater than 0, it is not empty
+     */
+    boolean isNotEmpty();
 
-    public <R> IFrame<R> mapParallel(Function<T, R> var1);
+    /**
+     * =========================== Frame Convert =====================================
+     */
+    /**
+     * convert to the new Frame
+     * @param map convert operation
+     * @return the new Frame
+     * @param <R> the new Frame type
+     */
+    <R> IFrame<R> map(Function<T, R> map);
 
-    public <R extends Number> IFrame<T> mapPercent(Function<T, R> var1, SetFunction<T, BigDecimal> var2, int var3);
+    /**
+     * parallel convert to the new Frame
+     * @param map convert operation
+     * @return the new Frame
+     * @param <R> the new Frame type
+     */
+    <R> IFrame<R> mapParallel(Function<T, R> map);
 
-    public <R extends Number> IFrame<T> mapPercent(Function<T, R> var1, SetFunction<T, BigDecimal> var2);
+    /**
+     * Percentage convert you can convert the value of a certain field to a percentage,
+     * Then assign a value to a certain column through SetFunction
+     * @param get need percentage convert field
+     * @param set field for storing percentage values
+     * @param scale percentage retain decimal places
+     * @param <R> the percentage field type
+     */
+    <R extends Number> IFrame<T> mapPercent(
+            Function<T, R> get, SetFunction<T, BigDecimal> set, int scale);
 
-    public IFrame<List<T>> partition(int var1);
+    /**
+     * Percentage convert such as {@link IFrame#mapPercent(Function, SetFunction, int)},
+     * but default scale is 2
+     * @param get need percentage convert field
+     * @param set field for storing percentage values
+     */
+    <R extends Number> IFrame<T> mapPercent(Function<T, R> get, SetFunction<T, BigDecimal> set);
 
-    public IFrame<FI2<T, Integer>> addRowNumberCol();
+    /**
+     * partition cut the matrix into multiple small matrices, with each matrix size n
+     * @param n size of each zone
+     */
+    IFrame<List<T>> partition(int n);
 
-    public IFrame<FI2<T, Integer>> addRowNumberCol(Sorter<T> var1);
+    /**
+     * add sort number to the {@link FI2#c2} field Default sequence number from 1 to
+     * frame.length
+     */
+    IFrame<FI2<T, Integer>> addRowNumberCol();
 
-    public IFrame<T> addRowNumberCol(SetFunction<T, Integer> var1);
+    /**
+     * Sort by sorter first, then add ordinal columns
+     * @param sorter the sorter
+     */
+    IFrame<FI2<T, Integer>> addRowNumberCol(Sorter<T> sorter);
 
-    public IFrame<T> addRowNumberCol(Sorter<T> var1, SetFunction<T, Integer> var2);
+    /**
+     * Add a numbered column to a specific column
+     * @param set specific column
+     */
+    IFrame<T> addRowNumberCol(SetFunction<T, Integer> set);
 
-    public IFrame<FI2<T, Integer>> addRankCol(Sorter<T> var1);
+    /**
+     * Add a numbered column to a specific column
+     * @param sorter the sorter
+     * @param set specific column
+     */
+    IFrame<T> addRowNumberCol(Sorter<T> sorter, SetFunction<T, Integer> set);
 
-    public IFrame<T> addRankCol(Sorter<T> var1, SetFunction<T, Integer> var2);
+    /**
+     * Add ranking columns by comparator Ranking logic, the same value means the Ranking
+     * is the same. This is different from {@link #addRowNumberCol}
+     * @param sorter the ranking sorter
+     */
+    IFrame<FI2<T, Integer>> addRankCol(Sorter<T> sorter);
 
-    public IFrame<FI2<T, String>> explodeString(Function<T, String> var1, String var2);
+    /**
+     * Add ranking column to a certain column by Comparator
+     * @param sorter the ranking comparator
+     * @param set certain column
+     */
+    IFrame<T> addRankCol(Sorter<T> sorter, SetFunction<T, Integer> set);
 
-    public IFrame<T> explodeString(Function<T, String> var1, SetFunction<T, String> var2, String var3);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter support string text format "a,b,c,d" or
+     * "[a,b,c,d]"
+     * @param getFunction wait to explode field
+     * @param delimiter split delimiter, support regex
+     */
+    IFrame<FI2<T, String>> explodeString(Function<T, String> getFunction, String delimiter);
 
-    public IFrame<FI2<T, String>> explodeJsonArray(Function<T, String> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     * @param delimiter split delimiter, support regex
+     */
+    IFrame<T> explodeString(
+            Function<T, String> getFunction, SetFunction<T, String> setFunction, String delimiter);
 
-    public IFrame<T> explodeJsonArray(Function<T, String> var1, SetFunction<T, String> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is JSON string array
+     * @param getFunction wait to explode field
+     */
+    IFrame<FI2<T, String>> explodeJsonArray(Function<T, String> getFunction);
 
-    public <E> IFrame<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is JSON string array
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     */
+    IFrame<T> explodeJsonArray(Function<T, String> getFunction, SetFunction<T, String> setFunction);
 
-    public <E> IFrame<T> explodeCollection(Function<T, ? extends Collection<E>> var1, SetFunction<T, E> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is collection
+     * @param getFunction wait to explode field
+     */
+    <E> IFrame<FI2<T, E>> explodeCollection(Function<T, ? extends Collection<E>> getFunction);
 
-    public <E> IFrame<FI2<T, E>> explodeCollectionArray(Function<T, ?> var1, Class<E> var2);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is collection
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     */
+    <E> IFrame<T> explodeCollection(
+            Function<T, ? extends Collection<E>> getFunction, SetFunction<T, E> setFunction);
 
-    public <E> IFrame<T> explodeCollectionArray(Function<T, ?> var1, SetFunction<T, E> var2, Class<E> var3);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is array or collection
+     * @param getFunction wait to explode field
+     * @param elementClass the array or collection element class
+     */
+    <E> IFrame<FI2<T, E>> explodeCollectionArray(Function<T, ?> getFunction, Class<E> elementClass);
 
-    public IFrame<T> sortDesc(Comparator<T> var1);
+    /**
+     * Convert columns to multiple rows, to expand fields of arrays or complex types by
+     * element, generating multiple rows of data Cut the string into multiple lines
+     * according to the specified delimiter
+     *
+     * Support explode field value type is array or collection
+     * @param getFunction wait to explode field
+     * @param setFunction accept the value after explode
+     * @param elementClass the array or collection element class
+     */
+    <E> IFrame<T> explodeCollectionArray(
+            Function<T, ?> getFunction, SetFunction<T, E> setFunction, Class<E> elementClass);
 
-    public <R extends Comparable<? super R>> IFrame<T> sortDesc(Function<T, R> var1);
+    /**
+     * =========================== Sort Frame =====================================
+     **/
 
-    public IFrame<T> sortAsc(Comparator<T> var1);
+    /**
+     * Descending order
+     * @param comparator comparator
+     */
+    IFrame<T> sortDesc(Comparator<T> comparator);
 
-    public <R extends Comparable<R>> IFrame<T> sortAsc(Function<T, R> var1);
+    /**
+     * Descending order by field
+     * @param function sort field
+     * @param <R> the sort field type
+     */
+    <R extends Comparable<? super R>> IFrame<T> sortDesc(Function<T, R> function);
 
-    public IFrame<T> cutFirst(int var1);
+    /**
+     * Ascending order
+     * @param comparator comparator
+     */
+    IFrame<T> sortAsc(Comparator<T> comparator);
 
-    public IFrame<T> cutLast(int var1);
+    /**
+     * Ascending order
+     * @param function sort field
+     */
+    <R extends Comparable<R>> IFrame<T> sortAsc(Function<T, R> function);
 
-    public IFrame<T> cut(Integer var1, Integer var2);
+    /** =========================== Cut Frame ===================================== **/
 
-    public IFrame<T> cutPage(int var1, int var2);
+    /**
+     * Cut the top n element
+     * @param n the top n
+     */
+    IFrame<T> cutFirst(int n);
 
-    public IFrame<T> cutFirstRank(Sorter<T> var1, int var2);
+    /**
+     * Cut the last n element
+     * @param n the last n
+     */
+    IFrame<T> cutLast(int n);
 
-    public T head();
+    /**
+     * cut elements within the scope
+     */
+    IFrame<T> cut(Integer startIndex, Integer endIndex);
 
-    public List<T> head(int var1);
+    /**
+     * cut paginated data
+     * @param page The current page number is considered as the first page, regardless of
+     * whether it is passed as 0 or 1
+     * @param pageSize page size
+     */
+    IFrame<T> cutPage(int page, int pageSize);
 
-    public T tail();
+    /**
+     * Cut the top N rankings data The same value is considered to have the same ranking
+     * @param sorter the ranking sorter
+     * @param n the top n
+     */
+    IFrame<T> cutFirstRank(Sorter<T> sorter, int n);
 
-    public List<T> tail(int var1);
+    /** =========================== View Frame ===================================== **/
 
-    public List<T> getList(Integer var1, Integer var2);
+    /**
+     * Get the first element
+     */
+    T head();
 
-    public IFrame<T> distinct();
+    /**
+     * Get the first n elements
+     */
+    List<T> head(int n);
 
-    public <R extends Comparable<R>> IFrame<T> distinct(Function<T, R> var1);
+    /**
+     * Get the last element
+     */
+    T tail();
 
-    public <R extends Comparable<R>> IFrame<T> distinct(Function<T, R> var1, ListToOneFunction<T> var2);
+    /**
+     * Get the last n elements
+     */
+    List<T> tail(int n);
 
-    public IFrame<T> distinct(Comparator<T> var1);
+    /**
+     * Get elements within the scope. [startIndex,endIndex]
+     */
+    List<T> getList(Integer startIndex, Integer endIndex);
 
-    public IFrame<T> distinct(Comparator<T> var1, ListToOneFunction<T> var2);
+    /**
+     * =========================== Distinct Frame =====================================
+     **/
 
-    public <C> IFrame<T> replenish(Function<T, C> var1, List<C> var2, Function<C, T> var3);
+    /**
+     * distinct by T value
+     */
+    IFrame<T> distinct();
 
-    public <G, C> IFrame<T> replenish(Function<T, G> var1, Function<T, C> var2, List<C> var3, ReplenishFunction<G, C, T> var4);
+    /**
+     * distinct by field value
+     * @param function the field
+     * @param <R> field value type
+     */
+    <R extends Comparable<R>> IFrame<T> distinct(Function<T, R> function);
 
-    public <G, C> IFrame<T> replenish(Function<T, G> var1, Function<T, C> var2, ReplenishFunction<G, C, T> var3);
+    /**
+     * distinct by field value
+     * @param function the field
+     * @param listOneFunction When there are more than one repeated element, this method
+     * will be called back, and customization will determine which element to choose
+     * @param <R> field value type
+     */
+    <R extends Comparable<R>> IFrame<T> distinct(
+            Function<T, R> function, ListToOneFunction<T> listOneFunction);
+
+    /**
+     * distinct by comparator
+     * @param comparator the comparator
+     */
+    IFrame<T> distinct(Comparator<T> comparator);
+
+    /**
+     * distinct by comparator
+     * @param comparator the comparator
+     * @param function When there are more than one repeated element, this method will be
+     * called back, and customization will determine which element to choose
+     */
+    IFrame<T> distinct(Comparator<T> comparator, ListToOneFunction<T> function);
+
+    /** =========================== Other ===================================== **/
+
+    /**
+     * Summarize all collectDim values, calculate the difference between them, and then
+     * add the missing difference to the Frame through getEmptyObject
+     *
+     */
+    <C> IFrame<T> replenish(
+            Function<T, C> collectDim, List<C> allDim, Function<C, T> getEmptyObject);
+
+    /**
+     * Calculate the difference in groups and then add the difference to that group
+     *
+     * according to the groupDim dimension, and then summarize all collectDim fields
+     * within each group After summarizing, calculate the difference sets with
+     * allAbscissa, which are the entries that need to be supplemented. Then, generate
+     * empty objects according to the ReplenishFunction logic and add them to the group
+     * @param groupDim Dimension fields for grouping
+     * @param collectDim Data fields collected within the group
+     * @param allDim All dimensions that need to be displayed within the group
+     * @param getEmptyObject Logic for generating empty objects
+     * @param <G> The type of grouping
+     * @param <C> type of collection within the group
+     *
+     * The set supplemented by @ return
+     */
+    <G, C> IFrame<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            List<C> allDim,
+            ReplenishFunction<G, C, T> getEmptyObject);
+
+    /**
+     * such as {@link IFrame#replenish(Function, Function, List, ReplenishFunction)}, but
+     * can not Specify allDim， will auto generate allDim, The default allDim is the value
+     * of all collectDim fields in the set
+     * @param groupDim Dimension fields for grouping
+     * @param collectDim Data fields collected within the group
+     * @param getEmptyObject Logic for generating empty objects
+     * @param <G> The type of grouping
+     * @param <C> type of collection within the group
+     */
+    <G, C> IFrame<T> replenish(
+            Function<T, G> groupDim,
+            Function<T, C> collectDim,
+            ReplenishFunction<G, C, T> getEmptyObject);
 }
-

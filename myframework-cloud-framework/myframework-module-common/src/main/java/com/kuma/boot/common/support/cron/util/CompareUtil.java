@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.cron.util;
 
 import com.kuma.boot.common.support.cron.pojo.CronPosition;
@@ -8,42 +21,57 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+/** 一些比较功能工具类 */
 public class CompareUtil {
+
+    /**
+     * 从小到大排好序的列表中找第一个符合的
+     * @param current 当前值
+     * @param sortedList 排好序的列表
+     * @param <T> T
+     */
     public static <T extends Comparable<T>> T findNext(T current, List<T> sortedList) {
-        for (Comparable item : sortedList) {
-            if (item.compareTo(current) < 0) continue;
-            return (T)item;
+        for (T item : sortedList) {
+            if (item.compareTo(current) >= 0) {
+                return item;
+            }
         }
-        throw new IllegalArgumentException("\u8d85\u51fa\u8303\u56f4\u4e86");
+        throw new IllegalArgumentException("超出范围了");
     }
 
     public static <T> boolean inList(T num, List<T> list) {
         for (T tmp : list) {
-            if (!tmp.equals(num)) continue;
-            return true;
+            if (tmp.equals(num)) {
+                // 相同要执行
+                return true;
+            }
         }
         return false;
     }
 
+    /** 利用Set列表去重,要求<T>必须实现hashCode和equals方法 */
     public static <T> void removeDuplicate(Collection<T> list) {
-        LinkedHashSet<T> set = new LinkedHashSet<T>(list.size());
+        LinkedHashSet<T> set = new LinkedHashSet<>(list.size());
         set.addAll(list);
         list.clear();
         list.addAll(set);
     }
 
+    /** 比较大小,左边的必须比右边小 */
     public static void assertSize(int left, int right) {
         if (left > right) {
-            throw new IllegalArgumentException("right should bigger than left , but find " + left + " > " + right);
+            throw new IllegalArgumentException(
+                    "right should bigger than left , but find " + left + " > " + right);
         }
     }
 
+    /** 某个域的范围 */
     public static void assertRange(CronPosition cronPosition, int value) {
         int min = cronPosition.getMin();
         int max = cronPosition.getMax();
         if (value < min || value > max) {
-            throw new IllegalArgumentException(cronPosition.name() + " \u57df[" + min + " , " + max + "],  but find " + value);
+            throw new IllegalArgumentException(
+                    cronPosition.name() + " 域[" + min + " , " + max + "],  but find " + value);
         }
     }
 }
-

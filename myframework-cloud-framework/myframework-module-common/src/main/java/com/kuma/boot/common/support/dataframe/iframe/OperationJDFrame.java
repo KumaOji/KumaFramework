@@ -1,65 +1,141 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.support.dataframe.iframe;
 
-import com.kuma.boot.common.support.dataframe.iframe.IFrame;
-import com.kuma.boot.common.support.dataframe.iframe.JDFrame;
-import com.kuma.boot.common.support.dataframe.iframe.OperationIFrame;
 import java.util.Collection;
 import java.util.Comparator;
 
-public interface OperationJDFrame<T>
-extends OperationIFrame<T> {
-    @Override
-    public JDFrame<T> unionAll(IFrame<T> var1);
+/**
+ * @author caizhihao
+ * @param <T>
+ */
+public interface OperationJDFrame<T> extends OperationIFrame<T> {
 
-    @Override
-    public JDFrame<T> unionAll(Collection<T> var1);
+    /**
+     * union other frame
+     * @param other other frame
+     */
+    JDFrame<T> unionAll(IFrame<T> other);
 
-    @Override
-    public JDFrame<T> union(IFrame<T> var1);
+    /**
+     * union other Collection
+     * @param other other frame
+     */
+    JDFrame<T> unionAll(Collection<T> other);
 
-    @Override
-    public JDFrame<T> union(IFrame<T> var1, Comparator<T> var2);
+    /**
+     * union frame,union other frame, will delete duplicates
+     * @param other other frame
+     */
+    JDFrame<T> union(IFrame<T> other);
 
-    @Override
-    public JDFrame<T> union(Collection<T> var1);
+    /**
+     * union other frame, will delete duplicates
+     * @param other other frame
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> union(IFrame<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> union(Collection<T> var1, Comparator<T> var2);
+    /**
+     * union other frame, will delete duplicates
+     * @param other other Collection
+     */
+    JDFrame<T> union(Collection<T> other);
 
-    @Override
-    public JDFrame<T> retainAll(IFrame<T> var1);
+    /**
+     * union other frame, will delete duplicates
+     * @param other other Collection
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> union(Collection<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> retainAll(IFrame<T> var1, Comparator<T> var2);
+    /**
+     * Retains only the elements in this list that are contained in the specified
+     * collection
+     * @return other frame
+     */
+    JDFrame<T> retainAll(IFrame<T> other);
 
-    @Override
-    public JDFrame<T> retainAll(Collection<T> var1);
+    /**
+     * Retains only the elements in this list that are contained in the specified
+     * collection
+     * @return other frame
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> retainAll(IFrame<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> retainAll(Collection<T> var1, Comparator<T> var2);
+    /**
+     * Retains only the elements in this list that are contained in the specified
+     * collection
+     * @return other collection
+     */
+    JDFrame<T> retainAll(Collection<T> other);
 
-    @Override
-    public JDFrame<T> intersection(IFrame<T> var1);
+    /**
+     * Retains only the elements in this list that are contained in the specified
+     * collection
+     * @return other collection
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> retainAll(Collection<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> intersection(IFrame<T> var1, Comparator<T> var2);
+    /**
+     * intersection other frame get identical elements from two sets
+     * @param other other frame
+     */
+    JDFrame<T> intersection(IFrame<T> other);
 
-    @Override
-    public JDFrame<T> intersection(Collection<T> var1);
+    /**
+     * intersection other frame get identical elements from two sets
+     * @param other other frame
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> intersection(IFrame<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> intersection(Collection<T> var1, Comparator<T> var2);
+    /**
+     * intersection other collection get identical elements from two sets
+     * @param other other collection
+     */
+    JDFrame<T> intersection(Collection<T> other);
 
-    @Override
-    public JDFrame<T> different(IFrame<T> var1, Comparator<T> var2);
+    /**
+     * intersection other collection get identical elements from two sets
+     * @param other other collection
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> intersection(Collection<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> different(Collection<T> var1);
+    /**
+     * different other frame Elements that are not within the other frame
+     * @return other frame
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> different(IFrame<T> other, Comparator<T> comparator);
 
-    @Override
-    public JDFrame<T> different(Collection<T> var1, Comparator<T> var2);
+    /**
+     * different other collection Elements that are not within the other frame
+     * @return other collection
+     */
+    JDFrame<T> different(Collection<T> other);
+
+    /**
+     * different other collection Elements that are not within the other frame
+     * @return other collection
+     * @param comparator repetitive judgment comparator
+     */
+    JDFrame<T> different(Collection<T> other, Comparator<T> comparator);
 }
-
