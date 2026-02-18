@@ -1,30 +1,74 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
 import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.model.Callable;
-import com.kuma.boot.common.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 
+/**
+ * TimeWatchUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:57:49
+ */
 public final class TimeWatchUtils {
+
+    /**
+     * 打印时间表
+     * @param isPrint 是否打印
+     * @param msg 消息
+     * @param action0 action0
+     * @since 2021-09-02 20:57:58
+     */
     public static void print(boolean isPrint, String msg, Callable.Action0 action0) {
-        TimeWatchUtils.print(isPrint, msg, () -> {
-            action0.invoke();
-            return 1;
-        });
+        print(
+                isPrint,
+                msg,
+                () -> {
+                    action0.invoke();
+                    return 1;
+                });
     }
 
+    /**
+     * 打印时间表
+     * @param isPrint 是否打印
+     * @param msg 消息
+     * @param action0 action0
+     * @param <T> T
+     * @return T
+     * @since 2021-09-02 20:58:09
+     */
     public static <T> T print(boolean isPrint, String msg, Callable.Func0<T> action0) {
         if (isPrint) {
             long b = System.currentTimeMillis();
             T t = action0.invoke();
             long e = System.currentTimeMillis();
-            LogUtils.info(PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY) + "--" + msg + " \u8017\u65f6: {}, ", e - b + "\u6beb\u79d2");
+            LogUtils.info(
+                    PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY)
+                            + "--"
+                            + msg
+                            + " 耗时: {}, ",
+                    (e - b) + "毫秒");
             return t;
+        } else {
+            return action0.invoke();
         }
-        return action0.invoke();
     }
 }
-

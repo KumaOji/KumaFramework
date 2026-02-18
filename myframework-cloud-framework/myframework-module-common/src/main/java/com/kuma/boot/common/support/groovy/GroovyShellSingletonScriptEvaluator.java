@@ -12,8 +12,6 @@ import groovy.lang.Script;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Map;
 
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -53,7 +51,7 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
                 this.config)) {
             this.loader = (GroovyClassLoader) parentLoader;
         } else {
-            this.loader = this.doPrivileged(() -> new GroovyClassLoader(parentLoader, this.config));
+            this.loader = new GroovyClassLoader(parentLoader, this.config);
         }
         this.groovyShell = new GroovyCacheShell(loader, this.config);
     }
@@ -87,9 +85,8 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
     }
 
     protected GroovyCodeSource convert( String text, String fileName ) {
-        GroovyCodeSource gcs = AccessController.doPrivileged(
-                (PrivilegedAction<GroovyCodeSource>) () -> new GroovyCodeSource(text, fileName, "/groovy/script"));
-        //使用缓存是关键.虽然newv GroovyCodeSource()默认cache是true，这里还是显示的再设置一次，为了突出重点.
+        GroovyCodeSource gcs = new GroovyCodeSource(text, fileName, "/groovy/script");
+        //使用缓存是关键.虽然new GroovyCodeSource()默认cache是true，这里还是显示的再设置一次，为了突出重点.
         gcs.setCachable(Boolean.TRUE);
         return gcs;
     }
@@ -100,10 +97,6 @@ public class GroovyShellSingletonScriptEvaluator extends AbstractScriptEvaluator
 
     public CompilerConfiguration getConfig() {
         return config;
-    }
-
-    private <T> T doPrivileged( PrivilegedAction<T> action ) {
-        return AccessController.doPrivileged(action);
     }
 
     /**

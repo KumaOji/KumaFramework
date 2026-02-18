@@ -1,81 +1,120 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.collections4.MapUtils
- *  org.apache.commons.lang3.ObjectUtils
- *  org.yaml.snakeyaml.Yaml
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
 
+/**
+ * Yml 工具类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 14:27:56
+ */
 public class YmlUtils {
+
+    private YmlUtils() {}
+
+    /** bootstrap.yml */
     private static final String BOOTSTRAP_YML = "bootstrap.yml";
+
+    /** application.yml */
     private static final String APPLICATION_YML = "application.yml";
 
-    private YmlUtils() {
-    }
-
+    /**
+     * 获取bootstrap.yml配置内容
+     * @param key 键
+     * @return {@link Object }
+     * @since 2021-09-02 14:31:01
+     */
     public static Object getBootstrapValue(String key) {
-        return YmlUtils.getValueByYml(BOOTSTRAP_YML, key);
+        return getValueByYml(BOOTSTRAP_YML, key);
     }
 
+    /**
+     * 获取Application.yml配置内容
+     * @param key 键
+     * @return {@link Object }
+     * @since 2021-09-02 14:31:43
+     */
     public static Object getApplicationValue(String key) {
-        return YmlUtils.getValueByYml(APPLICATION_YML, key);
+        return getValueByYml(APPLICATION_YML, key);
     }
 
+    /**
+     * 获取yml值
+     * @param fileName 文件名称
+     * @param key 键
+     * @return {@link Object }
+     * @since 2021-09-02 14:32:04
+     */
+    @SuppressWarnings("unchecked")
     public static Object getValueByYml(String fileName, String key) {
-        String[] keys;
-        Map map = YmlUtils.getYml(fileName);
+        Map<String, Object> map = getYml(fileName);
         if (MapUtils.isEmpty(map)) {
             return null;
         }
+
         Object result = null;
-        for (String k : keys = key.split("\\.")) {
+        String[] keys = key.split("\\.");
+        for (String k : keys) {
             Object o = map.get(k);
-            if (ObjectUtils.isNotEmpty((Object)o)) {
+            if (ObjectUtils.isNotEmpty(o)) {
                 if (o instanceof Map && !k.equals(key) && !key.endsWith("." + k)) {
-                    map = (Map)o;
-                    continue;
+                    map = (Map<String, Object>) o;
+                } else {
+                    result = o;
                 }
-                result = o;
-                continue;
+            } else {
+                result = null;
             }
-            result = null;
         }
+
         return result;
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
+    /**
+     * 获取 yml 文件内容
+     * @param fileName yml文件名
+     * @return {@link Map }
+     * @since 2021-09-02 14:32:40
      */
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> getYml(String fileName) {
         if (StringUtils.isBlank(fileName)) {
             return null;
         }
-        try (InputStream inputStream = YmlUtils.class.getClassLoader().getResourceAsStream(fileName);){
-            if (ObjectUtils.isEmpty((Object)inputStream)) {
-                Map<String, Object> map2 = null;
-                return map2;
+        try (InputStream inputStream =
+                     YmlUtils.class.getClassLoader().getResourceAsStream(fileName)) {
+            if (ObjectUtils.isEmpty(inputStream)) {
+                return null;
             }
             Yaml yaml = new Yaml();
-            Map map = (Map)yaml.loadAs(inputStream, Map.class);
-            return map;
+            return yaml.loadAs(inputStream, Map.class);
+        } catch (IOException e) {
+            LogUtils.error(e, "IO流处理失败");
         }
-        catch (IOException e) {
-            LogUtils.error(e, "IO\u6d41\u5904\u7406\u5931\u8d25", new Object[0]);
-            return null;
-        }
+        return null;
     }
 }
-

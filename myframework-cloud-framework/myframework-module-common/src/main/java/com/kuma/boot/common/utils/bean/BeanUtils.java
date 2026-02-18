@@ -1,41 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.bean.BeanUtil
- *  cn.hutool.core.bean.copier.CopyOptions
- *  cn.hutool.core.lang.Assert
- *  com.fasterxml.jackson.annotation.JsonIgnore
- *  jakarta.annotation.Nullable
- *  org.springframework.beans.BeanUtils
- *  org.springframework.beans.BeanWrapper
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.PropertyAccessorFactory
- *  org.springframework.cglib.beans.BeanCopier
- *  org.springframework.cglib.beans.BeanGenerator
- *  org.springframework.cglib.beans.BeanMap
- *  org.springframework.cglib.core.Converter
- *  org.springframework.util.FastByteArrayOutputStream
- *  tools.jackson.databind.BeanProperty
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.bean;
+
+import static com.kuma.boot.common.utils.common.OrikaUtils.convert;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.Assert;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import tools.jackson.databind.BeanProperty;
 import com.kuma.boot.common.exception.BaseException;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.utils.collection.MapUtils;
 import com.kuma.boot.common.utils.common.ArgUtils;
-import com.kuma.boot.common.utils.common.OrikaUtils;
+import com.kuma.boot.common.utils.convert.Converter;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.reflect.ClassUtils;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,228 +51,425 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.cglib.beans.BeanGenerator;
 import org.springframework.cglib.beans.BeanMap;
-import org.springframework.cglib.core.Converter;
 import org.springframework.util.FastByteArrayOutputStream;
-import tools.jackson.databind.BeanProperty;
 
-public class BeanUtils
-extends org.springframework.beans.BeanUtils {
-    private BeanUtils() {
-    }
+/**
+ * BeanUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 17:45:40
+ */
+public class BeanUtils extends org.springframework.beans.BeanUtils {
 
+    private BeanUtils() {}
+
+    /**
+     * 实例化对象
+     * @param clazz 类
+     * @param <T> 泛型标记
+     * @return 对象
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<?> clazz) {
-        return (T)BeanUtils.instantiateClass(clazz);
+        return (T) instantiateClass(clazz);
     }
 
+    /**
+     * 实例化对象
+     * @param clazzStr 类名
+     * @param <T> 泛型标记
+     * @return 对象
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T newInstance(String clazzStr) {
         try {
-            Class clazz = ClassUtils.forName((String)clazzStr, null);
-            return BeanUtils.newInstance(clazz);
-        }
-        catch (ClassNotFoundException e) {
+            Class<?> clazz = ClassUtils.forName(clazzStr, null);
+            return newInstance(clazz);
+        } catch (ClassNotFoundException e) {
             throw new BaseException(e);
         }
     }
 
+    /**
+     * 获取Bean的属性, 支持 propertyName 多级 ：test.user.name
+     * @param bean bean
+     * @param propertyName 属性名
+     * @return 属性值
+     */
     @Nullable
     public static Object getProperty(@Nullable Object bean, String propertyName) {
         if (bean == null) {
             return null;
         }
-        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess((Object)bean);
+        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
         return beanWrapper.getPropertyValue(propertyName);
     }
 
+    /**
+     * 设置Bean属性, 支持 propertyName 多级 ：test.user.name
+     * @param bean bean
+     * @param propertyName 属性名
+     * @param value 属性值
+     */
     public static void setProperty(Object bean, String propertyName, Object value) {
-        BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess((Object)Objects.requireNonNull(bean, "bean Could not null"));
+        BeanWrapper beanWrapper =
+                PropertyAccessorFactory.forBeanPropertyAccess(
+                        Objects.requireNonNull(bean, "bean Could not null"));
         beanWrapper.setPropertyValue(propertyName, value);
     }
 
+    /**
+     * 浅拷贝
+     *
+     * <p>
+     * 支持 map bean
+     * @param source 源对象
+     * @param <T> 泛型标记
+     * @return T
+     */
     @Nullable
+    @SuppressWarnings("unchecked")
     public static <T> T clone(@Nullable T source) {
         if (source == null) {
             return null;
         }
-        return (T)BeanUtils.copy(source, source.getClass());
+        return (T) copy(source, source.getClass());
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
+    /**
+     * 深度拷贝
+     * @param source 待拷贝的对象
+     * @return 拷贝之后的对象
      */
     @Nullable
+    @SuppressWarnings("unchecked")
     public static <T> T deepClone(@Nullable T source) {
         if (source == null) {
             return null;
         }
         FastByteArrayOutputStream fBos = new FastByteArrayOutputStream(1024);
-        try (ObjectOutputStream oos = new ObjectOutputStream((OutputStream)fBos);){
+        try (ObjectOutputStream oos = new ObjectOutputStream(fBos)) {
             oos.writeObject(source);
             oos.flush();
+        } catch (IOException ex) {
+            throw new IllegalArgumentException(
+                    "Failed to serialize object of type: " + source.getClass(), ex);
         }
-        catch (IOException ex) {
-            throw new IllegalArgumentException("Failed to serialize object of type: " + String.valueOf(source.getClass()), ex);
-        }
-        try (ObjectInputStream ois = new ObjectInputStream(fBos.getInputStream());){
-            Object object = ois.readObject();
-            return (T)object;
-        }
-        catch (IOException | ClassNotFoundException ex) {
+        try (ObjectInputStream ois = new ObjectInputStream(fBos.getInputStream())) {
+            return (T) ois.readObject();
+        } catch (IOException | ClassNotFoundException ex) {
             throw new IllegalArgumentException("Failed to deserialize object", ex);
         }
     }
 
+    /**
+     * copy 对象属性，默认不使用Convert
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param source 源对象
+     * @param clazz 类名
+     * @param <T> 泛型标记
+     * @return T
+     */
     @Nullable
     public static <T> T copy(@Nullable Object source, Class<T> clazz) {
         if (source == null) {
             return null;
         }
-        return BeanUtils.copy(source, source.getClass(), clazz);
+        return copy(source, source.getClass(), clazz);
     }
 
+    /**
+     * copy 对象属性，默认不使用Convert
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param source 源对象
+     * @param sourceClazz 源类型
+     * @param targetClazz 转换成的类型
+     * @return T
+     */
     @Nullable
     public static <T> T copy(@Nullable Object source, Class sourceClazz, Class<T> targetClazz) {
         if (source == null) {
             return null;
         }
-        BeanCopier copier = BeanCopier.create((Class)sourceClazz, targetClazz, (boolean)false);
-        T to = BeanUtils.newInstance(targetClazz);
+        BeanCopier copier = BeanCopier.create(sourceClazz, targetClazz, false);
+        T to = newInstance(targetClazz);
         copier.copy(source, to, null);
         return to;
     }
 
+    /**
+     * copy 列表对象，默认不使用Convert
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param sourceList 源列表
+     * @param targetClazz 转换成的类型
+     * @return T
+     */
     public static <T> List<T> copy(@Nullable Collection<?> sourceList, Class<T> targetClazz) {
-        return BeanUtils.copy(sourceList, (List)null, targetClazz);
+        return copy(sourceList, (List<T>) null, targetClazz);
     }
 
-    public static <T> List<T> copy(@Nullable Collection<?> sourceList, @Nullable List<T> targetList, Class<T> targetClazz) {
+    /**
+     * copy 列表对象，默认不使用Convert
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param sourceList 源列表
+     * @param targetList 目标列表
+     * @param targetClazz 转换成的类型
+     * @return T
+     */
+    public static <T> List<T> copy(
+            @Nullable Collection<?> sourceList,
+            @Nullable List<T> targetList,
+            Class<T> targetClazz) {
         if (sourceList == null || sourceList.isEmpty()) {
             return Collections.emptyList();
         }
         if (targetList == null) {
-            targetList = new ArrayList<T>(sourceList.size());
+            targetList = new ArrayList<>(sourceList.size());
         }
         Class<?> sourceClazz = null;
         for (Object source : sourceList) {
-            if (source == null) continue;
+            if (source == null) {
+                continue;
+            }
             if (sourceClazz == null) {
                 sourceClazz = source.getClass();
             }
-            T bean = BeanUtils.copy(source, sourceClazz, targetClazz);
+            T bean = copy(source, sourceClazz, targetClazz);
             targetList.add(bean);
         }
         return targetList;
     }
 
+    /**
+     * 拷贝对象
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param source 源对象
+     * @param targetBean 需要赋值的对象
+     */
     public static void copy(@Nullable Object source, @Nullable Object targetBean) {
         if (source == null || targetBean == null) {
             return;
         }
-        BeanCopier copier = BeanCopier.create(source.getClass(), targetBean.getClass(), (boolean)false);
+        BeanCopier copier = BeanCopier.create(source.getClass(), targetBean.getClass(), false);
+
         copier.copy(source, targetBean, null);
     }
 
+    /**
+     * 拷贝对象，source 属性做 null 判断，Map 不支持，map 会做 instanceof 判断，不会
+     *
+     * <p>
+     * 支持 bean copy
+     * @param source 源对象
+     * @param targetBean 需要赋值的对象
+     */
     public static void copyNonNull(@Nullable Object source, @Nullable Object targetBean) {
         if (source == null || targetBean == null) {
             return;
         }
-        BeanCopier copier = BeanCopier.create(source.getClass(), targetBean.getClass(), (boolean)false);
+        BeanCopier copier = BeanCopier.create(source.getClass(), targetBean.getClass(), false);
+
         copier.copy(source, targetBean, null);
     }
 
+    /**
+     * 拷贝对象并对不同类型属性进行转换
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param source 源对象
+     * @param targetClazz 转换成的类
+     * @return T
+     */
     @Nullable
     public static <T> T copyWithConvert(@Nullable Object source, Class<T> targetClazz) {
         if (source == null) {
             return null;
         }
-        return BeanUtils.copyWithConvert(source, source.getClass(), targetClazz);
+        return copyWithConvert(source, source.getClass(), targetClazz);
     }
 
+    /**
+     * 拷贝对象并对不同类型属性进行转换
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param source 源对象
+     * @param sourceClazz 源类
+     * @param targetClazz 转换成的类
+     * @return T
+     */
     @Nullable
-    public static <T> T copyWithConvert(@Nullable Object source, Class<?> sourceClazz, Class<T> targetClazz) {
+    public static <T> T copyWithConvert(
+            @Nullable Object source, Class<?> sourceClazz, Class<T> targetClazz) {
         if (source == null) {
             return null;
         }
-        BeanCopier copier = BeanCopier.create(sourceClazz, targetClazz, (boolean)true);
-        T to = BeanUtils.newInstance(targetClazz);
-        copier.copy(source, to, (Converter)new com.kuma.boot.common.utils.convert.Converter(sourceClazz, targetClazz));
+        BeanCopier copier = BeanCopier.create(sourceClazz, targetClazz, true);
+        T to = newInstance(targetClazz);
+        copier.copy(source, to, new Converter(sourceClazz, targetClazz));
         return to;
     }
 
-    public static <T> List<T> copyWithConvert(@Nullable Collection<?> sourceList, Class<T> targetClazz) {
+    /**
+     * 拷贝列表并对不同类型属性进行转换
+     *
+     * <p>
+     * 支持 map bean copy
+     * @param sourceList 源对象列表
+     * @param targetClazz 转换成的类
+     * @return List
+     */
+    public static <T> List<T> copyWithConvert(
+            @Nullable Collection<?> sourceList, Class<T> targetClazz) {
         if (sourceList == null || sourceList.isEmpty()) {
             return Collections.emptyList();
         }
-        ArrayList<T> outList = new ArrayList<T>(sourceList.size());
+        List<T> outList = new ArrayList<>(sourceList.size());
         Class<?> sourceClazz = null;
         for (Object source : sourceList) {
-            if (source == null) continue;
+            if (source == null) {
+                continue;
+            }
             if (sourceClazz == null) {
                 sourceClazz = source.getClass();
             }
-            T bean = BeanUtils.copyWithConvert(source, sourceClazz, targetClazz);
+            T bean = copyWithConvert(source, sourceClazz, targetClazz);
             outList.add(bean);
         }
         return outList;
     }
 
+    /**
+     * Copy the property values of the given source bean into the target class.
+     *
+     * <p>
+     * Note: The source and target classes do not have to match or even be derived from
+     * each other, as long as the properties match. Any bean properties that the source
+     * bean exposes but the target bean does not will silently be ignored.
+     *
+     * <p>
+     * This is just a convenience method. For more complex transfer needs,
+     * @param source the source bean
+     * @param targetClazz the target bean class
+     * @return T
+     * @throws BeansException if the copying failed
+     */
     @Nullable
-    public static <T> T copyProperties(@Nullable Object source, Class<T> targetClazz) throws BeansException {
+    public static <T> T copyProperties(@Nullable Object source, Class<T> targetClazz)
+            throws BeansException {
         if (source == null) {
             return null;
         }
-        T to = BeanUtils.newInstance(targetClazz);
-        BeanUtils.copyProperties(source, to);
+        T to = newInstance(targetClazz);
+        copyProperties(source, to);
         return to;
     }
 
-    public static <T> List<T> copyProperties(@Nullable Collection<?> sourceList, Class<T> targetClazz) throws BeansException {
+    /**
+     * Copy the property values of the given source bean into the target class.
+     *
+     * <p>
+     * Note: The source and target classes do not have to match or even be derived from
+     * each other, as long as the properties match. Any bean properties that the source
+     * bean exposes but the target bean does not will silently be ignored.
+     *
+     * <p>
+     * This is just a convenience method. For more complex transfer needs,
+     * @param sourceList the source list bean
+     * @param targetClazz the target bean class
+     * @return List
+     * @throws BeansException if the copying failed
+     */
+    public static <T> List<T> copyProperties(
+            @Nullable Collection<?> sourceList, Class<T> targetClazz) throws BeansException {
         if (sourceList == null || sourceList.isEmpty()) {
             return Collections.emptyList();
         }
-        ArrayList<T> outList = new ArrayList<T>(sourceList.size());
+        List<T> outList = new ArrayList<>(sourceList.size());
         for (Object source : sourceList) {
-            if (source == null) continue;
-            T bean = BeanUtils.copyProperties(source, targetClazz);
+            if (source == null) {
+                continue;
+            }
+            T bean = copyProperties(source, targetClazz);
             outList.add(bean);
         }
         return outList;
     }
 
+    /**
+     * 将对象装成map形式，map 不可写
+     * @param bean 源对象
+     * @return {Map}
+     */
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> toMap(@Nullable Object bean) {
         if (bean == null) {
-            return new HashMap<String, Object>(0);
+            return new HashMap<>(0);
         }
-        return BeanMap.create((Object)bean);
+        return BeanMap.create(bean);
     }
 
+    /**
+     * 将对象装成map形式，map 可写
+     * @param bean 源对象
+     * @return {Map}
+     */
     public static Map<String, Object> toNewMap(@Nullable Object bean) {
-        return new HashMap<String, Object>(BeanUtils.toMap(bean));
+        return new HashMap<>(toMap(bean));
     }
 
+    /**
+     * 将map 转为 bean
+     * @param beanMap map
+     * @param valueType 对象类型
+     * @return {T}
+     */
     public static <T> T toBean(Map<String, Object> beanMap, Class<T> valueType) {
         Objects.requireNonNull(beanMap, "beanMap Could not null");
-        T to = BeanUtils.newInstance(valueType);
+        T to = newInstance(valueType);
         if (beanMap.isEmpty()) {
             return to;
         }
-        BeanUtils.copy(beanMap, to);
+        copy(beanMap, to);
         return to;
     }
 
+    /**
+     * 给一个Bean添加字段
+     * @param superBean 父级Bean
+     * @param props 新增属性
+     * @return 对象
+     */
     @Nullable
-    public static Object generator(@Nullable Object superBean, BeanProperty ... props) {
+    public static Object generator(@Nullable Object superBean, BeanProperty... props) {
         if (superBean == null) {
             return null;
         }
         Class<?> superclass = superBean.getClass();
-        Object genBean = BeanUtils.generator(superclass, props);
-        BeanUtils.copy(superBean, genBean);
+        Object genBean = generator(superclass, props);
+        copy(superBean, genBean);
         return genBean;
     }
 
-    public static Object generator(Class<?> superclass, BeanProperty ... props) {
+    /**
+     * 给一个class添加字段
+     * @param superclass 父级
+     * @param props 新增属性
+     * @return 对象
+     */
+    public static Object generator(Class<?> superclass, BeanProperty... props) {
         BeanGenerator generator = new BeanGenerator();
         generator.setSuperclass(superclass);
         generator.setUseCache(true);
@@ -285,21 +480,35 @@ extends org.springframework.beans.BeanUtils {
         return generator.create();
     }
 
-    public static BeanDiff diff(Object src, Object dist) {
-        Assert.notNull((Object)src, (String)"diff Object src is null.", (Object[])new Object[0]);
-        Assert.notNull((Object)src, (String)"diff Object dist is null.", (Object[])new Object[0]);
-        return BeanUtils.diff(BeanUtils.toMap(src), BeanUtils.toMap(dist));
+    /**
+     * 比较对象
+     * @param src 源对象
+     * @param dist 新对象
+     * @return {BeanDiff}
+     */
+    public static BeanDiff diff(final Object src, final Object dist) {
+        Assert.notNull(src, "diff Object src is null.");
+        Assert.notNull(src, "diff Object dist is null.");
+        return diff(toMap(src), toMap(dist));
     }
 
-    public static BeanDiff diff(Map<String, Object> src, Map<String, Object> dist) {
-        Assert.notNull(src, (String)"diff Map src is null.", (Object[])new Object[0]);
-        Assert.notNull(src, (String)"diff Map dist is null.", (Object[])new Object[0]);
-        HashMap<String, Object> difference = new HashMap<String, Object>(8);
+    /**
+     * 比较Map
+     * @param src 源Map
+     * @param dist 新Map
+     * @return {BeanDiff}
+     */
+    public static BeanDiff diff(final Map<String, Object> src, final Map<String, Object> dist) {
+        Assert.notNull(src, "diff Map src is null.");
+        Assert.notNull(src, "diff Map dist is null.");
+        // 改变
+        Map<String, Object> difference = new HashMap<>(8);
         difference.putAll(src);
         difference.putAll(dist);
         difference.entrySet().removeAll(src.entrySet());
-        HashMap oldValues = new HashMap(8);
-        difference.keySet().forEach(k -> oldValues.put(k, src.get(k)));
+        // 老值
+        Map<String, Object> oldValues = new HashMap<>(8);
+        difference.keySet().forEach((k) -> oldValues.put(k, src.get(k)));
         BeanDiff diff = new BeanDiff();
         diff.getFields().addAll(difference.keySet());
         diff.getOldValues().putAll(oldValues);
@@ -307,81 +516,169 @@ extends org.springframework.beans.BeanUtils {
         return diff;
     }
 
+    /**
+     * 复制Bean对象属性<br>
+     * @param source 源Bean对象
+     * @param target 目标Bean对象
+     * @since 2021-09-02 17:45:45
+     */
     public static void copyIgnoredNull(Object source, Object target) {
-        BeanUtil.copyProperties((Object)source, (Object)target, (CopyOptions)CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
+        BeanUtil.copyProperties(
+                source, target, CopyOptions.create().setIgnoreNullValue(true).setIgnoreError(true));
     }
 
+    /**
+     * 复制Bean对象属性<br>
+     * @param source 源Bean对象
+     * @param target 目标Bean对象
+     * @since 2021-09-02 17:45:45
+     */
     public static void copyIncludeNull(Object source, Object target) {
-        BeanUtil.copyProperties((Object)source, (Object)target, (CopyOptions)CopyOptions.create().setIgnoreNullValue(true));
+        BeanUtil.copyProperties(
+                source, target, CopyOptions.create().setIgnoreNullValue(true));
     }
 
+    /**
+     * convert 类型转换
+     * @param value 值
+     * @param type 类型
+     * @return T
+     * @since 2021-09-02 17:46:05
+     */
+    // public static <T> T convert(Object value, Class<T> type) {
+    // if (value == null) {
+    // return null;
+    // }
+    // return ApplicationConversionService.getSharedInstance().convert(value, type);
+    // }
+
+    /**
+     * 类型转换
+     * @param value 值
+     * @param type 类型
+     * @return T
+     * @since 2021-09-02 17:46:40
+     */
     public static <T> T tryConvert(Object value, Class<T> type) {
         try {
-            return OrikaUtils.convert(value, type);
-        }
-        catch (Exception e) {
+            return convert(value, type);
+        } catch (Exception e) {
             return null;
         }
     }
 
+    /**
+     * bean 转换为 map
+     * @param bean 原始对象
+     * @return 结果
+     */
     public static Map<String, Object> beanToMap(Object bean) {
         ArgUtils.notNull(bean, "bean");
+
         try {
-            Field[] fieldList;
-            LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-            for (Field field : fieldList = bean.getClass().getFields()) {
-                String fieldName = field.getName();
-                Object fieldValue = field.get(bean);
+            Map<String, Object> map = new LinkedHashMap<>();
+            Field[] fieldList = bean.getClass().getFields();
+
+            for (Field field : fieldList) {
+                final String fieldName = field.getName();
+                final Object fieldValue = field.get(bean);
                 map.put(fieldName, fieldValue);
             }
             return map;
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new BootException(e);
         }
     }
 
-    public static void mapToBean(Map<String, Object> map, Object bean) {
+    /**
+     * map 中的值设置到 bean 中 （1）map 为空，则直接返回 （2）map 中有对应的 key 且 value 不为空，则进行值的设置。
+     * @param map map 信息
+     * @param bean 原始对象
+     */
+    public static void mapToBean(final Map<String, Object> map, final Object bean) {
         ArgUtils.notNull(bean, "bean");
         if (MapUtils.isEmpty(map)) {
             return;
         }
+
         try {
-            Field[] fieldList;
-            for (Field field : fieldList = bean.getClass().getFields()) {
-                String fieldName = field.getName();
-                Object fieldValue = map.get(fieldName);
-                if (!ObjectUtils.isNotNull(fieldValue)) continue;
-                field.set(bean, fieldValue);
+            Field[] fieldList = bean.getClass().getFields();
+
+            for (Field field : fieldList) {
+                final String fieldName = field.getName();
+                final Object fieldValue = map.get(fieldName);
+
+                if (ObjectUtils.isNotNull(fieldValue)) {
+                    field.set(bean, fieldValue);
+                }
             }
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new BootException(e);
         }
     }
 
-    public static void copyProperties(Object source, Object target) {
+    /**
+     * 属性拷贝
+     * @param source 源头
+     * @param target 目标
+     */
+    public static void copyProperties(final Object source, final Object target) {
         ObjectUtils.copyProperties(source, target);
     }
 
+    /// **
+    // * 深度克隆
+    // *
+    // * @param obj obj
+    // * @param <T> T
+    // * @return T
+    // * @since 2021-09-02 17:47:00
+    // */
+    // public static <T> T deepClone(T obj) {
+    // try {
+    // try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream()) {
+    // try (ObjectOutputStream out = new ObjectOutputStream(byteOut)) {
+    // out.writeObject(obj);
+    // try (ByteArrayInputStream byteIn = new ByteArrayInputStream(
+    // byteOut.toByteArray())) {
+    // ObjectInputStream in = new ObjectInputStream(byteIn);
+    // return (T) in.readObject();
+    // }
+    // }
+    // }
+    // } catch (Exception e) {
+    // throw new BaseException(e.getMessage());
+    // }
+    // }
+
+    /**
+     * 跟踪类变动比较
+     *
+     * @author kuma
+     * @version 2021.9
+     * @since 2021-09-02 19:41:13
+     */
     public static class BeanDiff {
-        @JsonIgnore
-        private transient Set<String> fields = new HashSet<String>();
-        @JsonIgnore
-        private transient Map<String, Object> oldValues = new HashMap<String, Object>();
-        @JsonIgnore
-        private transient Map<String, Object> newValues = new HashMap<String, Object>();
+
+        /** 变更字段 */
+        @JsonIgnore private transient Set<String> fields = new HashSet<>();
+
+        /** 旧值 */
+        @JsonIgnore private transient Map<String, Object> oldValues = new HashMap<>();
+
+        /** 新值 */
+        @JsonIgnore private transient Map<String, Object> newValues = new HashMap<>();
 
         public Set<String> getFields() {
-            return this.fields;
+            return fields;
         }
 
         public Map<String, Object> getOldValues() {
-            return this.oldValues;
+            return oldValues;
         }
 
         public Map<String, Object> getNewValues() {
-            return this.newValues;
+            return newValues;
         }
 
         public void setFields(Set<String> fields) {
@@ -397,4 +694,3 @@ extends org.springframework.beans.BeanUtils {
         }
     }
 }
-

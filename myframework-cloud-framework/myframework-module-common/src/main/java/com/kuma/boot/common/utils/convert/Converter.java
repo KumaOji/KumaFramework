@@ -1,32 +1,49 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.util.ReflectUtil
- *  org.jspecify.annotations.Nullable
- *  org.springframework.cglib.core.Converter
- *  org.springframework.core.convert.TypeDescriptor
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.convert;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.kuma.boot.common.support.function.CheckedFunction;
 import com.kuma.boot.common.support.function.Unchecked;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
-import com.kuma.boot.common.utils.convert.ConvertUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.reflect.ClassUtils;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.jspecify.annotations.Nullable;
-import org.springframework.core.convert.TypeDescriptor;
 
-public class Converter
-implements org.springframework.cglib.core.Converter {
-    private static final ConcurrentMap<String, TypeDescriptor> TYPE_CACHE = new ConcurrentHashMap<String, TypeDescriptor>();
+import org.springframework.core.convert.TypeDescriptor;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * 组合 spring cglib Converter 和 spring ConversionService
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class Converter implements org.springframework.cglib.core.Converter {
+
+    private static final ConcurrentMap<String, TypeDescriptor> TYPE_CACHE =
+            new ConcurrentHashMap<>();
+
     private final Class<?> sourceClazz;
+
     private final Class<?> targetClazz;
 
     public Converter(Class<?> sourceClazz, Class<?> targetClazz) {
@@ -34,37 +51,53 @@ implements org.springframework.cglib.core.Converter {
         this.targetClazz = targetClazz;
     }
 
-    public @Nullable Object convert(@Nullable Object value, Class target, Object fieldName) {
+    /**
+     * cglib convert
+     * @param value 源对象属性
+     * @param target 目标对象属性类
+     * @param fieldName 目标的field名，原为 set 方法名，MicaBeanCopier 里做了更改
+     * @return {Object}
+     */
+    @Override
+    @Nullable
+    public Object convert(@Nullable Object value, Class target, final Object fieldName) {
         if (value == null) {
             return null;
         }
-        if (ClassUtils.isAssignableValue((Class)target, (Object)value)) {
+        // 类型一样，不需要转换
+        if (ClassUtils.isAssignableValue(target, value)) {
             return value;
         }
         try {
-            TypeDescriptor targetDescriptor = Converter.getTypeDescriptor(this.targetClazz, (String)fieldName);
-            if (Map.class.isAssignableFrom(this.sourceClazz)) {
+            TypeDescriptor targetDescriptor =
+                    Converter.getTypeDescriptor(targetClazz, (String) fieldName);
+            // 1. 判断 sourceClazz 为 Map
+            if (Map.class.isAssignableFrom(sourceClazz)) {
                 return ConvertUtils.convert(value, targetDescriptor);
+            } else {
+                TypeDescriptor sourceDescriptor =
+                        Converter.getTypeDescriptor(sourceClazz, (String) fieldName);
+                return ConvertUtils.convert(value, sourceDescriptor, targetDescriptor);
             }
-            TypeDescriptor sourceDescriptor = Converter.getTypeDescriptor(this.sourceClazz, (String)fieldName);
-            return ConvertUtils.convert(value, sourceDescriptor, targetDescriptor);
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             LogUtils.warn("MicaConverter error", e);
             return null;
         }
     }
 
-    private static TypeDescriptor getTypeDescriptor(Class<?> clazz, String fieldName) {
+    private static TypeDescriptor getTypeDescriptor(final Class<?> clazz, final String fieldName) {
         String srcCacheKey = clazz.getName() + fieldName;
-        CheckedFunction<String, TypeDescriptor> uncheckedFunction = key -> {
-            Field field = ReflectUtil.getField((Class)clazz, (String)fieldName);
-            if (field == null) {
-                throw new NoSuchFieldException(fieldName);
-            }
-            return new TypeDescriptor(field);
-        };
-        return CollectionUtils.computeIfAbsent(TYPE_CACHE, srcCacheKey, Unchecked.function(uncheckedFunction));
+        // 忽略抛出异常的函数，定义完整泛型，避免编译问题
+        CheckedFunction<String, TypeDescriptor> uncheckedFunction =
+                (key) -> {
+                    // 这里 property 理论上不会为 null
+                    Field field = ReflectUtil.getField(clazz, fieldName);
+                    if (field == null) {
+                        throw new NoSuchFieldException(fieldName);
+                    }
+                    return new TypeDescriptor(field);
+                };
+        return CollectionUtils.computeIfAbsent(
+                TYPE_CACHE, srcCacheKey, Unchecked.function(uncheckedFunction));
     }
 }
-

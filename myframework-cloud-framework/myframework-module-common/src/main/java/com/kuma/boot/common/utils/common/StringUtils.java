@@ -1,22 +1,38 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.xkzhangsan.time.utils.CollectionUtil
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
+import static com.kuma.boot.common.constant.CommonConstants.BACK_SLASH;
+import static com.kuma.boot.common.constant.CommonConstants.DOUBLE_QUOTES;
+import static com.kuma.boot.common.constant.CommonConstants.UTF8;
+import static com.kuma.boot.common.utils.collection.ArrayUtils.getEndIndex;
+import static com.kuma.boot.common.utils.collection.CollectionUtils.difference;
+import static com.kuma.boot.common.utils.common.ArrayPrimitiveUtils.getPreChar;
+import static com.kuma.boot.common.utils.date.DateUtils.PURE_DATE_FORMAT;
+import static com.kuma.boot.common.utils.date.DateUtils.getDateFormat;
+import static com.kuma.boot.common.utils.date.DateUtils.getFormatDate;
+import static com.kuma.boot.common.utils.reflect.ClassTypeUtils.isArray;
+
+import com.kuma.boot.common.constant.PunctuationConstants;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.support.condition.Condition;
 import com.kuma.boot.common.support.handler.Handler;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
-import com.kuma.boot.common.utils.collection.CollectionUtils;
-import com.kuma.boot.common.utils.common.ArgUtils;
-import com.kuma.boot.common.utils.common.ArrayPrimitiveUtils;
-import com.kuma.boot.common.utils.common.CharUtils;
-import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import com.kuma.boot.common.utils.reflect.ClassTypeUtils;
 import com.kuma.boot.common.utils.system.SystemUtils;
 import com.xkzhangsan.time.utils.CollectionUtil;
 import java.io.UnsupportedEncodingException;
@@ -34,257 +50,492 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 字符串工具类
+ *
+ * @author bbhou
+ * @since 0.0.1
+ */
 public final class StringUtils {
+
+    /**
+     * 大写的字母
+     *
+     * @since 0.1.66
+     */
     public static final String LETTERS_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWSXYZ";
+
+    /**
+     * 小写的字母
+     *
+     * @since 0.1.66
+     */
     public static final String LETTERS_LOWER = "abcdefghijklmnopqrstuvwsxyz";
+
+    /**
+     * 空白信息的表达式
+     *
+     * @since 0.1.98
+     */
     private static final Pattern BLANK_PATTERN = Pattern.compile("\\s*|\t|\r|\n");
+
+    private StringUtils() {}
+
+    /**
+     * 空值变量
+     */
     public static final String Empty = "";
+
+    /**
+     * 空字符串
+     */
     public static final String EMPTY = "";
+
+    /**
+     * 空 json
+     *
+     * @since 0.1.80
+     */
     public static final String EMPTY_JSON = "{}";
+
+    /**
+     * 空格
+     */
     public static final String BLANK = " ";
+
+    /**
+     * 新行
+     * <p>
+     * System.lineSeparator() 实际的文本效果是2行
+     *
+     * @since 0.1.129
+     */
     public static final String NEW_LINE = "";
 
-    private StringUtils() {
-    }
-
+    /**
+     * 是否不为换行符
+     * @param line 内容
+     * @return 是否
+     * @since 0.1.129
+     */
     public static boolean isNotReturnLine(String line) {
-        return !StringUtils.isReturnLine(line);
+        return !isReturnLine(line);
     }
 
+    /**
+     * 验证是否为空
+     * @param obj 数据
+     * @return 返回布尔值
+     */
     public static boolean isNullAndSpaceOrEmpty(Object obj) {
+        // 验证是否为 null
         if (obj == null) {
             return true;
         }
-        return "".equals(obj.toString().trim());
+        // 验证是否为空
+        return Empty.equals(obj.toString().trim());
+        // 返回结果
     }
 
+    /**
+     * 是否为换行符
+     * @param line 内容
+     * @return 是否
+     * @since 0.1.129
+     */
     public static boolean isReturnLine(String line) {
         if (StringUtils.isEmpty(line)) {
             return true;
         }
+
         String trim = line.trim();
         if (StringUtils.isEmpty(trim)) {
             return true;
         }
-        return "".equals(line);
-    }
 
-    public static boolean isUpperCase(String string) {
-        char[] characters;
-        if (StringUtils.isEmpty(string)) {
-            return false;
-        }
-        for (char c : characters = string.toCharArray()) {
-            if (Character.isUpperCase(c)) continue;
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean isLowerCase(String string) {
-        char[] characters;
-        if (StringUtils.isEmpty(string)) {
-            return false;
-        }
-        for (char c : characters = string.toCharArray()) {
-            if (Character.isLowerCase(c)) continue;
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean containsUppercase(String string) {
-        char[] characters;
-        if (StringUtils.isEmpty(string)) {
-            return false;
-        }
-        for (char c : characters = string.toCharArray()) {
-            if (!Character.isUpperCase(c)) continue;
+        if (NEW_LINE.equals(line)) {
             return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 是否全部为大写
+     * @param string 待检验字符
+     * @return 是否为大写
+     */
+    public static boolean isUpperCase(final String string) {
+        if (StringUtils.isEmpty(string)) {
+            return false;
+        }
+
+        char[] characters = string.toCharArray();
+        for (char c : characters) {
+            if (!Character.isUpperCase(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 是否全部为小写
+     * @param string 待检验字符
+     * @return 是否为大写
+     */
+    public static boolean isLowerCase(final String string) {
+        if (StringUtils.isEmpty(string)) {
+            return false;
+        }
+
+        char[] characters = string.toCharArray();
+        for (char c : characters) {
+            if (!Character.isLowerCase(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 是否包含大写字母
+     * @param string 待检验字符
+     * @return 是否为大写
+     */
+    public static boolean containsUppercase(final String string) {
+        if (StringUtils.isEmpty(string)) {
+            return false;
+        }
+
+        char[] characters = string.toCharArray();
+        for (char c : characters) {
+            if (Character.isUpperCase(c)) {
+                return true;
+            }
         }
         return false;
     }
 
-    public static boolean containsLowercase(String string) {
-        char[] characters;
+    /**
+     * 是否包含小写字母
+     * @param string 待检验字符
+     * @return 是否为大写
+     */
+    public static boolean containsLowercase(final String string) {
         if (StringUtils.isEmpty(string)) {
             return false;
         }
-        for (char c : characters = string.toCharArray()) {
-            if (!Character.isLowerCase(c)) continue;
-            return true;
+
+        char[] characters = string.toCharArray();
+        for (char c : characters) {
+            if (Character.isLowerCase(c)) {
+                return true;
+            }
         }
         return false;
     }
 
-    public static boolean isLetter(String string) {
-        return StringUtils.isCharsCondition(string, new Condition<Character>(){
-
-            @Override
-            public boolean condition(Character character) {
-                return Character.isLowerCase(character.charValue()) || Character.isUpperCase(character.charValue());
-            }
-        });
+    /**
+     * 是否全部由字母组成 1. 大写字母 2. 小写字母
+     * @param string 字符串
+     * @return 结果
+     * @since 0.1.68
+     */
+    public static boolean isLetter(final String string) {
+        return isCharsCondition(
+                string,
+                new Condition<Character>() {
+                    @Override
+                    public boolean condition(Character character) {
+                        return Character.isLowerCase(character) || Character.isUpperCase(character);
+                    }
+                });
     }
 
-    public static boolean isDigit(String string) {
-        return StringUtils.isCharsCondition(string, new Condition<Character>(){
-
-            @Override
-            public boolean condition(Character character) {
-                return Character.isDigit(character.charValue());
-            }
-        });
+    /**
+     * 是否全部为数字
+     * @param string 字符串
+     * @return 是否为数字
+     * @since 0.1.68
+     */
+    public static boolean isDigit(final String string) {
+        return isCharsCondition(
+                string,
+                new Condition<Character>() {
+                    @Override
+                    public boolean condition(Character character) {
+                        return Character.isDigit(character);
+                    }
+                });
     }
 
-    public static boolean isDigitOrLetter(String string) {
-        return StringUtils.isCharsCondition(string, new Condition<Character>(){
-
-            @Override
-            public boolean condition(Character character) {
-                return CharUtils.isDigitOrLetter(character.charValue());
-            }
-        });
+    /**
+     * 是否全部为数字或者字母
+     * @param string 字符串
+     * @return 是否数字或者字母
+     * @since 0.1.68
+     */
+    public static boolean isDigitOrLetter(final String string) {
+        return isCharsCondition(
+                string,
+                new Condition<Character>() {
+                    @Override
+                    public boolean condition(Character character) {
+                        return CharUtils.isDigitOrLetter(character);
+                    }
+                });
     }
 
-    public static boolean isNumber(String string) {
-        return StringUtils.isCharsCondition(string, new Condition<Character>(){
-
-            @Override
-            public boolean condition(Character character) {
-                return CharUtils.isNumber(character.charValue());
-            }
-        });
+    /**
+     * 是否全部为数组
+     * @param string 字符串
+     * @return 结果
+     * @since 0.1.157
+     */
+    public static boolean isNumber(final String string) {
+        return isCharsCondition(
+                string,
+                new Condition<Character>() {
+                    @Override
+                    public boolean condition(Character character) {
+                        return CharUtils.isNumber(character);
+                    }
+                });
     }
 
-    private static boolean isCharsCondition(String string, Condition<Character> condition) {
-        char[] chars;
+    /**
+     * 字符串是否全部满足某一个条件
+     * @param string 原始字符串
+     * @param condition 条件
+     * @return 是否满足
+     * @since 0.1.68
+     */
+    private static boolean isCharsCondition(
+            final String string, final Condition<Character> condition) {
         if (StringUtils.isEmpty(string)) {
             return false;
         }
-        for (char c : chars = string.toCharArray()) {
-            if (condition.condition(Character.valueOf(c))) continue;
-            return false;
+
+        char[] chars = string.toCharArray();
+        for (char c : chars) {
+            if (!condition.condition(c)) {
+                return false;
+            }
         }
         return true;
     }
 
-    public static boolean isEmpty(String string) {
-        return null == string || "".equals(string);
+    /**
+     * 是否为空
+     * @param string 字符串
+     * @return {@code true} 为空
+     */
+    public static boolean isEmpty(final String string) {
+        return null == string || EMPTY.equals(string);
     }
 
-    public static boolean isEmptyTrim(String string) {
-        if (StringUtils.isEmpty(string)) {
+    /**
+     * 是否为空-进行 trim 之后
+     * @param string 原始字符串
+     * @return 是否
+     * @since 0.1.71
+     */
+    public static boolean isEmptyTrim(final String string) {
+        if (isEmpty(string)) {
             return true;
         }
-        String trim = StringUtils.trim(string);
-        return StringUtils.isEmpty(trim);
+
+        String trim = trim(string);
+        return isEmpty(trim);
     }
 
-    public static boolean isNotEmptyTrim(String string) {
-        return !StringUtils.isEmptyTrim(string);
+    /**
+     * 是否不为空-进行 trim 之后
+     * @param string 原始字符串
+     * @return 是否
+     * @since 0.1.102
+     */
+    public static boolean isNotEmptyTrim(final String string) {
+        return !isEmptyTrim(string);
     }
 
-    public static boolean isEmptyJson(String json) {
-        if (StringUtils.isEmptyTrim(json)) {
+    /**
+     * 是否为空的 json
+     * @param json json 信息
+     * @return 是否
+     * @since 0.1.80
+     */
+    public static boolean isEmptyJson(final String json) {
+        if (isEmptyTrim(json)) {
             return true;
         }
+
         String trim = json.trim();
         return EMPTY_JSON.equals(trim);
     }
 
-    public static boolean isNotEmpty(String string) {
-        return !StringUtils.isEmpty(string);
+    /**
+     * 是否为非空
+     * @param string 字符串
+     * @return {@code true} 为非空
+     */
+    public static boolean isNotEmpty(final String string) {
+        return !isEmpty(string);
     }
 
+    /**
+     * 是否为空
+     * @param str 字符串
+     * @return 是否为空
+     */
     public static boolean isBlank(String str) {
         int strLen;
         if (str != null && (strLen = str.length()) != 0) {
             for (int i = 0; i < strLen; ++i) {
-                if (Character.isWhitespace(str.charAt(i))) continue;
-                return false;
+                if (!Character.isWhitespace(str.charAt(i))) {
+                    return false;
+                }
             }
+
+            return true;
+        } else {
             return true;
         }
-        return true;
     }
 
+    /**
+     * 是否不为空
+     * @param str 字符串
+     * @return 是否不为空
+     */
     public static boolean isNotBlank(String str) {
-        return !StringUtils.isBlank(str);
+        return !isBlank(str);
     }
 
-    public static String[] splitByAnyBlank(String string) {
+    /**
+     * 根据任意多的空格进行分割字符串。 1. 入参为空,则返回空字符串数组
+     * @param string 字符串
+     * @return 割字符串数组
+     */
+    public static String[] splitByAnyBlank(final String string) {
         if (StringUtils.isEmpty(string)) {
             return new String[0];
         }
-        String pattern = "\\s+|\u0013";
-        return string.split("\\s+|\u0013");
+
+        final String pattern = "\\s+|\u0013";
+        return string.split(pattern);
     }
 
-    public static String trimAnyBlank(String string) {
+    /**
+     * 过滤掉所有的空格 （1）trim （2）移除所有的空格
+     * @param string 原始字符串
+     * @return 过滤后的内容
+     * @since 0.1.68
+     */
+    public static String trimAnyBlank(final String string) {
         if (StringUtils.isEmpty(string)) {
             return string;
         }
+
         String trim = string.trim();
         return trim.replaceAll("\\s+|\u0013", "");
     }
 
-    public static String replaceAnyBlank(String string, String replacement) {
+    /**
+     * 替换掉任意空格
+     * @param string 原始字符串
+     * @param replacement 待替换的文本
+     * @return 结果
+     * @since 0.1.98
+     */
+    public static String replaceAnyBlank(final String string, final String replacement) {
         if (StringUtils.isEmpty(string)) {
             return string;
         }
+
         Matcher m = BLANK_PATTERN.matcher(string);
         String result = m.replaceAll(replacement);
+        // 160 &nbsp;
         result = result.replaceAll("\\u00A0", replacement);
         return result;
     }
 
-    public static String replaceAnyBlank(String string) {
-        return StringUtils.replaceAnyBlank(string, "");
+    /**
+     * 替换掉任意空格为空
+     * @param string 原始字符串
+     * @return 结果
+     * @since 0.1.98
+     */
+    public static String replaceAnyBlank(final String string) {
+        return replaceAnyBlank(string, StringUtils.EMPTY);
     }
 
-    public static String trimAnyPunctionAndSymbol(String string) {
+    /**
+     * 过滤掉所有的标点符号 （1）trim （2）移除标点符号 （3）移除 symbol
+     * @param string 原始字符串
+     * @return 过滤后的内容
+     * @since 0.1.68
+     */
+    public static String trimAnyPunctionAndSymbol(final String string) {
         if (StringUtils.isEmpty(string)) {
             return string;
         }
+
         String trim = string.trim();
         return trim.replaceAll("\\p{P}|\\p{S}", "");
     }
 
+    /**
+     * 获取的驼峰写法。 1.这是 mybatis-gen 源码
+     * @param inputString 输入字符串
+     * @param firstCharacterUppercase 首字母是否大写。
+     * @return 驼峰写法
+     */
     public static String getCamelCaseString(String inputString, boolean firstCharacterUppercase) {
         StringBuilder sb = new StringBuilder();
+
         boolean nextUpperCase = false;
-        block3: for (int i = 0; i < inputString.length(); ++i) {
+        for (int i = 0; i < inputString.length(); i++) {
             char c = inputString.charAt(i);
+
             switch (c) {
-                case ' ': 
-                case '#': 
-                case '$': 
-                case '&': 
-                case '-': 
-                case '/': 
-                case '@': 
-                case '_': {
-                    if (sb.length() <= 0) continue block3;
-                    nextUpperCase = true;
-                    continue block3;
-                }
-                default: {
+                case '_':
+                case '-':
+                case '@':
+                case '$':
+                case '#':
+                case ' ':
+                case '/':
+                case '&':
+                    if (sb.length() > 0) {
+                        nextUpperCase = true;
+                    }
+                    break;
+
+                default:
                     if (nextUpperCase) {
                         sb.append(Character.toUpperCase(c));
                         nextUpperCase = false;
-                        continue block3;
+                    } else {
+                        sb.append(Character.toLowerCase(c));
                     }
-                    sb.append(Character.toLowerCase(c));
-                }
+                    break;
             }
         }
+
         if (firstCharacterUppercase) {
             sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
         }
+
         return sb.toString();
     }
 
+    /**
+     * 首字母小写
+     * @param str 字符串
+     * @return 首字母小写字符串
+     */
     public static String firstToLowerCase(String str) {
         if (str == null || str.trim().isEmpty()) {
             return str;
@@ -295,6 +546,11 @@ public final class StringUtils {
         return str.substring(0, 1).toLowerCase() + str.substring(1);
     }
 
+    /**
+     * 首字母大写
+     * @param str 字符串
+     * @return 首字母大写结果
+     */
     public static String firstToUpperCase(String str) {
         if (str == null || str.trim().isEmpty()) {
             return str;
@@ -305,293 +561,596 @@ public final class StringUtils {
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
-    public static String defaultEmpty(String string) {
-        if (StringUtils.isEmpty(string)) {
-            return "";
+    /**
+     * 默认为 “” 1. 如果为 null TO "" 2. 返回本身
+     * @param string 字符串
+     * @return 非 null 的字符串
+     */
+    public static String defaultEmpty(final String string) {
+        if (isEmpty(string)) {
+            return EMPTY;
         }
         return string;
     }
 
-    public static String join(Object ... array) {
-        return StringUtils.join(array, ",");
+    /**
+     * 将数组进行逗号连接
+     * @param array object array
+     * @return join string
+     * @since 0.1.46
+     */
+    public static String join(Object... array) {
+        return join(array, PunctuationConstants.COMMA);
     }
 
+    /**
+     * 将数组进行连接
+     * @param array object array
+     * @param separator 分隔符
+     * @return join string
+     * @see #join(Object[], String, int, int) 核心实现
+     * @since 0.1.14
+     */
     public static String join(Object[] array, String separator) {
-        int endIndex = ArrayUtils.getEndIndex(-1, array);
-        return StringUtils.join(array, separator, 0, endIndex);
+        final int endIndex = getEndIndex(-1, array);
+        return join(array, separator, 0, endIndex);
     }
 
-    public static String join(String splitter, Object ... objects) {
-        return StringUtils.join(objects, splitter);
+    /**
+     * 拼接
+     * @param splitter 拼接符
+     * @param objects 结果
+     * @return 结果
+     * @since 0.1.153
+     */
+    public static String join(String splitter, Object... objects) {
+        return join(objects, splitter);
     }
 
+    /**
+     * 将数组进行连接 from: apache lang3
+     * @param array object array
+     * @param separator 分隔符
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @return join string
+     */
     public static String join(Object[] array, String separator, int startIndex, int endIndex) {
-        int noOfItems;
         if (array == null) {
             return null;
         }
+
         if (separator == null) {
             separator = "";
         }
-        if ((noOfItems = endIndex - startIndex) < 0) {
+
+        int noOfItems = endIndex - startIndex;
+        if (noOfItems < 0) {
             return "";
-        }
-        StringBuilder buf = new StringBuilder(noOfItems * 16);
-        for (int i = startIndex; i <= endIndex; ++i) {
-            if (i > startIndex) {
-                buf.append(separator);
+        } else {
+            StringBuilder buf = new StringBuilder(noOfItems * 16);
+
+            for (int i = startIndex; i <= endIndex; ++i) {
+                if (i > startIndex) {
+                    buf.append(separator);
+                }
+
+                if (array[i] != null) {
+                    buf.append(array[i]);
+                }
             }
-            if (array[i] == null) continue;
-            buf.append(array[i]);
+
+            return buf.toString();
         }
-        return buf.toString();
     }
 
-    public static <E> String join(Collection<E> collection, String splitter, int startIndex, int endIndex) {
-        int i;
+    /**
+     * 字符串拼接 (1) v0.1.14 将其范围扩展到对象列表 注意：如果有 null 属性，会导致直接报错。此处不再处理。
+     * @param collection 集合列表
+     * @param splitter 分隔符
+     * @param startIndex 开始下标
+     * @param endIndex 结束下标
+     * @param <E> 泛型
+     * @return 结果
+     * @since 0.1.14
+     */
+    public static <E> String join(
+            final Collection<E> collection,
+            final String splitter,
+            final int startIndex,
+            final int endIndex) {
         if (CollectionUtil.isEmpty(collection)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String actualSplitter = StringUtils.nullToDefault(splitter, "");
+
+        final String actualSplitter = StringUtils.nullToDefault(splitter, StringUtils.EMPTY);
         StringBuilder stringBuilder = new StringBuilder();
+
         Iterator<E> iterator = collection.iterator();
-        for (i = 0; i < startIndex; ++i) {
+        // 循环直到 startIndex
+        for (int i = 0; i < startIndex; i++) {
             iterator.next();
         }
         stringBuilder.append(iterator.next().toString());
-        for (i = startIndex; i < endIndex; ++i) {
+        for (int i = startIndex; i < endIndex; i++) {
             stringBuilder.append(actualSplitter).append(iterator.next().toString());
         }
         return stringBuilder.toString();
     }
 
-    public static <E> String join(Collection<E> collection) {
-        return StringUtils.join(collection, ",");
+    // /**
+    // * 字符串拼接 (1) v0.1.14 将其范围扩展到对象列表 注意：如果有 null 属性，会导致直接报错。此处不再处理。
+    // *
+    // * @param collection 集合信息
+    // * @param splitter 分隔符
+    // * @param <E> 泛型
+    // * @return 结果
+    // * @since 0.1.14
+    // */
+    // public static <E> String join(final Collection<E> collection, final String
+    // splitter) {
+    // final int endIndex = CollectionUtil.getEndIndex(-1, collection);
+    // return join(collection, splitter, 0, endIndex);
+    // }
+
+    /**
+     * 字符串按逗号拼接拼接
+     * @param collection 集合信息
+     * @param <E> 泛型
+     * @return 结果
+     * @since 0.1.46
+     */
+    public static <E> String join(final Collection<E> collection) {
+        return join(collection, PunctuationConstants.COMMA);
     }
 
+    /**
+     * 驼峰命名转下划线
+     * @param camelStr 驼峰字符串
+     * @return 下划线字符串
+     */
     public static String camelToUnderline(String camelStr) {
-        char[] chars;
         if (StringUtils.isEmpty(camelStr)) {
-            return "";
+            return StringUtils.EMPTY;
         }
+
         StringBuilder sb = new StringBuilder();
-        for (char c : chars = camelStr.toCharArray()) {
+        char[] chars = camelStr.toCharArray();
+        for (char c : chars) {
             if (Character.isUpperCase(c)) {
                 sb.append('_');
                 sb.append(Character.toLowerCase(c));
-                continue;
+            } else {
+                sb.append(c);
             }
-            sb.append(c);
         }
+
         return sb.toString();
     }
 
+    /**
+     * 下划线转驼峰命名
+     * @param underlineStr 下划线字符串
+     * @return 驼峰字符串
+     */
     public static String underlineToCamel(String underlineStr) {
         if (StringUtils.isEmpty(underlineStr)) {
-            return "";
+            return StringUtils.EMPTY;
         }
+
         int len = underlineStr.length();
         StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; ++i) {
+        for (int i = 0; i < len; i++) {
             char c = underlineStr.charAt(i);
             if (c == '_') {
-                if (++i >= len) continue;
-                sb.append(Character.toUpperCase(underlineStr.charAt(i)));
-                continue;
+                if (++i < len) {
+                    sb.append(Character.toUpperCase(underlineStr.charAt(i)));
+                }
+            } else {
+                sb.append(c);
             }
-            sb.append(c);
         }
+
         return sb.toString();
     }
 
-    public static String repeat(String component, int times) {
+    /**
+     * 重复多少次
+     * @param component 组成信息
+     * @param times 重复次数
+     * @return 重复多次的字符串结果
+     */
+    public static String repeat(final String component, final int times) {
         if (StringUtils.isEmpty(component) || times <= 0) {
-            return "";
+            return StringUtils.EMPTY;
         }
+
         StringBuilder stringBuffer = new StringBuilder();
-        for (int i = 0; i < times; ++i) {
+        for (int i = 0; i < times; i++) {
             stringBuffer.append(component);
         }
+
         return stringBuffer.toString();
     }
 
-    public static String buildString(Object original, String middle, int prefixLength) {
+    /**
+     * 构建新的字符串
+     * @param original 原始对象
+     * @param middle 中间隐藏信息
+     * @param prefixLength 前边信息长度
+     * @return 构建后的新字符串
+     * @since 0.0.8
+     */
+    public static String buildString(
+            final Object original, final String middle, final int prefixLength) {
         if (ObjectUtils.isNull(original)) {
             return null;
         }
-        String string = original.toString();
-        int stringLength = string.length();
+
+        final String string = original.toString();
+        final int stringLength = string.length();
+
         String prefix = "";
         String suffix = "";
-        prefix = stringLength >= prefixLength ? string.substring(0, prefixLength) : string.substring(0, stringLength);
+
+        if (stringLength >= prefixLength) {
+            prefix = string.substring(0, prefixLength);
+        } else {
+            prefix = string.substring(0, stringLength);
+        }
+
         int suffixLength = stringLength - prefix.length() - middle.length();
         if (suffixLength > 0) {
             suffix = string.substring(stringLength - suffixLength);
         }
+
         return prefix + middle + suffix;
     }
 
-    public static String trim(String original) {
+    /**
+     * 过滤掉空格
+     * @param original 原始字符串
+     * @return 过滤后的字符串
+     * @since 0.1.0
+     */
+    public static String trim(final String original) {
         if (StringUtils.isEmpty(original)) {
             return original;
         }
         return original.trim();
     }
 
+    /**
+     * 如果字符串是<code>null</code>，则返回指定默认字符串，否则返回字符串本身。
+     *
+     * <pre>
+     * nullToDefault(null, &quot;default&quot;)  = &quot;default&quot;
+     * nullToDefault(&quot;&quot;, &quot;default&quot;)    = &quot;&quot;
+     * nullToDefault(&quot;  &quot;, &quot;default&quot;)  = &quot;  &quot;
+     * nullToDefault(&quot;bat&quot;, &quot;default&quot;) = &quot;bat&quot;
+     * </pre>
+     * @param str 要转换的字符串
+     * @param defaultStr 默认字符串
+     * @return 字符串本身或指定的默认字符串
+     * @since 0.1.0
+     */
     public static String nullToDefault(CharSequence str, String defaultStr) {
-        return str == null ? defaultStr : str.toString();
+        return (str == null) ? defaultStr : str.toString();
     }
 
+    /**
+     * 将已有字符串填充为规定长度，如果已有字符串超过这个长度则返回这个字符串
+     * @param str 被填充的字符串
+     * @param filledChar 填充的字符
+     * @param len 填充长度
+     * @param isPre 是否填充在前
+     * @return 填充后的字符串
+     * @since 0.1.0
+     */
     public static String fill(String str, char filledChar, int len, boolean isPre) {
-        int strLen = str.length();
+        final int strLen = str.length();
         if (strLen > len) {
             return str;
         }
+
         String filledStr = StringUtils.repeat(String.valueOf(filledChar), len - strLen);
         return isPre ? filledStr.concat(str) : str.concat(filledStr);
     }
 
-    public static String objectToString(Object object, String defaultWhenNull) {
+    /**
+     * 对象转换为字符串 1. 对数组特殊处理 {@link Arrays#toString(Object[])} 避免打印无意义的信息（v0.1.14）
+     * @param object 对象
+     * @param defaultWhenNull 对象为空时的默认值
+     * @return 结果
+     * @since 0.1.5
+     */
+    public static String objectToString(final Object object, final String defaultWhenNull) {
         if (ObjectUtils.isNull(object)) {
             return defaultWhenNull;
         }
         Class<?> type = object.getClass();
-        if (ClassTypeUtils.isArray(type)) {
-            Object[] arrays = (Object[])object;
+        if (isArray(type)) {
+            Object[] arrays = (Object[]) object;
             return Arrays.toString(arrays);
         }
         return object.toString();
     }
 
-    public static String objectToString(Object object) {
-        return StringUtils.objectToString(object, null);
+    /**
+     * 对象转换为字符串 1. 默认为空时返回 null
+     * @param object 对象
+     * @return 结果
+     * @since 0.1.5
+     */
+    public static String objectToString(final Object object) {
+        return objectToString(object, null);
     }
 
+    /**
+     * 对 single 的信息重复多次
+     * @param single 单个字符
+     * @param times 重复次数
+     * @return 结果
+     * @see #repeat(String, int) 重复
+     * @since 0.1.9
+     */
     @Deprecated
-    public static String times(String single, int times) {
+    public static String times(final String single, final int times) {
         if (StringUtils.isEmpty(single)) {
             return single;
         }
         if (times <= 0) {
             return single;
         }
+
         StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < times; ++i) {
+        for (int i = 0; i < times; i++) {
             stringBuilder.append(single);
         }
         return stringBuilder.toString();
     }
 
-    public static String capitalFirst(String string) {
+    /**
+     * 首字母大写
+     * @param string 字符串
+     * @return 大写的结果
+     * @since 0.1.11
+     */
+    public static String capitalFirst(final String string) {
         if (StringUtils.isEmpty(string)) {
             return string;
         }
+
         if (string.length() <= 1) {
             return string.toUpperCase();
         }
+
         char capitalChar = Character.toUpperCase(string.charAt(0));
         return capitalChar + string.substring(1);
     }
 
-    public static List<String> splitStrictly(String string, char splitUnit, int times) {
+    /**
+     * 严格拆分 【传统拆分】 1:2:3:31::32:4 结果是：[1, 2, 3, 31, , 32, 4]
+     * <p>
+     * 【严格拆分】 严格匹配 : 拆分符，如果有多个，则不进行拆分。 结果：[1, 2, 3, 31::32, 4]
+     * <p>
+     * 实现逻辑： （1）根据 index 获取所有的下标。+length（当前步长） （2）获取当前的所有拆分下标，获取 times+1 的拆分下标 （3）从当前下标中移除
+     * times+1 的下标。并且移除连续的信息。 连续：times+1 的下标，后续的 times 步长。如果不连续，则中断。 （4）根据过滤后的列表生成最后的结果。
+     * @param string 原始字符串
+     * @param splitUnit 分隔单元
+     * @param times 次数
+     * @return 结果
+     * @since 0.1.16
+     */
+    public static List<String> splitStrictly(
+            final String string, final char splitUnit, final int times) {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
         if (times <= 0) {
             return Collections.singletonList(string);
         }
-        String split = CharUtils.repeat(splitUnit, times);
-        String moreSplit = CharUtils.repeat(splitUnit, times + 1);
-        List<Integer> splitIndexList = StringUtils.getIndexList(string, split);
-        List<Integer> moreSplitIndexList = StringUtils.getIndexList(string, moreSplit);
-        List<Integer> removeIndexList = StringUtils.getSerialFilterList(splitIndexList, moreSplitIndexList, times);
-        List<Integer> trimIndexList = CollectionUtils.difference(splitIndexList, removeIndexList);
-        return StringUtils.subStringList(string, trimIndexList, times);
+
+        // 分别获取索引列表
+        final String split = CharUtils.repeat(splitUnit, times);
+        final String moreSplit = CharUtils.repeat(splitUnit, times + 1);
+        final List<Integer> splitIndexList = getIndexList(string, split);
+        final List<Integer> moreSplitIndexList = getIndexList(string, moreSplit);
+
+        // 移除重复下标
+        final List<Integer> removeIndexList =
+                getSerialFilterList(splitIndexList, moreSplitIndexList, times);
+
+        // 构建结果列表
+        Collection<Integer> trimIndexList = difference(splitIndexList, removeIndexList);
+        return subStringList(string, trimIndexList, times);
     }
 
-    private static List<Integer> getSerialFilterList(List<Integer> allList, List<Integer> filterList, int step) {
-        ArrayList<Integer> resultList = new ArrayList<Integer>(filterList);
+    /**
+     * 获取满足条件连续的列表 （1）当前信息 （2）连续的索引信息
+     * @param allList 所有的整数
+     * @param filterList 待排除的整数
+     * @param step 步长
+     * @return 结果列表
+     */
+    private static List<Integer> getSerialFilterList(
+            final List<Integer> allList, final List<Integer> filterList, final int step) {
+
+        List<Integer> resultList = new ArrayList<>(filterList);
+        // 根据 index+times 为步长进行连续判断。不存在则跳过
         for (Integer filter : filterList) {
-            int nextVal;
-            Integer indexVal;
-            int startIndex = allList.indexOf(filter) + 1;
+            // 从匹配的下一个元素开始
+            final int startIndex = allList.indexOf(filter) + 1;
             int stepTimes = 1;
-            for (int i = startIndex; i < allList.size() && (indexVal = allList.get(i)).equals(nextVal = step * stepTimes + filter); ++i) {
-                resultList.add(nextVal);
-                ++stepTimes;
+            for (int i = startIndex; i < allList.size(); i++) {
+                final Integer indexVal = allList.get(i);
+                final int nextVal = step * stepTimes + filter;
+                if (indexVal.equals(nextVal)) {
+                    resultList.add(nextVal);
+                } else {
+                    // 跳出当前循环
+                    break;
+                }
+                stepTimes++;
             }
         }
+
         return resultList;
     }
 
-    public static List<String> subStringList(String string, Collection<Integer> indexCollection, int ignoreLength) {
+    /**
+     * 根据下标截取列表
+     * <p>
+     * 【最后的截取问题】 最后构建的结果： string=1::2::3:31:::32::4: index=[1,4,15] ignore=2
+     * <p>
+     * 每次截取： [0,1) [1+2,4) [15+2,]
+     * @param string 原始字符串
+     * @param indexCollection 下标列表
+     * @param ignoreLength 每次忽略跳过的长度。用于跳过 split 字符。
+     * @return 结果列表
+     * @since 0.1.16
+     */
+    public static List<String> subStringList(
+            final String string,
+            final Collection<Integer> indexCollection,
+            final int ignoreLength) {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
         if (CollectionUtil.isEmpty(indexCollection)) {
             return Collections.singletonList(string);
         }
-        ArrayList<String> resultList = new ArrayList<String>();
+
+        List<String> resultList = new ArrayList<>();
         int startIndex = 0;
         for (Integer index : indexCollection) {
+            // 最后的位置添加空字符串
             if (startIndex > string.length() - 1) {
-                resultList.add("");
+                resultList.add(StringUtils.EMPTY);
                 break;
             }
             String subString = string.substring(startIndex, index);
             resultList.add(subString);
             startIndex = index + ignoreLength;
         }
+        // 最后的结果信息
         if (startIndex < string.length()) {
             String subString = string.substring(startIndex);
             resultList.add(subString);
         }
+
         return resultList;
     }
 
-    public static List<Integer> getIndexList(String string, String split) {
+    /**
+     * 获取所有符合条件的下标类表 【下标】 1:2:3:31::32:4:
+     * <p>
+     * [1, 3, 5, 8, 9, 12, 14]
+     * <p>
+     * 问题：这个下标没有过滤 split。 如果想过滤分隔符，应该如下： (0,1) (1+split.length, 3) ... 1,2,
+     * @param string 原始字符串
+     * @param split 分隔字符串
+     * @return 下标列表
+     * @since 0.1.16
+     */
+    public static List<Integer> getIndexList(final String string, final String split) {
         if (StringUtils.isEmpty(string) || StringUtils.isEmpty(split)) {
             return Collections.emptyList();
         }
-        ArrayList<Integer> indexList = new ArrayList<Integer>();
-        for (int startIndex = 0; startIndex < string.length() && (startIndex = string.indexOf(split, startIndex)) >= 0; startIndex += split.length()) {
+
+        List<Integer> indexList = new ArrayList<>();
+        int startIndex = 0;
+        while (startIndex < string.length()) {
+            startIndex = string.indexOf(split, startIndex);
+            if (startIndex < 0) {
+                break;
+            }
             indexList.add(startIndex);
+            startIndex += split.length();
         }
         return indexList;
     }
 
-    public static List<Integer> getIndexList(String string, char symbol, boolean ignoreDoubleQuotes) {
+    /**
+     * 获取字符串对应的下标信息
+     * @param string 字符串
+     * @param symbol 分隔符
+     * @param ignoreDoubleQuotes 是否忽略双引号中的信息
+     * @return 结果列表
+     * @since 0.1.27
+     */
+    public static List<Integer> getIndexList(
+            final String string, final char symbol, final boolean ignoreDoubleQuotes) {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
-        ArrayList<Integer> resultList = new ArrayList<Integer>();
+
+        List<Integer> resultList = new ArrayList<>();
         char[] chars = string.toCharArray();
+
         boolean doubleQuotesStart = false;
         char preChar = ' ';
-        for (int i = 0; i < chars.length; ++i) {
+        for (int i = 0; i < chars.length; i++) {
             char currentChar = chars[i];
-            if ('\\' != (preChar = ArrayPrimitiveUtils.getPreChar(preChar, currentChar)) && '\"' == currentChar) {
-                boolean bl = doubleQuotesStart = !doubleQuotesStart;
+
+            preChar = getPreChar(preChar, currentChar);
+            // 上一个字符不是转义，且当前为 "。则进行状态的切换
+            if (BACK_SLASH != preChar && DOUBLE_QUOTES == currentChar) {
+                doubleQuotesStart = !doubleQuotesStart;
             }
-            if (currentChar != symbol) continue;
-            if (ignoreDoubleQuotes) {
-                if (doubleQuotesStart) continue;
-                resultList.add(i);
-                continue;
+
+            // 等于且不在双引号中。
+            if (currentChar == symbol) {
+                // 忽略双引号中的信息 && 不在双引号中。
+                if (ignoreDoubleQuotes) {
+                    if (!doubleQuotesStart) {
+                        resultList.add(i);
+                    }
+                } else {
+                    resultList.add(i);
+                }
             }
-            resultList.add(i);
         }
         return resultList;
     }
 
-    public static List<String> splitByIndexes(String string, List<Integer> indexList) {
+    // /**
+    // * 获取上一个字符
+    // * <p>
+    // * 保证转义字符的两次抵消。
+    // *
+    // * @param preChar 上一个字符
+    // * @param currentChar 当前字符
+    // * @return 结果
+    // * @since 0.1.27
+    // */
+    // @Deprecated
+    // private static char getPreChar(final char preChar, final char currentChar) {
+    // // 判断前一个字符是什么
+    // if (BACK_SLASH == preChar
+    // && BACK_SLASH == currentChar) {
+    // return BLANK;
+    // }
+    // return currentChar;
+    // }
+
+    /**
+     * 根据索引下标直接拆分
+     * @param string 原始字符串
+     * @param indexList 结果列表
+     * @return 结果
+     * @since 0.1.27
+     */
+    public static List<String> splitByIndexes(final String string, final List<Integer> indexList) {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
         if (CollectionUtil.isEmpty(indexList)) {
             return Collections.singletonList(string);
         }
-        ArrayList<String> resultList = new ArrayList<String>();
+
+        List<String> resultList = new ArrayList<>();
+
         int preIndex = 0;
         for (Integer anIndexList : indexList) {
             int currentIndex = anIndexList;
@@ -600,312 +1159,573 @@ public final class StringUtils {
             }
             preIndex = currentIndex + 1;
         }
-        int lastIndex = indexList.get(indexList.size() - 1);
+        // 判断最后一个下标
+        final int lastIndex = indexList.get(indexList.size() - 1);
         if (lastIndex + 1 < string.length()) {
             resultList.add(string.substring(lastIndex + 1));
         }
         return resultList;
     }
 
-    public static byte[] stringToBytes(String string) {
+    /**
+     * 字符串转字节数组
+     * @param string 字符串
+     * @return 字节数组
+     * @since 0.1.35
+     */
+    public static byte[] stringToBytes(final String string) {
         if (ObjectUtils.isNull(string)) {
             return null;
         }
+
         return string.getBytes();
     }
 
-    public static String bytesToString(byte[] bytes) {
+    /**
+     * 字节数组转字符串
+     * @param bytes 字节数组
+     * @return 字符串
+     * @since 0.1.35
+     */
+    public static String bytesToString(final byte[] bytes) {
         if (ArrayPrimitiveUtils.isEmpty(bytes)) {
             return null;
         }
+
         return new String(bytes);
     }
 
-    public static String[] splitToStringArray(String string, String splitter) {
+    /**
+     * 拆分为字符串数组
+     * @param string 字符串
+     * @param splitter 拆分符号
+     * @return 字符串数组
+     * @since 0.1.46
+     */
+    public static String[] splitToStringArray(final String string, final String splitter) {
         if (StringUtils.isEmpty(string)) {
             return null;
         }
+
         return string.split(splitter);
     }
 
-    public static String[] splitToStringArray(String string) {
-        return StringUtils.splitToStringArray(string, ",");
+    /**
+     * 拆分为字符串数组
+     * @param string 字符串
+     * @return 字符串数组
+     * @since 0.1.46
+     */
+    public static String[] splitToStringArray(final String string) {
+        return splitToStringArray(string, PunctuationConstants.COMMA);
     }
 
-    public static String join(byte[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final byte[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Byte> lists = ArrayPrimitiveUtils.toList(array, new Handler<Byte, Byte>(){
 
-            @Override
-            public Byte handle(Byte value) {
-                return value;
-            }
-        });
-        return StringUtils.join(lists, splitter);
+        String splitter = getSplitter(splitters);
+        List<Byte> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        new Handler<Byte, Byte>() {
+                            @Override
+                            public Byte handle(Byte value) {
+                                return value;
+                            }
+                        });
+        return join(lists, splitter);
     }
 
-    public static String join(char[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final char[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Character> lists = ArrayPrimitiveUtils.toList(array, new Handler<Character, Character>(){
 
-            @Override
-            public Character handle(Character value) {
-                return value;
-            }
-        });
-        return StringUtils.join(lists, splitter);
+        String splitter = getSplitter(splitters);
+        List<Character> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        new Handler<Character, Character>() {
+                            @Override
+                            public Character handle(Character value) {
+                                return value;
+                            }
+                        });
+        return join(lists, splitter);
     }
 
-    public static String join(short[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final short[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Short> lists = ArrayPrimitiveUtils.toList(array, value -> value);
-        return StringUtils.join(lists, splitter);
+
+        String splitter = getSplitter(splitters);
+        List<Short> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        value -> value);
+        return join(lists, splitter);
     }
 
-    public static String join(long[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final long[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Long> lists = ArrayPrimitiveUtils.toList(array, value -> value);
-        return StringUtils.join(lists, splitter);
+
+        String splitter = getSplitter(splitters);
+        List<Long> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        value -> value);
+        return join(lists, splitter);
     }
 
-    public static String join(float[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final float[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Float> lists = ArrayPrimitiveUtils.toList(array, value -> value);
-        return StringUtils.join(lists, splitter);
+
+        String splitter = getSplitter(splitters);
+        List<Float> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        value -> value);
+        return join(lists, splitter);
     }
 
-    public static String join(double[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final double[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Double> lists = ArrayPrimitiveUtils.toList(array, new Handler<Double, Double>(){
 
-            @Override
-            public Double handle(Double value) {
-                return value;
-            }
-        });
-        return StringUtils.join(lists, splitter);
+        String splitter = getSplitter(splitters);
+        List<Double> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        new Handler<Double, Double>() {
+                            @Override
+                            public Double handle(Double value) {
+                                return value;
+                            }
+                        });
+        return join(lists, splitter);
     }
 
-    public static String join(boolean[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final boolean[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Boolean> lists = ArrayPrimitiveUtils.toList(array, new Handler<Boolean, Boolean>(){
 
-            @Override
-            public Boolean handle(Boolean value) {
-                return value;
-            }
-        });
-        return StringUtils.join(lists, splitter);
+        String splitter = getSplitter(splitters);
+        List<Boolean> lists =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        new Handler<Boolean, Boolean>() {
+                            @Override
+                            public Boolean handle(Boolean value) {
+                                return value;
+                            }
+                        });
+        return join(lists, splitter);
     }
 
-    public static String join(int[] array, String ... splitters) {
+    /**
+     * 数组拼接为字符串
+     * @param array 数组
+     * @param splitters 分隔符
+     * @return 拼接结果
+     * @since 0.1.49
+     */
+    public static String join(final int[] array, final String... splitters) {
         if (ArrayPrimitiveUtils.isEmpty(array)) {
-            return "";
+            return StringUtils.EMPTY;
         }
-        String splitter = StringUtils.getSplitter(splitters);
-        List<Integer> integers = ArrayPrimitiveUtils.toList(array, new Handler<Integer, Integer>(){
 
-            @Override
-            public Integer handle(Integer integer) {
-                return integer;
-            }
-        });
-        return StringUtils.join(integers, splitter);
+        String splitter = getSplitter(splitters);
+        List<Integer> integers =
+                ArrayPrimitiveUtils.toList(
+                        array,
+                        new Handler<Integer, Integer>() {
+                            @Override
+                            public Integer handle(Integer integer) {
+                                return integer;
+                            }
+                        });
+        return join(integers, splitter);
     }
 
-    private static String getSplitter(String ... splitters) {
+    /**
+     * 获取指定的分隔符
+     * @param splitters 分隔符
+     * @return 字符串
+     * @since 0.1.49
+     */
+    private static String getSplitter(final String... splitters) {
         if (ArrayUtils.isEmpty(splitters)) {
-            return ",";
+            return PunctuationConstants.COMMA;
         }
+
         return splitters[0];
     }
 
-    public static List<String> splitToList(String string, String splitter) {
+    /**
+     * 拆分为列表
+     * @param string 字符串
+     * @param splitter 分隔符号
+     * @return 字符串列表
+     * @since 0.1.49
+     */
+    public static List<String> splitToList(final String string, final String splitter) {
         ArgUtils.notEmpty(splitter, "splitter");
+
         if (StringUtils.isEmpty(string)) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
+
         String[] strings = string.split(splitter);
         return ArrayUtils.toList(strings);
     }
 
-    public static List<String> splitToList(String string, char c) {
+    /**
+     * 拆分为列表
+     * @param string 字符串
+     * @param c 字符
+     * @return 结果
+     * @since 0.2.3
+     */
+    public static List<String> splitToList(final String string, final char c) {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
+
         char[] chars = string.toCharArray();
-        return StringUtils.splitToList(chars, c);
+        return splitToList(chars, c);
     }
 
-    public static List<String> splitToList(char[] chars, char c) {
+    /**
+     * 拆分为列表
+     * @param chars 字符串
+     * @param c 字符
+     * @return 结果
+     * @since 0.2.3
+     */
+    public static List<String> splitToList(char[] chars, final char c) {
         if (ArrayPrimitiveUtils.isEmpty(chars)) {
             return Collections.emptyList();
         }
-        ArrayList<String> resultList = new ArrayList<String>();
+
+        List<String> resultList = new ArrayList<>();
+
         StringBuilder stringBuilder = new StringBuilder();
         for (char cs : chars) {
+            // 符合拆分条件
             if (c == cs) {
                 resultList.add(stringBuilder.toString());
                 stringBuilder.setLength(0);
-                continue;
+            } else {
+                stringBuilder.append(cs);
             }
-            stringBuilder.append(cs);
         }
+
+        // 如果还有
         if (!stringBuilder.isEmpty()) {
             resultList.add(stringBuilder.toString());
         }
+
         return resultList;
     }
 
-    public static List<String> splitToList(String string) {
-        return StringUtils.splitToList(string, ",");
+    /**
+     * 拆分为列表
+     * @param string 字符串
+     * @return 字符串列表
+     * @since 0.1.49
+     */
+    public static List<String> splitToList(final String string) {
+        return splitToList(string, PunctuationConstants.COMMA);
     }
 
-    public static Character[] toCharacterArray(String string) {
-        char[] chars = string.toCharArray();
+    /**
+     * 转换为数组字符
+     * @param string 字符串
+     * @return 结果
+     * @since 0.1.66
+     */
+    public static Character[] toCharacterArray(final String string) {
+        final char[] chars = string.toCharArray();
         Character[] newArray = new Character[chars.length];
-        for (int i = 0; i < chars.length; ++i) {
-            newArray[i] = Character.valueOf(chars[i]);
+
+        for (int i = 0; i < chars.length; i++) {
+            newArray[i] = chars[i];
         }
+
         return newArray;
     }
 
-    public static List<Character> toCharacterList(String string) {
-        char[] chars = string.toCharArray();
-        ArrayList<Character> newList = new ArrayList<Character>(chars.length);
+    /**
+     * 转换为列表字符
+     * @param string 字符串
+     * @return 结果
+     * @since 0.1.66
+     */
+    public static List<Character> toCharacterList(final String string) {
+        final char[] chars = string.toCharArray();
+        List<Character> newList = new ArrayList<>(chars.length);
+
         for (char aChar : chars) {
-            newList.add(Character.valueOf(aChar));
+            newList.add(aChar);
         }
+
         return newList;
     }
 
-    public static List<String> toCharStringList(String string) {
+    /**
+     * 转换为 char 字符串列表
+     * @param string 字符串
+     * @return 字符串列表
+     * @since 0.1.74
+     */
+    public static List<String> toCharStringList(final String string) {
         if (StringUtils.isEmpty(string)) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
-        char[] chars = string.toCharArray();
-        return ArrayPrimitiveUtils.toList(chars, new Handler<Character, String>(){
 
-            @Override
-            public String handle(Character character) {
-                return String.valueOf(character);
-            }
-        });
+        char[] chars = string.toCharArray();
+        return ArrayPrimitiveUtils.toList(
+                chars,
+                new Handler<Character, String>() {
+                    @Override
+                    public String handle(Character character) {
+                        return String.valueOf(character);
+                    }
+                });
     }
 
-    public static Set<Character> toCharSet(String string) {
+    /**
+     * 转换为 char set
+     * @param string 字符串
+     * @return 字符串列表
+     * @since 0.6.0
+     */
+    public static Set<Character> toCharSet(final String string) {
         if (StringUtils.isEmpty(string)) {
-            return new HashSet<Character>();
+            return new HashSet<>();
         }
+
         char[] chars = string.toCharArray();
-        HashSet<Character> set = new HashSet<Character>();
+        Set<Character> set = new HashSet<>();
         for (char c : chars) {
-            set.add(Character.valueOf(c));
+            set.add(c);
         }
+
         return set;
     }
 
-    public static String toHalfWidth(String string) {
-        return StringUtils.characterHandler(string, new Handler<Character, Character>(){
-
-            @Override
-            public Character handle(Character character) {
-                return Character.valueOf(CharUtils.toHalfWidth(character.charValue()));
-            }
-        });
+    /**
+     * 将字符串中的全角字符转为半角
+     * @param string 字符串
+     * @return 转换之后的字符串
+     * @since 0.1.68
+     */
+    public static String toHalfWidth(final String string) {
+        return characterHandler(
+                string,
+                new Handler<Character, Character>() {
+                    @Override
+                    public Character handle(Character character) {
+                        return CharUtils.toHalfWidth(character);
+                    }
+                });
     }
 
-    public static String toFullWidth(String string) {
-        return StringUtils.characterHandler(string, new Handler<Character, Character>(){
-
-            @Override
-            public Character handle(Character character) {
-                return Character.valueOf(CharUtils.toFullWidth(character.charValue()));
-            }
-        });
+    /**
+     * 将字符串中的半角字符转为全角
+     * @param string 字符串
+     * @return 转换之后的字符串
+     * @since 0.1.68
+     */
+    public static String toFullWidth(final String string) {
+        return characterHandler(
+                string,
+                new Handler<Character, Character>() {
+                    @Override
+                    public Character handle(Character character) {
+                        return CharUtils.toFullWidth(character);
+                    }
+                });
     }
 
-    private static String characterHandler(String string, Handler<Character, Character> handler) {
+    /**
+     * 字符的处理
+     * @param string 字符串
+     * @param handler 处理类
+     * @return 结果
+     * @since 0.1.68
+     */
+    private static String characterHandler(
+            final String string, final Handler<Character, Character> handler) {
         if (StringUtils.isEmpty(string)) {
             return string;
         }
+
+        // 1. 转换为列表
         char[] chars = string.toCharArray();
         char[] resultChars = new char[chars.length];
-        for (int i = 0; i < chars.length; ++i) {
-            resultChars[i] = handler.handle(Character.valueOf(chars[i])).charValue();
+        for (int i = 0; i < chars.length; i++) {
+            resultChars[i] = handler.handle(chars[i]);
         }
+
+        // 2. 构建结果
         return new String(resultChars);
     }
 
-    public static String trimNotChinese(String string) {
+    /**
+     * 过滤掉非中文字符
+     * @param string 字符串
+     * @return 结果
+     * @since 0.1.79
+     */
+    public static String trimNotChinese(final String string) {
         if (StringUtils.isEmptyTrim(string)) {
-            return "";
+            return StringUtils.EMPTY;
         }
+
         char[] chars = string.toCharArray();
         StringBuilder stringBuilder = new StringBuilder();
-        char[] cArray = chars;
-        int n = cArray.length;
-        for (int i = 0; i < n; ++i) {
-            Character character = Character.valueOf(cArray[i]);
-            if (!CharUtils.isChinese(character.charValue())) continue;
-            stringBuilder.append(character);
+        for (Character character : chars) {
+            if (CharUtils.isChinese(character)) {
+                stringBuilder.append(character);
+            }
         }
+
         return stringBuilder.toString();
     }
 
-    public static String valueOf(Object object) {
+    /**
+     * 避免默认实现的问题
+     * @param object 对象
+     * @return 结果
+     * @see String#valueOf(Object) 默认实现会把 null 转换为 "null"
+     * @since 0.1.102
+     */
+    public static String valueOf(final Object object) {
         if (ObjectUtils.isNull(object)) {
             return null;
         }
+
         return String.valueOf(object);
     }
 
-    public static String leftPadding(String original, int targetLength, char unit) {
+    /**
+     * 左补信息
+     * @param original 原始字符串
+     * @param targetLength 目标长度
+     * @param unit 补的元素
+     * @return 结果
+     * @since 0.1.104
+     */
+    public static String leftPadding(
+            final String original, final int targetLength, final char unit) {
         ArgUtils.notNull(original, "original");
-        int originalLength = original.length();
+
+        // 1. fast-return
+        final int originalLength = original.length();
         if (originalLength >= targetLength) {
             return original;
         }
+
+        // 2. 循环补零
         StringBuilder stringBuilder = new StringBuilder(targetLength);
-        for (int i = originalLength; i < targetLength; ++i) {
+        for (int i = originalLength; i < targetLength; i++) {
             stringBuilder.append(unit);
         }
         stringBuilder.append(original);
+
         return stringBuilder.toString();
     }
 
-    public static String leftPadding(String original, int targetLength) {
-        return StringUtils.leftPadding(original, targetLength, '0');
+    /**
+     * 左补信息 默认左补零 0
+     * @param original 原始字符串
+     * @param targetLength 目标长度
+     * @return 结果
+     * @since 0.1.104
+     */
+    public static String leftPadding(final String original, final int targetLength) {
+        return leftPadding(original, targetLength, '0');
     }
 
-    public static Character getFirstChar(String text) {
+    /**
+     * 获取第一个字符
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.122
+     */
+    public static Character getFirstChar(final String text) {
         if (StringUtils.isEmpty(text)) {
             return null;
         }
-        return Character.valueOf(text.charAt(0));
+
+        return text.charAt(0);
     }
 
+    /**
+     * 空转换为 null
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.123
+     */
     public static String emptyToNull(String text) {
         if (StringUtils.isEmpty(text)) {
             return null;
@@ -913,269 +1733,529 @@ public final class StringUtils {
         return text;
     }
 
-    public static Boolean toBool(String text) {
-        return "YES".equalsIgnoreCase(text) || "TRUE".equalsIgnoreCase(text) || "1".equalsIgnoreCase(text);
+    /**
+     * 转换为 boolean 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Boolean toBool(final String text) {
+        return "YES".equalsIgnoreCase(text)
+                || "TRUE".equalsIgnoreCase(text)
+                || "1".equalsIgnoreCase(text);
     }
 
-    public static Character toChar(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 boolean 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Character toChar(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
-        return Character.valueOf(text.charAt(0));
+
+        return text.charAt(0);
     }
 
-    public static Byte toByte(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Byte 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Byte toByte(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return Byte.valueOf(text);
     }
 
-    public static Short toShort(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Short 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Short toShort(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return Short.valueOf(text);
     }
 
-    public static Integer toInt(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Integer 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Integer toInt(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return Integer.valueOf(text);
     }
 
-    public static Long toLong(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Long 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Long toLong(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return Long.valueOf(text);
     }
 
-    public static Float toFloat(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Float 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Float toFloat(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return Float.valueOf(text);
     }
 
-    public static Double toDouble(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Float 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Double toDouble(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return Double.valueOf(text);
     }
 
-    public static BigInteger toBigInteger(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 BigInteger 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static BigInteger toBigInteger(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return new BigInteger(text);
     }
 
-    public static BigDecimal toBigDecimal(String text) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 BigDecimal 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static BigDecimal toBigDecimal(final String text) {
+        if (isEmpty(text)) {
             return null;
         }
+
         return new BigDecimal(text);
     }
 
-    public static Date toDate(String text, String dateFormat) {
-        if (StringUtils.isEmpty(text)) {
+    /**
+     * 转换为 Date 类型
+     * @param text 文本
+     * @param dateFormat 格式化
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Date toDate(final String text, final String dateFormat) {
+        if (isEmpty(text)) {
             return null;
         }
-        return DateUtils.getFormatDate(text, dateFormat);
+
+        return getFormatDate(text, dateFormat);
     }
 
-    public static Date toDate(String text) {
-        return StringUtils.toDate(text, "yyyyMMdd");
+    /**
+     * 转换为 BigDecimal 类型
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.124
+     */
+    public static Date toDate(final String text) {
+        return toDate(text, PURE_DATE_FORMAT);
     }
 
+    /**
+     * 转换为字符串
+     * @param date 日期
+     * @param format 格式化
+     * @return 结果
+     * @since 0.1.124
+     */
     public static String toString(Date date, String format) {
-        return DateUtils.getDateFormat(date, format);
+        return getDateFormat(date, format);
     }
 
+    /**
+     * 转换为字符串
+     * @param date 日期
+     * @return 结果
+     * @since 0.1.124
+     */
     public static String toString(Date date) {
-        return StringUtils.toString(date, "yyyyMMdd");
+        return toString(date, PURE_DATE_FORMAT);
     }
 
+    /**
+     * 转换为字符串
+     * @param object 对象
+     * @return 结果
+     * @since 0.1.124
+     */
     public static String toString(Object object) {
         if (null == object) {
             return null;
         }
+
         return object.toString();
     }
 
+    /**
+     * 转换为字符串
+     * @param bytes 字节
+     * @param charset 编码
+     * @return 结果
+     * @since 0.1.130
+     */
     public static String toString(byte[] bytes, String charset) {
         try {
             return new String(bytes, charset);
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new BootException(e);
         }
     }
 
+    /**
+     * 转换为字符串
+     * @param bytes 字节
+     * @return 结果
+     * @since 0.1.130
+     */
     public static String toString(byte[] bytes) {
-        return StringUtils.toString(bytes, "UTF-8");
+        return toString(bytes, UTF8);
     }
 
+    /**
+     * 转换为 bytes
+     * @param text 文本
+     * @param charset 编码
+     * @return 结果
+     * @since 0.1.130
+     */
     public static byte[] getBytes(String text, String charset) {
         try {
             return text.getBytes(charset);
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new BootException(e);
         }
     }
 
+    /**
+     * 转换为 bytes
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.130
+     */
     public static byte[] getBytes(String text) {
-        return StringUtils.getBytes(text, "UTF-8");
+        return getBytes(text, UTF8);
     }
 
+    /**
+     * 是否全部是英文
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.132
+     */
     public static boolean isEnglish(String text) {
-        char[] chars;
         if (StringUtils.isEmpty(text)) {
             return false;
         }
-        for (char c : chars = text.toCharArray()) {
-            if (CharUtils.isEnglish(c)) continue;
-            return false;
+
+        char[] chars = text.toCharArray();
+        for (char c : chars) {
+            if (!CharUtils.isEnglish(c)) {
+                return false;
+            }
         }
+
         return true;
     }
 
+    /**
+     * 是否全部是中文
+     * @param text 文本
+     * @return 结果
+     * @since 0.1.132
+     */
     public static boolean isChinese(String text) {
-        char[] chars;
         if (StringUtils.isEmpty(text)) {
             return false;
         }
-        for (char c : chars = text.toCharArray()) {
-            if (CharUtils.isChinese(c)) continue;
-            return false;
+
+        char[] chars = text.toCharArray();
+        for (char c : chars) {
+            if (!CharUtils.isChinese(c)) {
+                return false;
+            }
         }
+
         return true;
     }
 
+    /**
+     * 包信息调整为路径信息
+     * @param packageName 包信息
+     * @return 結果
+     * @since 0.1.141
+     */
     public static String packageToPath(String packageName) {
         if (StringUtils.isEmpty(packageName)) {
             return packageName;
         }
+
         return packageName.replaceAll("\\.", "/");
     }
 
+    /**
+     * 字符串截取
+     * @param text 文本
+     * @param startIndex 开始位置
+     * @param length 长度
+     * @return 结果
+     * @since 0.1.142
+     */
     public static String subString(String text, int startIndex, int length) {
         if (StringUtils.isEmpty(text)) {
             return text;
         }
+
+        // 长度
         if (length <= 0) {
             return null;
         }
+
+        // 避免越界
         int endIndex = startIndex + length;
         if (endIndex > text.length()) {
             endIndex = text.length();
         }
+
         return text.substring(startIndex, endIndex);
     }
 
+    /**
+     * 在不同的操作系统中，对换号符的定义是不同的，比如：
+     * <p>
+     * 1. \n unix,linux系统，好像新的mac也是这样的。
+     * <p>
+     * 2. \r 有的mac系统
+     * <p>
+     * 3. \r\n window系统。
+     * <p>
+     * 自己观察，你会发现规律，其实用一个正则表达式就可以满足： \r?\n
+     * @param content 内容
+     * @return 结果
+     * @since 0.1.143
+     */
     public static List<String> contentToLines(String content) {
         if (content == null) {
             return null;
         }
+
+        // 根据换行符分割
         String[] strings = content.split("\\r?\\n");
         return ArrayUtils.toList(strings);
     }
 
+    /**
+     * 字符串按照换行符拼接为新的内容
+     * @param lines 行
+     * @return 结果
+     * @since 0.1.143
+     */
     public static String linesToContent(List<String> lines) {
         if (CollectionUtil.isEmpty(lines)) {
             return null;
         }
+
         StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < lines.size() - 1; ++i) {
+
+        for (int i = 0; i < lines.size() - 1; i++) {
             stringBuilder.append(lines.get(i)).append(SystemUtils.getLineSeparator());
         }
+
         stringBuilder.append(lines.get(lines.size() - 1));
+
         return stringBuilder.toString();
     }
 
+    /**
+     * 根据长度进行文本截断
+     * @param text 文本
+     * @param limitSize 限制长度
+     * @return 结果列表
+     * @since 0.1.149
+     */
     public static List<String> splitByLength(String text, int limitSize) {
         if (StringUtils.isEmpty(text)) {
             return Collections.emptyList();
         }
-        int totalLength = text.length();
+
+        final int totalLength = text.length();
+
         int times = totalLength / limitSize;
         if (totalLength % limitSize != 0) {
-            ++times;
+            times++;
         }
-        ArrayList<String> resultList = new ArrayList<String>(times);
-        for (int i = 0; i < times; ++i) {
+
+        List<String> resultList = new ArrayList<>(times);
+
+        for (int i = 0; i < times; i++) {
             int startIndex = i * limitSize;
             int endIndex = (i + 1) * limitSize;
+
+            // 越界处理
             if (endIndex > totalLength) {
                 endIndex = totalLength;
             }
             String subText = text.substring(startIndex, endIndex);
             resultList.add(subText);
         }
+
         return resultList;
     }
 
+    /**
+     * 获取所有子字符串 比如：abc 1: a b c 2: ab bc 3: abc
+     * <p>
+     * 最大公共子串： https://blog.csdn.net/xiaojimanman/article/details/38924981
+     * @param text 文本
+     * @param minStepLen 最小步长
+     * @return 结果列表
+     */
     public static List<String> getAllSubStrList(String text, int minStepLen) {
         ArgUtils.positive(minStepLen, "stepLen");
+
         if (StringUtils.isEmpty(text) || minStepLen > text.length()) {
             return Collections.emptyList();
         }
-        ArrayList<String> list = new ArrayList<String>();
-        int length = text.length();
-        for (int i = minStepLen; i < length; ++i) {
-            for (int j = 0; j <= length - i; ++j) {
+
+        List<String> list = new ArrayList<>();
+
+        final int length = text.length();
+        for (int i = minStepLen; i < length; i++) {
+            // 从 0 开始，固定步长
+            for (int j = 0; j <= length - i; j++) {
                 String subStr = text.substring(j, j + i);
                 list.add(subStr);
             }
         }
+
         return list;
     }
 
+    /**
+     * 替換掉 emoji
+     * @param text 文本
+     * @param replacement 替換的内容
+     * @return 結果
+     * @since 0.1.160
+     */
     public static String replaceEmoji(String text, String replacement) {
         if (StringUtils.isEmpty(text)) {
             return text;
         }
+
         return text.replaceAll("[\\ud800\\udc00-\\udbff\\udfff\\ud800-\\udfff]", replacement);
     }
 
+    /**
+     * 替換掉 emoji
+     * @param text 文本
+     * @return 結果
+     * @since 0.1.160
+     */
     public static String replaceEmoji(String text) {
-        return StringUtils.replaceEmoji(text, "");
+        return replaceEmoji(text, "");
     }
 
-    public static Set<Character> getCharSet(String text) {
+    /**
+     * 获取对应的集合
+     * @param text 文本
+     * @return 结果
+     * @since 1.17.0
+     */
+    public static Set<Character> getCharSet(final String text) {
         if (StringUtils.isEmpty(text)) {
             return Collections.emptySet();
         }
+
         char[] chars = text.toCharArray();
-        HashSet<Character> characterSet = new HashSet<Character>(chars.length);
-        for (int i = 0; i < chars.length; ++i) {
-            characterSet.add(Character.valueOf(chars[i]));
+        Set<Character> characterSet = new HashSet<Character>(chars.length);
+        for (int i = 0; i < chars.length; i++) {
+            characterSet.add(chars[i]);
         }
+
         return characterSet;
     }
 
-    public static String subWithBytes(String text, int bytesLen, String charset) {
+    /**
+     * 按照字节数的长度截断
+     * @param text 文本
+     * @param bytesLen 字节长度
+     * @return 结果
+     * @since 0.13.0
+     */
+    public static String subWithBytes(final String text, final int bytesLen, final String charset) {
         if (StringUtils.isEmpty(text)) {
             return text;
         }
+
         try {
+            // 长度校验
             byte[] bytes = text.getBytes(charset);
+
+            // 长度判断
             if (bytes.length <= bytesLen) {
                 return text;
             }
+
             return new String(bytes, 0, bytesLen, charset);
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String subWithBytes(String text, int bytesLen) {
-        return StringUtils.subWithBytes(text, bytesLen, "UTF-8");
+    /**
+     * 按照字节数的长度截断
+     * @param text 文本
+     * @param bytesLen 字节长度
+     * @return 结果
+     * @since 0.13.0
+     */
+    public static String subWithBytes(final String text, final int bytesLen) {
+        return subWithBytes(text, bytesLen, "UTF-8");
     }
-}
 
+}

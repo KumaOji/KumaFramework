@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
@@ -8,61 +21,104 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * RetryUtil
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 14:58:57
+ */
 public final class RetryUtils {
-    private static final String NAME = "\u91cd\u8bd5\u5de5\u5177";
 
-    private RetryUtils() {
-    }
+    private RetryUtils() {}
 
-    public static <R> R invoke(Supplier<R> dataSupplier, Consumer<Throwable> exceptionCaught, int retryCount, long sleepTime, List<Class<? extends Throwable>> expectExceptions) {
+    /** name */
+    private static final String NAME = "重试工具";
+
+    /**
+     * 重试调度方法
+     * @param dataSupplier 返回数据方法执行体
+     * @param exceptionCaught 出错异常处理(包括第一次执行和重试错误)
+     * @param retryCount 重试次数
+     * @param sleepTime 重试间隔睡眠时间(注意：阻塞当前线程)
+     * @param expectExceptions 期待异常(抛出符合相应异常时候重试),空或者空容器默认进行重试
+     * @return R
+     * @since 2021-09-02 14:59:11
+     */
+    public static <R> R invoke(
+            Supplier<R> dataSupplier,
+            Consumer<Throwable> exceptionCaught,
+            int retryCount,
+            long sleepTime,
+            List<Class<? extends Throwable>> expectExceptions) {
+        Throwable ex;
+
         try {
-            return dataSupplier == null ? null : (R)dataSupplier.get();
+            // 产生数据
+            return dataSupplier == null ? null : dataSupplier.get();
+        } catch (Throwable throwable) {
+            // 捕获异常
+            catchException(exceptionCaught, throwable);
+            ex = throwable;
         }
-        catch (Throwable throwable) {
-            RetryUtils.catchException(exceptionCaught, throwable);
-            Throwable ex = throwable;
-            if (expectExceptions != null && !expectExceptions.isEmpty()) {
-                Class<?> exClass = ex.getClass();
-                boolean match = expectExceptions.stream().anyMatch(clazz -> clazz == exClass);
-                if (!match) {
-                    return null;
-                }
+
+        if (expectExceptions != null && !expectExceptions.isEmpty()) {
+            // 校验异常是否匹配期待异常
+            Class<? extends Throwable> exClass = ex.getClass();
+            boolean match = expectExceptions.stream().anyMatch(clazz -> clazz == exClass);
+            if (!match) {
+                return null;
             }
-            for (int i = 0; i < retryCount; ++i) {
-                try {
-                    if (sleepTime > 0L) {
-                        Thread.sleep(sleepTime);
-                    }
-                    return dataSupplier.get();
-                }
-                catch (InterruptedException e) {
-                    LogUtils.error("thread interrupted !! break retry,cause:" + e.getMessage(), new Object[0]);
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-                catch (Throwable throwable2) {
-                    RetryUtils.catchException(exceptionCaught, throwable2);
-                    continue;
-                }
-            }
-            return null;
         }
+
+        // 匹配期待异常或者允许任何异常重试
+        for (int i = 0; i < retryCount; i++) {
+            try {
+                if (sleepTime > 0) {
+                    Thread.sleep(sleepTime);
+                }
+                return dataSupplier.get();
+            } catch (InterruptedException e) {
+                LogUtils.error("thread interrupted !! break retry,cause:" + e.getMessage());
+                // 恢复中断信号
+                Thread.currentThread().interrupt();
+                // 线程中断直接退出重试
+                break;
+            } catch (Throwable throwable) {
+                catchException(exceptionCaught, throwable);
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * catchException
+     * @param exceptionCaught exceptionCaught
+     * @param throwable throwable
+     * @since 2021-09-02 17:04:42
+     */
     private static void catchException(Consumer<Throwable> exceptionCaught, Throwable throwable) {
         try {
             if (exceptionCaught != null) {
                 exceptionCaught.accept(throwable);
             }
-        }
-        catch (Throwable e) {
-            LogUtils.error(e, "retry exception caught throw error:" + ExceptionUtils.getFullStackTrace(e), new Object[0]);
+        } catch (Throwable e) {
+            LogUtils.error(
+                    e, "retry exception caught throw error:" + ExceptionUtils.getFullStackTrace(e));
         }
     }
 
+    /**
+     * Supplier
+     *
+     * @author kuma
+     * @version 2021.9
+     * @since 2021-09-02 14:59:53
+     */
     @FunctionalInterface
-    public static interface Supplier<T> {
-        public T get() throws Exception;
+    public interface Supplier<T> {
+
+        T get() throws Exception;
     }
 }
-

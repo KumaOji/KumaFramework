@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.collect.Lists
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.collection;
 
 import com.google.common.collect.Lists;
@@ -20,132 +30,213 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/** Map 工具类 */
 public final class MapUtils {
+
+    private MapUtils() {}
+
     private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
-    private MapUtils() {
-    }
-
+    /**
+     * 判断map为空
+     * @param map map
+     * @return {@code true} 为空
+     */
     public static boolean isEmpty(Map<?, ?> map) {
         return null == map || 0 == map.size();
     }
 
+    /**
+     * 判断map为非空
+     * @param map map
+     * @return {@code true} 非空
+     */
     public static boolean isNotEmpty(Map<?, ?> map) {
-        return !MapUtils.isEmpty(map);
+        return !isEmpty(map);
     }
 
+    /**
+     * 可遍历的结合转换为 map
+     * @param values 可遍历的元素 Iterator
+     * @param keyFunction 转化方式
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @return map 结果
+     */
     public static <K, V> Map<K, V> toMap(Collection<V> values, Handler<? super V, K> keyFunction) {
         if (ObjectUtils.isNull(values)) {
             return Collections.emptyMap();
         }
-        HashMap<K, V> map = new HashMap<K, V>(values.size());
+
+        Map<K, V> map = new HashMap<>(values.size());
+
         for (V value : values) {
-            K key = keyFunction.handle(value);
+            final K key = keyFunction.handle(value);
             map.put(key, value);
         }
         return map;
     }
 
+    /**
+     * 可遍历的结合转换为 map
+     * @param values 可遍历的元素 Iterator
+     * @param mapHandler map 转化方式
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @param <O> 原始泛型
+     * @return map 结果
+     */
     public static <K, V, O> Map<K, V> toMap(Collection<O> values, MapHandler<K, V, O> mapHandler) {
         if (ObjectUtils.isNull(values)) {
             return Collections.emptyMap();
         }
-        HashMap<K, V> map = new HashMap<K, V>(values.size());
+
+        Map<K, V> map = new HashMap<>(values.size());
         for (O line : values) {
-            K key = mapHandler.getKey(line);
-            V value = mapHandler.getValue(line);
+            final K key = mapHandler.getKey(line);
+            final V value = mapHandler.getValue(line);
             map.put(key, value);
         }
         return map;
     }
 
+    /**
+     * 可遍历的结合转换为 map
+     * @param map 可遍历的元素 Iterator
+     * @param entryHandler entry 转化方式
+     * @param <K> key 泛型
+     * @param <V> value 泛型
+     * @param <T> 目标泛型
+     * @return list 结果
+     */
     public static <K, V, T> List<T> toList(Map<K, V> map, MapEntryHandler<K, V, T> entryHandler) {
         if (MapUtils.isEmpty(map)) {
             return Collections.emptyList();
         }
-        ArrayList resultList = Lists.newArrayList();
+
+        List<T> resultList = Lists.newArrayList();
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            T result = entryHandler.handler(entry);
+            final T result = entryHandler.handler(entry);
             resultList.add(result);
         }
         return resultList;
     }
 
+    /**
+     * key 是元素的索引
+     * @param values 值
+     * @param <V> 元素泛型
+     * @return 结果 map
+     */
     public static <V> Map<Integer, V> toIndexMap(Collection<V> values) {
         if (ObjectUtils.isNull(values)) {
             return Collections.emptyMap();
         }
-        HashMap<Integer, V> map = new HashMap<Integer, V>(values.size());
+
+        Map<Integer, V> map = new HashMap<>(values.size());
+
         for (V v : values) {
             map.put(map.size(), v);
         }
         return map;
     }
 
-    public static String getMapValue(Map<String, String> map, String key) {
+    /**
+     * 获取对应的映射信息 （1）如果对应的值不存在，则返回 key 本身 （2）如果 map 为空，则返回
+     * @param map map
+     * @param key key
+     * @return value
+     */
+    public static String getMapValue(final Map<String, String> map, final String key) {
         if (MapUtils.isEmpty(map)) {
             return key;
         }
-        String value = map.get(key);
+        final String value = map.get(key);
         if (StringUtils.isEmpty(value)) {
             return key;
         }
         return value;
     }
 
-    public static <K, V> V getMapValue(Map<K, V> map, K key, V defaultValue) {
+    /**
+     * 获取对应的映射信息 1. 不存在则返回默认值
+     * @param map map
+     * @param key key
+     * @param defaultValue 默认值
+     * @param <K> 泛型 key
+     * @param <V> 泛型 value
+     * @return value
+     */
+    public static <K, V> V getMapValue(final Map<K, V> map, final K key, final V defaultValue) {
         if (MapUtils.isEmpty(map)) {
             return defaultValue;
         }
-        V value = map.get(key);
+        final V value = map.get(key);
         if (ObjectUtils.isNull(value)) {
             return defaultValue;
         }
         return value;
     }
 
-    public static Map.Entry<String, Object> getFirstEntry(Map<String, Object> map) {
+    /**
+     * 获取 map 的第一个值
+     * @param map map
+     * @return 结果
+     */
+    public static Map.Entry<String, Object> getFirstEntry(final Map<String, Object> map) {
         if (MapUtils.isEmpty(map)) {
             return null;
         }
-        Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
-        if (iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
             return entry;
         }
+
         return null;
     }
 
+    /**
+     * map转字符串，转换后的字符串格式为 {@code xxx=xxx&xxx=xxx}
+     * @param params 待转换的map
+     * @param encode 是否转码
+     * @return 转换后的字符串
+     */
     public static String parseMapToString(Map<String, String> params, boolean encode) {
         if (null == params || params.isEmpty()) {
             return "";
         }
-        ArrayList paramList = new ArrayList();
-        params.forEach((k, v) -> {
-            if (null == v) {
-                paramList.add(k + "=");
-            } else {
-                paramList.add(k + "=" + (encode ? MapUtils.urlEncode(v) : v));
-            }
-        });
-        return String.join((CharSequence)"&", paramList);
+        List<String> paramList = new ArrayList<>();
+        params.forEach(
+                (k, v) -> {
+                    if (null == v) {
+                        paramList.add(k + "=");
+                    } else {
+                        paramList.add(k + "=" + (encode ? urlEncode(v) : v));
+                    }
+                });
+        return String.join("&", paramList);
     }
 
+    /**
+     * 编码
+     * @param value str
+     * @return encode str
+     */
     public static String urlEncode(String value) {
         if (value == null) {
             return "";
         }
         try {
             String encoded = URLEncoder.encode(value, DEFAULT_ENCODING.displayName());
-            return encoded.replace("+", "%20").replace("*", "%2A").replace("~", "%7E").replace("/", "%2F");
-        }
-        catch (UnsupportedEncodingException e) {
+            return encoded.replace("+", "%20")
+                    .replace("*", "%2A")
+                    .replace("~", "%7E")
+                    .replace("/", "%2F");
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Failed To Encode Uri", e);
         }
     }
 }
-

@@ -1,70 +1,153 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
 import com.kuma.boot.common.utils.lang.StringUtils;
 
+/** 流水号生成规则(按默认规则递增，数字从1-99开始递增，数字到99，递增字母;位数不够增加位数) A001 A001A002 */
 public class CodeUtils {
+
+    // 数字位数(默认生成3位的数字)
+
+    /** 代表数字位数 */
     private static final int NUM_LENGTH = 2;
-    public static final int ZHANWEI_LENGTH = 3;
+
+    public static final int ZHANWEI_LENGTH = 1 + NUM_LENGTH;
+
     public static final char LETTER = 'Z';
 
+    /**
+     * 根据前一个code，获取同级下一个code 例如:当前最大code为D01A04，下一个code为：D01A05
+     * @param code
+     * @return
+     */
     public static synchronized String getNextYouBianCode(String code) {
         String newcode = "";
         if (StringUtils.isEmpty(code)) {
             String zimu = "A";
-            String num = CodeUtils.getStrNum(1);
+            String num = getStrNum(1);
             newcode = zimu + num;
         } else {
-            String beforeCode = code.substring(0, code.length() - 1 - 2);
-            String afterCode = code.substring(code.length() - 1 - 2, code.length());
+            String beforeCode = code.substring(0, code.length() - 1 - NUM_LENGTH);
+            String afterCode = code.substring(code.length() - 1 - NUM_LENGTH, code.length());
             char afterCodeZimu = afterCode.substring(0, 1).charAt(0);
             Integer afterCodeNum = Integer.parseInt(afterCode.substring(1));
+            // org.jeecgframework.core.util.LogUtil.info(after_code);
+            // org.jeecgframework.core.util.LogUtil.info(after_code_zimu);
+            // org.jeecgframework.core.util.LogUtil.info(after_code_num);
+
             String nextNum = "";
             char nextZimu = 'A';
-            nextNum = afterCodeNum == CodeUtils.getMaxNumByLength(2) ? CodeUtils.getNextStrNum(0) : CodeUtils.getNextStrNum(afterCodeNum);
-            nextZimu = afterCodeNum == CodeUtils.getMaxNumByLength(2) ? (char)CodeUtils.getNextZiMu(afterCodeZimu) : (char)afterCodeZimu;
-            newcode = 'Z' == afterCodeZimu && CodeUtils.getMaxNumByLength(2) == afterCodeNum ? code + nextZimu + nextNum : beforeCode + nextZimu + nextNum;
+            // 先判断数字等于999*，则计数从1重新开始，递增
+            if (afterCodeNum == getMaxNumByLength(NUM_LENGTH)) {
+                nextNum = getNextStrNum(0);
+            } else {
+                nextNum = getNextStrNum(afterCodeNum);
+            }
+            // 先判断数字等于999*，则字母从A重新开始,递增
+            if (afterCodeNum == getMaxNumByLength(NUM_LENGTH)) {
+                nextZimu = getNextZiMu(afterCodeZimu);
+            } else {
+                nextZimu = afterCodeZimu;
+            }
+
+            // 例如Z99，下一个code就是Z99A01
+            if (LETTER == afterCodeZimu && getMaxNumByLength(NUM_LENGTH) == afterCodeNum) {
+                newcode = code + (nextZimu + nextNum);
+            } else {
+                newcode = beforeCode + (nextZimu + nextNum);
+            }
         }
         return newcode;
     }
 
+    /**
+     * 根据父亲code,获取下级的下一个code
+     *
+     * <p>
+     * 例如：父亲CODE:A01 当前CODE:A01B03 获取的code:A01B04
+     * @param parentCode 上级code
+     * @param localCode 同级code
+     * @return
+     */
     public static synchronized String getSubYouBianCode(String parentCode, String localCode) {
         if (localCode != null && localCode != "") {
-            return CodeUtils.getNextYouBianCode(localCode);
+
+            // return parentCode + getNextYouBianCode(localCode);
+            return getNextYouBianCode(localCode);
+
+        } else {
+            parentCode = parentCode + "A" + getNextStrNum(0);
         }
-        parentCode = (String)parentCode + "A" + CodeUtils.getNextStrNum(0);
         return parentCode;
     }
 
+    /**
+     * 将数字前面位数补零
+     * @param num
+     * @return
+     */
     private static String getNextStrNum(int num) {
-        return CodeUtils.getStrNum(CodeUtils.getNextNum(num));
+        return getStrNum(getNextNum(num));
     }
 
+    /**
+     * 将数字前面位数补零
+     * @param num
+     * @return
+     */
     private static String getStrNum(int num) {
-        String s = String.format("%02d", num);
+        String s = String.format("%0" + NUM_LENGTH + "d", num);
         return s;
     }
 
+    /**
+     * 递增获取下个数字
+     * @param num
+     * @return
+     */
     private static int getNextNum(int num) {
-        return ++num;
+        num++;
+        return num;
     }
 
+    /**
+     * 递增获取下个字母
+     * @return
+     */
     private static char getNextZiMu(char zimu) {
-        if (zimu == 'Z') {
+        if (zimu == LETTER) {
             return 'A';
         }
-        zimu = (char)(zimu + '\u0001');
+        zimu++;
         return zimu;
     }
 
+    /**
+     * 根据数字位数获取最大值
+     * @param length
+     * @return
+     */
     private static int getMaxNumByLength(int length) {
         if (length == 0) {
             return 0;
         }
         StringBuilder maxNum = new StringBuilder();
-        for (int i = 0; i < length; ++i) {
+        for (int i = 0; i < length; i++) {
             maxNum.append("9");
         }
         return Integer.parseInt(maxNum.toString());
@@ -73,13 +156,20 @@ public class CodeUtils {
     public static String[] cutYouBianCode(String code) {
         if (StringUtils.isBlank(code)) {
             return null;
+        } else {
+            // 获取标准长度为numLength+1,截取的数量为code.length/numLength+1
+            int c = code.length() / (NUM_LENGTH + 1);
+            String[] cutcode = new String[c];
+            for (int i = 0; i < c; i++) {
+                cutcode[i] = code.substring(0, (i + 1) * (NUM_LENGTH + 1));
+            }
+            return cutcode;
         }
-        int c = code.length() / 3;
-        String[] cutcode = new String[c];
-        for (int i = 0; i < c; ++i) {
-            cutcode[i] = code.substring(0, (i + 1) * 3);
-        }
-        return cutcode;
     }
-}
+    // public static void main(String[] args) {
+    // // org.jeecgframework.core.util.LogUtil.info(getNextZiMu('C'));
+    // // org.jeecgframework.core.util.LogUtil.info(getNextNum(8));
+    // // org.jeecgframework.core.util.LogUtil.info(cutYouBianCode("C99A01B01")[2]);
+    // }
 
+}

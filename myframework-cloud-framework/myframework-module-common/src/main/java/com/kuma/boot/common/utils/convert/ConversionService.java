@@ -1,46 +1,63 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
- *  org.springframework.core.convert.converter.GenericConverter
- *  org.springframework.core.convert.support.GenericConversionService
- *  org.springframework.format.support.DefaultFormattingConversionService
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.convert;
 
-import com.kuma.boot.common.utils.convert.EnumToStringConverter;
-import com.kuma.boot.common.utils.convert.StringToEnumConverter;
-import org.jspecify.annotations.Nullable;
-import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
+import org.jspecify.annotations.Nullable;
 
-public class ConversionService
-extends DefaultFormattingConversionService {
-    private static volatile @Nullable ConversionService SHARED_INSTANCE;
+/**
+ * 类型 转换 服务，添加了 IEnum 转换
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 19:41:13
+ */
+public class ConversionService extends DefaultFormattingConversionService {
+
+    @Nullable private static volatile ConversionService SHARED_INSTANCE;
 
     public ConversionService() {
-        super.addConverter((GenericConverter)new EnumToStringConverter());
-        super.addConverter((GenericConverter)new StringToEnumConverter());
+        super();
+        super.addConverter(new EnumToStringConverter());
+        super.addConverter(new StringToEnumConverter());
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
+    /**
+     * Return a shared default application {@code ConversionService} instance, lazily
+     * building it once needed.
+     *
+     * <p>
+     * Note: This method actually returns an {@link ConversionService} instance. However,
+     * the {@code ConversionService} signature has been preserved for binary
+     * compatibility.
+     * @return the shared {@code MicaConversionService} instance (never{@code null})
      */
     public static GenericConversionService getInstance() {
-        ConversionService sharedInstance = SHARED_INSTANCE;
-        if (sharedInstance != null) return sharedInstance;
-        Class<ConversionService> clazz = ConversionService.class;
-        synchronized (ConversionService.class) {
-            sharedInstance = SHARED_INSTANCE;
-            if (sharedInstance != null) return sharedInstance;
-            SHARED_INSTANCE = sharedInstance = new ConversionService();
-            // ** MonitorExit[var1_1] (shouldn't be in output)
-            return sharedInstance;
+        ConversionService sharedInstance = ConversionService.SHARED_INSTANCE;
+        if (sharedInstance == null) {
+            synchronized (ConversionService.class) {
+                sharedInstance = ConversionService.SHARED_INSTANCE;
+                if (sharedInstance == null) {
+                    sharedInstance = new ConversionService();
+                    ConversionService.SHARED_INSTANCE = sharedInstance;
+                }
+            }
         }
+        return sharedInstance;
     }
 }
-

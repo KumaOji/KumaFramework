@@ -1,15 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.google.common.base.Objects
- *  com.google.common.cache.CacheBuilder
- *  com.google.common.cache.CacheLoader
- *  com.google.common.cache.LoadingCache
- *  org.springframework.cglib.beans.BeanCopier
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.bean;
 
+import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -17,59 +24,130 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.springframework.cglib.beans.BeanCopier;
 
+/**
+ * Bean属性拷贝的工具
+ */
 public final class BeanCopyUtils {
-    private static LoadingCache<ClassTuple, BeanCopier> cache = CacheBuilder.newBuilder().maximumSize(1024L).build((CacheLoader)new CacheLoader<ClassTuple, BeanCopier>(){
 
-        public BeanCopier load(ClassTuple classTuple) {
-            return BeanCopier.create(classTuple.sourceClass, classTuple.targetClass, (boolean)false);
-        }
-    });
+    private static LoadingCache<ClassTuple, BeanCopier> cache;
 
-    private BeanCopyUtils() {
+    static {
+        cache =
+                CacheBuilder.newBuilder()
+                        .maximumSize(1024)
+                        .build(
+                                new CacheLoader<ClassTuple, BeanCopier>() {
+                                    @Override
+                                    public BeanCopier load(ClassTuple classTuple) {
+                                        return BeanCopier.create(
+                                                classTuple.sourceClass,
+                                                classTuple.targetClass,
+                                                false);
+                                    }
+                                });
     }
 
+    private BeanCopyUtils() {
+        super();
+    }
+
+    /**
+     * 拷贝属性
+     * @param source 源对象
+     * @param target 目标对象
+     */
     public static void copyProperties(Object source, Object target) {
-        Objects.requireNonNull(source);
-        Objects.requireNonNull(target);
+        java.util.Objects.requireNonNull(source);
+        java.util.Objects.requireNonNull(target);
         try {
-            BeanCopier beanCopier = (BeanCopier)cache.get((ClassTuple) new ClassTuple(source.getClass(), target.getClass()));
+            BeanCopier beanCopier = cache.get(new ClassTuple(source.getClass(), target.getClass()));
             beanCopier.copy(source, target, null);
-        }
-        catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * 拷贝属性并获取新对象
+     * @param source 源对象
+     * @param target 目标对象
+     * @return A->B 返回B
+     */
     public static <T> T copyPropertiesAndGet(Object source, T target) {
-        BeanCopyUtils.copyProperties(source, target);
+        copyProperties(source, target);
         return target;
     }
 
+    /**
+     * 拷贝属性并获取新对象
+     * @param source 源对象
+     * @param supplier 目标对象的获取方法
+     * @return A->B 返回B
+     */
     public static <T> T copyPropertiesAndGet(Object source, Supplier<T> supplier) {
-        return BeanCopyUtils.copyPropertiesAndGet(source, supplier.get());
+        return copyPropertiesAndGet(source, supplier.get());
     }
 
-    public static <S, CS extends Collection<? extends S>, T, CT extends Collection<T>> CT copyCollection(CS source, Supplier<CT> collectionSupplier, Supplier<T> elementSupplier) {
-        return (CT)((Collection)source.stream().map(x -> BeanCopyUtils.copyPropertiesAndGet(x, elementSupplier)).collect(Collectors.toCollection(collectionSupplier)));
+    /**
+     * 拷贝集合c1(x1, x2, ..., xn)到新集合c2(y1, y2, ..., yn)
+     * @param source 原集合
+     * @param collectionSupplier 新集合初始化方法
+     * @param elementSupplier 新集合元素初始化方法
+     * @return 新集合
+     * @param <S> 原集合元素类型
+     * @param <CS> 原集合类型
+     * @param <T> 新集合元素类型
+     * @param <CT> 新集合类型
+     */
+    public static <S, CS extends Collection<? extends S>, T, CT extends Collection<T>>
+    CT copyCollection(
+            CS source, Supplier<CT> collectionSupplier, Supplier<T> elementSupplier) {
+        return source.stream()
+                .map(x -> copyPropertiesAndGet(x, elementSupplier))
+                .collect(Collectors.toCollection(collectionSupplier));
     }
 
-    public static <S, CS extends Collection<? extends S>, T> List<T> copyList(CS source, Supplier<T> elementSupplier) {
-        return BeanCopyUtils.copyCollection(source, ArrayList::new, elementSupplier);
+    /**
+     * 拷贝集合c1(x1, x2, ..., xn)到新List(y1, y2, ..., yn)
+     * @param source 原集合
+     * @param elementSupplier 新集合元素初始化方法
+     * @return 新集合
+     * @param <S> 原集合元素类型
+     * @param <CS> 原集合类型
+     * @param <T> 新集合元素类型
+     */
+    public static <S, CS extends Collection<? extends S>, T> List<T> copyList(
+            CS source, Supplier<T> elementSupplier) {
+        return copyCollection(source, ArrayList::new, elementSupplier);
     }
 
-    public static <S, CS extends Collection<? extends S>, T> Set<T> copySet(CS source, Supplier<T> elementSupplier) {
-        return BeanCopyUtils.copyCollection(source, HashSet::new, elementSupplier);
+    /**
+     * 拷贝集合c1(x1, x2, ..., xn)到新Set(y1, y2, ..., yn)
+     * @param source 原集合
+     * @param elementSupplier 新集合元素初始化方法
+     * @return 新集合
+     * @param <S> 原集合元素类型
+     * @param <CS> 原集合类型
+     * @param <T> 新集合元素类型
+     */
+    public static <S, CS extends Collection<? extends S>, T> Set<T> copySet(
+            CS source, Supplier<T> elementSupplier) {
+        return copyCollection(source, HashSet::new, elementSupplier);
     }
 
+    /**
+     * 两个类的元组
+     */
     private static class ClassTuple {
+
         private Class<?> sourceClass;
+
         private Class<?> targetClass;
 
         public ClassTuple(Class<?> sourceClass, Class<?> targetClass) {
@@ -77,20 +155,22 @@ public final class BeanCopyUtils {
             this.targetClass = targetClass;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
             }
-            if (o == null || this.getClass() != o.getClass()) {
+            if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            ClassTuple that = (ClassTuple)o;
-            return com.google.common.base.Objects.equal(this.sourceClass, that.sourceClass) && com.google.common.base.Objects.equal(this.targetClass, that.targetClass);
+            ClassTuple that = (ClassTuple) o;
+            return Objects.equal(sourceClass, that.sourceClass)
+                    && Objects.equal(targetClass, that.targetClass);
         }
 
+        @Override
         public int hashCode() {
-            return com.google.common.base.Objects.hashCode((Object[])new Object[]{this.sourceClass, this.targetClass});
+            return Objects.hashCode(sourceClass, targetClass);
         }
     }
 }
-

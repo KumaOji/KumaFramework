@@ -1,41 +1,93 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.util.ArrayUtil
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.common.utils.common;
 
-import cn.hutool.core.util.ArrayUtil;
 import java.util.HashMap;
 import java.util.Map;
+import cn.hutool.core.util.ArrayUtil;
 
+/**
+ * sql过滤
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 17:50:31
+ */
 public final class AntiSqlFilterUtils {
-    private static final String[] KEY_WORDS = new String[]{";", "\"", "'", "/*", "*/", "--", "exec", "select", "update", "delete", "insert", "alter", "drop", "create", "shutdown"};
 
-    private AntiSqlFilterUtils() {
-    }
+    private AntiSqlFilterUtils() {}
 
+    /** KEY_WORDS */
+    private static final String[] KEY_WORDS = {
+            ";",
+            "\"",
+            "'",
+            "/*",
+            "*/",
+            "--",
+            "exec",
+            "select",
+            "update",
+            "delete",
+            "insert",
+            "alter",
+            "drop",
+            "create",
+            "shutdown"
+    };
+
+    /**
+     * getSafeParameterMap
+     * @param parameterMap parameterMap
+     * @return {@link Map }
+     * @since 2021-09-02 17:50:43
+     */
     public static Map<String, String[]> getSafeParameterMap(Map<String, String[]> parameterMap) {
-        HashMap<String, String[]> map = new HashMap<String, String[]>(parameterMap.size());
+        Map<String, String[]> map = new HashMap<>(parameterMap.size());
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
             String[] oldValues = entry.getValue();
-            map.put(entry.getKey(), AntiSqlFilterUtils.getSafeValues(oldValues));
+            map.put(entry.getKey(), getSafeValues(oldValues));
         }
         return map;
     }
 
+    /**
+     * getSafeValues
+     * @param oldValues oldValues
+     * @return java.lang.String[]
+     * @since 2021-09-02 17:50:50
+     */
     public static String[] getSafeValues(String[] oldValues) {
-        if (ArrayUtil.isNotEmpty((Object[])oldValues)) {
+        if (ArrayUtil.isNotEmpty(oldValues)) {
             String[] newValues = new String[oldValues.length];
-            for (int i = 0; i < oldValues.length; ++i) {
-                newValues[i] = AntiSqlFilterUtils.getSafeValue(oldValues[i]);
+            for (int i = 0; i < oldValues.length; i++) {
+                newValues[i] = getSafeValue(oldValues[i]);
             }
             return newValues;
         }
         return null;
     }
 
+    /**
+     * getSafeValue
+     * @param oldValue oldValue
+     * @return {@link String }
+     * @since 2021-09-02 17:51:00
+     */
     public static String getSafeValue(String oldValue) {
         if (oldValue == null || "".equals(oldValue)) {
             return oldValue;
@@ -57,4 +109,3 @@ public final class AntiSqlFilterUtils {
         return sb.toString();
     }
 }
-
