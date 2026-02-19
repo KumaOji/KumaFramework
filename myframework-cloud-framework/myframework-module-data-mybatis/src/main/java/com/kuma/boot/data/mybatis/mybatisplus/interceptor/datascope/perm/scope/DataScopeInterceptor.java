@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -45,12 +44,15 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
  * 数据权限处理器
+ * <p>需应用提供 {@link DataPermScopeHandler} 实现方可启用</p>
  */
 @Component
+@ConditionalOnBean(DataPermScopeHandler.class)
 public class DataScopeInterceptor extends JsqlParserSupport implements InnerInterceptor {
 
     public static final String CREATOR = "create_by";
@@ -188,7 +190,7 @@ public class DataScopeInterceptor extends JsqlParserSupport implements InnerInte
             }
         }
 
-        return new AndExpression(new Parenthesis().withExpression(queryExpression), where);
+        return new AndExpression(queryExpression, where);
     }
 
     /**

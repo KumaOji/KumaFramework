@@ -25,9 +25,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
-/** 数据过滤处理 */
+/** 数据过滤处理（部门/自定义数据权限） */
 @Aspect
-@Component
+@Component("dataScopeDeptAspect")
 public class DataScopeAspect {
     /** 全部数据权限 */
     public static final String DATA_SCOPE_ALL = "1";

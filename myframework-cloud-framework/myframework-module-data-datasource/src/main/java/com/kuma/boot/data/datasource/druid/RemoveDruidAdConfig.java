@@ -29,6 +29,7 @@ import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -44,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnWebApplication
+@ConditionalOnBean(DruidStatProperties.class)
 @AutoConfigureAfter(DruidDataSourceAutoConfigure.class)
 @ConditionalOnProperty(
         name = "spring.datasource.druid.stat-view-servlet.enabled",

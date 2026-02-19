@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author Kuma
  * @version 1.0
  */
-@Configuration
+@Configuration("springThreadPoolConfig")
 @EnableAsync
 @Lazy
 public class ThreadPoolConfig implements AsyncConfigurer {

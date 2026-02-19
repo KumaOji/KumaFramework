@@ -13,6 +13,8 @@ dependencyManagement {
 
 dependencies {
     implementation project(':myframework-cloud-framework:myframework-module-application')
+    implementation project(':myframework-cloud-framework:myframework-module-data-mybatis')
+    implementation projectLibs.spring.boot.starter.jdbc
     runtimeOnly projectLibs.mysql
     runtimeOnly projectLibs.postgresql
     compileOnly projectLibs.lombok

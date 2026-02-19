@@ -6,6 +6,8 @@ description = 'Myframework cache-redis模块'
 
 dependencies {
     api project(':myframework-cloud-framework:myframework-module-common')
+    api projectLibs.guava
+    api projectLibs.commons.collections4
     api projectLibs.hutool.core
     api projectLibs.hutool.extra
     api projectLibs.spring.boot.starter.data.redis

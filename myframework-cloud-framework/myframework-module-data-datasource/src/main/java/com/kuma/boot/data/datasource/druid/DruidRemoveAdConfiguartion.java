@@ -26,6 +26,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import java.io.IOException;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -34,6 +35,7 @@ import org.springframework.context.annotation.Configuration;
 
 /** 删除druid的广告过滤器 */
 @Configuration
+@ConditionalOnBean(DruidStatProperties.class)
 @AutoConfigureAfter(DruidDataSourceAutoConfigure.class)
 public class DruidRemoveAdConfiguartion {
 

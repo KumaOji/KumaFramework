@@ -38,14 +38,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * DataScopeAspect
+ * DataScopeAspect（其他数据权限实现）
  *
  * @author kuma
  * @version 2026.01
  * @since 2025-12-19 09:30:45
  */
 @Aspect
-@Component
+@Component("dataScopeOtherAspect")
 public class DataScopeAspect {
 
     @Autowired

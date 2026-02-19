@@ -16,6 +16,7 @@
 
 package com.kuma.boot.data.datasource.tx;
 
+import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
@@ -37,28 +38,17 @@ public class TransactionalBean {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void beforeCommit() {
+    public void beforeCommit(ApplicationEvent event) {
         // 在事务提交前执行的逻辑...
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void afterCommit() {
+    public void afterCommit(ApplicationEvent event) {
         // 在事务提交后执行的逻辑...
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION)
-    public void afterCompletion( TransactionPhase phase ) {
-        // 在事务完成后执行的逻辑，可以获取事务结束的阶段
-        switch (phase) {
-            case AFTER_COMMIT:
-                // 事务已提交后执行的逻辑...
-                break;
-            case AFTER_ROLLBACK:
-                // 事务回滚后执行的逻辑...
-                break;
-            case AFTER_COMPLETION:
-                // 事务完成后执行的逻辑...
-                break;
-        }
+    public void afterCompletion(ApplicationEvent event) {
+        // 在事务完成后执行的逻辑
     }
 }

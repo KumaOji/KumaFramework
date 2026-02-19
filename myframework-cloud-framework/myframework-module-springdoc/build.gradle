@@ -6,6 +6,7 @@ description = 'Myframework springdoc模块'
 
 dependencies {
     api project(':myframework-cloud-framework:myframework-module-common')
+    api projectLibs.spring.cloud.context
     api projectLibs.hutool.core
     api projectLibs.spring.doc.common
     api projectLibs.spring.doc.webmvc

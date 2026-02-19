@@ -27,10 +27,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- * 线程池配置类
+ * 线程池配置类（data-mybatis 延迟消息用）
  */
 @EnableAsync
-@Configuration
+@Configuration("delayThreadPoolConfig")
 public class ThreadPoolConfig {
     /**
      * 核心线程数量
