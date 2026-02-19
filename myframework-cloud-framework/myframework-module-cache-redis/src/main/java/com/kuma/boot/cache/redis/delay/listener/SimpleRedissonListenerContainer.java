@@ -1,53 +1,57 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.redisson.Redisson
- *  org.redisson.api.RBlockingQueue
- *  org.redisson.api.RFuture
- *  org.redisson.client.RedisException
- *  org.redisson.client.codec.Codec
- *  org.redisson.client.protocol.RedisCommand
- *  org.redisson.client.protocol.decoder.ListObjectDecoder
- *  org.redisson.client.protocol.decoder.MultiDecoder
- *  org.redisson.command.CommandAsyncExecutor
- *  tools.jackson.databind.JsonNode
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.delay.listener;
 
-import cn.hutool.core.util.StrUtil;
+import tools.jackson.databind.JsonNode;
 import com.kuma.boot.cache.redis.delay.message.FastJsonCodec;
 import com.kuma.boot.cache.redis.delay.message.RedissonMessage;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import java.util.Map;
-import java.util.Objects;
+import cn.hutool.core.util.StrUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RFuture;
 import org.redisson.client.RedisException;
-import org.redisson.client.codec.Codec;
 import org.redisson.client.protocol.RedisCommand;
 import org.redisson.client.protocol.decoder.ListObjectDecoder;
-import org.redisson.client.protocol.decoder.MultiDecoder;
 import org.redisson.command.CommandAsyncExecutor;
-import tools.jackson.databind.JsonNode;
 
-public class SimpleRedissonListenerContainer
-extends AbstractRedissonListenerContainer {
-    private RedisCommand<Object> LPOP_VALUE = new RedisCommand("LPOP", (MultiDecoder)new ListObjectDecoder(1));
-    private AsyncMessageProcessingConsumer takeMessageTask;
+import java.util.Map;
 
-    public SimpleRedissonListenerContainer(ContainerProperties containerProperties) {
+/**
+ * SimpleRedissonListenerContainer
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-02-18 10:36:42
+ */
+public class SimpleRedissonListenerContainer extends AbstractRedissonListenerContainer {
+
+    private RedisCommand<Object> LPOP_VALUE = new RedisCommand<>("LPOP", new ListObjectDecoder<>(1));
+
+    public SimpleRedissonListenerContainer( ContainerProperties containerProperties ) {
         super(containerProperties);
     }
 
+    private AsyncMessageProcessingConsumer takeMessageTask;
+
     @Override
     protected void doStart() {
-        this.takeMessageTask = new AsyncMessageProcessingConsumer(this);
+        this.takeMessageTask = new AsyncMessageProcessingConsumer();
         this.getTaskExecutor().execute(this.takeMessageTask);
     }
 
@@ -56,71 +60,88 @@ extends AbstractRedissonListenerContainer {
         this.takeMessageTask.stop();
     }
 
-    private final class AsyncMessageProcessingConsumer
-    implements Runnable {
-        private volatile Thread currentThread;
-        private volatile AbstractRedissonListenerContainer.ConsumerStatus status;
-        final /* synthetic */ SimpleRedissonListenerContainer this$0;
+    /**
+     * AsyncMessageProcessingConsumer
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private final class AsyncMessageProcessingConsumer implements Runnable {
 
-        private AsyncMessageProcessingConsumer(SimpleRedissonListenerContainer simpleRedissonListenerContainer) {
-            SimpleRedissonListenerContainer simpleRedissonListenerContainer2 = simpleRedissonListenerContainer;
-            Objects.requireNonNull(simpleRedissonListenerContainer2);
-            this.this$0 = simpleRedissonListenerContainer2;
-            this.currentThread = null;
-            this.status = AbstractRedissonListenerContainer.ConsumerStatus.CREATED;
-        }
+        private volatile Thread currentThread = null;
+
+        private volatile ConsumerStatus status = ConsumerStatus.CREATED;
 
         @Override
         public void run() {
-            if (this.status != AbstractRedissonListenerContainer.ConsumerStatus.CREATED) {
-                LogUtils.info((String)"consumer currentThread [{}] will exit, because consumer status is {},expected is CREATED", (Object[])new Object[]{this.currentThread.getName(), this.status});
+            if (this.status != ConsumerStatus.CREATED) {
+                LogUtils.info(
+                        "consumer currentThread [{}] will exit, because consumer status is" + " {},expected is CREATED",
+                        this.currentThread.getName(),
+                        this.status);
                 return;
             }
-            String queue = this.this$0.getContainerProperties().getQueue();
-            Redisson redisson = (Redisson)this.this$0.getRedissonClient();
-            RBlockingQueue blockingQueue = redisson.getBlockingQueue(queue, (Codec)FastJsonCodec.INSTANCE);
+            final String queue = SimpleRedissonListenerContainer.this
+                    .getContainerProperties()
+                    .getQueue();
+            final Redisson redisson = (Redisson) SimpleRedissonListenerContainer.this.getRedissonClient();
+            final RBlockingQueue<Object> blockingQueue = redisson.getBlockingQueue(queue, FastJsonCodec.INSTANCE);
             if (blockingQueue == null) {
-                LogUtils.error((String)"error occurred while create blockingQueue for queue [{}]", (Object[])new Object[]{queue});
+                LogUtils.error("error occurred while create blockingQueue for queue [{}]", queue);
                 return;
             }
             CommandAsyncExecutor commandExecutor = redisson.getCommandExecutor();
             this.currentThread = Thread.currentThread();
-            this.status = AbstractRedissonListenerContainer.ConsumerStatus.RUNNING;
-            long maxWaitMillis = 100L;
-            long emptyFetchTimes = 0L;
-            do {
+            this.status = ConsumerStatus.RUNNING;
+            final long maxWaitMillis = 100;
+            long emptyFetchTimes = 0;
+            for (; ; ) {
                 try {
-                    RFuture asyncResult = commandExecutor.writeAsync(blockingQueue.getName(), blockingQueue.getCodec(), this.this$0.LPOP_VALUE, new Object[]{blockingQueue.getName()});
-                    String message = (String)commandExecutor.get(asyncResult);
-                    if (StrUtil.isBlank((CharSequence)message)) {
-                        Thread.sleep(Math.min(++emptyFetchTimes * 5L, 100L));
-                        continue;
+                    RFuture<String> asyncResult = commandExecutor.writeAsync(
+                            blockingQueue.getName(), blockingQueue.getCodec(), LPOP_VALUE, blockingQueue.getName());
+                    String message = commandExecutor.get(asyncResult);
+
+                    if (StrUtil.isBlank(message)) {
+                        Thread.sleep(Math.min(++emptyFetchTimes * 5, maxWaitMillis));
+                    } else {
+                        // reset counting
+                        LogUtils.info("message:" + message);
+                        emptyFetchTimes = 0;
+
+                        JsonNode jsonNode = JacksonUtils.parse(message);
+                        String payload = jsonNode.get("payload").toString();
+                        Map<String, Object> headers =
+                                JacksonUtils.readMap(jsonNode.get("headers").toString());
+
+                        // RedissonMessage redissonMessage = JsonUtil.(message,
+                        // RedissonMessage.class);
+
+                        RedissonMessage redissonMessage = new RedissonMessage(payload, headers);
+                        SimpleRedissonMessageListenerAdapter redissonListener = (SimpleRedissonMessageListenerAdapter)
+                                SimpleRedissonListenerContainer.this.getRedissonListener();
+                        redissonListener.onMessage(redissonMessage);
                     }
-                    LogUtils.info((String)("message:" + message), (Object[])new Object[0]);
-                    emptyFetchTimes = 0L;
-                    JsonNode jsonNode = JacksonUtils.parse((String)message);
-                    String payload = jsonNode.get("payload").toString();
-                    Map headers = JacksonUtils.readMap((String)jsonNode.get("headers").toString());
-                    RedissonMessage redissonMessage = new RedissonMessage(payload, headers);
-                    SimpleRedissonMessageListenerAdapter redissonListener = (SimpleRedissonMessageListenerAdapter)this.this$0.getRedissonListener();
-                    redissonListener.onMessage(redissonMessage);
+                } catch (InterruptedException | RedisException e) {
+                    // ignore
+                } catch (Exception e) {
+                    LogUtils.error("error occurred while take message from redisson", e);
                 }
-                catch (InterruptedException | RedisException asyncResult) {
+                if (this.status == ConsumerStatus.STOPPED) {
+                    LogUtils.info(
+                            "consumer currentThread [{}] will exit, because of STOPPED status",
+                            this.currentThread.getName());
+                    break;
                 }
-                catch (Exception e) {
-                    LogUtils.error((String)"error occurred while take message from redisson", (Object[])new Object[]{e});
-                }
-            } while (this.status != AbstractRedissonListenerContainer.ConsumerStatus.STOPPED);
-            LogUtils.info((String)"consumer currentThread [{}] will exit, because of STOPPED status", (Object[])new Object[]{this.currentThread.getName()});
+            }
             this.currentThread = null;
         }
 
         private void stop() {
             if (this.currentThread != null) {
-                this.status = AbstractRedissonListenerContainer.ConsumerStatus.STOPPED;
+                this.status = ConsumerStatus.STOPPED;
                 this.currentThread.interrupt();
             }
         }
     }
 }
-

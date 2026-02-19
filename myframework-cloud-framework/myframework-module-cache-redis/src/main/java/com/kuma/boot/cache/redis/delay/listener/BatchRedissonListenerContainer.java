@@ -1,57 +1,67 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.support.thread.ThreadFactoryCreator
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.redisson.api.RScript$Mode
- *  org.redisson.api.RScript$ReturnType
- *  org.redisson.api.RedissonClient
- *  org.redisson.client.RedisException
- *  org.redisson.client.codec.Codec
- *  org.springframework.core.task.SimpleAsyncTaskExecutor
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.delay.listener;
 
 import com.kuma.boot.cache.redis.delay.message.FastJsonCodec;
 import com.kuma.boot.cache.redis.delay.message.RedissonMessage;
-import com.kuma.boot.common.support.thread.ThreadFactoryCreator;
 import com.kuma.boot.common.utils.json.JacksonUtils;
+import com.kuma.boot.common.support.thread.ThreadFactoryCreator;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisException;
-import org.redisson.client.codec.Codec;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
 
-public class BatchRedissonListenerContainer
-extends AbstractRedissonListenerContainer {
+/**
+ * BatchRedissonListenerContainer
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-02-18 10:26:12
+ */
+public class BatchRedissonListenerContainer extends AbstractRedissonListenerContainer {
+
     private final String fetchScript;
+
     private final int maxFetch;
-    private AsyncMessageProcessingConsumer takeMessageTask;
 
     public int getMaxFetch() {
-        return this.maxFetch;
+        return maxFetch;
     }
 
-    public BatchRedissonListenerContainer(ContainerProperties containerProperties, int maxFetch) {
+    public BatchRedissonListenerContainer( ContainerProperties containerProperties, int maxFetch ) {
         super(containerProperties);
-        Assert.isTrue((maxFetch > 0 ? 1 : 0) != 0, (String)"maxFetch must be greater than 0");
+        Assert.isTrue(maxFetch > 0, "maxFetch must be greater than 0");
         this.maxFetch = maxFetch;
-        this.fetchScript = "local expiredValues = redis.call('lrange', KEYS[1], 0, ARGV[1]); if #expiredValues > 0 then redis.call('ltrim', KEYS[1], ARGV[2], -1); end; return expiredValues;";
-        this.setTaskExecutor((Executor)new SimpleAsyncTaskExecutor(ThreadFactoryCreator.create((String)"kmc-redisson-batch-consume-thread")));
+        this.fetchScript = "local expiredValues = redis.call('lrange', KEYS[1], 0, ARGV[1]); if #expiredValues"
+                + " > 0 then redis.call('ltrim', KEYS[1], ARGV[2], -1); end; return"
+                + " expiredValues;";
+        this.setTaskExecutor(
+                new SimpleAsyncTaskExecutor(ThreadFactoryCreator.create("kmc-redisson-batch-consume-thread")));
     }
+
+    private AsyncMessageProcessingConsumer takeMessageTask;
 
     @Override
     protected void doStart() {
-        this.takeMessageTask = new AsyncMessageProcessingConsumer(this);
+        this.takeMessageTask = new AsyncMessageProcessingConsumer();
         this.getTaskExecutor().execute(this.takeMessageTask);
     }
 
@@ -60,71 +70,90 @@ extends AbstractRedissonListenerContainer {
         this.takeMessageTask.stop();
     }
 
-    private final class AsyncMessageProcessingConsumer
-    implements Runnable {
-        private volatile Thread currentThread;
-        private volatile AbstractRedissonListenerContainer.ConsumerStatus status;
-        final /* synthetic */ BatchRedissonListenerContainer this$0;
+    /**
+     * AsyncMessageProcessingConsumer
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private final class AsyncMessageProcessingConsumer implements Runnable {
 
-        private AsyncMessageProcessingConsumer(BatchRedissonListenerContainer batchRedissonListenerContainer) {
-            BatchRedissonListenerContainer batchRedissonListenerContainer2 = batchRedissonListenerContainer;
-            Objects.requireNonNull(batchRedissonListenerContainer2);
-            this.this$0 = batchRedissonListenerContainer2;
-            this.currentThread = null;
-            this.status = AbstractRedissonListenerContainer.ConsumerStatus.CREATED;
-        }
+        private volatile Thread currentThread = null;
+
+        private volatile ConsumerStatus status = ConsumerStatus.CREATED;
 
         @Override
         public void run() {
-            if (this.status != AbstractRedissonListenerContainer.ConsumerStatus.CREATED) {
-                LogUtils.info((String)"consumer currentThread [{}] will exit, because consumer status is {},expected is CREATED", (Object[])new Object[]{this.currentThread.getName(), this.status});
+            if (this.status != ConsumerStatus.CREATED) {
+                LogUtils.info(
+                        "consumer currentThread [{}] will exit, because consumer status is" + " {},expected is CREATED",
+                        this.currentThread.getName(),
+                        this.status);
                 return;
             }
             this.currentThread = Thread.currentThread();
-            this.status = AbstractRedissonListenerContainer.ConsumerStatus.RUNNING;
-            long maxWaitMillis = 100L;
-            long emptyFetchTimes = 0L;
-            do {
+            this.status = ConsumerStatus.RUNNING;
+            final long maxWaitMillis = 100;
+            long emptyFetchTimes = 0;
+            for (; ; ) {
                 try {
                     List<RedissonMessage> messageList = this.fetch();
                     if (messageList == null || messageList.isEmpty()) {
-                        long delay = ++emptyFetchTimes * 5L;
-                        delay = Math.min(delay, 100L);
+                        long delay = ++emptyFetchTimes * 5;
+                        delay = Math.min(delay, maxWaitMillis);
                         Thread.sleep(delay);
-                        continue;
+                    } else {
+                        // reset counting
+                        emptyFetchTimes = 0;
+                        BatchRedissonMessageListenerAdapter redissonListener = (BatchRedissonMessageListenerAdapter)
+                                BatchRedissonListenerContainer.this.getRedissonListener();
+                        redissonListener.onMessage(messageList);
                     }
-                    emptyFetchTimes = 0L;
-                    BatchRedissonMessageListenerAdapter redissonListener = (BatchRedissonMessageListenerAdapter)this.this$0.getRedissonListener();
-                    redissonListener.onMessage(messageList);
+                } catch (InterruptedException | RedisException e) {
+                    // ignore
+                } catch (Exception e) {
+                    LogUtils.error("error occurred while take message from redisson", e);
                 }
-                catch (InterruptedException | RedisException messageList) {
+                if (this.status == ConsumerStatus.STOPPED) {
+                    LogUtils.info(
+                            "consumer currentThread [{}] will exit, because of STOPPED status",
+                            this.currentThread.getName());
+                    break;
                 }
-                catch (Exception e) {
-                    LogUtils.error((String)"error occurred while take message from redisson", (Object[])new Object[]{e});
-                }
-            } while (this.status != AbstractRedissonListenerContainer.ConsumerStatus.STOPPED);
-            LogUtils.info((String)"consumer currentThread [{}] will exit, because of STOPPED status", (Object[])new Object[]{this.currentThread.getName()});
+            }
             this.currentThread = null;
         }
 
+        @SuppressWarnings("unchecked")
         private List<RedissonMessage> fetch() {
-            String queue = this.this$0.getContainerProperties().getQueue();
-            RedissonClient redissonClient = this.this$0.getRedissonClient();
-            int fetchCount = this.this$0.maxFetch;
-            int searchEndIndex = fetchCount - 1;
-            List message = (List)redissonClient.getScript((Codec)FastJsonCodec.INSTANCE).eval(RScript.Mode.READ_WRITE, this.this$0.fetchScript, RScript.ReturnType.LIST, Collections.singletonList(queue), new Object[]{searchEndIndex, fetchCount});
+            final String queue =
+                    BatchRedissonListenerContainer.this.getContainerProperties().getQueue();
+            final RedissonClient redissonClient = BatchRedissonListenerContainer.this.getRedissonClient();
+            final int fetchCount = BatchRedissonListenerContainer.this.maxFetch;
+            final int searchEndIndex = fetchCount - 1;
+            List<String> message = (List<String>) redissonClient
+                    .getScript(FastJsonCodec.INSTANCE)
+                    .eval(
+                            RScript.Mode.READ_WRITE,
+                            BatchRedissonListenerContainer.this.fetchScript,
+                            RScript.ReturnType.LIST,
+                            Collections.singletonList(queue),
+                            searchEndIndex,
+                            fetchCount);
             if (message == null || message.isEmpty()) {
                 return null;
             }
-            return message.stream().map(e -> (RedissonMessage)JacksonUtils.toObject((String)e, RedissonMessage.class)).toList();
+            return message.stream()
+                    .map(e -> JacksonUtils.toObject(e, RedissonMessage.class))
+                    .toList();
         }
 
         private void stop() {
             if (this.currentThread != null) {
-                this.status = AbstractRedissonListenerContainer.ConsumerStatus.STOPPED;
+                this.status = ConsumerStatus.STOPPED;
                 this.currentThread.interrupt();
             }
         }
     }
 }
-

@@ -1,34 +1,45 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.data.redis.connection.RedisStreamCommands
- *  org.springframework.data.redis.connection.RedisStreamCommands$XAddOptions
- *  org.springframework.data.redis.connection.stream.MapRecord
- *  org.springframework.data.redis.connection.stream.Record
- *  org.springframework.data.redis.connection.stream.RecordId
- *  org.springframework.data.redis.core.RedisTemplate
- *  org.springframework.data.redis.core.StreamOperations
- *  org.springframework.data.redis.core.convert.RedisCustomConversions
- *  org.springframework.data.redis.serializer.StringRedisSerializer
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.stream;
+
+import org.springframework.data.redis.connection.RedisStreamCommands;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.Record;
+import org.springframework.data.redis.connection.stream.RecordId;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.data.redis.core.convert.RedisCustomConversions;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.springframework.data.redis.connection.RedisStreamCommands;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.Record;
-import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StreamOperations;
-import org.springframework.data.redis.core.convert.RedisCustomConversions;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-public class DefaultRStreamTemplate
-implements RStreamTemplate {
+/**
+ * 默认的 RStreamTemplate
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-03 09:34:49
+ */
+public class DefaultRStreamTemplate implements RStreamTemplate {
     private static final RedisCustomConversions CUSTOM_CONVERSIONS = new RedisCustomConversions();
     private final RedisTemplate<String, Object> redisTemplate;
     private final StreamOperations<String, String, Object> streamOperations;
@@ -40,61 +51,67 @@ implements RStreamTemplate {
 
     @Override
     public RecordId send(Record<String, ?> record) {
+        // 1. MapRecord
         if (record instanceof MapRecord) {
-            return this.streamOperations.add(record);
+            return streamOperations.add(record);
         }
-        String stream = Objects.requireNonNull((String)record.getStream(), "RStreamTemplate send stream name is null.");
-        Object recordValue = Objects.requireNonNull(record.getValue(), "RStreamTemplate send stream: " + stream + " value is null.");
+        String stream = Objects.requireNonNull(record.getStream(), "RStreamTemplate send stream name is null.");
+        Object recordValue =
+                Objects.requireNonNull(record.getValue(), "RStreamTemplate send stream: " + stream + " value is null.");
+
         Class<?> valueClass = recordValue.getClass();
+
+        // 2. 普通类型的 ObjectRecord
         if (CUSTOM_CONVERSIONS.isSimpleType(valueClass)) {
-            return this.streamOperations.add(record);
+            return streamOperations.add(record);
         }
-        HashMap<String, Object> payload = new HashMap<String, Object>();
-        payload.put("@payload", recordValue);
-        MapRecord mapRecord = MapRecord.create((Object)stream, payload);
-        return this.streamOperations.add(mapRecord);
+
+        // 3. 自定义类型处理
+        Map<String, Object> payload = new HashMap<>();
+        payload.put(RStreamTemplate.OBJECT_PAYLOAD_KEY, recordValue);
+        MapRecord<String, String, Object> mapRecord = MapRecord.create(stream, payload);
+        return streamOperations.add(mapRecord);
     }
 
     @Override
     public RecordId send(String name, String key, byte[] data, RedisStreamCommands.XAddOptions options) {
-        StringRedisSerializer stringSerializer = StringRedisSerializer.UTF_8;
-        byte[] nameBytes = Objects.requireNonNull(stringSerializer.serialize((Object)name), "redis stream name is null.");
-        byte[] keyBytes = Objects.requireNonNull(stringSerializer.serialize((Object)key), "redis stream key is null.");
+        RedisSerializer<String> stringSerializer = StringRedisSerializer.UTF_8;
+        byte[] nameBytes = Objects.requireNonNull(stringSerializer.serialize(name), "redis stream name is null.");
+        byte[] keyBytes = Objects.requireNonNull(stringSerializer.serialize(key), "redis stream key is null.");
         Map<byte[], byte[]> mapDate = Collections.singletonMap(keyBytes, data);
-        return (RecordId)this.redisTemplate.execute(redis -> {
+        return redisTemplate.execute((RedisCallback<RecordId>) redis -> {
             RedisStreamCommands streamCommands = redis.streamCommands();
-            return streamCommands.xAdd(MapRecord.create((Object)nameBytes, (Map)mapDate), options);
+            return streamCommands.xAdd(MapRecord.create(nameBytes, mapDate), options);
         });
     }
 
     @Override
-    public Long delete(String name, String ... recordIds) {
-        return this.streamOperations.delete((Object)name, recordIds);
+    public Long delete(String name, String... recordIds) {
+        return streamOperations.delete(name, recordIds);
     }
 
     @Override
-    public Long delete(String name, RecordId ... recordIds) {
-        return this.streamOperations.delete((Object)name, recordIds);
+    public Long delete(String name, RecordId... recordIds) {
+        return streamOperations.delete(name, recordIds);
     }
 
     @Override
     public Long trim(String name, long count, boolean approximateTrimming) {
-        return this.streamOperations.trim((Object)name, count, approximateTrimming);
+        return streamOperations.trim(name, count, approximateTrimming);
     }
 
     @Override
-    public Long acknowledge(String name, String group, String ... recordIds) {
-        return this.streamOperations.acknowledge((Object)name, group, recordIds);
+    public Long acknowledge(String name, String group, String... recordIds) {
+        return streamOperations.acknowledge(name, group, recordIds);
     }
 
     @Override
-    public Long acknowledge(String name, String group, RecordId ... recordIds) {
-        return this.streamOperations.acknowledge((Object)name, group, recordIds);
+    public Long acknowledge(String name, String group, RecordId... recordIds) {
+        return streamOperations.acknowledge(name, group, recordIds);
     }
 
     @Override
     public Long acknowledge(String group, Record<String, ?> record) {
-        return this.streamOperations.acknowledge(group, record);
+        return streamOperations.acknowledge(group, record);
     }
 }
-

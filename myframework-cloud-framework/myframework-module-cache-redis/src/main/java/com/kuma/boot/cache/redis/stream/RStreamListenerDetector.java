@@ -1,34 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.ReflectUtil
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.config.BeanPostProcessor
- *  org.springframework.core.annotation.AnnotationUtils
- *  org.springframework.data.redis.RedisSystemException
- *  org.springframework.data.redis.connection.stream.Consumer
- *  org.springframework.data.redis.connection.stream.MapRecord
- *  org.springframework.data.redis.connection.stream.ObjectRecord
- *  org.springframework.data.redis.connection.stream.ReadOffset
- *  org.springframework.data.redis.connection.stream.StreamInfo$XInfoGroups
- *  org.springframework.data.redis.connection.stream.StreamOffset
- *  org.springframework.data.redis.core.RedisTemplate
- *  org.springframework.data.redis.core.StreamOperations
- *  org.springframework.data.redis.stream.StreamMessageListenerContainer
- *  org.springframework.data.redis.stream.StreamMessageListenerContainer$ConsumerStreamReadRequest
- *  org.springframework.data.redis.stream.StreamMessageListenerContainer$StreamReadRequest
- *  org.springframework.util.Assert
- *  org.springframework.util.ClassUtils
- *  org.springframework.util.ReflectionUtils
- *  org.springframework.util.ReflectionUtils$MethodFilter
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.stream;
 
-import cn.hutool.core.util.ReflectUtil;
+import static cn.hutool.core.util.ReflectUtil.invoke;
+
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.lang.reflect.Method;
@@ -52,106 +41,152 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-public class RStreamListenerDetector
-implements BeanPostProcessor,
-InitializingBean {
-    private final StreamMessageListenerContainer<String, MapRecord<String, String, byte[]>> streamMessageListenerContainer;
+/**
+ * Redisson 监听器
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-03 09:35:02
+ */
+public class RStreamListenerDetector implements BeanPostProcessor, InitializingBean {
+    private final StreamMessageListenerContainer<String, MapRecord<String, String, byte[]>>
+            streamMessageListenerContainer;
     private final RedisTemplate<String, Object> redisTemplate;
     private final String consumerGroup;
     private final String consumerName;
 
-    public RStreamListenerDetector(StreamMessageListenerContainer<String, MapRecord<String, String, byte[]>> streamMessageListenerContainer, RedisTemplate<String, Object> redisTemplate, String consumerGroup, String consumerName) {
+    public RStreamListenerDetector(
+            StreamMessageListenerContainer<String, MapRecord<String, String, byte[]>> streamMessageListenerContainer,
+            RedisTemplate<String, Object> redisTemplate,
+            String consumerGroup,
+            String consumerName) {
         this.streamMessageListenerContainer = streamMessageListenerContainer;
         this.redisTemplate = redisTemplate;
         this.consumerGroup = consumerGroup;
         this.consumerName = consumerName;
     }
 
+    @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        Class userClass = ClassUtils.getUserClass((Object)bean);
-        ReflectionUtils.doWithMethods((Class)userClass, method -> {
-            RStreamListener listener = (RStreamListener)AnnotationUtils.findAnnotation((Method)method, RStreamListener.class);
-            if (listener != null) {
-                String streamKey = listener.name();
-                Assert.hasText((String)streamKey, (String)"@RStreamListener name must not be empty.");
-                LogUtils.info((String)"Found @RStreamListener on bean:{} method:{}", (Object[])new Object[]{beanName, method});
-                int paramCount = method.getParameterCount();
-                if (paramCount > 1) {
-                    throw new IllegalArgumentException("@RStreamListener on method " + String.valueOf(method) + " parameter count must less or equal to 1.");
-                }
-                ReadOffset readOffset = listener.offsetModel().getReadOffset();
-                StreamOffset streamOffset = StreamOffset.create((Object)streamKey, (ReadOffset)readOffset);
-                MessageModel messageModel = listener.messageModel();
-                if (MessageModel.BROADCASTING == messageModel) {
-                    this.broadCast((StreamOffset<String>)streamOffset, bean, method, listener.readRawBytes());
-                } else {
-                    String groupId = StringUtils.isNotBlank((String)listener.group()) ? listener.group() : this.consumerGroup;
-                    Consumer consumer = Consumer.from((String)groupId, (String)this.consumerName);
-                    RStreamListenerDetector.createGroupIfNeed(this.redisTemplate, streamKey, readOffset, groupId);
-                    this.cluster(consumer, (StreamOffset<String>)streamOffset, listener, bean, method);
-                }
-            }
-        }, (ReflectionUtils.MethodFilter)ReflectionUtils.USER_DECLARED_METHODS);
+        Class<?> userClass = ClassUtils.getUserClass(bean);
+        ReflectionUtils.doWithMethods(
+                userClass,
+                method -> {
+                    com.kuma.boot.cache.redis.stream.RStreamListener listener = AnnotationUtils.findAnnotation(method, com.kuma.boot.cache.redis.stream.RStreamListener.class);
+                    if (listener != null) {
+                        String streamKey = listener.name();
+                        Assert.hasText(streamKey, "@RStreamListener name must not be empty.");
+                        LogUtils.info("Found @RStreamListener on bean:{} method:{}", beanName, method);
+
+                        // 校验 method，method 入参数大于等于1
+                        int paramCount = method.getParameterCount();
+                        if (paramCount > 1) {
+                            throw new IllegalArgumentException("@RStreamListener on method "
+                                    + method
+                                    + " parameter count must less or equal to 1.");
+                        }
+
+                        // streamOffset
+                        ReadOffset readOffset = listener.offsetModel().getReadOffset();
+                        StreamOffset<String> streamOffset = StreamOffset.create(streamKey, readOffset);
+
+                        // 消费模式
+                        com.kuma.boot.cache.redis.stream.MessageModel messageModel = listener.messageModel();
+                        if (com.kuma.boot.cache.redis.stream.MessageModel.BROADCASTING == messageModel) {
+                            broadCast(streamOffset, bean, method, listener.readRawBytes());
+                        } else {
+                            String groupId =
+                                    StringUtils.isNotBlank(listener.group()) ? listener.group() : consumerGroup;
+                            Consumer consumer = Consumer.from(groupId, consumerName);
+                            // 如果需要，创建 group
+                            createGroupIfNeed(redisTemplate, streamKey, readOffset, groupId);
+                            cluster(consumer, streamOffset, listener, bean, method);
+                        }
+                    }
+                },
+                ReflectionUtils.USER_DECLARED_METHODS);
         return bean;
     }
 
     private void broadCast(StreamOffset<String> streamOffset, Object bean, Method method, boolean isReadRawBytes) {
-        this.streamMessageListenerContainer.receive(streamOffset, message -> this.invokeMethod(bean, method, (MapRecord<String, String, byte[]>)message, isReadRawBytes));
+        streamMessageListenerContainer.receive(streamOffset, (message) -> {
+            // MapBackedRecord
+            invokeMethod(bean, method, message, isReadRawBytes);
+        });
     }
 
-    private void cluster(Consumer consumer, StreamOffset<String> streamOffset, RStreamListener listener, Object bean, Method method) {
+    private void cluster(
+            Consumer consumer,
+            StreamOffset<String> streamOffset,
+            com.kuma.boot.cache.redis.stream.RStreamListener listener,
+            Object bean,
+            Method method) {
         boolean autoAcknowledge = listener.autoAcknowledge();
-        StreamMessageListenerContainer.ConsumerStreamReadRequest readRequest = StreamMessageListenerContainer.StreamReadRequest.builder(streamOffset).consumer(consumer).autoAcknowledge(autoAcknowledge).build();
-        StreamOperations opsForStream = this.redisTemplate.opsForStream();
-        this.streamMessageListenerContainer.register((StreamMessageListenerContainer.StreamReadRequest)readRequest, message -> {
-            this.invokeMethod(bean, method, (MapRecord<String, String, byte[]>)message, listener.readRawBytes());
+        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> readRequest =
+                StreamMessageListenerContainer.StreamReadRequest.builder(streamOffset)
+                        .consumer(consumer)
+                        .autoAcknowledge(autoAcknowledge)
+                        .build();
+        StreamOperations<String, Object, Object> opsForStream = redisTemplate.opsForStream();
+        streamMessageListenerContainer.register(readRequest, (message) -> {
+            // MapBackedRecord
+            invokeMethod(bean, method, message, listener.readRawBytes());
+
+            // ack
             if (!autoAcknowledge) {
                 opsForStream.acknowledge(consumer.getGroup(), message);
             }
         });
     }
 
-    private static void createGroupIfNeed(RedisTemplate<String, Object> redisTemplate, String streamKey, ReadOffset readOffset, String group) {
-        StreamOperations opsForStream = redisTemplate.opsForStream();
+    private static void createGroupIfNeed(
+            RedisTemplate<String, Object> redisTemplate, String streamKey, ReadOffset readOffset, String group) {
+        StreamOperations<String, Object, Object> opsForStream = redisTemplate.opsForStream();
         try {
-            StreamInfo.XInfoGroups groups = opsForStream.groups((Object)streamKey);
-            if (groups.stream().noneMatch(x -> group.equals(x.groupName()))) {
-                opsForStream.createGroup((Object)streamKey, readOffset, group);
+            StreamInfo.XInfoGroups groups = opsForStream.groups(streamKey);
+            if (groups.stream().noneMatch((x) -> group.equals(x.groupName()))) {
+                opsForStream.createGroup(streamKey, readOffset, group);
             }
-        }
-        catch (RedisSystemException e) {
-            opsForStream.createGroup((Object)streamKey, group);
+        } catch (RedisSystemException e) {
+            // RedisCommandExecutionException: ERR no such key
+            opsForStream.createGroup(streamKey, group);
         }
     }
 
-    private void invokeMethod(Object bean, Method method, MapRecord<String, String, byte[]> mapRecord, boolean isReadRawBytes) {
+    private void invokeMethod(
+            Object bean, Method method, MapRecord<String, String, byte[]> mapRecord, boolean isReadRawBytes) {
+        // 支持没有参数的方法
         if (method.getParameterCount() == 0) {
-            ReflectUtil.invoke((Object)bean, (Method)method, (Object[])new Object[0]);
+            invoke(bean, method);
             return;
         }
         if (isReadRawBytes) {
-            ReflectUtil.invoke((Object)bean, (Method)method, (Object[])new Object[]{mapRecord});
+            invoke(bean, method, mapRecord);
         } else {
-            ReflectUtil.invoke((Object)bean, (Method)method, (Object[])new Object[]{this.getRecordValue(mapRecord)});
+            invoke(bean, method, getRecordValue(mapRecord));
         }
     }
 
     private Object getRecordValue(MapRecord<String, String, byte[]> mapRecord) {
-        Map messageValue = (Map)mapRecord.getValue();
-        if (messageValue.containsKey("@payload")) {
-            byte[] payloads = (byte[])messageValue.get("@payload");
-            Object deserialize = this.redisTemplate.getValueSerializer().deserialize(payloads);
-            return ObjectRecord.create((Object)((String)mapRecord.getStream()), (Object)deserialize);
+        Map<String, byte[]> messageValue = mapRecord.getValue();
+        if (messageValue.containsKey(RStreamTemplate.OBJECT_PAYLOAD_KEY)) {
+            byte[] payloads = messageValue.get(RStreamTemplate.OBJECT_PAYLOAD_KEY);
+            Object deserialize = redisTemplate.getValueSerializer().deserialize(payloads);
+            return ObjectRecord.create(mapRecord.getStream(), deserialize);
+        } else {
+            return mapRecord.mapEntries(entry -> {
+                String key = entry.getKey();
+                Object value = redisTemplate.getValueSerializer().deserialize(entry.getValue());
+                return Collections.singletonMap(key, value)
+                        .entrySet()
+                        .iterator()
+                        .next();
+            });
         }
-        return mapRecord.mapEntries(entry -> {
-            String key = (String)entry.getKey();
-            Object value = this.redisTemplate.getValueSerializer().deserialize((byte[])entry.getValue());
-            return Collections.singletonMap(key, value).entrySet().iterator().next();
-        });
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        this.streamMessageListenerContainer.start();
+        streamMessageListenerContainer.start();
     }
 }
-

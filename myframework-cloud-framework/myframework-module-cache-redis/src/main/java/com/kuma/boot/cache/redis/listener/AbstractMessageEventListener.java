@@ -1,13 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.data.redis.connection.Message
- *  org.springframework.data.redis.core.StringRedisTemplate
- *  org.springframework.data.redis.serializer.RedisSerializer
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.listener;
 
 import com.kuma.boot.common.utils.json.JacksonUtils;
@@ -18,31 +24,40 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
-public abstract class AbstractMessageEventListener<T>
-implements MessageEventListener {
+/**
+ * redis消息监听处理器
+ */
+public abstract class AbstractMessageEventListener<T> implements MessageEventListener {
+
     @Autowired
     protected StringRedisTemplate stringRedisTemplate;
+
     protected final Class<T> clz;
 
+    @SuppressWarnings("unchecked")
     protected AbstractMessageEventListener() {
-        Type superClass = this.getClass().getGenericSuperclass();
-        ParameterizedType type = (ParameterizedType)superClass;
-        this.clz = (Class)type.getActualTypeArguments()[0];
+        Type superClass = getClass().getGenericSuperclass();
+        ParameterizedType type = (ParameterizedType) superClass;
+        clz = (Class<T>) type.getActualTypeArguments()[0];
     }
 
+    @Override
     public void onMessage(Message message, byte[] pattern) {
         byte[] channelBytes = message.getChannel();
-        RedisSerializer stringSerializer = this.stringRedisTemplate.getStringSerializer();
-        String channelTopic = (String)stringSerializer.deserialize(channelBytes);
-        String topic = this.topic().getTopic();
+        RedisSerializer<String> stringSerializer = stringRedisTemplate.getStringSerializer();
+        String channelTopic = stringSerializer.deserialize(channelBytes);
+        String topic = topic().getTopic();
         if (topic.equals(channelTopic)) {
             byte[] bodyBytes = message.getBody();
-            String body = (String)stringSerializer.deserialize(bodyBytes);
-            Object decodeMessage = JacksonUtils.toObject((String)body, this.clz);
-            this.handleMessage(decodeMessage);
+            String body = stringSerializer.deserialize(bodyBytes);
+            T decodeMessage = JacksonUtils.toObject(body, clz);
+            handleMessage(decodeMessage);
         }
     }
 
-    protected abstract void handleMessage(T var1);
+    /**
+     * 处理消息
+     * @param decodeMessage 反系列化之后的消息
+     */
+    protected abstract void handleMessage(T decodeMessage);
 }
-

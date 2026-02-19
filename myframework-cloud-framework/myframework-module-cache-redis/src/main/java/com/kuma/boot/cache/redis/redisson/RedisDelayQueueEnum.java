@@ -1,32 +1,56 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.redisson;
 
+/**
+ * 延迟队列业务枚举
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-27 17:45:55
+ */
 public enum RedisDelayQueueEnum {
-    ORDER_PAYMENT_TIMEOUT("ORDER_PAYMENT_TIMEOUT", "\u8ba2\u5355\u652f\u4ed8\u8d85\u65f6\uff0c\u81ea\u52a8\u53d6\u6d88\u8ba2\u5355", "orderPaymentTimeout"),
-    ORDER_TIMEOUT_NOT_EVALUATED("ORDER_TIMEOUT_NOT_EVALUATED", "\u8ba2\u5355\u8d85\u65f6\u672a\u8bc4\u4ef7\uff0c\u7cfb\u7edf\u9ed8\u8ba4\u597d\u8bc4", "orderTimeoutNotEvaluated");
+    ORDER_PAYMENT_TIMEOUT("ORDER_PAYMENT_TIMEOUT", "订单支付超时，自动取消订单", "orderPaymentTimeout"),
+    ORDER_TIMEOUT_NOT_EVALUATED("ORDER_TIMEOUT_NOT_EVALUATED", "订单超时未评价，系统默认好评", "orderTimeoutNotEvaluated");
 
+    /** 延迟队列 Redis Key */
     private String code;
+
+    /** 中文描述 */
     private String name;
+
+    /** 延迟队列具体业务实现的 Bean 可通过 Spring 的上下文获取 */
     private String beanId;
 
-    private RedisDelayQueueEnum(String code, String name, String beanId) {
+    RedisDelayQueueEnum(String code, String name, String beanId) {
         this.code = code;
         this.name = name;
         this.beanId = beanId;
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public String getBeanId() {
-        return this.beanId;
+        return beanId;
     }
 }
-

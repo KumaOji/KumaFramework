@@ -1,22 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.redisson.api.RedissonClient
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.BeanFactory
- *  org.springframework.beans.factory.BeanFactoryAware
- *  org.springframework.beans.factory.SmartInitializingSingleton
- *  org.springframework.beans.factory.config.BeanPostProcessor
- *  org.springframework.beans.factory.support.BeanDefinitionValidationException
- *  org.springframework.core.annotation.AnnotationUtils
- *  org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory
- *  org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory
- *  org.springframework.messaging.handler.invocation.InvocableHandlerMethod
- *  org.springframework.util.ReflectionUtils
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.delay.config;
 
 import com.kuma.boot.cache.redis.delay.annotation.RedissonListener;
@@ -50,51 +47,68 @@ import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * RedissonAnnotationBeanPostProcessor
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-02-18 10:23:57
+ */
 public class RedissonAnnotationBeanPostProcessor
-implements BeanPostProcessor,
-BeanFactoryAware,
-SmartInitializingSingleton {
-    private BeanFactory beanFactory;
-    private MessageHandlerMethodFactory messageHandlerMethodFactory;
-    private RedissonListenerContainerFactory redissonListenerContainerFactory;
-    private RedissonListenerRegistry redissonListenerRegistry;
-    private RedissonClient redissonClient;
-    private List<ListenerDescriptor> listenerDescriptors = new ArrayList<ListenerDescriptor>(8);
+        implements BeanPostProcessor, BeanFactoryAware, SmartInitializingSingleton {
 
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    private BeanFactory beanFactory;
+
+    private MessageHandlerMethodFactory messageHandlerMethodFactory;
+
+    private RedissonListenerContainerFactory redissonListenerContainerFactory;
+
+    private RedissonListenerRegistry redissonListenerRegistry;
+
+    private RedissonClient redissonClient;
+
+    private List<ListenerDescriptor> listenerDescriptors = new ArrayList<>(8);
+
+    @Override
+    public void setBeanFactory( BeanFactory beanFactory ) throws BeansException {
         this.beanFactory = beanFactory;
         DefaultMessageHandlerMethodFactory handlerMethodFactory = new DefaultMessageHandlerMethodFactory();
         handlerMethodFactory.setBeanFactory(beanFactory);
         handlerMethodFactory.afterPropertiesSet();
+
         this.messageHandlerMethodFactory = handlerMethodFactory;
         this.redissonListenerContainerFactory = new DefaultRedissonListenerContainerFactory();
     }
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    @Override
+    public Object postProcessAfterInitialization( Object bean, String beanName ) throws BeansException {
         Class<?> clazz = bean.getClass();
-        List<Method> allMethod = this.findAllMethod(clazz);
-        allMethod.forEach(method -> this.processMethod(bean, (Method)method));
+        List<Method> allMethod = findAllMethod(clazz);
+        allMethod.forEach(method -> processMethod(bean, method));
         return bean;
     }
 
-    private List<Method> findAllMethod(Class clazz) {
-        LinkedList<Method> methods = new LinkedList<Method>();
-        ReflectionUtils.doWithMethods((Class)clazz, methods::add);
+    private List<Method> findAllMethod( Class clazz ) {
+        final List<Method> methods = new LinkedList<>();
+        ReflectionUtils.doWithMethods(clazz, methods::add);
         return methods;
     }
 
-    private void processMethod(Object bean, Method method) {
-        String[] queues;
-        RedissonListener annotation = (RedissonListener)AnnotationUtils.findAnnotation((Method)method, RedissonListener.class);
+    private void processMethod( final Object bean, final Method method ) {
+        RedissonListener annotation = AnnotationUtils.findAnnotation(method, RedissonListener.class);
         if (annotation == null) {
             return;
         }
-        int maxFetch = annotation.maxFetch();
+
+        final int maxFetch = annotation.maxFetch();
         if (maxFetch <= 0) {
             throw new BeanDefinitionValidationException("maxFetch must be grater than 0");
         }
-        for (String queue : queues = annotation.queues()) {
-            InvocableHandlerMethod invocableHandlerMethod = this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method);
+
+        String[] queues = annotation.queues();
+        for (String queue : queues) {
+            InvocableHandlerMethod invocableHandlerMethod =
+                    this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method);
             ListenerDescriptor listenerDescriptor = new ListenerDescriptor();
             listenerDescriptor.setQueueInterested(queue);
             listenerDescriptor.setListenerType(maxFetch > 1 ? ListenerType.BATCH : ListenerType.SIMPLE);
@@ -108,37 +122,133 @@ SmartInitializingSingleton {
         }
     }
 
+    /**
+     * ListenerDescriptor
+     *
+     * @author kuma
+     * @version 2026.01
+     * @since 2025-12-19 09:30:45
+     */
+    private static class ListenerDescriptor {
+
+        private String queueInterested;
+
+        private ListenerType listenerType;
+
+        private InvocableHandlerMethod handlerMethod;
+
+        private String errorHandlerName;
+
+        private String isolationStrategyName;
+
+        private String messageConverterName;
+
+        private int concurrency;
+
+        private int maxFetch;
+
+        public String getQueueInterested() {
+            return queueInterested;
+        }
+
+        public void setQueueInterested( String queueInterested ) {
+            this.queueInterested = queueInterested;
+        }
+
+        public ListenerType getListenerType() {
+            return listenerType;
+        }
+
+        public void setListenerType( ListenerType listenerType ) {
+            this.listenerType = listenerType;
+        }
+
+        public InvocableHandlerMethod getHandlerMethod() {
+            return handlerMethod;
+        }
+
+        public void setHandlerMethod( InvocableHandlerMethod handlerMethod ) {
+            this.handlerMethod = handlerMethod;
+        }
+
+        public String getErrorHandlerName() {
+            return errorHandlerName;
+        }
+
+        public void setErrorHandlerName( String errorHandlerName ) {
+            this.errorHandlerName = errorHandlerName;
+        }
+
+        public String getIsolationStrategyName() {
+            return isolationStrategyName;
+        }
+
+        public void setIsolationStrategyName( String isolationStrategyName ) {
+            this.isolationStrategyName = isolationStrategyName;
+        }
+
+        public String getMessageConverterName() {
+            return messageConverterName;
+        }
+
+        public void setMessageConverterName( String messageConverterName ) {
+            this.messageConverterName = messageConverterName;
+        }
+
+        public int getConcurrency() {
+            return concurrency;
+        }
+
+        public void setConcurrency( int concurrency ) {
+            this.concurrency = concurrency;
+        }
+
+        public int getMaxFetch() {
+            return maxFetch;
+        }
+
+        public void setMaxFetch( int maxFetch ) {
+            this.maxFetch = maxFetch;
+        }
+    }
+
+    @Override
     public void afterSingletonsInstantiated() {
-        this.redissonClient = (RedissonClient)this.beanFactory.getBean(RedissonClient.class);
-        this.redissonListenerRegistry = (RedissonListenerRegistry)this.beanFactory.getBean("com.kuma.cloud.redis.redisson.redisson.internalRedissonListenerRegistry", RedissonListenerRegistry.class);
+        this.redissonClient = this.beanFactory.getBean(RedissonClient.class);
+        this.redissonListenerRegistry = this.beanFactory.getBean(
+                RedissonConfigUtils.REDISSON_LISTENER_REGISTRY_BEAN_NAME, RedissonListenerRegistry.class);
+
         this.listenerDescriptors.forEach(descriptor -> {
-            String queueInterested = descriptor.getQueueInterested();
+            final String queueInterested = descriptor.getQueueInterested();
             InvocableHandlerMethod invocableHandlerMethod = descriptor.getHandlerMethod();
             RedissonListenerErrorHandler errorHandler = null;
             IsolationStrategy isolationStrategy = null;
-            String errorHandlerName = descriptor.getErrorHandlerName();
-            String isolationStrategyName = descriptor.getIsolationStrategyName();
-            String messageConverterName = descriptor.getMessageConverterName();
-            if (StringUtils.hasText((String)errorHandlerName)) {
-                errorHandler = (RedissonListenerErrorHandler)this.beanFactory.getBean(errorHandlerName, RedissonListenerErrorHandler.class);
+            final String errorHandlerName = descriptor.getErrorHandlerName();
+            final String isolationStrategyName = descriptor.getIsolationStrategyName();
+            final String messageConverterName = descriptor.getMessageConverterName();
+            if (StringUtils.hasText(errorHandlerName)) {
+                errorHandler = this.beanFactory.getBean(errorHandlerName, RedissonListenerErrorHandler.class);
             }
-            ListenerType listenerType = descriptor.getListenerType();
-            if (StringUtils.hasText((String)isolationStrategyName)) {
-                isolationStrategy = (IsolationStrategy)this.beanFactory.getBean(isolationStrategyName, IsolationStrategy.class);
+
+            final ListenerType listenerType = descriptor.getListenerType();
+            if (StringUtils.hasText(isolationStrategyName)) {
+                isolationStrategy = this.beanFactory.getBean(isolationStrategyName, IsolationStrategy.class);
             }
+
             MessageConverter messageConverter = null;
-            if (StringUtils.hasText((String)messageConverterName)) {
-                messageConverter = (MessageConverter)this.beanFactory.getBean(messageConverterName, MessageConverter.class);
+            if (StringUtils.hasText(messageConverterName)) {
+                messageConverter = this.beanFactory.getBean(messageConverterName, MessageConverter.class);
             } else {
                 try {
-                    messageConverter = (MessageConverter)this.beanFactory.getBean(MessageConverter.class);
-                }
-                catch (BeansException e) {
-                    LogUtils.error((String)"no MessageConverter found for RedissonMessageListener to apply", (Object[])new Object[0]);
+                    messageConverter = this.beanFactory.getBean(MessageConverter.class);
+                } catch (BeansException e) {
+                    LogUtils.error("no MessageConverter found for RedissonMessageListener to" + " apply");
                 }
             }
-            MessageConverter payloadMessageConverter = messageConverter;
-            String isolatedQueueName = isolationStrategy == null ? queueInterested : isolationStrategy.getRedisQueueName(queueInterested);
+
+            final MessageConverter payloadMessageConverter = messageConverter;
+            final String isolatedQueueName =
+                    isolationStrategy == null ? queueInterested : isolationStrategy.getRedisQueueName(queueInterested);
             ContainerProperties containerProperties = new ContainerProperties();
             containerProperties.setQueue(isolatedQueueName);
             containerProperties.setListenerType(listenerType);
@@ -147,97 +257,29 @@ SmartInitializingSingleton {
             containerProperties.setMessageConverter(payloadMessageConverter);
             containerProperties.setConcurrency(descriptor.getConcurrency());
             containerProperties.setMaxFetch(descriptor.getMaxFetch());
-            RedissonMessageListener messageListener = this.createMessageListener(containerProperties, invocableHandlerMethod);
-            RedissonListenerContainer listenerContainer = this.redissonListenerContainerFactory.createListenerContainer(containerProperties);
+
+            RedissonMessageListener messageListener =
+                    this.createMessageListener(containerProperties, invocableHandlerMethod);
+            RedissonListenerContainer listenerContainer =
+                    this.redissonListenerContainerFactory.createListenerContainer(containerProperties);
+
             listenerContainer.setRedissonClient(this.redissonClient);
             listenerContainer.setListener(messageListener);
             this.redissonListenerRegistry.registerListenerContainer(listenerContainer);
         });
     }
 
-    private RedissonMessageListener createMessageListener(ContainerProperties containerProperties, InvocableHandlerMethod invocableHandlerMethod) {
+    private RedissonMessageListener createMessageListener(
+            ContainerProperties containerProperties, InvocableHandlerMethod invocableHandlerMethod ) {
         if (containerProperties.getListenerType() == ListenerType.BATCH) {
-            return new BatchRedissonMessageListenerAdapter(invocableHandlerMethod, containerProperties.getMessageConverter(), containerProperties.getErrorHandler());
+            return new BatchRedissonMessageListenerAdapter(
+                    invocableHandlerMethod,
+                    containerProperties.getMessageConverter(),
+                    containerProperties.getErrorHandler());
         }
-        return new SimpleRedissonMessageListenerAdapter(invocableHandlerMethod, containerProperties.getMessageConverter(), containerProperties.getErrorHandler());
-    }
-
-    private static class ListenerDescriptor {
-        private String queueInterested;
-        private ListenerType listenerType;
-        private InvocableHandlerMethod handlerMethod;
-        private String errorHandlerName;
-        private String isolationStrategyName;
-        private String messageConverterName;
-        private int concurrency;
-        private int maxFetch;
-
-        private ListenerDescriptor() {
-        }
-
-        public String getQueueInterested() {
-            return this.queueInterested;
-        }
-
-        public void setQueueInterested(String queueInterested) {
-            this.queueInterested = queueInterested;
-        }
-
-        public ListenerType getListenerType() {
-            return this.listenerType;
-        }
-
-        public void setListenerType(ListenerType listenerType) {
-            this.listenerType = listenerType;
-        }
-
-        public InvocableHandlerMethod getHandlerMethod() {
-            return this.handlerMethod;
-        }
-
-        public void setHandlerMethod(InvocableHandlerMethod handlerMethod) {
-            this.handlerMethod = handlerMethod;
-        }
-
-        public String getErrorHandlerName() {
-            return this.errorHandlerName;
-        }
-
-        public void setErrorHandlerName(String errorHandlerName) {
-            this.errorHandlerName = errorHandlerName;
-        }
-
-        public String getIsolationStrategyName() {
-            return this.isolationStrategyName;
-        }
-
-        public void setIsolationStrategyName(String isolationStrategyName) {
-            this.isolationStrategyName = isolationStrategyName;
-        }
-
-        public String getMessageConverterName() {
-            return this.messageConverterName;
-        }
-
-        public void setMessageConverterName(String messageConverterName) {
-            this.messageConverterName = messageConverterName;
-        }
-
-        public int getConcurrency() {
-            return this.concurrency;
-        }
-
-        public void setConcurrency(int concurrency) {
-            this.concurrency = concurrency;
-        }
-
-        public int getMaxFetch() {
-            return this.maxFetch;
-        }
-
-        public void setMaxFetch(int maxFetch) {
-            this.maxFetch = maxFetch;
-        }
+        return new SimpleRedissonMessageListenerAdapter(
+                invocableHandlerMethod,
+                containerProperties.getMessageConverter(),
+                containerProperties.getErrorHandler());
     }
 }
-

@@ -12,7 +12,7 @@ easyexcel = "3.2.1"
 dynamic-datasource = "4.5.0"
 sa-token = "1.35.0.RC"
 spring-doc = "2.1.0"
-spring-redisson = "3.21.3"
+spring-redisson = "4.1.0"
 pagehelper = "6.0.0"
 pagehelper-starter = "2.0.0"
 mybatis = "3.5.19"
@@ -47,6 +47,7 @@ spring-aop = "7.0.3"
 spring-web = "7.0.3"
 spring-webflux = "7.0.3"
 spring-expression = "7.0.3"
+spring-messaging = "7.0.3"
 jakarta-servlet-api = "6.0.0"
 jakarta-validation-api = "3.0.2"
 swagger-annotations = "2.2.29"
@@ -143,6 +144,7 @@ spring-aop = { module = "org.springframework:spring-aop", version.ref = "spring-
 spring-web = { module = "org.springframework:spring-web", version.ref = "spring-web" }
 spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "spring-webflux" }
 spring-expression = { module = "org.springframework:spring-expression", version.ref = "spring-expression" }
+spring-messaging = { module = "org.springframework:spring-messaging", version.ref = "spring-messaging" }
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet-api" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation-api" }
 swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger-annotations" }

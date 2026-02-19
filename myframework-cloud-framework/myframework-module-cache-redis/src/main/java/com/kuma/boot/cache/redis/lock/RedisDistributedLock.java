@@ -1,83 +1,140 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.data.redis.connection.RedisStringCommands$SetOption
- *  org.springframework.data.redis.connection.ReturnType
- *  org.springframework.data.redis.core.RedisTemplate
- *  org.springframework.data.redis.core.types.Expiration
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.lock;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.redisson.RedissonLock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.redis.connection.RedisStringCommands;
 import org.springframework.data.redis.connection.ReturnType;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
 
-@ConditionalOnClass(value={RedisTemplate.class})
+/**
+ * redis分布式锁实现
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-07 21:16:14
+ * 建议使用Redisson的实现方式 {@link RedissonLock}
+ */
+@ConditionalOnClass(RedisTemplate.class)
 @Deprecated
 public class RedisDistributedLock {
+
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ThreadLocal<String> lockFlag = new ThreadLocal();
-    private static final String UNLOCK_LUA = "if redis.call(\"get\",KEYS[1]) == ARGV[1] then     return redis.call(\"del\",KEYS[1]) else     return 0 end ";
+
+    private final ThreadLocal<String> lockFlag = new ThreadLocal<>();
+
+    private static final String UNLOCK_LUA;
+
+    /*
+     * 通过lua脚本释放锁,来达到释放锁的原子操作
+     */
+    static {
+        UNLOCK_LUA = "if redis.call(\"get\",KEYS[1]) == ARGV[1] "
+                + "then "
+                + "    return redis.call(\"del\",KEYS[1]) "
+                + "else "
+                + "    return 0 "
+                + "end ";
+    }
 
     public RedisDistributedLock(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * 获取锁
+     *
+     * @param key         锁的key
+     * @param expire      获取锁超时时间
+     * @param retryTimes  重试次数
+     * @param sleepMillis 获取锁失败的重试间隔
+     * @return 成功/失败
+     */
     public boolean lock(String key, long expire, int retryTimes, long sleepMillis) {
-        boolean result = this.setRedis(key, expire);
-        while (!result && retryTimes-- > 0) {
+        boolean result = setRedis(key, expire);
+        // 如果获取锁失败，按照传入的重试次数进行重试
+        while ((!result) && retryTimes-- > 0) {
             try {
-                LogUtils.debug((String)("get redisDistributeLock failed, retrying..." + retryTimes), (Object[])new Object[0]);
+                LogUtils.debug("get redisDistributeLock failed, retrying..." + retryTimes);
                 Thread.sleep(sleepMillis);
             }
             catch (InterruptedException e) {
-                LogUtils.error((String)"Interrupted!", (Object[])new Object[]{e});
+                LogUtils.error("Interrupted!", e);
                 Thread.currentThread().interrupt();
             }
-            result = this.setRedis(key, expire);
+            result = setRedis(key, expire);
         }
         return result;
     }
 
-    private boolean setRedis(String key, long expire) {
+    private boolean setRedis(final String key, final long expire) {
         try {
-            return Boolean.TRUE.equals(this.redisTemplate.execute(connection -> {
-                String uuid = UUID.randomUUID().toString();
-                this.lockFlag.set(uuid);
-                byte[] keyByte = this.redisTemplate.getStringSerializer().serialize((Object)key);
-                byte[] uuidByte = this.redisTemplate.getStringSerializer().serialize((Object)uuid);
-                return Boolean.TRUE.equals(connection.set(keyByte, uuidByte, Expiration.from((long)expire, (TimeUnit)TimeUnit.MILLISECONDS), RedisStringCommands.SetOption.ifAbsent()));
-            }));
+            return Boolean.TRUE.equals(
+                    redisTemplate.execute((RedisCallback<Boolean>) connection -> {
+                        String uuid = UUID.randomUUID().toString();
+                        lockFlag.set(uuid);
+                        byte[] keyByte = redisTemplate.getStringSerializer().serialize(key);
+                        byte[] uuidByte = redisTemplate.getStringSerializer().serialize(uuid);
+                        return Boolean.TRUE.equals(connection.set(
+                                keyByte,
+                                uuidByte,
+                                Expiration.from(expire, TimeUnit.MILLISECONDS),
+                                RedisStringCommands.SetOption.ifAbsent()));
+                    }));
         }
         catch (Exception e) {
-            LogUtils.error((String)"set redisDistributeLock occured an exception", (Object[])new Object[]{e});
-            return false;
+            LogUtils.error("set redisDistributeLock occured an exception", e);
         }
+        return false;
     }
 
+    /**
+     * 释放锁
+     *
+     * @param key 锁的key
+     * @return 成功/失败
+     */
     public boolean releaseLock(String key) {
+        // 释放锁的时候，有可能因为持锁之后方法执行时间大于锁的有效期，此时有可能已经被另外一个线程持有锁，所以不能直接删除
         try {
-            boolean bl = (Boolean)this.redisTemplate.execute(connection -> {
-                byte[] scriptByte = this.redisTemplate.getStringSerializer().serialize((Object)UNLOCK_LUA);
-                return (Boolean)connection.eval(scriptByte, ReturnType.BOOLEAN, 1, (byte[][])new byte[][]{this.redisTemplate.getStringSerializer().serialize((Object)key), this.redisTemplate.getStringSerializer().serialize((Object)this.lockFlag.get())});
+            // 使用lua脚本删除redis中匹配value的key，可以避免由于方法执行时间过长而redis锁自动过期失效的时候误删其他线程的锁
+            // spring自带的执行脚本方法中，集群模式直接抛出不支持执行脚本的异常，所以只能拿到原redis的connection来执行脚本
+            return redisTemplate.execute((RedisCallback<Boolean>) connection -> {
+                byte[] scriptByte = redisTemplate.getStringSerializer().serialize(UNLOCK_LUA);
+                return connection.eval(
+                        scriptByte,
+                        ReturnType.BOOLEAN,
+                        1,
+                        redisTemplate.getStringSerializer().serialize(key),
+                        redisTemplate.getStringSerializer().serialize(lockFlag.get()));
             });
-            return bl;
         }
         catch (Exception e) {
-            LogUtils.error((String)"release redisDistributeLock occured an exception", (Object[])new Object[]{e});
+            LogUtils.error("release redisDistributeLock occured an exception", e);
         }
         finally {
-            this.lockFlag.remove();
+            lockFlag.remove();
         }
         return false;
     }
 }
-

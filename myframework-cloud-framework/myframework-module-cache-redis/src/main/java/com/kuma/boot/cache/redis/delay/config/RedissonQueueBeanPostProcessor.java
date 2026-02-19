@@ -1,72 +1,87 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.redisson.api.RBlockingQueue
- *  org.redisson.api.RDelayedQueue
- *  org.redisson.api.RQueue
- *  org.redisson.api.RedissonClient
- *  org.redisson.client.codec.Codec
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.BeanFactory
- *  org.springframework.beans.factory.BeanFactoryAware
- *  org.springframework.beans.factory.config.BeanPostProcessor
- *  org.springframework.beans.factory.support.BeanDefinitionValidationException
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.delay.config;
 
 import com.kuma.boot.cache.redis.delay.handler.IsolationStrategy;
 import com.kuma.boot.cache.redis.delay.message.FastJsonCodec;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RDelayedQueue;
-import org.redisson.api.RQueue;
 import org.redisson.api.RedissonClient;
-import org.redisson.client.codec.Codec;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 
-public class RedissonQueueBeanPostProcessor
-implements BeanFactoryAware,
-BeanPostProcessor {
+/**
+ * RedissonQueueBeanPostProcessor
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-02-18 10:24:26
+ */
+public class RedissonQueueBeanPostProcessor implements BeanFactoryAware, BeanPostProcessor {
+
     private BeanFactory beanFactory;
+
     private RedissonClient redissonClient;
+
     private RedissonQueueRegistry redissonQueueRegistry;
 
+    @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
-        this.redissonClient = (RedissonClient)this.beanFactory.getBean(RedissonClient.class);
-        this.redissonQueueRegistry = (RedissonQueueRegistry)this.beanFactory.getBean("com.kuma.cloud.redis.redisson.redisson.internalRedissonQueueRegistry", RedissonQueueRegistry.class);
+        this.redissonClient = this.beanFactory.getBean(RedissonClient.class);
+        this.redissonQueueRegistry = this.beanFactory.getBean(
+                RedissonConfigUtils.REDISSON_QUEUE_REGISTRY_BEAN_NAME, RedissonQueueRegistry.class);
     }
 
+    @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof RedissonQueue) {
-            RedissonQueue redissonQueue = (RedissonQueue)bean;
-            QueueRegistryInfo registryInfo = new QueueRegistryInfo();
-            String queueName = redissonQueue.getQueue();
-            QueueRegistryInfo registeredInfo = this.redissonQueueRegistry.getRegistryInfo(queueName);
+            final RedissonQueue redissonQueue = (RedissonQueue) bean;
+            final QueueRegistryInfo registryInfo = new QueueRegistryInfo();
+            final String queueName = redissonQueue.getQueue();
+            final QueueRegistryInfo registeredInfo = this.redissonQueueRegistry.getRegistryInfo(queueName);
+
             if (registeredInfo != null) {
-                throw new BeanDefinitionValidationException("duplicate bean of RedissonQueue named [" + queueName + "]");
+                throw new BeanDefinitionValidationException(
+                        "duplicate bean of RedissonQueue named [" + queueName + "]");
             }
-            IsolationStrategy isolationHandler = redissonQueue.getIsolationHandler();
-            String isolatedName = isolationHandler == null ? queueName : isolationHandler.getRedisQueueName(queueName);
-            RBlockingQueue blockingQueue = this.redissonClient.getBlockingQueue(isolatedName, (Codec)FastJsonCodec.INSTANCE);
-            RDelayedQueue delayedQueue = null;
+
+            final IsolationStrategy isolationHandler = redissonQueue.getIsolationHandler();
+            final String isolatedName =
+                    isolationHandler == null ? queueName : isolationHandler.getRedisQueueName(queueName);
+            final RBlockingQueue<Object> blockingQueue =
+                    this.redissonClient.getBlockingQueue(isolatedName, FastJsonCodec.INSTANCE);
+            RDelayedQueue<Object> delayedQueue = null;
             if (redissonQueue.getDelay()) {
-                delayedQueue = this.redissonClient.getDelayedQueue((RQueue)blockingQueue);
+                delayedQueue = this.redissonClient.getDelayedQueue(blockingQueue);
             }
+
             registryInfo.setQueueName(queueName);
             registryInfo.setIsolatedName(isolatedName);
             registryInfo.setQueue(redissonQueue);
             registryInfo.setIsolationHandler(isolationHandler);
             registryInfo.setMessageConverter(redissonQueue.getMessageConverter());
-            registryInfo.setBlockingQueue((RBlockingQueue<Object>)blockingQueue);
-            registryInfo.setDelayedQueue((RDelayedQueue<Object>)delayedQueue);
+            registryInfo.setBlockingQueue(blockingQueue);
+            registryInfo.setDelayedQueue(delayedQueue);
             this.redissonQueueRegistry.registerQueueInfo(queueName, registryInfo);
         }
         return bean;
     }
 }
-

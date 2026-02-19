@@ -1,75 +1,218 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
- *  org.springframework.data.redis.connection.RedisStreamCommands$XAddOptions
- *  org.springframework.data.redis.connection.stream.MapRecord
- *  org.springframework.data.redis.connection.stream.ObjectRecord
- *  org.springframework.data.redis.connection.stream.Record
- *  org.springframework.data.redis.connection.stream.RecordId
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.stream;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.redis.connection.RedisStreamCommands;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.Record;
 import org.springframework.data.redis.connection.stream.RecordId;
+import org.jspecify.annotations.Nullable;
 
+/**
+ * 基于 redis Stream 的消息发布器
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-03 09:35:11
+ */
 public interface RStreamTemplate {
-    public static final String OBJECT_PAYLOAD_KEY = "@payload";
 
-    default public RecordId send(String name, Object value) {
-        return this.send((Record<String, ?>)ObjectRecord.create((Object)name, (Object)value));
+    /** 自定义 pojo 类型 key */
+    String OBJECT_PAYLOAD_KEY = "@payload";
+
+    /**
+     * 发布消息
+     *
+     * @param name 队列名
+     * @param value 消息
+     * @return 消息id
+     */
+    default RecordId send(String name, Object value) {
+        return send(ObjectRecord.create(name, value));
     }
 
-    default public RecordId send(String name, String key, Object value) {
-        return this.send(name, Collections.singletonMap(key, value));
+    /**
+     * 发布消息
+     *
+     * @param name 队列名
+     * @param key 消息key
+     * @param value 消息
+     * @return 消息id
+     */
+    default RecordId send(String name, String key, Object value) {
+        return send(name, Collections.singletonMap(key, value));
     }
 
-    default public RecordId send(String name, String key, byte[] data) {
-        return this.send(name, key, data, RedisStreamCommands.XAddOptions.none());
+    /**
+     * 发布消息
+     *
+     * @param name 队列名
+     * @param key 消息key
+     * @param data 消息
+     * @return 消息id
+     */
+    default RecordId send(String name, String key, byte[] data) {
+        return send(name, key, data, RedisStreamCommands.XAddOptions.none());
     }
 
-    default public RecordId send(String name, String key, byte[] data, long maxLen) {
-        return this.send(name, key, data, RedisStreamCommands.XAddOptions.maxlen((long)maxLen));
+    /**
+     * 发布消息
+     *
+     * @param name 队列名
+     * @param key 消息key
+     * @param data 消息
+     * @param maxLen 限制 stream 最大长度
+     * @return 消息id
+     */
+    default RecordId send(String name, String key, byte[] data, long maxLen) {
+        return send(name, key, data, RedisStreamCommands.XAddOptions.maxlen(maxLen));
     }
 
-    public RecordId send(String var1, String var2, byte[] var3, RedisStreamCommands.XAddOptions var4);
+    /**
+     * 发布消息
+     *
+     * @param name 队列名
+     * @param key 消息key
+     * @param data 消息
+     * @param options XAddOptions
+     * @return 消息id
+     */
+    RecordId send(String name, String key, byte[] data, RedisStreamCommands.XAddOptions options);
 
-    default public <T> RecordId send(String name, String key, T data, Function<T, byte[]> mapper) {
-        return this.send(name, key, mapper.apply(data));
+    /**
+     * 发布消息
+     *
+     * @param name 队列名
+     * @param key 消息key
+     * @param data 消息
+     * @param mapper 消息转换
+     * @param <T> 泛型
+     * @return 消息id
+     */
+    default <T> RecordId send(String name, String key, T data, Function<T, byte[]> mapper) {
+        return send(name, key, mapper.apply(data));
     }
 
-    default public RecordId send(String name, Map<String, Object> messages) {
-        return this.send((Record<String, ?>)MapRecord.create((Object)name, messages));
+    /**
+     * 批量发布
+     *
+     * @param name 队列名
+     * @param messages 消息
+     * @return 消息id
+     */
+    default RecordId send(String name, Map<String, Object> messages) {
+        return send(MapRecord.create(name, messages));
     }
 
-    public RecordId send(Record<String, ?> var1);
+    /**
+     * 发送消息
+     *
+     * @param record Record
+     * @return 消息id
+     */
+    RecordId send(Record<String, ?> record);
 
-    public @Nullable Long delete(String var1, String ... var2);
+    /**
+     * 删除消息
+     *
+     * @param name stream name
+     * @param recordIds recordIds
+     * @return Long
+     */
+    @Nullable
+    Long delete(String name, String... recordIds);
 
-    public @Nullable Long delete(String var1, RecordId ... var2);
+    /**
+     * 删除消息
+     *
+     * @param name stream name
+     * @param recordIds recordIds
+     * @return Long
+     */
+    @Nullable
+    Long delete(String name, RecordId... recordIds);
 
-    default public @Nullable Long delete(Record<String, ?> record) {
-        return this.delete((String)record.getStream(), record.getId());
+    /**
+     * 删除消息
+     *
+     * @param record Record
+     * @return Long
+     */
+    @Nullable
+    default Long delete(Record<String, ?> record) {
+        return delete(record.getStream(), record.getId());
     }
 
-    default public @Nullable Long trim(String name, long count) {
-        return this.trim(name, count, false);
+    /**
+     * 对流进行修剪，限制长度
+     *
+     * @param name name
+     * @param count count
+     * @return Long
+     */
+    @Nullable
+    default Long trim(String name, long count) {
+        return trim(name, count, false);
     }
 
-    public @Nullable Long trim(String var1, long var2, boolean var4);
+    /**
+     * 对流进行修剪，限制长度
+     *
+     * @param name name
+     * @param count count
+     * @param approximateTrimming approximateTrimming
+     * @return Long
+     */
+    @Nullable
+    Long trim(String name, long count, boolean approximateTrimming);
 
-    public @Nullable Long acknowledge(String var1, String var2, String ... var3);
+    /**
+     * 手动 ack
+     *
+     * @param name name
+     * @param group group
+     * @param recordIds recordIds
+     * @return Long
+     */
+    @Nullable
+    Long acknowledge(String name, String group, String... recordIds);
 
-    public @Nullable Long acknowledge(String var1, String var2, RecordId ... var3);
+    /**
+     * 手动 ack
+     *
+     * @param name name
+     * @param group group
+     * @param recordIds recordIds
+     * @return Long
+     */
+    @Nullable
+    Long acknowledge(String name, String group, RecordId... recordIds);
 
-    public @Nullable Long acknowledge(String var1, Record<String, ?> var2);
+    /**
+     * 手动 ack
+     *
+     * @param group group
+     * @param record record
+     * @return Long
+     */
+    @Nullable
+    Long acknowledge(String group, Record<String, ?> record);
 }
-
