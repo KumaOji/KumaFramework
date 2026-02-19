@@ -22,28 +22,19 @@ dependencies {
 processResources {
     filesMatching('**/application.yml') {
         expand(
-                mysql     : [
-                        url     : project.findProperty('mysql.url'),
-                        username: project.findProperty('mysql.username'),
-                        password: project.findProperty('mysql.password')
-                ],
-                postgresql: [
-                        url     : project.findProperty('postgresql.url'),
-                        username: project.findProperty('postgresql.username'),
-                        password: project.findProperty('postgresql.password')
-                ],
-                redis     : [
-                        host   : project.findProperty('redis.host'),
-                        port   : project.findProperty('redis.port'),
-                        database: project.findProperty('redis.database'),
-                        jedis  : [
-                                pool: [
-                                        'max-active': project.findProperty('redis.jedis.pool.max-active'),
-                                        'max-idle'  : project.findProperty('redis.jedis.pool.max-idle'),
-                                        'min-idle'  : project.findProperty('redis.jedis.pool.min-idle')
-                                ]
-                        ]
-                ]
+                active: 'dev',
+                mysql_url: project.findProperty('mysql.url') ?: '',
+                mysql_username: project.findProperty('mysql.username') ?: '',
+                mysql_password: project.findProperty('mysql.password') ?: '',
+                postgresql_url: project.findProperty('postgresql.url') ?: '',
+                postgresql_username: project.findProperty('postgresql.username') ?: '',
+                postgresql_password: project.findProperty('postgresql.password') ?: '',
+                redis_host: project.findProperty('redis.host') ?: '',
+                redis_port: project.findProperty('redis.port') ?: '',
+                redis_database: project.findProperty('redis.database') ?: '',
+                redis_jedis_pool_max_active: project.findProperty('redis.jedis.pool.max-active') ?: '',
+                redis_jedis_pool_max_idle: project.findProperty('redis.jedis.pool.max-idle') ?: '',
+                redis_jedis_pool_min_idle: project.findProperty('redis.jedis.pool.min-idle') ?: ''
         )
     }
 }

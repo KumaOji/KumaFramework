@@ -3,7 +3,7 @@ spring:
   config:
     import: optional:classpath:application-framework.yml
   profiles:
-    active: dev
+    active: ${active}
   application:
     name: project1
   datasource:
@@ -11,22 +11,22 @@ spring:
       primary: mysql
       datasource:
         mysql:
-          url: ${mysql.url}
-          username: ${mysql.username}
-          password: ${mysql.password}
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
           driver-class-name: com.mysql.cj.jdbc.Driver
         postgresql:
-          url: ${postgresql.url}
-          username: ${postgresql.username}
-          password: ${postgresql.password}
+          url: ${postgresql_url}
+          username: ${postgresql_username}
+          password: ${postgresql_password}
           driver-class-name: org.postgresql.Driver
   data:
     redis:
-      host: ${redis.host}
-      port: ${redis.port}
-      database: ${redis.database}
+      host: ${redis_host}
+      port: ${redis_port}
+      database: ${redis_database}
       jedis:
         pool:
-          max-active: ${redis.jedis.pool.max-active}
-          max-idle: ${redis.jedis.pool.max-idle}
-          min-idle: ${redis.jedis.pool.min-idle}
+          max-active: ${redis_jedis_pool_max_active}
+          max-idle: ${redis_jedis_pool_max_idle}
+          min-idle: ${redis_jedis_pool_min_idle}

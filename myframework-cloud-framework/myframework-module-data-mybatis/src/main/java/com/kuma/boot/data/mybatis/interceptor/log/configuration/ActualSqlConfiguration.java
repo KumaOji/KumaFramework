@@ -86,7 +86,8 @@ public class ActualSqlConfiguration implements InitializingBean {
     }
 
     private static void printGraph() {
-        LogUtils.info("  _  ___   _ __  __    _         ____   ___  _          _     ___   ____ \n" +
+        LogUtils.info("\n"+
+                "  _  ___   _ __  __    _         ____   ___  _          _     ___   ____ \n" +
                 " | |/ / | | |  \\/  |  / \\       / ___| / _ \\| |        | |   / _ \\ / ___|\n" +
                 " | ' /| | | | |\\/| | / _ \\      \\___ \\| | | | |        | |  | | | | |  _ \n" +
                 " | . \\| |_| | |  | |/ ___ \\      ___) | |_| | |___     | |__| |_| | |_| |\n" +
