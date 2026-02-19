@@ -81,6 +81,7 @@ javax-json-impl = "1.1.4"
 spring-cloud-context-ver = "5.0.1"
 taobao-text = "0.0.3"
 druid = "1.2.27"
+jdom2 = "2.0.6.1"
 
 ## 统一定义依赖
 [libraries]
@@ -184,6 +185,7 @@ spring-test = { module = "org.springframework:spring-test", version.ref = "sprin
 spring-cloud-context = { module = "org.springframework.cloud:spring-cloud-context", version.ref = "spring-cloud-context-ver" }
 taobao-text-ui = { module = "com.taobao.text:text-ui", version.ref = "taobao-text" }
 druid-starter = { module = "com.alibaba:druid-spring-boot-3-starter", version.ref = "druid" }
+jdom2 = { module = "org.jdom:jdom2", version.ref = "jdom2" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

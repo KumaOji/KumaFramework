@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.aop;
+
+import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.annotation.DataPermission;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.MethodClassKey;
+import org.springframework.core.annotation.AnnotationUtils;
+
+/** 自定义Advice 处理数据权限的拦截器 1. 在执行方法前，将 数据权限 注解入栈 2. 在执行方法后，将 数据权限 注解出栈 */
+@DataPermission
+public class DataPermissionAdvice implements MethodInterceptor {
+
+    /** DataPermission 空对象，方法无数据权限注解时，使用DATA_PERMISSION_NULL占位 */
+    static final DataPermission DATA_PERMISSION_NULL =
+            DataPermissionAdvice.class.getAnnotation(DataPermission.class);
+
+    private final Map<MethodClassKey, DataPermission> dataPermissionCache =
+            new ConcurrentHashMap<>();
+
+    public Map<MethodClassKey, DataPermission> getDataPermissionCache() {
+        return dataPermissionCache;
+    }
+
+    public DataPermissionAdvice() {}
+
+    @Override
+    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        // 方法执行前 获取方法上的数据权限注解
+        DataPermission dataPermission = this.findAnnotation(methodInvocation);
+
+        if (Objects.nonNull(dataPermission)) {
+            // 数据权限注解入栈
+            com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.aop.DataPermissionContextHolder.add(dataPermission);
+        }
+
+        try {
+            // 执行逻辑
+            return methodInvocation.proceed();
+        } finally {
+            if (Objects.nonNull(dataPermission)) {
+                // 数据权限注解出栈
+                com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.aop.DataPermissionContextHolder.remove();
+            }
+        }
+    }
+
+    private DataPermission findAnnotation(MethodInvocation methodInvocation) {
+        Method method = methodInvocation.getMethod();
+        Object targetObject = methodInvocation.getThis();
+        Class<?> clazz =
+                Objects.nonNull(targetObject)
+                        ? targetObject.getClass()
+                        : method.getDeclaringClass();
+        MethodClassKey methodClassKey = new MethodClassKey(method, clazz);
+
+        // 从缓存中获取数据权限注解
+        DataPermission dataPermission = dataPermissionCache.get(methodClassKey);
+        if (Objects.nonNull(dataPermission)) {
+            return dataPermission != DATA_PERMISSION_NULL ? dataPermission : null;
+        }
+
+        // 从方法中获取
+        dataPermission = AnnotationUtils.findAnnotation(method, DataPermission.class);
+
+        if (Objects.isNull(dataPermission)) {
+            // 从类上获取
+            dataPermission = AnnotationUtils.findAnnotation(clazz, DataPermission.class);
+        }
+
+        // 添加到缓存中
+        dataPermissionCache.put(
+                methodClassKey,
+                Objects.nonNull(dataPermission) ? dataPermission : DATA_PERMISSION_NULL);
+
+        return dataPermission;
+    }
+}
