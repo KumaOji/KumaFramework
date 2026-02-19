@@ -5,7 +5,7 @@
  *  com.github.benmanes.caffeine.cache.CacheLoader
  *  com.github.benmanes.caffeine.cache.Caffeine
  *  com.github.benmanes.caffeine.cache.CaffeineSpec
- *  com.taotao.boot.common.utils.log.LogUtils
+ *  com.kuma.boot.common.utils.log.LogUtils
  *  org.jspecify.annotations.Nullable
  *  org.springframework.beans.factory.InitializingBean
  *  org.springframework.beans.factory.ObjectProvider
@@ -33,7 +33,7 @@ import com.github.benmanes.caffeine.cache.CaffeineSpec;
 import com.kuma.boot.cache.caffeine.autoconfigure.properties.CaffeineProperties;
 import com.kuma.boot.cache.caffeine.manager.CaffeineAutoCacheManager;
 import com.kuma.boot.cache.caffeine.repository.CaffeineRepository;
-import com.taotao.boot.common.utils.log.LogUtils;
+import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.Collection;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -59,11 +59,11 @@ import org.springframework.util.StringUtils;
 @ConditionalOnClass(value={Caffeine.class, CaffeineCacheManager.class})
 @AutoConfiguration(before={CacheAutoConfiguration.class})
 @EnableConfigurationProperties(value={CaffeineProperties.class, CacheProperties.class})
-@ConditionalOnProperty(prefix="taotao.boot.cache.caffeine", name={"enabled"}, havingValue="true")
+@ConditionalOnProperty(prefix="kuma.boot.cache.caffeine", name={"enabled"}, havingValue="true")
 public class CaffeineCacheAutoConfiguration
 implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(CaffeineCacheAutoConfiguration.class, (String)"taotao-boot-starter-cache-caffeine", (String[])new String[0]);
+        LogUtils.started(CaffeineCacheAutoConfiguration.class, (String)"kuma-boot-starter-cache-caffeine", (String[])new String[0]);
     }
 
     @Bean

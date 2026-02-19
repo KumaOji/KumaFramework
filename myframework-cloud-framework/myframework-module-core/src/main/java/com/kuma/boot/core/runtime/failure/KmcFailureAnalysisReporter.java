@@ -39,7 +39,7 @@ public final class KmcFailureAnalysisReporter implements FailureAnalysisReporter
         StringBuilder builder = new StringBuilder();
         builder.append(String.format("%n%n"));
         builder.append(String.format("***************************%n"));
-        builder.append(String.format("TAOTAO BOOT APPLICATION FAILED TO START%n"));
+        builder.append(String.format("KUMA BOOT APPLICATION FAILED TO START%n"));
         builder.append(String.format("***************************%n%n"));
         builder.append(String.format("Description:%n%n"));
         builder.append(String.format("%s%n", failureAnalysis.getDescription()));
