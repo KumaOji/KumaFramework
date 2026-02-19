@@ -9,6 +9,8 @@ dependencies {
     api project(':myframework-cloud-framework:myframework-module-data-datasource')
     api project(':myframework-cloud-framework:myframework-module-cache-common')
     api project(':myframework-cloud-framework:myframework-module-cache-redis')
+    api project(':myframework-cloud-framework:myframework-module-cache-caffeine')
+    api project(':myframework-cloud-framework:myframework-module-cache-jetcache')
     api project(':myframework-cloud-framework:myframework-module-mq-common')
     api project(':myframework-cloud-framework:myframework-module-mq-kafka')
     api projectLibs.mybatis.plus

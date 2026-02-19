@@ -44,3 +44,5 @@ include 'myframework-cloud-framework:myframework-module-mq-common'
 include 'myframework-cloud-framework:myframework-module-mq-kafka'
 
 include 'myframework-cloud-framework:myframework-module-data-common'
+include 'myframework-cloud-framework:myframework-module-cache-jetcache'
+include 'myframework-cloud-framework:myframework-module-cache-caffeine'
