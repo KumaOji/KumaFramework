@@ -1,14 +1,26 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.collection.ListUtil
- *  org.apache.kafka.clients.producer.KafkaProducer
- *  org.apache.kafka.common.serialization.Serializer
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.mq.kafka.kafkaextend.kafka;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,46 +28,60 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.common.serialization.Serializer;
 
+import static com.kuma.boot.mq.kafka.kafkaextend.kafka.KafkaConstants.BOOTSTRAP_SERVERS_DELIMITER;
+
+/**
+ * 生产者 具体的配置请参考 {@link ProducerConfig} 这里只提供一些常用配置
+ */
 public class KafkaProducerBuilder {
+
     private final Properties properties = new Properties();
-    private final Set<String> bootstrapServers = new HashSet<String>();
+
+    private final Set<String> bootstrapServers = new HashSet<>();
 
     public KafkaProducerBuilder keySerializer(Class<? extends Serializer<?>> c) {
-        return this.keySerializer(c.getName());
+        return keySerializer(c.getName());
     }
 
     public KafkaProducerBuilder keySerializer(String className) {
-        return this.put("key.serializer", className);
+        return put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, className);
     }
 
     public KafkaProducerBuilder valueSerializer(Class<? extends Serializer<?>> c) {
-        return this.valueSerializer(c.getName());
+        return valueSerializer(c.getName());
     }
 
     public KafkaProducerBuilder valueSerializer(String className) {
-        return this.put("value.serializer", className);
+        return put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, className);
     }
 
+    /**
+     * 添加 kafka 路径 host:port
+     */
     public KafkaProducerBuilder addBootstrapServers(String uri) {
-        this.bootstrapServers.add(uri);
+        bootstrapServers.add(uri);
         return this;
     }
 
     public KafkaProducerBuilder addAllBootstrapServers(Collection<String> uris) {
-        this.bootstrapServers.addAll(uris);
+        bootstrapServers.addAll(uris);
         return this;
     }
 
+    /**
+     * 添加配置
+     */
     public KafkaProducerBuilder put(Object key, Object val) {
-        this.properties.put(key, val);
+        properties.put(key, val);
         return this;
     }
 
+    /**
+     * 添加配置
+     */
     public KafkaProducerBuilder putAll(Properties properties) {
-        this.properties.putAll((Map<?, ?>)properties);
+        this.properties.putAll(properties);
         return this;
     }
 
@@ -65,26 +91,28 @@ public class KafkaProducerBuilder {
     }
 
     public <K, V> KafkaExtendProducer<K, V> build(Function<Properties, KafkaExtendProducer<K, V>> function) {
-        return function.apply(this.getProperties());
+        return function.apply(getProperties());
     }
 
     public <K, V> KafkaExtendProducer<K, V> build(Properties properties) {
-        return this.putAll(properties).build();
+        return putAll(properties).build();
     }
 
     public <K, V> KafkaExtendProducer<K, V> build() {
-        return this.build((Properties p) -> new KafkaExtendProducer(new KafkaProducer(p)));
+        return build(p -> new KafkaExtendProducer<>(new org.apache.kafka.clients.producer.KafkaProducer<>(p)));
     }
 
     public Set<String> getBootstrapServers() {
-        this.getProperties();
-        return this.bootstrapServers;
+        getProperties();
+        return bootstrapServers;
     }
 
     public Properties getProperties() {
-        this.bootstrapServers.addAll(ListUtil.of((Object[])this.properties.getProperty("bootstrap.servers", "").split(",")));
-        this.properties.put("bootstrap.servers", String.join((CharSequence)",", this.bootstrapServers));
-        return this.properties;
+        bootstrapServers.addAll(ListUtil.of(properties
+                .getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, CharSequenceUtil.EMPTY)
+                .split(BOOTSTRAP_SERVERS_DELIMITER)));
+        properties.put(
+                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, String.join(BOOTSTRAP_SERVERS_DELIMITER, bootstrapServers));
+        return properties;
     }
 }
-

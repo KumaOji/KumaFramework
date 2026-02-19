@@ -1,26 +1,40 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.apache.kafka.streams.processor.ProcessorContext
- *  org.apache.kafka.streams.processor.internals.ProcessorContextImpl
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.mq.kafka.kafkaextend.stream.util;
 
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.internals.ProcessorContextImpl;
 
+/**
+ * kafka 上下文工具类
+ *
+ */
 public final class ProcessorContextUtil {
+
     private ProcessorContextUtil() {
     }
 
     public static String toLogString(ProcessorContext context) {
-        String res = " \u8282\u70b9\u5c5e\u6027: application-id: " + context.applicationId();
+        String res = " 节点属性: application-id: " + context.applicationId();
         if (context instanceof ProcessorContextImpl) {
-            res = res + " currentNode.name: " + ((ProcessorContextImpl)context).currentNode().name();
+            res += " currentNode.name: " + ((ProcessorContextImpl) context).currentNode().name();
         }
-        res = res + " topic: " + context.topic() + " offset: " + context.offset() + " taskId: " + String.valueOf(context.taskId());
+        res += " topic: " + context.topic() + " offset: " + context.offset() + " taskId: " + context.taskId();
         return res;
     }
-}
 
+}

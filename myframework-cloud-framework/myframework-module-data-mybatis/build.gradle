@@ -33,4 +33,5 @@ dependencies {
     api projectLibs.javers.core
     api projectLibs.swagger.annotations.jakarta
     api projectLibs.hutool.db
+    api projectLibs.aviator
 }

@@ -1,14 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.apache.kafka.clients.consumer.Consumer
- *  org.springframework.kafka.listener.KafkaListenerErrorHandler
- *  org.springframework.kafka.listener.ListenerExecutionFailedException
- *  org.springframework.messaging.Message
- *  org.springframework.stereotype.Component
- */
 package com.kuma.boot.mq.kafka.kafkause;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -18,17 +7,29 @@ import org.springframework.kafka.listener.ListenerExecutionFailedException;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-@Component(value="kafkaConsumerExceptionHandler")
-public class KafkaConsumerExceptionHandler
-implements KafkaListenerErrorHandler {
+@Component("kafkaConsumerExceptionHandler")
+public class KafkaConsumerExceptionHandler implements KafkaListenerErrorHandler {
+
+    /**
+     * 处理错误，不带 Consumer 对象
+     */
+    @Override
     public Object handleError(Message<?> message, ListenerExecutionFailedException e) {
-        LogUtils.error((String)"kafka\u6d88\u8d39\u6d88\u606f\u65f6\u53d1\u751f\u9519\u8bef\u3002\u6d88\u606f\u5185\u5bb9: {}, \u9519\u8bef\u4fe1\u606f: {}", (Object[])new Object[]{message, e.getMessage(), e});
+        LogUtils.error("kafka消费消息时发生错误。消息内容: {}, 错误信息: {}", message, e.getMessage(), e);
+        // 可以根据需要选择是否抛出异常
+        // 例如：return null; 表示忽略错误
+        // throw e;    // 抛出异常以触发重试机制
         return null;
     }
 
+    /**
+     * 处理错误，带 Consumer 对象
+     */
+    @Override
     public Object handleError(Message<?> message, ListenerExecutionFailedException exception, Consumer<?, ?> consumer) {
-        LogUtils.error((String)"kafka\u6d88\u8d39\u6d88\u606f\u65f6\u53d1\u751f\u9519\u8bef\u3002\u6d88\u606f\u5185\u5bb9: {}, \u9519\u8bef\u4fe1\u606f: {}", (Object[])new Object[]{message, exception.getMessage(), exception});
+        LogUtils.error("kafka消费消息时发生错误。消息内容: {}, 错误信息: {}", message, exception.getMessage(), exception);
+        // 可以根据需要选择处理方式，例如手动提交偏移量，或其他操作
+        // 这里仅记录日志并返回 null
         return null;
     }
 }
-

@@ -51,6 +51,7 @@ spring-messaging = "7.0.3"
 jakarta-servlet-api = "6.0.0"
 jakarta-validation-api = "3.0.2"
 swagger-annotations = "2.2.29"
+swagger-models = "2.2.41"
 jackson = "3.0.4"
 jackson-annotations = "2.18.2"
 slf4j = "2.0.16"
@@ -77,6 +78,10 @@ postgresql = "42.7.4"
 jjwt = "0.12.6"
 caffeine = "3.1.8"
 jetcache = "2.7.8"
+aviator = "5.4.3"
+spring-kafka = "4.0.2"
+kafka-clients = "4.0.2"
+kafka-streams = "4.0.2"
 swagger-annotations-jakarta = "2.2.25"
 javax-json-api = "1.1.4"
 javax-json-impl = "1.1.4"
@@ -117,6 +122,7 @@ spring-doc-common = { module = "org.springdoc:springdoc-openapi-starter-common",
 spring-doc-webmvc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc" }
 spring-redisson = { module = "org.redisson:redisson-spring-boot-starter", version.ref = "spring-redisson" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springboot" }
+spring-boot-starter-kafka = { module = "org.springframework.boot:spring-boot-starter-kafka", version.ref = "springboot" }
 spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc", version.ref = "springboot" }
 spring-boot-starter-undertow = { module = "org.springframework.boot:spring-boot-starter-undertow", version.ref = "springboot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springboot" }
@@ -149,6 +155,7 @@ spring-messaging = { module = "org.springframework:spring-messaging", version.re
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet-api" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation-api" }
 swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger-annotations" }
+swagger-models = { module = "io.swagger.core.v3:swagger-models", version.ref = "swagger-models" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson-annotations" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
@@ -192,6 +199,10 @@ mybatis-plus-jsqlparser = { module = "com.baomidou:mybatis-plus-jsqlparser", ver
 spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache", version.ref = "springboot" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 jetcache-starter-redis = { module = "com.alicp.jetcache:jetcache-starter-redis", version.ref = "jetcache" }
+aviator = { module = "com.googlecode.aviator:aviator", version.ref = "aviator" }
+spring-kafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "spring-kafka" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka-clients" }
+kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka-streams" }
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring-context" }
 spring-cloud-context = { module = "org.springframework.cloud:spring-cloud-context", version.ref = "spring-cloud-context-ver" }
 taobao-text-ui = { module = "com.taobao.text:text-ui", version.ref = "taobao-text" }

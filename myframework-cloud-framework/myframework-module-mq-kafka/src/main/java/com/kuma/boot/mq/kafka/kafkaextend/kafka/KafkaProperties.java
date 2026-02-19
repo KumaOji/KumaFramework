@@ -1,70 +1,120 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.text.CharSequenceUtil
- *  org.apache.kafka.common.serialization.Deserializer
- *  org.apache.kafka.common.serialization.Serializer
- *  org.apache.kafka.common.serialization.StringDeserializer
- *  org.apache.kafka.common.serialization.StringSerializer
- *  org.springframework.boot.context.properties.ConfigurationProperties
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.mq.kafka.kafkaextend.kafka;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="kuma.boot.mq.kafka.extend")
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+@ConfigurationProperties(prefix = "kuma.boot.mq.kafka.extend")
 public class KafkaProperties {
+
+    /**
+     * 用于指定分组
+     */
     private String groupId;
+
+    /**
+     * 所属服务
+     */
     private Set<String> bootstrapServers;
+
+    /**
+     * key 序列化
+     */
     private Class<? extends Serializer<?>> keySerializer = StringSerializer.class;
+
+    /**
+     * key 序列化 类名, 如果填写本值则 valueSerializer 无效
+     */
     private String keySerializerClassName;
+
+    /**
+     * value 序列化
+     */
     private Class<? extends Serializer<?>> valueSerializer = StringSerializer.class;
+
+    /**
+     * value 序列化 类名, 如果填写本值则 valueSerializer 无效
+     */
     private String valueSerializerClassName;
+
+    /**
+     * key 反序列化
+     */
     private Class<? extends Deserializer<?>> keyDeserializer = StringDeserializer.class;
+
+    /**
+     * key 反序列化 类名, 如果填写本值则 keyDeserializer 无效
+     */
     private String keyDeserializerClassName;
+
+    /**
+     * value 反序列化
+     */
     private Class<? extends Deserializer<?>> valueDeserializer = StringDeserializer.class;
+
+    /**
+     * value 反序列化 类名, 如果填写本值则 valueDeserializer 无效
+     */
     private String valueDeserializerClassName;
-    private Map<String, Object> extend = new HashMap<String, Object>();
+
+    /**
+     * 额外参数
+     */
+    private Map<String, Object> extend = new HashMap<>();
 
     public String getKeyDeserializerClassName() {
-        if (CharSequenceUtil.isNotEmpty((CharSequence)this.keyDeserializerClassName)) {
-            return this.keyDeserializerClassName;
+        if (CharSequenceUtil.isNotEmpty(keyDeserializerClassName)) {
+            return keyDeserializerClassName;
         }
-        return this.getKeyDeserializer().getName();
+        return getKeyDeserializer().getName();
     }
 
     public String getValueDeserializerClassName() {
-        if (CharSequenceUtil.isNotEmpty((CharSequence)this.valueDeserializerClassName)) {
-            return this.valueDeserializerClassName;
+        if (CharSequenceUtil.isNotEmpty(valueDeserializerClassName)) {
+            return valueDeserializerClassName;
         }
-        return this.getValueDeserializer().getName();
+        return getValueDeserializer().getName();
     }
 
     public String getKeySerializerClassName() {
-        if (CharSequenceUtil.isNotEmpty((CharSequence)this.keySerializerClassName)) {
-            return this.keySerializerClassName;
+        if (CharSequenceUtil.isNotEmpty(keySerializerClassName)) {
+            return keySerializerClassName;
         }
-        return this.getKeySerializer().getName();
+        return getKeySerializer().getName();
     }
 
     public String getValueSerializerClassName() {
-        if (CharSequenceUtil.isNotEmpty((CharSequence)this.valueSerializerClassName)) {
-            return this.valueSerializerClassName;
+        if (CharSequenceUtil.isNotEmpty(valueSerializerClassName)) {
+            return valueSerializerClassName;
         }
-        return this.getValueSerializer().getName();
+        return getValueSerializer().getName();
     }
 
     public String getGroupId() {
-        return this.groupId;
+        return groupId;
     }
 
     public void setGroupId(String groupId) {
@@ -72,7 +122,7 @@ public class KafkaProperties {
     }
 
     public Set<String> getBootstrapServers() {
-        return this.bootstrapServers;
+        return bootstrapServers;
     }
 
     public void setBootstrapServers(Set<String> bootstrapServers) {
@@ -80,7 +130,7 @@ public class KafkaProperties {
     }
 
     public Class<? extends Serializer<?>> getKeySerializer() {
-        return this.keySerializer;
+        return keySerializer;
     }
 
     public void setKeySerializer(Class<? extends Serializer<?>> keySerializer) {
@@ -92,7 +142,7 @@ public class KafkaProperties {
     }
 
     public Class<? extends Serializer<?>> getValueSerializer() {
-        return this.valueSerializer;
+        return valueSerializer;
     }
 
     public void setValueSerializer(Class<? extends Serializer<?>> valueSerializer) {
@@ -104,7 +154,7 @@ public class KafkaProperties {
     }
 
     public Class<? extends Deserializer<?>> getKeyDeserializer() {
-        return this.keyDeserializer;
+        return keyDeserializer;
     }
 
     public void setKeyDeserializer(Class<? extends Deserializer<?>> keyDeserializer) {
@@ -116,7 +166,7 @@ public class KafkaProperties {
     }
 
     public Class<? extends Deserializer<?>> getValueDeserializer() {
-        return this.valueDeserializer;
+        return valueDeserializer;
     }
 
     public void setValueDeserializer(Class<? extends Deserializer<?>> valueDeserializer) {
@@ -128,11 +178,10 @@ public class KafkaProperties {
     }
 
     public Map<String, Object> getExtend() {
-        return this.extend;
+        return extend;
     }
 
     public void setExtend(Map<String, Object> extend) {
         this.extend = extend;
     }
 }
-

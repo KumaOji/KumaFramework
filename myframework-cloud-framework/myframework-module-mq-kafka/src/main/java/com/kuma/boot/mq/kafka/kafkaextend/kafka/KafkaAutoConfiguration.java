@@ -1,13 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Scope
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.mq.kafka.kafkaextend.kafka;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,22 +23,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 
 @AutoConfiguration
-@EnableConfigurationProperties(value={KafkaProperties.class})
+@EnableConfigurationProperties({KafkaProperties.class})
 public class KafkaAutoConfiguration {
+
     @Bean
-    @ConditionalOnMissingBean(value={KafkaExtendProducer.class})
+    @ConditionalOnMissingBean(KafkaExtendProducer.class)
     public KafkaExtendProducer<String, String> stringKafkaExtendProducer(KafkaProperties properties) {
-        KafkaProducerBuilder builder = new KafkaProducerBuilder().addAllBootstrapServers(properties.getBootstrapServers()).putAll(properties.getExtend());
+        KafkaProducerBuilder builder = new KafkaProducerBuilder()
+                .addAllBootstrapServers(properties.getBootstrapServers())
+                .putAll(properties.getExtend());
+
         builder.keySerializer(properties.getKeySerializerClassName());
         builder.valueSerializer(properties.getValueSerializerClassName());
         return builder.build();
     }
 
     @Bean
-    @Scope(value="prototype")
-    @ConditionalOnMissingBean(value={KafkaConsumerBuilder.class})
+    @Scope("prototype")
+    @ConditionalOnMissingBean(KafkaConsumerBuilder.class)
     public KafkaConsumerBuilder consumerBuilder(KafkaProperties properties) {
-        return new KafkaConsumerBuilder().addAllBootstrapServers(properties.getBootstrapServers()).keyDeserializer(properties.getKeyDeserializerClassName()).valueDeserializer(properties.getValueDeserializerClassName()).groupId(properties.getGroupId());
+        return new KafkaConsumerBuilder()
+                .addAllBootstrapServers(properties.getBootstrapServers())
+                .keyDeserializer(properties.getKeyDeserializerClassName())
+                .valueDeserializer(properties.getValueDeserializerClassName())
+                .groupId(properties.getGroupId());
     }
 }
-

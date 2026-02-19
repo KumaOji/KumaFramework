@@ -1,33 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.context.ApplicationListener
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.context.event.EventListener
- *  org.springframework.kafka.event.ConsumerFailedToStartEvent
- *  org.springframework.kafka.event.ConsumerPartitionPausedEvent
- *  org.springframework.kafka.event.ConsumerPartitionResumedEvent
- *  org.springframework.kafka.event.ConsumerPausedEvent
- *  org.springframework.kafka.event.ConsumerResumedEvent
- *  org.springframework.kafka.event.ConsumerStartedEvent
- *  org.springframework.kafka.event.ConsumerStoppedEvent
- *  org.springframework.kafka.event.ContainerStoppedEvent
- *  org.springframework.kafka.event.KafkaEvent
- *  org.springframework.kafka.event.ListenerContainerIdleEvent
- *  org.springframework.kafka.event.ListenerContainerPartitionIdleEvent
- *  org.springframework.kafka.event.NonResponsiveConsumerEvent
- *  org.springframework.kafka.listener.KafkaMessageListenerContainer
- *  org.springframework.scheduling.annotation.Async
- *  org.springframework.stereotype.Component
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.mq.kafka.kafka.autoconfigure;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
@@ -51,163 +40,268 @@ import org.springframework.stereotype.Component;
 @AutoConfiguration
 public class KafkaEventListenerAutoConfiguration {
 
-    @Component
-    public static class KafkaEventMonitor {
-        private final KafkaEventMetrics metrics = new KafkaEventMetrics();
+    //消费者启动事件
+    @Configuration
+    public static class ConsumerStartedEventListener implements ApplicationListener<ConsumerStartedEvent> {
 
-        @Async
-        @EventListener
-        public void monitorAllKafkaEvents(KafkaEvent event) {
-            this.metrics.recordEvent(event.getClass().getSimpleName());
-            if (event instanceof ConsumerFailedToStartEvent) {
-                this.metrics.incrementFailureCount();
-            } else if (event instanceof ConsumerStartedEvent) {
-                this.metrics.incrementStartCount();
-            }
-        }
+        @Override
+        public void onApplicationEvent(ConsumerStartedEvent event) {
 
-        public KafkaEventMetrics getMetrics() {
-            return this.metrics;
-        }
+//			LogUtils.info("KafkaEventListener ----- ConsumerStartedEvent onApplicationEvent 消费者启动事件 {}", event);
 
-        public static class KafkaEventMetrics {
-            private int startCount = 0;
-            private int failureCount = 0;
-            private Map<String, Integer> eventCounts = new HashMap<String, Integer>();
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
 
-            public void recordEvent(String eventType) {
-                this.eventCounts.put(eventType, this.eventCounts.getOrDefault(eventType, 0) + 1);
-            }
-
-            public void incrementStartCount() {
-                ++this.startCount;
-            }
-
-            public void incrementFailureCount() {
-                ++this.failureCount;
-            }
-
-            public int getStartCount() {
-                return this.startCount;
-            }
-
-            public int getFailureCount() {
-                return this.failureCount;
-            }
-
-            public Map<String, Integer> getEventCounts() {
-                return this.eventCounts;
-            }
+            LogUtils.info("KafkaEventListener ----- ConsumerStartedEvent 消费者启动成功事件: {}, source:{}", listenerId, event);
         }
     }
 
     @Configuration
-    public static class NonResponsiveConsumerEventListener
-    implements ApplicationListener<NonResponsiveConsumerEvent> {
-        public void onApplicationEvent(NonResponsiveConsumerEvent event) {
-            LogUtils.info((String)"KafkaEventListener ----- NonResponsiveConsumerEvent onApplicationEvent {}", (Object[])new Object[]{event});
+    public static class ConsumerPausedEventListener implements ApplicationListener<ConsumerPausedEvent> {
+
+        @Override
+        public void onApplicationEvent(ConsumerPausedEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ConsumerPausedEvent onApplicationEvent {}", event);
+
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
+
+            LogUtils.info("KafkaEventListener ----- ConsumerPausedEvent 消费者已暂停事件: {}, source:{}", listenerId, event);
+        }
+    }
+
+
+    @Configuration
+    public static class ConsumerResumedEventListener implements ApplicationListener<ConsumerResumedEvent> {
+
+        @Override
+        public void onApplicationEvent(ConsumerResumedEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ConsumerResumedEvent onApplicationEvent {}", event);
+
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
+
+            LogUtils.info("KafkaEventListener ----- ConsumerResumedEvent 消费者已恢复事件: {}, source:{}", listenerId, event);
+        }
+    }
+
+
+    @Configuration
+    public static class ConsumerStoppedEventListener implements ApplicationListener<ConsumerStoppedEvent> {
+
+        @Override
+        public void onApplicationEvent(ConsumerStoppedEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ConsumerStoppedEvent onApplicationEvent {}", event);
+
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
+
+            LogUtils.info("KafkaEventListener ----- ConsumerStoppedEvent 消费者已停止事件: {}, source:{}", listenerId, event);
         }
     }
 
     @Configuration
-    public static class ListenerContainerPartitionIdleEventListener
-    implements ApplicationListener<ListenerContainerPartitionIdleEvent> {
-        public void onApplicationEvent(ListenerContainerPartitionIdleEvent event) {
-            String topic = event.getTopicPartition().topic();
-            Integer partition = event.getTopicPartition().partition();
-            long idleTime = event.getIdleTime();
-            String listenerId = event.getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ListenerContainerPartitionIdleEvent \u5206\u533a\u7a7a\u95f2\u4e8b\u4ef6 topic:{}, partition:{}, idleTime:{}, listenerId:{}, source:{}", (Object[])new Object[]{topic, partition, idleTime, listenerId, event});
-        }
-    }
+    public static class ConsumerFailedToStartEventListener implements ApplicationListener<ConsumerFailedToStartEvent> {
 
-    @Configuration
-    public static class ListenerContainerIdleEventListener
-    implements ApplicationListener<ListenerContainerIdleEvent> {
-        public void onApplicationEvent(ListenerContainerIdleEvent event) {
-            String listenerId = event.getListenerId();
-            long idleTime = event.getIdleTime();
-            LogUtils.info((String)"KafkaEventListener ----- ListenerContainerIdleEvent \u5bb9\u5668\u7a7a\u95f2\u4e8b\u4ef6 \u7a7a\u95f2\u65f6\u95f4:{}, listenerId:{}, source:{}", (Object[])new Object[]{idleTime, listenerId, event});
-            if (idleTime > 30000L) {
-                // empty if block
-            }
-        }
-    }
+        @Override
+        public void onApplicationEvent(ConsumerFailedToStartEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ConsumerFailedToStartEvent onApplicationEvent {}", event);
 
-    @Configuration
-    public static class ContainerStoppedEventListener
-    implements ApplicationListener<ContainerStoppedEvent> {
-        public void onApplicationEvent(ContainerStoppedEvent event) {
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ContainerStoppedEvent \u5bb9\u5668\u505c\u6b62\u4e8b\u4ef6: {}, source:{}", (Object[])new Object[]{listenerId, event});
-        }
-    }
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
 
-    @Configuration
-    public static class ConsumerPartitionResumedEventListener
-    implements ApplicationListener<ConsumerPartitionResumedEvent> {
-        public void onApplicationEvent(ConsumerPartitionResumedEvent event) {
-            String topic = event.getPartition().topic();
-            int partition = event.getPartition().partition();
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerPartitionResumedEvent \u5206\u533a\u6062\u590d\u4e8b\u4ef6 topic:{}, partition:{}, listenerId:{}, source:{}", (Object[])new Object[]{topic, partition, listenerId, event});
+            LogUtils.info("KafkaEventListener ----- ConsumerFailedToStartEvent 消费者启动失败事件: {}, source:{}", listenerId, event);
         }
     }
 
     @Configuration
     public static class ConsumerPartitionPausedEventEventListener
-    implements ApplicationListener<ConsumerPartitionPausedEvent> {
+            implements ApplicationListener<ConsumerPartitionPausedEvent> {
+
+        @Override
         public void onApplicationEvent(ConsumerPartitionPausedEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ConsumerPartitionPausedEvent onApplicationEvent {}", event);
+
             String topic = event.getPartition().topic();
             int partition = event.getPartition().partition();
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerPartitionPausedEvent \u5206\u533a\u6682\u505c\u4e8b\u4ef6 topic:{}, partition:{}, listenerId:{}, source:{}", (Object[])new Object[]{topic, partition, listenerId, event});
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
+
+            LogUtils.info(
+                    "KafkaEventListener ----- ConsumerPartitionPausedEvent 分区暂停事件 topic:{}, partition:{}, listenerId:{}, source:{}",
+                    topic, partition, listenerId, event);
         }
     }
 
     @Configuration
-    public static class ConsumerFailedToStartEventListener
-    implements ApplicationListener<ConsumerFailedToStartEvent> {
-        public void onApplicationEvent(ConsumerFailedToStartEvent event) {
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerFailedToStartEvent \u6d88\u8d39\u8005\u542f\u52a8\u5931\u8d25\u4e8b\u4ef6: {}, source:{}", (Object[])new Object[]{listenerId, event});
+    public static class ConsumerPartitionResumedEventListener
+            implements ApplicationListener<ConsumerPartitionResumedEvent> {
+
+        @Override
+        public void onApplicationEvent(ConsumerPartitionResumedEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ConsumerPartitionResumedEvent onApplicationEvent {}", event);
+            String topic = event.getPartition().topic();
+            int partition = event.getPartition().partition();
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
+
+            LogUtils.info(
+                    "KafkaEventListener ----- ConsumerPartitionResumedEvent 分区恢复事件 topic:{}, partition:{}, listenerId:{}, source:{}",
+                    topic, partition, listenerId, event);
+        }
+    }
+
+
+    @Configuration
+    public static class ContainerStoppedEventListener implements ApplicationListener<ContainerStoppedEvent> {
+
+        @Override
+        public void onApplicationEvent(ContainerStoppedEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ContainerStoppedEvent onApplicationEvent {}", event);
+
+            String listenerId = event.getSource(KafkaMessageListenerContainer.class).getListenerId();
+
+            LogUtils.info("KafkaEventListener ----- ContainerStoppedEvent 容器停止事件: {}, source:{}", listenerId, event);
         }
     }
 
     @Configuration
-    public static class ConsumerStoppedEventListener
-    implements ApplicationListener<ConsumerStoppedEvent> {
-        public void onApplicationEvent(ConsumerStoppedEvent event) {
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerStoppedEvent \u6d88\u8d39\u8005\u5df2\u505c\u6b62\u4e8b\u4ef6: {}, source:{}", (Object[])new Object[]{listenerId, event});
+    public static class ListenerContainerIdleEventListener implements ApplicationListener<ListenerContainerIdleEvent> {
+
+        @Override
+        public void onApplicationEvent(ListenerContainerIdleEvent event) {
+//			LogUtils.info("KafkaEventListener ----- ListenerContainerIdleEvent onApplicationEvent {}", event);
+
+            String listenerId = event.getListenerId();
+            long idleTime = event.getIdleTime();
+
+            LogUtils.info("KafkaEventListener ----- ListenerContainerIdleEvent 容器空闲事件 空闲时间:{}, listenerId:{}, source:{}",
+                    idleTime, listenerId, event);
+
+            // 空闲时间过长可以执行一些清理操作
+            if (idleTime > 30000) { // 30秒
+                //handleLongIdleTime(listenerId, idleTime);
+            }
         }
     }
 
     @Configuration
-    public static class ConsumerResumedEventListener
-    implements ApplicationListener<ConsumerResumedEvent> {
-        public void onApplicationEvent(ConsumerResumedEvent event) {
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerResumedEvent \u6d88\u8d39\u8005\u5df2\u6062\u590d\u4e8b\u4ef6: {}, source:{}", (Object[])new Object[]{listenerId, event});
+    public static class ListenerContainerPartitionIdleEventListener
+            implements ApplicationListener<ListenerContainerPartitionIdleEvent> {
+
+        @Override
+        public void onApplicationEvent(ListenerContainerPartitionIdleEvent event) {
+//			LogUtils.info(
+//				"KafkaEventListener ----- ListenerContainerPartitionIdleEvent" + " onApplicationEvent {}", event);
+
+            String topic = event.getTopicPartition().topic();
+            Integer partition = event.getTopicPartition().partition();
+            long idleTime = event.getIdleTime();
+            String listenerId = event.getListenerId();
+
+            LogUtils.info(
+                    "KafkaEventListener ----- ListenerContainerPartitionIdleEvent 分区空闲事件 topic:{}, partition:{}, idleTime:{}, listenerId:{}, source:{}",
+                    topic, partition, idleTime, listenerId, event);
+
         }
     }
 
     @Configuration
-    public static class ConsumerPausedEventListener
-    implements ApplicationListener<ConsumerPausedEvent> {
-        public void onApplicationEvent(ConsumerPausedEvent event) {
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerPausedEvent \u6d88\u8d39\u8005\u5df2\u6682\u505c\u4e8b\u4ef6: {}, source:{}", (Object[])new Object[]{listenerId, event});
+    public static class NonResponsiveConsumerEventListener implements ApplicationListener<NonResponsiveConsumerEvent> {
+
+        @Override
+        public void onApplicationEvent(NonResponsiveConsumerEvent event) {
+            LogUtils.info("KafkaEventListener ----- NonResponsiveConsumerEvent onApplicationEvent {}", event);
         }
     }
 
-    @Configuration
-    public static class ConsumerStartedEventListener
-    implements ApplicationListener<ConsumerStartedEvent> {
-        public void onApplicationEvent(ConsumerStartedEvent event) {
-            String listenerId = ((KafkaMessageListenerContainer)event.getSource(KafkaMessageListenerContainer.class)).getListenerId();
-            LogUtils.info((String)"KafkaEventListener ----- ConsumerStartedEvent \u6d88\u8d39\u8005\u542f\u52a8\u6210\u529f\u4e8b\u4ef6: {}, source:{}", (Object[])new Object[]{listenerId, event});
+
+    @Component
+    public static class KafkaEventMonitor {
+
+        private final KafkaEventMetrics metrics = new KafkaEventMetrics();
+
+        @Async
+        @EventListener
+        public void monitorAllKafkaEvents(KafkaEvent event) {
+            metrics.recordEvent(event.getClass().getSimpleName());
+
+            if (event instanceof ConsumerFailedToStartEvent) {
+                metrics.incrementFailureCount();
+            } else if (event instanceof ConsumerStartedEvent) {
+                metrics.incrementStartCount();
+            }
+        }
+
+        // 获取监控数据
+        public KafkaEventMetrics getMetrics() {
+            return metrics;
+        }
+
+        public static class KafkaEventMetrics {
+
+            private int startCount = 0;
+            private int failureCount = 0;
+            private java.util.Map<String, Integer> eventCounts = new java.util.HashMap<>();
+
+            public void recordEvent(String eventType) {
+                eventCounts.put(eventType, eventCounts.getOrDefault(eventType, 0) + 1);
+            }
+
+            public void incrementStartCount() {
+                startCount++;
+            }
+
+            public void incrementFailureCount() {
+                failureCount++;
+            }
+
+            // getter方法
+            public int getStartCount() {
+                return startCount;
+            }
+
+            public int getFailureCount() {
+                return failureCount;
+            }
+
+            public java.util.Map<String, Integer> getEventCounts() {
+                return eventCounts;
+            }
         }
     }
+
+//	@Configuration
+//	@EnableAsync
+//	public class ComprehensiveKafkaEventListener {
+//
+//		// 异步处理事件，避免阻塞主线程
+//		@Async
+//		@EventListener
+//		public void handleKafkaEvent(Object event) {
+//			if (event instanceof ConsumerFailedToStartEvent) {
+//				handleConsumerFailedToStart((ConsumerFailedToStartEvent) event);
+//			} else if (event instanceof ConsumerStartedEvent) {
+//				handleConsumerStarted((ConsumerStartedEvent) event);
+//			} else if (event instanceof ConsumerStoppedEvent) {
+//				handleConsumerStopped((ConsumerStoppedEvent) event);
+//			} else if (event instanceof ConsumerPausedEvent) {
+//				handleConsumerPaused((ConsumerPausedEvent) event);
+//			} else if (event instanceof ConsumerResumedEvent) {
+//				handleConsumerResumed((ConsumerResumedEvent) event);
+//			} else if (event instanceof ConsumerPartitionPausedEvent) {
+//				handlePartitionPaused((ConsumerPartitionPausedEvent) event);
+//			} else if (event instanceof ConsumerPartitionResumedEvent) {
+//				handlePartitionResumed((ConsumerPartitionResumedEvent) event);
+//			} else if (event instanceof ListenerContainerIdleEvent) {
+//				handleContainerIdle((ListenerContainerIdleEvent) event);
+//			} else if (event instanceof ListenerContainerPartitionIdleEvent) {
+//				handlePartitionIdle((ListenerContainerPartitionIdleEvent) event);
+//			}
+//		}
+//
+//		// 各个事件处理方法（同上）
+//		private void handleConsumerFailedToStart(ConsumerFailedToStartEvent event) {
+//			// 实现同上
+//		}
+//
+//		private void handleConsumerStarted(ConsumerStartedEvent event) {
+//			// 实现同上
+//		}
+//
+//		// 其他方法...
+//	}
 }
-

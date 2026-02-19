@@ -1,21 +1,18 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- */
 package com.kuma.boot.mq.kafka.kafkafactory;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="mq.kafka.producer")
+@ConfigurationProperties(prefix = "mq.kafka.producer")
 public class KafkaProducerProperties {
+
     private String bootstrapServers;
+
     private String acks;
+
     private String clientId;
 
     public String getBootstrapServers() {
-        return this.bootstrapServers;
+        return bootstrapServers;
     }
 
     public void setBootstrapServers(String bootstrapServers) {
@@ -23,7 +20,7 @@ public class KafkaProducerProperties {
     }
 
     public String getAcks() {
-        return this.acks;
+        return acks;
     }
 
     public void setAcks(String acks) {
@@ -31,11 +28,10 @@ public class KafkaProducerProperties {
     }
 
     public String getClientId() {
-        return this.clientId;
+        return clientId;
     }
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
 }
-
