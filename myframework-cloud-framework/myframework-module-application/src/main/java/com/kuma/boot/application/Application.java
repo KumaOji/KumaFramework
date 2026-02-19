@@ -37,6 +37,14 @@ import org.springframework.boot.SpringApplication;
  *
  * @author kuma
  */
+/***
+ *  *   _  ___   _ __  __    _          ____ _     ___  _   _ ____
+ *  *  | |/ / | | |  \/  |  / \        / ___| |   / _ \| | | |  _ \
+ *  *  | ' /| | | | |\/| | / _ \      | |   | |  | | | | | | | | | |
+ *  *  | . \| |_| | |  | |/ ___ \     | |___| |__| |_| | |_| | |_| |
+ *  *  |_|\_\\___/|_|  |_/_/   \_\     \____|_____\___/ \___/|____/
+ *  *
+ *  */
 public abstract class Application {
 
     protected static final Logger log = LoggerFactory.getLogger(Application.class);

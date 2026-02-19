@@ -16,17 +16,14 @@
 
 package com.kuma.boot.core.startup;
 
-import com.kuma.boot.common.enums.EventEnum;
 import com.kuma.boot.common.utils.common.PropertyUtils;
 import com.kuma.boot.core.banner.KmcBanner;
-import java.util.Collections;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -48,7 +45,7 @@ import static com.kuma.boot.common.constant.CommonConstants.ENV;
  */
 public class StartupSpringApplication extends SpringApplication {
 
-    public static final String DEFAULT_BANNER_LOCATION = "kmc-banner.txt";
+    public static final String DEFAULT_BANNER_LOCATION = "banner/kmc-banner.txt";
 
     private final List<com.kuma.boot.core.startup.BaseStat> initializerStartupStatList = new ArrayList<>();
 

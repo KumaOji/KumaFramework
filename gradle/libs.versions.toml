@@ -80,6 +80,7 @@ javax-json-api = "1.1.4"
 javax-json-impl = "1.1.4"
 spring-cloud-context-ver = "5.0.1"
 taobao-text = "0.0.3"
+druid = "1.2.27"
 
 ## 统一定义依赖
 [libraries]
@@ -182,6 +183,7 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "c
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring-context" }
 spring-cloud-context = { module = "org.springframework.cloud:spring-cloud-context", version.ref = "spring-cloud-context-ver" }
 taobao-text-ui = { module = "com.taobao.text:text-ui", version.ref = "taobao-text" }
+druid-starter = { module = "com.alibaba:druid-spring-boot-3-starter", version.ref = "druid" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

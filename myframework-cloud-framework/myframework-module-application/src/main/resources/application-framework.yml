@@ -4,8 +4,7 @@ spring:
     banner-mode: console
     log-startup-info: false
   banner:
-    location: classpath:kmc-banner.txt
-#    location: classpath:banner/banner.txt
+    location: classpath:banner/banner.txt
   cache:
     type: none
   autoconfigure:

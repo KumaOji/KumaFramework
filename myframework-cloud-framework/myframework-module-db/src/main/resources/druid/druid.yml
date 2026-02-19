@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    druid:
+      enable: true
+      username: ${spring.datasource.username}
+      # 密码可配置 RSA 回调: password-callback: com.xxx.config.RsaDBPasswordCallBack
+      password: ${spring.datasource.password}
+      driver-class-name: ${spring.datasource.driver-class-name}
+      url: ${spring.datasource.url}
+      db-type: mysql
+      # 连接池配置
+      initialSize: 10
+      minIdle: 10
+      maxActive: 500
+      max-wait: 60000
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      validation-query: SELECT 1
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      use-global-data-source-stat: true
+      name: druid-db1
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      maxEvictableIdleTimeMillis: 900000
+      maxOpenPreparedStatements: 20
+      keepAlive: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      useGlobalDataSourceStat: true
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+      filters: stat,wall,slf4j
+      filter:
+        stat:
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 2000
+        slf4j:
+          enabled: true
+          statement-log-error-enabled: true
+        wall:
+          enabled: true
+          config:
+            update-allow: true
+            drop-table-allow: false
+            insert-allow: true
+            delete-allow: true
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+        session-stat-max-count: 1000
+        profile-enable: true
+        session-stat-enable: false
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: true
+        login-username: admin
+        login-password: 123456
+        allow: 127.0.0.1
+        deny: ""
+      aop-patterns: "com.kuma.boot.dao.*"
