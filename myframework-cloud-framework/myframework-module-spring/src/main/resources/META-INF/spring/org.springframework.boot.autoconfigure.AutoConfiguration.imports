@@ -1,2 +1,1 @@
-com.kuma.boot.spring.web.schema.SchemaSwitchFilterAutoConfiguration
 com.kuma.boot.spring.web.swagger.SpringDocAutoConfiguration

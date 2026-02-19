@@ -23,12 +23,13 @@ spring:
             minimum-idle: 1
             maximum-pool-size: 10
             connection-timeout: 10000
-#        postgresql_2:
-#          hikari:
-#            minimum-idle: 1
-#            maximum-pool-size: 10
-#            connection-timeout: 10000
-
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      acks: "1"
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
 logging:
   config: classpath:logback-spring.xml
   level:
@@ -40,6 +41,8 @@ logging:
 mybatis-plus:
   global-config:
     banner: false
+  configuration:
+    map-underscore-to-camel-case: true
 
 springdoc:
   api-docs:
@@ -54,18 +57,6 @@ springdoc:
     try-it-out-enabled: false
 
 kuma:
-  cache:
-    caffeine:
-      cache-names: default
-      initial-capacity: 100
-      maximum-size: 1000
-      expire-after-write-minutes: 30
-      expire-after-access-minutes: 30
-  schema-switch:
-    enabled: false
-    order: -100
-  mybatis:
-    default-schema: public
   springdoc:
     title: API 文档
     description: RESTful API 接口文档

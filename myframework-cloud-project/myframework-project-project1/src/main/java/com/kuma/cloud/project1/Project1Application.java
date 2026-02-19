@@ -16,6 +16,7 @@
 
 package com.kuma.cloud.project1;
 
+import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.application.Application;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,9 +28,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
  *
  * @author kuma
  */
-@SpringBootApplication(scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project1"})
+@SpringBootApplication(
+        scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project1"},
+        exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project1"})
-@MapperScan(basePackages = "com.kuma.boot.mybatis.mapper")
+@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.cloud.project1.mapper"})
 public class Project1Application extends Application {
 
     public static void main(String[] args) {

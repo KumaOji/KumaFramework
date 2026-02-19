@@ -22,7 +22,7 @@ for (name in oneLayerProjects) {
     include "myframework-cloud-${name}"
 }
 
-def frameworkSubModules = ['common', 'core', 'data-datasource', 'data-mybatis', 'cache-common', 'cache-redis', 'infrastruct', "spring", "mybatis", "datasource", "application"]
+def frameworkSubModules = ['common', 'core', 'data-datasource', 'data-mybatis', 'cache-common', 'cache-redis', 'infrastruct', "spring", "application"]
 for (name in frameworkSubModules) {
     include "myframework-cloud-framework:myframework-module-${name}"
 }

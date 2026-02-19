@@ -33,6 +33,3 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
 
-kuma:
-  mybatis:
-    default-schema: blog

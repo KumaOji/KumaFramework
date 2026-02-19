@@ -20,16 +20,3 @@ spring:
           username: ${postgresql.username}
           password: ${postgresql.password}
           driver-class-name: org.postgresql.Driver
-#        postgresql_2:
-#          url: ${postgresql.url}
-#          username: ${postgresql.username}
-#          password: ${postgresql.password}
-#          driver-class-name: org.postgresql.Driver
-
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-
-kuma:
-  mybatis:
-    default-schema: blog

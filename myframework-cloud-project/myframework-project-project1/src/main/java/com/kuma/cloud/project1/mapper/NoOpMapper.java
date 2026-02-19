@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.mybatis.mapper;
+package com.kuma.cloud.project1.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 
