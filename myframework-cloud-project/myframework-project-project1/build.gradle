@@ -23,14 +23,26 @@ processResources {
     filesMatching('**/application.yml') {
         expand(
                 mysql     : [
-                        url     : project.findProperty('mysql.url') ?: 'jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai',
-                        username: project.findProperty('mysql.username') ?: 'root',
-                        password: project.findProperty('mysql.password') ?: ''
+                        url     : project.findProperty('mysql.url'),
+                        username: project.findProperty('mysql.username'),
+                        password: project.findProperty('mysql.password')
                 ],
                 postgresql: [
-                        url     : project.findProperty('postgresql.url') ?: 'jdbc:postgresql://localhost:5432/postgres',
-                        username: project.findProperty('postgresql.username') ?: 'postgres',
-                        password: project.findProperty('postgresql.password') ?: ''
+                        url     : project.findProperty('postgresql.url'),
+                        username: project.findProperty('postgresql.username'),
+                        password: project.findProperty('postgresql.password')
+                ],
+                redis     : [
+                        host   : project.findProperty('redis.host'),
+                        port   : project.findProperty('redis.port'),
+                        database: project.findProperty('redis.database'),
+                        jedis  : [
+                                pool: [
+                                        'max-active': project.findProperty('redis.jedis.pool.max-active'),
+                                        'max-idle'  : project.findProperty('redis.jedis.pool.max-idle'),
+                                        'min-idle'  : project.findProperty('redis.jedis.pool.min-idle')
+                                ]
+                        ]
                 ]
         )
     }

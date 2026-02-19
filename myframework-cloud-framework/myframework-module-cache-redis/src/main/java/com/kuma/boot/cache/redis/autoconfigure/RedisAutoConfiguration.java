@@ -104,16 +104,15 @@ public class RedisAutoConfiguration implements InitializingBean {
 //        return new RedissonConnectionFactory(redissonClient);
 //    }
 
-    @Bean
-    public RedisTemplate<String, Object> stringObjectRedisTemplate(
+    /**
+     * 创建 RedisTemplate，bean 名称为 redisTemplate。
+     * 使用 redisTemplate 名称以满足 redisKeyValueAdapter 等 Spring Data Redis 组件的依赖要求。
+     */
+    @Bean("redisTemplate")
+    public RedisTemplate<String, Object> redisTemplate(
             RedissonConnectionFactory factory, RedisSerializer<Object> redisSerializer) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
-
-        // Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new
-        // Jackson2JsonRedisSerializer<>(
-        //	Object.class);
-        // jackson2JsonRedisSerializer.setJsonMapper(JsonUtil.MAPPER);
 
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         // key采用String的序列化方式
@@ -131,14 +130,14 @@ public class RedisAutoConfiguration implements InitializingBean {
     }
 
     @Bean
-    public RedisRepository redisRepository(RedisTemplate<String, Object> stringObjectRedisTemplate) {
-        return new RedisRepository(stringObjectRedisTemplate, false);
+    public RedisRepository redisRepository(RedisTemplate<String, Object> redisTemplate) {
+        return new RedisRepository(redisTemplate, false);
     }
 
     @Bean
     @ConditionalOnMissingBean(ValueOperations.class)
-    public ValueOperations<String, Object> valueOperations(RedisTemplate<String, Object> stringObjectRedisTemplate) {
-        return stringObjectRedisTemplate.opsForValue();
+    public ValueOperations<String, Object> valueOperations(RedisTemplate<String, Object> redisTemplate) {
+        return redisTemplate.opsForValue();
     }
 
 //    @Bean("stringRedisTemplate")
