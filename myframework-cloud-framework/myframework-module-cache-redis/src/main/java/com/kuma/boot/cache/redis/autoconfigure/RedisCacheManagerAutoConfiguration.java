@@ -1,41 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.jspecify.annotations.Nullable
- *  org.redisson.spring.data.connection.RedissonConnectionFactory
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.ObjectProvider
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.cache.autoconfigure.CacheManagerCustomizer
- *  org.springframework.boot.cache.autoconfigure.CacheManagerCustomizers
- *  org.springframework.boot.cache.autoconfigure.CacheProperties
- *  org.springframework.boot.cache.autoconfigure.CacheProperties$Redis
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.boot.convert.DurationStyle
- *  org.springframework.cache.Cache
- *  org.springframework.cache.CacheManager
- *  org.springframework.cache.annotation.CachingConfigurer
- *  org.springframework.cache.annotation.EnableCaching
- *  org.springframework.cache.interceptor.CacheErrorHandler
- *  org.springframework.cache.interceptor.KeyGenerator
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Primary
- *  org.springframework.context.annotation.Role
- *  org.springframework.data.redis.cache.RedisCache
- *  org.springframework.data.redis.cache.RedisCacheConfiguration
- *  org.springframework.data.redis.cache.RedisCacheManager
- *  org.springframework.data.redis.cache.RedisCacheWriter
- *  org.springframework.data.redis.connection.RedisConnectionFactory
- *  org.springframework.data.redis.serializer.RedisSerializationContext$SerializationPair
- *  org.springframework.data.redis.serializer.RedisSerializer
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.autoconfigure;
 
+import com.kuma.boot.cache.redis.autoconfigure.properties.CacheManagerProperties;
+import com.kuma.boot.common.constant.StarterNameConstants;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.time.Duration;
@@ -44,10 +27,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.jspecify.annotations.Nullable;
+import jodd.util.StringPool;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -72,140 +56,290 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.jspecify.annotations.Nullable;
 
+/**
+ * redis cache manager自动配置类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-07 21:17:09
+ */
 @EnableCaching
-@AutoConfiguration(after={RedisAutoConfiguration.class})
-@EnableConfigurationProperties(value={CacheProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.cache.redis.cache-manager", name={"enabled"}, havingValue="true", matchIfMissing=true)
-@Role(value=2)
-public class RedisCacheManagerAutoConfiguration
-implements CachingConfigurer,
-InitializingBean {
-    private final CacheProperties cacheProperties;
-    private final RedisSerializer<Object> redisSerializer;
-    private final @Nullable RedisCacheConfiguration redisCacheConfiguration;
+@AutoConfiguration(after = {RedisAutoConfiguration.class})
+@EnableConfigurationProperties({CacheProperties.class})
+@ConditionalOnProperty(
+        prefix = CacheManagerProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true",
+        matchIfMissing = true)
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, InitializingBean {
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(RedisCacheManagerAutoConfiguration.class, (String)"kuma-boot-starter-cache-redis", (String[])new String[0]);
+        LogUtils.started(RedisCacheManagerAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 
-    RedisCacheManagerAutoConfiguration(RedisSerializer<Object> redisSerializer, CacheProperties cacheProperties, ObjectProvider<RedisCacheConfiguration> redisCacheConfiguration) {
+    private final CacheProperties cacheProperties;
+    /**
+     * 序列化方式
+     */
+    private final RedisSerializer<Object> redisSerializer;
+
+    @Nullable
+    private final RedisCacheConfiguration redisCacheConfiguration;
+
+    RedisCacheManagerAutoConfiguration(
+            RedisSerializer<Object> redisSerializer,
+            CacheProperties cacheProperties,
+            ObjectProvider<RedisCacheConfiguration> redisCacheConfiguration) {
         this.redisSerializer = redisSerializer;
         this.cacheProperties = cacheProperties;
-        this.redisCacheConfiguration = (RedisCacheConfiguration)redisCacheConfiguration.getIfAvailable();
+        this.redisCacheConfiguration = redisCacheConfiguration.getIfAvailable();
     }
 
     @Bean
-    public CacheManagerCustomizers cacheManagerCustomizers(ObjectProvider<List<CacheManagerCustomizer<?>>> customizers) {
-        return new CacheManagerCustomizers((List)customizers.getIfAvailable());
+    public CacheManagerCustomizers cacheManagerCustomizers(
+            ObjectProvider<List<CacheManagerCustomizer<?>>> customizers) {
+        return new CacheManagerCustomizers(customizers.getIfAvailable());
     }
 
     @Bean
+    @Override
     public KeyGenerator keyGenerator() {
         return (target, method, objects) -> {
             StringBuilder sb = new StringBuilder();
             sb.append(target.getClass().getName());
-            sb.append(":");
+            sb.append(StrPoolConstants.COLON);
             sb.append(method.getName());
             for (Object obj : objects) {
-                if (obj == null) continue;
-                sb.append(":");
-                sb.append(obj);
+                if (obj != null) {
+                    sb.append(StrPoolConstants.COLON);
+                    sb.append(obj);
+                }
             }
             return sb.toString();
         };
     }
 
+    /**
+     * 自定义缓存异常处理 当缓存读写异常时，忽略异常
+     */
+    @Override
     public CacheErrorHandler errorHandler() {
-        return new CacheErrorHandler(this){
-            {
-                Objects.requireNonNull(this$0);
-            }
-
+        return new CacheErrorHandler() {
+            @Override
             public void handleCacheGetError(RuntimeException e, Cache cache, Object o) {
-                LogUtils.error((String)e.getMessage(), (Object[])new Object[]{e});
+                LogUtils.error(e.getMessage(), e);
             }
 
+            @Override
             public void handleCachePutError(RuntimeException e, Cache cache, Object o, Object o1) {
-                LogUtils.error((String)e.getMessage(), (Object[])new Object[]{e});
+                LogUtils.error(e.getMessage(), e);
             }
 
+            @Override
             public void handleCacheEvictError(RuntimeException e, Cache cache, Object o) {
-                LogUtils.error((String)e.getMessage(), (Object[])new Object[]{e});
+                LogUtils.error(e.getMessage(), e);
             }
 
+            @Override
             public void handleCacheClearError(RuntimeException e, Cache cache) {
-                LogUtils.error((String)e.getMessage(), (Object[])new Object[]{e});
+                LogUtils.error(e.getMessage(), e);
             }
         };
     }
 
     @Primary
     @Bean
-    @ConditionalOnBean(value={RedissonConnectionFactory.class})
-    @ConditionalOnProperty(prefix="kuma.boot.cache.redis.cache-manager", name={"type"}, havingValue="redis", matchIfMissing=true)
-    public CacheManager redisCacheManager(CacheManagerCustomizers cacheManagerCustomizers, ObjectProvider<RedissonConnectionFactory> connectionFactoryObjectProvider) {
-        RedisConnectionFactory connectionFactory = (RedisConnectionFactory)connectionFactoryObjectProvider.getIfAvailable();
+    @ConditionalOnBean(RedissonConnectionFactory.class)
+    @ConditionalOnProperty(
+            prefix = CacheManagerProperties.PREFIX,
+            name = "type",
+            havingValue = "redis",
+            matchIfMissing = true)
+    public CacheManager redisCacheManager(
+            CacheManagerCustomizers cacheManagerCustomizers,
+            ObjectProvider<RedissonConnectionFactory> connectionFactoryObjectProvider) {
+        RedisConnectionFactory connectionFactory = connectionFactoryObjectProvider.getIfAvailable();
         Objects.requireNonNull(connectionFactory, "Bean RedisConnectionFactory is null.");
-        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter((RedisConnectionFactory)connectionFactory);
+        RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory);
         RedisCacheConfiguration cacheConfiguration = this.determineConfiguration();
-        List cacheNames = this.cacheProperties.getCacheNames();
-        LinkedHashMap<String, RedisCacheConfiguration> initialCaches = new LinkedHashMap<String, RedisCacheConfiguration>();
+        List<String> cacheNames = this.cacheProperties.getCacheNames();
+        Map<String, RedisCacheConfiguration> initialCaches = new LinkedHashMap<>();
         if (!cacheNames.isEmpty()) {
-            LinkedHashMap cacheConfigMap = new LinkedHashMap(cacheNames.size());
+            Map<String, RedisCacheConfiguration> cacheConfigMap = new LinkedHashMap<>(cacheNames.size());
             cacheNames.forEach(it -> cacheConfigMap.put(it, cacheConfiguration));
             initialCaches.putAll(cacheConfigMap);
         }
+
         boolean allowInFlightCacheCreation = true;
         boolean enableTransactions = false;
-        RedisAutoCacheManager cacheManager = new RedisAutoCacheManager(redisCacheWriter, cacheConfiguration, allowInFlightCacheCreation, initialCaches);
+        RedisAutoCacheManager cacheManager = new RedisAutoCacheManager(
+                redisCacheWriter, cacheConfiguration, allowInFlightCacheCreation, initialCaches);
         cacheManager.setTransactionAware(enableTransactions);
-        return cacheManagerCustomizers.customize((CacheManager)cacheManager);
+
+        return cacheManagerCustomizers.customize(cacheManager);
+
+        // RedisCacheConfiguration defConfig = getDefConf();
+        // defConfig.entryTtl(cacheProperties.getDef().getTimeToLive());
+        //
+        // Map<String, CacheProperties.Cache> configs = cacheProperties.getConfigs();
+        // Map<String, RedisCacheConfiguration> map = Maps.newHashMap();
+        //
+        //// 自定义的缓存过期时间配置
+        // Optional
+        //	.ofNullable(configs)
+        //	.ifPresent(config ->
+        //		config.forEach((key, cache) -> {
+        //			RedisCacheConfiguration cfg = handleRedisCacheConfiguration(cache, defConfig);
+        //			map.put(key, cfg);
+        //		})
+        //	);
+        //
+        // return RedisCacheManager
+        //	.builder(redisConnectionFactory)
+        //	.cacheDefaults(defConfig)
+        //	.withInitialCacheConfigurations(map)
+        //	.build();
     }
 
     private RedisCacheConfiguration determineConfiguration() {
         if (this.redisCacheConfiguration != null) {
             return this.redisCacheConfiguration;
+        } else {
+            CacheProperties.Redis redisProperties =
+                    this.cacheProperties.getRedis();
+            RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+            config = config.serializeValuesWith(
+                    RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer));
+            if (redisProperties.getTimeToLive() != null) {
+                config = config.entryTtl(redisProperties.getTimeToLive());
+            }
+
+            if (redisProperties.getKeyPrefix() != null) {
+                config = config.prefixCacheNameWith(redisProperties.getKeyPrefix());
+            }
+
+            if (!redisProperties.isCacheNullValues()) {
+                config = config.disableCachingNullValues();
+            }
+
+            if (!redisProperties.isUseKeyPrefix()) {
+                config = config.disableKeyPrefix();
+            }
+
+            return config;
         }
-        CacheProperties.Redis redisProperties = this.cacheProperties.getRedis();
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
-        config = config.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(this.redisSerializer));
-        if (redisProperties.getTimeToLive() != null) {
-            config = config.entryTtl(redisProperties.getTimeToLive());
-        }
-        if (redisProperties.getKeyPrefix() != null) {
-            config = config.prefixCacheNameWith(redisProperties.getKeyPrefix());
-        }
-        if (!redisProperties.isCacheNullValues()) {
-            config = config.disableCachingNullValues();
-        }
-        if (!redisProperties.isUseKeyPrefix()) {
-            config = config.disableKeyPrefix();
-        }
-        return config;
     }
 
-    public static class RedisAutoCacheManager
-    extends RedisCacheManager {
-        public RedisAutoCacheManager(RedisCacheWriter cacheWriter, RedisCacheConfiguration defaultCacheConfiguration, boolean allowRuntimeCacheCreation, Map<String, RedisCacheConfiguration> initialCacheConfigurations) {
+    /**
+     * redis cache 扩展cache name自动化配置
+     */
+    public static class RedisAutoCacheManager extends RedisCacheManager {
+
+        public RedisAutoCacheManager(
+                RedisCacheWriter cacheWriter,
+                RedisCacheConfiguration defaultCacheConfiguration,
+                boolean allowRuntimeCacheCreation,
+                Map<String, RedisCacheConfiguration> initialCacheConfigurations) {
             super(cacheWriter, defaultCacheConfiguration, allowRuntimeCacheCreation, initialCacheConfigurations);
         }
 
+        @Override
         protected RedisCache createRedisCache(String name, @Nullable RedisCacheConfiguration cacheConfig) {
-            if (StringUtils.isBlank((String)name) || !name.contains("#")) {
+            if (StringUtils.isBlank(name) || !name.contains(StringPool.HASH)) {
                 return super.createRedisCache(name, cacheConfig);
             }
-            String[] cacheArray = name.split("#");
+            String[] cacheArray = name.split(StringPool.HASH);
             if (cacheArray.length < 2) {
                 return super.createRedisCache(name, cacheConfig);
             }
             String cacheName = cacheArray[0];
             if (cacheConfig != null) {
-                Duration duration = DurationStyle.detectAndParse((String)cacheArray[1], (ChronoUnit)ChronoUnit.SECONDS);
+                // 转换时间，支持时间单位例如：300ms，第二个参数是默认单位
+                Duration duration = DurationStyle.detectAndParse(cacheArray[1], ChronoUnit.SECONDS);
                 cacheConfig = cacheConfig.entryTtl(duration);
             }
             return super.createRedisCache(cacheName, cacheConfig);
         }
     }
-}
 
+    //	@Configuration
+    //	@EnableMethodCache(basePackages = "com.kuma.cloud")
+    //	@EnableCreateCacheAnnotation
+    //	@PropertySource(factory = YamlPropertySourceFactory.class, value = "classpath:jetcache.yml")
+    //	public class JetCacheAutoConfiguration {
+    //
+    //		@Bean
+    //		@ConditionalOnProperty(prefix = CustomCacheProperties.PREFIX, name = "type", havingValue =
+    // "JETCACHE")
+    //		public SpringConfigProvider springConfigProvider() {
+    //			return new SpringConfigProvider();
+    //		}
+    //
+    //		@Bean
+    //		@ConditionalOnProperty(prefix = CustomCacheProperties.PREFIX, name = "type", havingValue =
+    // "JETCACHE")
+    //		public GlobalCacheConfig config() {
+    //			Map localBuilders = new HashMap();
+    //			EmbeddedCacheBuilder localBuilder = LinkedHashMapCacheBuilder
+    //				.createLinkedHashMapCacheBuilder()
+    //				.keyConvertor(FastjsonKeyConvertor.INSTANCE);
+    //			localBuilders.put(CacheConsts.DEFAULT_AREA, localBuilder);
+    //
+    //			Map remoteBuilders = new HashMap(6);
+    //			RedisSpringDataCacheBuilder<?> redisSpringDataCacheBuilder =
+    // RedisSpringDataCacheBuilder.createBuilder()
+    //				.keyConvertor(FastjsonKeyConvertor.INSTANCE)
+    //				.valueEncoder(JavaValueEncoder.INSTANCE)
+    //				.valueDecoder(JavaValueDecoder.INSTANCE);
+    //			remoteBuilders.put(CacheConsts.DEFAULT_AREA, redisSpringDataCacheBuilder);
+    //
+    //			GlobalCacheConfig globalCacheConfig = new GlobalCacheConfig();
+    //			// globalCacheConfig.setConfigProvider(configProvider);//for jetcache <=2.5
+    //			globalCacheConfig.setLocalCacheBuilders(localBuilders);
+    //			globalCacheConfig.setRemoteCacheBuilders(remoteBuilders);
+    //			globalCacheConfig.setStatIntervalMinutes(15);
+    //			globalCacheConfig.setAreaInCacheName(false);
+    //
+    //			return globalCacheConfig;
+    //		}
+    //	}
+
+    // private RedisCacheConfiguration getDefConf() {
+    //	RedisCacheConfiguration def = RedisCacheConfiguration
+    //		.defaultCacheConfig()
+    //		.disableCachingNullValues()
+    //		.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(
+    //			new StringRedisSerializer()))
+    //		.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+    //			new RedisObjectSerializer()));
+    //	return handleRedisCacheConfiguration(cacheProperties.getDef(), def);
+    // }
+    //
+    // private RedisCacheConfiguration handleRedisCacheConfiguration(
+    //	CacheProperties.Cache redisProperties, RedisCacheConfiguration config) {
+    //	if (Objects.isNull(redisProperties)) {
+    //		return config;
+    //	}
+    //	if (redisProperties.getTimeToLive() != null) {
+    //		config = config.entryTtl(redisProperties.getTimeToLive());
+    //	}
+    //	if (redisProperties.getKeyPrefix() != null) {
+    //		config = config.computePrefixWith(cacheName -> redisProperties.getKeyPrefix().concat(
+    //			StrPool.COLON).concat(cacheName).concat(StrPool.COLON));
+    //	} else {
+    //		config = config.computePrefixWith(cacheName -> cacheName.concat(StrPool.COLON));
+    //	}
+    //	if (!redisProperties.isCacheNullValues()) {
+    //		config = config.disableCachingNullValues();
+    //	}
+    //	if (!redisProperties.isUseKeyPrefix()) {
+    //		config = config.disableKeyPrefix();
+    //	}
+    //
+    //	return config;
+    // }
+}

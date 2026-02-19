@@ -1,91 +1,132 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.redisson.spring.data.connection.RedissonConnectionFactory
- *  org.redisson.spring.starter.RedissonAutoConfigurationV4
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.ObjectProvider
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
- *  org.springframework.boot.data.redis.autoconfigure.DataRedisProperties
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Role
- *  org.springframework.data.redis.connection.RedisConnectionFactory
- *  org.springframework.data.redis.core.RedisTemplate
- *  org.springframework.data.redis.core.ValueOperations
- *  org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
- *  org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
- *  org.springframework.data.redis.serializer.RedisSerializer
- *  org.springframework.data.redis.serializer.StringRedisSerializer
- *  tools.jackson.databind.ObjectMapper
- *  tools.jackson.databind.json.JsonMapper
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.autoconfigure;
 
-import com.kuma.boot.cache.redis.autoconfigure.properties.CacheManagerProperties;
 import com.kuma.boot.cache.redis.autoconfigure.properties.RedisProperties;
+import org.redisson.spring.starter.RedissonAutoConfigurationV4;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
+import org.springframework.context.annotation.Role;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import com.kuma.boot.cache.redis.enums.SerializerType;
+import com.kuma.boot.cache.redis.autoconfigure.properties.CacheManagerProperties;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
-import org.redisson.spring.starter.RedissonAutoConfigurationV4;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
-import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Role;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
-@AutoConfiguration(after={DataRedisAutoConfiguration.class, RedissonAutoConfigurationV4.class})
-@ConditionalOnProperty(prefix="kuma.boot.cache.redis", name={"enabled"}, havingValue="true", matchIfMissing=true)
-@EnableConfigurationProperties(value={DataRedisProperties.class, CacheManagerProperties.class, RedisProperties.class})
-@Role(value=2)
-public class RedisAutoConfiguration
-implements InitializingBean {
+/**
+ * redis 自动配置类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-07 21:17:02
+ */
+@AutoConfiguration(after = {DataRedisAutoConfiguration.class, RedissonAutoConfigurationV4.class})
+@ConditionalOnProperty(
+        prefix = RedisProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true",
+        matchIfMissing = true)
+@EnableConfigurationProperties({
+        DataRedisProperties.class,
+        CacheManagerProperties.class,
+        RedisProperties.class
+})
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+public class RedisAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(RedisAutoConfiguration.class, (String)"kuma-boot-starter-cache-redis", (String[])new String[0]);
+        LogUtils.started(RedisAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 
+    // @Bean
+    // public RedisSerializer<String> redisKeySerializer() {
+    //	return RedisSerializer.string();
+    // }
+
     @Bean
-    public RedisSerializer<Object> redisSerializer(CacheManagerProperties properties, ObjectProvider<JsonMapper> objectProvider) {
+    public RedisSerializer<Object> redisSerializer(
+            CacheManagerProperties properties, ObjectProvider<JsonMapper> objectProvider) {
         SerializerType serializerType = properties.getSerializerType();
+
         if (SerializerType.JDK == serializerType) {
             ClassLoader classLoader = this.getClass().getClassLoader();
             return new JdkSerializationRedisSerializer(classLoader);
         }
-        return new GenericJacksonJsonRedisSerializer((ObjectMapper)JacksonUtils.MAPPER);
+
+        //// jackson findAndRegisterModules，use copy
+        // JsonMapper jsonMapper = objectProvider.getIfAvailable(JsonMapper::new).copy();
+        // jsonMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        //// findAndRegisterModules
+        // jsonMapper.findAndRegisterModules();
+        //// class type info to json
+        // GenericJackson2JsonRedisSerializer.registerNullValueSerializer(jsonMapper, null);
+        // jsonMapper.activateDefaultTyping(jsonMapper.getPolymorphicTypeValidator(),
+        //	DefaultTyping.NON_FINAL, As.PROPERTY);
+
+        return new GenericJacksonJsonRedisSerializer(JacksonUtils.MAPPER);
     }
 
+//    @Bean
+//	@ConditionalOnSingleCandidate(RedissonConnectionFactory.class)
+//    public RedissonConnectionFactory redissonConnectionFactory(RedissonClient redissonClient) {
+//        return new RedissonConnectionFactory(redissonClient);
+//    }
+
     @Bean
-    public RedisTemplate<String, Object> stringObjectRedisTemplate(RedissonConnectionFactory factory, RedisSerializer<Object> redisSerializer) {
-        RedisTemplate template = new RedisTemplate();
-        template.setConnectionFactory((RedisConnectionFactory)factory);
+    public RedisTemplate<String, Object> stringObjectRedisTemplate(
+            RedissonConnectionFactory factory, RedisSerializer<Object> redisSerializer) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+
+        // Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new
+        // Jackson2JsonRedisSerializer<>(
+        //	Object.class);
+        // jackson2JsonRedisSerializer.setJsonMapper(JsonUtil.MAPPER);
+
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        template.setKeySerializer((RedisSerializer)stringRedisSerializer);
-        template.setHashKeySerializer((RedisSerializer)stringRedisSerializer);
+        // key采用String的序列化方式
+        template.setKeySerializer(stringRedisSerializer);
+        // hash的key也采用String的序列化方式
+        template.setHashKeySerializer(stringRedisSerializer);
+
+        // value序列化方式采用jackson
         template.setValueSerializer(redisSerializer);
+        // hash的value序列化方式采用jackson
         template.setHashValueSerializer(redisSerializer);
         template.afterPropertiesSet();
+
         return template;
     }
 
@@ -95,9 +136,16 @@ implements InitializingBean {
     }
 
     @Bean
-    @ConditionalOnMissingBean(value={ValueOperations.class})
+    @ConditionalOnMissingBean(ValueOperations.class)
     public ValueOperations<String, Object> valueOperations(RedisTemplate<String, Object> stringObjectRedisTemplate) {
         return stringObjectRedisTemplate.opsForValue();
     }
-}
 
+//    @Bean("stringRedisTemplate")
+//	@ConditionalOnMissingBean(StringRedisTemplate.class)
+//    public StringRedisTemplate stringRedisTemplate(RedissonConnectionFactory factory) {
+//        StringRedisTemplate template = new StringRedisTemplate();
+//        template.setConnectionFactory(factory);
+//        return template;
+//    }
+}

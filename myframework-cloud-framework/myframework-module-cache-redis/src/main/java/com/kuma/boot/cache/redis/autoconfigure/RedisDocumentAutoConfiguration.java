@@ -1,16 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.context.annotation.Bean
- *  org.springframework.data.redis.core.mapping.RedisMappingContext
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.redis.autoconfigure;
 
+// import com.redis.om.spring.annotations.EnableRedisDocumentRepositories;
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -18,12 +25,21 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.mapping.RedisMappingContext;
 
-@ConditionalOnClass(value={RedisMappingContext.class})
+/**
+ * redis search 自动配置类
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-03 09:24:57
+ */
+@ConditionalOnClass(RedisMappingContext.class)
+//@EnableRedisDocumentRepositories(basePackages = {"com.kuma.cloud.*.biz.redisSearch","com.kuma.cloud.*.infrastructure.redisSearch.**"})
 @AutoConfiguration
-public class RedisDocumentAutoConfiguration
-implements InitializingBean {
+public class RedisDocumentAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(RedisDocumentAutoConfiguration.class, (String)"kuma-boot-starter-cache-redis", (String[])new String[0]);
+        LogUtils.started(RedisDocumentAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 
     @Bean
@@ -31,4 +47,3 @@ implements InitializingBean {
         return new RedisMappingContext();
     }
 }
-
