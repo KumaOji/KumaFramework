@@ -2,11 +2,10 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework mybatis模块'
+description = 'Myframework data-mybatis模块'
 
 dependencies {
     api project(':myframework-cloud-framework:myframework-module-common')
-    api project(':myframework-cloud-framework:myframework-module-datasource')
     api project(':myframework-cloud-framework:myframework-module-data-datasource')
     api projectLibs.mybatis.plus
     api projectLibs.mybatis.plus.extension

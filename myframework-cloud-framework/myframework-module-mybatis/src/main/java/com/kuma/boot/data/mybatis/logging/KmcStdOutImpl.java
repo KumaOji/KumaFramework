@@ -28,7 +28,7 @@ import org.apache.ibatis.logging.Log;
  * @version 2022.03
  * @since 2021/10/28 10:42
  */
-public class TtcStdOutImpl implements Log {
+public class KmcStdOutImpl implements Log {
 
     private static final Set<String> DML = new HashSet<>();
 
@@ -39,7 +39,7 @@ public class TtcStdOutImpl implements Log {
         DML.add("select");
     }
 
-    public TtcStdOutImpl(String clazz) {
+    public KmcStdOutImpl(String clazz) {
         // Do Nothing
     }
 

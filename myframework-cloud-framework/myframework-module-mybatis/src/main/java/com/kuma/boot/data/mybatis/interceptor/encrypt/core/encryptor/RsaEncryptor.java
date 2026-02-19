@@ -25,7 +25,6 @@ import com.kuma.boot.data.mybatis.interceptor.encrypt.enumd.AlgorithmType;
 import com.kuma.boot.data.mybatis.interceptor.encrypt.enumd.EncodeType;
 import com.kuma.boot.common.utils.lang.StringUtils;
 
-import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
 
 /** RSA算法实现 */
 public class RsaEncryptor extends AbstractEncryptor {

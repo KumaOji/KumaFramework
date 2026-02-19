@@ -14,4 +14,6 @@ dependencies {
     api projectLibs.mysql
     api projectLibs.druid.starter
     api projectLibs.jakarta.servlet.api
+    api projectLibs.transmittable.thread.local
+    api projectLibs.hutool.crypto
 }

@@ -22,7 +22,7 @@ for (name in oneLayerProjects) {
     include "myframework-cloud-${name}"
 }
 
-def frameworkSubModules = ['common', 'core', 'infrastruct', "spring", "mybatis", "datasource", "db", "application"]
+def frameworkSubModules = ['common', 'core', "data-datasource","data-mybatis",'infrastruct', "spring", "mybatis", "datasource",  "application"]
 for (name in frameworkSubModules) {
     include "myframework-cloud-framework:myframework-module-${name}"
 }
@@ -41,4 +41,5 @@ gradle.settingsEvaluated {
 include 'myframework-cloud-project:myframework-project-project2'
 include 'myframework-cloud-project:myframework-project-project3'
 
-include 'myframework-cloud-framework:myframework-module-db'
+
+include 'myframework-cloud-framework:myframework-module-data-mybatis'

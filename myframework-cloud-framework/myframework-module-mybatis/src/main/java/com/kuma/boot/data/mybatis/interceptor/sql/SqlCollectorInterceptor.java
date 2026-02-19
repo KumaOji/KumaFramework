@@ -158,7 +158,7 @@ public class SqlCollectorInterceptor implements Interceptor {
         String sql = boundSql.getSql();
 
         return collector
-                .hook("ttc.monitor.mybatis.sql.hook")
+                .hook("kmc.monitor.mybatis.sql.hook")
                 .run(
                         StringUtils.nullToEmpty(sql).replace("\r", "").replace("\n", ""),
                         () -> {

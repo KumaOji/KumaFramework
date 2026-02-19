@@ -34,7 +34,7 @@ import org.apache.ibatis.type.MappedTypes;
  *        //支付通道信息列表
  *        @see PayChannelInfo
  *
- *        @TableField(typeHandler = TtcStringTypeHandler.class)
+ *        @TableField(typeHandler = KmcStringTypeHandler.class)
  *        @BigField
  *        private List  payChannelInfo;
  *     }
@@ -42,7 +42,7 @@ import org.apache.ibatis.type.MappedTypes;
  */
 @MappedTypes({String.class})
 @MappedJdbcTypes(JdbcType.VARCHAR)
-public class TtcStringTypeHandler extends BaseTypeHandler<String> {
+public class KmcStringTypeHandler extends BaseTypeHandler<String> {
 
     @Override
     public String getResult(ResultSet rs, String columnName) {

@@ -598,7 +598,7 @@ public class FieldEncryptInterceptor implements Interceptor {
     public void setProperties(Properties properties) {
         CONSTANT_CIPHER_TEXT = properties.getProperty("CONSTANT_CIPHER_TEXT");
         if (!StringUtils.hasLength(CONSTANT_CIPHER_TEXT)) {
-            CONSTANT_CIPHER_TEXT = "ttc";
+            CONSTANT_CIPHER_TEXT = "kmc";
             // LOGGER.warn("=================================================================================================================================\n" +
             // 	"=====================================当前拦截器未配置常量密文值
             // key:CONSTANT_CIPHER_TEXT======================================\n" +

@@ -71,7 +71,7 @@ public class AuditLoggingAspect {
                 UserCache userCache = new UserCache();
                 userCache.setUserId(String.valueOf(UserContextHolder.getUserId()));
                 userCache.setUserId(UserContextHolder.getUserName());
-                userCache.setRequestId(TraceUtils.getTtcTraceId());
+                userCache.setRequestId(TraceUtils.getKmcTraceId());
                 DataOperateLogThreadLocal.THREADDATA_USER_CACHE.set(userCache);
 
                 obj = userCache.getRequestId();
