@@ -16,8 +16,7 @@ dependencyResolutionManagement {
     }
 }
 
-//include "myframework-project"
-def oneLayerProjects = ['framework', 'project']
+def oneLayerProjects = ['framework']
 for (name in oneLayerProjects) {
     include "myframework-boot-${name}"
     include "myframework-cloud-${name}"
@@ -38,16 +37,12 @@ def frameworkSubModules = ['bootstrap']
 for (name in frameworkSubModules) {
     include "myframework-cloud-framework:myframework-module-${name}"
 }
-
+include "myframework-project"
 def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'blog']
 for (name in projectBootSubModules) {
-    include "myframework-boot-project:myframework-project-${name}"
+    include "myframework-project:myframework-project-${name}"
 }
 
-//def projectCloudSubModules = ['']
-//for (name in projectCloudSubModules) {
-//    include "myframework-cloud-project:myframework-project-${name}"
-//}
 
 gradle.settingsEvaluated {
     if (JavaVersion.current() < JavaVersion.VERSION_25) {
