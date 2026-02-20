@@ -1,206 +1,201 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.context.properties.ConfigurationProperties
- *  org.springframework.boot.http.client.HttpRedirects
- */
 package com.kuma.boot.web.httpexchange;
+
+import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.http.client.HttpRedirects;
+import org.springframework.boot.http.client.autoconfigure.HttpClientProperties;
+import org.springframework.boot.http.client.autoconfigure.HttpClientSettingsProperties;
+import org.springframework.boot.http.client.autoconfigure.HttpClientsProperties;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@ConfigurationProperties(value="http-exchange")
-public class HttpExchangeProperties
-implements InitializingBean {
+/**
+ * Http Clients Configuration Properties.
+ *
+ * @author Freeman
+ */
+@ConfigurationProperties(HttpExchangeProperties.PREFIX)
+public class HttpExchangeProperties implements InitializingBean {
     public static final String PREFIX = "http-exchange";
+
+    /**
+     * Whether to enable http exchange autoconfiguration, default {@code true}.
+     */
     private boolean enabled = true;
-    private Set<String> basePackages = new LinkedHashSet<String>();
-    private Set<Class<?>> clients = new LinkedHashSet();
-    private @Nullable String baseUrl;
-    private List<Header> headers = new ArrayList<Header>();
-    private List<Channel> channels = new ArrayList<Channel>();
+    /**
+     * Base packages to scan, use {@link com.kuma.boot.web.httpexchange.EnableExchangeClients#basePackages} first if configured.
+     */
+    private Set<String> basePackages = new LinkedHashSet<>();
+    /**
+     * Exchange client interfaces to register as beans, use {@link com.kuma.boot.web.httpexchange.EnableExchangeClients#clients} first if configured.
+     *
+     * @since 3.2.0
+     */
+    private Set<Class<?>> clients = new LinkedHashSet<>();
+    /**
+     * Default base url, 'http' scheme can be omitted.
+     *
+     * <p> If loadbalancer is enabled, this value means the service id.
+     *
+     * <ul>
+     *     <li> localhost:8080 </li>
+     *     <li> http://localhost:8080 </li>
+     *     <li> https://localhost:8080 </li>
+     *     <li> localhost:8080/api </li>
+     *     <li> user(service id) </li>
+     * </ul>
+     */
+    @Nullable
+    private String baseUrl;
+    /**
+     * Default headers will be added to all the requests.
+     */
+    private List<Header> headers = new ArrayList<>();
+    /**
+     * Channels configuration.
+     */
+    private List<Channel> channels = new ArrayList<>();
+    /**
+     * Whether to convert Java bean to query parameters, default value is {@code false}.
+     */
     private boolean beanToQueryEnabled = false;
+    /**
+     * Refresh configuration.
+     */
     private Refresh refresh = new Refresh();
-    private @Nullable ClientType clientType;
+    /**
+     * Client Type, if not specified, an appropriate client type will be set.
+     *
+     * <ul>
+     *     <li> Use {@link ClientType#REST_CLIENT} if none of the methods in the client return Reactive type.
+     *     <li> Use {@link ClientType#WEB_CLIENT} if any method in the client returns Reactive type.
+     * </ul>
+     *
+     * <p> In most cases, you don't need to explicitly specify the client type.
+     *
+     * @see ClientType
+     * @since 3.2.0
+     */
+    @Nullable
+    private ClientType clientType;
+    /**
+     * whether to process {@link RequestMapping} based annotation,
+     * default {@code false}.
+     *
+     * <p color="red"> Recommending to use {@link HttpExchange} instead of {@link RequestMapping}.
+     *
+     * @since 3.2.0
+     */
     private boolean requestMappingSupportEnabled = false;
+    /**
+     * Whether to check unused configuration, default {@code true}.
+     *
+     * @since 3.2.0
+     */
     private boolean warnUnusedConfigEnabled = true;
+    /**
+     * Whether to enable loadbalancer, default {@code true}.
+     *
+     * <p> Prerequisites:
+     * <ul>
+     *     <li> {@code spring-cloud-starter-loadbalancer} dependency in the classpath.</li>
+     *     <li> {@code spring.cloud.loadbalancer.enabled=true}</li>
+     * </ul>
+     *
+     * @since 3.2.0
+     */
     private boolean loadbalancerEnabled = true;
+    /**
+     * Whether to enable http client reuse, default {@code true}.
+     *
+     * <p> Same {@link Channel} configuration will share the same http client if enabled.
+     *
+     * @since 3.2.2
+     */
     private boolean httpClientReuseEnabled = true;
 
-    public void afterPropertiesSet() {
-        this.merge();
+    /**
+     * @param key    Header key.
+     * @param values Header values.
+     */
+    public record Header(String key, List<String> values) {
+        public Header {
+            values = List.copyOf(values);
+        }
     }
 
+    @Override
+    public void afterPropertiesSet() {
+        merge();
+    }
+
+    /**
+     * Merge default configuration to channels configuration.
+     */
     void merge() {
-        for (Channel chan : this.channels) {
-            if (this.baseUrl != null && chan.getBaseUrl() == null) {
-                chan.setBaseUrl(this.baseUrl);
+        for (Channel chan : channels) {
+            if (baseUrl != null && chan.getBaseUrl() == null) {
+                chan.setBaseUrl(baseUrl);
             }
-            if (this.clientType != null && chan.getClientType() == null) {
-                chan.setClientType(this.clientType);
+
+            if (clientType != null && chan.getClientType() == null) {
+                chan.setClientType(clientType);
             }
+
             if (chan.getLoadbalancerEnabled() == null) {
-                chan.setLoadbalancerEnabled(this.loadbalancerEnabled);
+                chan.setLoadbalancerEnabled(loadbalancerEnabled);
             }
+
             if (chan.getHttpClientReuseEnabled() == null) {
-                chan.setHttpClientReuseEnabled(this.httpClientReuseEnabled);
+                chan.setHttpClientReuseEnabled(httpClientReuseEnabled);
             }
-            LinkedHashMap total = this.headers.stream().collect(Collectors.toMap(Header::key, Header::values, (oldV, newV) -> oldV, LinkedHashMap::new));
+
+            // defaultHeaders + chan.headers
+            LinkedHashMap<String, List<String>> total = headers.stream()
+                    .collect(toMap(Header::key, Header::values, (oldV, newV) -> oldV, LinkedHashMap::new));
             for (Header header : chan.getHeaders()) {
                 total.put(header.key(), header.values());
             }
-            List<Header> mergedHeaders = total.entrySet().stream().map(e -> new Header((String)e.getKey(), (List)e.getValue())).toList();
+            List<Header> mergedHeaders = total.entrySet().stream()
+                    .map(e -> new Header(e.getKey(), e.getValue()))
+                    .toList();
             chan.setHeaders(mergedHeaders);
         }
     }
 
-    Channel defaultChannel() {
-        return new Channel(null, this.baseUrl, this.headers, this.clientType, null, null, null, this.loadbalancerEnabled, this.httpClientReuseEnabled, null, List.of(), List.of());
-    }
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Set<String> getBasePackages() {
-        return this.basePackages;
-    }
-
-    public void setBasePackages(Set<String> basePackages) {
-        this.basePackages = basePackages;
-    }
-
-    public Set<Class<?>> getClients() {
-        return this.clients;
-    }
-
-    public void setClients(Set<Class<?>> clients) {
-        this.clients = clients;
-    }
-
-    public @Nullable String getBaseUrl() {
-        return this.baseUrl;
-    }
-
-    public void setBaseUrl(@Nullable String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public List<Header> getHeaders() {
-        return this.headers;
-    }
-
-    public void setHeaders(List<Header> headers) {
-        this.headers = headers;
-    }
-
-    public List<Channel> getChannels() {
-        return this.channels;
-    }
-
-    public void setChannels(List<Channel> channels) {
-        this.channels = channels;
-    }
-
-    public boolean isBeanToQueryEnabled() {
-        return this.beanToQueryEnabled;
-    }
-
-    public void setBeanToQueryEnabled(boolean beanToQueryEnabled) {
-        this.beanToQueryEnabled = beanToQueryEnabled;
-    }
-
-    public Refresh getRefresh() {
-        return this.refresh;
-    }
-
-    public void setRefresh(Refresh refresh) {
-        this.refresh = refresh;
-    }
-
-    public @Nullable ClientType getClientType() {
-        return this.clientType;
-    }
-
-    public void setClientType(@Nullable ClientType clientType) {
-        this.clientType = clientType;
-    }
-
-    public boolean isRequestMappingSupportEnabled() {
-        return this.requestMappingSupportEnabled;
-    }
-
-    public void setRequestMappingSupportEnabled(boolean requestMappingSupportEnabled) {
-        this.requestMappingSupportEnabled = requestMappingSupportEnabled;
-    }
-
-    public boolean isWarnUnusedConfigEnabled() {
-        return this.warnUnusedConfigEnabled;
-    }
-
-    public void setWarnUnusedConfigEnabled(boolean warnUnusedConfigEnabled) {
-        this.warnUnusedConfigEnabled = warnUnusedConfigEnabled;
-    }
-
-    public boolean isLoadbalancerEnabled() {
-        return this.loadbalancerEnabled;
-    }
-
-    public void setLoadbalancerEnabled(boolean loadbalancerEnabled) {
-        this.loadbalancerEnabled = loadbalancerEnabled;
-    }
-
-    public boolean isHttpClientReuseEnabled() {
-        return this.httpClientReuseEnabled;
-    }
-
-    public void setHttpClientReuseEnabled(boolean httpClientReuseEnabled) {
-        this.httpClientReuseEnabled = httpClientReuseEnabled;
-    }
-
-    public static class Refresh {
-        public static final String PREFIX = "http-exchange.refresh";
-        private boolean enabled = false;
-
-        public boolean isEnabled() {
-            return this.enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
+    HttpExchangeProperties.Channel defaultChannel() {
+        return new Channel(
+                null,
+                baseUrl,
+                headers,
+                clientType,
+                null,
+                null,
+                null,
+                loadbalancerEnabled,
+                httpClientReuseEnabled,
+                null,
+                List.of(),
+                List.of());
     }
 
     public static class Channel {
-        private @Nullable String name;
-        private @Nullable String baseUrl;
-        private List<Header> headers = new ArrayList<Header>();
-        private @Nullable ClientType clientType;
-        private @Nullable HttpRedirects redirects;
-        private @Nullable Integer connectTimeout;
-        private @Nullable Integer readTimeout;
-        private @Nullable Boolean loadbalancerEnabled;
-        private @Nullable Boolean httpClientReuseEnabled;
-        private @Nullable Ssl ssl;
-        private List<String> clients = new ArrayList<String>();
-        private List<Class<?>> classes = new ArrayList();
 
-        public Channel(@Nullable String name, @Nullable String baseUrl, List<Header> headers, @Nullable ClientType clientType, @Nullable HttpRedirects redirects, @Nullable Integer connectTimeout, @Nullable Integer readTimeout, @Nullable Boolean loadbalancerEnabled, @Nullable Boolean httpClientReuseEnabled, @Nullable Ssl ssl, List<String> clients, List<Class<?>> classes) {
+        public Channel( @Nullable String name, @Nullable String baseUrl, List<Header> headers,
+                        @Nullable ClientType clientType,
+                        @Nullable HttpRedirects redirects, @Nullable Integer connectTimeout, @Nullable Integer readTimeout,
+                        @Nullable Boolean loadbalancerEnabled, @Nullable Boolean httpClientReuseEnabled, @Nullable Ssl ssl,
+                        List<String> clients, List<Class<?>> classes ) {
             this.name = name;
             this.baseUrl = baseUrl;
             this.headers = headers;
@@ -216,115 +211,346 @@ implements InitializingBean {
         }
 
         public @Nullable String getName() {
-            return this.name;
+            return name;
         }
 
-        public void setName(@Nullable String name) {
+        public void setName( @Nullable String name ) {
             this.name = name;
         }
 
         public @Nullable String getBaseUrl() {
-            return this.baseUrl;
+            return baseUrl;
         }
 
-        public void setBaseUrl(@Nullable String baseUrl) {
+        public void setBaseUrl( @Nullable String baseUrl ) {
             this.baseUrl = baseUrl;
         }
 
         public List<Header> getHeaders() {
-            return this.headers;
+            return headers;
         }
 
-        public void setHeaders(List<Header> headers) {
+        public void setHeaders( List<Header> headers ) {
             this.headers = headers;
         }
 
         public @Nullable ClientType getClientType() {
-            return this.clientType;
+            return clientType;
         }
 
-        public void setClientType(@Nullable ClientType clientType) {
+        public void setClientType( @Nullable ClientType clientType ) {
             this.clientType = clientType;
         }
 
         public @Nullable HttpRedirects getRedirects() {
-            return this.redirects;
+            return redirects;
         }
 
-        public void setRedirects(@Nullable HttpRedirects redirects) {
+        public void setRedirects( @Nullable HttpRedirects redirects ) {
             this.redirects = redirects;
         }
 
         public @Nullable Integer getConnectTimeout() {
-            return this.connectTimeout;
+            return connectTimeout;
         }
 
-        public void setConnectTimeout(@Nullable Integer connectTimeout) {
+        public void setConnectTimeout( @Nullable Integer connectTimeout ) {
             this.connectTimeout = connectTimeout;
         }
 
         public @Nullable Integer getReadTimeout() {
-            return this.readTimeout;
+            return readTimeout;
         }
 
-        public void setReadTimeout(@Nullable Integer readTimeout) {
+        public void setReadTimeout( @Nullable Integer readTimeout ) {
             this.readTimeout = readTimeout;
         }
 
         public @Nullable Boolean getLoadbalancerEnabled() {
-            return this.loadbalancerEnabled;
+            return loadbalancerEnabled;
         }
 
-        public void setLoadbalancerEnabled(@Nullable Boolean loadbalancerEnabled) {
+        public void setLoadbalancerEnabled( @Nullable Boolean loadbalancerEnabled ) {
             this.loadbalancerEnabled = loadbalancerEnabled;
         }
 
         public @Nullable Boolean getHttpClientReuseEnabled() {
-            return this.httpClientReuseEnabled;
+            return httpClientReuseEnabled;
         }
 
-        public void setHttpClientReuseEnabled(@Nullable Boolean httpClientReuseEnabled) {
+        public void setHttpClientReuseEnabled( @Nullable Boolean httpClientReuseEnabled ) {
             this.httpClientReuseEnabled = httpClientReuseEnabled;
         }
 
         public @Nullable Ssl getSsl() {
-            return this.ssl;
+            return ssl;
         }
 
-        public void setSsl(@Nullable Ssl ssl) {
+        public void setSsl( @Nullable Ssl ssl ) {
             this.ssl = ssl;
         }
 
         public List<String> getClients() {
-            return this.clients;
+            return clients;
         }
 
-        public void setClients(List<String> clients) {
+        public void setClients( List<String> clients ) {
             this.clients = clients;
         }
 
         public List<Class<?>> getClasses() {
-            return this.classes;
+            return classes;
         }
 
-        public void setClasses(List<Class<?>> classes) {
+        public void setClasses( List<Class<?>> classes ) {
             this.classes = classes;
         }
+
+        /**
+         * Optional channel name.
+         */
+        @Nullable
+        private String name;
+        /**
+         * Base url, use {@link HttpExchangeProperties#baseUrl} if not set.
+         */
+        @Nullable
+        private String baseUrl;
+        /**
+         * Default headers will be merged with {@link HttpExchangeProperties#headers}.
+         */
+        private List<Header> headers = new ArrayList<>();
+        /**
+         * Client type, use {@link HttpExchangeProperties#clientType} if not set.
+         *
+         * @see ClientType
+         */
+        @Nullable
+        private ClientType clientType;
+        /**
+         * Redirects configuration.
+         *
+         * <p> If not set, {@code spring.http.clients.redirects} will be used.
+         *
+         * @see HttpClientsProperties#getRedirects()
+         * @since 3.5.0
+         */
+        @Nullable
+        private HttpRedirects redirects;
+        /**
+         * Connection timeout duration, specified in milliseconds.
+         *
+         * <p> If not set, {@code spring.http.clients.connect-timeout} will be used.
+         *
+         * @see HttpClientsProperties#getConnectTimeout()
+         * @since 3.2.0
+         */
+        @Nullable
+        private Integer connectTimeout;
+        /**
+         * Read timeout duration, specified in milliseconds.
+         *
+         * <p> If not set, {@code spring.http.clients.read-timeout} will be used.
+         *
+         * @see HttpClientsProperties#getReadTimeout()
+         * @since 3.2.0
+         */
+        @Nullable
+        private Integer readTimeout;
+        /**
+         * Whether to enable loadbalancer, use {@link HttpExchangeProperties#loadbalancerEnabled} if not set.
+         *
+         * @see HttpExchangeProperties#loadbalancerEnabled
+         * @since 3.2.0
+         */
+        @Nullable
+        private Boolean loadbalancerEnabled;
+        /**
+         * Whether to enable http client reuse, use {@link HttpExchangeProperties#httpClientReuseEnabled} if not set.
+         *
+         * @see HttpExchangeProperties#httpClientReuseEnabled
+         * @since 3.2.2
+         */
+        @Nullable
+        private Boolean httpClientReuseEnabled;
+        /**
+         * SSL configuration.
+         *
+         * <p> If not set, {@code spring.http.clients.ssl} will be used.
+         * @since 3.4.1
+         * @see HttpClientProperties#getSsl()
+         */
+        @Nullable
+        private Ssl ssl;
+        /**
+         * Exchange Clients to apply this channel.
+         *
+         * <p> e.g. client {@code com.example.client.ExampleClient} can be identified by
+         * <ul>
+         *     <li> {@code ExampleClient}, {@code exampleClient}, {@code example-client} (Class simple name)
+         *     <li> {@code com.example.client.ExampleClient} (Class canonical name)
+         *     <li> {@code com.**.*Client}, {@code com.example.**} (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>)
+         * </ul>
+         *
+         * <p> This is a more flexible alternative to {@link HttpExchangeProperties.Channel#classes}.
+         *
+         * @see Class#getCanonicalName()
+         * @see org.springframework.util.AntPathMatcher
+         */
+        private List<String> clients = new ArrayList<>();
+        /**
+         * Exchange Client classes to apply this channel.
+         *
+         * <p> This is a more IDE-friendly alternative to {@link HttpExchangeProperties.Channel#clients}.
+         */
+        private List<Class<?>> classes = new ArrayList<>();
     }
 
-    public static enum ClientType {
-        REST_CLIENT,
-        WEB_CLIENT;
+    public static class Refresh {
 
-    }
-
-    public record Header(String key, List<String> values) {
-        public Header {
-            values = List.copyOf(values);
+        public boolean isEnabled() {
+            return enabled;
         }
+
+        public void setEnabled( boolean enabled ) {
+            this.enabled = enabled;
+        }
+
+        public static final String PREFIX = HttpExchangeProperties.PREFIX + ".refresh";
+        /**
+         * Whether to enable refresh exchange clients, default {@code false}.
+         *
+         * <p> This feature needs {@code spring-cloud-context} dependency in the classpath.
+         *
+         * <p color="orange"> NOTE: This feature is not supported by native image.
+         *
+         * @see <a href="https://github.com/spring-cloud/spring-cloud-release/wiki/AOT-transformations-and-native-image-support#refresh-scope">Refresh Scope</a>
+         */
+        private boolean enabled = false;
     }
 
-    public record Ssl(String bundle) {
+    /**
+     * @param bundle SSL bundle to use.
+     *
+     * <p> Bundle name is configured under {@code spring.ssl} properties.
+     * <p> See configuration properties under {@code spring.ssl}.
+     *
+     * @see HttpClientSettingsProperties.Ssl
+     */
+    public record Ssl(String bundle) {}
+
+    public enum ClientType {
+        /**
+         * @see RestClient
+         */
+        REST_CLIENT,
+        /**
+         * @see WebClient
+         */
+        WEB_CLIENT,
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled( boolean enabled ) {
+        this.enabled = enabled;
+    }
+
+    public Set<String> getBasePackages() {
+        return basePackages;
+    }
+
+    public void setBasePackages( Set<String> basePackages ) {
+        this.basePackages = basePackages;
+    }
+
+    public Set<Class<?>> getClients() {
+        return clients;
+    }
+
+    public void setClients( Set<Class<?>> clients ) {
+        this.clients = clients;
+    }
+
+    public @Nullable String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl( @Nullable String baseUrl ) {
+        this.baseUrl = baseUrl;
+    }
+
+    public List<Header> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders( List<Header> headers ) {
+        this.headers = headers;
+    }
+
+    public List<Channel> getChannels() {
+        return channels;
+    }
+
+    public void setChannels( List<Channel> channels ) {
+        this.channels = channels;
+    }
+
+    public boolean isBeanToQueryEnabled() {
+        return beanToQueryEnabled;
+    }
+
+    public void setBeanToQueryEnabled( boolean beanToQueryEnabled ) {
+        this.beanToQueryEnabled = beanToQueryEnabled;
+    }
+
+    public Refresh getRefresh() {
+        return refresh;
+    }
+
+    public void setRefresh( Refresh refresh ) {
+        this.refresh = refresh;
+    }
+
+    public @Nullable ClientType getClientType() {
+        return clientType;
+    }
+
+    public void setClientType( @Nullable ClientType clientType ) {
+        this.clientType = clientType;
+    }
+
+    public boolean isRequestMappingSupportEnabled() {
+        return requestMappingSupportEnabled;
+    }
+
+    public void setRequestMappingSupportEnabled( boolean requestMappingSupportEnabled ) {
+        this.requestMappingSupportEnabled = requestMappingSupportEnabled;
+    }
+
+    public boolean isWarnUnusedConfigEnabled() {
+        return warnUnusedConfigEnabled;
+    }
+
+    public void setWarnUnusedConfigEnabled( boolean warnUnusedConfigEnabled ) {
+        this.warnUnusedConfigEnabled = warnUnusedConfigEnabled;
+    }
+
+    public boolean isLoadbalancerEnabled() {
+        return loadbalancerEnabled;
+    }
+
+    public void setLoadbalancerEnabled( boolean loadbalancerEnabled ) {
+        this.loadbalancerEnabled = loadbalancerEnabled;
+    }
+
+    public boolean isHttpClientReuseEnabled() {
+        return httpClientReuseEnabled;
+    }
+
+    public void setHttpClientReuseEnabled( boolean httpClientReuseEnabled ) {
+        this.httpClientReuseEnabled = httpClientReuseEnabled;
     }
 }
-

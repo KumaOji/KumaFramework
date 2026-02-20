@@ -1,14 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.date.DateUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.laytpl.model;
 
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.web.laytpl.exception.LayTplException;
 import com.kuma.boot.web.laytpl.properties.LayTplProperties;
+
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,45 +28,61 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 
+/**
+ * 内置函数
+ *
+ * <p>提供给 tpl 和 Thymeleaf 使用
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:01:42
+ */
 public class FmtFunc {
+
     private final LayTplProperties properties;
 
-    public FmtFunc(LayTplProperties properties) {
+    public FmtFunc( LayTplProperties properties) {
         this.properties = properties;
     }
 
+    /**
+     * 对象格式化
+     *
+     * @param object 格式化对象
+     * @return 格式化后的字符串
+     */
     public String format(Object object) {
         if (object instanceof Number) {
-            return this.format(object, this.properties.getNumPattern());
+            return format(object, properties.getNumPattern());
+        } else if (object instanceof Date) {
+            return format(object, properties.getDatePattern());
+        } else if (object instanceof LocalTime) {
+            return format(object, properties.getLocalTimePattern());
+        } else if (object instanceof LocalDate) {
+            return format(object, properties.getLocalDatePattern());
+        } else if (object instanceof LocalDateTime) {
+            return format(object, properties.getLocalDateTimePattern());
         }
-        if (object instanceof Date) {
-            return this.format(object, this.properties.getDatePattern());
-        }
-        if (object instanceof LocalTime) {
-            return this.format(object, this.properties.getLocalTimePattern());
-        }
-        if (object instanceof LocalDate) {
-            return this.format(object, this.properties.getLocalDatePattern());
-        }
-        if (object instanceof LocalDateTime) {
-            return this.format(object, this.properties.getLocalDateTimePattern());
-        }
-        throw new LayTplException("\u672a\u652f\u6301\u7684\u5bf9\u8c61\u683c\u5f0f" + String.valueOf(object));
+        throw new LayTplException("未支持的对象格式" + object);
     }
 
+    /**
+     * 对象格式化
+     *
+     * @param object 格式化对象
+     * @param pattern 表达式
+     * @return 格式化后的字符串
+     */
     public String format(Object object, String pattern) {
         if (object instanceof Number) {
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
             return decimalFormat.format(object);
-        }
-        if (object instanceof Date) {
-            return DateUtils.format((Date)((Date)object), (String)pattern);
-        }
-        if (object instanceof TemporalAccessor) {
+        } else if (object instanceof Date) {
+            return DateUtils.format((Date) object, pattern);
+        } else if (object instanceof TemporalAccessor) {
             DateTimeFormatter df = DateTimeFormatter.ofPattern(pattern);
-            return df.format((TemporalAccessor)object);
+            return df.format((TemporalAccessor) object);
         }
-        throw new LayTplException("\u672a\u652f\u6301\u7684\u5bf9\u8c61\u683c\u5f0f" + String.valueOf(object));
+        throw new LayTplException("未支持的对象格式" + object);
     }
 }
-

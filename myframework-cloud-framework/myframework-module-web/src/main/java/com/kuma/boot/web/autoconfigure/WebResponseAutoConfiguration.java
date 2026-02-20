@@ -1,26 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.model.result.Result
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.common.utils.servlet.ResponseUtils
- *  jakarta.servlet.Servlet
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication$Type
- *  org.springframework.core.MethodParameter
- *  org.springframework.http.MediaType
- *  org.springframework.http.server.ServerHttpRequest
- *  org.springframework.http.server.ServerHttpResponse
- *  org.springframework.web.bind.annotation.RestControllerAdvice
- *  org.springframework.web.servlet.DispatcherServlet
- *  org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.autoconfigure;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.servlet.ResponseUtils;
@@ -39,33 +35,57 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+/**
+ * 全局统一返回值包装器 自动配置
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 21:28:49
+ */
 @AutoConfiguration
-@ConditionalOnClass(value={Servlet.class, DispatcherServlet.class})
-@ConditionalOnWebApplication(type=ConditionalOnWebApplication.Type.SERVLET)
-@RestControllerAdvice(annotations={BusinessApi.class})
-public class WebResponseAutoConfiguration
-implements ResponseBodyAdvice<Object>,
-InitializingBean {
+@ConditionalOnClass({Servlet.class, DispatcherServlet.class})
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+// @RestControllerAdvice(basePackages = {"com.kuma.cloud.*.biz.api.controller"})
+@RestControllerAdvice(annotations = BusinessApi.class)
+public class WebResponseAutoConfiguration implements ResponseBodyAdvice<Object>, InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(WebResponseAutoConfiguration.class, (String)"kuma-boot-starter-web", (String[])new String[0]);
+        LogUtils.started(WebResponseAutoConfiguration.class, StarterNameConstants.WEB_STARTER);
     }
 
+    @Override
     public boolean supports(MethodParameter methodParameter, Class aClass) {
-        if (methodParameter.getDeclaringClass().isAnnotationPresent(IgnoreResponseBodyAdvice.class)) {
+        // 类上如果被 IgnoreResponseBodyAdvice 标识就不拦截
+        if (methodParameter
+                .getDeclaringClass()
+                .isAnnotationPresent(IgnoreResponseBodyAdvice.class)) {
             return false;
         }
+
+        // 方法上被标注也不拦截
         return !methodParameter.getMethod().isAnnotationPresent(IgnoreResponseBodyAdvice.class);
     }
 
-    public Object beforeBodyWrite(Object o, MethodParameter methodParameter, MediaType mediaType, Class aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
-        ResponseUtils.addResponseHeader((ServerHttpResponse)serverHttpResponse);
+    @Override
+    public Object beforeBodyWrite(
+            Object o,
+            MethodParameter methodParameter,
+            MediaType mediaType,
+            Class aClass,
+            ServerHttpRequest serverHttpRequest,
+            ServerHttpResponse serverHttpResponse) {
+
+        ResponseUtils.addResponseHeader(serverHttpResponse);
+
         if (o == null) {
             return null;
         }
+
         if (o instanceof Result) {
             return o;
         }
-        return Result.success((Object)o);
+
+        return Result.success(o);
     }
 }
-

@@ -1,28 +1,59 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- *  org.springframework.cloud.context.config.annotation.RefreshScope
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
+/**
+ * FilterProperties
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-03 08:04:30
+ */
 @RefreshScope
-@ConfigurationProperties(prefix="kuma.boot.web.filter")
+@ConfigurationProperties(prefix = WebMvcFilterProperties.PREFIX)
 public class WebMvcFilterProperties {
+
     public static final String PREFIX = "kuma.boot.web.filter";
+
+    /** 开启负载均衡隔离规则 */
     private Boolean version = true;
+
+    /** 开启租户过滤器 */
     private Boolean tenant = true;
+
+    /** 开启日志链路追踪过滤器 */
     private Boolean trace = true;
+
+    /** 开启日志链路追踪过滤器 */
     private Boolean webContext = true;
+
+    /** 开启监控报表 */
     private Boolean report = true;
+
+    /** 开启ping */
     private Boolean ping = true;
 
+    public WebMvcFilterProperties() {}
+
     public Boolean getVersion() {
-        return this.version;
+        return version;
     }
 
     public void setVersion(Boolean version) {
@@ -30,7 +61,7 @@ public class WebMvcFilterProperties {
     }
 
     public Boolean getTenant() {
-        return this.tenant;
+        return tenant;
     }
 
     public void setTenant(Boolean tenant) {
@@ -38,7 +69,7 @@ public class WebMvcFilterProperties {
     }
 
     public Boolean getTrace() {
-        return this.trace;
+        return trace;
     }
 
     public void setTrace(Boolean trace) {
@@ -46,7 +77,7 @@ public class WebMvcFilterProperties {
     }
 
     public Boolean getWebContext() {
-        return this.webContext;
+        return webContext;
     }
 
     public void setWebContext(Boolean webContext) {
@@ -54,7 +85,7 @@ public class WebMvcFilterProperties {
     }
 
     public Boolean getReport() {
-        return this.report;
+        return report;
     }
 
     public void setReport(Boolean report) {
@@ -62,11 +93,10 @@ public class WebMvcFilterProperties {
     }
 
     public Boolean getPing() {
-        return this.ping;
+        return ping;
     }
 
     public void setPing(Boolean ping) {
         this.ping = ping;
     }
 }
-

@@ -1,16 +1,33 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.laytpl.js;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 映射 js 中的 console
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:01:42
+ */
 public class JsConsole {
+
     private static Logger log = LoggerFactory.getLogger(JsConsole.class);
 
     public void debug() {
@@ -21,7 +38,7 @@ public class JsConsole {
         log.debug(message);
     }
 
-    public void debug(String message, Object ... args) {
+    public void debug(String message, Object... args) {
         log.debug(message, args);
     }
 
@@ -33,7 +50,7 @@ public class JsConsole {
         log.info(message);
     }
 
-    public void log(String message, Object ... args) {
+    public void log(String message, Object... args) {
         log.info(message, args);
     }
 
@@ -45,7 +62,7 @@ public class JsConsole {
         log.info(message);
     }
 
-    public void info(String message, Object ... args) {
+    public void info(String message, Object... args) {
         log.info(message, args);
     }
 
@@ -57,7 +74,7 @@ public class JsConsole {
         log.warn(message);
     }
 
-    public void warn(String message, Object ... args) {
+    public void warn(String message, Object... args) {
         log.warn(message, args);
     }
 
@@ -69,7 +86,7 @@ public class JsConsole {
         log.trace(message);
     }
 
-    public void trace(String message, Object ... args) {
+    public void trace(String message, Object... args) {
         log.trace(message, args);
     }
 
@@ -81,8 +98,7 @@ public class JsConsole {
         log.error(message);
     }
 
-    public void error(String message, Object ... args) {
+    public void error(String message, Object... args) {
         log.error(message, args);
     }
 }
-

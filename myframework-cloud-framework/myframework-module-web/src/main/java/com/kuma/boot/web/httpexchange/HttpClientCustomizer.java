@@ -1,24 +1,25 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.web.client.RestClient$Builder
- *  org.springframework.web.reactive.function.client.WebClient$Builder
- */
 package com.kuma.boot.web.httpexchange;
 
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
+/**
+ * {@link HttpClientCustomizer} customizes the configuration of the http client based on the given {@link HttpExchangeProperties.Channel}.
+ *
+ * @author Freeman
+ * @since 3.2.4
+ */
 public sealed interface HttpClientCustomizer<T> {
-    public void customize(T var1, HttpExchangeProperties.Channel var2);
 
-    public static interface WebClientCustomizer
-    extends HttpClientCustomizer<WebClient.Builder> {
-    }
+    /**
+     * Customize the client builder with the given config.
+     *
+     * @param client  the http client to customize
+     * @param channel the current channel config to use
+     */
+    void customize(T client, HttpExchangeProperties.Channel channel);
 
-    public static interface RestClientCustomizer
-    extends HttpClientCustomizer<RestClient.Builder> {
-    }
+    non-sealed interface RestClientCustomizer extends HttpClientCustomizer<RestClient.Builder> {}
+
+    non-sealed interface WebClientCustomizer extends HttpClientCustomizer<WebClient.Builder> {}
 }
-

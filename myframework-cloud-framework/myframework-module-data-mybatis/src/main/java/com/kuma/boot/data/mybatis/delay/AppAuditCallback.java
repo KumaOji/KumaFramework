@@ -21,7 +21,7 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import cn.hutool.core.util.StrUtil;
 
 /** 超时处理 */
-@com.kuma.boot.data.mybatis.delay.Callback("AppAuditCallback")
+@Callback("AppAuditCallback")
 public class AppAuditCallback implements com.kuma.boot.data.mybatis.delay.TimeoutCallback {
 
     /** 超时消息 */

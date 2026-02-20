@@ -1,38 +1,59 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  org.jspecify.annotations.NonNull
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.caffeine.model;
 
 import cn.hutool.core.util.StrUtil;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.util.Objects;
-import org.jspecify.annotations.NonNull;
 
-public class CacheHashKey
-extends CacheKey {
-    private @NonNull Object field;
+import static com.kuma.boot.common.constant.StrPoolConstants.COLON;
 
-    public CacheHashKey(@NonNull String key, @NonNull Object field) {
+/**
+ * CacheHashKey
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-07 21:15:35
+ */
+public class CacheHashKey extends CacheKey {
+
+    /** redis hash field */
+    @NonNull
+    private Object field;
+
+    public CacheHashKey(@NonNull String key, final @NonNull Object field) {
         super(key);
         this.field = field;
     }
 
-    public CacheHashKey(@NonNull String key, @NonNull Object field, Duration expire) {
+    public CacheHashKey(@NonNull String key, final @NonNull Object field, Duration expire) {
         super(key, expire);
         this.field = field;
     }
 
     public CacheKey tran() {
-        return new CacheKey(StrUtil.join((CharSequence)":", (Object[])new Object[]{this.getKey(), this.getField()}), this.getExpire());
+        return new CacheKey(StrUtil.join(COLON, getKey(), getField()), getExpire());
     }
 
-    public @NonNull Object getField() {
-        return this.field;
+    @NonNull
+    public Object getField() {
+        return field;
     }
 
     public void setField(@NonNull Object field) {
@@ -41,7 +62,7 @@ extends CacheKey {
 
     @Override
     public String toString() {
-        return "CacheHashKey{field=" + String.valueOf(this.field) + "} " + super.toString();
+        return "CacheHashKey{" + "field=" + field + "} " + super.toString();
     }
 
     @Override
@@ -49,19 +70,18 @@ extends CacheKey {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        CacheHashKey that = (CacheHashKey)o;
-        return this.field.equals(that.field);
+        CacheHashKey that = (CacheHashKey) o;
+        return field.equals(that.field);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), this.field);
+        return Objects.hash(super.hashCode(), field);
     }
 }
-

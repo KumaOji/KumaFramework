@@ -1,27 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.collection.CollUtil
- *  cn.hutool.core.lang.Assert
- *  cn.hutool.core.text.CharSequenceUtil
- *  cn.hutool.core.util.ReflectUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.context.MessageSource
- *  org.springframework.context.NoSuchMessageException
- *  org.springframework.context.i18n.LocaleContextHolder
- *  org.springframework.core.MethodParameter
- *  org.springframework.core.annotation.AnnotationUtils
- *  org.springframework.expression.Expression
- *  org.springframework.expression.ExpressionParser
- *  org.springframework.expression.spel.standard.SpelExpressionParser
- *  org.springframework.http.MediaType
- *  org.springframework.http.converter.HttpMessageConverter
- *  org.springframework.http.server.ServerHttpRequest
- *  org.springframework.http.server.ServerHttpResponse
- *  org.springframework.web.bind.annotation.RestControllerAdvice
- *  org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.i18n;
 
 import cn.hutool.core.collection.CollUtil;
@@ -29,13 +21,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ReflectUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
-
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -51,121 +36,218 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-@RestControllerAdvice
-public class I18nResponseAdvice
-implements ResponseBodyAdvice<Object> {
-    private final MessageSource messageSource;
-    private final boolean useCodeAsDefaultMessage;
-    private Locale fallbackLocale = null;
-    private static final ExpressionParser PARSER = new SpelExpressionParser();
-    private static final Map<String, Expression> EXPRESSION_CACHE = new HashMap<String, Expression>();
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-    public I18nResponseAdvice(MessageSource messageSource, I18nOptions i18nOptions) {
+/**
+ * 利用 ResponseBodyAdvice 对返回结果进行国际化处理
+ *
+ */
+@RestControllerAdvice
+public class I18nResponseAdvice implements ResponseBodyAdvice<Object> {
+
+    private final MessageSource messageSource;
+
+    private final boolean useCodeAsDefaultMessage;
+
+    private Locale fallbackLocale = null;
+
+    /**
+     * SpEL 解析器
+     */
+    private static final ExpressionParser PARSER = new SpelExpressionParser();
+
+    /**
+     * 表达式缓存
+     */
+    private static final Map<String, Expression> EXPRESSION_CACHE = new HashMap<>();
+
+    public I18nResponseAdvice(MessageSource messageSource, com.kuma.boot.web.i18n.I18nOptions i18nOptions) {
         this.messageSource = messageSource;
+
         String fallbackLanguageTag = i18nOptions.getFallbackLanguageTag();
         if (fallbackLanguageTag != null) {
             String[] arr = fallbackLanguageTag.split("-");
-            Assert.isTrue((arr.length == 2 ? 1 : 0) != 0, (String)"error fallbackLanguageTag!", (Object[])new Object[0]);
-            this.fallbackLocale = Locale.of(arr[0], arr[1]);
+            Assert.isTrue(arr.length == 2, "error fallbackLanguageTag!");
+            fallbackLocale = Locale.of(arr[0], arr[1]);
         }
+
         this.useCodeAsDefaultMessage = i18nOptions.isUseCodeAsDefaultMessage();
     }
 
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    /**
+     * 对于使用了 @I18nIgnore 之外的所有接口进行增强处理
+     * @param returnType MethodParameter
+     * @param converterType 消息转换器
+     * @return boolean: true is support, false is ignored
+     */
+    @Override
+    public boolean supports(
+            MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         AnnotatedElement annotatedElement = returnType.getAnnotatedElement();
-        I18nIgnore i18nIgnore = (I18nIgnore)AnnotationUtils.findAnnotation((AnnotatedElement)annotatedElement, I18nIgnore.class);
+        com.kuma.boot.web.i18n.I18nIgnore i18nIgnore = AnnotationUtils.findAnnotation(annotatedElement, com.kuma.boot.web.i18n.I18nIgnore.class);
         return i18nIgnore == null;
     }
 
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    @Override
+    public Object beforeBodyWrite(
+            Object body,
+            MethodParameter returnType,
+            MediaType selectedContentType,
+            Class<? extends HttpMessageConverter<?>> selectedConverterType,
+            ServerHttpRequest request,
+            ServerHttpResponse response) {
+
         try {
-            this.switchLanguage(body);
+            switchLanguage(body);
+        } catch (Exception ex) {
+            LogUtils.error("[国际化]响应体国际化处理异常：{}", body);
         }
-        catch (Exception ex) {
-            LogUtils.error((String)"[\u56fd\u9645\u5316]\u54cd\u5e94\u4f53\u56fd\u9645\u5316\u5904\u7406\u5f02\u5e38\uff1a{}", (Object[])new Object[]{body});
-        }
+
         return body;
     }
 
+    /**
+     * <p>
+     * 对提供了 {@link com.kuma.boot.web.i18n.I18nClass} 注解的类进行国际化处理，递归检查所有属性。
+     * </p>
+     * ps: 仅处理 String 类型，且注解了 {@link com.kuma.boot.web.i18n.I18nField} 的属性
+     * @param source 当前待处理的对象
+     */
     public void switchLanguage(Object source) {
         if (source == null) {
             return;
         }
         Class<?> sourceClass = source.getClass();
-        I18nClass i18nClass = sourceClass.getAnnotation(I18nClass.class);
+        // 只对添加了 I18nClass 注解的类进行处理
+        com.kuma.boot.web.i18n.I18nClass i18nClass = sourceClass.getAnnotation(com.kuma.boot.web.i18n.I18nClass.class);
         if (i18nClass == null) {
             return;
         }
+
         for (Field field : ReflectUtil.getFields(sourceClass)) {
-            Object[] elements;
             Class<?> fieldType = field.getType();
-            Object fieldValue = ReflectUtil.getFieldValue((Object)source, (Field)field);
+            Object fieldValue = ReflectUtil.getFieldValue(source, field);
+
             if (fieldValue instanceof String) {
-                String string;
-                I18nField i18nField = field.getAnnotation(I18nField.class);
-                if (i18nField == null) continue;
+                // 若不存在国际化注解 直接跳过
+                com.kuma.boot.web.i18n.I18nField i18nField = field.getAnnotation(com.kuma.boot.web.i18n.I18nField.class);
+                if (i18nField == null) {
+                    continue;
+                }
+
+                // 国际化条件判断
                 String conditionExpression = i18nField.condition();
-                if (CharSequenceUtil.isNotEmpty((CharSequence)conditionExpression)) {
-                    Expression expression = EXPRESSION_CACHE.computeIfAbsent(conditionExpression, arg_0 -> ((ExpressionParser)PARSER).parseExpression(arg_0));
-                    Boolean needI18n = (Boolean)expression.getValue(source, Boolean.class);
-                    if (needI18n != null && !needI18n.booleanValue()) continue;
+                if (CharSequenceUtil.isNotEmpty(conditionExpression)) {
+                    Expression expression =
+                            EXPRESSION_CACHE.computeIfAbsent(
+                                    conditionExpression, PARSER::parseExpression);
+                    Boolean needI18n = expression.getValue(source, Boolean.class);
+                    if (needI18n != null && !needI18n) {
+                        continue;
+                    }
                 }
-                if (CharSequenceUtil.isEmpty((CharSequence)(string = this.parseMessageCode(source, (String)fieldValue, i18nField)))) continue;
+
+                // 获取国际化标识
+                String code = parseMessageCode(source, (String) fieldValue, i18nField);
+                if (CharSequenceUtil.isEmpty(code)) {
+                    continue;
+                }
+
+                // 把当前 field 的值更新为国际化后的属性
                 Locale locale = LocaleContextHolder.getLocale();
-                String message = this.codeToMessage(string, locale, (String)fieldValue, this.fallbackLocale);
-                ReflectUtil.setFieldValue((Object)source, (Field)field, (Object)message);
-                continue;
-            }
-            if (fieldValue instanceof Collection) {
-                elements = (Object[])fieldValue;
-                if (CollUtil.isEmpty((Collection)elements)) continue;
-                for (Object e : elements) {
-                    this.switchLanguage(e);
+                String message = codeToMessage(code, locale, (String) fieldValue, fallbackLocale);
+                ReflectUtil.setFieldValue(source, field, message);
+            } else if (fieldValue instanceof Collection) {
+                @SuppressWarnings("unchecked")
+                Collection<Object> elements = (Collection<Object>) fieldValue;
+                if (CollUtil.isEmpty(elements)) {
+                    continue;
                 }
-                continue;
-            }
-            if (fieldType.isArray()) {
-                elements = (Object[])fieldValue;
-                if (elements == null || elements.length == 0) continue;
+                // 集合属性 递归处理
                 for (Object element : elements) {
-                    this.switchLanguage(element);
+                    switchLanguage(element);
                 }
-                continue;
+            } else if (fieldType.isArray()) {
+                Object[] elements = (Object[]) fieldValue;
+                if (elements == null || elements.length == 0) {
+                    continue;
+                }
+                // 数组 递归处理
+                for (Object element : elements) {
+                    switchLanguage(element);
+                }
+            } else {
+                // 其他类型的属性，递归判断处理
+                switchLanguage(fieldValue);
             }
-            this.switchLanguage(fieldValue);
         }
     }
 
-    private String parseMessageCode(Object source, String fieldValue, I18nField i18nField) {
+    /**
+     * 解析获取国际化code
+     * <ul>
+     * <li>如果 @I18nField 注解中未指定 code 的 SpEL 表达式， 则使用当前属性值作为 code。
+     * <li>否则使用该表达式解析出来的 code 值。
+     * </ul>
+     * @param source 源对象
+     * @param fieldValue 属性值
+     * @param i18nField 国际化注解
+     * @return String 国际化 code
+     */
+    private String parseMessageCode(Object source, String fieldValue, com.kuma.boot.web.i18n.I18nField i18nField) {
+        // 如果没有指定 spel，则直接返回属性值
         String codeExpression = i18nField.code();
-        if (CharSequenceUtil.isEmpty((CharSequence)codeExpression)) {
+        if (CharSequenceUtil.isEmpty(codeExpression)) {
             return fieldValue;
         }
-        Expression expression = EXPRESSION_CACHE.computeIfAbsent(codeExpression, arg_0 -> ((ExpressionParser)PARSER).parseExpression(arg_0));
-        return (String)expression.getValue(source, String.class);
+
+        // 否则解析 spel
+        Expression expression =
+                EXPRESSION_CACHE.computeIfAbsent(codeExpression, PARSER::parseExpression);
+        return expression.getValue(source, String.class);
     }
 
-    private String codeToMessage(String code, Locale locale, String defaultMessage, Locale fallbackLocale) {
+    /**
+     * 转换 code 为对应的国家的语言文本
+     * @param code 国际化唯一标识
+     * @param locale 当前地区
+     * @param fallbackLocale 回退语言
+     * @return 国际化 text，或者 code 本身
+     */
+    private String codeToMessage(
+            String code, Locale locale, String defaultMessage, Locale fallbackLocale) {
+        String message;
+
         try {
-            String message = this.messageSource.getMessage(code, null, locale);
+            message = messageSource.getMessage(code, null, locale);
             return message;
+        } catch (NoSuchMessageException e) {
+            LogUtils.warn("[codeToMessage]未找到对应的国际化配置，code: {}, local: {}", code, locale);
         }
-        catch (NoSuchMessageException e) {
-            LogUtils.warn((String)"[codeToMessage]\u672a\u627e\u5230\u5bf9\u5e94\u7684\u56fd\u9645\u5316\u914d\u7f6e\uff0ccode: {}, local: {}", (Object[])new Object[]{code, locale});
-            if (fallbackLocale != null && locale != fallbackLocale) {
-                try {
-                    String message = this.messageSource.getMessage(code, null, fallbackLocale);
-                    return message;
-                }
-                catch (NoSuchMessageException e2) {
-                    LogUtils.warn((String)"[codeToMessage]\u671f\u671b\u8bed\u8a00\u548c\u56de\u9000\u8bed\u8a00\u4e2d\u7686\u672a\u627e\u5230\u5bf9\u5e94\u7684\u56fd\u9645\u5316\u914d\u7f6e\uff0ccode: {}, local: {}, fallbackLocale\uff1a{}", (Object[])new Object[]{code, locale, fallbackLocale});
-                }
+
+        // 当配置了回退语言时，尝试回退
+        if (fallbackLocale != null && locale != fallbackLocale) {
+            try {
+                message = messageSource.getMessage(code, null, fallbackLocale);
+                return message;
+            } catch (NoSuchMessageException e) {
+                LogUtils.warn(
+                        "[codeToMessage]期望语言和回退语言中皆未找到对应的国际化配置，code: {}, local: {}, fallbackLocale：{}",
+                        code,
+                        locale,
+                        fallbackLocale);
             }
-            if (this.useCodeAsDefaultMessage) {
-                return code;
-            }
+        }
+
+        if (useCodeAsDefaultMessage) {
+            return code;
+        } else {
             return defaultMessage;
         }
     }
 }
-

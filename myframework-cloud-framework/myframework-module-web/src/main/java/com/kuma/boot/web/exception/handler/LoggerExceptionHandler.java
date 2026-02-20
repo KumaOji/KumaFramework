@@ -1,15 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.servlet.http.HttpServletRequest
- *  org.springframework.core.MethodParameter
- *  org.springframework.web.context.request.NativeWebRequest
- *  org.springframework.web.method.HandlerMethod
- *  org.springframework.web.servlet.HandlerExecutionChain
- *  org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.exception.handler;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -20,8 +24,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-public class LoggerExceptionHandler
-implements ExceptionHandler {
+/** 默认的异常日志处理类 */
+public class LoggerExceptionHandler implements com.kuma.boot.web.exception.handler.ExceptionHandler {
+
     private RequestMappingHandlerMapping mapping;
 
     public LoggerExceptionHandler(RequestMappingHandlerMapping mapping) {
@@ -30,23 +35,37 @@ implements ExceptionHandler {
 
     @Override
     public void handle(NativeWebRequest req, Throwable throwable, String traceId) {
-        this.printLog(req, throwable);
+        printLog(req, throwable);
     }
 
+    /**
+     * 打印日志
+     *
+     * @param req 请求对象
+     * @param e 异常信息
+     * @since 2021-09-02 21:27:34
+     */
     private void printLog(NativeWebRequest req, Throwable e) {
         try {
-            HandlerExecutionChain chain = this.mapping.getHandler((HttpServletRequest)req.getNativeRequest());
+            // RequestMappingHandlerMapping mapping =
+            // ContextUtils.getBean("requestMappingHandlerMapping",RequestMappingHandlerMapping.class);
+            HandlerExecutionChain chain =
+                    mapping.getHandler((HttpServletRequest) req.getNativeRequest());
             Object handler = chain.getHandler();
-            if (handler instanceof HandlerMethod) {
-                HandlerMethod handlerMethod = (HandlerMethod)handler;
+            if (handler instanceof HandlerMethod handlerMethod) {
                 MethodParameter[] methodParameters = handlerMethod.getMethodParameters();
-                Object object = handlerMethod.getBean();
+                Object bean = handlerMethod.getBean();
             }
+        } catch (Exception ex) {
+            LogUtils.error(e);
         }
-        catch (Exception ex) {
-            LogUtils.error((Throwable)e);
-        }
-        LogUtils.error((Throwable)e, (String)"\u3010\u5168\u5c40\u5f02\u5e38\u62e6\u622a\u3011{}: \u8bf7\u6c42\u8def\u5f84: {}, \u8bf7\u6c42\u53c2\u6570: {}, \u5f02\u5e38\u4fe1\u606f {} ", (Object[])new Object[]{e.getClass().getName(), this.uri(req), this.query(req), e.getMessage()});
+
+        LogUtils.error(
+                e,
+                "【全局异常拦截】{}: 请求路径: {}, 请求参数: {}, 异常信息 {} ",
+                e.getClass().getName(),
+                uri(req),
+                query(req),
+                e.getMessage());
     }
 }
-

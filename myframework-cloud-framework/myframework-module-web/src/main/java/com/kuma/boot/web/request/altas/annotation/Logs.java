@@ -1,18 +1,23 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
-@Target(value={ElementType.METHOD, ElementType.TYPE})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * 多个日志注解的容器
+ * 当在同一个方法或类上使用多个@Log注解时，会自动使用此容器
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Logs {
-    public Log[] value();
-}
 
+    /**
+     * 日志注解数组
+     *
+     * @return Log注解数组
+     */
+    com.kuma.boot.web.request.altas.annotation.Log[] value();
+}

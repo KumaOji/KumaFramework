@@ -1,54 +1,138 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.context.annotation.Import
- */
 package com.kuma.boot.web.request.altas.annotation;
 
 import com.kuma.boot.web.request.altas.config.AtlasLogAnnotationConfigRegistrar;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
-@Target(value={ElementType.TYPE})
-@Retention(value=RetentionPolicy.RUNTIME)
+import java.lang.annotation.*;
+
+/**
+ * 启用Atlas Log注解配置
+ * <p>
+ * 通过在Spring Boot应用主类上添加此注解，可以通过注解方式配置Atlas Log，
+ * 提供更加简洁和声明式的配置方式。
+ * </p>
+ *
+ * <h3>基础使用示例：</h3>
+ * <pre>
+ * &#64;SpringBootApplication
+ * &#64;EnableAtlasLog
+ * public class Application {
+ *     public static void main(String[] args) {
+ *         SpringApplication.run(Application.class, args);
+ *     }
+ * }
+ * </pre>
+ *
+ * <h3>完整配置示例：</h3>
+ * <pre>
+ * &#64;SpringBootApplication
+ * &#64;EnableAtlasLog(
+ *     enabled = true,
+ *     defaultLevel = "INFO",
+ *     enabledTags = {"business", "security", "api"},
+ *     enabledGroups = {"default", "business"},
+ *     trace = &#64;AtlasLogTrace(enabled = true, headerName = "X-Trace-Id"),
+ *     performance = &#64;AtlasLogPerformance(slowThreshold = 1000L),
+ *     sensitive = &#64;AtlasLogSensitive(maskValue = "***")
+ * )
+ * public class Application {
+ *     public static void main(String[] args) {
+ *         SpringApplication.run(Application.class, args);
+ *     }
+ * }
+ * </pre>
+ *
+ * <h3>配置优先级：</h3>
+ * <p>注解配置 > application.yml > 环境变量 > 默认值</p>
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(value={AtlasLogAnnotationConfigRegistrar.class})
+@Import(AtlasLogAnnotationConfigRegistrar.class)
 public @interface EnableAtlasLog {
-    public boolean enabled() default true;
 
-    public String defaultLevel() default "INFO";
+    /**
+     * 是否启用Atlas Log
+     */
+    boolean enabled() default true;
 
-    public String dateFormat() default "yyyy-MM-dd HH:mm:ss.SSS";
+    /**
+     * 默认日志级别
+     */
+    String defaultLevel() default "INFO";
 
-    public boolean prettyPrint() default false;
+    /**
+     * 日期格式
+     */
+    String dateFormat() default "yyyy-MM-dd HH:mm:ss.SSS";
 
-    public int maxMessageLength() default 2000;
+    /**
+     * 是否美化JSON输出
+     */
+    boolean prettyPrint() default false;
 
-    public boolean spelEnabled() default true;
+    /**
+     * 最大消息长度
+     */
+    int maxMessageLength() default 2000;
 
-    public boolean conditionEnabled() default true;
+    /**
+     * 是否启用SpEL表达式
+     */
+    boolean spelEnabled() default true;
 
-    public String[] enabledTags() default {"business", "security", "api"};
+    /**
+     * 是否启用条件评估
+     */
+    boolean conditionEnabled() default true;
 
-    public String[] enabledGroups() default {"default", "business"};
+    /**
+     * 启用的日志标签
+     * <p>只有这些标签的日志才会被记录</p>
+     */
+    String[] enabledTags() default {"business", "security", "api"};
 
-    public String[] exclusions() default {"*.toString", "*.hashCode", "*.equals"};
+    /**
+     * 启用的日志组
+     */
+    String[] enabledGroups() default {"default", "business"};
 
-    public AtlasLogTrace trace() default @AtlasLogTrace;
+    /**
+     * 排除的方法模式
+     * <p>匹配这些模式的方法不会记录日志</p>
+     */
+    String[] exclusions() default {"*.toString", "*.hashCode", "*.equals"};
 
-    public AtlasLogPerformance performance() default @AtlasLogPerformance;
+    /**
+     * 链路追踪配置
+     */
+    com.kuma.boot.web.request.altas.annotation.AtlasLogTrace trace() default @com.kuma.boot.web.request.altas.annotation.AtlasLogTrace;
 
-    public AtlasLogCondition condition() default @AtlasLogCondition;
+    /**
+     * 性能监控配置
+     */
+    com.kuma.boot.web.request.altas.annotation.AtlasLogPerformance performance() default @com.kuma.boot.web.request.altas.annotation.AtlasLogPerformance;
 
-    public AtlasLogSensitive sensitive() default @AtlasLogSensitive;
+    /**
+     * 条件评估配置
+     */
+    com.kuma.boot.web.request.altas.annotation.AtlasLogCondition condition() default @com.kuma.boot.web.request.altas.annotation.AtlasLogCondition;
 
-    public AtlasLogHttpLog httpLog() default @AtlasLogHttpLog;
+    /**
+     * 敏感数据配置
+     */
+    com.kuma.boot.web.request.altas.annotation.AtlasLogSensitive sensitive() default @com.kuma.boot.web.request.altas.annotation.AtlasLogSensitive;
 
-    public AtlasLogResultLog resultLog() default @AtlasLogResultLog;
+    /**
+     * HTTP请求日志配置
+     */
+    com.kuma.boot.web.request.altas.annotation.AtlasLogHttpLog httpLog() default @com.kuma.boot.web.request.altas.annotation.AtlasLogHttpLog;
+
+    /**
+     * 返回值记录配置
+     */
+    com.kuma.boot.web.request.altas.annotation.AtlasLogResultLog resultLog() default @com.kuma.boot.web.request.altas.annotation.AtlasLogResultLog;
 }
-

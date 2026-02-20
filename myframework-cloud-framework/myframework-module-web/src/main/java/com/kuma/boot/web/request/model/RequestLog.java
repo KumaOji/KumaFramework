@@ -1,78 +1,155 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonProperty
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.request.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.Serial;
 import java.io.Serializable;
 
-public class RequestLog
-implements Serializable {
-    private static final long serialVersionUID = -749360940290141180L;
-    @JsonProperty(value="trace_id")
+/**
+ * 日志
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2020/6/15 11:00
+ */
+public class RequestLog implements Serializable {
+
+    @Serial private static final long serialVersionUID = -749360940290141180L;
+
+    /** 请求日志id */
+    @JsonProperty(value = "trace_id")
     private String traceId;
-    @JsonProperty(value="application_name")
+
+    /** 服务名称 */
+    @JsonProperty(value = "application_name")
     private String applicationName;
-    @JsonProperty(value="username")
+
+    /** 操作人ID */
+    @JsonProperty(value = "username")
     private String username;
-    @JsonProperty(value="user_id")
+
+    /** 操作人ID */
+    @JsonProperty(value = "user_id")
     private String userId;
-    @JsonProperty(value="client_id")
+
+    /** 客户端ID */
+    @JsonProperty(value = "client_id")
     private String clientId;
-    @JsonProperty(value="description")
+
+    /** 操作描述 */
+    @JsonProperty(value = "description")
     private String description;
-    @JsonProperty(value="ip")
+
+    /** 操作IP */
+    @JsonProperty(value = "ip")
     private String ip;
-    @JsonProperty(value="operate_type")
+
+    /** 操作类型 1 操作记录 2异常记录 */
+    @JsonProperty(value = "operate_type")
     private Integer operateType;
-    @JsonProperty(value="request_type")
+
+    /** 请求类型（1查询/获取，2添加，3修改，4删除） */
+    @JsonProperty(value = "request_type")
     private Integer requestType;
-    @JsonProperty(value="method_name")
+
+    /** 请求方法名称 */
+    @JsonProperty(value = "method_name")
     private String methodName;
-    @JsonProperty(value="method")
+
+    /** 请求方式 */
+    @JsonProperty(value = "method")
     private String method;
-    @JsonProperty(value="url")
+
+    /** 请求url */
+    @JsonProperty(value = "url")
     private String url;
-    @JsonProperty(value="args")
+
+    /** 方法参数 */
+    @JsonProperty(value = "args")
     private String args;
-    @JsonProperty(value="params")
+
+    /** 请求参数 */
+    @JsonProperty(value = "params")
     private String params;
-    @JsonProperty(value="headers")
+
+    /** 请求头 */
+    @JsonProperty(value = "headers")
     private String headers;
-    @JsonProperty(value="classpath")
+
+    /** 类路径 */
+    @JsonProperty(value = "classpath")
     private String classpath;
-    @JsonProperty(value="start_time")
+
+    /** 开始时间 */
+    @JsonProperty(value = "start_time")
     private Long startTime;
-    @JsonProperty(value="end_time")
+
+    /** 完成时间 */
+    @JsonProperty(value = "end_time")
     private Long endTime;
-    @JsonProperty(value="consuming_time")
+
+    /** 消耗时间 */
+    @JsonProperty(value = "consuming_time")
     private Long consumingTime;
-    @JsonProperty(value="ex_detail")
+
+    /** 异常详情信息 堆栈信息 */
+    @JsonProperty(value = "ex_detail")
     private String exDetail;
-    @JsonProperty(value="ex_desc")
+
+    /** 异常描述 e.getMessage */
+    @JsonProperty(value = "ex_desc")
     private String exDesc;
-    @JsonProperty(value="tenant_id")
+
+    /** 租户id */
+    @JsonProperty(value = "tenant_id")
     private String tenantId;
-    @JsonProperty(value="source")
+
+    /** 来源 */
+    @JsonProperty(value = "source")
     private String source;
-    @JsonProperty(value="ctime")
+
+    /** 记录时间 */
+    @JsonProperty(value = "ctime")
     private String ctime;
-    @JsonProperty(value="result")
+
+    /** 返回值 */
+    @JsonProperty(value = "result")
     private String result;
-    @JsonProperty(value="logday")
+
+    /** 记录时间 */
+    @JsonProperty(value = "logday")
     private String logday;
-    @JsonProperty(value="location")
+
+    /** 操作地点 */
+    @JsonProperty(value = "location")
     private String location;
-    @JsonProperty(value="os")
+
+    /** 操作系统 */
+    @JsonProperty(value = "os")
     private String os;
-    @JsonProperty(value="browser")
+
+    /** 浏览器 */
+    @JsonProperty(value = "browser")
     private String browser;
 
     public String getTraceId() {
-        return this.traceId;
+        return traceId;
     }
 
     public void setTraceId(String traceId) {
@@ -80,7 +157,7 @@ implements Serializable {
     }
 
     public String getApplicationName() {
-        return this.applicationName;
+        return applicationName;
     }
 
     public void setApplicationName(String applicationName) {
@@ -88,7 +165,7 @@ implements Serializable {
     }
 
     public String getUsername() {
-        return this.username;
+        return username;
     }
 
     public void setUsername(String username) {
@@ -96,7 +173,7 @@ implements Serializable {
     }
 
     public String getUserId() {
-        return this.userId;
+        return userId;
     }
 
     public void setUserId(String userId) {
@@ -104,7 +181,7 @@ implements Serializable {
     }
 
     public String getClientId() {
-        return this.clientId;
+        return clientId;
     }
 
     public void setClientId(String clientId) {
@@ -112,7 +189,7 @@ implements Serializable {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
@@ -120,7 +197,7 @@ implements Serializable {
     }
 
     public String getIp() {
-        return this.ip;
+        return ip;
     }
 
     public void setIp(String ip) {
@@ -128,7 +205,7 @@ implements Serializable {
     }
 
     public Integer getOperateType() {
-        return this.operateType;
+        return operateType;
     }
 
     public void setOperateType(Integer operateType) {
@@ -136,7 +213,7 @@ implements Serializable {
     }
 
     public Integer getRequestType() {
-        return this.requestType;
+        return requestType;
     }
 
     public void setRequestType(Integer requestType) {
@@ -144,7 +221,7 @@ implements Serializable {
     }
 
     public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
     public void setMethodName(String methodName) {
@@ -152,7 +229,7 @@ implements Serializable {
     }
 
     public String getMethod() {
-        return this.method;
+        return method;
     }
 
     public void setMethod(String method) {
@@ -160,7 +237,7 @@ implements Serializable {
     }
 
     public String getUrl() {
-        return this.url;
+        return url;
     }
 
     public void setUrl(String url) {
@@ -168,7 +245,7 @@ implements Serializable {
     }
 
     public String getArgs() {
-        return this.args;
+        return args;
     }
 
     public void setArgs(String args) {
@@ -176,7 +253,7 @@ implements Serializable {
     }
 
     public String getParams() {
-        return this.params;
+        return params;
     }
 
     public void setParams(String params) {
@@ -184,7 +261,7 @@ implements Serializable {
     }
 
     public String getHeaders() {
-        return this.headers;
+        return headers;
     }
 
     public void setHeaders(String headers) {
@@ -192,7 +269,7 @@ implements Serializable {
     }
 
     public String getClasspath() {
-        return this.classpath;
+        return classpath;
     }
 
     public void setClasspath(String classpath) {
@@ -200,7 +277,7 @@ implements Serializable {
     }
 
     public Long getStartTime() {
-        return this.startTime;
+        return startTime;
     }
 
     public void setStartTime(Long startTime) {
@@ -208,7 +285,7 @@ implements Serializable {
     }
 
     public Long getEndTime() {
-        return this.endTime;
+        return endTime;
     }
 
     public void setEndTime(Long endTime) {
@@ -216,7 +293,7 @@ implements Serializable {
     }
 
     public Long getConsumingTime() {
-        return this.consumingTime;
+        return consumingTime;
     }
 
     public void setConsumingTime(Long consumingTime) {
@@ -224,7 +301,7 @@ implements Serializable {
     }
 
     public String getExDetail() {
-        return this.exDetail;
+        return exDetail;
     }
 
     public void setExDetail(String exDetail) {
@@ -232,7 +309,7 @@ implements Serializable {
     }
 
     public String getExDesc() {
-        return this.exDesc;
+        return exDesc;
     }
 
     public void setExDesc(String exDesc) {
@@ -240,7 +317,7 @@ implements Serializable {
     }
 
     public String getTenantId() {
-        return this.tenantId;
+        return tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -248,7 +325,7 @@ implements Serializable {
     }
 
     public String getSource() {
-        return this.source;
+        return source;
     }
 
     public void setSource(String source) {
@@ -256,7 +333,7 @@ implements Serializable {
     }
 
     public String getCtime() {
-        return this.ctime;
+        return ctime;
     }
 
     public void setCtime(String ctime) {
@@ -264,7 +341,7 @@ implements Serializable {
     }
 
     public String getResult() {
-        return this.result;
+        return result;
     }
 
     public void setResult(String result) {
@@ -272,7 +349,7 @@ implements Serializable {
     }
 
     public String getLogday() {
-        return this.logday;
+        return logday;
     }
 
     public void setLogday(String logday) {
@@ -280,7 +357,7 @@ implements Serializable {
     }
 
     public String getLocation() {
-        return this.location;
+        return location;
     }
 
     public void setLocation(String location) {
@@ -288,7 +365,7 @@ implements Serializable {
     }
 
     public String getOs() {
-        return this.os;
+        return os;
     }
 
     public void setOs(String os) {
@@ -296,11 +373,10 @@ implements Serializable {
     }
 
     public String getBrowser() {
-        return this.browser;
+        return browser;
     }
 
     public void setBrowser(String browser) {
         this.browser = browser;
     }
 }
-

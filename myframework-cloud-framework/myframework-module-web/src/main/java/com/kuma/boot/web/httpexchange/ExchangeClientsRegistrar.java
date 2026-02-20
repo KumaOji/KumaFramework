@@ -1,12 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.beans.factory.support.BeanDefinitionRegistry
- *  org.springframework.context.annotation.ImportBeanDefinitionRegistrar
- *  org.springframework.core.type.AnnotationMetadata
- *  org.springframework.util.ClassUtils
- */
 package com.kuma.boot.web.httpexchange;
 
 import java.util.List;
@@ -17,20 +8,32 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 
-class ExchangeClientsRegistrar
-implements ImportBeanDefinitionRegistrar {
-    ExchangeClientsRegistrar() {
-    }
+/**
+ * @author Freeman
+ */
+class ExchangeClientsRegistrar implements ImportBeanDefinitionRegistrar {
 
+    @Override
     public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-        Map attrs = Optional.ofNullable(metadata.getAnnotationAttributes(EnableExchangeClients.class.getName())).orElse(Map.of());
-        String[] basePackages = Optional.ofNullable((String[])attrs.get("value")).orElseGet(() -> new String[0]);
-        Class[] clientClasses = Optional.ofNullable((Class[])attrs.get("clients")).orElseGet(() -> new Class[0]);
+        var attrs = Optional.ofNullable(metadata.getAnnotationAttributes(com.kuma.boot.web.httpexchange.EnableExchangeClients.class.getName()))
+                .orElse(Map.of());
+
+        // Shouldn't scan basePackages when using 'clients' property
+        // see https://github.com/DanielLiu1123/httpexchange-spring-boot-starter/issues/1
+
+        String[] basePackages =
+                Optional.ofNullable((String[]) attrs.get("value")).orElseGet(() -> new String[0]);
+        Class<?>[] clientClasses =
+                Optional.ofNullable((Class<?>[]) attrs.get("clients")).orElseGet(() -> new Class[0]);
+
         HttpClientBeanDefinitionRegistry.scanInfo.clients.addAll(List.of(clientClasses));
         HttpClientBeanDefinitionRegistry.scanInfo.basePackages.addAll(List.of(basePackages));
+
         if (basePackages.length == 0 && clientClasses.length == 0) {
-            HttpClientBeanDefinitionRegistry.scanInfo.basePackages.add(ClassUtils.getPackageName((String)metadata.getClassName()));
+            // @EnableExchangeClients
+            // should scan the package of the annotated class
+            HttpClientBeanDefinitionRegistry.scanInfo.basePackages.add(
+                    ClassUtils.getPackageName(metadata.getClassName()));
         }
     }
 }
-

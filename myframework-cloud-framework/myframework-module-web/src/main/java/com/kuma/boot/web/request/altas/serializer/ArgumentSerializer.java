@@ -1,15 +1,40 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.serializer;
 
 import com.kuma.boot.web.request.altas.annotation.Log;
 
+/**
+ * 参数序列化器接口
+ * 用于将方法参数和返回值序列化为字符串
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
 public interface ArgumentSerializer {
-    public String serializeArgs(Object[] var1, Log var2);
 
-    public String serializeResult(Object var1, Log var2);
+    /**
+     * 序列化方法参数
+     *
+     * @param args 方法参数数组
+     * @param annotation Log注解
+     * @return 序列化后的字符串
+     */
+    String serializeArgs(Object[] args, Log annotation);
 
-    public String serialize(Object var1, int var2);
+    /**
+     * 序列化方法返回值
+     *
+     * @param result 方法返回值
+     * @param annotation Log注解
+     * @return 序列化后的字符串
+     */
+    String serializeResult(Object result, Log annotation);
+
+    /**
+     * 序列化单个对象
+     *
+     * @param obj 要序列化的对象
+     * @param maxLength 最大长度限制
+     * @return 序列化后的字符串
+     */
+    String serialize(Object obj, int maxLength);
 }
-

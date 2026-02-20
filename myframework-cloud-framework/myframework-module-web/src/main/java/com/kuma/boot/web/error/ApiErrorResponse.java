@@ -1,27 +1,41 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonAnyGetter
- *  com.fasterxml.jackson.annotation.JsonIgnore
- *  com.fasterxml.jackson.annotation.JsonInclude
- *  com.fasterxml.jackson.annotation.JsonInclude$Include
- *  org.springframework.http.HttpStatus
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.error;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.http.HttpStatus;
 
-@JsonInclude(value=JsonInclude.Include.NON_EMPTY)
+/**
+ * ApiErrorResponse
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-01-12 08:56:55
+ */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ApiErrorResponse {
+
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
@@ -34,60 +48,59 @@ public class ApiErrorResponse {
         this.httpStatus = httpStatus;
         this.code = code;
         this.message = message;
-        this.properties = new HashMap<String, Object>();
-        this.fieldErrors = new ArrayList<ApiFieldError>();
-        this.globalErrors = new ArrayList<ApiGlobalError>();
-        this.parameterErrors = new ArrayList<ApiParameterError>();
+        this.properties = new HashMap<>();
+        this.fieldErrors = new ArrayList<>();
+        this.globalErrors = new ArrayList<>();
+        this.parameterErrors = new ArrayList<>();
     }
 
     @JsonIgnore
     public HttpStatus getHttpStatus() {
-        return this.httpStatus;
+        return httpStatus;
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public String getMessage() {
-        return this.message;
+        return message;
     }
 
     @JsonAnyGetter
     public Map<String, Object> getProperties() {
-        return this.properties;
+        return properties;
     }
 
     public List<ApiFieldError> getFieldErrors() {
-        return this.fieldErrors;
+        return fieldErrors;
     }
 
     public List<ApiGlobalError> getGlobalErrors() {
-        return this.globalErrors;
+        return globalErrors;
     }
 
     public List<ApiParameterError> getParameterErrors() {
-        return this.parameterErrors;
+        return parameterErrors;
     }
 
     public void addErrorProperties(Map<String, Object> errorProperties) {
-        this.properties.putAll(errorProperties);
+        properties.putAll(errorProperties);
     }
 
     public void addErrorProperty(String propertyName, Object propertyValue) {
-        this.properties.put(propertyName, propertyValue);
+        properties.put(propertyName, propertyValue);
     }
 
-    public void addFieldError(ApiFieldError fieldError) {
-        this.fieldErrors.add(fieldError);
+    public void addFieldError( ApiFieldError fieldError) {
+        fieldErrors.add(fieldError);
     }
 
-    public void addGlobalError(ApiGlobalError globalError) {
-        this.globalErrors.add(globalError);
+    public void addGlobalError( ApiGlobalError globalError) {
+        globalErrors.add(globalError);
     }
 
-    public void addParameterError(ApiParameterError parameterError) {
-        this.parameterErrors.add(parameterError);
+    public void addParameterError( ApiParameterError parameterError) {
+        parameterErrors.add(parameterError);
     }
 }
-

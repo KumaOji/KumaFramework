@@ -1,10 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.request.service.impl;
 
 import com.kuma.boot.common.utils.json.JacksonUtils;
@@ -12,11 +21,17 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.request.model.RequestLog;
 import com.kuma.boot.web.request.service.RequestLoggerService;
 
-public class LoggerRequestLoggerServiceImpl
-implements RequestLoggerService {
+/**
+ * 审计日志实现类-logger
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2020/5/2 11:18
+ */
+public class LoggerRequestLoggerServiceImpl implements RequestLoggerService {
+
     @Override
-    public void save(RequestLog requestLog) {
-        LogUtils.info((String)"\u672c\u5730\u65e5\u5fd7\u8bb0\u5f55\u6210\u529f\uff1a{}", (Object[])new Object[]{JacksonUtils.toJSONString((Object)requestLog)});
+    public void save( RequestLog requestLog) {
+        LogUtils.info("本地日志记录成功：{}", JacksonUtils.toJSONString(requestLog));
     }
 }
-

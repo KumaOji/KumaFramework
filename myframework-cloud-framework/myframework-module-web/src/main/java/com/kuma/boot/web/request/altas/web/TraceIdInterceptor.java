@@ -1,13 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.util.StringUtils
- *  org.springframework.web.servlet.HandlerInterceptor
- */
 package com.kuma.boot.web.request.altas.web;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -17,37 +7,62 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-public class TraceIdInterceptor
-implements HandlerInterceptor {
+
+/**
+ * TraceId拦截器
+ * 从HTTP请求头中提取TraceId，如果不存在则生成一个新的
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+public class TraceIdInterceptor implements HandlerInterceptor {
+
     private final String headerName;
 
     public TraceIdInterceptor(String headerName) {
         this.headerName = headerName;
     }
 
+    @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        LogUtils.debug((String)"TraceIdInterceptor.preHandle called - URI: {}", (Object[])new Object[]{request.getRequestURI()});
+        LogUtils.debug("TraceIdInterceptor.preHandle called - URI: {}", request.getRequestURI());
+
+        // 检查是否已有 TraceId（由 LoggingFilter 设置）
         String existingTraceId = TraceIdHolder.getTraceIdIfPresent();
         if (existingTraceId != null) {
-            response.setHeader(this.headerName, existingTraceId);
-            LogUtils.debug((String)"Reusing existing TraceId: {}", (Object[])new Object[]{existingTraceId});
+            // 如果已有，直接使用，不重新生成
+            response.setHeader(headerName, existingTraceId);
+            LogUtils.debug("Reusing existing TraceId: {}", existingTraceId);
             return true;
         }
-        String traceId = request.getHeader(this.headerName);
-        LogUtils.debug((String)"Obtained TraceId from request header: {} (header: {})", (Object[])new Object[]{traceId, this.headerName});
-        if (!StringUtils.hasText((String)traceId)) {
+
+        // 如果没有，按原逻辑处理
+        String traceId = request.getHeader(headerName);
+        LogUtils.debug("Obtained TraceId from request header: {} (header: {})", traceId, headerName);
+
+        if (!StringUtils.hasText(traceId)) {
+            // 如果请求头中没有TraceId，生成一个新的
             traceId = TraceIdHolder.generateTraceId();
-            LogUtils.debug((String)"Generated new TraceId: {}", (Object[])new Object[]{traceId});
+            LogUtils.debug("Generated new TraceId: {}", traceId);
         }
+
+        // 设置到当前线程
         TraceIdHolder.setTraceId(traceId);
-        response.setHeader(this.headerName, traceId);
-        LogUtils.debug((String)"TraceId setup completed: {}", (Object[])new Object[]{traceId});
+
+        // 将TraceId设置到响应头中
+        response.setHeader(headerName, traceId);
+
+        LogUtils.debug("TraceId setup completed: {}", traceId);
         return true;
     }
 
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) {
+        // 临时注释掉清理，调试TraceId不一致问题
         String currentTraceId = TraceIdHolder.getTraceIdIfPresent();
-        LogUtils.debug((String)"TraceIdInterceptor completed - current TraceId: {}", (Object[])new Object[]{currentTraceId});
+        LogUtils.debug("TraceIdInterceptor completed - current TraceId: {}", currentTraceId);
+        // TraceIdHolder.clear();
+        // LogUtils.debug("TraceId cleared");
     }
 }
-

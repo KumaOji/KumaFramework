@@ -1,15 +1,20 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.web.service.invoker.HttpServiceProxyFactory$Builder
- */
 package com.kuma.boot.web.httpexchange;
 
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
+/**
+ * Callback interface that can be used to customize a {@link HttpServiceProxyFactory.Builder}.
+ *
+ * @author Freeman
+ * @since 3.2.2
+ */
 @FunctionalInterface
 public interface HttpServiceProxyFactoryCustomizer {
-    public void customize(HttpServiceProxyFactory.Builder var1);
-}
 
+    /**
+     * Customize the {@link HttpServiceProxyFactory.Builder}.
+     *
+     * @param builder the builder to customize
+     */
+    void customize(HttpServiceProxyFactory.Builder builder);
+}

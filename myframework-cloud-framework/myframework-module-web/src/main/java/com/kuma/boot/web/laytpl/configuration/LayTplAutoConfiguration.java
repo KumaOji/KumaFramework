@@ -1,16 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.laytpl.configuration;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.laytpl.model.FmtFunc;
 import com.kuma.boot.web.laytpl.model.LayTplTemplate;
@@ -21,23 +27,30 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * laytpl 自动化配置
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:01:42
+ */
 @AutoConfiguration
-@EnableConfigurationProperties(value={LayTplProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.laytpl", name={"enabled"}, havingValue="true")
-public class LayTplAutoConfiguration
-implements InitializingBean {
+@EnableConfigurationProperties({LayTplProperties.class})
+@ConditionalOnProperty(prefix = LayTplProperties.PREFIX, name = "enabled", havingValue = "true")
+public class LayTplAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(LayTplAutoConfiguration.class, (String)"kuma-boot-starter-laytpl", (String[])new String[0]);
+        LogUtils.started(LayTplAutoConfiguration.class, StarterNameConstants.LAYTPL_STARTER);
     }
 
-    @Bean(value={"fmt"})
-    public FmtFunc fmtFunc(LayTplProperties properties) {
+    @Bean("fmt")
+    public FmtFunc fmtFunc( LayTplProperties properties) {
         return new FmtFunc(properties);
     }
 
-    @Bean(value={"layTpl"})
-    public LayTplTemplate layTplTemplate(FmtFunc fmtFunc, LayTplProperties properties) {
+    @Bean("layTpl")
+    public LayTplTemplate layTplTemplate( FmtFunc fmtFunc, LayTplProperties properties) {
         return new LayTplTemplate(properties, fmtFunc);
     }
 }
-

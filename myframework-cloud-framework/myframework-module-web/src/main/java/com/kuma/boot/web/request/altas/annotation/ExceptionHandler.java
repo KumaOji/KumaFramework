@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.annotation;
 
 import java.lang.annotation.Documented;
@@ -8,16 +5,48 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(value={})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * 异常处理注解
+ * 用于定义特定异常类型的日志处理方式
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+@Target({})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ExceptionHandler {
-    public Class<? extends Throwable> exception();
 
-    public LogLevel level() default LogLevel.ERROR;
+    /**
+     * 异常类型
+     *
+     * @return 异常类
+     */
+    Class<? extends Throwable> exception();
 
-    public String message() default "";
+    /**
+     * 该异常的日志级别
+     *
+     * @return 日志级别
+     */
+    LogLevel level() default LogLevel.ERROR;
 
-    public boolean logStackTrace() default true;
+    /**
+     * 自定义异常日志模板，支持SpEL表达式
+     * 支持的变量：
+     * - #{args[n]} - 方法参数
+     * - #{exception} - 异常对象
+     * - #{exception.message} - 异常消息
+     * - #{methodName} - 方法名称
+     *
+     * @return 异常日志模板
+     */
+    String message() default "";
+
+    /**
+     * 是否记录异常堆栈
+     *
+     * @return true-记录堆栈，false-不记录堆栈
+     */
+    boolean logStackTrace() default true;
 }
-

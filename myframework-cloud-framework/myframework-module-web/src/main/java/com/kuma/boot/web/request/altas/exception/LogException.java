@@ -1,13 +1,17 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.exception;
 
-public class LogException
-extends RuntimeException {
+/**
+ * Atlas Log基础异常类
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+public class LogException extends RuntimeException {
+
     private static final long serialVersionUID = 1L;
 
     public LogException() {
+        super();
     }
 
     public LogException(String message) {
@@ -22,4 +26,3 @@ extends RuntimeException {
         super(cause);
     }
 }
-

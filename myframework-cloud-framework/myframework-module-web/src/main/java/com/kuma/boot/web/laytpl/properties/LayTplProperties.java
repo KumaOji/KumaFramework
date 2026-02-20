@@ -1,32 +1,69 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- *  org.springframework.cloud.context.config.annotation.RefreshScope
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.laytpl.properties;
 
+import com.kuma.boot.common.utils.date.DateUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
+/**
+ * LayTpl配置
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-27 17:30:16
+ */
 @RefreshScope
-@ConfigurationProperties(prefix="kuma.boot.laytpl")
+@ConfigurationProperties(prefix = LayTplProperties.PREFIX)
 public class LayTplProperties {
+
     public static final String PREFIX = "kuma.boot.laytpl";
+
     private boolean enabled = false;
+
+    /** 模板分隔符开始，默认：{{ */
     private String open = "{{";
+
+    /** 模板分隔符结束，默认：}} */
     private String close = "}}";
+
+    /** 模板前缀，默认：classpath:templates/tpl/ */
     private String prefix = "classpath:templates/tpl/";
+
+    /** 缓存模板，默认：true */
     private boolean cache = true;
+
+    /** 数字格式化，默认：#.00 */
     private String numPattern = "#.00";
-    private String datePattern = "yyyy-MM-dd HH:mm:ss";
-    private String localTimePattern = "HH:mm:ss";
-    private String localDatePattern = "yyyy-MM-dd";
-    private String localDateTimePattern = "yyyy-MM-dd HH:mm:ss";
+
+    /** Date 日期格式化，默认："yyyy-MM-dd HH:mm:ss" */
+    private String datePattern = DateUtils.PATTERN_DATETIME;
+
+    /** java8 LocalTime时间格式化，默认："HH:mm:ss" */
+    private String localTimePattern = DateUtils.PATTERN_TIME;
+
+    /** java8 LocalDate日期格式化，默认："yyyy-MM-dd" */
+    private String localDatePattern = DateUtils.PATTERN_DATE;
+
+    /** java8 LocalDateTime日期时间格式化，默认："yyyy-MM-dd HH:mm:ss" */
+    private String localDateTimePattern = DateUtils.PATTERN_DATETIME;
 
     public String getOpen() {
-        return this.open;
+        return open;
     }
 
     public void setOpen(String open) {
@@ -34,7 +71,7 @@ public class LayTplProperties {
     }
 
     public String getClose() {
-        return this.close;
+        return close;
     }
 
     public void setClose(String close) {
@@ -42,7 +79,7 @@ public class LayTplProperties {
     }
 
     public String getPrefix() {
-        return this.prefix;
+        return prefix;
     }
 
     public void setPrefix(String prefix) {
@@ -50,7 +87,7 @@ public class LayTplProperties {
     }
 
     public boolean isCache() {
-        return this.cache;
+        return cache;
     }
 
     public void setCache(boolean cache) {
@@ -58,7 +95,7 @@ public class LayTplProperties {
     }
 
     public String getNumPattern() {
-        return this.numPattern;
+        return numPattern;
     }
 
     public void setNumPattern(String numPattern) {
@@ -66,7 +103,7 @@ public class LayTplProperties {
     }
 
     public String getDatePattern() {
-        return this.datePattern;
+        return datePattern;
     }
 
     public void setDatePattern(String datePattern) {
@@ -74,7 +111,7 @@ public class LayTplProperties {
     }
 
     public String getLocalTimePattern() {
-        return this.localTimePattern;
+        return localTimePattern;
     }
 
     public void setLocalTimePattern(String localTimePattern) {
@@ -82,7 +119,7 @@ public class LayTplProperties {
     }
 
     public String getLocalDatePattern() {
-        return this.localDatePattern;
+        return localDatePattern;
     }
 
     public void setLocalDatePattern(String localDatePattern) {
@@ -90,7 +127,7 @@ public class LayTplProperties {
     }
 
     public String getLocalDateTimePattern() {
-        return this.localDateTimePattern;
+        return localDateTimePattern;
     }
 
     public void setLocalDateTimePattern(String localDateTimePattern) {
@@ -98,11 +135,10 @@ public class LayTplProperties {
     }
 
     public boolean getEnabled() {
-        return this.enabled;
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 }
-

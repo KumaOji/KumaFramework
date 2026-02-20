@@ -1,22 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.annotation.Resource
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.core.MethodParameter
- *  org.springframework.core.annotation.Order
- *  org.springframework.http.MediaType
- *  org.springframework.http.converter.HttpMessageConverter
- *  org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
- *  org.springframework.http.server.ServerHttpRequest
- *  org.springframework.http.server.ServerHttpResponse
- *  org.springframework.util.AntPathMatcher
- *  org.springframework.util.CollectionUtils
- *  org.springframework.web.bind.annotation.ControllerAdvice
- *  org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse.advice;
 
 import com.kuma.boot.web.gracefulresponse.GracefulResponseProperties;
@@ -24,9 +21,6 @@ import com.kuma.boot.web.gracefulresponse.api.ExcludeFromGracefulResponse;
 import com.kuma.boot.web.gracefulresponse.api.ResponseFactory;
 import com.kuma.boot.web.gracefulresponse.data.Response;
 import jakarta.annotation.Resource;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -41,49 +35,87 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * 非空返回值的处理.
+ */
 @ControllerAdvice
-@Order(value=1000)
-public class NotVoidResponseBodyAdvice
-implements ResponseBodyAdvice<Object> {
+@Order(value = 1000)
+public class NotVoidResponseBodyAdvice implements ResponseBodyAdvice<Object> {
+
     private final Logger logger = LoggerFactory.getLogger(NotVoidResponseBodyAdvice.class);
-    @Resource
-    private ResponseFactory responseFactory;
-    @Resource
-    private GracefulResponseProperties properties;
+
+    @Resource private ResponseFactory responseFactory;
+    @Resource private GracefulResponseProperties properties;
+
+    /**
+     * 路径过滤器
+     */
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
-    public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> clazz) {
+    /**
+     * 只处理不返回void的，并且MappingJackson2HttpMessageConverter支持的类型.
+     *
+     * @param methodParameter 方法参数
+     * @param clazz           处理器
+     * @return 是否支持
+     */
+    @Override
+    public boolean supports(
+            MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> clazz) {
         Method method = methodParameter.getMethod();
-        if (Objects.isNull(method) || method.getReturnType().equals(Void.TYPE) || !MappingJackson2HttpMessageConverter.class.isAssignableFrom(clazz)) {
-            this.logger.debug("Graceful Response:method\u4e3a\u7a7a\u3001\u8fd4\u56de\u503c\u4e3avoid\u3001\u975eJSON\uff0c\u8df3\u8fc7");
+
+        // method为空、返回值为void、非JSON，直接跳过
+        if (Objects.isNull(method)
+                || method.getReturnType().equals(Void.TYPE)
+                || !MappingJackson2HttpMessageConverter.class.isAssignableFrom(clazz)) {
+            logger.debug("Graceful Response:method为空、返回值为void、非JSON，跳过");
             return false;
         }
+
+        // 有ExcludeFromGracefulResponse注解修饰的，也跳过
         if (method.isAnnotationPresent(ExcludeFromGracefulResponse.class)) {
-            if (this.logger.isDebugEnabled()) {
-                this.logger.debug("Graceful Response:\u65b9\u6cd5\u88ab@ExcludeFromGracefulResponse\u6ce8\u89e3\u4fee\u9970\uff0c\u8df3\u8fc7:methodName={}", (Object)method.getName());
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                        "Graceful Response:方法被@ExcludeFromGracefulResponse注解修饰，跳过:methodName={}",
+                        method.getName());
             }
             return false;
         }
-        List<String> excludePackages = this.properties.getExcludePackages();
+
+        // 配置了例外包路径，则该路径下的controller都不再处理
+        List<String> excludePackages = properties.getExcludePackages();
         if (!CollectionUtils.isEmpty(excludePackages)) {
+            // 获取请求所在类的的包名
             String packageName = method.getDeclaringClass().getPackage().getName();
-            if (excludePackages.stream().anyMatch(item -> ANT_PATH_MATCHER.match(item, packageName))) {
-                this.logger.debug("Graceful Response:\u5339\u914d\u5230excludePackages\u4f8b\u5916\u914d\u7f6e\uff0c\u8df3\u8fc7:packageName={},", (Object)packageName);
+            if (excludePackages.stream()
+                    .anyMatch(item -> ANT_PATH_MATCHER.match(item, packageName))) {
+                logger.debug(
+                        "Graceful Response:匹配到excludePackages例外配置，跳过:packageName={},", packageName);
                 return false;
             }
         }
-        this.logger.debug("Graceful Response:\u975e\u7a7a\u8fd4\u56de\u503c\uff0c\u9700\u8981\u8fdb\u884c\u5c01\u88c5");
+        logger.debug("Graceful Response:非空返回值，需要进行封装");
         return true;
     }
 
-    public Object beforeBodyWrite(Object body, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> clazz, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
+    @Override
+    public Object beforeBodyWrite(
+            Object body,
+            MethodParameter methodParameter,
+            MediaType mediaType,
+            Class<? extends HttpMessageConverter<?>> clazz,
+            ServerHttpRequest serverHttpRequest,
+            ServerHttpResponse serverHttpResponse) {
         if (body == null) {
-            return this.responseFactory.newSuccessInstance();
-        }
-        if (body instanceof Response) {
+            return responseFactory.newSuccessInstance();
+        } else if (body instanceof Response) {
             return body;
+        } else {
+            return responseFactory.newSuccessInstance(body);
         }
-        return this.responseFactory.newSuccessInstance(body);
     }
 }
-

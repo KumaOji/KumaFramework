@@ -1,24 +1,37 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonIgnore
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse.defaults;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kuma.boot.web.gracefulresponse.data.Response;
 import com.kuma.boot.web.gracefulresponse.data.ResponseStatus;
+
 import java.util.Collections;
 
-public class DefaultResponseImplStyle1
-implements Response {
+public class DefaultResponseImplStyle1 implements Response {
+
     private String code;
+
     private String msg;
+
     private Object data = Collections.emptyMap();
 
     @Override
-    public void setStatus(ResponseStatus statusLine) {
+    public void setStatus( ResponseStatus statusLine) {
         this.code = statusLine.getCode();
         this.msg = statusLine.getMsg();
     }
@@ -41,7 +54,7 @@ implements Response {
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -49,7 +62,7 @@ implements Response {
     }
 
     public String getMsg() {
-        return this.msg;
+        return msg;
     }
 
     public void setMsg(String msg) {
@@ -57,11 +70,10 @@ implements Response {
     }
 
     public Object getData() {
-        return this.data;
+        return data;
     }
 
     public void setData(Object data) {
         this.data = data;
     }
 }
-

@@ -1,14 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.config.ConfigurableListableBeanFactory
- *  org.springframework.beans.factory.support.BeanDefinitionRegistry
- *  org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
- *  org.springframework.core.env.Environment
- *  org.springframework.util.ObjectUtils
- */
 package com.kuma.boot.web.httpexchange;
 
 import org.springframework.beans.BeansException;
@@ -18,36 +7,42 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
 
-class HttpClientBeanDefinitionRegistry
-implements BeanDefinitionRegistryPostProcessor {
+/**
+ * @author Freeman
+ */
+class HttpClientBeanDefinitionRegistry implements BeanDefinitionRegistryPostProcessor {
+
     static final ScanInfo scanInfo = new ScanInfo();
+
     private final Environment environment;
 
     HttpClientBeanDefinitionRegistry(Environment environment) {
         this.environment = environment;
     }
 
+    @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        boolean enabled = (Boolean)this.environment.getProperty("http-exchange.enabled", Boolean.class, (Object)true);
+        boolean enabled = environment.getProperty(HttpExchangeProperties.PREFIX + ".enabled", Boolean.class, true);
         if (!enabled) {
             return;
         }
-        this.registerBeans(new HttpClientBeanRegistrar(registry, this.environment));
+        registerBeans(new HttpClientBeanRegistrar(registry, environment));
     }
 
-    void registerBeans(HttpClientBeanRegistrar registrar) {
-        HttpExchangeProperties properties = Util.getProperties(this.environment);
-        HttpClientBeanDefinitionRegistry.scanInfo.basePackages.addAll(properties.getBasePackages());
-        if (!ObjectUtils.isEmpty(HttpClientBeanDefinitionRegistry.scanInfo.basePackages)) {
-            registrar.register((String[])HttpClientBeanDefinitionRegistry.scanInfo.basePackages.toArray(String[]::new));
+    /*private*/ void registerBeans(HttpClientBeanRegistrar registrar) {
+        var properties = Util.getProperties(environment);
+        scanInfo.basePackages.addAll(properties.getBasePackages());
+        if (!ObjectUtils.isEmpty(scanInfo.basePackages)) {
+            registrar.register(scanInfo.basePackages.toArray(String[]::new));
         }
-        HttpClientBeanDefinitionRegistry.scanInfo.clients.addAll(properties.getClients());
-        if (!ObjectUtils.isEmpty(HttpClientBeanDefinitionRegistry.scanInfo.clients)) {
-            registrar.register((Class[])HttpClientBeanDefinitionRegistry.scanInfo.clients.toArray(Class[]::new));
+        scanInfo.clients.addAll(properties.getClients());
+        if (!ObjectUtils.isEmpty(scanInfo.clients)) {
+            registrar.register(scanInfo.clients.toArray(Class<?>[]::new));
         }
     }
 
+    @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        // nothing to do
     }
 }
-

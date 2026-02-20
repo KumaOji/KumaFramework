@@ -1,10 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.context.annotation.Import
- *  org.springframework.core.annotation.AliasFor
- */
 package com.kuma.boot.web.httpexchange;
 
 import java.lang.annotation.ElementType;
@@ -13,17 +6,68 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@Retention(value=RetentionPolicy.RUNTIME)
-@Target(value={ElementType.TYPE})
-@Import(value={ExchangeClientsRegistrar.class})
+/**
+ * Enable auto scan {@link HttpExchange} interfaces, and register them as {@link HttpExchange} client beans.
+ *
+ * <p> Examples:
+ *
+ * <p> Scan the package of the annotated class:
+ * <pre>{@code
+ * @EnableExchangeClients
+ * }</pre>
+ *
+ * <p> Scan the package of the specified {@link #basePackages} (not include the package of annotated class):
+ * <pre>{@code
+ * @EnableExchangeClients("org.my.pkg")
+ * }</pre>
+ *
+ * <p> Register specified clients (don't scan any packages):
+ * <pre>{@code
+ * @EnableExchangeClients(clients = {FooApi.class})
+ * }</pre>
+ *
+ * <p> Scan specified {@link #basePackages} and register specified clients:
+ * <pre>{@code
+ * @EnableExchangeClients(basePackages = "org.my.pkg", clients = {FooApi.class})
+ * }</pre>
+ *
+ * <p> NOTE: scanning packages will increase the startup time (you don't feel difference in most cases),
+ * you can sacrifice some flexibility and use the {@link #clients} attribute to specify the interfaces that need to be registered as beans.
+ *
+ * @author Freeman
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+@Import({ExchangeClientsRegistrar.class})
 public @interface EnableExchangeClients {
-    @AliasFor(value="basePackages")
-    public String[] value() default {};
+    /**
+     * Scan base packages.
+     *
+     * <p> Scan the package of the annotated class by default.
+     * <p> Alias for the {@link #basePackages()} attribute.
+     *
+     * @return the base packages to scan
+     */
+    @AliasFor("basePackages")
+    String[] value() default {};
 
-    @AliasFor(value="value")
-    public String[] basePackages() default {};
+    /**
+     * Alias for the {@link #value()} attribute.
+     *
+     * @return the base packages to scan
+     * @see #value()
+     */
+    @AliasFor("value")
+    String[] basePackages() default {};
 
-    public Class<?>[] clients() default {};
+    /**
+     * The classes to register as HttpExchange client beans.
+     *
+     * <p> clients and {@link #basePackages} <strong>can</strong> be used together.
+     *
+     * @return the interfaces to register as HttpExchange client beans.
+     */
+    Class<?>[] clients() default {};
 }
-

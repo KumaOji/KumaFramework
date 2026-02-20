@@ -1,28 +1,65 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.exception.domain;
 
+/** 异常通知消息 */
 public class ExceptionMessage {
+
+    /** 用于筛选重复异常 */
     private String traceId;
+
+    /** 消息 */
     private String message;
+
+    /** 数量 */
     private int number;
+
+    /** 堆栈 */
     private String stack;
+
+    /** 最新的触发时间 */
     private String time;
+
+    /** 机器地址 */
     private String mac;
+
+    /** 线程id */
     private long threadId;
+
+    /** 服务名 */
     private String applicationName;
+
+    /** hostname */
     private String hostname;
+
+    /** ip */
     private String ip;
+
+    /** 请求地址 */
     private String requestUri;
 
+    /** 数量自增 */
     public ExceptionMessage increment() {
-        ++this.number;
+        number++;
         return this;
     }
 
     public String getTraceId() {
-        return this.traceId;
+        return traceId;
     }
 
     public void setTraceId(String traceId) {
@@ -30,7 +67,7 @@ public class ExceptionMessage {
     }
 
     public String getMessage() {
-        return this.message;
+        return message;
     }
 
     public void setMessage(String message) {
@@ -38,7 +75,7 @@ public class ExceptionMessage {
     }
 
     public int getNumber() {
-        return this.number;
+        return number;
     }
 
     public void setNumber(int number) {
@@ -46,7 +83,7 @@ public class ExceptionMessage {
     }
 
     public String getStack() {
-        return this.stack;
+        return stack;
     }
 
     public void setStack(String stack) {
@@ -54,7 +91,7 @@ public class ExceptionMessage {
     }
 
     public String getTime() {
-        return this.time;
+        return time;
     }
 
     public void setTime(String time) {
@@ -62,7 +99,7 @@ public class ExceptionMessage {
     }
 
     public String getMac() {
-        return this.mac;
+        return mac;
     }
 
     public void setMac(String mac) {
@@ -70,7 +107,7 @@ public class ExceptionMessage {
     }
 
     public long getThreadId() {
-        return this.threadId;
+        return threadId;
     }
 
     public void setThreadId(long threadId) {
@@ -78,7 +115,7 @@ public class ExceptionMessage {
     }
 
     public String getApplicationName() {
-        return this.applicationName;
+        return applicationName;
     }
 
     public void setApplicationName(String applicationName) {
@@ -86,7 +123,7 @@ public class ExceptionMessage {
     }
 
     public String getHostname() {
-        return this.hostname;
+        return hostname;
     }
 
     public void setHostname(String hostname) {
@@ -94,7 +131,7 @@ public class ExceptionMessage {
     }
 
     public String getIp() {
-        return this.ip;
+        return ip;
     }
 
     public void setIp(String ip) {
@@ -102,15 +139,32 @@ public class ExceptionMessage {
     }
 
     public String getRequestUri() {
-        return this.requestUri;
+        return requestUri;
     }
 
     public void setRequestUri(String requestUri) {
         this.requestUri = requestUri;
     }
 
+    @Override
     public String toString() {
-        return "\u670d\u52a1\u540d\u79f0\uff1a" + this.applicationName + "\nip\uff1a" + this.ip + "\nhostname\uff1a" + this.hostname + "\n\u673a\u5668\u5730\u5740\uff1a" + this.mac + "\n\u89e6\u53d1\u65f6\u95f4\uff1a" + this.time + "\n\u8bf7\u6c42\u5730\u5740\uff1a" + this.requestUri + "\n\u7ebf\u7a0bid\uff1a" + this.threadId + "\n\u6570\u91cf\uff1a" + this.number + "\n\u5806\u6808\uff1a" + this.stack;
+        return "服务名称："
+                + applicationName
+                + "\nip："
+                + ip
+                + "\nhostname："
+                + hostname
+                + "\n机器地址："
+                + mac
+                + "\n触发时间："
+                + time
+                + "\n请求地址："
+                + requestUri
+                + "\n线程id："
+                + threadId
+                + "\n数量："
+                + number
+                + "\n堆栈："
+                + stack;
     }
 }
-

@@ -1,30 +1,41 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.exception;
 
-public class ExpressionEvaluationException
-extends LogException {
+/**
+ * SpEL表达式评估异常
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+public class ExpressionEvaluationException extends LogException {
+
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 表达式内容
+     */
     private final String expression;
 
     public ExpressionEvaluationException(String expression, String message) {
-        super("\u8868\u8fbe\u5f0f\u8bc4\u4f30\u5931\u8d25: " + expression + ", \u539f\u56e0: " + message);
+        super("表达式评估失败: " + expression + ", 原因: " + message);
         this.expression = expression;
     }
 
     public ExpressionEvaluationException(String expression, String message, Throwable cause) {
-        super("\u8868\u8fbe\u5f0f\u8bc4\u4f30\u5931\u8d25: " + expression + ", \u539f\u56e0: " + message, cause);
+        super("表达式评估失败: " + expression + ", 原因: " + message, cause);
         this.expression = expression;
     }
 
     public ExpressionEvaluationException(String expression, Throwable cause) {
-        super("\u8868\u8fbe\u5f0f\u8bc4\u4f30\u5931\u8d25: " + expression, cause);
+        super("表达式评估失败: " + expression, cause);
         this.expression = expression;
     }
 
+    /**
+     * 获取出错的表达式
+     *
+     * @return 表达式内容
+     */
     public String getExpression() {
-        return this.expression;
+        return expression;
     }
 }
-

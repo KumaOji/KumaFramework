@@ -1,12 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.annotation.Resource
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse.defaults;
 
 import com.kuma.boot.web.gracefulresponse.GracefulResponseProperties;
@@ -15,50 +22,60 @@ import com.kuma.boot.web.gracefulresponse.api.ResponseStatusFactory;
 import com.kuma.boot.web.gracefulresponse.data.Response;
 import com.kuma.boot.web.gracefulresponse.data.ResponseStatus;
 import jakarta.annotation.Resource;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-public class DefaultResponseFactory
-implements ResponseFactory {
+import java.util.Objects;
+
+/**
+ * 提供的默认的ResponseBeanFactory实现.
+ */
+public class DefaultResponseFactory implements ResponseFactory {
+
     private final Logger logger = LoggerFactory.getLogger(DefaultResponseFactory.class);
+
     private static final Integer RESPONSE_STYLE_0 = 0;
+
     private static final Integer RESPONSE_STYLE_1 = 1;
-    @Resource
-    private ResponseStatusFactory responseStatusFactory;
-    @Resource
-    private GracefulResponseProperties properties;
+
+    @Resource private ResponseStatusFactory responseStatusFactory;
+
+    @Resource private GracefulResponseProperties properties;
 
     @Override
     public Response newEmptyInstance() {
         try {
-            String responseClassFullName = this.properties.getResponseClassFullName();
-            if (StringUtils.hasLength((String)responseClassFullName)) {
-                Object newInstance = Class.forName(responseClassFullName).getConstructor(new Class[0]).newInstance(new Object[0]);
-                return (Response)newInstance;
+            String responseClassFullName = properties.getResponseClassFullName();
+
+            // 配置了Response的全限定名，即自定义了Response，用配置的进行返回
+            if (StringUtils.hasLength(responseClassFullName)) {
+                Object newInstance =
+                        Class.forName(responseClassFullName).getConstructor().newInstance();
+                return (Response) newInstance;
+            } else {
+                // 没有配Response的全限定名，则创建DefaultResponse
+                return generateDefaultResponse();
             }
-            return this.generateDefaultResponse();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private Response generateDefaultResponse() {
-        Integer responseStyle = this.properties.getResponseStyle();
+        Integer responseStyle = properties.getResponseStyle();
         if (Objects.isNull(responseStyle) || RESPONSE_STYLE_0.equals(responseStyle)) {
             return new DefaultResponseImplStyle0();
-        }
-        if (RESPONSE_STYLE_1.equals(responseStyle)) {
+        } else if (RESPONSE_STYLE_1.equals(responseStyle)) {
             return new DefaultResponseImplStyle1();
+        } else {
+            logger.error("不支持的Response style类型,responseStyle={}", responseStyle);
+            throw new IllegalArgumentException("不支持的Response style类型");
         }
-        this.logger.error("\u4e0d\u652f\u6301\u7684Response style\u7c7b\u578b,responseStyle={}", (Object)responseStyle);
-        throw new IllegalArgumentException("\u4e0d\u652f\u6301\u7684Response style\u7c7b\u578b");
     }
 
     @Override
-    public Response newInstance(ResponseStatus responseStatus) {
+    public Response newInstance( ResponseStatus responseStatus) {
         Response bean = this.newEmptyInstance();
         bean.setStatus(responseStatus);
         return bean;
@@ -67,7 +84,7 @@ implements ResponseFactory {
     @Override
     public Response newSuccessInstance() {
         Response emptyInstance = this.newEmptyInstance();
-        emptyInstance.setStatus(this.responseStatusFactory.defaultSuccess());
+        emptyInstance.setStatus(responseStatusFactory.defaultSuccess());
         return emptyInstance;
     }
 
@@ -81,8 +98,7 @@ implements ResponseFactory {
     @Override
     public Response newFailInstance() {
         Response bean = this.newEmptyInstance();
-        bean.setStatus(this.responseStatusFactory.defaultError());
+        bean.setStatus(responseStatusFactory.defaultError());
         return bean;
     }
 }
-

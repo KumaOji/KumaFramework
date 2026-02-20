@@ -1,11 +1,41 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.aop.aop.caching;
 
+/**
+ * 缓存的提供者
+ */
 public interface CacheProvider {
-    public <T> void put(String var1, T var2, long var3);
 
-    public <T> T get(String var1, long var2);
+    /**
+     * 存储
+     * @param key 键
+     * @param value 值
+     * @param expireMillis 过期时长
+     * @param <T> 值类型
+     */
+    <T> void put(String key, T value, long expireMillis);
+
+    /**
+     * 获取
+     * @param key 键
+     * @param expireMillis 过期时长
+     * @param <T> 值类型
+     * @return 值
+     */
+    <T> T get(String key, long expireMillis);
 }
-

@@ -1,39 +1,67 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- *  org.springframework.cloud.context.config.annotation.RefreshScope
- *  org.springframework.http.HttpStatus
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.error;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.http.HttpStatus;
 
+/**
+ * ErrorHandlingProperties
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-01-12 08:54:32
+ */
 @RefreshScope
-@ConfigurationProperties(prefix="kuma.boot.web.error.handling")
+@ConfigurationProperties(prefix = ErrorHandlingProperties.PREFIX)
 public class ErrorHandlingProperties {
+
     public static final String PREFIX = "kuma.boot.web.error.handling";
+
     private boolean enabled = true;
+
     private JsonFieldNames jsonFieldNames = new JsonFieldNames();
+
     private ExceptionLogging exceptionLogging = ExceptionLogging.MESSAGE_ONLY;
-    private List<Class<? extends Throwable>> fullStacktraceClasses = new ArrayList<Class<? extends Throwable>>();
-    private List<String> fullStacktraceHttpStatuses = new ArrayList<String>();
+
+    private List<Class<? extends Throwable>> fullStacktraceClasses = new ArrayList<>();
+
+    private List<String> fullStacktraceHttpStatuses = new ArrayList<>();
+
     private DefaultErrorCodeStrategy defaultErrorCodeStrategy = DefaultErrorCodeStrategy.ALL_CAPS;
+
     private boolean httpStatusInJsonResponse = false;
-    private Map<String, HttpStatus> httpStatuses = new HashMap<String, HttpStatus>();
-    private Map<String, String> codes = new HashMap<String, String>();
-    private Map<String, String> messages = new HashMap<String, String>();
+
+    private Map<String, HttpStatus> httpStatuses = new HashMap<>();
+
+    private Map<String, String> codes = new HashMap<>();
+
+    private Map<String, String> messages = new HashMap<>();
+
     private boolean searchSuperClassHierarchy = false;
 
     public boolean isEnabled() {
-        return this.enabled;
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
@@ -41,7 +69,7 @@ public class ErrorHandlingProperties {
     }
 
     public JsonFieldNames getJsonFieldNames() {
-        return this.jsonFieldNames;
+        return jsonFieldNames;
     }
 
     public void setJsonFieldNames(JsonFieldNames jsonFieldNames) {
@@ -49,7 +77,7 @@ public class ErrorHandlingProperties {
     }
 
     public ExceptionLogging getExceptionLogging() {
-        return this.exceptionLogging;
+        return exceptionLogging;
     }
 
     public void setExceptionLogging(ExceptionLogging exceptionLogging) {
@@ -57,7 +85,7 @@ public class ErrorHandlingProperties {
     }
 
     public List<Class<? extends Throwable>> getFullStacktraceClasses() {
-        return this.fullStacktraceClasses;
+        return fullStacktraceClasses;
     }
 
     public void setFullStacktraceClasses(List<Class<? extends Throwable>> fullStacktraceClasses) {
@@ -65,7 +93,7 @@ public class ErrorHandlingProperties {
     }
 
     public List<String> getFullStacktraceHttpStatuses() {
-        return this.fullStacktraceHttpStatuses;
+        return fullStacktraceHttpStatuses;
     }
 
     public void setFullStacktraceHttpStatuses(List<String> fullStacktraceHttpStatuses) {
@@ -73,7 +101,7 @@ public class ErrorHandlingProperties {
     }
 
     public DefaultErrorCodeStrategy getDefaultErrorCodeStrategy() {
-        return this.defaultErrorCodeStrategy;
+        return defaultErrorCodeStrategy;
     }
 
     public void setDefaultErrorCodeStrategy(DefaultErrorCodeStrategy defaultErrorCodeStrategy) {
@@ -81,7 +109,7 @@ public class ErrorHandlingProperties {
     }
 
     public boolean isHttpStatusInJsonResponse() {
-        return this.httpStatusInJsonResponse;
+        return httpStatusInJsonResponse;
     }
 
     public void setHttpStatusInJsonResponse(boolean httpStatusInJsonResponse) {
@@ -89,7 +117,7 @@ public class ErrorHandlingProperties {
     }
 
     public Map<String, HttpStatus> getHttpStatuses() {
-        return this.httpStatuses;
+        return httpStatuses;
     }
 
     public void setHttpStatuses(Map<String, HttpStatus> httpStatuses) {
@@ -97,7 +125,7 @@ public class ErrorHandlingProperties {
     }
 
     public Map<String, String> getCodes() {
-        return this.codes;
+        return codes;
     }
 
     public void setCodes(Map<String, String> codes) {
@@ -105,7 +133,7 @@ public class ErrorHandlingProperties {
     }
 
     public Map<String, String> getMessages() {
-        return this.messages;
+        return messages;
     }
 
     public void setMessages(Map<String, String> messages) {
@@ -113,14 +141,26 @@ public class ErrorHandlingProperties {
     }
 
     public boolean isSearchSuperClassHierarchy() {
-        return this.searchSuperClassHierarchy;
+        return searchSuperClassHierarchy;
     }
 
     public void setSearchSuperClassHierarchy(boolean searchSuperClassHierarchy) {
         this.searchSuperClassHierarchy = searchSuperClassHierarchy;
     }
 
+    enum ExceptionLogging {
+        NO_LOGGING,
+        MESSAGE_ONLY,
+        WITH_STACKTRACE
+    }
+
+    public enum DefaultErrorCodeStrategy {
+        FULL_QUALIFIED_NAME,
+        ALL_CAPS
+    }
+
     public static class JsonFieldNames {
+
         private String code = "code";
         private String message = "message";
         private String fieldErrors = "fieldErrors";
@@ -128,7 +168,7 @@ public class ErrorHandlingProperties {
         private String parameterErrors = "parameterErrors";
 
         public String getCode() {
-            return this.code;
+            return code;
         }
 
         public void setCode(String code) {
@@ -136,7 +176,7 @@ public class ErrorHandlingProperties {
         }
 
         public String getMessage() {
-            return this.message;
+            return message;
         }
 
         public void setMessage(String message) {
@@ -144,7 +184,7 @@ public class ErrorHandlingProperties {
         }
 
         public String getFieldErrors() {
-            return this.fieldErrors;
+            return fieldErrors;
         }
 
         public void setFieldErrors(String fieldErrors) {
@@ -152,7 +192,7 @@ public class ErrorHandlingProperties {
         }
 
         public String getGlobalErrors() {
-            return this.globalErrors;
+            return globalErrors;
         }
 
         public void setGlobalErrors(String globalErrors) {
@@ -160,25 +200,11 @@ public class ErrorHandlingProperties {
         }
 
         public String getParameterErrors() {
-            return this.parameterErrors;
+            return parameterErrors;
         }
 
         public void setParameterErrors(String parameterErrors) {
             this.parameterErrors = parameterErrors;
         }
     }
-
-    static enum ExceptionLogging {
-        NO_LOGGING,
-        MESSAGE_ONLY,
-        WITH_STACKTRACE;
-
-    }
-
-    public static enum DefaultErrorCodeStrategy {
-        FULL_QUALIFIED_NAME,
-        ALL_CAPS;
-
-    }
 }
-

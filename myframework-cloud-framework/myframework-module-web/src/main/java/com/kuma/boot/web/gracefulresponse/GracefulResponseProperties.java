@@ -1,29 +1,88 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse;
 
-import java.util.List;
+import com.kuma.boot.web.gracefulresponse.defaults.DefaultConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="kuma.boot.web.graceful-response")
+import java.util.List;
+
+/**
+ * 核心配置类.
+ */
+@ConfigurationProperties(prefix = "kuma.boot.web.graceful-response")
 public class GracefulResponseProperties {
+
+    /**
+     * 在全局异常处理器中打印异常，默认不打印
+     */
     private boolean printExceptionInGlobalAdvice = false;
+
+    /**
+     * 默认的Response实现类名称，配置了responseClassFullName，则responseStyle不生效
+     */
     private String responseClassFullName;
+
+    /**
+     * responseStyle的风格，responseClassFullName为空时才会生效
+     * responseStyle==null或者responseStyle==0,Response风格为 DefaultResponseImplStyle0
+     * responseStyle=1,Response风格为 DefaultResponseImplStyle1
+     */
     private Integer responseStyle;
-    private String defaultSuccessCode = "0";
-    private String defaultSuccessMsg = "ok";
-    private String defaultErrorCode = "1";
-    private String defaultErrorMsg = "error";
-    private String defaultValidateErrorCode = "1";
+
+    /**
+     * 默认的成功返回码
+     */
+    private String defaultSuccessCode = DefaultConstants.DEFAULT_SUCCESS_CODE;
+
+    /**
+     * 默认的成功提示
+     */
+    private String defaultSuccessMsg = DefaultConstants.DEFAULT_SUCCESS_MSG;
+
+    /**
+     * 默认的失败码
+     */
+    private String defaultErrorCode = DefaultConstants.DEFAULT_ERROR_CODE;
+
+    /**
+     * 默认的失败提示
+     */
+    private String defaultErrorMsg = DefaultConstants.DEFAULT_ERROR_MSG;
+
+    /**
+     * Validate异常码，不提供的话默认DefaultConstants.DEFAULT_ERROR_CODE
+     */
+    private String defaultValidateErrorCode = DefaultConstants.DEFAULT_ERROR_CODE;
+
+    /**
+     * 例外包路径
+     */
     private List<String> excludePackages;
+
+    /**
+     * 不使用@ExceptionMapper和@ExceptionAliasFor修饰的原生异常
+     * 是否使用异常信息Throwable类的detailMessage进行返回
+     * originExceptionUsingDetailMessage=false，则msg=defaultErrorMsg
+     */
     private Boolean originExceptionUsingDetailMessage = false;
 
     public boolean isPrintExceptionInGlobalAdvice() {
-        return this.printExceptionInGlobalAdvice;
+        return printExceptionInGlobalAdvice;
     }
 
     public void setPrintExceptionInGlobalAdvice(boolean printExceptionInGlobalAdvice) {
@@ -31,7 +90,7 @@ public class GracefulResponseProperties {
     }
 
     public String getDefaultSuccessCode() {
-        return this.defaultSuccessCode;
+        return defaultSuccessCode;
     }
 
     public void setDefaultSuccessCode(String defaultSuccessCode) {
@@ -39,7 +98,7 @@ public class GracefulResponseProperties {
     }
 
     public String getDefaultSuccessMsg() {
-        return this.defaultSuccessMsg;
+        return defaultSuccessMsg;
     }
 
     public void setDefaultSuccessMsg(String defaultSuccessMsg) {
@@ -47,7 +106,7 @@ public class GracefulResponseProperties {
     }
 
     public String getDefaultErrorCode() {
-        return this.defaultErrorCode;
+        return defaultErrorCode;
     }
 
     public void setDefaultErrorCode(String defaultErrorCode) {
@@ -55,7 +114,7 @@ public class GracefulResponseProperties {
     }
 
     public String getDefaultErrorMsg() {
-        return this.defaultErrorMsg;
+        return defaultErrorMsg;
     }
 
     public void setDefaultErrorMsg(String defaultErrorMsg) {
@@ -63,7 +122,7 @@ public class GracefulResponseProperties {
     }
 
     public String getResponseClassFullName() {
-        return this.responseClassFullName;
+        return responseClassFullName;
     }
 
     public void setResponseClassFullName(String responseClassFullName) {
@@ -71,7 +130,7 @@ public class GracefulResponseProperties {
     }
 
     public Integer getResponseStyle() {
-        return this.responseStyle;
+        return responseStyle;
     }
 
     public void setResponseStyle(Integer responseStyle) {
@@ -79,7 +138,7 @@ public class GracefulResponseProperties {
     }
 
     public String getDefaultValidateErrorCode() {
-        return this.defaultValidateErrorCode;
+        return defaultValidateErrorCode;
     }
 
     public void setDefaultValidateErrorCode(String defaultValidateErrorCode) {
@@ -87,7 +146,7 @@ public class GracefulResponseProperties {
     }
 
     public List<String> getExcludePackages() {
-        return this.excludePackages;
+        return excludePackages;
     }
 
     public void setExcludePackages(List<String> excludePackages) {
@@ -95,11 +154,10 @@ public class GracefulResponseProperties {
     }
 
     public Boolean getOriginExceptionUsingDetailMessage() {
-        return this.originExceptionUsingDetailMessage;
+        return originExceptionUsingDetailMessage;
     }
 
     public void setOriginExceptionUsingDetailMessage(Boolean originExceptionUsingDetailMessage) {
         this.originExceptionUsingDetailMessage = originExceptionUsingDetailMessage;
     }
 }
-

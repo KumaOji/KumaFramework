@@ -1,21 +1,36 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.exception.enums;
 
+/** 异常处理类型 */
 public enum ExceptionHandleTypeEnum {
-    LOGGER("\u4e0d\u901a\u77e5"),
-    DING_TALK("\u901a\u8fc7\u9489\u9489\u901a\u77e5"),
-    MAIL("\u90ae\u4ef6\u901a\u77e5");
+
+    /** 异常处理通知类型 说明 */
+    LOGGER("不通知"),
+    DING_TALK("通过钉钉通知"),
+    MAIL("邮件通知");
 
     private final String text;
 
     public String getText() {
-        return this.text;
+        return text;
     }
 
-    private ExceptionHandleTypeEnum(String text) {
+    ExceptionHandleTypeEnum(String text) {
         this.text = text;
     }
 }
-

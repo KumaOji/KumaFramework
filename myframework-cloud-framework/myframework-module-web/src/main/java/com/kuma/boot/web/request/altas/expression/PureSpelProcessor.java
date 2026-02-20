@@ -1,14 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.expression.Expression
- *  org.springframework.expression.ExpressionParser
- *  org.springframework.expression.spel.standard.SpelExpressionParser
- *  org.springframework.expression.spel.support.StandardEvaluationContext
- */
 package com.kuma.boot.web.request.altas.expression;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -19,13 +8,20 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public class PureSpelProcessor
-implements ExpressionProcessor {
+/**
+ * 纯SpEL表达式处理器 处理整个字符串都是SpEL表达式的情况，如: #{args[0]}
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+
+public class PureSpelProcessor implements com.kuma.boot.web.request.altas.expression.ExpressionProcessor {
+
     private final ExpressionParser parser = new SpelExpressionParser();
     private final SpelExpressionEvaluator mainEvaluator;
     private final boolean failSafe;
 
-    public PureSpelProcessor(SpelExpressionEvaluator mainEvaluator, boolean failSafe) {
+    public PureSpelProcessor( SpelExpressionEvaluator mainEvaluator, boolean failSafe) {
         this.mainEvaluator = mainEvaluator;
         this.failSafe = failSafe;
     }
@@ -35,75 +31,108 @@ implements ExpressionProcessor {
         if (expression == null || expression.trim().isEmpty()) {
             return "";
         }
+
+        // 预先验证LogContext状态
         if (logContext == null) {
-            LogUtils.warn((String)"PureSpelProcessor received null LogContext, expression: {}", (Object[])new Object[]{expression});
-            return this.failSafe ? "[LogContext\u4e3anull]" : expression;
+            LogUtils.warn("PureSpelProcessor received null LogContext, expression: {}", expression);
+            return failSafe ? "[LogContext为null]" : expression;
         }
+
+        // 如果表达式包含args引用，验证args是否存在
         if (expression.contains("args") && logContext.getArgs() == null) {
-            String warnMsg = String.format("\u8868\u8fbe\u5f0f\u5f15\u7528args\u4f46LogContext.args\u4e3anull\uff0c\u8868\u8fbe\u5f0f: %s, method: %s", expression, logContext.getMethodName());
-            LogUtils.warn((String)warnMsg, (Object[])new Object[0]);
-            if (this.failSafe) {
+            String warnMsg = String.format("表达式引用args但LogContext.args为null，表达式: %s, method: %s",
+                    expression, logContext.getMethodName());
+            LogUtils.warn(warnMsg);
+
+            if (failSafe) {
                 return "[" + warnMsg + "]";
             }
         }
+
         try {
-            EvaluationContext evaluationContext;
-            String processedExpression;
-            Expression spelExpression;
-            Object result;
+            // 对于纯SpEL表达式，需要移除#{...}包装
             String cleanExpression = expression.trim();
             if (cleanExpression.startsWith("#{") && cleanExpression.endsWith("}")) {
                 cleanExpression = cleanExpression.substring(2, cleanExpression.length() - 1);
             }
-            return (result = (spelExpression = this.parser.parseExpression(processedExpression = this.ensureVariableSyntax(cleanExpression))).getValue(evaluationContext = this.createSafeEvaluationContext(logContext))) != null ? result.toString() : "";
-        }
-        catch (Exception e) {
-            String errorMsg = "\u7eafSpEL\u8868\u8fbe\u5f0f\u5904\u7406\u5931\u8d25: " + expression;
-            LogUtils.warn((String)errorMsg, (Object[])new Object[]{e});
-            if (this.failSafe) {
+
+            // 确保变量引用使用正确的语法 (#variableName)
+            String processedExpression = ensureVariableSyntax(cleanExpression);
+
+            // 解析并求值SpEL表达式
+            Expression spelExpression = parser.parseExpression(processedExpression);
+            EvaluationContext evaluationContext = createSafeEvaluationContext(logContext);
+
+            Object result = spelExpression.getValue(evaluationContext);
+            return result != null ? result.toString() : "";
+
+        } catch (Exception e) {
+            String errorMsg = "纯SpEL表达式处理失败: " + expression;
+            LogUtils.warn(errorMsg, e);
+
+            if (failSafe) {
                 return "[" + errorMsg + "]";
+            } else {
+                // 重新抛出异常让上层处理
+                throw new RuntimeException(errorMsg, e);
             }
-            throw new RuntimeException(errorMsg, e);
         }
     }
 
+    /**
+     * 确保变量引用使用正确的语法 将变量名转换为#variableName格式
+     */
     private String ensureVariableSyntax(String expression) {
-        Object processed = expression;
-        if (((String)processed).matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\[.*\\].*")) {
-            processed = ((String)processed).replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
-        } else if (((String)processed).matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\..*")) {
-            processed = ((String)processed).replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
-        } else if (((String)processed).matches("^([a-zA-Z_][a-zA-Z0-9_]*)$")) {
-            processed = "#" + (String)processed;
+        // 处理常见的变量引用
+        String processed = expression;
+
+        // 如果表达式以变量名开头且没有#前缀，添加#前缀
+        if (processed.matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\[.*\\].*")) {
+            // 处理数组/列表访问，如 args[0]
+            processed = processed.replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
+        } else if (processed.matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\..*")) {
+            // 处理属性访问，如 result.success
+            processed = processed.replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
+        } else if (processed.matches("^([a-zA-Z_][a-zA-Z0-9_]*)$")) {
+            // 处理简单变量引用，如 args
+            processed = "#" + processed;
         }
-        LogUtils.debug((String)"Expression syntax processing: {} -> {}", (Object[])new Object[]{expression, processed});
+
+        LogUtils.debug("Expression syntax processing: {} -> {}", expression, processed);
         return processed;
     }
 
-    private EvaluationContext createSafeEvaluationContext(LogContext logContext) {
-        EvaluationContext context = this.mainEvaluator.createEvaluationContext(logContext);
+    /**
+     * 新增：安全的求值上下文创建
+     */
+    private EvaluationContext createSafeEvaluationContext( LogContext logContext) {
+        EvaluationContext context = mainEvaluator.createEvaluationContext(logContext);
+
+        // 验证关键变量是否正确设置
         try {
             Object args = context.lookupVariable("args");
-            LogUtils.debug((String)"PureSpelProcessor\u4e2dargs\u53d8\u91cf\u72b6\u6001: {}, LogContext.args: {}", (Object[])new Object[]{args != null ? "non-null" : "null", logContext != null && logContext.getArgs() != null ? "non-null" : "null"});
+            LogUtils.debug("PureSpelProcessor中args变量状态: {}, LogContext.args: {}",
+                    args != null ? "non-null" : "null",
+                    logContext != null && logContext.getArgs() != null ? "non-null" : "null");
+
             if (args == null && logContext != null && logContext.getArgs() != null) {
-                LogUtils.warn((String)"args is null in EvaluationContext but LogContext.args is not null, resetting", (Object[])new Object[0]);
-                ((StandardEvaluationContext)context).setVariable("args", (Object)logContext.getArgs());
+                LogUtils.warn("args is null in EvaluationContext but LogContext.args is not null, resetting");
+                ((StandardEvaluationContext) context).setVariable("args", logContext.getArgs());
             }
+        } catch (Exception e) {
+            LogUtils.debug("Exception occurred while validating EvaluationContext state", e);
         }
-        catch (Exception e) {
-            LogUtils.debug((String)"Exception occurred while validating EvaluationContext state", (Object[])new Object[]{e});
-        }
+
         return context;
     }
 
     @Override
     public boolean canHandle(String expression) {
-        return ExpressionTypeDetector.detectType(expression) == ExpressionType.PURE_SPEL;
+        return com.kuma.boot.web.request.altas.expression.ExpressionTypeDetector.detectType(expression) == com.kuma.boot.web.request.altas.expression.ExpressionType.PURE_SPEL;
     }
 
     @Override
-    public ExpressionType getSupportedType() {
-        return ExpressionType.PURE_SPEL;
+    public com.kuma.boot.web.request.altas.expression.ExpressionType getSupportedType() {
+        return com.kuma.boot.web.request.altas.expression.ExpressionType.PURE_SPEL;
     }
 }
-

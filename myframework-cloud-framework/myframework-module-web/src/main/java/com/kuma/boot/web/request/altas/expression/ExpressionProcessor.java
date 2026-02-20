@@ -1,15 +1,37 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.expression;
 
 import com.kuma.boot.web.request.altas.context.LogContext;
 
+/**
+ * 表达式处理策略接口
+ * 定义了不同类型表达式的处理方式
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
 public interface ExpressionProcessor {
-    public String processExpression(String var1, LogContext var2);
 
-    public boolean canHandle(String var1);
+    /**
+     * 处理表达式
+     *
+     * @param expression 表达式字符串
+     * @param logContext 日志上下文
+     * @return 处理后的字符串结果
+     */
+    String processExpression(String expression, LogContext logContext);
 
-    public ExpressionType getSupportedType();
+    /**
+     * 检查是否能处理指定类型的表达式
+     *
+     * @param expression 表达式字符串
+     * @return 如果能处理返回true，否则返回false
+     */
+    boolean canHandle(String expression);
+
+    /**
+     * 获取支持的表达式类型
+     *
+     * @return 表达式类型
+     */
+    ExpressionType getSupportedType();
 }
-

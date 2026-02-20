@@ -1,22 +1,30 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.exception.advice;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(value={ElementType.METHOD, ElementType.TYPE})
-@Retention(value=RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface ErrorMapping {
-    public Class<? extends Exception> exception();
 
-    public String code();
+    /**
+     * 异常类型
+     */
+    Class<? extends Exception> exception();
 
-    public String message();
+    /**
+     * 错误码
+     */
+    String code();
 
-    public int httpStatus() default 500;
+    /**
+     * 错误消息
+     */
+    String message();
+
+    /**
+     * HTTP状态码
+     */
+    int httpStatus() default 500;
 }
-

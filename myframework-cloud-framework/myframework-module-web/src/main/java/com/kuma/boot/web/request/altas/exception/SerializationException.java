@@ -1,30 +1,41 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.exception;
 
-public class SerializationException
-extends LogException {
+/**
+ * 序列化异常
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+public class SerializationException extends com.kuma.boot.web.request.altas.exception.LogException {
+
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 序列化的对象类型
+     */
     private final Class<?> objectType;
 
     public SerializationException(Class<?> objectType, String message) {
-        super("\u5e8f\u5217\u5316\u5931\u8d25: " + (objectType != null ? objectType.getSimpleName() : "unknown") + ", \u539f\u56e0: " + message);
+        super("序列化失败: " + (objectType != null ? objectType.getSimpleName() : "unknown") + ", 原因: " + message);
         this.objectType = objectType;
     }
 
     public SerializationException(Class<?> objectType, String message, Throwable cause) {
-        super("\u5e8f\u5217\u5316\u5931\u8d25: " + (objectType != null ? objectType.getSimpleName() : "unknown") + ", \u539f\u56e0: " + message, cause);
+        super("序列化失败: " + (objectType != null ? objectType.getSimpleName() : "unknown") + ", 原因: " + message, cause);
         this.objectType = objectType;
     }
 
     public SerializationException(Class<?> objectType, Throwable cause) {
-        super("\u5e8f\u5217\u5316\u5931\u8d25: " + (objectType != null ? objectType.getSimpleName() : "unknown"), cause);
+        super("序列化失败: " + (objectType != null ? objectType.getSimpleName() : "unknown"), cause);
         this.objectType = objectType;
     }
 
+    /**
+     * 获取序列化失败的对象类型
+     *
+     * @return 对象类型
+     */
     public Class<?> getObjectType() {
-        return this.objectType;
+        return objectType;
     }
 }
-

@@ -1,14 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.context.ContextUtils
- *  com.kuma.boot.core.support.Collector
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.web.method.HandlerMethod
- *  org.springframework.web.servlet.HandlerInterceptor
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.mvc.interceptor;
 
 import com.kuma.boot.common.utils.context.ContextUtils;
@@ -16,75 +21,111 @@ import com.kuma.boot.core.support.Collector;
 import com.kuma.boot.web.autoconfigure.properties.WebMvcInterceptorProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-public class DoubtApiInterceptor
-implements HandlerInterceptor {
-    private final ThreadLocal<Long> beforeMem = new ThreadLocal();
-    private final Map<String, DoubtApiInfo> statisticMap = new ConcurrentHashMap<String, DoubtApiInfo>();
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 拦截器，统计接口内存增长
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-10 17:06:43
+ */
+public class DoubtApiInterceptor implements HandlerInterceptor {
+
+    private final ThreadLocal<Long> beforeMem = new ThreadLocal<>();
+    private final Map<String, DoubtApiInfo> statisticMap = new ConcurrentHashMap<>();
     private final WebMvcInterceptorProperties properties;
 
     public DoubtApiInterceptor(WebMvcInterceptorProperties properties) {
         this.properties = properties;
     }
 
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        this.beforeMem.set(this.getJVMUsed());
+    @Override
+    public boolean preHandle(
+            HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+        beforeMem.set(getJVMUsed());
         return true;
     }
 
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        Long data = this.beforeMem.get();
-        this.beforeMem.remove();
-        if (handler instanceof HandlerMethod) {
-            HandlerMethod method = (HandlerMethod)handler;
-            String methodPath = method.getBean().getClass().getName() + "." + method.getMethod().getName();
+    @Override
+    public void afterCompletion(
+            HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
+        Long data = beforeMem.get();
+        beforeMem.remove();
+
+        if (handler instanceof HandlerMethod method) {
+            String methodPath =
+                    method.getBean().getClass().getName() + "." + method.getMethod().getName();
             String url = request.getRequestURI();
-            long incrMem = this.getJVMUsed() - data;
-            if (incrMem > (long)this.properties.getDoubtApiThreshold()) {
-                if (this.statisticMap.containsKey(methodPath)) {
-                    staticInfo = this.statisticMap.get(methodPath);
+
+            long incrMem = getJVMUsed() - data;
+            if (incrMem > properties.getDoubtApiThreshold()) {
+                if (statisticMap.containsKey(methodPath)) {
+                    DoubtApiInfo staticInfo = statisticMap.get(methodPath);
                     staticInfo.uri = url;
-                    ++staticInfo.count;
+                    staticInfo.count += 1;
                     staticInfo.totalIncreMem += incrMem;
-                    if (staticInfo.totalIncreMem <= 0L) {
+                    if (staticInfo.totalIncreMem <= 0) {
                         staticInfo.totalIncreMem = incrMem;
                         staticInfo.count = 1;
                     }
                 } else {
-                    staticInfo = new DoubtApiInfo();
+                    DoubtApiInfo staticInfo = new DoubtApiInfo();
                     staticInfo.method = methodPath;
                     staticInfo.uri = url;
+                    // 第一次不计算内存
                     staticInfo.count = 0;
-                    staticInfo.totalIncreMem = 0L;
-                    this.statisticMap.put(methodPath, staticInfo);
+                    staticInfo.totalIncreMem = 0;
+                    statisticMap.put(methodPath, staticInfo);
                 }
-                Collector collector = (Collector)ContextUtils.getBean(Collector.class, (boolean)true);
+
+                Collector collector = ContextUtils.getBean(Collector.class, true);
                 if (Objects.nonNull(collector)) {
-                    collector.value("kmc.monitor.doubtapi.info").set(this.statisticMap);
+                    collector.value("ttc.monitor.doubtapi.info").set(statisticMap);
                 }
             }
         }
     }
 
+    /**
+     * 获取JVM内存
+     *
+     * @return long
+     * @since 2021-09-10 17:08:03
+     */
     private long getJVMUsed() {
         Runtime rt = Runtime.getRuntime();
-        return rt.totalMemory() - rt.freeMemory();
+        return (rt.totalMemory() - rt.freeMemory());
     }
 
-    public static class DoubtApiInfo
-    implements Comparable<DoubtApiInfo> {
+    /**
+     * DoubtApiInfo
+     *
+     * @author kuma
+     * @since 2021-09-10 17:08:13
+     */
+    public static class DoubtApiInfo implements Comparable<DoubtApiInfo> {
+
+        /** 请求URL */
         private String uri;
+
+        /** 请求接口方法 */
         private String method;
+
+        /** 总增加内存 */
         private long totalIncreMem;
+
+        /** 请求命中次数 */
         private int count;
 
-        public DoubtApiInfo() {
-        }
+        public DoubtApiInfo() {}
 
         public DoubtApiInfo(String uri, String method, long totalIncreMem, int count) {
             this.uri = uri;
@@ -93,24 +134,30 @@ implements HandlerInterceptor {
             this.count = count;
         }
 
+        /** 倒序 */
         @Override
         public int compareTo(DoubtApiInfo doubtApiInfo) {
-            long cha;
             if (doubtApiInfo == null) {
                 return -1;
             }
-            long l = doubtApiInfo.count > 0 ? doubtApiInfo.totalIncreMem / (long)doubtApiInfo.count : (cha = doubtApiInfo.totalIncreMem - (long)this.count > 0L ? this.totalIncreMem / (long)this.count : this.totalIncreMem);
-            if (cha > 0L) {
+            long cha =
+                    doubtApiInfo.count > 0
+                            ? doubtApiInfo.totalIncreMem / doubtApiInfo.count
+                            : doubtApiInfo.totalIncreMem - this.count > 0
+                            ? this.totalIncreMem / this.count
+                            : this.totalIncreMem;
+
+            if (cha > 0) {
                 return 1;
-            }
-            if (cha < 0L) {
+            } else if (cha < 0) {
                 return -1;
+            } else {
+                return 0;
             }
-            return 0;
         }
 
         public String getUri() {
-            return this.uri;
+            return uri;
         }
 
         public void setUri(String uri) {
@@ -118,7 +165,7 @@ implements HandlerInterceptor {
         }
 
         public String getMethod() {
-            return this.method;
+            return method;
         }
 
         public void setMethod(String method) {
@@ -126,7 +173,7 @@ implements HandlerInterceptor {
         }
 
         public long getTotalIncreMem() {
-            return this.totalIncreMem;
+            return totalIncreMem;
         }
 
         public void setTotalIncreMem(long totalIncreMem) {
@@ -134,7 +181,7 @@ implements HandlerInterceptor {
         }
 
         public int getCount() {
-            return this.count;
+            return count;
         }
 
         public void setCount(int count) {
@@ -142,4 +189,3 @@ implements HandlerInterceptor {
         }
     }
 }
-

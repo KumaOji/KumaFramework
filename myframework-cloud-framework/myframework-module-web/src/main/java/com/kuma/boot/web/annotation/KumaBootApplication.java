@@ -16,33 +16,29 @@
 
 package com.kuma.boot.web.annotation;
 
+import com.kuma.boot.common.utils.context.EnableContextUtils;
+import com.kuma.boot.security.spring.annotation.EnableOauth2ResourceServer;
+//import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
 import java.lang.annotation.*;
 
 /**
- * 是否启用自动获取用户信息注解
- *
- * <p>
- *
- * <pre>
- *     {@code
- *     public Object getUser(@EnableUser LoginUser user)
- *     }
- * </pre>
+ * TaoTaoBootApplication
  *
  * @author kuma
  * @version 2021.9
- * @since 2021-09-02 22:04:48
+ * @since 2021-09-02 21:02:52
  */
-@Target(ElementType.PARAMETER)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface LoginUser {
-
-    /**
-     * 是否查询LoginUser对象所有信息，true则通过rpc接口查询
-     *
-     * @return boolean
-     * @since 2022-07-06 14:51:24
-     */
-    boolean value() default false;
-}
+@EnableContextUtils
+@ServletComponentScan(basePackages = {"com.kuma.boot.web.servlet"})
+@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+@EnableOauth2ResourceServer
+//@EnableEncryptableProperties
+@SpringBootApplication
+public @interface KumaBootApplication {}

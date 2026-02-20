@@ -1,26 +1,45 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  com.kuma.boot.common.utils.date.DateUtils
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.request.service.impl;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
+import com.kuma.boot.common.constant.RedisConstants;
+import com.kuma.boot.common.model.DatePattern;
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.request.model.RequestLog;
 import com.kuma.boot.web.request.service.RequestLoggerService;
+
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class RedisRequestLoggerServiceImpl
-implements RequestLoggerService {
+/**
+ * 审计日志实现类-redis
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2020/5/2 11:18
+ */
+public class RedisRequestLoggerServiceImpl implements RequestLoggerService {
+
     private final RedisRepository redisRepository;
     private static final int THRESHOLD = 1000;
+
     private final AtomicLong sendSuccessNum = new AtomicLong(0L);
     private final AtomicLong sendErrorsNum = new AtomicLong(0L);
 
@@ -29,23 +48,24 @@ implements RequestLoggerService {
     }
 
     @Override
-    public void save(RequestLog requestLog) {
-        String date = DateUtils.format((LocalDate)LocalDate.now(), (String)"yyyy:MM:dd");
-        if (Objects.nonNull(this.redisRepository)) {
-            this.redisRepository.send("REQUEST:LOG:TOPIC", (Object)requestLog);
-            Long index = this.redisRepository.leftPush("REQUEST:LOG:" + date, (Object)requestLog);
-            if (index > 0L) {
-                long andIncrement = this.sendSuccessNum.getAndIncrement();
-                if (andIncrement > 0L && andIncrement % 1000L == 0L) {
-                    LogUtils.info((String)"RedisRequestLogger \u8fdc\u7a0b\u65e5\u5fd7\u8bb0\u5f55\u6210\u529f\uff1a\u6210\u529f\u6761\u6570\uff1a{}", (Object[])new Object[]{andIncrement});
+    public void save( RequestLog requestLog) {
+        String date = DateUtils.format(LocalDate.now(), DatePattern.COLON_DATE_PATTERN);
+
+        if (Objects.nonNull(redisRepository)) {
+            redisRepository.send(RedisConstants.REQUEST_LOG_TOPIC, requestLog);
+
+            Long index = redisRepository.leftPush(RedisConstants.REQUEST_LOG + date, requestLog);
+            if (index > 0) {
+                long andIncrement = sendSuccessNum.getAndIncrement();
+                if (andIncrement > 0 && andIncrement % THRESHOLD == 0) {
+                    LogUtils.info("RedisRequestLogger 远程日志记录成功：成功条数：{}", andIncrement);
                 }
             } else {
-                long andIncrement = this.sendErrorsNum.getAndIncrement();
-                if (andIncrement > 0L && andIncrement % 1000L == 0L) {
-                    LogUtils.error((String)"RedisRequestLogger \u8fdc\u7a0b\u65e5\u5fd7\u8bb0\u5f55\u5931\u8d25\uff1a\u5931\u8d25\u6761\u6570\uff1a{}", (Object[])new Object[]{andIncrement});
+                long andIncrement = sendErrorsNum.getAndIncrement();
+                if (andIncrement > 0 && andIncrement % THRESHOLD == 0) {
+                    LogUtils.error("RedisRequestLogger 远程日志记录失败：失败条数：{}", andIncrement);
                 }
             }
         }
     }
 }
-

@@ -1,33 +1,54 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.google.common.base.Stopwatch
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.kafka.core.KafkaTemplate
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.request.service.impl;
 
 import com.google.common.base.Stopwatch;
+import com.kuma.boot.common.utils.async.CompletableFutureUtils;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.mq.kafka.kafka.constant.KafkaConstant;
 import com.kuma.boot.web.request.model.RequestLog;
 import com.kuma.boot.web.request.service.RequestLoggerService;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.kafka.core.KafkaTemplate;
 
-public class KafkaRequestLoggerServiceImpl
-implements RequestLoggerService {
+/**
+ * 审计日志实现类-Kafka
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2020/5/2 11:18
+ */
+public class KafkaRequestLoggerServiceImpl implements RequestLoggerService {
+
     private final Stopwatch currentStopwatch = Stopwatch.createStarted();
     private final Stopwatch lastSuccessStopwatch = Stopwatch.createStarted();
     private final Stopwatch lastErrorStopwatch = Stopwatch.createStarted();
+
     private final AtomicLong sendSuccessNum = new AtomicLong(0L);
     private final AtomicLong sendErrorsNum = new AtomicLong(0L);
+
     private static final int THRESHOLD = 1000;
+
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     public KafkaRequestLoggerServiceImpl(KafkaTemplate<String, String> kafkaTemplate) {
@@ -35,20 +56,23 @@ implements RequestLoggerService {
     }
 
     @Override
-    public void save(RequestLog requestLog) {
-        if (Objects.nonNull(this.kafkaTemplate)) {
-            String data = JacksonUtils.toJSONString((Object)requestLog);
-            CompletableFuture future = this.kafkaTemplate.send("request-log", (Object)data);
-            future.whenComplete((result, throwable) -> {
+    public void save( RequestLog requestLog) {
+        if (Objects.nonNull(kafkaTemplate)) {
+            String data = JacksonUtils.toJSONString(requestLog);
+
+            CompletableFuture<SendResult<String, String>> future =
+                    kafkaTemplate.send(KafkaConstant.REQUEST_LOG_TOPIC, data);
+
+            future.whenComplete((result, throwable) ->{
                 if (throwable != null) {
-                    long errorNum = this.sendErrorsNum.getAndIncrement();
-                    if (errorNum > 0L && errorNum % 1000L == 0L) {
-                        this.errorLog(errorNum);
+                    long errorNum = sendErrorsNum.getAndIncrement();
+                    if (errorNum > 0 && errorNum % THRESHOLD == 0) {
+                        errorLog(errorNum);
                     }
                 } else {
-                    long andIncrement = this.sendSuccessNum.getAndIncrement();
-                    if (andIncrement > 0L && andIncrement % 1000L == 0L) {
-                        this.successLog(andIncrement);
+                    long andIncrement = sendSuccessNum.getAndIncrement();
+                    if (andIncrement > 0 && andIncrement % THRESHOLD == 0) {
+                        successLog(andIncrement);
                     }
                 }
             });
@@ -56,25 +80,46 @@ implements RequestLoggerService {
     }
 
     protected void successLog(long num) {
-        long hour = this.currentStopwatch.elapsed(TimeUnit.HOURS);
-        long minute = this.currentStopwatch.elapsed(TimeUnit.MINUTES);
-        long seconds = this.currentStopwatch.elapsed(TimeUnit.SECONDS);
-        long lastSeconds = this.lastSuccessStopwatch.elapsed(TimeUnit.SECONDS);
-        long lastMinute = this.lastSuccessStopwatch.elapsed(TimeUnit.MINUTES);
-        long lastHour = this.lastSuccessStopwatch.elapsed(TimeUnit.HOURS);
-        LogUtils.info((String)"KafkaRequestLogger [{}\u5df2\u8fbe {}\u6761 \u5171\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6, \u6700\u8fd1\u4e00\u6b21\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6]", (Object[])new Object[]{"\u8bf7\u6c42\u65e5\u5fd7\u6d88\u606f\u53d1\u9001\u6210\u529f", num, seconds, minute, hour, lastSeconds, lastMinute, lastHour});
-        this.lastSuccessStopwatch.reset().start();
+        long hour = currentStopwatch.elapsed(TimeUnit.HOURS);
+        long minute = currentStopwatch.elapsed(TimeUnit.MINUTES);
+        long seconds = currentStopwatch.elapsed(TimeUnit.SECONDS);
+
+        long lastSeconds = lastSuccessStopwatch.elapsed(TimeUnit.SECONDS);
+        long lastMinute = lastSuccessStopwatch.elapsed(TimeUnit.MINUTES);
+        long lastHour = lastSuccessStopwatch.elapsed(TimeUnit.HOURS);
+
+        LogUtils.info(
+                "KafkaRequestLogger [{}已达 {}条 共用时{}秒 {}分 {}小时, 最近一次用时{}秒 {}分 {}小时]",
+                "请求日志消息发送成功",
+                num,
+                seconds,
+                minute,
+                hour,
+                lastSeconds,
+                lastMinute,
+                lastHour);
+        lastSuccessStopwatch.reset().start();
     }
 
     protected void errorLog(long num) {
-        long hour = this.currentStopwatch.elapsed(TimeUnit.HOURS);
-        long minute = this.currentStopwatch.elapsed(TimeUnit.MINUTES);
-        long seconds = this.currentStopwatch.elapsed(TimeUnit.SECONDS);
-        long lastSeconds = this.lastErrorStopwatch.elapsed(TimeUnit.SECONDS);
-        long lastMinute = this.lastErrorStopwatch.elapsed(TimeUnit.MINUTES);
-        long lastHour = this.lastErrorStopwatch.elapsed(TimeUnit.HOURS);
-        LogUtils.error((String)"KafkaRequestLogger [{}\u5df2\u8fbe {}\u6761 \u5171\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6, \u6700\u8fd1\u4e00\u6b21\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6]", (Object[])new Object[]{"\u8bf7\u6c42\u65e5\u5fd7\u53d1\u9001\u8fdc\u7a0b\u8bb0\u5f55\u5931\u8d25", num, seconds, minute, hour, lastSeconds, lastMinute, lastHour});
-        this.lastErrorStopwatch.reset().start();
+        long hour = currentStopwatch.elapsed(TimeUnit.HOURS);
+        long minute = currentStopwatch.elapsed(TimeUnit.MINUTES);
+        long seconds = currentStopwatch.elapsed(TimeUnit.SECONDS);
+
+        long lastSeconds = lastErrorStopwatch.elapsed(TimeUnit.SECONDS);
+        long lastMinute = lastErrorStopwatch.elapsed(TimeUnit.MINUTES);
+        long lastHour = lastErrorStopwatch.elapsed(TimeUnit.HOURS);
+
+        LogUtils.error(
+                "KafkaRequestLogger [{}已达 {}条 共用时{}秒 {}分 {}小时, 最近一次用时{}秒 {}分 {}小时]",
+                "请求日志发送远程记录失败",
+                num,
+                seconds,
+                minute,
+                hour,
+                lastSeconds,
+                lastMinute,
+                lastHour);
+        lastErrorStopwatch.reset().start();
     }
 }
-

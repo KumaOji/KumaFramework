@@ -1,42 +1,110 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.context;
+
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 日志上下文
+ * 在日志处理过程中传递各种上下文信息，供SpEL表达式使用
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
 public class LogContext {
-    private String traceId;
-    private long startTime;
-    private long executionTime;
-    private String className;
-    private String methodName;
-    private String methodSignature;
-    private Object[] args;
-    private Object result;
-    private Throwable exception;
-    private Map<String, Object> variables = new HashMap<String, Object>();
 
+    /**
+     * 链路追踪ID
+     */
+    private String traceId;
+
+    /**
+     * 方法开始执行时间（毫秒）
+     */
+    private long startTime;
+
+    /**
+     * 方法执行时间（毫秒）
+     */
+    private long executionTime;
+
+    /**
+     * 类名
+     */
+    private String className;
+
+    /**
+     * 方法名
+     */
+    private String methodName;
+
+    /**
+     * 方法签名
+     */
+    private String methodSignature;
+
+    /**
+     * 方法参数
+     */
+    private Object[] args;
+
+    /**
+     * 方法返回值
+     */
+    private Object result;
+
+    /**
+     * 异常对象
+     */
+    private Throwable exception;
+
+    /**
+     * 自定义变量
+     * 可用于存储额外的上下文信息
+     */
+    private Map<String, Object> variables = new HashMap<>();
+
+    /**
+     * 添加自定义变量
+     *
+     * @param key 变量名
+     * @param value 变量值
+     * @return 当前对象
+     */
     public LogContext addVariable(String key, Object value) {
         this.variables.put(key, value);
         return this;
     }
 
+    /**
+     * 获取自定义变量
+     *
+     * @param key 变量名
+     * @return 变量值
+     */
     public Object getVariable(String key) {
         return this.variables.get(key);
     }
 
+    /**
+     * 移除自定义变量
+     *
+     * @param key 变量名
+     * @return 移除的变量值
+     */
     public Object removeVariable(String key) {
         return this.variables.remove(key);
     }
 
+    /**
+     * 清空所有自定义变量
+     */
     public void clearVariables() {
         this.variables.clear();
     }
 
     public String getTraceId() {
-        return this.traceId;
+        return traceId;
     }
 
     public void setTraceId(String traceId) {
@@ -44,7 +112,7 @@ public class LogContext {
     }
 
     public long getStartTime() {
-        return this.startTime;
+        return startTime;
     }
 
     public void setStartTime(long startTime) {
@@ -52,7 +120,7 @@ public class LogContext {
     }
 
     public long getExecutionTime() {
-        return this.executionTime;
+        return executionTime;
     }
 
     public void setExecutionTime(long executionTime) {
@@ -60,7 +128,7 @@ public class LogContext {
     }
 
     public String getClassName() {
-        return this.className;
+        return className;
     }
 
     public void setClassName(String className) {
@@ -68,7 +136,7 @@ public class LogContext {
     }
 
     public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
     public void setMethodName(String methodName) {
@@ -76,7 +144,7 @@ public class LogContext {
     }
 
     public String getMethodSignature() {
-        return this.methodSignature;
+        return methodSignature;
     }
 
     public void setMethodSignature(String methodSignature) {
@@ -84,7 +152,7 @@ public class LogContext {
     }
 
     public Object[] getArgs() {
-        return this.args;
+        return args;
     }
 
     public void setArgs(Object[] args) {
@@ -92,7 +160,7 @@ public class LogContext {
     }
 
     public Object getResult() {
-        return this.result;
+        return result;
     }
 
     public void setResult(Object result) {
@@ -100,7 +168,7 @@ public class LogContext {
     }
 
     public Throwable getException() {
-        return this.exception;
+        return exception;
     }
 
     public void setException(Throwable exception) {
@@ -108,11 +176,10 @@ public class LogContext {
     }
 
     public Map<String, Object> getVariables() {
-        return this.variables;
+        return variables;
     }
 
     public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
     }
 }
-

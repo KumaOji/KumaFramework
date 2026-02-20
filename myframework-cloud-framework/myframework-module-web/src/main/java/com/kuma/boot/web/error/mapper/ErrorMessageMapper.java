@@ -1,19 +1,37 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.error.mapper;
 
 import com.kuma.boot.web.error.ErrorHandlingProperties;
 
+/**
+ * This class contains the logic for getting the matching error message for the given {@link
+ * Throwable}.
+ */
 public class ErrorMessageMapper {
+
     private final ErrorHandlingProperties properties;
 
-    public ErrorMessageMapper(ErrorHandlingProperties properties) {
+    public ErrorMessageMapper( ErrorHandlingProperties properties) {
         this.properties = properties;
     }
 
     public String getErrorMessage(Throwable exception) {
-        String code = this.getErrorMessageFromProperties(exception.getClass());
+        String code = getErrorMessageFromProperties(exception.getClass());
         if (code != null) {
             return code;
         }
@@ -21,16 +39,18 @@ public class ErrorMessageMapper {
     }
 
     public String getErrorMessage(String fieldSpecificCode, String code, String defaultMessage) {
-        if (this.properties.getMessages().containsKey(fieldSpecificCode)) {
-            return this.properties.getMessages().get(fieldSpecificCode);
+        if (properties.getMessages().containsKey(fieldSpecificCode)) {
+            return properties.getMessages().get(fieldSpecificCode);
         }
-        return this.getErrorMessage(code, defaultMessage);
+
+        return getErrorMessage(code, defaultMessage);
     }
 
     public String getErrorMessage(String code, String defaultMessage) {
-        if (this.properties.getMessages().containsKey(code)) {
-            return this.properties.getMessages().get(code);
+        if (properties.getMessages().containsKey(code)) {
+            return properties.getMessages().get(code);
         }
+
         return defaultMessage;
     }
 
@@ -39,13 +59,13 @@ public class ErrorMessageMapper {
             return null;
         }
         String exceptionClassName = exceptionClass.getName();
-        if (this.properties.getMessages().containsKey(exceptionClassName)) {
-            return this.properties.getMessages().get(exceptionClassName);
+        if (properties.getMessages().containsKey(exceptionClassName)) {
+            return properties.getMessages().get(exceptionClassName);
         }
-        if (this.properties.isSearchSuperClassHierarchy()) {
-            return this.getErrorMessageFromProperties(exceptionClass.getSuperclass());
+        if (properties.isSearchSuperClassHierarchy()) {
+            return getErrorMessageFromProperties(exceptionClass.getSuperclass());
+        } else {
+            return null;
         }
-        return null;
     }
 }
-

@@ -1,22 +1,6 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
- *  org.springframework.beans.factory.config.BeanDefinition
- *  org.springframework.beans.factory.support.BeanDefinitionRegistry
- *  org.springframework.beans.factory.support.DefaultListableBeanFactory
- *  org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
- *  org.springframework.core.env.Environment
- *  org.springframework.core.type.AnnotationMetadata
- *  org.springframework.core.type.ClassMetadata
- *  org.springframework.core.type.classreading.MetadataReader
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.service.annotation.HttpExchange
- */
 package com.kuma.boot.web.httpexchange;
+
+import static com.kuma.boot.web.httpexchange.Util.isHttpExchangeInterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,96 +23,128 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.service.annotation.HttpExchange;
 
+/**
+ * @author Freeman
+ */
 class HttpClientBeanRegistrar {
+
     private static final Logger log = LoggerFactory.getLogger(HttpClientBeanRegistrar.class);
-    private final ClassPathScanningCandidateComponentProvider scanner = HttpClientBeanRegistrar.getScanner();
+    private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
     private final BeanDefinitionRegistry registry;
     private final Environment environment;
-    private static final HashMap<BeanDefinitionRegistry, Map<Class<?>, List<BeanDefinition>>> beanDefinitionMap = new HashMap();
+
+    private static final HashMap<BeanDefinitionRegistry, Map<Class<?>, List<BeanDefinition>>> beanDefinitionMap =
+            new HashMap<>();
 
     public HttpClientBeanRegistrar(BeanDefinitionRegistry registry, Environment environment) {
         this.registry = registry;
         this.environment = environment;
     }
 
-    public void register(String ... basePackages) {
+    /**
+     * Register HTTP client beans for base packages, using {@link HttpExchangeProperties#getBasePackages()} if not specify base packages.
+     *
+     * @param basePackages base packages to scan
+     */
+    public void register(String... basePackages) {
         Set<String> packages = Set.copyOf(Arrays.asList(basePackages));
-        this.registerBeans4BasePackages(packages);
+        registerBeans4BasePackages(packages);
     }
 
-    public void register(Class<?> ... clients) {
+    public void register(Class<?>... clients) {
         for (Class<?> client : clients) {
-            this.registerHttpClientBean(this.registry, client);
+            registerHttpClientBean(registry, client);
         }
     }
 
+    /**
+     * Register HTTP client beans the specified class name.
+     *
+     * @param registry {@link BeanDefinitionRegistry}
+     * @param clz      class name
+     */
     private void registerHttpClientBean(BeanDefinitionRegistry registry, Class<?> clz) {
         if (!clz.isInterface()) {
             throw new IllegalArgumentException(clz.getName() + " is not an interface");
         }
-        if (!Util.isHttpExchangeInterface(clz)) {
+
+        if (!isHttpExchangeInterface(clz)) {
             return;
         }
-        if (!(registry instanceof DefaultListableBeanFactory)) {
+
+        if (!(registry instanceof DefaultListableBeanFactory bf)) {
             throw new IllegalArgumentException("BeanDefinitionRegistry is not a DefaultListableBeanFactory");
         }
-        DefaultListableBeanFactory bf = (DefaultListableBeanFactory)registry;
-        HttpClientBeanRegistrar.addBeanDefinitionCache(bf);
-        if (HttpClientBeanRegistrar.hasManualRegistered(registry, clz)) {
+
+        addBeanDefinitionCache(bf);
+
+        if (hasManualRegistered(registry, clz)) {
             if (log.isDebugEnabled()) {
-                log.debug("HTTP client bean '{}' is already registered, skip auto registration", (Object)clz.getName());
+                log.debug("HTTP client bean '{}' is already registered, skip auto registration", clz.getName());
             }
             return;
         }
-        HttpExchangeUtil.registerHttpExchangeBean(bf, this.environment, clz);
+
+        HttpExchangeUtil.registerHttpExchangeBean(bf, environment, clz);
     }
 
     private static void addBeanDefinitionCache(DefaultListableBeanFactory bf) {
         if (beanDefinitionMap.containsKey(bf)) {
             return;
         }
-        for (String beanDefinitionName : bf.getBeanDefinitionNames()) {
-            BeanDefinition beanDefinition = bf.getBeanDefinition(beanDefinitionName);
-            Class<?> clz = Util.getBeanDefinitionClass(beanDefinition);
-            if (clz == null) continue;
-            beanDefinitionMap.computeIfAbsent((BeanDefinitionRegistry)bf, k -> new HashMap()).computeIfAbsent(clz, k -> new ArrayList()).add(beanDefinition);
+        for (var beanDefinitionName : bf.getBeanDefinitionNames()) {
+            var beanDefinition = bf.getBeanDefinition(beanDefinitionName);
+            var clz = Util.getBeanDefinitionClass(beanDefinition);
+            if (clz != null) {
+                beanDefinitionMap
+                        .computeIfAbsent(bf, k -> new HashMap<>())
+                        .computeIfAbsent(clz, k -> new ArrayList<>())
+                        .add(beanDefinition);
+            }
         }
     }
 
     private static boolean hasManualRegistered(BeanDefinitionRegistry registry, Class<?> clz) {
-        return !beanDefinitionMap.getOrDefault(registry, Map.of()).getOrDefault(clz, List.of()).isEmpty();
+        return !beanDefinitionMap
+                .getOrDefault(registry, Map.of())
+                .getOrDefault(clz, List.of())
+                .isEmpty();
     }
 
     private static ClassPathScanningCandidateComponentProvider getScanner() {
-        ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false){
-
+        ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false) {
+            @Override
             protected boolean isCandidateComponent(AnnotatedBeanDefinition abd) {
                 return true;
             }
         };
-        provider.addIncludeFilter((mr, mrf) -> HttpClientBeanRegistrar.isHttpExchange(mr));
+        provider.addIncludeFilter((mr, mrf) -> isHttpExchange(mr));
         return provider;
     }
 
     private static boolean isHttpExchange(MetadataReader mr) {
         ClassMetadata cm = mr.getClassMetadata();
         AnnotationMetadata am = mr.getAnnotationMetadata();
-        return cm.isInterface() && cm.isIndependent() && !cm.isAnnotation() && (am.hasAnnotatedMethods(HttpExchange.class.getName()) || am.hasAnnotatedMethods(RequestMapping.class.getName()));
+        return cm.isInterface()
+                && cm.isIndependent()
+                && !cm.isAnnotation()
+                && (am.hasAnnotatedMethods(HttpExchange.class.getName())
+                || am.hasAnnotatedMethods(RequestMapping.class.getName()));
     }
 
     private void registerBeans4BasePackages(Collection<String> basePackages) {
         for (String pkg : basePackages) {
-            Set beanDefinitions = this.scanner.findCandidateComponents(pkg);
+            Set<BeanDefinition> beanDefinitions = scanner.findCandidateComponents(pkg);
             for (BeanDefinition bd : beanDefinitions) {
-                Class<?> clz = Util.getBeanDefinitionClass(bd);
-                if (clz == null) continue;
-                this.registerHttpClientBean(this.registry, clz);
+                var clz = Util.getBeanDefinitionClass(bd);
+                if (clz != null) {
+                    registerHttpClientBean(registry, clz);
+                }
             }
         }
     }
 
     static void clearBeanDefinitionCache(BeanDefinitionRegistry registry) {
-        beanDefinitionMap.remove(registry);
+        beanDefinitionMap.remove(registry); // Only used in startup phase
     }
 }
-

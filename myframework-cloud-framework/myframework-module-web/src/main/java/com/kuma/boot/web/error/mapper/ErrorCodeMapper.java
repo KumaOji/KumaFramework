@@ -1,50 +1,69 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.core.annotation.AnnotationUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.error.mapper;
 
 import com.kuma.boot.web.error.ErrorHandlingProperties;
 import com.kuma.boot.web.error.ResponseErrorCode;
-import java.util.Locale;
 import org.springframework.core.annotation.AnnotationUtils;
 
+import java.util.Locale;
+
+/**
+ * This class contains the logic for getting the matching error code for the given {@link
+ * Throwable}.
+ */
 public class ErrorCodeMapper {
+
     private final ErrorHandlingProperties properties;
 
-    public ErrorCodeMapper(ErrorHandlingProperties properties) {
+    public ErrorCodeMapper( ErrorHandlingProperties properties) {
         this.properties = properties;
     }
 
     public String getErrorCode(Throwable exception) {
-        String code = this.getErrorCodeFromPropertiesOrAnnotation(exception.getClass());
+        String code = getErrorCodeFromPropertiesOrAnnotation(exception.getClass());
         if (code != null) {
             return code;
         }
-        switch (this.properties.getDefaultErrorCodeStrategy()) {
-            case FULL_QUALIFIED_NAME: {
+        switch (properties.getDefaultErrorCodeStrategy()) {
+            case FULL_QUALIFIED_NAME:
                 return exception.getClass().getName();
-            }
-            case ALL_CAPS: {
-                return this.convertToAllCaps(exception.getClass().getSimpleName());
-            }
+            case ALL_CAPS:
+                return convertToAllCaps(exception.getClass().getSimpleName());
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown default error code strategy: "
+                                + properties.getDefaultErrorCodeStrategy());
         }
-        throw new IllegalArgumentException("Unknown default error code strategy: " + String.valueOf((Object)this.properties.getDefaultErrorCodeStrategy()));
     }
 
     public String getErrorCode(String fieldSpecificErrorCode, String errorCode) {
-        if (this.properties.getCodes().containsKey(fieldSpecificErrorCode)) {
-            return this.properties.getCodes().get(fieldSpecificErrorCode);
+        if (properties.getCodes().containsKey(fieldSpecificErrorCode)) {
+            return properties.getCodes().get(fieldSpecificErrorCode);
         }
-        return this.getErrorCode(errorCode);
+
+        return getErrorCode(errorCode);
     }
 
     public String getErrorCode(String errorCode) {
-        if (this.properties.getCodes().containsKey(errorCode)) {
-            return this.properties.getCodes().get(errorCode);
+        if (properties.getCodes().containsKey(errorCode)) {
+            return properties.getCodes().get(errorCode);
         }
+
         return errorCode;
     }
 
@@ -59,17 +78,19 @@ public class ErrorCodeMapper {
             return null;
         }
         String exceptionClassName = exceptionClass.getName();
-        if (this.properties.getCodes().containsKey(exceptionClassName)) {
-            return this.properties.getCodes().get(exceptionClassName);
+        if (properties.getCodes().containsKey(exceptionClassName)) {
+            return properties.getCodes().get(exceptionClassName);
         }
-        ResponseErrorCode errorCodeAnnotation = (ResponseErrorCode)AnnotationUtils.getAnnotation(exceptionClass, ResponseErrorCode.class);
+        ResponseErrorCode errorCodeAnnotation =
+                AnnotationUtils.getAnnotation(exceptionClass, ResponseErrorCode.class);
         if (errorCodeAnnotation != null) {
             return errorCodeAnnotation.value();
         }
-        if (this.properties.isSearchSuperClassHierarchy()) {
-            return this.getErrorCodeFromPropertiesOrAnnotation(exceptionClass.getSuperclass());
+
+        if (properties.isSearchSuperClassHierarchy()) {
+            return getErrorCodeFromPropertiesOrAnnotation(exceptionClass.getSuperclass());
+        } else {
+            return null;
         }
-        return null;
     }
 }
-

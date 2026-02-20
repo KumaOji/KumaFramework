@@ -1,42 +1,29 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.github.benmanes.caffeine.cache.CacheLoader
- *  com.github.benmanes.caffeine.cache.Caffeine
- *  com.github.benmanes.caffeine.cache.CaffeineSpec
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.jspecify.annotations.Nullable
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.ObjectProvider
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration
- *  org.springframework.boot.cache.autoconfigure.CacheManagerCustomizer
- *  org.springframework.boot.cache.autoconfigure.CacheManagerCustomizers
- *  org.springframework.boot.cache.autoconfigure.CacheProperties
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.cache.CacheManager
- *  org.springframework.cache.annotation.EnableCaching
- *  org.springframework.cache.caffeine.CaffeineCacheManager
- *  org.springframework.context.annotation.Bean
- *  org.springframework.util.CollectionUtils
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.cache.caffeine.autoconfigure;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
-import com.kuma.boot.cache.caffeine.autoconfigure.properties.CaffeineProperties;
 import com.kuma.boot.cache.caffeine.manager.CaffeineAutoCacheManager;
+import com.kuma.boot.cache.caffeine.autoconfigure.properties.CaffeineProperties;
 import com.kuma.boot.cache.caffeine.repository.CaffeineRepository;
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import java.util.Collection;
-import java.util.List;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -52,18 +39,29 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
+/**
+ * Caffeine auto cache configuration.
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-03 09:33:45
+ */
 @EnableCaching
-@ConditionalOnClass(value={Caffeine.class, CaffeineCacheManager.class})
-@AutoConfiguration(before={CacheAutoConfiguration.class})
-@EnableConfigurationProperties(value={CaffeineProperties.class, CacheProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.cache.caffeine", name={"enabled"}, havingValue="true")
-public class CaffeineCacheAutoConfiguration
-implements InitializingBean {
+@ConditionalOnClass({Caffeine.class, CaffeineCacheManager.class})
+@AutoConfiguration(before = CacheAutoConfiguration.class)
+@EnableConfigurationProperties({CaffeineProperties.class, CacheProperties.class})
+@ConditionalOnProperty(prefix = CaffeineProperties.PREFIX, name = "enabled", havingValue = "true")
+public class CaffeineCacheAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(CaffeineCacheAutoConfiguration.class, (String)"kuma-boot-starter-cache-caffeine", (String[])new String[0]);
+        LogUtils.started(CaffeineCacheAutoConfiguration.class, StarterNameConstants.CACHE_CAFFEINE_STARTER);
     }
 
     @Bean
@@ -78,26 +76,66 @@ implements InitializingBean {
     }
 
     @ConditionalOnMissingBean
-    @Bean(value={"caffeineCacheManager"})
-    public CacheManager caffeineCacheManager(CacheProperties cacheProperties, CacheManagerCustomizers customizers, ObjectProvider<Caffeine<Object, Object>> caffeine, ObjectProvider<CaffeineSpec> caffeineSpec, ObjectProvider<CacheLoader<Object, Object>> cacheLoader) {
-        CaffeineAutoCacheManager cacheManager = CaffeineCacheAutoConfiguration.createCacheManager(cacheProperties, caffeine, caffeineSpec, cacheLoader);
-        List cacheNames = cacheProperties.getCacheNames();
-        if (!CollectionUtils.isEmpty((Collection)cacheNames)) {
+    @Bean("caffeineCacheManager")
+    public CacheManager caffeineCacheManager(
+            CacheProperties cacheProperties,
+            CacheManagerCustomizers customizers,
+            ObjectProvider<Caffeine<Object, Object>> caffeine,
+            ObjectProvider<CaffeineSpec> caffeineSpec,
+            ObjectProvider<CacheLoader<Object, Object>> cacheLoader) {
+        CaffeineAutoCacheManager cacheManager =
+                createCacheManager(cacheProperties, caffeine, caffeineSpec, cacheLoader);
+        List<String> cacheNames = cacheProperties.getCacheNames();
+        if (!CollectionUtils.isEmpty(cacheNames)) {
             cacheManager.setCacheNames(cacheNames);
         }
-        return customizers.customize((CacheManager)cacheManager);
+        return customizers.customize(cacheManager);
     }
 
-    private static CaffeineAutoCacheManager createCacheManager(CacheProperties cacheProperties, ObjectProvider<Caffeine<Object, Object>> caffeine, ObjectProvider<CaffeineSpec> caffeineSpec, ObjectProvider<CacheLoader<Object, Object>> cacheLoader) {
+    // @Bean("caffeineCacheManager")
+    // @ConditionalOnProperty(prefix = CacheProperties.PREFIX, name = "type", havingValue =
+    // "CAFFEINE")
+    // public CacheManager caffeineCacheManager() {
+    //	LogUtil.started(CaffeineCacheManager.class, StarterNameConstant.REDIS_STARTER);
+    //
+    //	CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+    //
+    //	Caffeine caffeine = Caffeine
+    //		.newBuilder()
+    //		.recordStats()
+    //		.initialCapacity(500)
+    //		.expireAfterWrite(cacheProperties.getDef().getTimeToLive())
+    //		.maximumSize(cacheProperties.getDef().getMaxSize());
+    //
+    //	cacheManager.setAllowNullValues(cacheProperties.getDef().isCacheNullValues());
+    //	cacheManager.setCaffeine(caffeine);
+    //
+    //	//配置了这里，就必须事先在配置文件中指定key 缓存才生效
+    //    Map<String, CacheProperties.Cache> configs = cacheProperties.getConfigs();
+    //    Optional.ofNullable(configs).ifPresent((config)->{
+    //        cacheManager.setCacheNames(config.keySet());
+    //    });
+    //	return cacheManager;
+    // }
+
+    private static CaffeineAutoCacheManager createCacheManager(
+            CacheProperties cacheProperties,
+            ObjectProvider<Caffeine<Object, Object>> caffeine,
+            ObjectProvider<CaffeineSpec> caffeineSpec,
+            ObjectProvider<CacheLoader<Object, Object>> cacheLoader) {
         CaffeineAutoCacheManager cacheManager = new CaffeineAutoCacheManager();
-        CaffeineCacheAutoConfiguration.setCacheBuilder(cacheProperties, (CaffeineSpec)caffeineSpec.getIfAvailable(), (Caffeine<Object, Object>)((Caffeine)caffeine.getIfAvailable()), cacheManager);
-        cacheLoader.ifAvailable(arg_0 -> ((CaffeineAutoCacheManager)cacheManager).setCacheLoader(arg_0));
+        setCacheBuilder(cacheProperties, caffeineSpec.getIfAvailable(), caffeine.getIfAvailable(), cacheManager);
+        cacheLoader.ifAvailable(cacheManager::setCacheLoader);
         return cacheManager;
     }
 
-    private static void setCacheBuilder(CacheProperties cacheProperties, @Nullable CaffeineSpec caffeineSpec, @Nullable Caffeine<Object, Object> caffeine, CaffeineCacheManager cacheManager) {
+    private static void setCacheBuilder(
+            CacheProperties cacheProperties,
+            @Nullable CaffeineSpec caffeineSpec,
+            @Nullable Caffeine<Object, Object> caffeine,
+            CaffeineCacheManager cacheManager) {
         String specification = cacheProperties.getCaffeine().getSpec();
-        if (StringUtils.hasText((String)specification)) {
+        if (StringUtils.hasText(specification)) {
             cacheManager.setCacheSpecification(specification);
         } else if (caffeineSpec != null) {
             cacheManager.setCaffeineSpec(caffeineSpec);
@@ -106,4 +144,3 @@ implements InitializingBean {
         }
     }
 }
-

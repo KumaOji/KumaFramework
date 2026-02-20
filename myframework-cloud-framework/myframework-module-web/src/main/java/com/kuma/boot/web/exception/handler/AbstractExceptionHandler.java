@@ -1,16 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.date.DateUtil
- *  cn.hutool.core.date.StopWatch
- *  cn.hutool.core.exceptions.ExceptionUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  org.springframework.beans.factory.DisposableBean
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.web.context.request.NativeWebRequest
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.exception.handler;
 
 import cn.hutool.core.date.DateUtil;
@@ -21,6 +24,10 @@ import com.kuma.boot.common.utils.servlet.RequestUtils;
 import com.kuma.boot.web.exception.domain.ExceptionMessage;
 import com.kuma.boot.web.exception.domain.ExceptionNoticeResponse;
 import com.kuma.boot.web.exception.properties.ExceptionHandleProperties;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.web.context.request.NativeWebRequest;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Date;
@@ -29,90 +36,108 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.web.context.request.NativeWebRequest;
 
-public abstract class AbstractExceptionHandler
-extends Thread
-implements ExceptionHandler,
-InitializingBean,
-DisposableBean {
-    private final BlockingQueue<QueueMessage> queue = new LinkedBlockingQueue<QueueMessage>();
+public abstract class AbstractExceptionHandler extends Thread
+        implements ExceptionHandler, InitializingBean, DisposableBean {
+
+    private final BlockingQueue<QueueMessage> queue = new LinkedBlockingQueue<>();
+
     private static final String NULL_MESSAGE_KEY = "";
+
     protected final ExceptionHandleProperties config;
+
     private volatile boolean flag = true;
+
+    /** 通知消息存放 e.message 堆栈信息 */
     private final Map<String, ExceptionMessage> messages;
+
+    /** 本地物理地址 */
     private String mac;
+
+    /** 本地hostname */
     private String hostname;
+
+    /** 本地ip */
     private String ip;
+
     private final String applicationName;
 
-    protected AbstractExceptionHandler(ExceptionHandleProperties config, String applicationName) {
+    protected AbstractExceptionHandler( ExceptionHandleProperties config, String applicationName) {
         this.config = config;
-        this.messages = new ConcurrentHashMap<String, ExceptionMessage>(config.getMax() * 2);
+        messages = new ConcurrentHashMap<>(config.getMax() * 2);
         this.applicationName = applicationName;
         try {
             InetAddress ia = InetAddress.getLocalHost();
-            this.hostname = ia.getHostName();
-            this.ip = ia.getHostAddress();
+            hostname = ia.getHostName();
+            ip = ia.getHostAddress();
+
             byte[] macByte = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < macByte.length; ++i) {
-                sb.append(String.format("%02X%s", macByte[i], i < macByte.length - 1 ? "-" : NULL_MESSAGE_KEY));
+            for (int i = 0; i < macByte.length; i++) {
+                sb.append(String.format("%02X%s", macByte[i], (i < macByte.length - 1) ? "-" : ""));
             }
             this.mac = sb.toString();
-        }
-        catch (Exception e) {
-            this.mac = "\u83b7\u53d6\u5931\u8d25!";
+        } catch (Exception e) {
+            mac = "获取失败!";
         }
     }
 
     @Override
+    @SuppressWarnings("all")
     public void run() {
+        String key;
         StopWatch interval = new StopWatch();
         long threadId = Thread.currentThread().threadId();
-        while (this.flag) {
+        // 未被中断则一直运行
+        while (flag) {
             int i = 0;
-            while (i < this.config.getMax() && interval.getTotalTimeSeconds() < (double)this.config.getTime()) {
-                ExceptionMessage message;
+            while (i < config.getMax() && interval.getTotalTimeSeconds() < config.getTime()) {
                 QueueMessage queueMessage = null;
                 try {
-                    queueMessage = this.queue.poll(i == 0 ? TimeUnit.HOURS.toSeconds(1L) : 10L, TimeUnit.SECONDS);
+                    // 如果 i=0,即 当前未处理异常，则等待超时时间为 1 小时， 否则为 10 秒
+                    queueMessage =
+                            queue.poll(i == 0 ? TimeUnit.HOURS.toSeconds(1) : 10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    interrupt();
                 }
-                catch (InterruptedException e) {
-                    this.interrupt();
-                }
-                if (queueMessage == null) continue;
-                String key = queueMessage.getTraceId();
-                if (i++ == 0) {
-                    interval.stop();
-                    message = this.toMessage(queueMessage);
-                    message.setThreadId(threadId);
-                    this.messages.put(key, message);
-                    continue;
-                }
-                if (this.messages.containsKey(key)) {
-                    this.messages.put(key, this.messages.get(key).increment());
-                    continue;
-                }
-                message = this.toMessage(queueMessage);
-                message.setThreadId(threadId);
-                this.messages.put(key, message);
-            }
-            if (this.messages.size() > 0) {
-                this.messages.forEach((k, v) -> {
-                    try {
-                        ExceptionNoticeResponse response = this.send((ExceptionMessage)v);
-                        if (!response.isSuccess()) {
-                            LogUtils.error((String)"\u6d88\u606f\u901a\u77e5\u53d1\u9001\u5931\u8d25! msg: {}", (Object[])new Object[]{response.getErrMsg()});
+
+                if (queueMessage != null) {
+                    // key = t.getMessage() == null ? NULL_MESSAGE_KEY : t.getMessage();
+                    key = queueMessage.getTraceId();
+                    // i++
+                    if (i++ == 0) {
+                        // 第一次收到数据, 重置计时
+                        interval.stop();
+                        ExceptionMessage message = toMessage(queueMessage);
+                        message.setThreadId(threadId);
+                        messages.put(key, message);
+                    } else {
+                        if (messages.containsKey(key)) {
+                            messages.put(key, messages.get(key).increment());
+                        } else {
+                            ExceptionMessage message = toMessage(queueMessage);
+                            message.setThreadId(threadId);
+                            messages.put(key, message);
                         }
                     }
-                    catch (Exception e) {
-                        LogUtils.error((String)"\u6d88\u606f\u901a\u77e5\u65f6\u53d1\u751f\u5f02\u5e38", (Object[])new Object[]{e});
-                    }
-                });
-                this.messages.clear();
+                }
+            }
+
+            // 一次处理结束
+            if (messages.size() > 0) {
+                // 如果需要发送的消息不为空
+                messages.forEach(
+                        (k, v) -> {
+                            try {
+                                ExceptionNoticeResponse response = send(v);
+                                if (!response.isSuccess()) {
+                                    LogUtils.error("消息通知发送失败! msg: {}", response.getErrMsg());
+                                }
+                            } catch (Exception e) {
+                                LogUtils.error("消息通知时发生异常", e);
+                            }
+                        });
+                messages.clear();
             }
             interval.stop();
         }
@@ -122,47 +147,67 @@ DisposableBean {
         ExceptionMessage message = new ExceptionMessage();
         message.setTraceId(queueMessage.getTraceId());
         message.setNumber(1);
-        message.setMac(this.mac);
-        message.setApplicationName(this.applicationName);
-        message.setHostname(this.hostname);
-        message.setIp(this.ip);
+        message.setMac(mac);
+        message.setApplicationName(applicationName);
+        message.setHostname(hostname);
+        message.setIp(ip);
         message.setRequestUri(queueMessage.getRequestUri());
-        message.setTime(DateUtil.formatTime((Date)new Date()));
-        message.setStack(ExceptionUtil.stacktraceToString((Throwable)queueMessage.getThrowable(), (int)this.config.getLength()).replace("\\r", NULL_MESSAGE_KEY));
+        message.setTime(DateUtil.formatTime(new Date()));
+        message.setStack(
+                ExceptionUtil.stacktraceToString(queueMessage.getThrowable(), config.getLength())
+                        .replace("\\r", ""));
         return message;
     }
 
-    public abstract ExceptionNoticeResponse send(ExceptionMessage var1);
+    /**
+     * 发送通知
+     *
+     * @param sendMessage 发送的消息
+     * @return 返回消息发送状态，如果发送失败需要设置失败信息
+     */
+    public abstract ExceptionNoticeResponse send( ExceptionMessage sendMessage);
 
     @Override
     public void handle(NativeWebRequest req, Throwable throwable, String traceId) {
         try {
-            String requestUri = RequestUtils.getRequest() == null ? "uri not found" : RequestUtils.getRequest().getRequestURI();
+            String requestUri =
+                    RequestUtils.getRequest() == null
+                            ? "uri not found"
+                            : RequestUtils.getRequest().getRequestURI();
+
+            // 是否忽略该异常
             boolean ignore = false;
-            if (Boolean.FALSE.equals(this.config.getIgnoreChild())) {
-                ignore = this.config.getIgnoreExceptions().contains(throwable.getClass());
+
+            // 只有不是忽略的异常类才会插入异常消息队列
+            if (Boolean.FALSE.equals(config.getIgnoreChild())) {
+                // 不忽略子类
+                ignore = config.getIgnoreExceptions().contains(throwable.getClass());
             } else {
-                for (Class<? extends Throwable> ignoreException : this.config.getIgnoreExceptions()) {
-                    if (!ignoreException.isAssignableFrom(throwable.getClass())) continue;
-                    ignore = true;
-                    break;
+                // 忽略子类
+                for (Class<? extends Throwable> ignoreException : config.getIgnoreExceptions()) {
+                    // 属于子类
+                    if (ignoreException.isAssignableFrom(throwable.getClass())) {
+                        ignore = true;
+                        break;
+                    }
                 }
             }
+
             QueueMessage message = new QueueMessage(throwable, traceId, requestUri);
+            // 不忽略则插入队列
             if (!ignore) {
-                this.queue.put(message);
+                queue.put(message);
             }
-        }
-        catch (InterruptedException e) {
-            this.interrupt();
-        }
-        catch (Exception e) {
-            LogUtils.error((String)"\u5f80\u5f02\u5e38\u6d88\u606f\u961f\u5217\u63d2\u5165\u65b0\u5f02\u5e38\u65f6\u51fa\u9519", (Object[])new Object[]{e});
+        } catch (InterruptedException e) {
+            interrupt();
+        } catch (Exception e) {
+            LogUtils.error("往异常消息队列插入新异常时出错", e);
         }
     }
 
+    @Override
     public void afterPropertiesSet() {
-        this.initThread();
+        initThread();
     }
 
     protected void initThread() {
@@ -170,6 +215,7 @@ DisposableBean {
         this.start();
     }
 
+    @Override
     public void destroy() throws Exception {
         this.flag = false;
         this.interrupt();
@@ -187,7 +233,7 @@ DisposableBean {
         }
 
         public Throwable getThrowable() {
-            return this.throwable;
+            return throwable;
         }
 
         public void setThrowable(Throwable throwable) {
@@ -195,7 +241,7 @@ DisposableBean {
         }
 
         public String getTraceId() {
-            return this.traceId;
+            return traceId;
         }
 
         public void setTraceId(String traceId) {
@@ -203,7 +249,7 @@ DisposableBean {
         }
 
         public String getRequestUri() {
-            return this.requestUri;
+            return requestUri;
         }
 
         public void setRequestUri(String requestUri) {
@@ -211,4 +257,3 @@ DisposableBean {
         }
     }
 }
-

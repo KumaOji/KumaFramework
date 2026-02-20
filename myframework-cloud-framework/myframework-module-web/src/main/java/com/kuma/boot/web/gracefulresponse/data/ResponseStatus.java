@@ -1,15 +1,46 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse.data;
 
 public interface ResponseStatus {
-    public void setCode(String var1);
+    /**
+     * 设置响应码.
+     *
+     * @param code 设置的响应码.
+     */
+    void setCode(String code);
 
-    public String getCode();
+    /**
+     * 获得响应码.
+     *
+     */
+    String getCode();
 
-    public void setMsg(String var1);
+    /**
+     * 设置响应提示信息.
+     *
+     * @param msg 设置响应提示信息.
+     */
+    void setMsg(String msg);
 
-    public String getMsg();
+    /**
+     * 获得响应信息.
+     *
+     * @return
+     */
+    String getMsg();
 }
-

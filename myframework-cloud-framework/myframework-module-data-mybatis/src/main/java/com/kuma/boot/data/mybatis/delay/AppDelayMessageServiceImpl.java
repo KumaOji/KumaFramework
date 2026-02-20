@@ -77,7 +77,7 @@ public class AppDelayMessageServiceImpl extends ServiceImpl<AppDelayMessageMappe
                         .callback(callback.getSimpleName())
                         .build();
         // 发布延时消息时间事件
-        com.kuma.boot.data.mybatis.delay.InvokeTimeoutEvent event = new com.kuma.boot.data.mybatis.delay.InvokeTimeoutEvent(message);
+        InvokeTimeoutEvent event = new InvokeTimeoutEvent(message);
         eventPublisher.publishEvent(event);
     }
 

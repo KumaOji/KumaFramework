@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.annotation;
 
 import java.lang.annotation.Documented;
@@ -8,18 +5,40 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(value={})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * Atlas Log HTTP请求日志配置注解
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+@Target({})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface AtlasLogHttpLog {
-    public boolean logFullParameters() default true;
 
-    public String urlFormat() default "";
+    /**
+     * 是否记录完整的请求参数
+     */
+    boolean logFullParameters() default true;
 
-    public boolean includeQueryString() default true;
+    /**
+     * URL格式化模式
+     * 支持占位符：{method}, {uri}, {queryString}, {remoteAddr}
+     */
+    String urlFormat() default "";
 
-    public boolean includeHeaders() default false;
+    /**
+     * 是否包含查询字符串
+     */
+    boolean includeQueryString() default true;
 
-    public String[] excludeHeaders() default {"authorization", "cookie", "x-auth-token"};
+    /**
+     * 是否包含请求头信息
+     */
+    boolean includeHeaders() default false;
+
+    /**
+     * 排除的请求头（敏感信息）
+     */
+    String[] excludeHeaders() default {"authorization", "cookie", "x-auth-token"};
 }
-

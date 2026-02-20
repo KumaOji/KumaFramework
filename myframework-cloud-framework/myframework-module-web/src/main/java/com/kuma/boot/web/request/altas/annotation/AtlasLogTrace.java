@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.annotation;
 
 import java.lang.annotation.Documented;
@@ -8,14 +5,29 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(value={})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * Atlas Log 链路追踪配置注解
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+@Target({})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface AtlasLogTrace {
-    public boolean enabled() default true;
 
-    public String headerName() default "X-Trace-Id";
+    /**
+     * 是否启用链路追踪
+     */
+    boolean enabled() default true;
 
-    public String generator() default "uuid";
+    /**
+     * HTTP头名称
+     */
+    String headerName() default "X-Trace-Id";
+
+    /**
+     * 生成器类型：uuid, snowflake
+     */
+    String generator() default "uuid";
 }
-

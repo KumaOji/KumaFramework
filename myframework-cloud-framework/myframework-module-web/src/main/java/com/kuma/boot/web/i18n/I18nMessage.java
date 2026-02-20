@@ -1,29 +1,54 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  io.swagger.v3.oas.annotations.media.Schema
- *  jakarta.validation.constraints.NotEmpty
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.i18n;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 
-@Schema(title="\u56fd\u9645\u5316\u4fe1\u606f")
+/**
+ * 对标于 message bundle 的文件消息的抽象
+ *
+ */
+@Schema(title = "国际化信息")
 public class I18nMessage {
-    @NotEmpty(message="{i18nMessage.code}\uff1a{}")
-    @Schema(title="\u56fd\u9645\u5316\u6807\u8bc6")
-    private @NotEmpty(message="{i18nMessage.code}\uff1a{}") String code;
-    @NotEmpty(message="{i18nMessage.message}\uff1a{}")
-    @Schema(title="\u6587\u672c\u503c\uff0c\u53ef\u4ee5\u4f7f\u7528 { } \u52a0\u89d2\u6807\uff0c\u4f5c\u4e3a\u5360\u4f4d\u7b26")
-    private @NotEmpty(message="{i18nMessage.message}\uff1a{}") String message;
-    @NotEmpty(message="{i18nMessage.languageTag}\uff1a{}")
-    @Schema(title="\u8bed\u8a00\u6807\u7b7e")
-    private @NotEmpty(message="{i18nMessage.languageTag}\uff1a{}") String languageTag;
+
+    /**
+     * 国际化标识
+     */
+    @NotEmpty(message = "{i18nMessage.code}：{}")
+    @Schema(title = "国际化标识")
+    private String code;
+
+    /**
+     * 消息
+     */
+    @NotEmpty(message = "{i18nMessage.message}：{}")
+    @Schema(title = "文本值，可以使用 { } 加角标，作为占位符")
+    private String message;
+
+    /**
+     * 地区语言标签
+     */
+    @NotEmpty(message = "{i18nMessage.languageTag}：{}")
+    @Schema(title = "语言标签")
+    private String languageTag;
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -31,7 +56,7 @@ public class I18nMessage {
     }
 
     public String getMessage() {
-        return this.message;
+        return message;
     }
 
     public void setMessage(String message) {
@@ -39,11 +64,10 @@ public class I18nMessage {
     }
 
     public String getLanguageTag() {
-        return this.languageTag;
+        return languageTag;
     }
 
     public void setLanguageTag(String languageTag) {
         this.languageTag = languageTag;
     }
 }
-

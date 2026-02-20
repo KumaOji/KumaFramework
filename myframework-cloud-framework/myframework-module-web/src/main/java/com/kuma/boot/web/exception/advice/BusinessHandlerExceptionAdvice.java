@@ -1,61 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.csp.sentinel.slots.block.BlockException
- *  com.alibaba.csp.sentinel.slots.block.authority.AuthorityException
- *  com.alibaba.csp.sentinel.slots.block.degrade.DegradeException
- *  com.alibaba.csp.sentinel.slots.block.flow.FlowException
- *  com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException
- *  com.alibaba.csp.sentinel.slots.system.SystemBlockException
- *  com.kuma.boot.common.enums.ResultEnum
- *  com.kuma.boot.common.exception.BaseException
- *  com.kuma.boot.common.exception.BusinessException
- *  com.kuma.boot.common.exception.IdempotencyException
- *  com.kuma.boot.common.exception.InnerException
- *  com.kuma.boot.common.exception.LockException
- *  com.kuma.boot.common.holder.TraceContextHolder
- *  com.kuma.boot.common.model.Code
- *  com.kuma.boot.common.model.result.Result
- *  com.kuma.boot.common.utils.id.IdGeneratorUtils
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  com.kuma.boot.common.utils.servlet.TraceUtils
- *  com.kuma.boot.idempotent.exception.IdempotentException
- *  com.kuma.boot.ratelimit.ratelimitaspect.LimitException
- *  com.kuma.boot.ratelimit.ratelimitprovider.RateLimitException
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  jakarta.validation.ConstraintViolation
- *  jakarta.validation.ConstraintViolationException
- *  jakarta.validation.ValidationException
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.beans.factory.annotation.Qualifier
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.context.ApplicationEventPublisher
- *  org.springframework.core.NestedCheckedException
- *  org.springframework.core.NestedRuntimeException
- *  org.springframework.dao.DataIntegrityViolationException
- *  org.springframework.dao.DuplicateKeyException
- *  org.springframework.http.converter.HttpMessageNotReadableException
- *  org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
- *  org.springframework.security.access.AccessDeniedException
- *  org.springframework.security.core.userdetails.UsernameNotFoundException
- *  org.springframework.validation.BindException
- *  org.springframework.validation.BindingResult
- *  org.springframework.validation.FieldError
- *  org.springframework.web.HttpMediaTypeNotSupportedException
- *  org.springframework.web.HttpRequestMethodNotSupportedException
- *  org.springframework.web.bind.MethodArgumentNotValidException
- *  org.springframework.web.bind.MissingServletRequestParameterException
- *  org.springframework.web.bind.annotation.ExceptionHandler
- *  org.springframework.web.bind.annotation.RestControllerAdvice
- *  org.springframework.web.context.request.NativeWebRequest
- *  org.springframework.web.method.HandlerMethod
- *  org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.exception.advice;
 
 import com.alibaba.csp.sentinel.slots.block.BlockException;
@@ -64,14 +22,11 @@ import com.alibaba.csp.sentinel.slots.block.degrade.DegradeException;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowException;
 import com.alibaba.csp.sentinel.slots.system.SystemBlockException;
+import com.kuma.boot.common.constant.StarterNameConstants;
+import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.enums.ResultEnum;
-import com.kuma.boot.common.exception.BaseException;
-import com.kuma.boot.common.exception.BusinessException;
-import com.kuma.boot.common.exception.IdempotencyException;
-import com.kuma.boot.common.exception.InnerException;
-import com.kuma.boot.common.exception.LockException;
+import com.kuma.boot.common.exception.*;
 import com.kuma.boot.common.holder.TraceContextHolder;
-import com.kuma.boot.common.model.Code;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.id.IdGeneratorUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
@@ -90,17 +45,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -108,8 +52,10 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.NestedCheckedException;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.access.AccessDeniedException;
@@ -126,348 +72,510 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.kuma.boot.common.enums.ResultEnum.BAD_REQUEST;
+import static com.kuma.boot.common.enums.ResultEnum.LIMIT_ERROR;
+
+/**
+ * 全局异常处理
+ */
 @AutoConfiguration
-@RestControllerAdvice(annotations={BusinessApi.class})
-public class BusinessHandlerExceptionAdvice
-implements InitializingBean {
+// @ConditionalOnExpression("!'${security.oauth2.client.clientId}'.isEmpty()")
+// @RestControllerAdvice
+// @RestControllerAdvice(basePackages = {"com.kuma.cloud.**.biz.controller.business"})
+@RestControllerAdvice(annotations = BusinessApi.class)
+public class BusinessHandlerExceptionAdvice implements InitializingBean {
+
     private final List<ExceptionHandler> exceptionHandler;
+
     @Autowired
-    @Qualifier(value="asyncThreadPoolTaskExecutor")
+    @Qualifier("asyncThreadPoolTaskExecutor")
     private ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor;
+
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public BusinessHandlerExceptionAdvice(List<ExceptionHandler> exceptionHandler) {
+    public BusinessHandlerExceptionAdvice( List<ExceptionHandler> exceptionHandler ) {
         this.exceptionHandler = exceptionHandler;
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(BusinessHandlerExceptionAdvice.class, (String)"kuma-boot-starter-web", (String[])new String[0]);
+        LogUtils.started(BusinessHandlerExceptionAdvice.class, StarterNameConstants.WEB_STARTER);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={BaseException.class})
-    public Result<String> baseException(NativeWebRequest req, BaseException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)e.getCode(), (String)e.getMessage());
+    @org.springframework.web.bind.annotation.ExceptionHandler({BaseException.class})
+    public Result<String> baseException( NativeWebRequest req, BaseException e ) {
+        handleExceptions(req, e);
+        return Result.fail(e.getCode(), e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={InnerException.class})
-    public Result<String> innerException(NativeWebRequest req, InnerException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.INNER_ERROR);
+    @org.springframework.web.bind.annotation.ExceptionHandler({InnerException.class})
+    public Result<String> innerException( NativeWebRequest req, InnerException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.INNER_ERROR);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={LockException.class})
-    public Result<String> lockException(NativeWebRequest req, LockException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.FAILED);
+    @org.springframework.web.bind.annotation.ExceptionHandler({LockException.class})
+    public Result<String> lockException( NativeWebRequest req, LockException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.FAILED);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={IdempotencyException.class})
-    public Result<String> idempotencyException(NativeWebRequest req, IdempotencyException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.FAILED);
+    @org.springframework.web.bind.annotation.ExceptionHandler({IdempotencyException.class})
+    public Result<String> idempotencyException( NativeWebRequest req, IdempotencyException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.FAILED);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={BusinessException.class})
-    public Result<String> businessException(NativeWebRequest req, BusinessException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)e.getCode(), (String)e.getMessage());
+    /**
+     * 自定义异常处理方法
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler({BusinessException.class})
+    public Result<String> businessException( NativeWebRequest req, BusinessException e ) {
+        handleExceptions(req, e);
+        return Result.fail(e.getCode(), e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={IllegalArgumentException.class})
-    public Result<String> illegalArgumentException(NativeWebRequest req, IllegalArgumentException e) {
-        this.handleExceptions(req, e);
-        return Result.fail((ResultEnum)ResultEnum.ILLEGAL_ARGUMENT_ERROR);
+    @org.springframework.web.bind.annotation.ExceptionHandler({IllegalArgumentException.class})
+    public Result<String> illegalArgumentException(
+            NativeWebRequest req, IllegalArgumentException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.ILLEGAL_ARGUMENT_ERROR);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={AccessDeniedException.class})
-    public Result<String> badMethodExpressException(NativeWebRequest req, AccessDeniedException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.FORBIDDEN);
+    @org.springframework.web.bind.annotation.ExceptionHandler({AccessDeniedException.class})
+    public Result<String> badMethodExpressException( NativeWebRequest req, AccessDeniedException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.FORBIDDEN);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={UsernameNotFoundException.class})
-    public Result<String> badUsernameNotFoundException(NativeWebRequest req, UsernameNotFoundException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.USERNAME_OR_PASSWORD_ERROR);
+
+    @org.springframework.web.bind.annotation.ExceptionHandler({UsernameNotFoundException.class})
+    public Result<String> badUsernameNotFoundException(
+            NativeWebRequest req, UsernameNotFoundException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.USERNAME_OR_PASSWORD_ERROR);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={DataIntegrityViolationException.class})
-    public Result<String> handleDataIntegrityViolationException(NativeWebRequest req, DataIntegrityViolationException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.FAILED);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            DataIntegrityViolationException.class
+    })
+    public Result<String> handleDataIntegrityViolationException(
+            NativeWebRequest req, DataIntegrityViolationException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.FAILED);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={LimitException.class})
-    public Result<String> limitException(NativeWebRequest req, LimitException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)e.getCode(), (String)e.getMessage());
+//	@org.springframework.web.bind.annotation.ExceptionHandler({DecodeException.class})
+//	public Result<String> handleDecodeException(NativeWebRequest req, DecodeException e) {
+//		handleExceptions(req, e);
+//		return Result.fail(ResultEnum.FAILED);
+//	}
+
+    @org.springframework.web.bind.annotation.ExceptionHandler({LimitException.class})
+    public Result<String> limitException( NativeWebRequest req, LimitException e ) {
+        handleExceptions(req, e);
+        return Result.fail(e.getCode(), e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={IdempotentException.class})
-    public Result<String> idempotentException(NativeWebRequest req, IdempotentException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)e.getCode(), (String)e.getMessage());
+    @org.springframework.web.bind.annotation.ExceptionHandler({IdempotentException.class})
+    public Result<String> idempotentException( NativeWebRequest req, IdempotentException e ) {
+        handleExceptions(req, e);
+        return Result.fail(e.getCode(), e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={NestedRuntimeException.class})
-    public Result<String> handleNestedRuntimeException(NativeWebRequest req, NestedRuntimeException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((String)e.getMessage());
+    @org.springframework.web.bind.annotation.ExceptionHandler(NestedRuntimeException.class)
+    public Result<String> handleNestedRuntimeException(
+            NativeWebRequest req, NestedRuntimeException e ) {
+        handleExceptions(req, e);
+        return Result.fail(e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={NestedCheckedException.class})
-    public Result<String> handleNestedCheckedException(NativeWebRequest req, NestedCheckedException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((String)e.getMessage());
+    @org.springframework.web.bind.annotation.ExceptionHandler(NestedCheckedException.class)
+    public Result<String> handleNestedCheckedException(
+            NativeWebRequest req, NestedCheckedException e ) {
+        handleExceptions(req, e);
+        return Result.fail(e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={BindException.class})
-    public Result<Map<String, String>> handleBindException(NativeWebRequest req, BindException e) {
-        this.handleExceptions(req, (Exception)e);
-        List<HashMap<String, String>> errors = this.methodArgumentNotValidExceptionDescribe(e);
-        String message = Optional.ofNullable(errors).orElse(Collections.emptyList()).stream().flatMap(s -> s.values().stream()).findFirst().orElse("\u8bf7\u6c42\u53c2\u6570\u9519\u8bef");
+    // *****************************参数校验错误***************************************
+
+    /**
+     * 校验表单提交参数
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = BindException.class)
+    public Result<Map<String, String>> handleBindException( NativeWebRequest req, BindException e ) {
+        handleExceptions(req, e);
+
+        List<HashMap<String, String>> errors = methodArgumentNotValidExceptionDescribe(e);
+        String message =
+                Optional.ofNullable(errors).orElse(Collections.emptyList()).stream()
+                        .flatMap(s -> s.values().stream())
+                        .findFirst()
+                        .orElse("请求参数错误");
+
         BindingResult bindingResult = e.getBindingResult();
-        return Result.fail((Code)ResultEnum.BAD_REQUEST.code(), (String)this.getErrors(bindingResult));
+        return Result.fail(BAD_REQUEST.code(), getErrors(bindingResult));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={MethodArgumentNotValidException.class})
-    public Result<Map<String, String>> handleMethodArgumentNotValidException(NativeWebRequest req, MethodArgumentNotValidException e) {
-        this.handleExceptions(req, (Exception)e);
-        List<HashMap<String, String>> errors = this.methodArgumentNotValidExceptionDescribe((BindException)e);
-        String message = Optional.ofNullable(errors).orElse(Collections.emptyList()).stream().flatMap(s -> s.values().stream()).findFirst().orElse("\u8bf7\u6c42\u53c2\u6570\u9519\u8bef");
+    /**
+     * 处理 json 请求体调用接口对象参数校验失败抛出的异常  对应的是校验RequestBody入参
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<Map<String, String>> handleMethodArgumentNotValidException(
+            NativeWebRequest req, MethodArgumentNotValidException e ) {
+        handleExceptions(req, e);
+
+        List<HashMap<String, String>> errors = methodArgumentNotValidExceptionDescribe(e);
+        String message =
+                Optional.ofNullable(errors).orElse(Collections.emptyList()).stream()
+                        .flatMap(s -> s.values().stream())
+                        .findFirst()
+                        .orElse("请求参数错误");
+
         BindingResult bindingResult = e.getBindingResult();
-        return Result.fail((Code)ResultEnum.BAD_REQUEST.code(), (String)this.getErrors(bindingResult));
+        return Result.fail(BAD_REQUEST.code(), getErrors(bindingResult));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={ConstraintViolationException.class})
-    public Result<Map<String, String>> handleException(NativeWebRequest req, ConstraintViolationException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)ResultEnum.BAD_REQUEST.code(), (String)this.getErrors(e));
+    /**
+     * get请求 异常对应的就是校验RequestParam参数和校验PathVariable参数
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(ConstraintViolationException.class)
+    public Result<Map<String, String>> handleException(
+            NativeWebRequest req, ConstraintViolationException e ) {
+        handleExceptions(req, e);
+        return Result.fail(BAD_REQUEST.code(), getErrors(e));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={MethodArgumentTypeMismatchException.class})
-    public Result<String> requestTypeMismatch(NativeWebRequest req, MethodArgumentTypeMismatchException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.METHOD_ARGUMENTS_TYPE_MISMATCH);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            MethodArgumentTypeMismatchException.class
+    })
+    public Result<String> requestTypeMismatch(
+            NativeWebRequest req, MethodArgumentTypeMismatchException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.METHOD_ARGUMENTS_TYPE_MISMATCH);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={MissingServletRequestParameterException.class})
-    public Result<String> requestMissingServletRequest(NativeWebRequest req, MissingServletRequestParameterException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.MISSING_SERVLET_REQUEST_PARAMETER);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            MissingServletRequestParameterException.class
+    })
+    public Result<String> requestMissingServletRequest(
+            NativeWebRequest req, MissingServletRequestParameterException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.MISSING_SERVLET_REQUEST_PARAMETER);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={HttpMessageNotReadableException.class})
-    public Result<String> httpMessageNotReadableException(NativeWebRequest req, HttpMessageNotReadableException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.HTTP_MESSAGE_NOT_READABLE);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            HttpMessageNotReadableException.class
+    })
+    public Result<String> httpMessageNotReadableException(
+            NativeWebRequest req, HttpMessageNotReadableException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.HTTP_MESSAGE_NOT_READABLE);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={ValidationException.class})
-    public Result<String> handleException(NativeWebRequest req, ValidationException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.BAD_REQUEST);
+    @org.springframework.web.bind.annotation.ExceptionHandler(ValidationException.class)
+    public Result<String> handleException( NativeWebRequest req, ValidationException e ) {
+        handleExceptions(req, e);
+        return Result.fail(BAD_REQUEST);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={HttpRequestMethodNotSupportedException.class})
-    public Result<String> handleHttpRequestMethodNotSupportedException(NativeWebRequest req, HttpRequestMethodNotSupportedException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.METHOD_NOT_SUPPORTED_ERROR);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            HttpRequestMethodNotSupportedException.class
+    })
+    public Result<String> handleHttpRequestMethodNotSupportedException(
+            NativeWebRequest req, HttpRequestMethodNotSupportedException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.METHOD_NOT_SUPPORTED_ERROR);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={HttpMediaTypeNotSupportedException.class})
-    public Result<String> handleHttpMediaTypeNotSupportedException(NativeWebRequest req, HttpMediaTypeNotSupportedException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((ResultEnum)ResultEnum.MEDIA_TYPE_NOT_SUPPORTED_ERROR);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            HttpMediaTypeNotSupportedException.class
+    })
+    public Result<String> handleHttpMediaTypeNotSupportedException(
+            NativeWebRequest req, HttpMediaTypeNotSupportedException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.MEDIA_TYPE_NOT_SUPPORTED_ERROR);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={SQLException.class})
-    public Result<String> handleSqlException(NativeWebRequest req, SQLException e) {
-        this.handleExceptions(req, e);
-        return Result.fail((ResultEnum)ResultEnum.FAILED);
+    // *******************************sql错误***************************************
+
+    @org.springframework.web.bind.annotation.ExceptionHandler({SQLException.class})
+    public Result<String> handleSqlException( NativeWebRequest req, SQLException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.FAILED);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={SQLIntegrityConstraintViolationException.class})
-    public Result<String> handleSqlException(NativeWebRequest req, SQLIntegrityConstraintViolationException e) {
-        this.handleExceptions(req, e);
-        return Result.fail((ResultEnum)ResultEnum.FAILED);
+    @org.springframework.web.bind.annotation.ExceptionHandler({
+            SQLIntegrityConstraintViolationException.class
+    })
+    public Result<String> handleSqlException(
+            NativeWebRequest req, SQLIntegrityConstraintViolationException e ) {
+        handleExceptions(req, e);
+        return Result.fail(ResultEnum.FAILED);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={DuplicateKeyException.class})
-    public Result<String> handleDuplicateKeyException(DuplicateKeyException e, HttpServletRequest request) {
+    // @org.springframework.web.bind.annotation.ExceptionHandler({PersistenceException.class})
+    // public Result<String> handleSqlException(NativeWebRequest req, PersistenceException e) {
+    //    handleExceptions(req, e);
+    //    return Result.fail(ResultEnum.FAILED);
+    // }
+
+    /**
+     * 主键或UNIQUE索引，数据重复异常
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(DuplicateKeyException.class)
+    public Result<String> handleDuplicateKeyException(
+            DuplicateKeyException e, HttpServletRequest request ) {
         String requestURI = request.getRequestURI();
-        LogUtils.error((String)"\u8bf7\u6c42\u5730\u5740'{}',\u6570\u636e\u5e93\u4e2d\u5df2\u5b58\u5728\u8bb0\u5f55'{}'", (Object[])new Object[]{requestURI, e.getMessage()});
-        return Result.fail((String)"\u6570\u636e\u5e93\u4e2d\u5df2\u5b58\u5728\u8be5\u8bb0\u5f55\uff0c\u8bf7\u8054\u7cfb\u7ba1\u7406\u5458\u786e\u8ba4");
+        LogUtils.error("请求地址'{}',数据库中已存在记录'{}'", requestURI, e.getMessage());
+        return Result.fail("数据库中已存在该记录，请联系管理员确认");
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={Exception.class})
-    public Result<String> handleException(NativeWebRequest req, Exception e) {
-        this.handleExceptions(req, e);
+    /**
+     * Mybatis系统异常 通用处理
+     */
+    // @org.springframework.web.bind.annotation.ExceptionHandler(MyBatisSystemException.class)
+    // public Result<String> handleCannotFindDataSourceException(MyBatisSystemException e,
+    // HttpServletRequest request) {
+    //    String requestURI = request.getRequestURI();
+    //    String message = e.getMessage();
+    //    if (message.contains("CannotFindDataSourceException")) {
+    //        LogUtils.error("请求地址'{}', 未找到数据源", requestURI);
+    //        return Result.fail("未找到数据源，请联系管理员确认");
+    //    }
+    //    LogUtils.error("请求地址'{}', Mybatis系统异常", requestURI, e);
+    //    return Result.fail(message);
+    // }
+
+    // *******************************通用错误***************************************
+    @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+    public Result<String> handleException( NativeWebRequest req, Exception e ) {
+        handleExceptions(req, e);
         return Result.fail();
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={Error.class})
-    public Result<String> handleThrowable(NativeWebRequest req, Error e) {
-        this.handleExceptions(req, new Exception(e.getMessage()));
+    @org.springframework.web.bind.annotation.ExceptionHandler(Error.class)
+    public Result<String> handleThrowable( NativeWebRequest req, Error e ) {
+        handleExceptions(req, new Exception(e.getMessage()));
         return Result.fail();
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={UndeclaredThrowableException.class})
-    public Result<String> handleUndeclaredThrowableException(NativeWebRequest req, UndeclaredThrowableException ex) {
-        this.handleExceptions(req, ex);
+    // *******************************限流错误***************************************
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(UndeclaredThrowableException.class)
+    public Result<String> handleUndeclaredThrowableException(
+            NativeWebRequest req, UndeclaredThrowableException ex ) {
+        handleExceptions(req, ex);
         Throwable e = ex.getCause();
-        LogUtils.error((String)"WebmvcHandler sentinel \u964d\u7ea7 \u8d44\u6e90\u540d\u79f0", (Object[])new Object[0]);
+
+        LogUtils.error("WebmvcHandler sentinel 降级 资源名称");
         String errMsg = e.getMessage();
         if (e instanceof FlowException) {
-            errMsg = "\u88ab\u9650\u6d41\u4e86";
+            errMsg = "被限流了";
         }
         if (e instanceof DegradeException) {
-            errMsg = "\u670d\u52a1\u964d\u7ea7\u4e86";
+            errMsg = "服务降级了";
         }
         if (e instanceof ParamFlowException) {
-            errMsg = "\u670d\u52a1\u70ed\u70b9\u964d\u7ea7\u4e86";
+            errMsg = "服务热点降级了";
         }
         if (e instanceof SystemBlockException) {
-            errMsg = "\u7cfb\u7edf\u8fc7\u8f7d\u4fdd\u62a4";
+            errMsg = "系统过载保护";
         }
         if (e instanceof AuthorityException) {
-            errMsg = "\u9650\u6d41\u6743\u9650\u63a7\u5236\u5f02\u5e38";
+            errMsg = "限流权限控制异常";
         }
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)errMsg);
+
+        return Result.fail(LIMIT_ERROR.code(), errMsg);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={BlockException.class})
-    public Result<String> handleBlockException(NativeWebRequest req, BlockException e) {
-        this.handleExceptions(req, (Exception)e);
-        LogUtils.error((String)"WebmvcHandler sentinel \u964d\u7ea7 \u8d44\u6e90\u540d\u79f0{}", (Object[])new Object[]{e, e.getRule().getResource()});
+    @org.springframework.web.bind.annotation.ExceptionHandler(BlockException.class)
+    public Result<String> handleBlockException( NativeWebRequest req, BlockException e ) {
+        handleExceptions(req, e);
+        LogUtils.error("WebmvcHandler sentinel 降级 资源名称{}", e, e.getRule().getResource());
         String errMsg = e.getMessage();
         if (e instanceof FlowException) {
-            errMsg = "\u88ab\u9650\u6d41\u4e86";
+            errMsg = "被限流了";
         }
         if (e instanceof DegradeException) {
-            errMsg = "\u670d\u52a1\u964d\u7ea7\u4e86";
+            errMsg = "服务降级了";
         }
         if (e instanceof ParamFlowException) {
-            errMsg = "\u670d\u52a1\u70ed\u70b9\u964d\u7ea7\u4e86";
+            errMsg = "服务热点降级了";
         }
         if (e instanceof SystemBlockException) {
-            errMsg = "\u7cfb\u7edf\u8fc7\u8f7d\u4fdd\u62a4";
+            errMsg = "系统过载保护";
         }
         if (e instanceof AuthorityException) {
-            errMsg = "\u9650\u6d41\u6743\u9650\u63a7\u5236\u5f02\u5e38";
+            errMsg = "限流权限控制异常";
         }
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)errMsg);
+        return Result.fail(LIMIT_ERROR.code(), errMsg);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={FlowException.class})
-    public Result<String> handleFlowException(NativeWebRequest req, FlowException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)"\u88ab\u9650\u6d41\u4e86");
+    @org.springframework.web.bind.annotation.ExceptionHandler(FlowException.class)
+    public Result<String> handleFlowException( NativeWebRequest req, FlowException e ) {
+        handleExceptions(req, e);
+        return Result.fail(LIMIT_ERROR.code(), "被限流了");
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={DegradeException.class})
-    public Result<String> handleDegradeException(NativeWebRequest req, DegradeException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)"\u670d\u52a1\u964d\u7ea7\u4e86");
+    @org.springframework.web.bind.annotation.ExceptionHandler(DegradeException.class)
+    public Result<String> handleDegradeException( NativeWebRequest req, DegradeException e ) {
+        handleExceptions(req, e);
+        return Result.fail(LIMIT_ERROR.code(), "服务降级了");
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={ParamFlowException.class})
-    public Result<String> handleParamFlowException(NativeWebRequest req, ParamFlowException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)"\u670d\u52a1\u70ed\u70b9\u964d\u7ea7\u4e86");
+    @org.springframework.web.bind.annotation.ExceptionHandler(ParamFlowException.class)
+    public Result<String> handleParamFlowException( NativeWebRequest req, ParamFlowException e ) {
+        handleExceptions(req, e);
+        return Result.fail(LIMIT_ERROR.code(), "服务热点降级了");
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={SystemBlockException.class})
-    public Result<String> handleSystemBlockException(NativeWebRequest req, SystemBlockException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)"\u7cfb\u7edf\u8fc7\u8f7d\u4fdd\u62a4");
+    @org.springframework.web.bind.annotation.ExceptionHandler(SystemBlockException.class)
+    public Result<String> handleSystemBlockException( NativeWebRequest req, SystemBlockException e ) {
+        handleExceptions(req, e);
+        return Result.fail(LIMIT_ERROR.code(), "系统过载保护");
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={AuthorityException.class})
-    public Result<String> handleAuthorityException(NativeWebRequest req, AuthorityException e) {
-        this.handleExceptions(req, (Exception)e);
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)"\u9650\u6d41\u6743\u9650\u63a7\u5236\u5f02\u5e38");
+    @org.springframework.web.bind.annotation.ExceptionHandler(AuthorityException.class)
+    public Result<String> handleAuthorityException( NativeWebRequest req, AuthorityException e ) {
+        handleExceptions(req, e);
+        return Result.fail(LIMIT_ERROR.code(), "限流权限控制异常");
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value={RateLimitException.class})
-    public Result<String> rateLimitException(RateLimitException e) {
-        return Result.fail((Code)ResultEnum.LIMIT_ERROR.code(), (String)"\u9650\u6d41\u6743\u9650\u63a7\u5236\u5f02\u5e38");
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = RateLimitException.class)
+    public Result<String> rateLimitException( RateLimitException e ) {
+        return Result.fail(LIMIT_ERROR.code(), "限流权限控制异常");
     }
 
-    private String getErrors(BindingResult result) {
+    /**
+     * 获取Binding错误数据
+     *
+     * @param result 请求对象
+     * @return 错误数据
+     * @since 2021-09-02 21:27:21
+     */
+    private String getErrors( BindingResult result ) {
         String errorMsg = "";
-        HashMap<String, String> map = new HashMap<String, String>();
-        List list = result.getFieldErrors();
+
+        Map<String, String> map = new HashMap<>();
+        List<FieldError> list = result.getFieldErrors();
         for (FieldError error : list) {
             map.put(error.getField(), error.getDefaultMessage());
+
             errorMsg = error.getDefaultMessage();
         }
+        // return JsonUtil.toJSONString(map);
         return errorMsg;
     }
 
-    private List<HashMap<String, String>> methodArgumentNotValidExceptionDescribe(BindException exception) {
+    /**
+     * 格式化请求参数异常
+     **/
+    private List<HashMap<String, String>> methodArgumentNotValidExceptionDescribe(
+            BindException exception ) {
         BindingResult bindingResult = exception.getBindingResult();
-        List fieldErrors = bindingResult.getFieldErrors();
-        return fieldErrors.stream().map(fieldError -> {
-            HashMap<String, String> map = new HashMap<String, String>(1);
-            map.put(fieldError.getField(), fieldError.getDefaultMessage());
-            return map;
-        }).collect(Collectors.toList());
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+
+        return fieldErrors.stream()
+                .map(
+                        fieldError -> {
+                            HashMap<String, String> map = new HashMap<>(1);
+                            map.put(fieldError.getField(), fieldError.getDefaultMessage());
+                            return map;
+                        })
+                .collect(Collectors.toList());
     }
 
-    private String getErrors(ConstraintViolationException e) {
+    /**
+     * 获取校验错误数据
+     *
+     * @param e 异常信息
+     * @return 校验错误数据
+     * @since 2021-09-02 21:27:27
+     */
+    private String getErrors( ConstraintViolationException e ) {
         String errorMsg = "";
-        HashMap<String, String> map = new HashMap<String, String>();
-        Set constraintViolations = e.getConstraintViolations();
-        for (ConstraintViolation constraintViolation : constraintViolations) {
+        Map<String, String> map = new HashMap<>();
+        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+        for (ConstraintViolation<?> constraintViolation : constraintViolations) {
             String property = constraintViolation.getPropertyPath().toString();
             String message = constraintViolation.getMessage();
             map.put(property, message);
+
             errorMsg = message;
         }
+        // return JsonUtil.toJSONString(map);
         return errorMsg;
     }
 
-    public void handleExceptions(NativeWebRequest req, Exception e) {
-        String traceId = this.getTraceId();
+    public void handleExceptions( NativeWebRequest req, Exception e ) {
+        String traceId = getTraceId();
+
         try {
-            HttpServletRequest nativeRequest = (HttpServletRequest)req.getNativeRequest(HttpServletRequest.class);
-            HttpServletResponse nativeResponse = (HttpServletResponse)req.getNativeResponse(HttpServletResponse.class);
-            LogUtils.error((Throwable)e);
+            HttpServletRequest nativeRequest = req.getNativeRequest(HttpServletRequest.class);
+            HttpServletResponse nativeResponse = req.getNativeResponse(HttpServletResponse.class);
+
+            LogUtils.error(e);
             if (nativeRequest != null) {
-                LogUtils.error((String)"\u8bf7\u6c42\u5931\u8d25\u8fd4\u56de request:{} traceId:{} url:{} \u5f02\u5e38\u6d88\u606f:{}", (Object[])new Object[]{req.getDescription(true), traceId, nativeRequest.getRequestURL(), e.getMessage()});
+                LogUtils.error(
+                        "请求失败返回 request:{} traceId:{} url:{} 异常消息:{}",
+                        req.getDescription(true),
+                        traceId,
+                        nativeRequest.getRequestURL(),
+                        e.getMessage());
             }
+        } catch (Exception ignored) {
         }
-        catch (Exception exception) {
-            // empty catch block
-        }
-        this.publishEvent(e);
-        this.asyncThreadPoolTaskExecutor.submit(() -> this.exceptionHandler.forEach(handler -> handler.handle(req, e, traceId)));
+
+        publishEvent(e);
+
+        asyncThreadPoolTaskExecutor.submit(
+                () -> {
+                    exceptionHandler.forEach(
+                            handler -> {
+                                handler.handle(req, e, traceId);
+                            });
+                });
     }
 
-    private void publishEvent(Throwable error) {
+    private void publishEvent( Throwable error ) {
         ErrorEvent event = new ErrorEvent();
-        event.setRequestId(this.getTraceId());
+        // 服务异常类型
+        // event.setErrorType(ErrorType.REQUEST);
+        // 异步获取不到的一些信息
+        event.setRequestId(getTraceId());
         event.setRequestType("api");
+
         HttpServletRequest request = RequestUtils.getRequest();
+        // 请求方法名
         event.setRequestMethod(request.getMethod());
-        Object requestUrl = request.getRequestURI();
+        // 拼接地址
+        String requestUrl = request.getRequestURI();
         String queryString = request.getQueryString();
-        if (StringUtils.isNotBlank((String)queryString)) {
-            requestUrl = (String)requestUrl + "?" + queryString;
+        if (StringUtils.isNotBlank(queryString)) {
+            requestUrl = requestUrl + StrPoolConstants.QUESTION_MARK + queryString;
         }
-        event.setRequestIp(RequestUtils.getHttpServletRequestIpAddress((HttpServletRequest)request));
-        event.setRequestUrl((String)requestUrl);
+        // 请求ip
+        event.setRequestIp(RequestUtils.getHttpServletRequestIpAddress(request));
+        event.setRequestUrl(requestUrl);
+        // 堆栈信息
         ErrorUtils.initErrorInfo(error, event);
-        this.applicationEventPublisher.publishEvent((Object)event);
+        // 发布事件，其他参数可监听时异步获取
+        applicationEventPublisher.publishEvent(event);
     }
 
     private String getTraceId() {
         String traceId = TraceContextHolder.getTraceId();
         if (traceId == null) {
-            traceId = TraceUtils.getKmcTraceId();
+            traceId = TraceUtils.getTtcTraceId();
         }
         if (traceId == null) {
             traceId = IdGeneratorUtils.getIdStr();
@@ -475,26 +583,42 @@ implements InitializingBean {
         return traceId;
     }
 
-    private ErrorMapping findMethodMapping(HandlerMethod handlerMethod, Exception ex) {
+
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<ErrorResponse> handleException( Exception ex, HandlerMethod handlerMethod,
+//		HttpServletRequest request ) {    // 1.获取方法级异常配置
+//		ErrorMapping errorMapping = findMethodMapping(handlerMethod, ex);
+//		if (errorMapping == null) {      // 2.获取类级别异常配置
+//			errorMapping = findClassMapping(handlerMethod, ex);
+//		}    // 3.获取类上的响应配置
+//		ErrorResponseBody responseConfig = getResponseConfig(handlerMethod);    // 4.构建错误响应
+//		ErrorResponse errorResponse = buildErrorResponse(ex, request, errorMapping, responseConfig);    // 5.记录日志
+//		logError(ex, responseConfig);    // 6.返回响应
+//		return ResponseEntity.status(errorMapping != null ? errorMapping.httpStatus() : 500).body(errorResponse);
+//	}
+
+    // 查找方法上的注解映射
+    private ErrorMapping findMethodMapping( HandlerMethod handlerMethod, Exception ex ) {
         Method method = handlerMethod.getMethod();
-        for (ErrorMapping mapping : (ErrorMapping[])method.getAnnotationsByType(ErrorMapping.class)) {
-            if (!mapping.exception().isInstance(ex)) continue;
-            return mapping;
+        for (ErrorMapping mapping : method.getAnnotationsByType(ErrorMapping.class)) {
+            if (mapping.exception().isInstance(ex)) {
+                return mapping;
+            }
         }
         return null;
     }
 
-    private ErrorMapping findClassMapping(HandlerMethod handlerMethod, Exception ex) {
-        Class clazz = handlerMethod.getBeanType();
-        for (ErrorMapping mapping : (ErrorMapping[])clazz.getAnnotationsByType(ErrorMapping.class)) {
-            if (!mapping.exception().isInstance(ex)) continue;
-            return mapping;
+    private ErrorMapping findClassMapping( HandlerMethod handlerMethod, Exception ex ) {
+        Class<?> clazz = handlerMethod.getBeanType();
+        for (ErrorMapping mapping : clazz.getAnnotationsByType(ErrorMapping.class)) {
+            if (mapping.exception().isInstance(ex)) {
+                return mapping;
+            }
         }
         return null;
     }
 
-    private ErrorResponseBody getResponseConfig(HandlerMethod handlerMethod) {
+    private ErrorResponseBody getResponseConfig( HandlerMethod handlerMethod ) {
         return handlerMethod.getBeanType().getAnnotation(ErrorResponseBody.class);
     }
 }
-

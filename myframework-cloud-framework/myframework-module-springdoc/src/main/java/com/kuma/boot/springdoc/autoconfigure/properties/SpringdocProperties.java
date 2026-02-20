@@ -103,7 +103,7 @@ public class SpringdocProperties {
     /**
      * description
      */
-    private String description = "TAOTAO CLOUD 电商及大数据平台";
+    private String description = "KUMA CLOUD FRAMEWORK";
     /**
      * contact
      */
@@ -119,7 +119,7 @@ public class SpringdocProperties {
     /**
      * externalDescription
      */
-    private String externalDescription = "TaoTao Cloud Wiki Documentation";
+    private String externalDescription = "Kuma Cloud Wiki Documentation";
     /**
      * externalUrl
      */

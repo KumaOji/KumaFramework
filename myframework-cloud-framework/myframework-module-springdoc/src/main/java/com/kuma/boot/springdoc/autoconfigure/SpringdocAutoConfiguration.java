@@ -232,7 +232,7 @@ public class SpringdocAutoConfiguration implements InitializingBean {
             // );
             // components.addSecuritySchemes("kuma_token",
             //	new SecurityScheme()
-            //		.name("TAOTAO_CLOUD_AUTH")
+            //		.name("KUMA_CLOUD_AUTH")
             //		.type(Type.OAUTH2)
             //		.in(In.HEADER)
             //		.scheme("bearer")

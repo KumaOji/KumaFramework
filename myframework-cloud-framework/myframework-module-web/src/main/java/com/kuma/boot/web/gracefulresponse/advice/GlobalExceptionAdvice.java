@@ -1,18 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.annotation.Resource
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.beans.BeansException
- *  org.springframework.context.ApplicationContext
- *  org.springframework.context.ApplicationContextAware
- *  org.springframework.core.annotation.Order
- *  org.springframework.web.bind.annotation.ControllerAdvice
- *  org.springframework.web.bind.annotation.ExceptionHandler
- *  org.springframework.web.bind.annotation.ResponseBody
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse.advice;
 
 import com.kuma.boot.web.gracefulresponse.ExceptionAliasRegister;
@@ -35,64 +36,104 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+/**
+ * 全局异常处理.
+ */
 @ControllerAdvice
-@Order(value=200)
-public class GlobalExceptionAdvice
-implements ApplicationContextAware {
-    private final Logger logger = LoggerFactory.getLogger(GlobalExceptionAdvice.class);
-    @Resource
-    private ResponseStatusFactory responseStatusFactory;
-    @Resource
-    private ResponseFactory responseFactory;
-    private ExceptionAliasRegister exceptionAliasRegister;
-    @Resource
-    private GracefulResponseProperties gracefulResponseProperties;
-    @Resource
-    private GracefulResponseProperties properties;
+@Order(200)
+public class GlobalExceptionAdvice implements ApplicationContextAware {
 
-    @ExceptionHandler(value={Throwable.class})
+    private final Logger logger = LoggerFactory.getLogger(GlobalExceptionAdvice.class);
+
+    @Resource private ResponseStatusFactory responseStatusFactory;
+
+    @Resource private ResponseFactory responseFactory;
+
+    private ExceptionAliasRegister exceptionAliasRegister;
+
+    @Resource private GracefulResponseProperties gracefulResponseProperties;
+
+    @Resource private GracefulResponseProperties properties;
+
+    /**
+     * 异常处理逻辑.
+     *
+     * @param throwable 业务逻辑抛出的异常
+     * @return 统一返回包装后的结果
+     */
+    @ExceptionHandler({Throwable.class})
     @ResponseBody
     public Response exceptionHandler(Throwable throwable) {
-        if (this.gracefulResponseProperties.isPrintExceptionInGlobalAdvice()) {
-            this.logger.error("Graceful Response:GlobalExceptionAdvice\u6355\u83b7\u5230\u5f02\u5e38,message=[{}]", (Object)throwable.getMessage(), (Object)throwable);
+        if (gracefulResponseProperties.isPrintExceptionInGlobalAdvice()) {
+            logger.error(
+                    "Graceful Response:GlobalExceptionAdvice捕获到异常,message=[{}]",
+                    throwable.getMessage(),
+                    throwable);
         }
-        ResponseStatus statusLine = throwable instanceof GracefulResponseException ? this.fromGracefulResponseExceptionInstance((GracefulResponseException)throwable) : this.fromExceptionInstance(throwable);
-        return this.responseFactory.newInstance(statusLine);
+        ResponseStatus statusLine;
+        if (throwable instanceof GracefulResponseException) {
+            statusLine =
+                    fromGracefulResponseExceptionInstance((GracefulResponseException) throwable);
+        } else {
+            // 校验异常转自定义异常
+            statusLine = fromExceptionInstance(throwable);
+        }
+        return responseFactory.newInstance(statusLine);
     }
 
-    private ResponseStatus fromGracefulResponseExceptionInstance(GracefulResponseException exception) {
+    private ResponseStatus fromGracefulResponseExceptionInstance(
+            GracefulResponseException exception) {
         String code = exception.getCode();
         if (code == null) {
-            code = this.properties.getDefaultErrorCode();
+            code = properties.getDefaultErrorCode();
         }
-        return this.responseStatusFactory.newInstance(code, exception.getMsg());
+        return responseStatusFactory.newInstance(code, exception.getMsg());
     }
 
     private ResponseStatus fromExceptionInstance(Throwable throwable) {
-        String throwableMessage;
-        ExceptionAliasFor exceptionAliasFor;
-        Class<?> clazz = throwable.getClass();
+
+        Class<? extends Throwable> clazz = throwable.getClass();
+
         ExceptionMapper exceptionMapper = clazz.getAnnotation(ExceptionMapper.class);
+
+        // 1.有@ExceptionMapper注解，直接设置结果的状态
         if (exceptionMapper != null) {
-            String throwableMessage2;
             boolean msgReplaceable = exceptionMapper.msgReplaceable();
-            if (msgReplaceable && (throwableMessage2 = throwable.getMessage()) != null) {
-                return this.responseStatusFactory.newInstance(exceptionMapper.code(), throwableMessage2);
+            // 异常提示可替换+抛出来的异常有自定义的异常信息
+            if (msgReplaceable) {
+                String throwableMessage = throwable.getMessage();
+                if (throwableMessage != null) {
+                    return responseStatusFactory.newInstance(
+                            exceptionMapper.code(), throwableMessage);
+                }
             }
-            return this.responseStatusFactory.newInstance(exceptionMapper.code(), exceptionMapper.msg());
+            return responseStatusFactory.newInstance(exceptionMapper.code(), exceptionMapper.msg());
         }
-        if (this.exceptionAliasRegister != null && (exceptionAliasFor = this.exceptionAliasRegister.getExceptionAliasFor(clazz)) != null) {
-            return this.responseStatusFactory.newInstance(exceptionAliasFor.code(), exceptionAliasFor.msg());
+
+        // 2.有@ExceptionAliasFor异常别名注解，获取已注册的别名信息
+        if (exceptionAliasRegister != null) {
+            ExceptionAliasFor exceptionAliasFor =
+                    exceptionAliasRegister.getExceptionAliasFor(clazz);
+            if (exceptionAliasFor != null) {
+                return responseStatusFactory.newInstance(
+                        exceptionAliasFor.code(), exceptionAliasFor.msg());
+            }
         }
-        ResponseStatus defaultError = this.responseStatusFactory.defaultError();
-        if (this.properties.getOriginExceptionUsingDetailMessage().booleanValue() && (throwableMessage = throwable.getMessage()) != null) {
-            defaultError.setMsg(throwableMessage);
+        ResponseStatus defaultError = responseStatusFactory.defaultError();
+
+        // 3. 原生异常+originExceptionUsingDetailMessage=true
+        // 如果有自定义的异常信息，原生异常将直接使用异常信息进行返回，不再返回默认错误提示
+        if (properties.getOriginExceptionUsingDetailMessage()) {
+            String throwableMessage = throwable.getMessage();
+            if (throwableMessage != null) {
+                defaultError.setMsg(throwableMessage);
+            }
         }
         return defaultError;
     }
 
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.exceptionAliasRegister = (ExceptionAliasRegister)applicationContext.getBean(ExceptionAliasRegister.class);
+        this.exceptionAliasRegister = applicationContext.getBean(ExceptionAliasRegister.class);
     }
 }
-

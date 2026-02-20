@@ -1,18 +1,34 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.gracefulresponse.data;
 
 import java.util.List;
 
+/**
+ */
 public class PageBean<T> {
+
     private Integer pageSize;
     private Integer total;
     private Integer page;
     private List<T> list;
 
     public Integer getPageSize() {
-        return this.pageSize;
+        return pageSize;
     }
 
     public void setPageSize(Integer pageSize) {
@@ -20,7 +36,7 @@ public class PageBean<T> {
     }
 
     public Integer getTotal() {
-        return this.total;
+        return total;
     }
 
     public void setTotal(Integer total) {
@@ -28,7 +44,7 @@ public class PageBean<T> {
     }
 
     public Integer getPage() {
-        return this.page;
+        return page;
     }
 
     public void setPage(Integer page) {
@@ -36,11 +52,10 @@ public class PageBean<T> {
     }
 
     public List<T> getList() {
-        return this.list;
+        return list;
     }
 
     public void setList(List<T> list) {
         this.list = list;
     }
 }
-

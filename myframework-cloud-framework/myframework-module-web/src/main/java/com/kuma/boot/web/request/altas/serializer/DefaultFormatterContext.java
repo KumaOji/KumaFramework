@@ -1,14 +1,17 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.serializer;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DefaultFormatterContext
-implements ArgumentFormatter.FormatterContext {
+/**
+ * 默认格式化上下文实现
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+public class DefaultFormatterContext implements com.kuma.boot.web.request.altas.serializer.ArgumentFormatter.FormatterContext {
+
     private final String methodName;
     private final String className;
     private final int maxLength;
@@ -18,37 +21,36 @@ implements ArgumentFormatter.FormatterContext {
         this.methodName = methodName;
         this.className = className;
         this.maxLength = maxLength;
-        this.attributes = new ConcurrentHashMap<String, Object>();
+        this.attributes = new ConcurrentHashMap<>();
     }
 
     @Override
     public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
     @Override
     public String getClassName() {
-        return this.className;
+        return className;
     }
 
     @Override
     public int getMaxLength() {
-        return this.maxLength;
+        return maxLength;
     }
 
     @Override
     public Object getAttribute(String key) {
-        return this.attributes.get(key);
+        return attributes.get(key);
     }
 
     @Override
     public void setAttribute(String key, Object value) {
-        this.attributes.put(key, value);
+        attributes.put(key, value);
     }
 
     @Override
     public Map<String, Object> getAttributes() {
-        return new HashMap<String, Object>(this.attributes);
+        return new HashMap<>(attributes);
     }
 }
-

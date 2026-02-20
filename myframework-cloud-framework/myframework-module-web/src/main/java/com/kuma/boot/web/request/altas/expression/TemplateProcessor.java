@@ -1,36 +1,52 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.expression.Expression
- *  org.springframework.expression.ExpressionParser
- *  org.springframework.expression.spel.standard.SpelExpressionParser
- *  org.springframework.expression.spel.support.StandardEvaluationContext
- */
 package com.kuma.boot.web.request.altas.expression;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.request.altas.context.LogContext;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public class TemplateProcessor
-implements ExpressionProcessor {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 模板表达式处理器 处理包含中文字符和SpEL占位符的混合字符串 例如: "查询用户信息: 用户ID=#{args[0]}"
+ * <p>
+ * 核心思路： 1. 提取所有SpEL占位符 #{...} 2. 对每个SpEL表达式单独求值 3. 用求值结果替换原始模板中的占位符 4. 避免将包含中文的整个字符串传递给SpEL解析器
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+
+public class TemplateProcessor implements com.kuma.boot.web.request.altas.expression.ExpressionProcessor {
+
     private final ExpressionParser parser = new SpelExpressionParser();
-    private final SpelExpressionEvaluator mainEvaluator;
+    private final com.kuma.boot.web.request.altas.expression.SpelExpressionEvaluator mainEvaluator;
     private final boolean failSafe;
 
-    public TemplateProcessor(SpelExpressionEvaluator mainEvaluator, boolean failSafe) {
+    /**
+     * SpEL占位符信息
+     */
+    private static class SpelPlaceholder {
+
+        final String fullPlaceholder;  // 完整占位符 #{args[0]}
+        final String expression;       // 纯表达式部分 args[0]
+        final int startIndex;          // 在原字符串中的开始位置
+        final int endIndex;            // 在原字符串中的结束位置
+
+        SpelPlaceholder(String fullPlaceholder, String expression, int startIndex, int endIndex) {
+            this.fullPlaceholder = fullPlaceholder;
+            this.expression = expression;
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+        }
+    }
+
+    public TemplateProcessor(com.kuma.boot.web.request.altas.expression.SpelExpressionEvaluator mainEvaluator, boolean failSafe) {
         this.mainEvaluator = mainEvaluator;
         this.failSafe = failSafe;
     }
@@ -40,123 +56,163 @@ implements ExpressionProcessor {
         if (expression == null || expression.trim().isEmpty()) {
             return "";
         }
+
+        // 预先验证LogContext状态
         if (logContext == null) {
-            LogUtils.warn((String)"TemplateProcessor received null LogContext, expression: {}", (Object[])new Object[]{expression});
-            return this.failSafe ? "[LogContext\u4e3anull]" : expression;
+            LogUtils.warn("TemplateProcessor received null LogContext, expression: {}", expression);
+            return failSafe ? "[LogContext为null]" : expression;
         }
+
+        // 如果表达式包含args引用，验证args是否存在
         if (expression.contains("args") && logContext.getArgs() == null) {
-            String warnMsg = String.format("\u8868\u8fbe\u5f0f\u5f15\u7528args\u4f46LogContext.args\u4e3anull\uff0c\u8868\u8fbe\u5f0f: %s, method: %s", expression, logContext.getMethodName());
-            LogUtils.warn((String)warnMsg, (Object[])new Object[0]);
-            if (this.failSafe) {
+            String warnMsg = String.format("表达式引用args但LogContext.args为null，表达式: %s, method: %s",
+                    expression, logContext.getMethodName());
+            LogUtils.warn(warnMsg);
+
+            if (failSafe) {
                 return "[" + warnMsg + "]";
             }
         }
+
         try {
-            List<SpelPlaceholder> placeholders = this.extractSpelPlaceholders(expression);
+            // 提取所有SpEL占位符
+            List<SpelPlaceholder> placeholders = extractSpelPlaceholders(expression);
+
             if (placeholders.isEmpty()) {
+                // 没有SpEL占位符，当作纯文本处理
                 return expression;
             }
-            EvaluationContext evaluationContext = this.createSafeEvaluationContext(logContext);
-            return this.replacePlaceholders(expression, placeholders, evaluationContext);
-        }
-        catch (Exception e) {
-            String errorMsg = "\u6a21\u677f\u8868\u8fbe\u5f0f\u5904\u7406\u5931\u8d25: " + expression + ", LogContext: " + (logContext != null ? logContext.getMethodName() : "null");
-            LogUtils.warn((String)errorMsg, (Object[])new Object[]{e});
-            if (this.failSafe) {
+
+            // 创建求值上下文前再次验证
+            EvaluationContext evaluationContext = createSafeEvaluationContext(logContext);
+
+            // 替换占位符
+            return replacePlaceholders(expression, placeholders, evaluationContext);
+
+        } catch (Exception e) {
+            String errorMsg = "模板表达式处理失败: " + expression + ", LogContext: " +
+                    (logContext != null ? logContext.getMethodName() : "null");
+            LogUtils.warn(errorMsg, e);
+
+            if (failSafe) {
                 return "[" + errorMsg + "]";
+            } else {
+                throw new RuntimeException(errorMsg, e);
             }
-            throw new RuntimeException(errorMsg, e);
         }
     }
 
     @Override
     public boolean canHandle(String expression) {
-        return ExpressionTypeDetector.detectType(expression) == ExpressionType.TEMPLATE;
+        return com.kuma.boot.web.request.altas.expression.ExpressionTypeDetector.detectType(expression) == com.kuma.boot.web.request.altas.expression.ExpressionType.TEMPLATE;
     }
 
     @Override
-    public ExpressionType getSupportedType() {
-        return ExpressionType.TEMPLATE;
+    public com.kuma.boot.web.request.altas.expression.ExpressionType getSupportedType() {
+        return com.kuma.boot.web.request.altas.expression.ExpressionType.TEMPLATE;
     }
 
+    /**
+     * 提取字符串中的所有SpEL占位符
+     */
     private List<SpelPlaceholder> extractSpelPlaceholders(String template) {
-        ArrayList<SpelPlaceholder> placeholders = new ArrayList<SpelPlaceholder>();
-        Pattern pattern = ExpressionTypeDetector.getSpelPlaceholderPattern();
+        List<SpelPlaceholder> placeholders = new ArrayList<>();
+        Pattern pattern = com.kuma.boot.web.request.altas.expression.ExpressionTypeDetector.getSpelPlaceholderPattern();
         Matcher matcher = pattern.matcher(template);
+
         while (matcher.find()) {
-            String fullPlaceholder = matcher.group(0);
-            String expression = matcher.group(1);
+            String fullPlaceholder = matcher.group(0);  // #{args[0]}
+            String expression = matcher.group(1);       // args[0] - 这里已经是纯表达式，不包含#{}
             int startIndex = matcher.start();
             int endIndex = matcher.end();
+
             placeholders.add(new SpelPlaceholder(fullPlaceholder, expression, startIndex, endIndex));
-            LogUtils.debug((String)"Extracted SpEL placeholder: {} -> {}", (Object[])new Object[]{fullPlaceholder, expression});
+            LogUtils.debug("Extracted SpEL placeholder: {} -> {}", fullPlaceholder, expression);
         }
+
         return placeholders;
     }
 
+    /**
+     * 替换模板中的占位符
+     */
     private String replacePlaceholders(String template, List<SpelPlaceholder> placeholders, EvaluationContext context) {
         StringBuilder result = new StringBuilder(template);
-        for (int i = placeholders.size() - 1; i >= 0; --i) {
+
+        // 从后往前替换，避免位置偏移问题
+        for (int i = placeholders.size() - 1; i >= 0; i--) {
             SpelPlaceholder placeholder = placeholders.get(i);
+
             try {
-                String processedExpression = this.ensureVariableSyntax(placeholder.expression);
-                Expression expression = this.parser.parseExpression(processedExpression);
+                // 确保变量引用使用正确的语法
+                String processedExpression = ensureVariableSyntax(placeholder.expression);
+
+                // 对单个SpEL表达式求值
+                Expression expression = parser.parseExpression(processedExpression);
                 Object value = expression.getValue(context);
                 String valueStr = value != null ? value.toString() : "";
+
+                // 替换占位符
                 result.replace(placeholder.startIndex, placeholder.endIndex, valueStr);
-                LogUtils.debug((String)"Replaced placeholder: {} -> {}", (Object[])new Object[]{placeholder.fullPlaceholder, valueStr});
-                continue;
-            }
-            catch (Exception e) {
-                Object errorValue = this.failSafe ? "[\u8868\u8fbe\u5f0f\u9519\u8bef: " + placeholder.expression + "]" : placeholder.fullPlaceholder;
-                result.replace(placeholder.startIndex, placeholder.endIndex, (String)errorValue);
-                LogUtils.warn((String)"SpEL placeholder evaluation failed: {}", (Object[])new Object[]{placeholder.fullPlaceholder, e});
+
+                LogUtils.debug("Replaced placeholder: {} -> {}", placeholder.fullPlaceholder, valueStr);
+
+            } catch (Exception e) {
+                String errorValue =
+                        failSafe ? "[表达式错误: " + placeholder.expression + "]" : placeholder.fullPlaceholder;
+                result.replace(placeholder.startIndex, placeholder.endIndex, errorValue);
+
+                LogUtils.warn("SpEL placeholder evaluation failed: {}", placeholder.fullPlaceholder, e);
             }
         }
+
         return result.toString();
     }
 
-    private EvaluationContext createSafeEvaluationContext(LogContext logContext) {
-        EvaluationContext context = this.mainEvaluator.createEvaluationContext(logContext);
+    /**
+     * 新增：安全的求值上下文创建
+     */
+    private EvaluationContext createSafeEvaluationContext( LogContext logContext) {
+        EvaluationContext context = mainEvaluator.createEvaluationContext(logContext);
+
+        // 验证关键变量是否正确设置
         try {
             Object args = context.lookupVariable("args");
-            LogUtils.debug((String)"TemplateProcessor\u4e2dargs\u53d8\u91cf\u72b6\u6001: {}, LogContext.args: {}", (Object[])new Object[]{args != null ? "non-null" : "null", logContext != null && logContext.getArgs() != null ? "non-null" : "null"});
+            LogUtils.debug("TemplateProcessor中args变量状态: {}, LogContext.args: {}",
+                    args != null ? "non-null" : "null",
+                    logContext != null && logContext.getArgs() != null ? "non-null" : "null");
+
             if (args == null && logContext != null && logContext.getArgs() != null) {
-                LogUtils.warn((String)"args is null in EvaluationContext but LogContext.args is not null, resetting", (Object[])new Object[0]);
-                ((StandardEvaluationContext)context).setVariable("args", (Object)logContext.getArgs());
+                LogUtils.warn("args is null in EvaluationContext but LogContext.args is not null, resetting");
+                ((StandardEvaluationContext) context).setVariable("args", logContext.getArgs());
             }
+        } catch (Exception e) {
+            LogUtils.debug("Exception occurred while validating EvaluationContext state", e);
         }
-        catch (Exception e) {
-            LogUtils.debug((String)"Exception occurred while validating EvaluationContext state", (Object[])new Object[]{e});
-        }
+
         return context;
     }
 
+    /**
+     * 确保变量引用使用正确的语法 将变量名转换为#variableName格式
+     */
     private String ensureVariableSyntax(String expression) {
-        Object processed = expression;
-        if (((String)processed).matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\[.*\\].*")) {
-            processed = ((String)processed).replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
-        } else if (((String)processed).matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\..*")) {
-            processed = ((String)processed).replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
-        } else if (((String)processed).matches("^([a-zA-Z_][a-zA-Z0-9_]*)$")) {
-            processed = "#" + (String)processed;
+        // 处理常见的变量引用
+        String processed = expression;
+
+        // 如果表达式以变量名开头且没有#前缀，添加#前缀
+        if (processed.matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\[.*\\].*")) {
+            // 处理数组/列表访问，如 args[0]
+            processed = processed.replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
+        } else if (processed.matches("^([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\..*")) {
+            // 处理属性访问，如 result.success
+            processed = processed.replaceFirst("^([a-zA-Z_][a-zA-Z0-9_]*)", "#$1");
+        } else if (processed.matches("^([a-zA-Z_][a-zA-Z0-9_]*)$")) {
+            // 处理简单变量引用，如 args
+            processed = "#" + processed;
         }
-        LogUtils.debug((String)"Expression syntax processing: {} -> {}", (Object[])new Object[]{expression, processed});
+
+        LogUtils.debug("Expression syntax processing: {} -> {}", expression, processed);
         return processed;
     }
-
-    private static class SpelPlaceholder {
-        final String fullPlaceholder;
-        final String expression;
-        final int startIndex;
-        final int endIndex;
-
-        SpelPlaceholder(String fullPlaceholder, String expression, int startIndex, int endIndex) {
-            this.fullPlaceholder = fullPlaceholder;
-            this.expression = expression;
-            this.startIndex = startIndex;
-            this.endIndex = endIndex;
-        }
-    }
 }
-

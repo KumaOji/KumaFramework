@@ -1,11 +1,19 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.request.altas.serializer;
 
+/**
+ * 参数格式类型枚举
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
 public enum ArgumentFormatType {
+    /**
+     * JSON 格式
+     */
     JSON,
-    KEY_VALUE;
 
+    /**
+     * key=value 格式
+     */
+    KEY_VALUE
 }
-

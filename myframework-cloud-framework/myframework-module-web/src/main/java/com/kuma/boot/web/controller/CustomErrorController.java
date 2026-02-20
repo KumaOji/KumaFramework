@@ -1,66 +1,84 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.ResultEnum
- *  com.kuma.boot.common.model.result.Result
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.boot.autoconfigure.web.ErrorProperties
- *  org.springframework.boot.web.error.ErrorAttributeOptions
- *  org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController
- *  org.springframework.boot.webmvc.error.ErrorAttributes
- *  org.springframework.http.HttpStatus
- *  org.springframework.http.HttpStatusCode
- *  org.springframework.http.ResponseEntity
- *  org.springframework.web.servlet.ModelAndView
- *  org.springframework.web.servlet.View
- *  org.springframework.web.servlet.view.json.JacksonJsonView
- *  tools.jackson.databind.json.JsonMapper
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.controller;
 
-import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController;
 import org.springframework.boot.webmvc.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.json.JacksonJsonView;
 import tools.jackson.databind.json.JsonMapper;
 
-public class CustomErrorController
-extends BasicErrorController {
+import java.util.Map;
+
+import static com.kuma.boot.common.enums.ResultEnum.REQUEST_NOT_FOUND;
+
+/**
+ * 更改 html 请求异常为 ajax，对前后端分离更加友好
+ */
+public class CustomErrorController extends BasicErrorController {
     private final JsonMapper jsonMapper;
 
-    public CustomErrorController(JsonMapper jsonMapper, ErrorAttributes errorAttributes, ErrorProperties errorProperties) {
+    public CustomErrorController(
+            JsonMapper jsonMapper,
+            ErrorAttributes errorAttributes,
+            ErrorProperties errorProperties) {
         super(errorAttributes, errorProperties);
         this.jsonMapper = jsonMapper;
     }
 
+    /**
+     * 覆盖默认的JSON响应
+     */
+    @Override
     public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
-        Result fail = Result.fail((ResultEnum)ResultEnum.REQUEST_NOT_FOUND);
-        Map map = JacksonUtils.toMap((Object)fail);
-        return new ResponseEntity((Object)map, HttpStatusCode.valueOf((int)200));
+        Result<String> fail = Result.fail(REQUEST_NOT_FOUND);
+        Map<String, Object> map = JacksonUtils.toMap(fail);
+        return new ResponseEntity<>(map, HttpStatusCode.valueOf(200));
     }
 
+    /**
+     * 覆盖默认的HTML响应
+     */
+    // @Override
+    // public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
+    // 	// 请求的状态
+    // 	response.setStatus(getStatus(request).value());
+    // 	// 指定自定义的视图
+    // 	//log.info("覆盖默认的HTML响应:{}", "https://vue.ruoyi.vip/404");
+    // 	return new ModelAndView("redirect:https://vue.ruoyi.vip/404");
+    // }
+
+    @Override
     public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
-        Map body = this.getErrorAttributes(request, ErrorAttributeOptions.defaults());
-        HttpStatus status = this.getStatus(request);
+        Map<String, Object> body = getErrorAttributes(request, ErrorAttributeOptions.defaults());
+        HttpStatus status = getStatus(request);
         response.setStatus(status.value());
-        JacksonJsonView view = new JacksonJsonView(this.jsonMapper);
-        view.setContentType("application/json");
-        return new ModelAndView((View)view, body);
+        JacksonJsonView view = new JacksonJsonView(jsonMapper);
+        view.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return new ModelAndView(view, body);
     }
 }
-

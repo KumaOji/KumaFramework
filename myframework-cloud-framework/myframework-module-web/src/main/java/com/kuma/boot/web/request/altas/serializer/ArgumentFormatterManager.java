@@ -1,101 +1,174 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- */
 package com.kuma.boot.web.request.altas.serializer;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 参数格式化器管理器
+ * 负责管理和选择不同的格式化器
+ *
+ * @author nemoob
+ * @since 0.2.0
+ */
+
 public class ArgumentFormatterManager {
-    private final Map<String, ArgumentFormatter> formatters = new ConcurrentHashMap<String, ArgumentFormatter>();
-    private final ArgumentFormatter defaultFormatter;
+
+    private final Map<String, com.kuma.boot.web.request.altas.serializer.ArgumentFormatter> formatters = new ConcurrentHashMap<>();
+    private final com.kuma.boot.web.request.altas.serializer.ArgumentFormatter defaultFormatter;
     private final String defaultFormatterName;
 
-    public ArgumentFormatterManager(ArgumentFormatter defaultFormatter, String defaultFormatterName) {
+    public ArgumentFormatterManager(com.kuma.boot.web.request.altas.serializer.ArgumentFormatter defaultFormatter, String defaultFormatterName) {
         this.defaultFormatter = defaultFormatter;
         this.defaultFormatterName = defaultFormatterName;
-        this.registerFormatter(defaultFormatterName, defaultFormatter);
-        LogUtils.info((String)"ArgumentFormatterManager initialized with default formatter: {}", (Object[])new Object[]{defaultFormatterName});
+
+        // 注册默认格式化器
+        registerFormatter(defaultFormatterName, defaultFormatter);
+
+        LogUtils.info("ArgumentFormatterManager initialized with default formatter: {}", defaultFormatterName);
     }
 
-    public void registerFormatter(String name, ArgumentFormatter formatter) {
+    /**
+     * 注册格式化器
+     *
+     * @param name 格式化器名称
+     * @param formatter 格式化器实例
+     */
+    public void registerFormatter(String name, com.kuma.boot.web.request.altas.serializer.ArgumentFormatter formatter) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Formatter name cannot be null or empty");
         }
         if (formatter == null) {
             throw new IllegalArgumentException("Formatter cannot be null");
         }
-        this.formatters.put(name.toLowerCase(), formatter);
-        LogUtils.debug((String)"Registered formatter: {} -> {}", (Object[])new Object[]{name, formatter.getClass().getSimpleName()});
+
+        formatters.put(name.toLowerCase(), formatter);
+        LogUtils.debug("Registered formatter: {} -> {}", name, formatter.getClass().getSimpleName());
     }
 
-    public ArgumentFormatter getFormatter(String name) {
+    /**
+     * 获取格式化器
+     *
+     * @param name 格式化器名称
+     * @return 格式化器实例，如果不存在则返回默认格式化器
+     */
+    public com.kuma.boot.web.request.altas.serializer.ArgumentFormatter getFormatter(String name) {
         if (name == null || name.trim().isEmpty()) {
-            return this.defaultFormatter;
+            return defaultFormatter;
         }
-        ArgumentFormatter formatter = this.formatters.get(name.toLowerCase());
+
+        com.kuma.boot.web.request.altas.serializer.ArgumentFormatter formatter = formatters.get(name.toLowerCase());
         if (formatter == null) {
-            LogUtils.warn((String)"Formatter '{}' not found, using default formatter '{}'", (Object[])new Object[]{name, this.defaultFormatterName});
-            return this.defaultFormatter;
+            LogUtils.warn("Formatter '{}' not found, using default formatter '{}'", name, defaultFormatterName);
+            return defaultFormatter;
         }
+
         return formatter;
     }
 
-    public ArgumentFormatter getDefaultFormatter() {
-        return this.defaultFormatter;
+    /**
+     * 获取默认格式化器
+     *
+     * @return 默认格式化器
+     */
+    public com.kuma.boot.web.request.altas.serializer.ArgumentFormatter getDefaultFormatter() {
+        return defaultFormatter;
     }
 
+    /**
+     * 获取默认格式化器名称
+     *
+     * @return 默认格式化器名称
+     */
     public String getDefaultFormatterName() {
-        return this.defaultFormatterName;
+        return defaultFormatterName;
     }
 
+    /**
+     * 检查格式化器是否存在
+     *
+     * @param name 格式化器名称
+     * @return 是否存在
+     */
     public boolean hasFormatter(String name) {
         if (name == null || name.trim().isEmpty()) {
             return false;
         }
-        return this.formatters.containsKey(name.toLowerCase());
+        return formatters.containsKey(name.toLowerCase());
     }
 
-    public Set<String> getFormatterNames() {
-        return new HashSet<String>(this.formatters.keySet());
+    /**
+     * 获取所有已注册的格式化器名称
+     *
+     * @return 格式化器名称集合
+     */
+    public java.util.Set<String> getFormatterNames() {
+        return new java.util.HashSet<>(formatters.keySet());
     }
 
+    /**
+     * 移除格式化器
+     *
+     * @param name 格式化器名称
+     * @return 是否成功移除
+     */
     public boolean removeFormatter(String name) {
         if (name == null || name.trim().isEmpty()) {
             return false;
         }
-        if (this.defaultFormatterName.equalsIgnoreCase(name)) {
-            LogUtils.warn((String)"Cannot remove default formatter: {}", (Object[])new Object[]{name});
+
+        // 不允许移除默认格式化器
+        if (defaultFormatterName.equalsIgnoreCase(name)) {
+            LogUtils.warn("Cannot remove default formatter: {}", name);
             return false;
         }
-        ArgumentFormatter removed = this.formatters.remove(name.toLowerCase());
+
+        com.kuma.boot.web.request.altas.serializer.ArgumentFormatter removed = formatters.remove(name.toLowerCase());
         if (removed != null) {
-            LogUtils.debug((String)"Removed formatter: {}", (Object[])new Object[]{name});
+            LogUtils.debug("Removed formatter: {}", name);
             return true;
         }
+
         return false;
     }
 
-    public String formatArguments(String formatterName, Object[] args, ArgumentFormatter.FormatterContext context) {
-        ArgumentFormatter formatter = this.getFormatter(formatterName);
+    /**
+     * 格式化方法参数
+     *
+     * @param formatterName 格式化器名称
+     * @param args 方法参数
+     * @param context 格式化上下文
+     * @return 格式化后的字符串
+     */
+    public String formatArguments(String formatterName, Object[] args, com.kuma.boot.web.request.altas.serializer.ArgumentFormatter.FormatterContext context) {
+        com.kuma.boot.web.request.altas.serializer.ArgumentFormatter formatter = getFormatter(formatterName);
         return formatter.formatArguments(args, context);
     }
 
-    public String formatResult(String formatterName, Object result, ArgumentFormatter.FormatterContext context) {
-        ArgumentFormatter formatter = this.getFormatter(formatterName);
+    /**
+     * 格式化方法返回值
+     *
+     * @param formatterName 格式化器名称
+     * @param result 方法返回值
+     * @param context 格式化上下文
+     * @return 格式化后的字符串
+     */
+    public String formatResult(String formatterName, Object result, com.kuma.boot.web.request.altas.serializer.ArgumentFormatter.FormatterContext context) {
+        com.kuma.boot.web.request.altas.serializer.ArgumentFormatter formatter = getFormatter(formatterName);
         return formatter.formatResult(result, context);
     }
 
-    public String formatHttpParameters(String formatterName, Map<String, String[]> parameters, ArgumentFormatter.FormatterContext context) {
-        ArgumentFormatter formatter = this.getFormatter(formatterName);
+    /**
+     * 格式化HTTP请求参数
+     *
+     * @param formatterName 格式化器名称
+     * @param parameters HTTP请求参数
+     * @param context 格式化上下文
+     * @return 格式化后的字符串
+     */
+    public String formatHttpParameters(String formatterName, Map<String, String[]> parameters, com.kuma.boot.web.request.altas.serializer.ArgumentFormatter.FormatterContext context) {
+        com.kuma.boot.web.request.altas.serializer.ArgumentFormatter formatter = getFormatter(formatterName);
         return formatter.formatHttpParameters(parameters, context);
     }
 }
-
