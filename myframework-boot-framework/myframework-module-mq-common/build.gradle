@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework mq-common模块'
+
+dependencies {
+    api project(':myframework-boot-framework:myframework-module-common')
+    api projectLibs.hutool.extra
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.context
+}

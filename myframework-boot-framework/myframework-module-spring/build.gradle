@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework spring模块'
+
+dependencies {
+    api project(':myframework-boot-framework:myframework-module-common')
+    api project(':myframework-boot-framework:myframework-module-core')
+    api project(':myframework-boot-framework:myframework-module-data-mybatis')
+    api project(':myframework-boot-framework:myframework-module-data-datasource')
+    api projectLibs.hutool.core
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.doc.webmvc
+    api projectLibs.dynamic.datasource
+    api projectLibs.spring.boot.starter.cache
+    api projectLibs.caffeine
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

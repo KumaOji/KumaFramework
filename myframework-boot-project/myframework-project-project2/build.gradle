@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+def springBootVersion = projectLibs.versions.springboot.get()
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+dependencies {
+    implementation project(':myframework-boot-framework:myframework-module-application')
+    implementation project(':myframework-boot-framework:myframework-module-data-mybatis')
+    implementation projectLibs.spring.boot.starter.jdbc
+    runtimeOnly projectLibs.mysql
+    runtimeOnly projectLibs.postgresql
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(
+                mysql     : [
+                        url     : project.findProperty('mysql.url') ?: 'jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai',
+                        username: project.findProperty('mysql.username') ?: 'root',
+                        password: project.findProperty('mysql.password') ?: ''
+                ],
+                postgresql: [
+                        url     : project.findProperty('postgresql.url') ?: 'jdbc:postgresql://localhost:5432/postgres',
+                        username: project.findProperty('postgresql.username') ?: 'postgres',
+                        password: project.findProperty('postgresql.password') ?: ''
+                ]
+        )
+    }
+}
+
+bootJar {
+    archiveBaseName = 'project2'
+}

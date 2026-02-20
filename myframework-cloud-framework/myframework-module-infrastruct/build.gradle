@@ -1,9 +1,0 @@
-plugins {
-    id 'java-library'
-}
-
-description = 'Myframework 基础设施模块'
-
-dependencies {
-    api project(':myframework-cloud-framework:myframework-module-spring')
-}
