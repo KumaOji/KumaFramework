@@ -1,4 +1,0 @@
-# Druid RSA 密码加密密钥对
-# 使用 com.alibaba.druid.filter.config.ConfigTools 生成
-# 将生成的密钥填入实际 rsa_keys.txt，并将 rsa_keys.txt 加入 .gitignore
-# 格式示例：{"public":"xxx","private":"xxx"}

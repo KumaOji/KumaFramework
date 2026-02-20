@@ -36,7 +36,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @AutoConfiguration
 @ConditionalOnClass(DruidStatProperties.class)
-@PropertySource(factory = YamlPropertySourceFactory.class, value = "classpath:tt-druid.yml")
+@PropertySource(factory = YamlPropertySourceFactory.class, value = "classpath:kuma-druid.yml")
 public class DruidAutoConfiguration {
 
     @Bean
