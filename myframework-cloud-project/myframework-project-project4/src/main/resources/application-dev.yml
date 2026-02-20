@@ -1,10 +1,7 @@
 spring:
   main:
     lazy-initialization: true
-    banner-mode: console
     log-startup-info: false
-  banner:
-    location: classpath:banner/banner.txt
   cache:
     type: none
   autoconfigure:

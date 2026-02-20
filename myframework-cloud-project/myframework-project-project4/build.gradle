@@ -14,21 +14,26 @@ dependencyManagement {
 dependencies {
     api project(':myframework-cloud-framework:myframework-module-common')
     api project(':myframework-cloud-framework:myframework-module-core')
-    api project(':myframework-cloud-framework:myframework-module-data-mybatis')
+    api project(':myframework-cloud-framework:myframework-module-cache-common')
+    api project(':myframework-cloud-framework:myframework-module-cache-redis')
+    api project(':myframework-cloud-framework:myframework-module-cache-caffeine')
+    api project(':myframework-cloud-framework:myframework-module-cache-jetcache')
+    api project(':myframework-cloud-framework:myframework-module-mq-common')
+    api project(':myframework-cloud-framework:myframework-module-mq-kafka')
+    api project(':myframework-cloud-framework:myframework-module-data-common')
     api project(':myframework-cloud-framework:myframework-module-data-datasource')
+    api project(':myframework-cloud-framework:myframework-module-data-mybatis')
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.doc.webmvc
-    api projectLibs.dynamic.datasource
-    api projectLibs.spring.boot.starter.cache
-    api projectLibs.caffeine
+
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
-    annotationProcessor projectLibs.lombok
+
     runtimeOnly projectLibs.mysql
     runtimeOnly projectLibs.postgresql
-    compileOnly projectLibs.lombok
+
     annotationProcessor projectLibs.lombok
 }
 
