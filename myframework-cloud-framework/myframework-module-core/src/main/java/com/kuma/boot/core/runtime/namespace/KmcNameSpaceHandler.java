@@ -19,11 +19,11 @@ public class KmcNameSpaceHandler extends NamespaceHandlerSupport {
 
     @Override
     public void init() {
-        // 注册解析 ttbean 标签的解析器
-        registerBeanDefinitionParser("kmcbean", new TaoTaoBeanDefinitionParser());
+        // 注册解析 kmcbean 标签的解析器
+        registerBeanDefinitionParser("kmcbean", new KumaBeanDefinitionParser());
     }
 
-    private static class TaoTaoBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+    private static class KumaBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
         @Override
         protected boolean shouldGenerateId() {

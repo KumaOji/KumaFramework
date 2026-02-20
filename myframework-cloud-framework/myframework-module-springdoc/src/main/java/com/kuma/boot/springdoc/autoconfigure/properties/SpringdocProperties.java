@@ -1,18 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.constant.CommonConstants
- *  com.kuma.boot.common.utils.common.PropertyUtils
- *  io.swagger.v3.oas.models.headers.Header
- *  io.swagger.v3.oas.models.info.Contact
- *  io.swagger.v3.oas.models.info.License
- *  io.swagger.v3.oas.models.security.SecurityScheme
- *  io.swagger.v3.oas.models.servers.Server
- *  io.swagger.v3.oas.models.tags.Tag
- *  org.springframework.boot.context.properties.ConfigurationProperties
- *  org.springframework.cloud.context.config.annotation.RefreshScope
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.springdoc.autoconfigure.properties;
 
 import com.kuma.boot.common.constant.CommonConstants;
@@ -30,33 +31,106 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
+/**
+ * SpringdocProperties
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2020/4/30 10:11
+ */
 @RefreshScope
-@ConfigurationProperties(value="kuma.boot.springdoc")
+@ConfigurationProperties(SpringdocProperties.PREFIX)
 public class SpringdocProperties {
+
     public static final String PREFIX = "kuma.boot.springdoc";
+
+    /**
+     * 是否开启springdoc
+     */
     private Boolean enabled = false;
     private Type type = Type.SERVICE;
-    private String group = PropertyUtils.getProperty((String)CommonConstants.SPRING_APP_NAME_KEY);
+    /**
+     * group default applicationName
+     */
+    private String group = PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY);
+
+    /**
+     * pathsToMatch default /**
+     */
     private String[] pathsToMatch = new String[]{"/**"};
+
+    /**
+     * The Paths to exclude.
+     */
     private String[] pathsToExclude = new String[]{"/actuator/**"};
-    private String[] packagesToScan = new String[]{"com.kuma.cloud.*.biz.api.controller", "com.kuma.cloud.*.facade.controller.**"};
+
+    /**
+     * The Packages to scan.
+     */
+    private String[] packagesToScan = new String[]{"com.kuma.cloud.*.biz.api.controller",
+            "com.kuma.cloud.*.facade.controller.**"};
+
+    /**
+     * The Packages to exclude.
+     */
     private String[] packagesToExclude;
-    private String version = PropertyUtils.getProperty((String)"kmcVersion");
-    private Map<String, SecurityScheme> securitySchemes = new HashMap<String, SecurityScheme>();
-    private Map<String, Header> headers = new HashMap<String, Header>();
-    private List<Server> servers = new ArrayList<Server>();
-    private List<Tag> tags = new ArrayList<Tag>();
-    private String title = PropertyUtils.getProperty((String)CommonConstants.SPRING_APP_NAME_KEY).toUpperCase() + " API";
-    private String description = "KUMA CLOUD \u7535\u5546\u53ca\u5927\u6570\u636e\u5e73\u53f0";
+
+    /**
+     * version default kmcVersion
+     */
+    private String version = PropertyUtils.getProperty("kmcVersion");
+    /**
+     * SecuritySchemes
+     */
+    private Map<String, SecurityScheme> securitySchemes = new HashMap<>();
+    /**
+     * Headers
+     */
+    private Map<String, Header> headers = new HashMap<>();
+    /**
+     * Headers
+     */
+    private List<Server> servers = new ArrayList<>();
+    /**
+     * tags
+     */
+    private List<Tag> tags = new ArrayList<>();
+    /**
+     * title
+     */
+    private String title =
+            PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY).toUpperCase() + " API";
+    /**
+     * description
+     */
+    private String description = "TAOTAO CLOUD 电商及大数据平台";
+    /**
+     * contact
+     */
     private Contact contact;
+    /**
+     * termsOfService
+     */
     private String termsOfService = "http://kumacloud.com/terms/";
+    /**
+     * license
+     */
     private License license;
+    /**
+     * externalDescription
+     */
     private String externalDescription = "TaoTao Cloud Wiki Documentation";
+    /**
+     * externalUrl
+     */
     private String externalUrl = "https://github.com/kuma/kuma-cloud-project/wiki";
+    /**
+     * openapi
+     */
     private String openapi = "3.0.1";
 
     public Boolean getEnabled() {
-        return this.enabled;
+        return enabled;
     }
 
     public void setEnabled(Boolean enabled) {
@@ -64,7 +138,7 @@ public class SpringdocProperties {
     }
 
     public String getGroup() {
-        return this.group;
+        return group;
     }
 
     public void setGroup(String group) {
@@ -72,7 +146,7 @@ public class SpringdocProperties {
     }
 
     public String[] getPathsToMatch() {
-        return this.pathsToMatch;
+        return pathsToMatch;
     }
 
     public void setPathsToMatch(String[] pathsToMatch) {
@@ -80,7 +154,7 @@ public class SpringdocProperties {
     }
 
     public String getVersion() {
-        return this.version;
+        return version;
     }
 
     public void setVersion(String version) {
@@ -88,7 +162,7 @@ public class SpringdocProperties {
     }
 
     public Map<String, SecurityScheme> getSecuritySchemes() {
-        return this.securitySchemes;
+        return securitySchemes;
     }
 
     public void setSecuritySchemes(Map<String, SecurityScheme> securitySchemes) {
@@ -96,7 +170,7 @@ public class SpringdocProperties {
     }
 
     public Map<String, Header> getHeaders() {
-        return this.headers;
+        return headers;
     }
 
     public void setHeaders(Map<String, Header> headers) {
@@ -104,7 +178,7 @@ public class SpringdocProperties {
     }
 
     public List<Server> getServers() {
-        return this.servers;
+        return servers;
     }
 
     public void setServers(List<Server> servers) {
@@ -112,7 +186,7 @@ public class SpringdocProperties {
     }
 
     public String getTitle() {
-        return this.title;
+        return title;
     }
 
     public void setTitle(String title) {
@@ -120,7 +194,7 @@ public class SpringdocProperties {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
@@ -128,7 +202,7 @@ public class SpringdocProperties {
     }
 
     public Contact getContact() {
-        return this.contact;
+        return contact;
     }
 
     public void setContact(Contact contact) {
@@ -136,7 +210,7 @@ public class SpringdocProperties {
     }
 
     public String getTermsOfService() {
-        return this.termsOfService;
+        return termsOfService;
     }
 
     public void setTermsOfService(String termsOfService) {
@@ -144,7 +218,7 @@ public class SpringdocProperties {
     }
 
     public License getLicense() {
-        return this.license;
+        return license;
     }
 
     public void setLicense(License license) {
@@ -152,7 +226,7 @@ public class SpringdocProperties {
     }
 
     public String getExternalDescription() {
-        return this.externalDescription;
+        return externalDescription;
     }
 
     public void setExternalDescription(String externalDescription) {
@@ -160,7 +234,7 @@ public class SpringdocProperties {
     }
 
     public String getExternalUrl() {
-        return this.externalUrl;
+        return externalUrl;
     }
 
     public void setExternalUrl(String externalUrl) {
@@ -168,7 +242,7 @@ public class SpringdocProperties {
     }
 
     public String getOpenapi() {
-        return this.openapi;
+        return openapi;
     }
 
     public void setOpenapi(String openapi) {
@@ -176,7 +250,8 @@ public class SpringdocProperties {
     }
 
     public String[] getPathsToExclude() {
-        return this.pathsToExclude;
+
+        return pathsToExclude;
     }
 
     public void setPathsToExclude(String[] pathsToExclude) {
@@ -184,7 +259,7 @@ public class SpringdocProperties {
     }
 
     public String[] getPackagesToScan() {
-        return this.packagesToScan;
+        return packagesToScan;
     }
 
     public void setPackagesToScan(String[] packagesToScan) {
@@ -192,7 +267,7 @@ public class SpringdocProperties {
     }
 
     public String[] getPackagesToExclude() {
-        return this.packagesToExclude;
+        return packagesToExclude;
     }
 
     public void setPackagesToExclude(String[] packagesToExclude) {
@@ -200,7 +275,7 @@ public class SpringdocProperties {
     }
 
     public List<Tag> getTags() {
-        return this.tags;
+        return tags;
     }
 
     public void setTags(List<Tag> tags) {
@@ -208,17 +283,15 @@ public class SpringdocProperties {
     }
 
     public Type getType() {
-        return this.type;
+        return type;
     }
 
-    public void setType(Type type) {
+    public void setType( Type type ) {
         this.type = type;
     }
 
-    public static enum Type {
+    public enum Type{
         GATEWAY,
-        SERVICE;
-
+        SERVICE,
     }
 }
-

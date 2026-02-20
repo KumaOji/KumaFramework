@@ -51,7 +51,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
- * 在springcloud环境执行顺序 构造器  1  TaoTaoCloudSysApplication starting 1 TaoTaoCloudSysApplication
+ * 在springcloud环境执行顺序 构造器  1  KumaCloudSysApplication starting 1 KumaCloudSysApplication
  * <p>
  * 构造器  1  BootstrapImportSelectorConfiguration starting 1 BootstrapImportSelectorConfiguration
  * <p>
@@ -59,9 +59,9 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * BootstrapImportSelectorConfiguration contextLoaded 1 BootstrapImportSelectorConfiguration started
  * 1 BootstrapImportSelectorConfiguration
  * <p>
- * environmentPrepared 1 TaoTaoCloudSysApplication-BootstrapImportSelectorConfiguration
- * contextPrepared 1 TaoTaoCloudSysApplication-BootstrapImportSelectorConfiguration contextLoaded 1
- * TaoTaoCloudSysApplication-BootstrapImportSelectorConfiguration
+ * environmentPrepared 1 KumaCloudSysApplication-BootstrapImportSelectorConfiguration
+ * contextPrepared 1 KumaCloudSysApplication-BootstrapImportSelectorConfiguration contextLoaded 1
+ * KumaCloudSysApplication-BootstrapImportSelectorConfiguration
  */
 public class KmcSpringApplicationRunListener implements SpringApplicationRunListener, Ordered {
 

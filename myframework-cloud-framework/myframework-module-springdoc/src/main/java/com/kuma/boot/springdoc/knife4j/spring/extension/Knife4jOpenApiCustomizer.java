@@ -1,49 +1,51 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright © 2017-2023 Knife4j(xiaoymin@foxmail.com)
  *
- * Could not load the following classes:
- *  com.github.xiaoymin.knife4j.annotations.ApiSupport
- *  com.kuma.boot.common.utils.log.LogUtils
- *  io.swagger.v3.oas.annotations.tags.Tag
- *  io.swagger.v3.oas.models.OpenAPI
- *  org.apache.commons.lang3.ArrayUtils
- *  org.springdoc.core.customizers.GlobalOpenApiCustomizer
- *  org.springdoc.core.properties.SpringDocConfigProperties
- *  org.springdoc.core.properties.SpringDocConfigProperties$GroupConfig
- *  org.springframework.beans.factory.config.BeanDefinition
- *  org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
- *  org.springframework.core.type.filter.AnnotationTypeFilter
- *  org.springframework.core.type.filter.TypeFilter
- *  org.springframework.util.CollectionUtils
- *  org.springframework.web.bind.annotation.RestController
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+
 package com.kuma.boot.springdoc.knife4j.spring.extension;
 
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
+import com.github.xiaoymin.knife4j.core.conf.ExtensionsConstants;
+import com.github.xiaoymin.knife4j.core.conf.GlobalConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.springdoc.knife4j.spring.configuration.Knife4jProperties;
 import com.kuma.boot.springdoc.knife4j.spring.configuration.Knife4jSetting;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.models.OpenAPI;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.properties.SpringDocConfigProperties;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-public class Knife4jOpenApiCustomizer
-implements GlobalOpenApiCustomizer {
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * 增强扩展属性支持
+ * @since 4.1.0
+ * @author <a href="xiaoymin@foxmail.com">xiaoymin@foxmail.com</a>
+ * 2022/12/11 22:40
+ */
+public class Knife4jOpenApiCustomizer implements GlobalOpenApiCustomizer {
+
     final Knife4jProperties knife4jProperties;
     final SpringDocConfigProperties properties;
 
@@ -52,74 +54,106 @@ implements GlobalOpenApiCustomizer {
         this.properties = properties;
     }
 
+    @Override
     public void customise(OpenAPI openApi) {
-        LogUtils.debug((String)"Knife4j OpenApiCustomizer", (Object[])new Object[0]);
-        if (this.knife4jProperties.isEnable()) {
-            Knife4jSetting setting = this.knife4jProperties.getSetting();
-            OpenApiExtensionResolver openApiExtensionResolver = new OpenApiExtensionResolver(setting, this.knife4jProperties.getDocuments());
+        LogUtils.debug("Knife4j OpenApiCustomizer");
+        if (knife4jProperties.isEnable()) {
+            Knife4jSetting setting = knife4jProperties.getSetting();
+            OpenApiExtensionResolver openApiExtensionResolver = new OpenApiExtensionResolver(setting, knife4jProperties.getDocuments());
+            // 解析初始化
             openApiExtensionResolver.start();
-            HashMap<String, Object> objectMap = new HashMap<String, Object>();
-            objectMap.put("x-setting", setting);
-            objectMap.put("x-markdownFiles", openApiExtensionResolver.getMarkdownFiles());
-            openApi.addExtension("x-openapi", objectMap);
-            this.addOrderExtension(openApi);
+            Map<String, Object> objectMap = new HashMap<>();
+            objectMap.put(GlobalConstants.EXTENSION_OPEN_SETTING_NAME, setting);
+            objectMap.put(GlobalConstants.EXTENSION_OPEN_MARKDOWN_NAME, openApiExtensionResolver.getMarkdownFiles());
+            openApi.addExtension(GlobalConstants.EXTENSION_OPEN_API_NAME, objectMap);
+            addOrderExtension(openApi);
         }
     }
-
+    /**
+     * 往OpenAPI内tags字段添加x-order属性
+     *
+     * @param openApi openApi
+     */
     private void addOrderExtension(OpenAPI openApi) {
-        if (CollectionUtils.isEmpty((Collection)this.properties.getGroupConfigs())) {
+        if (CollectionUtils.isEmpty(properties.getGroupConfigs())) {
             return;
         }
-        Set packagesToScan = this.properties.getGroupConfigs().stream().map(SpringDocConfigProperties.GroupConfig::getPackagesToScan).filter(toScan -> !CollectionUtils.isEmpty((Collection)toScan)).flatMap(Collection::stream).collect(Collectors.toSet());
+        // 获取包扫描路径
+        Set<String> packagesToScan =
+                properties.getGroupConfigs().stream()
+                        .map(SpringDocConfigProperties.GroupConfig::getPackagesToScan)
+                        .filter(toScan -> !CollectionUtils.isEmpty(toScan))
+                        .flatMap(List::stream)
+                        .collect(Collectors.toSet());
         if (CollectionUtils.isEmpty(packagesToScan)) {
             return;
         }
-        Set<Class> classes = packagesToScan.stream().map(packageToScan -> this.scanPackageByAnnotation((String)packageToScan, (Class<? extends Annotation>)RestController.class)).flatMap(Collection::stream).filter(clazz -> clazz.isAnnotationPresent(ApiSupport.class)).collect(Collectors.toSet());
+        // 扫描包下被ApiSupport注解的RestController Class
+        Set<Class<?>> classes =
+                packagesToScan.stream()
+                        .map(packageToScan -> scanPackageByAnnotation(packageToScan, RestController.class))
+                        .flatMap(Set::stream)
+                        .filter(clazz -> clazz.isAnnotationPresent(ApiSupport.class))
+                        .collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(classes)) {
-            HashMap tagOrderMap = new HashMap();
-            classes.forEach(clazz -> {
-                Tag tag = this.getTag((Class<?>)clazz);
-                if (Objects.nonNull(tag)) {
-                    ApiSupport apiSupport = clazz.getAnnotation(ApiSupport.class);
-                    tagOrderMap.putIfAbsent(tag.name(), apiSupport.order());
-                }
-            });
+            // ApiSupport oder值存入tagSortMap<Tag.name,ApiSupport.order>
+            Map<String, Integer> tagOrderMap = new HashMap<>();
+            classes.forEach(
+                    clazz -> {
+                        Tag tag = getTag(clazz);
+                        if (Objects.nonNull(tag)) {
+                            ApiSupport apiSupport = clazz.getAnnotation(ApiSupport.class);
+                            tagOrderMap.putIfAbsent(tag.name(), apiSupport.order());
+                        }
+                    });
+            // 往openApi tags字段添加x-order增强属性
             if (openApi.getTags() != null) {
-                openApi.getTags().forEach(tag -> {
-                    if (tagOrderMap.containsKey(tag.getName())) {
-                        tag.addExtension("x-order", tagOrderMap.get(tag.getName()));
-                    }
-                });
+                openApi
+                        .getTags()
+                        .forEach(
+                                tag -> {
+                                    if (tagOrderMap.containsKey(tag.getName())) {
+                                        tag.addExtension(
+                                                ExtensionsConstants.EXTENSION_ORDER, tagOrderMap.get(tag.getName()));
+                                    }
+                                });
             }
         }
     }
 
     private Tag getTag(Class<?> clazz) {
-        Object[] interfaces;
+        // 从类上获取
         Tag tag = clazz.getAnnotation(Tag.class);
-        if (Objects.isNull(tag) && ArrayUtils.isNotEmpty((Object[])(interfaces = clazz.getInterfaces()))) {
-            for (Object interfaceClazz : interfaces) {
-                Tag anno = ((Class)interfaceClazz).getAnnotation(Tag.class);
-                if (!Objects.nonNull(anno)) continue;
-                tag = anno;
-                break;
+        if (Objects.isNull(tag)) {
+            // 从接口上获取
+            Class<?>[] interfaces = clazz.getInterfaces();
+            if (ArrayUtils.isNotEmpty(interfaces)) {
+                for (Class<?> interfaceClazz : interfaces) {
+                    Tag anno = interfaceClazz.getAnnotation(Tag.class);
+                    if (Objects.nonNull(anno)) {
+                        tag = anno;
+                        break;
+                    }
+                }
             }
         }
         return tag;
     }
 
-    private Set<Class<?>> scanPackageByAnnotation(String packageName, Class<? extends Annotation> annotationClass) {
-        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
-        scanner.addIncludeFilter((TypeFilter)new AnnotationTypeFilter(annotationClass));
-        HashSet classes = new HashSet();
+    private Set<Class<?>> scanPackageByAnnotation(
+            String packageName, final Class<? extends Annotation> annotationClass) {
+        ClassPathScanningCandidateComponentProvider scanner =
+                new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(annotationClass));
+        Set<Class<?>> classes = new HashSet<>();
         for (BeanDefinition beanDefinition : scanner.findCandidateComponents(packageName)) {
             try {
                 Class<?> clazz = Class.forName(beanDefinition.getBeanClassName());
                 classes.add(clazz);
+            } catch (ClassNotFoundException ignore) {
+
             }
-            catch (ClassNotFoundException classNotFoundException) {}
         }
         return classes;
     }
 }
-

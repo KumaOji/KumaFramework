@@ -1,74 +1,49 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.collection.CollUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  io.swagger.v3.oas.models.Components
- *  io.swagger.v3.oas.models.ExternalDocumentation
- *  io.swagger.v3.oas.models.OpenAPI
- *  io.swagger.v3.oas.models.PathItem
- *  io.swagger.v3.oas.models.Paths
- *  io.swagger.v3.oas.models.headers.Header
- *  io.swagger.v3.oas.models.info.Contact
- *  io.swagger.v3.oas.models.info.Info
- *  io.swagger.v3.oas.models.info.License
- *  io.swagger.v3.oas.models.media.IntegerSchema
- *  io.swagger.v3.oas.models.media.Schema
- *  io.swagger.v3.oas.models.media.StringSchema
- *  io.swagger.v3.oas.models.security.OAuthFlow
- *  io.swagger.v3.oas.models.security.OAuthFlows
- *  io.swagger.v3.oas.models.security.Scopes
- *  io.swagger.v3.oas.models.security.SecurityRequirement
- *  io.swagger.v3.oas.models.security.SecurityScheme
- *  io.swagger.v3.oas.models.security.SecurityScheme$In
- *  io.swagger.v3.oas.models.security.SecurityScheme$Type
- *  io.swagger.v3.oas.models.servers.Server
- *  org.apache.commons.lang3.StringUtils
- *  org.springdoc.core.customizers.OpenApiCustomizer
- *  org.springdoc.core.models.GroupedOpenApi
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.beans.factory.annotation.Value
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
- *  org.springframework.core.env.Environment
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.springdoc.autoconfigure;
 
-import cn.hutool.core.collection.CollUtil;
+import static com.kuma.boot.springdoc.support.PackageScanUtils.resolvePackagesWithWildcard;
+import static org.apache.commons.lang3.StringUtils.stripAccents;
+
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.springdoc.autoconfigure.properties.SpringdocProperties;
 import com.kuma.boot.springdoc.knife4j.spring.annotations.EnableKnife4j;
-import com.kuma.boot.springdoc.support.PackageScanUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.IntegerSchema;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityScheme.In;
 import io.swagger.v3.oas.models.servers.Server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+
+import cn.hutool.core.collection.CollUtil;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
@@ -78,117 +53,287 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.core.env.Environment;
 
+/**
+ * SwaggerAutoConfiguration
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2020/4/30 10:10
+ */
+//第一种.集成OAuth2登录认证
+//@OpenAPIDefinition(
+//	info = @io.swagger.v3.oas.annotations.info.Info(
+//		// 标题
+//		title = "${custom.info.title:'example-api'}",
+//		// 版本
+//		version = "${custom.info.version:'0.0.1'}",
+//		// 描述
+//		description = "${custom.info.description:'这是一个使用SpringDoc生成的在线文档.'}",
+//		// 首页
+//		termsOfService = "${custom.info.termsOfService:'http://127.0.0.1:8080/example/test01'}",
+//		// license
+//		license = @io.swagger.v3.oas.annotations.info.License(
+//			name = "${custom.license.name:'Apache 2.0'}",
+//			// license 地址
+//			url = "http://127.0.0.1:8080/example/test01"
+//		)
+//	),
+//	// 这里的名字是引用下边 @SecurityScheme 注解中指定的名字，指定后发起请求时会在请求头中按照OAuth2的规范添加token
+//	security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "${custom.security.name:Authenticate}")
+//)
+//@SecuritySchemes({@io.swagger.v3.oas.annotations.security.SecurityScheme(
+//	// 指定 SecurityScheme 的名称(OpenAPIDefinition注解中的security属性中会引用该名称)
+//	name = "${custom.security.name:Authenticate}",
+//	// 指定认证类型为oauth2
+//	type = SecuritySchemeType.OAUTH2,
+//	// 设置认证流程
+//	flows = @io.swagger.v3.oas.annotations.security.OAuthFlows(
+//		// 设置授权码模式
+//		authorizationCode = @io.swagger.v3.oas.annotations.security.OAuthFlow(
+//			// 获取token地址
+//			tokenUrl = "${custom.security.token-url:'http://kwqqr48rgo.cdhttp.cn/oauth2/token'}",
+//			// 授权申请地址
+//			authorizationUrl = "${custom.security.authorization-url:'http://kwqqr48rgo.cdhttp.cn/oauth2/authorize'}",
+//			// oauth2的申请的scope(需要在OAuth2客户端中存在)
+//			scopes = {
+//				@OAuthScope(name = "openid", description = "OpenId登录"),
+//				@OAuthScope(name = "profile", description = "获取用户信息"),
+//				@OAuthScope(name = "message.read", description = "读"),
+//				@OAuthScope(name = "message.write", description = "写")
+//			}
+//		)
+//	)
+//)})
 @AutoConfiguration
 @EnableKnife4j
-@EnableConfigurationProperties(value={SpringdocProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.springdoc", name={"enabled"}, havingValue="true", matchIfMissing=true)
-public class SpringdocAutoConfiguration
-implements InitializingBean {
-    @Value(value="${server.port:8080}")
+@EnableConfigurationProperties({SpringdocProperties.class})
+@ConditionalOnProperty(
+        prefix = SpringdocProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true",
+        matchIfMissing = true)
+public class SpringdocAutoConfiguration implements InitializingBean {
+
+    //@Value("${spring.cloud.client.ip-address}")
+    //private String ip;
+
+    @Value("${server.port:8080}")
     private int port;
-    @Value(value="${spring.mvc.servlet.path:/}")
+
+    @Value("${spring.mvc.servlet.path:/}")
     private String servletPath;
+
     private final SpringdocProperties properties;
-    @Autowired
-    private Environment environment;
 
     public SpringdocAutoConfiguration(SpringdocProperties properties) {
         this.properties = properties;
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(SpringdocAutoConfiguration.class, (String)"kuma-boot-starter-springdoc", (String[])new String[0]);
+        LogUtils.started(SpringdocAutoConfiguration.class, StarterNameConstants.SPRINGDOC_STARTER);
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="kuma.boot.springdoc", name={"type"}, havingValue="SERVICE", matchIfMissing=true)
+    @ConditionalOnProperty(
+            prefix = SpringdocProperties.PREFIX,
+            name = "type",
+            havingValue = "SERVICE",
+            matchIfMissing = true)
     public GroupedOpenApi groupedOpenApi() {
-        return GroupedOpenApi.builder().group(this.properties.getGroup()).pathsToMatch(this.properties.getPathsToMatch()).pathsToExclude(this.properties.getPathsToExclude()).packagesToScan(PackageScanUtils.resolvePackagesWithWildcard(this.properties.getPackagesToScan())).build();
+        return GroupedOpenApi.builder()
+                .group(properties.getGroup())
+                .pathsToMatch(properties.getPathsToMatch())
+                .pathsToExclude(properties.getPathsToExclude())
+                .packagesToScan(resolvePackagesWithWildcard(properties.getPackagesToScan()))
+                // .packagesToExclude(properties.getPackagesToExclude())
+                // .addOpenApiCustomizer(openApiCustomizer())
+                .build();
     }
 
     @Bean
     public OpenApiCustomizer openApiCustomizer() {
         return openApi -> {
-            Paths paths = openApi.getPaths();
+            final Paths paths = openApi.getPaths();
+
             Paths newPaths = new Paths();
-            paths.keySet().forEach(e -> newPaths.put((Object)("/api/v" + this.properties.getVersion() + e), (Object)((PathItem)paths.get(e))));
+            paths.keySet().forEach(e -> newPaths.put("/api/v" + properties.getVersion() + e, paths.get(e)));
             openApi.setPaths(newPaths);
-            openApi.getPaths().values().stream().flatMap(pathItem -> pathItem.readOperations().stream()).forEach(operation -> {});
-            if (CollUtil.isEmpty(this.properties.getTags())) {
-                openApi.setTags(this.properties.getTags());
-                openApi.setTags(openApi.getTags().stream().sorted(Comparator.comparing(tag -> StringUtils.stripAccents((String)tag.getName()))).collect(Collectors.toList()));
+
+            openApi.getPaths().values().stream()
+                    .flatMap(pathItem -> pathItem.readOperations().stream())
+                    .forEach(operation -> {
+                    });
+
+            if (CollUtil.isEmpty(properties.getTags())) {
+                openApi.setTags(properties.getTags());
+
+                openApi.setTags(openApi.getTags().stream()
+                        .sorted(Comparator.comparing(tag -> stripAccents(tag.getName())))
+                        .collect(Collectors.toList()));
             }
         };
     }
+    @Autowired
+    private Environment environment;
 
     public String getServerIp() {
-        String serverAddress = this.environment.getProperty("server.address");
+        // 获取server.address配置，如果没有配置则返回本地IP
+        String serverAddress = environment.getProperty("server.address");
         if (serverAddress == null || serverAddress.isEmpty()) {
             try {
                 serverAddress = InetAddress.getLocalHost().getHostAddress();
-            }
-            catch (UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 serverAddress = "127.0.0.1";
             }
         }
         return serverAddress;
     }
-
     @Bean
     public OpenAPI openApi() {
+        // 组件
         Components components = new Components();
-        Map<String, SecurityScheme> securitySchemes = this.properties.getSecuritySchemes();
+
+        Map<String, SecurityScheme> securitySchemes = properties.getSecuritySchemes();
         if (CollUtil.isEmpty(securitySchemes)) {
-            components.addSecuritySchemes("token", new SecurityScheme().name("token").description("token").type(SecurityScheme.Type.HTTP).in(SecurityScheme.In.HEADER).scheme("bearer"));
+            // 安全认证组件
+
+            components.addSecuritySchemes(
+                    "token",
+                    new SecurityScheme()
+                            .name("token")
+                            .description("token")
+                            .type(SecurityScheme.Type.HTTP)
+                            .in(In.HEADER)
+                            .scheme("bearer"));
+
+            // components.addSecuritySchemes("bearer",
+            //	new SecurityScheme()
+            //		.name(HttpHeaders.AUTHORIZATION)
+            //		.type(SecurityScheme.Type.HTTP)
+            //		.in(In.HEADER)
+            //		.scheme("bearer")
+            //		.bearerFormat("JWT")
+            // );
+            // components.addSecuritySchemes("kuma_token",
+            //	new SecurityScheme()
+            //		.name("TAOTAO_CLOUD_AUTH")
+            //		.type(Type.OAUTH2)
+            //		.in(In.HEADER)
+            //		.scheme("bearer")
+            //		.bearerFormat("JWT")
+            //		.flows(password)
+            //		.flows(clientCredentials)
+            // );
+
         } else {
-            securitySchemes.forEach((arg_0, arg_1) -> ((Components)components).addSecuritySchemes(arg_0, arg_1));
+            securitySchemes.forEach(components::addSecuritySchemes);
         }
-        Map<String, Header> headers = this.properties.getHeaders();
+
+        Map<String, Header> headers = properties.getHeaders();
         if (CollUtil.isEmpty(headers)) {
-            components.addHeaders("kmc-request-version-header", new Header().description("\u7248\u672c\u53f7").schema((Schema)new StringSchema()));
-            components.addHeaders("kmc-request-weight-header", new Header().description("\u6743\u91cd").schema((Schema)new IntegerSchema()));
+            // 添加全局header
+            components.addHeaders(
+                    "kmc-request-version-header",
+                    new Header().description("版本号").schema(new StringSchema()));
+            components.addHeaders(
+                    "kmc-request-weight-header",
+                    new Header().description("权重").schema(new IntegerSchema()));
         } else {
-            headers.forEach((arg_0, arg_1) -> ((Components)components).addHeaders(arg_0, arg_1));
+            headers.forEach(components::addHeaders);
         }
-        List<Server> servers = this.properties.getServers();
+
+        List<Server> servers = properties.getServers();
         if (CollUtil.isEmpty(servers)) {
             Server s0 = new Server();
-            s0.setUrl("http://127.0.0.1:" + this.port + this.servletPath);
-            s0.setDescription("\u672c\u5730\u56de\u73af\u5730\u5740");
+            s0.setUrl("http://" + "127.0.0.1" + ":" + port + "" + servletPath);
+            s0.setDescription("本地回环地址");
             servers.add(s0);
             Server s1 = new Server();
-            s1.setUrl("http://" + this.getServerIp() + ":" + this.port + this.servletPath);
-            s1.setDescription("\u672c\u5730\u5730\u5740");
+            s1.setUrl("http://" + getServerIp() + ":" + port + "" + servletPath);
+            s1.setDescription("本地地址");
             servers.add(s1);
             Server s2 = new Server();
             s2.setUrl("http://dev.kumacloud.com/");
-            s2.setDescription("\u6d4b\u8bd5\u73af\u5883\u5730\u5740");
+            s2.setDescription("测试环境地址");
             servers.add(s2);
             Server s3 = new Server();
             s3.setUrl("https://pre.kumacloud.com/");
-            s3.setDescription("\u9884\u4e0a\u7ebf\u73af\u5883\u5730\u5740");
+            s3.setDescription("预上线环境地址");
             servers.add(s3);
             Server s4 = new Server();
             s4.setUrl("https://pro.kumacloud.com/");
-            s4.setDescription("\u751f\u4ea7\u73af\u5883\u5730\u5740");
+            s4.setDescription("生产环境地址");
             servers.add(s4);
         }
-        Contact contact = new Contact().name("kuma").email("2569277704@qq.com").url("https://github.com/kuma/kuma-cloud-project");
-        License license = new License().name("Apache 2.0").url("https://github.com/kuma/kuma-cloud-project/blob/master/LICENSE.txt");
-        Info info = new Info().title(this.properties.getTitle()).description(this.properties.getDescription()).version(this.properties.getVersion()).contact(Objects.isNull(this.properties.getContact()) ? contact : this.properties.getContact()).termsOfService(this.properties.getTermsOfService()).license(Objects.isNull(this.properties.getLicense()) ? license : this.properties.getLicense());
-        ExternalDocumentation externalDocumentation = new ExternalDocumentation().description(this.properties.getExternalDescription()).url(this.properties.getExternalUrl());
+
+        Contact contact = new Contact()
+                .name("kuma")
+                .email("981376577@qq.com")
+                .url("https://github.com/kuma/kuma-cloud-project");
+        License license = new License()
+                .name("Apache 2.0")
+                .url("https://github.com/kuma/kuma-cloud-project/blob/master/LICENSE.txt");
+
+        //基础信息
+        Info info = new Info()
+                .title(properties.getTitle())
+                .description(properties.getDescription())
+                .version(properties.getVersion())
+                .contact(Objects.isNull(properties.getContact()) ? contact : properties.getContact())
+                .termsOfService(properties.getTermsOfService())
+                .license(Objects.isNull(properties.getLicense()) ? license : properties.getLicense());
+
+        ExternalDocumentation externalDocumentation = new ExternalDocumentation()
+                .description(properties.getExternalDescription())
+                .url(properties.getExternalUrl());
+
+        //第二种.集成OAuth2登录认证
+        // 安全认证组件
         SecurityScheme securityScheme = new SecurityScheme();
+        // 创建一个oauth认证流程
         OAuthFlows oAuthFlows = new OAuthFlows();
-        OAuthFlow oAuthFlow = new OAuthFlow().authorizationUrl("http://kwqqr48rgo.cdhttp.cn/oauth2/authorize").tokenUrl("http://kwqqr48rgo.cdhttp.cn/oauth2/token").scopes(new Scopes().addString("openid", "OpenId\u767b\u5f55").addString("profile", "\u83b7\u53d6\u7528\u6237\u4fe1\u606f").addString("message.read", "\u8bfb").addString("message.write", "\u5199"));
+        // 设置OAuth2流程中认证服务的基本信息
+        OAuthFlow oAuthFlow = new OAuthFlow()
+                // 授权申请地址
+                .authorizationUrl("http://kwqqr48rgo.cdhttp.cn/oauth2/authorize")
+                // 获取token地址
+                .tokenUrl("http://kwqqr48rgo.cdhttp.cn/oauth2/token")
+                .scopes(new Scopes()
+                        .addString("openid", "OpenId登录")
+                        .addString("profile", "获取用户信息")
+                        .addString("message.read", "读")
+                        .addString("message.write", "写")
+                );
+        // 使用授权码模式
         oAuthFlows.authorizationCode(oAuthFlow);
-        securityScheme.flows(oAuthFlows).type(SecurityScheme.Type.OAUTH2);
+        // OAuth2流程
+        securityScheme.flows(oAuthFlows)
+                .type(SecurityScheme.Type.OAUTH2);
+        // 安全认证名
         String securityName = "Authenticate";
+        // 将认证配置加入组件中
         components.addSecuritySchemes(securityName, securityScheme);
         SecurityRequirement securityRequirement = new SecurityRequirement();
+        // 将安全认证和swagger-ui关联起来
         securityRequirement.addList(securityName);
-        return new OpenAPI().components(components).openapi(this.properties.getOpenapi()).info(info).servers(servers).externalDocs(externalDocumentation).addSecurityItem(securityRequirement);
+
+        return new OpenAPI()
+                .components(components)
+                .openapi(properties.getOpenapi())
+                .info(info)
+                .servers(servers)
+                .externalDocs(externalDocumentation)
+                // 添加请求时携带OAuth2规范的请求头(通过OAuth2流程获取token后发请求时会自动携带Authorization请求头)
+                .addSecurityItem(securityRequirement);
+
     }
 }
-

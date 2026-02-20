@@ -18,9 +18,12 @@ package com.kuma.cloud.project1;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.application.Application;
+import com.kuma.boot.core.startup.StartupSpringApplication;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 /**
  * Project1 启动类
@@ -33,9 +36,23 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
         exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project1"})
 @MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.cloud.project1.mapper"})
-public class Project1Application extends Application {
+public class Project1Application extends SpringBootServletInitializer {
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(Project1Application.class);
+    }
 
     public static void main(String[] args) {
-        run(Project1Application.class, args);
+        new StartupSpringApplication(Project1Application.class)
+                .setKmcBanner()
+                .setKmcProfileIfNotExists("dev")
+                .setKmcApplicationProperty("kuma-cloud-project")
+                .setKmcAllowBeanDefinitionOverriding(true)
+                .run(args);
     }
+
+//    public static void main(String[] args) {
+//        run(Project1Application.class, args);
+//    }
 }

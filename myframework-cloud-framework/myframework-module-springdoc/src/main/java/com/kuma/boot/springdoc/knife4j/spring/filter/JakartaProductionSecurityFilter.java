@@ -1,16 +1,20 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright © 2017-2023 Knife4j(xiaoymin@foxmail.com)
  *
- * Could not load the following classes:
- *  com.github.xiaoymin.knife4j.extend.filter.BasicFilter
- *  jakarta.servlet.Filter
- *  jakarta.servlet.FilterChain
- *  jakarta.servlet.FilterConfig
- *  jakarta.servlet.ServletException
- *  jakarta.servlet.ServletRequest
- *  jakarta.servlet.ServletResponse
- *  jakarta.servlet.http.HttpServletRequest
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+
 package com.kuma.boot.springdoc.knife4j.spring.filter;
 
 import com.github.xiaoymin.knife4j.extend.filter.BasicFilter;
@@ -21,27 +25,40 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 
-public class JakartaProductionSecurityFilter
-extends BasicFilter
-implements Filter {
+/***
+ * <p>
+ * {@code @since } 1.9.0
+ * @author <a href="mailto:xiaoymin@foxmail.com">xiaoymin@foxmail.com</a>
+ * 2019/01/18 17:15
+ */
+public class JakartaProductionSecurityFilter extends BasicFilter implements Filter {
+
+    /***
+     * 是否生产环境,如果是生成环境,过滤Swagger的相关资源请求
+     */
     private boolean production = false;
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        Enumeration enumeration = filterConfig.getInitParameterNames();
+        // 判断filterConfig
+        Enumeration<String> enumeration = filterConfig.getInitParameterNames();
+        // SpringMVC环境中,由此init方法初始化此Filter,SpringBoot环境中则不同
         if (enumeration.hasMoreElements()) {
-            this.setProduction(Boolean.valueOf(filterConfig.getInitParameter("production")));
+            setProduction(Boolean.valueOf(filterConfig.getInitParameter("production")));
         }
     }
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-        if (this.production) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        if (production) {
             String uri = httpServletRequest.getRequestURI();
-            if (!this.match(uri)) {
+            if (!match(uri)) {
                 chain.doFilter(request, response);
             } else {
                 response.setContentType("text/palin;charset=UTF-8");
@@ -54,7 +71,9 @@ implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
+
     }
 
     public JakartaProductionSecurityFilter(boolean production) {
@@ -65,11 +84,10 @@ implements Filter {
     }
 
     public boolean isProduction() {
-        return this.production;
+        return production;
     }
 
     public void setProduction(boolean production) {
         this.production = production;
     }
 }
-

@@ -29,6 +29,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy(proxyTargetClass=true, exposeProxy=true)
 @EnableOauth2ResourceServer
 @SpringBootApplication
-public @interface TaoTaoBootApplication {
+public @interface KumaBootApplication {
 }
 

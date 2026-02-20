@@ -1,42 +1,76 @@
 /*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.base.CodeEnum
- *  com.kuma.boot.common.enums.base.CommonEnum
- *  com.kuma.boot.common.enums.base.SelfDescribedEnum
- *  org.springframework.web.bind.annotation.RestController
+ * Copyright (c) 2022-present Charles7c Authors. All Rights Reserved.
+ * <p>
+ * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.gnu.org/licenses/lgpl.html
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.springdoc.springdocextension.util;
 
-import com.kuma.boot.common.enums.base.CodeEnum;
 import com.kuma.boot.common.enums.base.CommonEnum;
-import com.kuma.boot.common.enums.base.SelfDescribedEnum;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 接口文档工具类
+ *
+ * @author echo
+ * @since 2.5.2
+ */
 public class DocUtils {
+
     private DocUtils() {
     }
 
+    /**
+     * 获取枚举值类型
+     *
+     * @param enumClass 枚举类型
+     * @return 枚举值类型
+     */
     public static String getEnumValueTypeAsString(Class<?> enumClass) {
+        // 获取枚举类实现的所有接口
         Type[] interfaces = enumClass.getGenericInterfaces();
-        Map<Class<String>, String> typeMap = Map.of(Integer.class, "integer", Long.class, "long", Double.class, "number", String.class, "string");
+        // 定义枚举值类型的映射
+        Map<Class<?>, String> typeMap = Map
+                .of(Integer.class, "integer", Long.class, "long", Double.class, "number", String.class, "string");
+        // 遍历所有接口
         for (Type type : interfaces) {
-            Type actualType;
-            ParameterizedType parameterizedType;
-            if (!(type instanceof ParameterizedType) || (parameterizedType = (ParameterizedType)type).getRawType() != CommonEnum.class || !((actualType = parameterizedType.getActualTypeArguments()[0]) instanceof Class)) continue;
-            Class actualClass = (Class)actualType;
-            return typeMap.getOrDefault(actualClass, "string");
+            // 检查接口是否为参数化类型并且原始类型为 BaseEnum
+            if (type instanceof ParameterizedType parameterizedType && parameterizedType
+                    .getRawType() == CommonEnum.class) {
+                Type actualType = parameterizedType.getActualTypeArguments()[0];
+                // 检查实际类型参数是否为类类型，并返回对应的字符串类型
+                if (actualType instanceof Class<?> actualClass) {
+                    return typeMap.getOrDefault(actualClass, "string");
+                }
+            }
         }
+        // 默认返回 "string" 类型
         return "string";
     }
 
+    /**
+     * 解析枚举值的格式
+     *
+     * @param enumValueType 枚举值类型
+     * @return String 格式化类型
+     */
     public static String resolveFormat(String enumValueType) {
         return switch (enumValueType) {
             case "integer" -> "int32";
@@ -46,20 +80,40 @@ public class DocUtils {
         };
     }
 
+    /**
+     * 具有 RestController 注释，既检查是否继承了BaseController
+     *
+     * @param clazz clazz
+     * @return boolean
+     */
     public static boolean hasRestControllerAnnotation(Class<?> clazz) {
+        // 如果注释包含 RestController 注解，则返回 true
         if (clazz.isAnnotationPresent(RestController.class)) {
             return true;
         }
-        for (Class<?> superClass = clazz.getSuperclass(); superClass != null && !superClass.equals(Object.class); superClass = superClass.getSuperclass()) {
-            if (!DocUtils.hasRestControllerAnnotation(superClass)) continue;
-            return true;
+        // 递归检查父类
+        Class<?> superClass = clazz.getSuperclass();
+        // 循环检查父类
+        while (superClass != null && !superClass.equals(Object.class)) {
+            // 如果父类包含 RestController 注解，则返回 true
+            if (hasRestControllerAnnotation(superClass)) {
+                return true;
+            }
+            // 递归检查接口
+            superClass = superClass.getSuperclass();
         }
         return false;
     }
 
+    /**
+     * 获取枚举描述 Map
+     *
+     * @param enumClass 枚举类型
+     * @return 枚举描述 Map
+     */
     public static Map<Object, String> getDescMap(Class<?> enumClass) {
         CommonEnum[] enums = (CommonEnum[])enumClass.getEnumConstants();
-        return Arrays.stream(enums).collect(Collectors.toMap(CodeEnum::getCode, SelfDescribedEnum::getDesc, (a, b) -> a, LinkedHashMap::new));
+        return Arrays.stream(enums)
+                .collect(Collectors.toMap(CommonEnum::getCode, CommonEnum::getDesc, (a, b) -> a, LinkedHashMap::new));
     }
 }
-
