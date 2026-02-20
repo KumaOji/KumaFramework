@@ -1,22 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.metadata.Head
- *  com.alibaba.excel.metadata.data.WriteCellData
- *  com.alibaba.excel.write.handler.CellWriteHandler
- *  com.alibaba.excel.write.metadata.holder.WriteSheetHolder
- *  com.alibaba.excel.write.metadata.holder.WriteTableHolder
- *  org.apache.poi.common.usermodel.HyperlinkType
- *  org.apache.poi.ss.usermodel.Cell
- *  org.apache.poi.ss.usermodel.CellStyle
- *  org.apache.poi.ss.usermodel.CreationHelper
- *  org.apache.poi.ss.usermodel.Font
- *  org.apache.poi.ss.usermodel.Hyperlink
- *  org.apache.poi.ss.usermodel.IndexedColors
- *  org.apache.poi.ss.usermodel.Row
- *  org.apache.poi.ss.usermodel.Workbook
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelconvert.core;
 
 import com.alibaba.excel.metadata.Head;
@@ -35,37 +32,77 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 
-public class CustomCellWriteHandler
-implements CellWriteHandler {
-    public void beforeCellCreate(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, Row row, Head head, Integer integer, Integer integer1, Boolean aBoolean) {
+/** 实现CellWriteHandler接口, 实现对单元格样式的精确控制 */
+public class CustomCellWriteHandler implements CellWriteHandler {
+
+    /** 创建单元格之前的操作 */
+    @Override
+    public void beforeCellCreate(
+            WriteSheetHolder writeSheetHolder,
+            WriteTableHolder writeTableHolder,
+            Row row,
+            Head head,
+            Integer integer,
+            Integer integer1,
+            Boolean aBoolean) {}
+
+    /** 创建单元格之后的操作 */
+    @Override
+    public void afterCellCreate(
+            WriteSheetHolder writeSheetHolder,
+            WriteTableHolder writeTableHolder,
+            Cell cell,
+            Head head,
+            Integer integer,
+            Boolean aBoolean) {}
+
+    /** 单元格内容转换之后的操作 */
+    @Override
+    public void afterCellDataConverted(
+            WriteSheetHolder writeSheetHolder,
+            WriteTableHolder writeTableHolder,
+            WriteCellData<?> cellData,
+            Cell cell,
+            Head head,
+            Integer relativeRowIndex,
+            Boolean isHead) {
+
+        CellWriteHandler.super.afterCellDataConverted(
+                writeSheetHolder, writeTableHolder, cellData, cell, head, relativeRowIndex, isHead);
     }
 
-    public void afterCellCreate(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, Cell cell, Head head, Integer integer, Boolean aBoolean) {
-    }
+    /** 单元格处理后(已写入值)的操作 */
+    @Override
+    public void afterCellDispose(
+            WriteSheetHolder writeSheetHolder,
+            WriteTableHolder writeTableHolder,
+            List<WriteCellData<?>> cellDataList,
+            Cell cell,
+            Head head,
+            Integer relativeRowIndex,
+            Boolean isHead) {
 
-    public void afterCellDataConverted(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, WriteCellData<?> cellData, Cell cell, Head head, Integer relativeRowIndex, Boolean isHead) {
-        super.afterCellDataConverted(writeSheetHolder, writeTableHolder, cellData, cell, head, relativeRowIndex, isHead);
-    }
-
-    public void afterCellDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, List<WriteCellData<?>> cellDataList, Cell cell, Head head, Integer relativeRowIndex, Boolean isHead) {
-        boolean bool;
-        if (isHead.booleanValue() && cell.getRowIndex() == 0 && cell.getColumnIndex() == 0) {
+        // 设置超链接
+        if (isHead && cell.getRowIndex() == 0 && cell.getColumnIndex() == 0) {
             CreationHelper helper = writeSheetHolder.getSheet().getWorkbook().getCreationHelper();
             Hyperlink hyperlink = helper.createHyperlink(HyperlinkType.URL);
             hyperlink.setAddress("https://github.com/alibaba/easyexcel");
             cell.setHyperlink(hyperlink);
         }
-        boolean bl = bool = isHead != false && cell.getRowIndex() == 1;
+
+        // 精确设置单元格格式
+        boolean bool = isHead && cell.getRowIndex() == 1;
         if (bool) {
+            // 获取工作簿
             Workbook workbook = writeSheetHolder.getSheet().getWorkbook();
             CellStyle cellStyle = workbook.createCellStyle();
+
             Font cellFont = workbook.createFont();
-            cellFont.setBold(Boolean.TRUE.booleanValue());
-            cellFont.setFontHeightInPoints((short)14);
+            cellFont.setBold(Boolean.TRUE);
+            cellFont.setFontHeightInPoints((short) 14);
             cellFont.setColor(IndexedColors.SEA_GREEN.getIndex());
             cellStyle.setFont(cellFont);
             cell.setCellStyle(cellStyle);
         }
     }
 }
-

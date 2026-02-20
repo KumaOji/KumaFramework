@@ -1,17 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.metadata.data.DataFormatData
- *  com.alibaba.excel.metadata.data.WriteCellData
- *  com.alibaba.excel.write.handler.context.CellWriteHandlerContext
- *  com.alibaba.excel.write.metadata.style.WriteCellStyle
- *  com.alibaba.excel.write.metadata.style.WriteFont
- *  com.alibaba.excel.write.style.HorizontalCellStyleStrategy
- *  org.apache.poi.ss.usermodel.BorderStyle
- *  org.apache.poi.ss.usermodel.HorizontalAlignment
- *  org.apache.poi.ss.usermodel.IndexedColors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelcell;
 
 import com.alibaba.excel.metadata.data.DataFormatData;
@@ -20,65 +22,76 @@ import com.alibaba.excel.write.handler.context.CellWriteHandlerContext;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
-import java.util.List;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
-public class CellStyleStrategy
-extends HorizontalCellStyleStrategy {
+import java.util.List;
+
+/** EasyExcel解析动态表头及导出 设置表头和填充内容的样式 */
+public class CellStyleStrategy extends HorizontalCellStyleStrategy {
+
     private final WriteCellStyle headWriteCellStyle;
     private final WriteCellStyle contentWriteCellStyle;
+
+    /** 操作列 */
     private final List<Integer> columnIndexes;
 
-    public CellStyleStrategy(List<Integer> columnIndexes, WriteCellStyle headWriteCellStyle, WriteCellStyle contentWriteCellStyle) {
+    public CellStyleStrategy(
+            List<Integer> columnIndexes, WriteCellStyle headWriteCellStyle, WriteCellStyle contentWriteCellStyle) {
         this.columnIndexes = columnIndexes;
         this.headWriteCellStyle = headWriteCellStyle;
         this.contentWriteCellStyle = contentWriteCellStyle;
     }
 
+    // 设置头样式
+    @Override
     protected void setHeadCellStyle(CellWriteHandlerContext context) {
+        // 获取字体实例
         WriteFont headWriteFont = new WriteFont();
-        headWriteFont.setFontName("\u5b8b\u4f53");
-        if (this.columnIndexes.get(0).equals(context.getRowIndex())) {
-            this.headWriteCellStyle.setFillForegroundColor(Short.valueOf(IndexedColors.WHITE.getIndex()));
-            this.headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.LEFT);
-            headWriteFont.setFontHeightInPoints(Short.valueOf((short)12));
-            headWriteFont.setBold(Boolean.valueOf(false));
-            headWriteFont.setFontName("\u5b8b\u4f53");
+        headWriteFont.setFontName("宋体");
+        // 表头不同处理
+        if (columnIndexes.get(0).equals(context.getRowIndex())) {
+            headWriteCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
+            headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.LEFT);
+            headWriteFont.setFontHeightInPoints((short) 12);
+            headWriteFont.setBold(false);
+            headWriteFont.setFontName("宋体");
         } else {
-            this.headWriteCellStyle.setFillForegroundColor(Short.valueOf(IndexedColors.GREY_25_PERCENT.getIndex()));
-            this.headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
-            headWriteFont.setFontHeightInPoints(Short.valueOf((short)11));
-            headWriteFont.setBold(Boolean.valueOf(false));
-            headWriteFont.setFontName("\u5fae\u8f6f\u96c5\u9ed1");
+            headWriteCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
+            headWriteFont.setFontHeightInPoints((short) 11);
+            headWriteFont.setBold(false);
+            headWriteFont.setFontName("微软雅黑");
         }
-        this.headWriteCellStyle.setWriteFont(headWriteFont);
+        headWriteCellStyle.setWriteFont(headWriteFont);
         DataFormatData dataFormatData = new DataFormatData();
-        dataFormatData.setIndex(Short.valueOf((short)49));
-        this.headWriteCellStyle.setDataFormatData(dataFormatData);
-        if (this.stopProcessing(context)) {
+        dataFormatData.setIndex((short) 49);
+        headWriteCellStyle.setDataFormatData(dataFormatData);
+        if (stopProcessing(context)) {
             return;
         }
-        WriteCellData cellData = context.getFirstCellData();
-        WriteCellStyle.merge((WriteCellStyle)this.headWriteCellStyle, (WriteCellStyle)cellData.getOrCreateStyle());
+        WriteCellData<?> cellData = context.getFirstCellData();
+        WriteCellStyle.merge(headWriteCellStyle, cellData.getOrCreateStyle());
     }
 
+    // 设置填充数据样式
+    @Override
     protected void setContentCellStyle(CellWriteHandlerContext context) {
         WriteFont contentWriteFont = new WriteFont();
-        contentWriteFont.setFontName("\u5b8b\u4f53");
-        contentWriteFont.setFontHeightInPoints(Short.valueOf((short)11));
-        this.contentWriteCellStyle.setWriteFont(contentWriteFont);
-        this.contentWriteCellStyle.setBorderLeft(BorderStyle.THIN);
-        this.contentWriteCellStyle.setBorderTop(BorderStyle.THIN);
-        this.contentWriteCellStyle.setBorderRight(BorderStyle.THIN);
-        this.contentWriteCellStyle.setBorderBottom(BorderStyle.THIN);
+        contentWriteFont.setFontName("宋体");
+        contentWriteFont.setFontHeightInPoints((short) 11);
+        // 设置数据填充后的实线边框
+        contentWriteCellStyle.setWriteFont(contentWriteFont);
+        contentWriteCellStyle.setBorderLeft(BorderStyle.THIN);
+        contentWriteCellStyle.setBorderTop(BorderStyle.THIN);
+        contentWriteCellStyle.setBorderRight(BorderStyle.THIN);
+        contentWriteCellStyle.setBorderBottom(BorderStyle.THIN);
         DataFormatData dataFormatData = new DataFormatData();
-        dataFormatData.setIndex(Short.valueOf((short)49));
-        this.contentWriteCellStyle.setDataFormatData(dataFormatData);
-        this.contentWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
-        WriteCellData cellData = context.getFirstCellData();
-        WriteCellStyle.merge((WriteCellStyle)this.contentWriteCellStyle, (WriteCellStyle)cellData.getOrCreateStyle());
+        dataFormatData.setIndex((short) 49);
+        contentWriteCellStyle.setDataFormatData(dataFormatData);
+        contentWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        WriteCellData<?> cellData = context.getFirstCellData();
+        WriteCellStyle.merge(contentWriteCellStyle, cellData.getOrCreateStyle());
     }
 }
-

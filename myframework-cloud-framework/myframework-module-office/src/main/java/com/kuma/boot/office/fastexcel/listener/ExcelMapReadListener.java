@@ -1,35 +1,65 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
  *
- * Could not load the following classes:
- *  cn.idev.excel.context.AnalysisContext
- *  cn.idev.excel.read.listener.ReadListener
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel.listener;
 
 import cn.idev.excel.context.AnalysisContext;
 import cn.idev.excel.read.listener.ReadListener;
 import com.kuma.boot.office.fastexcel.ExcelDataType;
+
 import java.util.Collection;
 import java.util.Map;
 
-public interface ExcelMapReadListener<T>
-extends ReadListener<T> {
-    default public void doAfterAllAnalysed(AnalysisContext context) {
+/**
+ * The interface Excel map read listener.
+ *
+ * @param <T> the type parameter
+ * @author livk
+ */
+public interface ExcelMapReadListener<T> extends ReadListener<T> {
+
+    @Override
+    default void doAfterAllAnalysed(AnalysisContext context) {
+
     }
 
-    default public Collection<T> getCollectionData() {
-        return this.getMapData().values().stream().flatMap(Collection::stream).toList();
+    /**
+     * Get collection data collection.
+     * @return the collection
+     */
+    default Collection<T> getCollectionData() {
+        return getMapData().values().stream().flatMap(Collection::stream).toList();
     }
 
-    public Map<String, ? extends Collection<T>> getMapData();
+    /**
+     * 获取数据集合
+     * @return collection collection data
+     */
+    Map<String, ? extends Collection<T>> getMapData();
 
-    default public Object getData(ExcelDataType type) {
+    /**
+     * Get data object.
+     * @param type the type
+     * @return the object
+     */
+    default Object getData(ExcelDataType type) {
         return switch (type) {
-            default -> throw new MatchException(null, null);
-            case ExcelDataType.MAP -> this.getMapData();
-            case ExcelDataType.COLLECTION -> this.getCollectionData();
+            case MAP -> getMapData();
+            case COLLECTION -> getCollectionData();
         };
     }
-}
 
+}

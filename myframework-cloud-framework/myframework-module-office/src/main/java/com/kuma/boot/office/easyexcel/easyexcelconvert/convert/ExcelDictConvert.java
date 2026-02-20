@@ -1,66 +1,94 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.annotation.AnnotationUtil
- *  cn.hutool.core.convert.Convert
- *  cn.hutool.core.util.ObjUtil
- *  com.alibaba.excel.converters.Converter
- *  com.alibaba.excel.enums.CellDataTypeEnum
- *  com.alibaba.excel.metadata.GlobalConfiguration
- *  com.alibaba.excel.metadata.data.ReadCellData
- *  com.alibaba.excel.metadata.data.WriteCellData
- *  com.alibaba.excel.metadata.property.ExcelContentProperty
- *  com.kuma.boot.common.utils.lang.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelconvert.convert;
 
 import cn.hutool.core.annotation.AnnotationUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.ObjUtil;
 import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.data.ReadCellData;
 import com.alibaba.excel.metadata.data.WriteCellData;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.office.easyexcel.easyexcelconvert.EasyExcelUtils;
-import com.kuma.boot.office.easyexcel.easyexcelconvert.annotation.ExcelDictFormat;
-import java.lang.reflect.AnnotatedElement;
+
 import java.lang.reflect.Field;
 
-public class ExcelDictConvert
-implements Converter<Object> {
+import com.kuma.boot.office.easyexcel.easyexcelconvert.annotation.ExcelDictFormat;
+import com.kuma.boot.common.utils.lang.StringUtils;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjUtil;
+
+/**
+ * 字典格式化转换处理
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-31 20:54:03
+ */
+public class ExcelDictConvert implements Converter<Object> {
+
+    @Override
     public Class<Object> supportJavaTypeKey() {
         return Object.class;
     }
 
+    @Override
     public CellDataTypeEnum supportExcelTypeKey() {
         return null;
     }
 
-    public Object convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) {
-        ExcelDictFormat anno = this.getAnnotation(contentProperty.getField());
+    @Override
+    public Object convertToJavaData(
+            ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) {
+        ExcelDictFormat anno = getAnnotation(contentProperty.getField());
         String type = anno.dictType();
         String label = cellData.getStringValue();
-        String value = StringUtils.isBlank((String)type) ? EasyExcelUtils.reverseByExp(label, anno.readConverterExp(), anno.separator()) : "";
-        return Convert.convert(contentProperty.getField().getType(), (Object)value);
+        String value;
+        if (StringUtils.isBlank(type)) {
+            value = EasyExcelUtils.reverseByExp(label, anno.readConverterExp(), anno.separator());
+        } else {
+            value = "";
+            // value = SpringUtils.getBean(DictService.class).getDictValue(type, label,
+            // anno.separator());
+        }
+        return Convert.convert(contentProperty.getField().getType(), value);
     }
 
-    public WriteCellData<String> convertToExcelData(Object object, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) {
-        if (ObjUtil.isNull((Object)object)) {
-            return new WriteCellData("");
+    @Override
+    public WriteCellData<String> convertToExcelData(
+            Object object, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) {
+        if (ObjUtil.isNull(object)) {
+            return new WriteCellData<>("");
         }
-        ExcelDictFormat anno = this.getAnnotation(contentProperty.getField());
+        ExcelDictFormat anno = getAnnotation(contentProperty.getField());
         String type = anno.dictType();
-        String value = Convert.toStr((Object)object);
-        String label = StringUtils.isBlank((String)type) ? EasyExcelUtils.convertByExp(value, anno.readConverterExp(), anno.separator()) : "";
-        return new WriteCellData(label);
+        String value = Convert.toStr(object);
+        String label;
+        if (StringUtils.isBlank(type)) {
+            label = EasyExcelUtils.convertByExp(value, anno.readConverterExp(), anno.separator());
+        } else {
+            label = "";
+            // label = SpringUtils.getBean(DictService.class).getDictLabel(type, value,
+            // anno.separator());
+        }
+        return new WriteCellData<>(label);
     }
 
     private ExcelDictFormat getAnnotation(Field field) {
-        return (ExcelDictFormat)AnnotationUtil.getAnnotation((AnnotatedElement)field, ExcelDictFormat.class);
+        return AnnotationUtil.getAnnotation(field, ExcelDictFormat.class);
     }
 }
-

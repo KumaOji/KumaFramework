@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.idev.excel.context.AnalysisContext
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel.listener;
 
 import cn.idev.excel.context.AnalysisContext;
@@ -13,19 +23,23 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TypeExcelMapReadListener<T>
-implements ExcelMapReadListener<T> {
-    private final Map<String, Collection<T>> mapData = new HashMap<String, Collection<T>>();
+/**
+ * @author livk
+ */
+public abstract class TypeExcelMapReadListener<T> implements com.kuma.boot.office.fastexcel.listener.ExcelMapReadListener<T> {
+
+    private final Map<String, Collection<T>> mapData = new HashMap<>();
 
     @Override
     public Map<String, ? extends Collection<T>> getMapData() {
-        return this.mapData;
+        return mapData;
     }
 
+    @Override
     public void invoke(T data, AnalysisContext context) {
         String sheetName = context.readSheetHolder().getSheetName();
-        Collection infos = this.mapData.computeIfAbsent(sheetName, s -> new ArrayList());
+        Collection<T> infos = mapData.computeIfAbsent(sheetName, s -> new ArrayList<>());
         infos.add(data);
     }
-}
 
+}

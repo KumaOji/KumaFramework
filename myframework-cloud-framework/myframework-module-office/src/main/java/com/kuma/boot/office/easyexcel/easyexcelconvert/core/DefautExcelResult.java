@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelconvert.core;
 
 import cn.hutool.core.util.StrUtil;
@@ -11,14 +21,25 @@ import cn.hutool.core.util.StrUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefautExcelResult<T>
-implements ExcelResult<T> {
+/**
+ * 默认excel返回对象
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-31 21:01:25
+ */
+public class DefautExcelResult<T> implements
+        ExcelResult<T> {
+
+    /** 数据对象list */
     private List<T> list;
+
+    /** 错误信息列表 */
     private List<String> errorList;
 
     public DefautExcelResult() {
-        this.list = new ArrayList<T>();
-        this.errorList = new ArrayList<String>();
+        this.list = new ArrayList<>();
+        this.errorList = new ArrayList<>();
     }
 
     public DefautExcelResult(List<T> list, List<String> errorList) {
@@ -33,25 +54,32 @@ implements ExcelResult<T> {
 
     @Override
     public List<T> getList() {
-        return this.list;
+        return list;
     }
 
     @Override
     public List<String> getErrorList() {
-        return this.errorList;
+        return errorList;
     }
 
+    /**
+     * 获取导入回执
+     *
+     * @return 导入回执
+     */
     @Override
     public String getAnalysis() {
-        int successCount = this.list.size();
-        int errorCount = this.errorList.size();
+        int successCount = list.size();
+        int errorCount = errorList.size();
         if (successCount == 0) {
-            return "\u8bfb\u53d6\u5931\u8d25\uff0c\u672a\u89e3\u6790\u5230\u6570\u636e";
+            return "读取失败，未解析到数据";
+        } else {
+            if (errorCount == 0) {
+                return StrUtil.format("恭喜您，全部读取成功！共{}条", successCount);
+            } else {
+                return "";
+            }
         }
-        if (errorCount == 0) {
-            return StrUtil.format((CharSequence)"\u606d\u559c\u60a8\uff0c\u5168\u90e8\u8bfb\u53d6\u6210\u529f\uff01\u5171{}\u6761", (Object[])new Object[]{successCount});
-        }
-        return "";
     }
 
     public void setList(List<T> list) {
@@ -62,4 +90,3 @@ implements ExcelResult<T> {
         this.errorList = errorList;
     }
 }
-

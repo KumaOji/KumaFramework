@@ -1,17 +1,16 @@
 /*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.jspecify.annotations.NonNull
- *  org.springframework.core.MethodParameter
- *  org.springframework.core.ResolvableType
- *  org.springframework.http.HttpInputMessage
- *  org.springframework.http.HttpOutputMessage
- *  org.springframework.http.MediaType
- *  org.springframework.http.converter.HttpMessageConverter
- *  org.springframework.http.converter.HttpMessageNotReadableException
- *  org.springframework.http.converter.HttpMessageNotWritableException
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel.converter;
 
 import com.kuma.boot.office.fastexcel.ExcelDataType;
@@ -19,11 +18,6 @@ import com.kuma.boot.office.fastexcel.FastExcelSupport;
 import com.kuma.boot.office.fastexcel.annotation.RequestExcel;
 import com.kuma.boot.office.fastexcel.annotation.ResponseExcel;
 import com.kuma.boot.office.fastexcel.listener.ExcelMapReadListener;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
@@ -32,12 +26,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.jspecify.annotations.NonNull;
 
-public class ExcelHttpMessageConverter
-implements HttpMessageConverter<Object> {
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author livk
+ */
+public class ExcelHttpMessageConverter implements HttpMessageConverter<Object> {
+
     private final ExcelMapReadListener<?> listener;
+
     private final MethodParameter parameter;
+
     private final RequestExcel requestExcel;
+
     private final ResponseExcel responseExcel;
 
     public ExcelHttpMessageConverter(ExcelMapReadListener<?> listener, MethodParameter parameter, RequestExcel requestExcel, ResponseExcel responseExcel) {
@@ -47,7 +53,8 @@ implements HttpMessageConverter<Object> {
         this.responseExcel = responseExcel;
     }
 
-    public static ExcelHttpMessageConverter readExcel(ExcelMapReadListener<?> listener, MethodParameter parameter, RequestExcel requestExcel) {
+    public static ExcelHttpMessageConverter readExcel(ExcelMapReadListener<?> listener, MethodParameter parameter,
+                                                      RequestExcel requestExcel) {
         return new ExcelHttpMessageConverter(listener, parameter, requestExcel, null);
     }
 
@@ -55,6 +62,7 @@ implements HttpMessageConverter<Object> {
         return new ExcelHttpMessageConverter(null, parameter, null, responseExcel);
     }
 
+    @Override
     public boolean canRead(@NonNull Class<?> clazz, MediaType mediaType) {
         try {
             ExcelDataType.match(clazz);
@@ -62,33 +70,44 @@ implements HttpMessageConverter<Object> {
         catch (Exception e) {
             return false;
         }
-        return mediaType.toString().startsWith("multipart/form-data");
+        return mediaType.toString().startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
     }
 
+    @Override
     public boolean canWrite(@NonNull Class<?> type, MediaType mediaType) {
         return Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type);
     }
 
-    public @NonNull List<MediaType> getSupportedMediaTypes() {
+    @NonNull
+    @Override
+    public List<MediaType> getSupportedMediaTypes() {
         return List.of();
     }
 
-    public @NonNull Object read(@NonNull Class<?> parameterType, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+    @NonNull
+    @Override
+    public Object read(@NonNull Class<?> parameterType, HttpInputMessage inputMessage)
+            throws IOException, HttpMessageNotReadableException {
         ExcelDataType dataType = ExcelDataType.match(parameterType);
-        Class<?> excelModelClass = dataType.getFunction().apply(ResolvableType.forMethodParameter((MethodParameter)this.parameter));
-        FastExcelSupport.read(inputMessage.getBody(), excelModelClass, this.listener, this.requestExcel.ignoreEmptyRow());
-        return this.listener.getData(dataType);
+        Class<?> excelModelClass = dataType.getFunction().apply(ResolvableType.forMethodParameter(parameter));
+        FastExcelSupport.read(inputMessage.getBody(), excelModelClass, listener, requestExcel.ignoreEmptyRow());
+        return listener.getData(dataType);
     }
 
-    public void write(@NonNull Object returnValue, MediaType contentType, @NonNull HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+    @Override
+    public void write(@NonNull Object returnValue, MediaType contentType, @NonNull HttpOutputMessage outputMessage)
+            throws IOException, HttpMessageNotWritableException {
         if (returnValue instanceof Collection) {
-            Class excelModelClass = ResolvableType.forMethodParameter((MethodParameter)this.parameter).resolveGeneric(new int[]{0});
-            FastExcelSupport.write(outputMessage.getBody(), excelModelClass, this.responseExcel.template(), Map.of("sheet", (Collection)returnValue));
-        } else if (returnValue instanceof Map) {
-            Map result = (Map)returnValue;
-            Class excelModelClass = ResolvableType.forMethodParameter((MethodParameter)this.parameter).getGeneric(new int[]{1}).resolveGeneric(new int[]{0});
-            FastExcelSupport.write(outputMessage.getBody(), excelModelClass, this.responseExcel.template(), result);
+            Class<?> excelModelClass = ResolvableType.forMethodParameter(parameter).resolveGeneric(0);
+            FastExcelSupport.write(outputMessage.getBody(), excelModelClass, responseExcel.template(),
+                    Map.of("sheet", (Collection<?>) returnValue));
+        }
+        else if (returnValue instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Collection<?>> result = (Map<String, Collection<?>>) returnValue;
+            Class<?> excelModelClass = ResolvableType.forMethodParameter(parameter).getGeneric(1).resolveGeneric(0);
+            FastExcelSupport.write(outputMessage.getBody(), excelModelClass, responseExcel.template(), result);
         }
     }
-}
 
+}

@@ -1,16 +1,16 @@
 /*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.io.DataBufferUtils
- *  org.jspecify.annotations.NonNull
- *  org.springframework.core.ResolvableType
- *  org.springframework.http.MediaType
- *  org.springframework.http.ReactiveHttpInputMessage
- *  org.springframework.http.codec.HttpMessageReader
- *  reactor.core.publisher.Flux
- *  reactor.core.publisher.Mono
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel.converter;
 
 import com.kuma.boot.common.utils.io.DataBufferUtils;
@@ -18,28 +18,35 @@ import com.kuma.boot.office.fastexcel.ExcelDataType;
 import com.kuma.boot.office.fastexcel.FastExcelSupport;
 import com.kuma.boot.office.fastexcel.annotation.RequestExcel;
 import com.kuma.boot.office.fastexcel.listener.ExcelMapReadListener;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import org.jspecify.annotations.NonNull;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
+import org.jspecify.annotations.NonNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class ExcelHttpMessageReader
-implements HttpMessageReader<Object> {
-    public @NonNull List<MediaType> getReadableMediaTypes() {
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * @author livk
+ */
+public class ExcelHttpMessageReader implements HttpMessageReader<Object> {
+
+    @NonNull
+    @Override
+    public List<MediaType> getReadableMediaTypes() {
         return List.of(MediaType.MULTIPART_FORM_DATA);
     }
 
+    @Override
     public boolean canRead(@NonNull ResolvableType elementType, MediaType mediaType) {
         try {
             ResolvableType type = elementType;
             if (Objects.equals(type.resolve(), Mono.class)) {
-                type = elementType.getGeneric(new int[]{0});
+                type = elementType.getGeneric(0);
             }
             if (type.getRawClass() == null) {
                 return false;
@@ -52,25 +59,36 @@ implements HttpMessageReader<Object> {
         catch (Exception e) {
             return false;
         }
-        return mediaType.toString().startsWith("multipart/form-data");
+        return mediaType.toString().startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
     }
 
-    public @NonNull Flux<Object> read(@NonNull ResolvableType elementType, @NonNull ReactiveHttpInputMessage message, @NonNull Map<String, Object> hints) {
+    @NonNull
+    @Override
+    public Flux<Object> read(@NonNull ResolvableType elementType, @NonNull ReactiveHttpInputMessage message,
+                             @NonNull Map<String, Object> hints) {
         throw new UnsupportedOperationException("");
     }
 
-    public @NonNull Mono<Object> readMono(@NonNull ResolvableType elementType, @NonNull ReactiveHttpInputMessage message, @NonNull Map<String, Object> hints) {
-        ExcelMapReadListener listener = (ExcelMapReadListener)hints.get("listener");
-        RequestExcel requestExcel = (RequestExcel)hints.get("requestExcel");
+    @NonNull
+    @Override
+    public Mono<Object> readMono(@NonNull ResolvableType elementType, @NonNull ReactiveHttpInputMessage message,
+                                 @NonNull Map<String, Object> hints) {
+        ExcelMapReadListener<?> listener = (ExcelMapReadListener<?>) hints.get("listener");
+        RequestExcel requestExcel = (RequestExcel) hints.get("requestExcel");
         if (Objects.equals(elementType.resolve(), Mono.class)) {
-            elementType = elementType.getGeneric(new int[]{0});
+            elementType = elementType.getGeneric(0);
         }
         if (elementType.getRawClass() != null) {
-            ExcelDataType dataType = Flux.class.isAssignableFrom(elementType.getRawClass()) ? ExcelDataType.COLLECTION : ExcelDataType.match(elementType.getRawClass());
+
+            ExcelDataType dataType = Flux.class.isAssignableFrom(elementType.getRawClass()) ? ExcelDataType.COLLECTION
+                    : ExcelDataType.match(elementType.getRawClass());
             Class<?> excelModelClass = dataType.getFunction().apply(elementType);
-            return Mono.just((Object)message.getBody()).flatMap(DataBufferUtils::transform).doOnSuccess(in -> FastExcelSupport.read(in, excelModelClass, listener, requestExcel.ignoreEmptyRow())).map(in -> listener.getData(dataType));
+            return Mono.just(message.getBody())
+                    .flatMap(DataBufferUtils::transform)
+                    .doOnSuccess(in -> FastExcelSupport.read(in, excelModelClass, listener, requestExcel.ignoreEmptyRow()))
+                    .map(in -> listener.getData(dataType));
         }
         return Mono.empty();
     }
-}
 
+}

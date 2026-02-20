@@ -1,20 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.afterturn.easypoi.excel.ExcelExportUtil
- *  cn.afterturn.easypoi.excel.ExcelImportUtil
- *  cn.afterturn.easypoi.excel.entity.ExportParams
- *  cn.afterturn.easypoi.excel.entity.ImportParams
- *  cn.afterturn.easypoi.excel.entity.enmus.ExcelType
- *  com.kuma.boot.common.exception.BusinessException
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  jakarta.servlet.http.HttpServletResponse
- *  org.apache.poi.ss.usermodel.Workbook
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.web.multipart.MultipartFile
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easypoi;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
@@ -23,46 +22,71 @@ import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import com.kuma.boot.common.exception.BusinessException;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+/**
+ * excel跑龙套
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-31 20:58:06
+ */
 public class ExcelUtil {
+
     private static final Logger logger = LoggerFactory.getLogger(ExcelUtil.class);
 
-    private ExcelUtil() {
-    }
+    private ExcelUtil() {}
 
-    public static void exportExcel(List<?> list, String title, String sheetName, Class<?> pojoClass, String fileName, boolean isCreateHeader, HttpServletResponse response) {
+    public static void exportExcel(
+            List<?> list,
+            String title,
+            String sheetName,
+            Class<?> pojoClass,
+            String fileName,
+            boolean isCreateHeader,
+            HttpServletResponse response) {
         ExportParams exportParams = new ExportParams(title, sheetName);
         exportParams.setCreateHeadRows(isCreateHeader);
-        ExcelUtil.defaultExport(list, pojoClass, fileName, response, exportParams);
+        defaultExport(list, pojoClass, fileName, response, exportParams);
     }
 
-    public static void exportExcel(List<?> list, String title, String sheetName, Class<?> pojoClass, String fileName, HttpServletResponse response) {
-        ExcelUtil.defaultExport(list, pojoClass, fileName, response, new ExportParams(title, sheetName));
+    public static void exportExcel(
+            List<?> list,
+            String title,
+            String sheetName,
+            Class<?> pojoClass,
+            String fileName,
+            HttpServletResponse response) {
+        defaultExport(list, pojoClass, fileName, response, new ExportParams(title, sheetName));
     }
 
     public static void exportExcel(List<Map<String, Object>> list, String fileName, HttpServletResponse response) {
-        ExcelUtil.defaultExport(list, fileName, response);
+        defaultExport(list, fileName, response);
     }
 
-    private static void defaultExport(List<?> list, Class<?> pojoClass, String fileName, HttpServletResponse response, ExportParams exportParams) {
-        Workbook workbook = ExcelExportUtil.exportExcel((ExportParams)exportParams, pojoClass, list);
+    private static void defaultExport(
+            List<?> list,
+            Class<?> pojoClass,
+            String fileName,
+            HttpServletResponse response,
+            ExportParams exportParams) {
+        Workbook workbook = ExcelExportUtil.exportExcel(exportParams, pojoClass, list);
         if (workbook != null) {
-            ExcelUtil.downLoadExcel(fileName, response, workbook);
+            downLoadExcel(fileName, response, workbook);
         }
     }
 
@@ -71,82 +95,88 @@ public class ExcelUtil {
             response.setCharacterEncoding("UTF-8");
             response.setHeader("content-Type", "application/vnd.ms-excel");
             response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
-            workbook.write((OutputStream)response.getOutputStream());
-        }
-        catch (IOException e) {
-            logger.error("excel\u6587\u6863\u5bfc\u51fa\u4e0b\u8f7d\u62a5\u9519:{}", (Throwable)e);
-            throw new BusinessException("excel\u4e0b\u8f7d\u62a5\u9519");
+            workbook.write(response.getOutputStream());
+        } catch (IOException e) {
+            logger.error("excel文档导出下载报错:{}", e);
+            throw new BusinessException("excel下载报错");
         }
     }
 
     private static void defaultExport(List<Map<String, Object>> list, String fileName, HttpServletResponse response) {
-        Workbook workbook = ExcelExportUtil.exportExcel(list, (ExcelType)ExcelType.HSSF);
+        Workbook workbook = ExcelExportUtil.exportExcel(list, ExcelType.HSSF);
         if (workbook != null) {
-            ExcelUtil.downLoadExcel(fileName, response, workbook);
+            downLoadExcel(fileName, response, workbook);
         }
     }
 
     public static <T> List<T> importExcel(String filePath, Integer titleRows, Integer headerRows, Class<T> pojoClass) {
-        List list;
-        if (StringUtils.isBlank((String)filePath)) {
+        if (StringUtils.isBlank(filePath)) {
             return Collections.emptyList();
         }
         ImportParams params = new ImportParams();
-        params.setTitleRows(titleRows.intValue());
-        params.setHeadRows(headerRows.intValue());
+        params.setTitleRows(titleRows);
+        params.setHeadRows(headerRows);
+        List<T> list;
         try {
-            list = ExcelImportUtil.importExcel((File)new File(filePath), pojoClass, (ImportParams)params);
-        }
-        catch (NoSuchElementException e) {
-            logger.error("excel\u6a21\u677f\u6587\u4ef6\u5bfc\u5165\u4e3a\u7a7a:{}", (Throwable)e);
-            throw new BusinessException("excel\u4e0b\u8f7d\u62a5\u9519");
-        }
-        catch (Exception e) {
-            logger.error("excel\u6a21\u677f\u6587\u4ef6\u5bfc\u5165\u4e3a\u7a7a:{}", (Throwable)e);
-            throw new BusinessException("excel\u4e0b\u8f7d\u62a5\u9519");
+            list = ExcelImportUtil.importExcel(new File(filePath), pojoClass, params);
+        } catch (NoSuchElementException e) {
+            logger.error("excel模板文件导入为空:{}", e);
+            throw new BusinessException("excel下载报错");
+        } catch (Exception e) {
+            logger.error("excel模板文件导入为空:{}", e);
+            throw new BusinessException("excel下载报错");
         }
         return list;
     }
 
-    public static <T> List<T> importExcel(MultipartFile file, Integer titleRows, Integer headerRows, Class<T> pojoClass) {
+    public static <T> List<T> importExcel(
+            MultipartFile file, Integer titleRows, Integer headerRows, Class<T> pojoClass) {
         if (file == null) {
             return Collections.emptyList();
         }
         ImportParams params = new ImportParams();
-        params.setTitleRows(titleRows.intValue());
-        params.setHeadRows(headerRows.intValue());
-        List list = null;
+        params.setTitleRows(titleRows);
+        params.setHeadRows(headerRows);
+        List<T> list = null;
         try {
-            list = ExcelImportUtil.importExcel((InputStream)file.getInputStream(), pojoClass, (ImportParams)params);
-        }
-        catch (NoSuchElementException e) {
-            logger.error("excel\u6587\u4ef6\u5bfc\u5165\u4e3a\u7a7a:{}", (Throwable)e);
-            throw new BusinessException("excel\u4e0b\u8f7d\u62a5\u9519");
-        }
-        catch (Exception e) {
-            logger.error("excel\u5bfc\u5165\u4e3a\u7a7a:{}", (Throwable)e);
-            throw new BusinessException("excel\u4e0b\u8f7d\u62a5\u9519");
+            list = ExcelImportUtil.importExcel(file.getInputStream(), pojoClass, params);
+        } catch (NoSuchElementException e) {
+            logger.error("excel文件导入为空:{}", e);
+            throw new BusinessException("excel下载报错");
+        } catch (Exception e) {
+            logger.error("excel导入为空:{}", e);
+            throw new BusinessException("excel下载报错");
         }
         return list;
     }
 
-    public static <T> List<T> importExcel(InputStream inputStream, Integer titleRows, Integer headerRows, ImportParams params, Class<T> pojoClass) throws IOException {
+    /**
+     * excel 导入
+     *
+     * @param inputStream 文件输入流
+     * @param titleRows 标题行
+     * @param headerRows 表头行
+     * @param params 自定义验证
+     * @param pojoClass pojo类型
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> importExcel(
+            InputStream inputStream, Integer titleRows, Integer headerRows, ImportParams params, Class<T> pojoClass)
+            throws IOException {
         if (inputStream == null) {
             return Collections.emptyList();
         }
-        params.setTitleRows(titleRows.intValue());
-        params.setHeadRows(headerRows.intValue());
+        params.setTitleRows(titleRows);
+        params.setHeadRows(headerRows);
         params.setSaveUrl("/excel/");
         params.setNeedSave(true);
         try {
-            return ExcelImportUtil.importExcel((InputStream)inputStream, pojoClass, (ImportParams)params);
-        }
-        catch (NoSuchElementException e) {
-            throw new IOException("excel\u6587\u4ef6\u4e0d\u80fd\u4e3a\u7a7a");
-        }
-        catch (Exception e) {
+            return ExcelImportUtil.importExcel(inputStream, pojoClass, params);
+        } catch (NoSuchElementException e) {
+            throw new IOException("excel文件不能为空");
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 }
-

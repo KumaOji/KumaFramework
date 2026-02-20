@@ -1,25 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.write.handler.SheetWriteHandler
- *  com.alibaba.excel.write.metadata.holder.WriteSheetHolder
- *  com.alibaba.excel.write.metadata.holder.WriteWorkbookHolder
- *  org.apache.poi.ss.usermodel.DataValidation
- *  org.apache.poi.ss.usermodel.DataValidationConstraint
- *  org.apache.poi.ss.usermodel.DataValidationHelper
- *  org.apache.poi.ss.usermodel.Name
- *  org.apache.poi.ss.usermodel.Sheet
- *  org.apache.poi.ss.usermodel.Workbook
- *  org.apache.poi.ss.util.CellRangeAddressList
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelconvert.core;
 
 import com.alibaba.excel.write.handler.SheetWriteHandler;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteWorkbookHolder;
-import java.util.Map;
-import java.util.TreeMap;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
@@ -28,41 +27,73 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
 
-public class CustomSheetWriteHandler
-implements SheetWriteHandler {
-    private final Map<Integer, String[]> map = new TreeMap<Integer, String[]>();
+import java.util.Map;
+import java.util.TreeMap;
+
+/** 这个类的作用主要是给列增加下拉框 主要是为了方便用户填写数据 */
+public class CustomSheetWriteHandler implements SheetWriteHandler {
+
+    /** 存放下拉内容的集合 key为列的下标， value为下拉内容数组 */
+    private final Map<Integer, String[]> map = new TreeMap<>();
+
+    /** 工作簿下标，从0开始 */
     private int index = 0;
+
+    /** 给多少行添加下拉框，这里默认给2000行 */
     private final int batchSize = 2000;
 
-    public void beforeSheetCreate(WriteWorkbookHolder writeWorkbookHolder, WriteSheetHolder writeSheetHolder) {
-    }
+    @Override
+    public void beforeSheetCreate(WriteWorkbookHolder writeWorkbookHolder, WriteSheetHolder writeSheetHolder) {}
 
+    /**
+     * 宝藏在此：如果下拉框内容总的长度超过255，会导致Cell有下拉框，但是下拉内容显示不了， 这时我们可以新建一个sheet，将其隐藏，然后将里面的内容引用到我们的下拉框列就可以。
+     * 值得细品
+     *
+     * @param writeWorkbookHolder
+     * @param writeSheetHolder
+     */
+    @Override
     public void afterSheetCreate(WriteWorkbookHolder writeWorkbookHolder, WriteSheetHolder writeSheetHolder) {
-        this.map.put(1, new String[]{"\u4e0b\u62c9\u5185\u5bb9\u4e00", "\u4e0b\u62c9\u5185\u5bb9\u4e8c"});
-        this.map.put(3, new String[]{"\u5317\u4eac\u5e02", "\u4e0a\u6d77\u5e02", "\u91cd\u5e86\u5e02", "\u5929\u6d25\u5e02"});
+        // excel下标从0开始，这里第二列的下拉选择内容
+        map.put(1, new String[] {"下拉内容一", "下拉内容二"});
+        // excel下标从0开始，这里第三列的下拉选择内容
+        map.put(3, new String[] {"北京市", "上海市", "重庆市", "天津市"});
+
         DataValidationHelper helper = writeSheetHolder.getSheet().getDataValidationHelper();
-        this.map.forEach((k, v) -> {
+        map.forEach((k, v) -> {
+            // 创建sheet，突破下拉框255的限制
+            // 获取一个workbook
             Workbook workbook = writeWorkbookHolder.getWorkbook();
+            // 定义sheet的名称
             String sheetName = "sheet" + k;
+            // 1.创建一个隐藏的sheet 名称为 proviceSheet
             Sheet proviceSheet = workbook.createSheet(sheetName);
-            ++this.index;
+            // 从第二个工作簿开始隐藏
+            this.index++;
+            // 设置隐藏
             workbook.setSheetHidden(this.index, true);
-            int length = ((String[])v).length;
-            for (int i = 0; i < length; ++i) {
+            // 2.循环赋值（为了防止下拉框的行数与隐藏域的行数相对应，将隐藏域加到结束行之后）
+            for (int i = 0, length = v.length; i < length; i++) {
+                // i:表示你开始的行数 0表示你开始的列数
                 proviceSheet.createRow(i).createCell(0).setCellValue(v[i]);
             }
             Name category1Name = workbook.createName();
             category1Name.setNameName(sheetName);
-            category1Name.setRefersToFormula(sheetName + "!$A$1:$A$" + ((String[])v).length);
-            CellRangeAddressList addressList = new CellRangeAddressList(1, 2000, k.intValue(), k.intValue());
+            // 4 $A$1:$A$N代表 以A列1行开始获取N行下拉数据
+            category1Name.setRefersToFormula(sheetName + "!$A$1:$A$" + (v.length));
+            // 5
+            // 将刚才设置的sheet引用到你的下拉列表中,1表示从行的序号1开始（开始行，通常行的序号为0的行是表头），50表示行的序号50（结束行），表示从行的序号1到50，k表示开始列序号和结束列序号
+            CellRangeAddressList addressList = new CellRangeAddressList(1, batchSize, k, k);
             DataValidationConstraint constraint8 = helper.createFormulaListConstraint(sheetName);
             DataValidation dataValidation3 = helper.createValidation(constraint8, addressList);
-            dataValidation3.setErrorStyle(0);
+
+            // 阻止输入非下拉选项的值
+            dataValidation3.setErrorStyle(DataValidation.ErrorStyle.STOP);
             dataValidation3.setShowErrorBox(true);
             dataValidation3.setSuppressDropDownArrow(true);
-            dataValidation3.createErrorBox("\u63d0\u793a", "\u6b64\u503c\u4e0e\u5355\u5143\u683c\u5b9a\u4e49\u683c\u5f0f\u4e0d\u4e00\u81f4");
+            dataValidation3.createErrorBox("提示", "此值与单元格定义格式不一致");
+            // validation.createPromptBox("填写说明：","填写内容只能为下拉数据集中的单位，其他单位将会导致无法入仓");
             writeSheetHolder.getSheet().addValidationData(dataValidation3);
         });
     }
 }
-

@@ -1,58 +1,94 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.aspose.words.Document
- *  com.aspose.words.DocumentBuilder
- *  org.apache.poi.poifs.filesystem.DirectoryNode
- *  org.apache.poi.poifs.filesystem.DocumentEntry
- *  org.apache.poi.poifs.filesystem.POIFSFileSystem
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.convert.html2word;
 
 import com.aspose.words.Document;
 import com.aspose.words.DocumentBuilder;
+import com.aspose.words.SaveFormat;
+import org.apache.poi.poifs.filesystem.DirectoryEntry;
+import org.apache.poi.poifs.filesystem.DocumentEntry;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import org.apache.poi.poifs.filesystem.DirectoryNode;
-import org.apache.poi.poifs.filesystem.DocumentEntry;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
+/**
+ * Html 转 Word 工具类
+ *
+ * @since 2020/11/23 16:00
+ */
 public class Htm2WordUtil {
+
+    /**
+     * `html` 转 `word` 【 注：本地图片不支持显示！！！ 需转换成在线图片 】
+     *
+     * @param htmlBytes: html字节码
+     * @return word文件路径
+     * @since 2020/11/24 11:52
+     */
     public static byte[] htmlBytes2WordBytes(byte[] htmlBytes) throws Exception {
         Document doc = new Document();
         DocumentBuilder builder = new DocumentBuilder(doc);
         builder.insertHtml(new String(htmlBytes));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        doc.save((OutputStream)outputStream, 20);
+        doc.save(outputStream, SaveFormat.DOCX);
         return outputStream.toByteArray();
     }
 
+    /**
+     * `html` 转 `word` 【 注：本地图片不支持显示！！！ 需转换成在线图片 】
+     *
+     * @param htmlBytes: html字节码
+     * @param wordFilePath: 待生成的word文件路径
+     * @return word文件数据
+     * @since 2020/11/24 11:52
+     */
     public static File htmlBytes2WordFile(byte[] htmlBytes, String wordFilePath) throws Exception {
         Document doc = new Document();
         DocumentBuilder builder = new DocumentBuilder(doc);
         builder.insertHtml(new String(htmlBytes));
-        doc.save(wordFilePath, 20);
+        doc.save(wordFilePath, SaveFormat.DOCX);
         return new File(wordFilePath);
     }
 
+    /**
+     * `html` 转 `word` 【注`doc`生成的html中的图片路径中中文是被转义处理过的，再生成word时图片便看不了，需单独做处理，`docx`无此问题】 【
+     * 注：此方式会丢失一定格式 】
+     *
+     * @param html: html内容
+     * @param fileRootPath: 文件根位置
+     * @param wordFileName: 待生成的word文件名
+     * @return word文件路径
+     * @since 2020/11/23 16:04
+     */
     public static String html2Word(String html, String fileRootPath, String wordFileName) throws IOException {
-        String wordFilePath = fileRootPath + "/" + wordFileName;
-        byte[] htmlBytes = html.getBytes();
+        final String wordFilePath = fileRootPath + "/" + wordFileName;
+        byte htmlBytes[] = html.getBytes();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(htmlBytes);
         POIFSFileSystem poifs = new POIFSFileSystem();
-        DirectoryNode directory = poifs.getRoot();
-        DocumentEntry documentEntry = directory.createDocument("WordDocument", (InputStream)inputStream);
+        DirectoryEntry directory = poifs.getRoot();
+        DocumentEntry documentEntry = directory.createDocument("WordDocument", inputStream);
         FileOutputStream outputStream = new FileOutputStream(wordFilePath);
-        poifs.writeFilesystem((OutputStream)outputStream);
+        poifs.writeFilesystem(outputStream);
         inputStream.close();
         outputStream.close();
         return wordFilePath;
     }
 }
-

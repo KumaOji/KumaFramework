@@ -1,82 +1,153 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.univocity.parsers.common.DataProcessingException
- *  com.univocity.parsers.common.ParsingContext
- *  com.univocity.parsers.common.ProcessorErrorHandler
- *  com.univocity.parsers.common.RetryableErrorHandler
- *  com.univocity.parsers.common.processor.BeanListProcessor
- *  com.univocity.parsers.common.processor.RowListProcessor
- *  com.univocity.parsers.common.processor.core.Processor
- *  com.univocity.parsers.csv.CsvFormat
- *  com.univocity.parsers.csv.CsvParser
- *  com.univocity.parsers.csv.CsvParserSettings
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.csv;
 
+import com.kuma.boot.office.easyexcel.easyexcelimport.constant.ImportConstant;
 import com.kuma.boot.office.easyexcel.easyexcelimport.refactor.ThrowingConsumer;
 import com.kuma.boot.office.easyexcel.easyexcelimport.valid.ImportValid;
 import com.univocity.parsers.common.DataProcessingException;
 import com.univocity.parsers.common.ParsingContext;
-import com.univocity.parsers.common.ProcessorErrorHandler;
 import com.univocity.parsers.common.RetryableErrorHandler;
 import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.common.processor.RowListProcessor;
-import com.univocity.parsers.common.processor.core.Processor;
-import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
+import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.util.StrUtil;
+
 import java.io.InputStream;
 import java.util.List;
 
 public class CsvImportUtil<T> {
-    public static <T> void importCsvWithString(InputStream inputStream, List<String> errorList, Class<T> rowDto, ThrowingConsumer<List<String[]>> rowAction) {
+
+    /**
+     * @param inputStream
+     * @param errorList
+     * @param rowDto
+     * @param rowAction
+     * @param <T>
+     */
+    public static <T> void importCsvWithString(
+            InputStream inputStream,
+            List<String> errorList,
+            Class<T> rowDto,
+            ThrowingConsumer<List<String[]>> rowAction) {
+        // 定义bean解析者：用于将csv中数据绑定到实体属性中，然后存储带list集合上
         RowListProcessor rowListProcessor = new RowListProcessor();
-        CsvParserSettings setting = CsvImportUtil.getDefaultSetting(errorList);
-        setting.setProcessor((Processor)rowListProcessor);
+        CsvParserSettings setting = getDefaultSetting(errorList);
+        setting.setProcessor(rowListProcessor);
+        // 创建csv文件解析
         CsvParser csvParser = new CsvParser(setting);
         csvParser.parse(inputStream);
-        List rowDataList = rowListProcessor.getRows();
-        CsvImportUtil.persistentStringDataToDb(rowDataList, rowAction);
+        // 获取数据映射后的集合
+        List<String[]> rowDataList = rowListProcessor.getRows();
+        // 执行数据持久化
+        persistentStringDataToDb(rowDataList, rowAction);
     }
 
-    private static <T> void persistentStringDataToDb(List<String[]> data, ThrowingConsumer<List<String[]>> persistentActionMethod) {
-        Iterable dataList = null;
+    /**
+     * 将数据持久化到数据库中 具体数据落库的业务逻辑方法：此处的逻辑是将数据从csv中读取出来后，然后进行自己的业务处理，最后进行落库操作
+     * 不懂的可以参考：UserServiceImpl下的uploadUserListWithCsv方法案例
+     *
+     * @param data
+     * @param persistentActionMethod
+     */
+    private static <T> void persistentStringDataToDb(
+            List<String[]> data, ThrowingConsumer<List<String[]>> persistentActionMethod) {
+        // 对数据分组，批量插入
+//        List<List<String[]>> dataList = ListUtil.avgPartition(data, ImportConstant.MAX_INSERT_COUNT);
+        List<List<String[]>> dataList = null;
         dataList.forEach(persistentActionMethod);
     }
 
-    public static <T> void importCsvWithBean(InputStream inputStream, List<String> errorList, Class<T> rowDtoClass, ThrowingConsumer<List<T>> rowAction) {
-        BeanListProcessor rowProcessor = new BeanListProcessor(rowDtoClass);
-        CsvParserSettings setting = CsvImportUtil.getDefaultSetting(errorList);
-        setting.setProcessor((Processor)rowProcessor);
+    /**
+     * 使用实体bean接收csv数据文件并进行数据落盘
+     *
+     * @param inputStream
+     * @param errorList
+     * @param rowDtoClass
+     * @param rowAction
+     * @param <T>
+     */
+    public static <T> void importCsvWithBean(
+            InputStream inputStream,
+            List<String> errorList,
+            Class<T> rowDtoClass,
+            ThrowingConsumer<List<T>> rowAction) {
+        // 定义bean解析者：用于将csv中数据绑定到实体属性中，然后存储带list集合上
+        BeanListProcessor<T> rowProcessor = new BeanListProcessor<>(rowDtoClass);
+        CsvParserSettings setting = getDefaultSetting(errorList);
+        setting.setProcessor(rowProcessor);
+        // 创建csv文件解析
         CsvParser csvParser = new CsvParser(setting);
         csvParser.parse(inputStream);
-        List dataList = rowProcessor.getBeans();
-        for (Object row : dataList) {
+        // 获取数据映射后的集合
+        List<T> dataList = rowProcessor.getBeans();
+        // 校验必填字段
+        for (T row : dataList) {
+            // 校验导入字段
             ImportValid.validRequireField(row, errorList);
         }
-        CsvImportUtil.persistentBeanDataToDb(dataList, rowAction);
+        // 执行数据持久化
+        persistentBeanDataToDb(dataList, rowAction);
     }
 
+    /**
+     * 将数据持久化到数据库中 具体数据落库的业务逻辑方法：此处的逻辑是将数据从csv中读取出来后，然后进行自己的业务处理，最后进行落库操作
+     * 不懂的可以参考：UserServiceImpl下的uploadUserListWithCsv方法案例
+     *
+     * @param data
+     * @param persistentActionMethod
+     */
     private static <T> void persistentBeanDataToDb(List<T> data, ThrowingConsumer<List<T>> persistentActionMethod) {
-        Iterable dataList = null;
+        // 对数据分组，批量插入
+//        List<List<T>> dataList = ListUtil.avgPartition(data, ImportConstant.MAX_INSERT_COUNT);
+        List<List<T>> dataList = null;
         dataList.forEach(persistentActionMethod);
     }
 
-    private static CsvParserSettings getDefaultSetting(final List<String> errorList) {
+    /**
+     * 获取导入默认setting对象
+     *
+     * @param errorList
+     * @return
+     */
+    private static CsvParserSettings getDefaultSetting(List<String> errorList) {
         CsvParserSettings settings = new CsvParserSettings();
-        ((CsvFormat)settings.getFormat()).setLineSeparator("\n");
-        settings.setLineSeparatorDetectionEnabled(Boolean.TRUE.booleanValue());
+        // 配置行分隔符
+        settings.getFormat().setLineSeparator(StrUtil.LF);
+        // 配置自动检查行分隔符序列
+        settings.setLineSeparatorDetectionEnabled(Boolean.TRUE);
+        // 设置将文件第一行解析为：标题
         settings.setHeaderExtractionEnabled(true);
-        settings.setProcessorErrorHandler((ProcessorErrorHandler)new RetryableErrorHandler<ParsingContext>(){
-
+        // 处理转换中出现的问题
+        settings.setProcessorErrorHandler(new RetryableErrorHandler<ParsingContext>() {
+            @Override
             public void handleError(DataProcessingException error, Object[] inputRow, ParsingContext context) {
-                String errorLog = "row error details: column '" + error.getColumnName() + "' (index " + error.getColumnIndex() + ") has value '" + String.valueOf(inputRow[error.getColumnIndex()]) + " transfer error";
+                String errorLog = "row error details: column '"
+                        + error.getColumnName()
+                        + "' (index "
+                        + error.getColumnIndex()
+                        + ") has value '"
+                        + inputRow[error.getColumnIndex()]
+                        + " transfer error";
                 errorList.add(errorLog);
             }
         });
         return settings;
     }
 }
-

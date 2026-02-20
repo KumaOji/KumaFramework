@@ -1,23 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelimport.refactor;
 
 import java.util.function.Consumer;
 
+/** java8中自带的Consumer是不会抛出异常的，为了支持执行自定义操作时能够将具体的异常抛出，重写了一个可以抛出异常的Consumer */
 @FunctionalInterface
-public interface ThrowingConsumer<T>
-extends Consumer<T> {
+public interface ThrowingConsumer<T> extends Consumer<T> {
+    /**
+     * 重写accept方法，捕获并抛出异常
+     *
+     * @param t
+     */
     @Override
-    default public void accept(T t) {
+    default void accept(T t) {
         try {
-            this.acceptBase(t);
-        }
-        catch (Exception ex) {
+            acceptBase(t);
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public void acceptBase(T var1);
+    void acceptBase(T t);
 }
-

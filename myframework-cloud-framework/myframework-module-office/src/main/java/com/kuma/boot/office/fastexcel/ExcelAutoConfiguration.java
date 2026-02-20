@@ -1,20 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
  *
- * Could not load the following classes:
- *  cn.idev.excel.FastExcel
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication$Type
- *  org.springframework.context.annotation.Bean
- *  org.springframework.web.method.support.HandlerMethodArgumentResolver
- *  org.springframework.web.method.support.HandlerMethodReturnValueHandler
- *  org.springframework.web.reactive.config.WebFluxConfigurer
- *  org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver
- *  org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
- *  org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel;
 
 import cn.idev.excel.FastExcel;
@@ -22,7 +21,6 @@ import com.kuma.boot.office.fastexcel.resolver.ExcelMethodArgumentResolver;
 import com.kuma.boot.office.fastexcel.resolver.ExcelMethodReturnValueHandler;
 import com.kuma.boot.office.fastexcel.resolver.ReactiveExcelMethodArgumentResolver;
 import com.kuma.boot.office.fastexcel.resolver.ReactiveExcelMethodReturnValueHandler;
-import java.util.List;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -33,35 +31,60 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
+/**
+ * <p>
+ * ExcelAutoConfiguration
+ * </p>
+ *
+ * @author livk
+ */
 @AutoConfiguration
-@ConditionalOnClass(value={FastExcel.class})
+@ConditionalOnClass(FastExcel.class)
 public class ExcelAutoConfiguration {
 
+    /**
+     * The type Excel web mvc auto configuration.
+     */
     @AutoConfiguration
-    @ConditionalOnWebApplication(type=ConditionalOnWebApplication.Type.REACTIVE)
-    public static class ExcelWebFluxAutoConfiguration
-    implements WebFluxConfigurer {
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public static class ExcelWebMvcAutoConfiguration implements WebMvcConfigurer {
+
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(new ExcelMethodArgumentResolver());
+        }
+
+        @Override
+        public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> handlers) {
+            handlers.add(new ExcelMethodReturnValueHandler());
+        }
+
+    }
+
+    /**
+     * The type Excel web flux auto configuration.
+     */
+    @AutoConfiguration
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public static class ExcelWebFluxAutoConfiguration implements WebFluxConfigurer {
+
+        /**
+         * Reactive excel method return value handler reactive excel method return value
+         * handler.
+         * @return the reactive excel method return value handler
+         */
         @Bean
         public ReactiveExcelMethodReturnValueHandler reactiveExcelMethodReturnValueHandler() {
             return new ReactiveExcelMethodReturnValueHandler();
         }
 
+        @Override
         public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
-            configurer.addCustomResolver(new org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver[]{new ReactiveExcelMethodArgumentResolver()});
-        }
-    }
-
-    @AutoConfiguration
-    @ConditionalOnWebApplication(type=ConditionalOnWebApplication.Type.SERVLET)
-    public static class ExcelWebMvcAutoConfiguration
-    implements WebMvcConfigurer {
-        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-            resolvers.add(new ExcelMethodArgumentResolver());
+            configurer.addCustomResolver(new ReactiveExcelMethodArgumentResolver());
         }
 
-        public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> handlers) {
-            handlers.add((HandlerMethodReturnValueHandler)new ExcelMethodReturnValueHandler());
-        }
     }
+
 }
-

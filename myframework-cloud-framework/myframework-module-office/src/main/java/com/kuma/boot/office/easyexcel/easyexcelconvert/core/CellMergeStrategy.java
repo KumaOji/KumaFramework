@@ -1,32 +1,46 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.metadata.Head
- *  com.alibaba.excel.write.merge.AbstractMergeStrategy
- *  org.apache.commons.collections4.CollectionUtils
- *  org.apache.poi.ss.usermodel.Cell
- *  org.apache.poi.ss.usermodel.Sheet
- *  org.apache.poi.ss.util.CellRangeAddress
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelconvert.core;
 
 import com.alibaba.excel.metadata.Head;
 import com.alibaba.excel.write.merge.AbstractMergeStrategy;
 import com.kuma.boot.office.easyexcel.easyexcelconvert.annotation.CellMerge;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
+import java.util.Map;
 
-public class CellMergeStrategy
-extends AbstractMergeStrategy {
+/**
+ * 列值重复合并策略
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-31 20:59:45
+ */
+public class CellMergeStrategy extends AbstractMergeStrategy {
+
     private List<?> list;
     private boolean hasTitle;
 
@@ -35,86 +49,88 @@ extends AbstractMergeStrategy {
         this.hasTitle = hasTitle;
     }
 
+    @Override
     protected void merge(Sheet sheet, Cell cell, Head head, Integer relativeRowIndex) {
         List<CellRangeAddress> cellList = null;
         try {
-            cellList = CellMergeStrategy.handle(this.list, this.hasTitle);
-        }
-        catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            cellList = handle(list, hasTitle);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        if (CollectionUtils.isNotEmpty(cellList) && cell.getRowIndex() == 1 && cell.getColumnIndex() == 0) {
-            for (CellRangeAddress item : cellList) {
-                sheet.addMergedRegion(item);
+        // judge the list is not null
+        if (CollectionUtils.isNotEmpty(cellList)) {
+            // the judge is necessary
+            if (cell.getRowIndex() == 1 && cell.getColumnIndex() == 0) {
+                for (CellRangeAddress item : cellList) {
+                    sheet.addMergedRegion(item);
+                }
             }
         }
     }
 
-    private static List<CellRangeAddress> handle(List<?> list, boolean hasTitle) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        ArrayList<CellRangeAddress> cellList = new ArrayList<CellRangeAddress>();
+    private static List<CellRangeAddress> handle(List<?> list, boolean hasTitle)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        List<CellRangeAddress> cellList = new ArrayList<>();
         if (CollectionUtils.isEmpty(list)) {
             return cellList;
         }
         Class<?> clazz = list.get(0).getClass();
         Field[] fields = clazz.getDeclaredFields();
-        ArrayList<Field> mergeFields = new ArrayList<Field>();
-        ArrayList<Integer> mergeFieldsIndex = new ArrayList<Integer>();
-        for (int i = 0; i < fields.length; ++i) {
+        // 有注解的字段
+        List<Field> mergeFields = new ArrayList<>();
+        List<Integer> mergeFieldsIndex = new ArrayList<>();
+        for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
-            if (!field.isAnnotationPresent(CellMerge.class)) continue;
-            CellMerge cm = field.getAnnotation(CellMerge.class);
-            mergeFields.add(field);
-            mergeFieldsIndex.add(cm.index() == -1 ? i : cm.index());
+            if (field.isAnnotationPresent(CellMerge.class)) {
+                CellMerge cm = field.getAnnotation(CellMerge.class);
+                mergeFields.add(field);
+                mergeFieldsIndex.add(cm.index() == -1 ? i : cm.index());
+            }
         }
+        // 行合并开始下标
         int rowIndex = hasTitle ? 1 : 0;
-        HashMap<Field, RepeatCell> map = new HashMap<Field, RepeatCell>();
-        for (int i = 0; i < list.size(); ++i) {
-            for (int j = 0; j < mergeFields.size(); ++j) {
-                Field field = (Field)mergeFields.get(j);
+        Map<Field, RepeatCell> map = new HashMap<>();
+        // 生成两两合并单元格
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = 0; j < mergeFields.size(); j++) {
+                Field field = mergeFields.get(j);
                 String name = field.getName();
                 String methodName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
-                Method readMethod = clazz.getMethod(methodName, new Class[0]);
-                Object val = readMethod.invoke(list.get(i), new Object[0]);
-                int colNum = (Integer)mergeFieldsIndex.get(j);
+                Method readMethod = clazz.getMethod(methodName);
+                Object val = readMethod.invoke(list.get(i));
+
+                int colNum = mergeFieldsIndex.get(j);
                 if (!map.containsKey(field)) {
                     map.put(field, new RepeatCell(val, i));
-                    continue;
-                }
-                RepeatCell repeatCell = (RepeatCell)map.get(field);
-                Object cellValue = repeatCell.getValue();
-                if (cellValue == null || "".equals(cellValue)) continue;
-                if (cellValue != val) {
-                    if (i - repeatCell.getCurrent() > 1) {
-                        cellList.add(new CellRangeAddress(repeatCell.getCurrent() + rowIndex, i + rowIndex - 1, colNum, colNum));
+                } else {
+                    RepeatCell repeatCell = map.get(field);
+                    Object cellValue = repeatCell.getValue();
+                    if (cellValue == null || "".equals(cellValue)) {
+                        // 空值跳过不合并
+                        continue;
                     }
-                    map.put(field, new RepeatCell(val, i));
-                    continue;
+                    if (cellValue != val) {
+                        if (i - repeatCell.getCurrent() > 1) {
+                            cellList.add(new CellRangeAddress(
+                                    repeatCell.getCurrent() + rowIndex, i + rowIndex - 1, colNum, colNum));
+                        }
+                        map.put(field, new RepeatCell(val, i));
+                    } else if (i == list.size() - 1) {
+                        if (i > repeatCell.getCurrent()) {
+                            cellList.add(new CellRangeAddress(
+                                    repeatCell.getCurrent() + rowIndex, i + rowIndex, colNum, colNum));
+                        }
+                    }
                 }
-                if (i != list.size() - 1 || i <= repeatCell.getCurrent()) continue;
-                cellList.add(new CellRangeAddress(repeatCell.getCurrent() + rowIndex, i + rowIndex, colNum, colNum));
             }
         }
         return cellList;
     }
 
-    public List<?> getList() {
-        return this.list;
-    }
-
-    public void setList(List<?> list) {
-        this.list = list;
-    }
-
-    public boolean isHasTitle() {
-        return this.hasTitle;
-    }
-
-    public void setHasTitle(boolean hasTitle) {
-        this.hasTitle = hasTitle;
-    }
-
     public static class RepeatCell {
+
         private Object value;
+
         private int current;
 
         public RepeatCell(Object value, int current) {
@@ -123,7 +139,7 @@ extends AbstractMergeStrategy {
         }
 
         public Object getValue() {
-            return this.value;
+            return value;
         }
 
         public void setValue(Object value) {
@@ -131,12 +147,28 @@ extends AbstractMergeStrategy {
         }
 
         public int getCurrent() {
-            return this.current;
+            return current;
         }
 
         public void setCurrent(int current) {
             this.current = current;
         }
     }
-}
 
+    public List<?> getList() {
+
+        return list;
+    }
+
+    public void setList(List<?> list) {
+        this.list = list;
+    }
+
+    public boolean isHasTitle() {
+        return hasTitle;
+    }
+
+    public void setHasTitle(boolean hasTitle) {
+        this.hasTitle = hasTitle;
+    }
+}

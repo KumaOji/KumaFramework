@@ -1,32 +1,73 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  jakarta.servlet.http.HttpServletResponse
- */
 package com.kuma.boot.office.excelstrategy;
 
+
+
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class ExcelParam
-extends ExcelParamAbstract
-implements Serializable {
+/**
+ */
+public class ExcelParam extends ExcelParamAbstract implements Serializable {
+
     private static final long serialVersionUID = -4231868339831975335L;
+
+    /**
+     * 反射具体类
+     */
     private Class clazz;
+    /**
+     * 从第几行开始扫描
+     */
     private Integer rowNumIndex;
+    /**
+     * 读取到第几个sheet结束
+     */
     private Integer sheetIndex;
+    /**
+     * 读取指定的sheetName或写入指定的sheetName
+     */
     private String sheetName;
+    /**
+     * 存储属性和表头的对应关系
+     */
     private Map map;
+    /**
+     * keyValue
+     */
     private String keyValue;
+    /**
+     * 表头是否强一致
+     */
     private Boolean sameHeader = false;
+    /**
+     * 是否流读取
+     */
     private Boolean stream = false;
+    /**
+     * 用流代替本地文件
+     */
     private byte[] buf;
+
+    /**
+     * 表头
+     */
     private String headerName;
+
+    /**
+     * 文件导出封装数据
+     */
     private List list;
+    /**
+     *文件导出封装数据
+     */
     private Object obj;
+
+    /**
+     * 水印文字
+     */
     private String waterMark;
 
     public ExcelParam() {
@@ -44,35 +85,32 @@ implements Serializable {
         this.outFilePath = outFilePath;
         this.list = list;
     }
-
-    public ExcelParam(Class clazz, String outFilePath, List list, String headerName) {
+    public ExcelParam(Class clazz, String outFilePath, List list,String headerName) {
         this.clazz = clazz;
         this.outFilePath = outFilePath;
         this.list = list;
         this.headerName = headerName;
     }
-
     public ExcelParam(Class clazz, HttpServletResponse response, List list) {
         this.clazz = clazz;
         this.response = response;
         this.list = list;
     }
-
-    public ExcelParam(Class clazz, HttpServletResponse response, List list, String headerName) {
+    public ExcelParam(Class clazz, HttpServletResponse response,List list,String headerName) {
         this.clazz = clazz;
         this.response = response;
         this.list = list;
         this.headerName = headerName;
     }
 
-    public ExcelParam(Class clazz, String keyValue, HttpServletResponse response, List list) {
+    public ExcelParam(Class clazz, String keyValue, HttpServletResponse response,List list) {
         this.clazz = clazz;
         this.keyValue = keyValue;
         this.response = response;
         this.list = list;
     }
 
-    public ExcelParam(Class clazz, String keyValue, HttpServletResponse response, String fileName, List list) {
+    public ExcelParam(Class clazz, String keyValue, HttpServletResponse response, String fileName,List list) {
         this.clazz = clazz;
         this.keyValue = keyValue;
         this.response = response;
@@ -81,50 +119,50 @@ implements Serializable {
         this.list = list;
     }
 
-    public ExcelParam(Class clazz, String keyValue, HttpServletResponse response, String fileName, Boolean fileNameAsHeaderName, List list) {
+    public ExcelParam(Class clazz, String keyValue, HttpServletResponse response, String fileName,Boolean fileNameAsHeaderName,List list) {
         this.clazz = clazz;
         this.keyValue = keyValue;
         this.response = response;
         this.fileName = fileName;
-        if (fileNameAsHeaderName.booleanValue()) {
+        if(fileNameAsHeaderName) {
             this.headerName = fileName;
         }
         this.list = list;
     }
 
-    public ExcelParam(Class clazz, HttpServletResponse response, String fileName, List list) {
+    public ExcelParam(Class clazz, HttpServletResponse response, String fileName,List list) {
         this.clazz = clazz;
         this.response = response;
         this.fileName = fileName;
         this.list = list;
     }
-
-    public ExcelParam(Class clazz, HttpServletResponse response, String fileName, Boolean fileNameAsHeaderName, List list) {
+    public ExcelParam(Class clazz, HttpServletResponse response, String fileName,Boolean fileNameAsHeaderName,List list) {
         this.clazz = clazz;
         this.response = response;
         this.fileName = fileName;
-        if (fileNameAsHeaderName.booleanValue()) {
+        if(fileNameAsHeaderName) {
             this.headerName = fileName;
         }
         this.list = list;
     }
 
-    public ExcelParam(HttpServletResponse response, String templatePath, String outFilePath, Object obj) {
+    public ExcelParam(HttpServletResponse response, String templatePath,String outFilePath,Object obj) {
         this.response = response;
         this.filePath = templatePath;
         this.outFilePath = outFilePath;
         this.obj = obj;
     }
 
-    public ExcelParam(HttpServletResponse response, String templatePath, Object obj, String fileName) {
+    public ExcelParam(HttpServletResponse response, String templatePath,Object obj,String fileName) {
         this.response = response;
         this.filePath = templatePath;
         this.fileName = fileName;
         this.obj = obj;
     }
 
+
     public Class getClazz() {
-        return this.clazz;
+        return clazz;
     }
 
     public void setClazz(Class clazz) {
@@ -132,7 +170,7 @@ implements Serializable {
     }
 
     public Integer getRowNumIndex() {
-        return this.rowNumIndex;
+        return rowNumIndex;
     }
 
     public void setRowNumIndex(Integer rowNumIndex) {
@@ -140,7 +178,7 @@ implements Serializable {
     }
 
     public Integer getSheetIndex() {
-        return this.sheetIndex;
+        return sheetIndex;
     }
 
     public void setSheetIndex(Integer sheetIndex) {
@@ -148,7 +186,7 @@ implements Serializable {
     }
 
     public String getSheetName() {
-        return this.sheetName;
+        return sheetName;
     }
 
     public void setSheetName(String sheetName) {
@@ -156,7 +194,7 @@ implements Serializable {
     }
 
     public Map getMap() {
-        return this.map;
+        return map;
     }
 
     public void setMap(Map map) {
@@ -164,7 +202,7 @@ implements Serializable {
     }
 
     public String getKeyValue() {
-        return this.keyValue;
+        return keyValue;
     }
 
     public void setKeyValue(String keyValue) {
@@ -172,7 +210,7 @@ implements Serializable {
     }
 
     public Boolean getSameHeader() {
-        return this.sameHeader;
+        return sameHeader;
     }
 
     public void setSameHeader(Boolean sameHeader) {
@@ -180,7 +218,7 @@ implements Serializable {
     }
 
     public Boolean getStream() {
-        return this.stream;
+        return stream;
     }
 
     public void setStream(Boolean stream) {
@@ -188,7 +226,7 @@ implements Serializable {
     }
 
     public byte[] getBuf() {
-        return this.buf;
+        return buf;
     }
 
     public void setBuf(byte[] buf) {
@@ -196,23 +234,25 @@ implements Serializable {
     }
 
     public String getHeaderName() {
-        return this.headerName;
+        return headerName;
     }
 
     public void setHeaderName(String headerName) {
         this.headerName = headerName;
     }
 
+    @Override
     public List getList() {
-        return this.list;
+        return list;
     }
 
+    @Override
     public void setList(List list) {
         this.list = list;
     }
 
     public Object getObj() {
-        return this.obj;
+        return obj;
     }
 
     public void setObj(Object obj) {
@@ -220,11 +260,10 @@ implements Serializable {
     }
 
     public String getWaterMark() {
-        return this.waterMark;
+        return waterMark;
     }
 
     public void setWaterMark(String waterMark) {
         this.waterMark = waterMark;
     }
 }
-

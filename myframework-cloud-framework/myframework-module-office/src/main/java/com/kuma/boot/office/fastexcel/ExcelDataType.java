@@ -1,39 +1,68 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
  *
- * Could not load the following classes:
- *  org.springframework.core.ResolvableType
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel;
+
+import org.springframework.core.ResolvableType;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.springframework.core.ResolvableType;
 
+/**
+ * The enum Excel data type.
+ *
+ * @author livk
+ */
 public enum ExcelDataType {
-    COLLECTION(resolvableType -> resolvableType.resolveGeneric(new int[]{0}), Collection.class::isAssignableFrom),
-    MAP(resolvableType -> resolvableType.getGeneric(new int[]{1}).resolveGeneric(new int[]{0}), Map.class::isAssignableFrom);
+
+    /**
+     * Collection excel data type.
+     */
+    COLLECTION(resolvableType -> resolvableType.resolveGeneric(0), Collection.class::isAssignableFrom),
+    /**
+     * Map excel data type.
+     */
+    MAP(resolvableType -> resolvableType.getGeneric(1).resolveGeneric(0), Map.class::isAssignableFrom);
 
     private final Function<ResolvableType, Class<?>> function;
+
     private final Predicate<Class<?>> assignableFrom;
 
-    private ExcelDataType(Function<ResolvableType, Class<?>> function, Predicate<Class<?>> assignableFrom) {
+    ExcelDataType(Function<ResolvableType, Class<?>> function, Predicate<Class<?>> assignableFrom) {
         this.function = function;
         this.assignableFrom = assignableFrom;
     }
 
+    /**
+     * Match excel data type.
+     * @param type the type
+     * @return the excel data type
+     */
     public static ExcelDataType match(Class<?> type) {
-        for (ExcelDataType excelDataType : ExcelDataType.values()) {
-            if (!excelDataType.assignableFrom.test(type)) continue;
-            return excelDataType;
+        for (final ExcelDataType excelDataType : values()) {
+            if (excelDataType.assignableFrom.test(type)) {
+                return excelDataType;
+            }
         }
         throw new IllegalArgumentException();
     }
 
     public Function<ResolvableType, Class<?>> getFunction() {
-        return this.function;
+        return function;
     }
 }
-

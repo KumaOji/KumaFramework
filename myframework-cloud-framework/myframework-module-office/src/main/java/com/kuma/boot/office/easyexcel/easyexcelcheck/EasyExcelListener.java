@@ -1,14 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.annotation.ExcelProperty
- *  com.alibaba.excel.context.AnalysisContext
- *  com.alibaba.excel.event.AnalysisEventListener
- *  com.alibaba.excel.exception.ExcelAnalysisException
- *  com.alibaba.excel.util.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelcheck;
 
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -24,13 +29,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+public class EasyExcelListener<T> extends AnalysisEventListener<T> {
 
-public class EasyExcelListener<T>
-extends AnalysisEventListener<T> {
-    private List<T> successList = new ArrayList<T>();
-    private List<ExcelCheckErrDto<T>> errList = new ArrayList<ExcelCheckErrDto<T>>();
+    // 成功结果集
+    private List<T> successList = new ArrayList<>();
+
+    // 失败结果集
+    private List<ExcelCheckErrDto<T>> errList = new ArrayList<>();
+
+    // 处理逻辑service
     private ExcelCheckManager<T> excelCheckManager;
-    private List<T> list = new ArrayList<T>();
+
+    private List<T> list = new ArrayList<>();
+
+    // excel对象的反射类
     private Class<T> clazz;
 
     public EasyExcelListener(ExcelCheckManager<T> excelCheckManager) {
@@ -42,77 +54,97 @@ extends AnalysisEventListener<T> {
         this.clazz = clazz;
     }
 
+    @Override
     public void invoke(T t, AnalysisContext analysisContext) {
         String errMsg;
         try {
+            // 根据excel数据实体中的jakarta.validation + 正则表达式来校验excel数据
             errMsg = EasyExcelValiHelper.validateEntity(t);
+        } catch (NoSuchFieldException e) {
+            errMsg = "解析数据出错";
+            LogUtils.error(e);
         }
-        catch (NoSuchFieldException e) {
-            errMsg = "\u89e3\u6790\u6570\u636e\u51fa\u9519";
-            LogUtils.error((Throwable)e);
-        }
-        if (!StringUtils.isEmpty((CharSequence)errMsg)) {
-            ExcelCheckErrDto<T> excelCheckErrDto = new ExcelCheckErrDto<T>(t, errMsg);
-            this.errList.add(excelCheckErrDto);
+        if (!StringUtils.isEmpty(errMsg)) {
+            ExcelCheckErrDto excelCheckErrDto = new ExcelCheckErrDto(t, errMsg);
+            errList.add(excelCheckErrDto);
         } else {
-            this.list.add(t);
+            list.add(t);
         }
-        if (this.list.size() > 1000) {
-            ExcelCheckResult result = this.excelCheckManager.checkImportExcel(this.list);
-            this.successList.addAll(result.getSuccessDtos());
-            this.errList.addAll(result.getErrDtos());
-            this.list.clear();
+        // 每1000条处理一次
+        if (list.size() > 1000) {
+            // 校验
+            ExcelCheckResult result = excelCheckManager.checkImportExcel(list);
+            successList.addAll(result.getSuccessDtos());
+            errList.addAll(result.getErrDtos());
+            list.clear();
         }
     }
 
+    // 所有数据解析完成了 都会来调用
+    @Override
     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-        ExcelCheckResult result = this.excelCheckManager.checkImportExcel(this.list);
-        this.successList.addAll(result.getSuccessDtos());
-        this.errList.addAll(result.getErrDtos());
-        this.list.clear();
+        ExcelCheckResult result = excelCheckManager.checkImportExcel(list);
+
+        successList.addAll(result.getSuccessDtos());
+        errList.addAll(result.getErrDtos());
+        list.clear();
     }
 
+    /**
+     * @param headMap 传入excel的头部（第一行数据）数据的index,name
+     * @param context context
+     */
+    @Override
     public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
         super.invokeHeadMap(headMap, context);
-        if (this.clazz != null) {
+        if (clazz != null) {
             try {
-                Map<Integer, String> indexNameMap = this.getIndexNameMap(this.clazz);
+                Map<Integer, String> indexNameMap = getIndexNameMap(clazz);
                 Set<Integer> keySet = indexNameMap.keySet();
                 for (Integer key : keySet) {
-                    if (StringUtils.isEmpty((CharSequence)headMap.get(key))) {
-                        throw new ExcelAnalysisException("\u89e3\u6790excel\u51fa\u9519\uff0c\u8bf7\u4f20\u5165\u6b63\u786e\u683c\u5f0f\u7684excel");
+                    if (StringUtils.isEmpty(headMap.get(key))) {
+                        throw new ExcelAnalysisException("解析excel出错，请传入正确格式的excel");
                     }
-                    if (headMap.get(key).equals(indexNameMap.get(key))) continue;
-                    throw new ExcelAnalysisException("\u89e3\u6790excel\u51fa\u9519\uff0c\u8bf7\u4f20\u5165\u6b63\u786e\u683c\u5f0f\u7684excel");
+                    if (!headMap.get(key).equals(indexNameMap.get(key))) {
+                        throw new ExcelAnalysisException("解析excel出错，请传入正确格式的excel");
+                    }
                 }
-            }
-            catch (NoSuchFieldException e) {
-                LogUtils.error((Throwable)e);
+
+            } catch (NoSuchFieldException e) {
+                LogUtils.error(e);
             }
         }
     }
 
+    /**
+     * @param clazz
+     * @return java.util.Map<java.lang.Integer, java.lang.String>
+     * @throws : 获取注解里ExcelProperty的value，用作校验excel
+     */
+    @SuppressWarnings("rawtypes")
     public Map<Integer, String> getIndexNameMap(Class clazz) throws NoSuchFieldException {
-        HashMap<Integer, String> result = new HashMap<Integer, String>();
+        Map<Integer, String> result = new HashMap<>();
+        Field field;
         Field[] fields = clazz.getDeclaredFields();
-        for (int i = 0; i < fields.length; ++i) {
-            Field field = clazz.getDeclaredField(fields[i].getName());
+        for (int i = 0; i < fields.length; i++) {
+            field = clazz.getDeclaredField(fields[i].getName());
             field.setAccessible(true);
             ExcelProperty excelProperty = field.getAnnotation(ExcelProperty.class);
-            if (excelProperty == null) continue;
-            int index = excelProperty.index();
-            String[] values = excelProperty.value();
-            StringBuilder value = new StringBuilder();
-            for (String v : values) {
-                value.append(v);
+            if (excelProperty != null) {
+                int index = excelProperty.index();
+                String[] values = excelProperty.value();
+                StringBuilder value = new StringBuilder();
+                for (String v : values) {
+                    value.append(v);
+                }
+                result.put(index, value.toString());
             }
-            result.put(index, value.toString());
         }
         return result;
     }
 
     public List<T> getSuccessList() {
-        return this.successList;
+        return successList;
     }
 
     public void setSuccessList(List<T> successList) {
@@ -120,7 +152,7 @@ extends AnalysisEventListener<T> {
     }
 
     public List<ExcelCheckErrDto<T>> getErrList() {
-        return this.errList;
+        return errList;
     }
 
     public void setErrList(List<ExcelCheckErrDto<T>> errList) {
@@ -128,7 +160,7 @@ extends AnalysisEventListener<T> {
     }
 
     public ExcelCheckManager<T> getExcelCheckManager() {
-        return this.excelCheckManager;
+        return excelCheckManager;
     }
 
     public void setExcelCheckManager(ExcelCheckManager<T> excelCheckManager) {
@@ -136,7 +168,7 @@ extends AnalysisEventListener<T> {
     }
 
     public List<T> getList() {
-        return this.list;
+        return list;
     }
 
     public void setList(List<T> list) {
@@ -144,11 +176,10 @@ extends AnalysisEventListener<T> {
     }
 
     public Class<T> getClazz() {
-        return this.clazz;
+        return clazz;
     }
 
     public void setClazz(Class<T> clazz) {
         this.clazz = clazz;
     }
 }
-

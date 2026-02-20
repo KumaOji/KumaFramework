@@ -1,76 +1,105 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.spire.doc.Document
- *  com.spire.doc.FileFormat
- *  com.spire.pdf.FileFormat
- *  com.spire.pdf.PdfDocument
- *  com.spire.pdf.widget.PdfPageCollection
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.convert.pdf2word;
 
 import com.spire.doc.Document;
-import com.spire.doc.FileFormat;
+import com.spire.pdf.FileFormat;
 import com.spire.pdf.PdfDocument;
 import com.spire.pdf.widget.PdfPageCollection;
 import com.kuma.boot.common.utils.log.LogUtils;
+
 import java.io.File;
 
+/**
+ * Pdf 转 Word 工具类
+ *
+ * @since 2021/1/28 9:33
+ */
 public class Pdf2WordUtil {
+
+    // 涉及到的路径
+    // 1、pdf所在的路径，真实测试种是从外部引入的
+
+    /** 2、如果是大文件，需要进行切分，保存的子pdf路径 */
     String splitPath = "./split/";
+
+    /** 3、如果是大文件，需要对子pdf文件一个一个进行转化 */
     String docPath = "./doc/";
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public void pdf2Word(String srcPath, String desPath) {
+        // 4、desPath:最终生成的doc所在的目录，默认是和引入的一个地方，开源时对外提供下载的接口。
         boolean result = false;
         try {
-            boolean flag = this.isPDFFile(srcPath);
-            boolean flag1 = this.create();
+            // 0、判断输入的是否是pdf文件
+            // 第一步：判断输入的是否合法
+            boolean flag = isPDFFile(srcPath);
+            // 第二步：在输入的路径下新建文件夹
+            boolean flag1 = create();
+
             if (flag && flag1) {
+                // 1、加载pdf
                 PdfDocument pdf = new PdfDocument();
                 pdf.loadFromFile(srcPath);
                 PdfPageCollection num = pdf.getPages();
+
+                // 2、如果pdf的页数小于11，那么直接进行转化
                 if (num.getCount() <= 10) {
-                    pdf.saveToFile(desPath, com.spire.pdf.FileFormat.DOCX);
-                } else {
-                    File[] fs;
-                    pdf.split(this.splitPath + "test{0}.pdf", 0);
-                    for (File f : fs = this.getSplitFiles(this.splitPath)) {
+                    pdf.saveToFile(desPath, FileFormat.DOCX);
+                }
+                // 3、否则输入的页数比较多，就开始进行切分再转化
+                else {
+                    // 第一步：将其进行切分,每页一张pdf
+                    pdf.split(splitPath + "test{0}.pdf", 0);
+
+                    // 第二步：将切分的pdf，一个一个进行转换
+                    File[] fs = getSplitFiles(splitPath);
+                    for (File f : fs) {
                         PdfDocument sonpdf = new PdfDocument();
                         sonpdf.loadFromFile(f.getAbsolutePath());
-                        sonpdf.saveToFile(this.docPath + f.getName().substring(0, f.getName().length() - 4) + ".docx", com.spire.pdf.FileFormat.DOCX);
+                        sonpdf.saveToFile(
+                                docPath + f.getName().substring(0, f.getName().length() - 4) + ".docx",
+                                FileFormat.DOCX);
                     }
+                    // 第三步：对转化的doc文档进行合并，合并成一个大的word
                     try {
-                        result = this.merge(this.docPath, desPath);
-                        LogUtils.debug((String)String.valueOf(result), (Object[])new Object[0]);
-                    }
-                    catch (Exception e) {
-                        LogUtils.error((Throwable)e);
+                        result = this.merge(docPath, desPath);
+                        LogUtils.debug(String.valueOf(result));
+                    } catch (Exception e) {
+                        LogUtils.error(e);
                     }
                 }
             } else {
-                LogUtils.debug((String)"\u8f93\u5165\u7684\u4e0d\u662fpdf\u6587\u4ef6", (Object[])new Object[0]);
+                LogUtils.debug("输入的不是pdf文件");
             }
-        }
-        catch (Exception e) {
-            LogUtils.error((Throwable)e);
-        }
-        finally {
+        } catch (Exception e) {
+            LogUtils.error(e);
+        } finally {
+            // 4、把刚刚缓存的split和doc删除
             if (result) {
-                this.clearFiles(this.splitPath);
-                this.clearFiles(this.docPath);
+                this.clearFiles(splitPath);
+                this.clearFiles(docPath);
             }
         }
-        LogUtils.debug((String)"\u8f6c\u6362\u6210\u529f", (Object[])new Object[0]);
+        LogUtils.debug("转换成功");
     }
 
     private boolean create() {
-        File f = new File(this.splitPath);
-        File f1 = new File(this.docPath);
+        File f = new File(splitPath);
+        File f1 = new File(docPath);
         if (!f.exists()) {
             f.mkdirs();
         }
@@ -80,12 +109,17 @@ public class Pdf2WordUtil {
         return true;
     }
 
+    /** 判断是否是pdf文件 */
     private boolean isPDFFile(String srcPath2) {
         File file = new File(srcPath2);
         String filename = file.getName();
-        return filename.endsWith(".pdf");
+        if (filename.endsWith(".pdf")) {
+            return true;
+        }
+        return false;
     }
 
+    /** 取得某一路径下所有的pdf */
     private File[] getSplitFiles(String path) {
         File f = new File(path);
         File[] fs = f.listFiles();
@@ -98,15 +132,15 @@ public class Pdf2WordUtil {
     public void clearFiles(String workspaceRootPath) {
         File file = new File(workspaceRootPath);
         if (file.exists()) {
-            this.deleteFile(file);
+            deleteFile(file);
         }
     }
 
     public void deleteFile(File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
-            for (int i = 0; i < files.length; ++i) {
-                this.deleteFile(files[i]);
+            for (int i = 0; i < files.length; i++) {
+                deleteFile(files[i]);
             }
         }
         file.delete();
@@ -114,18 +148,20 @@ public class Pdf2WordUtil {
 
     private boolean merge(String docPath, String desPath) {
         File[] fs = this.getSplitFileList(docPath);
-        LogUtils.info((String)docPath, (Object[])new Object[0]);
+        LogUtils.info(docPath);
         Document document = new Document(docPath + "test0.docx");
-        for (int i = 1; i < fs.length; ++i) {
-            document.insertTextFromFile(docPath + "test" + i + ".docx", FileFormat.Docx_2013);
+
+        for (int i = 1; i < fs.length; i++) {
+            document.insertTextFromFile(docPath + "test" + i + ".docx", com.spire.doc.FileFormat.Docx_2013);
         }
+        // 第四步：对合并的doc进行保存2
         document.saveToFile(desPath);
         return true;
     }
 
+    /** 取得某一路径下所有的pdf */
     private File[] getSplitFileList(String path) {
         File f = new File(path);
         return f.listFiles();
     }
 }
-

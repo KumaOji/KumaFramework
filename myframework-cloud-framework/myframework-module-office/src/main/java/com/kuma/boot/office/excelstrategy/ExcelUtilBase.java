@@ -1,43 +1,32 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.servlet.ServletOutputStream
- *  org.apache.commons.lang3.StringUtils
- *  org.apache.poi.ooxml.POIXMLDocumentPart
- *  org.apache.poi.openxml4j.opc.PackagePartName
- *  org.apache.poi.openxml4j.opc.PackageRelationship
- *  org.apache.poi.openxml4j.opc.TargetMode
- *  org.apache.poi.ss.formula.functions.T
- *  org.apache.poi.ss.usermodel.Cell
- *  org.apache.poi.ss.usermodel.CellStyle
- *  org.apache.poi.ss.usermodel.CellType
- *  org.apache.poi.ss.usermodel.DateUtil
- *  org.apache.poi.ss.usermodel.HorizontalAlignment
- *  org.apache.poi.ss.usermodel.Row
- *  org.apache.poi.ss.usermodel.Sheet
- *  org.apache.poi.ss.usermodel.Workbook
- *  org.apache.poi.ss.usermodel.WorkbookFactory
- *  org.apache.poi.ss.util.CellAddress
- *  org.apache.poi.ss.util.CellRangeAddress
- *  org.apache.poi.xssf.usermodel.XSSFCellStyle
- *  org.apache.poi.xssf.usermodel.XSSFRelation
- *  org.apache.poi.xssf.usermodel.XSSFRow
- *  org.apache.poi.xssf.usermodel.XSSFSheet
- *  org.apache.poi.xssf.usermodel.XSSFWorkbook
- *  org.springframework.beans.BeanUtils
- */
 package com.kuma.boot.office.excelstrategy;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.office.excelstrategy.strategy.Context;
 import com.kuma.boot.office.excelstrategy.strategy.ExcelVersionStrategy;
-import jakarta.servlet.ServletOutputStream;
+import com.kuma.boot.common.utils.lang.StringUtils;
+import org.apache.poi.ooxml.POIXMLDocumentPart;
+import org.apache.poi.openxml4j.opc.PackagePartName;
+import org.apache.poi.openxml4j.opc.PackageRelationship;
+import org.apache.poi.openxml4j.opc.TargetMode;
+import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFRelation;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.BeanUtils;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -61,36 +50,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
-import javax.imageio.ImageIO;
-import org.apache.poi.ooxml.POIXMLDocumentPart;
-import org.apache.poi.openxml4j.opc.PackagePartName;
-import org.apache.poi.openxml4j.opc.PackageRelationship;
-import org.apache.poi.openxml4j.opc.TargetMode;
-import org.apache.poi.ss.formula.functions.T;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRelation;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.BeanUtils;
 
+import static org.apache.commons.lang3.StringUtils.remove;
+
+/**
+ *
+ */
 public class ExcelUtilBase {
+    /**
+     * @param keyValue
+     * @return java.util.Map<java.lang.String, java.lang.String>
+     * @Function 把传进指定格式的字符串解析到Map中
+     * @author likaixuan
+     * @since 2019-07-05 15:09
+     */
     public static Map<String, String> getMap(String keyValue) {
-        HashMap<String, String> map = new HashMap<String, String>(20);
+
+        Map<String, String> map = new HashMap<String, String>(20);
         if (keyValue != null) {
-            String[] str;
-            for (String element : str = keyValue.split(",")) {
+            String[] str = keyValue.split(",");
+            for (String element : str) {
                 String[] str2 = element.split(":");
                 map.put(str2[0], str2[1]);
             }
@@ -98,17 +77,25 @@ public class ExcelUtilBase {
         return map;
     }
 
+    /**
+     * @param clazz
+     * @return java.util.Map<java.lang.String, java.lang.String>
+     * @Function 把传进指定格式的字符串解析到Map中
+     * @author likaixuan
+     * @since 2019-07-05 15:09
+     */
     public static Map<String, String> getMap(Class<T> clazz) throws NoSuchFieldException {
-        int i;
-        HashMap<String, String> map = new HashMap<String, String>(20);
-        HashMap<String, String> noExcelMap = new HashMap<String, String>(20);
+
+        Map<String, String> map = new HashMap<String, String>(20);
+        Map<String, String> noExcelMap = new HashMap<String, String>(20);
+        Field field;
         Field[] fields = clazz.getDeclaredFields();
-        for (i = 0; i < fields.length; ++i) {
+        for (int i = 0; i < fields.length; i++) {
             fields[i].setAccessible(true);
         }
-        for (i = 0; i < fields.length; ++i) {
-            Field field = clazz.getDeclaredField(fields[i].getName());
-            Excel column = field.getAnnotation(Excel.class);
+        for (int i = 0; i < fields.length; i++) {
+            field = clazz.getDeclaredField(fields[i].getName());
+            com.kuma.boot.office.excelstrategy.Excel column = field.getAnnotation(com.kuma.boot.office.excelstrategy.Excel.class);
             if (column != null) {
                 map.put(column.title(), field.getName());
             }
@@ -120,27 +107,42 @@ public class ExcelUtilBase {
         return noExcelMap;
     }
 
+    /**
+     * @param obj
+     * @return
+     * @throws NoSuchFieldException
+     */
     public static Map<String, Object> getMap(Object obj) {
-        HashMap<String, Object> map = new HashMap<String, Object>(20);
+
+        Map<String, Object> map = new HashMap(20);
         Field[] fields = obj.getClass().getDeclaredFields();
-        for (int j = 0; j < fields.length; ++j) {
+
+        for (int j = 0; j < fields.length; j++) {
             fields[j].setAccessible(true);
+            // 字段值
             try {
                 map.put(fields[j].getName(), fields[j].get(obj));
-                continue;
-            }
-            catch (Exception e) {
-                System.out.println("\u5b57\u6bb5[" + fields[j].getName() + "]\u89e3\u6790\u5f02\u5e38");
+            } catch (Exception e) {
+                System.out.println("字段[" + fields[j].getName() + "]解析异常");
             }
         }
         return map;
     }
 
+    /**
+     * @param keyValue
+     * @return java.util.List<java.lang.String>
+     * @Function 把传进指定格式的字符串解析到List中
+     * @author likaixuan
+     * @since 2019-07-05 15:08
+     */
     public static List<String> getList(String keyValue) {
-        ArrayList<String> list = new ArrayList<String>();
+
+        List<String> list = new ArrayList<String>();
         if (keyValue != null) {
-            String[] str;
-            for (String element : str = keyValue.split(",")) {
+            String[] str = keyValue.split(",");
+
+            for (String element : str) {
                 String[] str2 = element.split(":");
                 list.add(str2[0]);
             }
@@ -148,17 +150,25 @@ public class ExcelUtilBase {
         return list;
     }
 
+    /**
+     * @param clazz
+     * @return java.util.List<java.lang.String>
+     * @Function 把传进指定格式的字符串解析到List中
+     * @author likaixuan
+     * @since 2019-07-05 15:08
+     */
     public static List<String> getList(Class<T> clazz) throws NoSuchFieldException {
-        int i;
-        ArrayList<String> list = new ArrayList<String>();
-        ArrayList<String> noExcellist = new ArrayList<String>();
+
+        List<String> list = new ArrayList<String>();
+        List<String> noExcellist = new ArrayList<String>();
+        Field field;
         Field[] fields = clazz.getDeclaredFields();
-        for (i = 0; i < fields.length; ++i) {
+        for (int i = 0; i < fields.length; i++) {
             fields[i].setAccessible(true);
         }
-        for (i = 0; i < fields.length; ++i) {
-            Field field = clazz.getDeclaredField(fields[i].getName());
-            Excel column = field.getAnnotation(Excel.class);
+        for (int i = 0; i < fields.length; i++) {
+            field = clazz.getDeclaredField(fields[i].getName());
+            com.kuma.boot.office.excelstrategy.Excel column = field.getAnnotation(com.kuma.boot.office.excelstrategy.Excel.class);
             if (column != null) {
                 list.add(column.title());
             }
@@ -170,110 +180,158 @@ public class ExcelUtilBase {
         return noExcellist;
     }
 
-    public static List getResult(ExcelParam excelParam) throws Exception {
+    public static List getResult(com.kuma.boot.office.excelstrategy.ExcelParam excelParam) throws Exception {
         Set keySet = null;
+        //新加入了注解，如果map为空，则自动从class中的注解自动查找
         if (excelParam.getMap() == null || excelParam.getMap().size() == 0) {
-            excelParam.setMap(ExcelUtilBase.getMap(excelParam.getClazz()));
+            excelParam.setMap(getMap(excelParam.getClazz()));
             keySet = excelParam.getMap().keySet();
         } else {
+            // 返回键的集合
             keySet = excelParam.getMap().keySet();
         }
-        ArrayList list = new ArrayList();
+        List<Object> list = new ArrayList();
         String fileType = "";
         InputStream is = null;
         Workbook wb = null;
-        if (excelParam.getStream().booleanValue()) {
+        if (excelParam.getStream()) {
             is = new ByteArrayInputStream(excelParam.getBuf());
-            wb = WorkbookFactory.create((InputStream)is);
+            wb = WorkbookFactory.create(is);
         } else {
             fileType = excelParam.getFilePath().substring(excelParam.getFilePath().lastIndexOf(".") + 1, excelParam.getFilePath().length());
             is = new FileInputStream(excelParam.getFilePath());
             Context context = new Context(new ExcelVersionStrategy());
             wb = context.executeStrategy(fileType, is, wb);
         }
+
+
         int startSheetNum = 0;
         int endSheetNum = 1;
         if (null != excelParam.getSheetIndex()) {
             startSheetNum = excelParam.getSheetIndex() - 1;
             endSheetNum = excelParam.getSheetIndex();
         }
-        for (int sheetNum = startSheetNum; sheetNum < endSheetNum; ++sheetNum) {
+
+
+        // 获取每个Sheet表
+        for (int sheetNum = startSheetNum; sheetNum < endSheetNum; sheetNum++) {
+            // 记录第x行为表头
             int rowNum_x = -1;
-            HashMap<String, Integer> cellmap = new HashMap<String, Integer>(20);
-            ArrayList<String> headlist = new ArrayList<String>();
+            // 存放每一个field字段对应所在的列的序号
+            Map<String, Integer> cellmap = new HashMap<String, Integer>(20);
+            // 存放所有的表头字段信息
+            List<String> headlist = new ArrayList();
+
             Sheet hssfSheet = wb.getSheetAt(sheetNum);
-            if (hssfSheet.getNumMergedRegions() > 0) {
+
+            //判断表中是否含有合并单元格-为了忽略导出时候带的表头
+            if (hssfSheet.getNumMergedRegions() > 0 ? true : false) {
                 excelParam.setRowNumIndex(2);
             }
+            // 设置默认最大行为50w行
             if (hssfSheet != null && hssfSheet.getLastRowNum() > 500000) {
-                throw new Exception("Excel \u6570\u636e\u8d85\u8fc750w\u884c,\u8bf7\u68c0\u67e5\u662f\u5426\u6709\u7a7a\u884c,\u6216\u5206\u6279\u5bfc\u5165");
+                throw new Exception("Excel 数据超过50w行,请检查是否有空行,或分批导入");
             }
-            for (int rowNum = 0; rowNum <= hssfSheet.getLastRowNum(); ++rowNum) {
-                int i;
-                Row hssfRow;
-                if (excelParam.getRowNumIndex() != null && rowNum_x == -1 && (hssfRow = hssfSheet.getRow(rowNum = excelParam.getRowNumIndex() - 1)) == null) {
-                    throw new RuntimeException("\u6307\u5b9a\u7684\u884c\u4e3a\u7a7a\uff0c\u8bf7\u68c0\u67e5");
+
+            // 循环行Row
+            for (int rowNum = 0; rowNum <= hssfSheet.getLastRowNum(); rowNum++) {
+                // 如果传值指定从第几行开始读，就从指定行寻找，否则自动寻找
+                if (excelParam.getRowNumIndex() != null && rowNum_x == -1) {
+                    rowNum = excelParam.getRowNumIndex() - 1;
+                    Row hssfRow = hssfSheet.getRow(rowNum);
+                    if (hssfRow == null) {
+                        throw new RuntimeException("指定的行为空，请检查");
+                    }
                 }
-                hssfRow = hssfSheet.getRow(rowNum);
-                if (hssfRow == null) continue;
-                boolean flag = false;
-                for (i = 0; i < hssfRow.getLastCellNum(); ++i) {
-                    if (hssfRow.getCell(i) == null || "".equals(hssfRow.getCell(i).toString().trim())) continue;
-                    flag = true;
-                }
-                if (!flag) continue;
-                if (rowNum_x == -1) {
-                    for (int cellNum = 0; cellNum <= hssfRow.getLastCellNum(); ++cellNum) {
-                        Cell hssfCell = hssfRow.getCell(cellNum);
-                        if (hssfCell == null) continue;
-                        String tempCellValue = hssfSheet.getRow(rowNum).getCell(cellNum).getStringCellValue();
-                        tempCellValue = org.apache.commons.lang3.StringUtils.remove((String)tempCellValue, (char)'\u00a0');
-                        tempCellValue = tempCellValue.trim();
-                        headlist.add(tempCellValue);
-                        for (Object key : keySet) {
-                            if (!StringUtils.isNotBlank((String)tempCellValue) || !StringUtils.equals((CharSequence)tempCellValue, (CharSequence)key.toString())) continue;
-                            rowNum_x = rowNum;
-                            cellmap.put(excelParam.getMap().get(key).toString(), cellNum);
-                        }
-                    }
-                    if (rowNum_x == -1) {
-                        throw new Exception("\u6ca1\u6709\u627e\u5230\u5bf9\u5e94\u7684\u5b57\u6bb5\u6216\u8005\u5bf9\u5e94\u5b57\u6bb5\u884c\u4e0a\u9762\u542b\u6709\u4e0d\u4e3a\u7a7a\u767d\u7684\u884c\u5b57\u6bb5");
-                    }
-                    if (!excelParam.getSameHeader().booleanValue()) continue;
-                    for (i = 0; i < headlist.size(); ++i) {
-                        boolean boo = false;
-                        Iterator itor = keySet.iterator();
-                        while (itor.hasNext()) {
-                            String tempname = itor.next().toString();
-                            if (!tempname.equals(headlist.get(i))) continue;
-                            boo = true;
-                        }
-                        if (boo) continue;
-                        throw new Exception("\u8868\u5934\u5b57\u6bb5\u548c\u5b9a\u4e49\u7684\u5c5e\u6027\u5b57\u6bb5\u4e0d\u5339\u914d\uff0c\u8bf7\u68c0\u67e5");
-                    }
-                    Iterator itor = keySet.iterator();
-                    while (itor.hasNext()) {
-                        boolean boo = false;
-                        String tempname = itor.next().toString();
-                        for (int i2 = 0; i2 < headlist.size(); ++i2) {
-                            if (!tempname.equals(headlist.get(i2))) continue;
-                            boo = true;
-                        }
-                        if (boo) continue;
-                        throw new Exception("\u8868\u5934\u5b57\u6bb5\u548c\u5b9a\u4e49\u7684\u5c5e\u6027\u5b57\u6bb5\u4e0d\u5339\u914d\uff0c\u8bf7\u68c0\u67e5");
-                    }
+                Row hssfRow = hssfSheet.getRow(rowNum);
+                if (hssfRow == null) {
                     continue;
                 }
-                Object obj = excelParam.getClazz().newInstance();
-                for (Object key : keySet) {
-                    Integer cellNum_x = (Integer)cellmap.get(excelParam.getMap().get(key).toString());
-                    if (cellNum_x == null || hssfRow.getCell(cellNum_x.intValue()) == null) continue;
-                    String attr = excelParam.getMap().get(key).toString();
-                    Class attrType = BeanUtils.findPropertyType((String)attr, (Class[])new Class[]{obj.getClass()});
-                    Cell cell = hssfRow.getCell(cellNum_x.intValue());
-                    ExcelUtilBase.getValue(cell, obj, attr, attrType, rowNum, cellNum_x, key);
+                boolean flag = false;
+                for (int i = 0; i < hssfRow.getLastCellNum(); i++) {
+                    if (hssfRow.getCell(i) != null && !("").equals(hssfRow.getCell(i).toString().trim())) {
+                        flag = true;
+                    }
                 }
-                list.add(obj);
+                if (!flag) {
+                    continue;
+                }
+                if (rowNum_x == -1) {
+                    // 循环列Cell
+                    for (int cellNum = 0; cellNum <= hssfRow.getLastCellNum(); cellNum++) {
+
+                        Cell hssfCell = hssfRow.getCell(cellNum);
+                        if (hssfCell == null) {
+                            continue;
+                        }
+                        String tempCellValue = hssfSheet.getRow(rowNum).getCell(cellNum).getStringCellValue();
+                        tempCellValue = remove(tempCellValue, (char) 160);
+                        tempCellValue = tempCellValue.trim();
+
+                        headlist.add(tempCellValue);
+
+                        Iterator it = keySet.iterator();
+
+                        while (it.hasNext()) {
+                            Object key = it.next();
+                            if (StringUtils.isNotBlank(tempCellValue)
+                                    && StringUtils.equals(tempCellValue, key.toString())) {
+                                rowNum_x = rowNum;
+                                cellmap.put(excelParam.getMap().get(key).toString(), cellNum);
+                            }
+                        }
+
+                    }
+                    if (rowNum_x == -1) {
+                        throw new Exception("没有找到对应的字段或者对应字段行上面含有不为空白的行字段");
+                    }
+                    if (excelParam.getSameHeader()) {
+                        // 读取到列后，检查表头是否完全一致--start
+                        for (int i = 0; i < headlist.size(); i++) {
+                            boolean boo = false;
+                            Iterator itor = keySet.iterator();
+                            while (itor.hasNext()) {
+                                String tempname = itor.next().toString();
+                                if (tempname.equals(headlist.get(i))) {
+                                    boo = true;
+                                }
+                            }
+                            if (boo == false) {
+                                throw new Exception("表头字段和定义的属性字段不匹配，请检查");
+                            }
+                        }
+                        Iterator itor = keySet.iterator();
+                        while (itor.hasNext()) {
+                            boolean boo = false;
+                            String tempname = itor.next().toString();
+                            for (int i = 0; i < headlist.size(); i++) {
+                                if (tempname.equals(headlist.get(i))) {
+                                    boo = true;
+                                }
+                            }
+                            if (boo == false) {
+                                throw new Exception("表头字段和定义的属性字段不匹配，请检查");
+                            }
+                        }
+                        // 读取到列后，检查表头是否完全一致--end
+                    }
+                } else {
+                    Object obj = excelParam.getClazz().newInstance();
+                    Iterator it = keySet.iterator();
+                    while (it.hasNext()) {
+                        Object key = it.next();
+                        Integer cellNum_x = cellmap.get(excelParam.getMap().get(key).toString());
+                        if (cellNum_x == null || hssfRow.getCell(cellNum_x) == null) {
+                            continue;
+                        }
+                        // 得到属性
+                        String attr = excelParam.getMap().get(key).toString();
+                        Class<?> attrType = BeanUtils.findPropertyType(attr, new Class[]{obj.getClass()});
+                        Cell cell = hssfRow.getCell(cellNum_x);
+                        getValue(cell, obj, attr, attrType, rowNum, cellNum_x, key);
+                    }
+                    list.add(obj);
+                }
             }
         }
         is.close();
@@ -281,349 +339,422 @@ public class ExcelUtilBase {
     }
 
     public static void addWaterMark(XSSFWorkbook wb, XSSFSheet sheet, String waterMark) {
-        if (StringUtils.isNotEmpty((CharSequence)waterMark)) {
-            FontImage.Watermark watermark = new FontImage.Watermark();
+        //是否添加水印
+        if (StringUtils.isNotEmpty(waterMark)) {
+
+            com.kuma.boot.office.excelstrategy.FontImage.Watermark watermark = new com.kuma.boot.office.excelstrategy.FontImage.Watermark();
             watermark.setText(waterMark);
             watermark.setEnable(true);
             BufferedImage image = FontImage.createWatermarkImage(watermark);
+            // 导出到字节流B
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
-                ImageIO.write((RenderedImage)image, "png", os);
+                ImageIO.write(image, "png", os);
+            } catch (IOException e) {
+                LogUtils.error(e);
+                System.out.println("添加水印失败");
             }
-            catch (IOException e) {
-                LogUtils.error((Throwable)e);
-                System.out.println("\u6dfb\u52a0\u6c34\u5370\u5931\u8d25");
-            }
-            int pictureIdx = wb.addPicture(os.toByteArray(), 6);
-            POIXMLDocumentPart poixmlDocumentPart = (POIXMLDocumentPart)wb.getAllPictures().get(pictureIdx);
+
+            int pictureIdx = wb.addPicture(os.toByteArray(), Workbook.PICTURE_TYPE_PNG);
+            POIXMLDocumentPart poixmlDocumentPart = wb.getAllPictures().get(pictureIdx);
+
             PackagePartName ppn = poixmlDocumentPart.getPackagePart().getPartName();
             String relType = XSSFRelation.IMAGES.getRelation();
+            //add relation from sheet to the picture data
             PackageRelationship pr = sheet.getPackagePart().addRelationship(ppn, TargetMode.INTERNAL, relType, null);
+            //set background picture to sheet
             sheet.getCTWorksheet().addNewPicture().setId(pr.getId());
         }
     }
 
-    public static void commonExportExcel(ExcelParam excelParam) throws Exception {
-        int i;
-        XSSFRow rowHeader;
-        Map<String, String> map = ExcelUtilBase.getMap(excelParam.getClazz());
+    public static void commonExportExcel(com.kuma.boot.office.excelstrategy.ExcelParam excelParam) throws Exception {
+
+        Map<String, String> map = getMap(excelParam.getClazz());
         List<String> keyList = null;
-        keyList = StringUtils.isEmpty((String)excelParam.getKeyValue()) ? ExcelUtilBase.getList(excelParam.getClazz()) : ExcelUtilBase.getList(excelParam.getKeyValue());
-        Object obj = excelParam.getClazz().newInstance();
-        XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFSheet sheet = wb.createSheet("sheet1");
-        if (StringUtils.isNotEmpty((CharSequence)excelParam.getWaterMark())) {
-            ExcelUtilBase.addWaterMark(wb, sheet, excelParam.getWaterMark());
+        if (StringUtils.isEmpty(excelParam.getKeyValue())) {
+            keyList = getList(excelParam.getClazz());
+        } else {
+            keyList = getList(excelParam.getKeyValue());
         }
-        XSSFCellStyle headerStyle = wb.createCellStyle();
+        Object obj = excelParam.getClazz().newInstance();
+        // 创建HSSFWorkbook对象(excel的文档对象)
+        XSSFWorkbook wb = new XSSFWorkbook();
+        // 建立新的sheet对象（excel的表单）
+        XSSFSheet sheet = wb.createSheet("sheet1");
+
+        //添加水印
+        if (StringUtils.isNotEmpty(excelParam.getWaterMark())) {
+            addWaterMark(wb, sheet, excelParam.getWaterMark());
+        }
+
+        // 头部样式
+        CellStyle headerStyle = wb.createCellStyle();
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
         headerStyle.setWrapText(true);
-        XSSFCellStyle cellStyle = wb.createCellStyle();
+        // 单元格样式
+        CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        HashMap<Integer, Integer> maxWidth = new HashMap<Integer, Integer>(20);
-        HashMap<String, String> attMap = new HashMap<String, String>(20);
+
+        //存储最大列宽
+        Map<Integer, Integer> maxWidth = new HashMap<Integer, Integer>(20);
+        // 存储属性信息
+        Map<String, String> attMap = new HashMap(20);
+        //如果有表头，字段头及表格创建行开始行
         int startRow = 0;
-        if (StringUtils.isNotEmpty((CharSequence)excelParam.getHeaderName())) {
-            rowHeader = sheet.createRow(0);
-            rowHeader.setHeight((short)625);
-            rowHeader.setRowStyle((CellStyle)headerStyle);
+        //是否创建表头
+        if (StringUtils.isNotEmpty(excelParam.getHeaderName())) {
+            Row rowHeader = sheet.createRow(0);
+            rowHeader.setHeight((short) (25 * 25));
+            rowHeader.setRowStyle(headerStyle);
             Cell rowCell = rowHeader.createCell(0);
-            rowCell.setCellStyle((CellStyle)headerStyle);
+            rowCell.setCellStyle(headerStyle);
             rowCell.setCellValue(excelParam.getHeaderName());
-            CellRangeAddress cra = new CellRangeAddress(0, 0, 0, keyList.size() - 1);
+            CellRangeAddress cra = new CellRangeAddress(0, 0, 0, (keyList.size() - 1));
             sheet.addMergedRegion(cra);
             startRow = 1;
         }
-        rowHeader = sheet.createRow(startRow);
-        rowHeader.setHeight((short)500);
-        rowHeader.setRowStyle((CellStyle)headerStyle);
+        // 在sheet里创建第x(取决于是否有表头，如果有表头，则在第2行创建，否则在第一行创建)行为表头，参数为行索引(excel的行)
+        Row rowHeader = sheet.createRow(startRow);
+        rowHeader.setHeight((short) (25 * 20));
+        rowHeader.setRowStyle(headerStyle);
+
+        //设置表head
         int index = 0;
         for (String key : keyList) {
             Cell rowCell = rowHeader.createCell(index);
-            rowCell.setCellStyle((CellStyle)headerStyle);
+            rowCell.setCellStyle(headerStyle);
             rowCell.setCellValue(key);
             attMap.put(Integer.toString(index), map.get(key));
             maxWidth.put(index, rowCell.getStringCellValue().getBytes().length * 256 + 200);
-            ++index;
+            index++;
         }
-        for (i = 0; i < keyList.size(); ++i) {
-            sheet.setColumnWidth(i, ((Integer)maxWidth.get(i)).intValue());
+        // 列宽自适应
+        for (int i = 0; i < keyList.size(); i++) {
+            sheet.setColumnWidth(i, maxWidth.get(i));
         }
         if (null != excelParam.getList() && excelParam.getList().size() > 0) {
-            for (i = 0; i < excelParam.getList().size(); ++i) {
-                XSSFRow row = sheet.createRow(i + startRow + 1);
-                row.setHeight((short)450);
-                for (int j = 0; j < map.size(); ++j) {
-                    Class attrType = BeanUtils.findPropertyType((String)((String)attMap.get(Integer.toString(j))), (Class[])new Class[]{obj.getClass()});
-                    Object value = ExcelUtilBase.getAttrVal(excelParam.getList().get(i), (String)attMap.get(Integer.toString(j)), attrType);
+            // 设置表格内容
+            for (int i = 0; i < excelParam.getList().size(); i++) {
+
+                Row row = sheet.createRow(i + startRow + 1);
+                row.setHeight((short) (25 * 18));
+                for (int j = 0; j < map.size(); j++) {
+                    Class<?> attrType = BeanUtils.findPropertyType(attMap.get(Integer.toString(j)),
+                            new Class[]{obj.getClass()});
+                    Object value = getAttrVal(excelParam.getList().get(i), attMap.get(Integer.toString(j)), attrType);
                     if (null == value) {
                         value = "";
                     }
                     Cell rowCell = row.createCell(j);
-                    rowCell.setCellStyle((CellStyle)cellStyle);
+                    rowCell.setCellStyle(cellStyle);
                     rowCell.setCellValue(value.toString());
                 }
             }
         }
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         String newFileName = excelParam.getFileName();
-        if (StringUtils.isEmpty((String)newFileName)) {
+        if (StringUtils.isEmpty(newFileName)) {
             newFileName = df.format(new Date());
         }
+        // 输出Excel文件
         try {
             if (excelParam.getResponse() != null) {
-                ServletOutputStream outstream = excelParam.getResponse().getOutputStream();
-                excelParam.getResponse().setHeader("Content-disposition", "attachment; filename=" + new String(newFileName.getBytes(), "iso-8859-1") + ".xlsx");
+                OutputStream outstream = excelParam.getResponse().getOutputStream();
+                // excelParam.getResponse().reset();
+                excelParam.getResponse().setHeader("Content-disposition",
+                        "attachment; filename=" + new String(newFileName.getBytes(), "iso-8859-1") + ".xlsx");
                 excelParam.getResponse().setContentType("application/x-download");
-                wb.write((OutputStream)outstream);
+                wb.write(outstream);
                 outstream.flush();
                 outstream.close();
             } else {
                 FileOutputStream out = new FileOutputStream(excelParam.getOutFilePath());
-                wb.write((OutputStream)out);
+                wb.write(out);
                 out.flush();
                 out.close();
             }
-        }
-        catch (FileNotFoundException e) {
-            throw new FileNotFoundException("\u5bfc\u51fa\u5931\u8d25\uff01" + String.valueOf(e));
-        }
-        catch (IOException e) {
-            throw new IOException("\u5bfc\u51fa\u5931\u8d25\uff01" + String.valueOf(e));
+
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("导出失败！" + e);
+        } catch (IOException e) {
+            throw new IOException("导出失败！" + e);
         }
     }
 
-    public static void commonExportExcel2(ExcelParamAbstract excelParamAbstract) throws Exception {
+    public static void commonExportExcel2(com.kuma.boot.office.excelstrategy.ExcelParamAbstract excelParamAbstract) throws Exception {
+
+
+        // 创建HSSFWorkbook对象(excel的文档对象)
         XSSFWorkbook wb = new XSSFWorkbook();
+
         int count = 1;
-        for (ExcelParam excelParam : excelParamAbstract.getList()) {
-            int i;
-            XSSFRow rowHeader;
-            Map<String, String> map = ExcelUtilBase.getMap(excelParam.getClazz());
+        for (com.kuma.boot.office.excelstrategy.ExcelParam excelParam : excelParamAbstract.getList()) {
+            Map<String, String> map = getMap(excelParam.getClazz());
             List<String> keyList = null;
-            keyList = StringUtils.isEmpty((String)excelParam.getKeyValue()) ? ExcelUtilBase.getList(excelParam.getClazz()) : ExcelUtilBase.getList(excelParam.getKeyValue());
-            Object obj = excelParam.getClazz().newInstance();
-            XSSFSheet sheet = wb.createSheet((String)(excelParam.getSheetName() != null ? excelParam.getSheetName() : "sheet" + count));
-            if (StringUtils.isNotEmpty((CharSequence)excelParam.getWaterMark())) {
-                ExcelUtilBase.addWaterMark(wb, sheet, excelParam.getWaterMark());
+            if (StringUtils.isEmpty(excelParam.getKeyValue())) {
+                keyList = getList(excelParam.getClazz());
+            } else {
+                keyList = getList(excelParam.getKeyValue());
             }
-            ++count;
-            XSSFCellStyle headerStyle = wb.createCellStyle();
+            Object obj = excelParam.getClazz().newInstance();
+
+            // 建立新的sheet对象（excel的表单）
+            XSSFSheet sheet = wb.createSheet(excelParam.getSheetName() != null ? excelParam.getSheetName() : "sheet" + count);
+
+
+            //添加水印
+            if (StringUtils.isNotEmpty(excelParam.getWaterMark())) {
+                addWaterMark(wb, sheet, excelParam.getWaterMark());
+            }
+
+            count++;
+            // 头部样式
+            CellStyle headerStyle = wb.createCellStyle();
             headerStyle.setAlignment(HorizontalAlignment.CENTER);
             headerStyle.setWrapText(true);
-            XSSFCellStyle cellStyle = wb.createCellStyle();
+            // 单元格样式
+            CellStyle cellStyle = wb.createCellStyle();
             cellStyle.setAlignment(HorizontalAlignment.CENTER);
-            HashMap<Integer, Integer> maxWidth = new HashMap<Integer, Integer>(20);
-            HashMap<String, String> attMap = new HashMap<String, String>(20);
+
+            //存储最大列宽
+            Map<Integer, Integer> maxWidth = new HashMap<Integer, Integer>(20);
+            // 存储属性信息
+            Map<String, String> attMap = new HashMap(20);
+            //如果有表头，字段头及表格创建行开始行
             int startRow = 0;
-            if (StringUtils.isNotEmpty((CharSequence)excelParam.getHeaderName())) {
-                rowHeader = sheet.createRow(0);
-                rowHeader.setHeight((short)625);
-                rowHeader.setRowStyle((CellStyle)headerStyle);
+            //是否创建表头
+            if (StringUtils.isNotEmpty(excelParam.getHeaderName())) {
+                Row rowHeader = sheet.createRow(0);
+                rowHeader.setHeight((short) (25 * 25));
+                rowHeader.setRowStyle(headerStyle);
                 Cell rowCell = rowHeader.createCell(0);
-                rowCell.setCellStyle((CellStyle)headerStyle);
+                rowCell.setCellStyle(headerStyle);
                 rowCell.setCellValue(excelParam.getHeaderName());
-                CellRangeAddress cra = new CellRangeAddress(0, 0, 0, keyList.size() - 1);
+                CellRangeAddress cra = new CellRangeAddress(0, 0, 0, (keyList.size() - 1));
                 sheet.addMergedRegion(cra);
                 startRow = 1;
             }
-            rowHeader = sheet.createRow(startRow);
-            rowHeader.setHeight((short)500);
-            rowHeader.setRowStyle((CellStyle)headerStyle);
+            // 在sheet里创建第x(取决于是否有表头，如果有表头，则在第2行创建，否则在第一行创建)行为表头，参数为行索引(excel的行)
+            Row rowHeader = sheet.createRow(startRow);
+            rowHeader.setHeight((short) (25 * 20));
+            rowHeader.setRowStyle(headerStyle);
+
+            //设置表head
             int index = 0;
             for (String key : keyList) {
                 Cell rowCell = rowHeader.createCell(index);
-                rowCell.setCellStyle((CellStyle)headerStyle);
+                rowCell.setCellStyle(headerStyle);
                 rowCell.setCellValue(key);
                 attMap.put(Integer.toString(index), map.get(key));
                 maxWidth.put(index, rowCell.getStringCellValue().getBytes().length * 256 + 200);
-                ++index;
+                index++;
             }
-            for (i = 0; i < keyList.size(); ++i) {
-                sheet.setColumnWidth(i, ((Integer)maxWidth.get(i)).intValue());
+            // 列宽自适应
+            for (int i = 0; i < keyList.size(); i++) {
+                sheet.setColumnWidth(i, maxWidth.get(i));
             }
-            for (i = 0; i < excelParam.getList().size(); ++i) {
-                XSSFRow row = sheet.createRow(i + startRow + 1);
-                row.setHeight((short)450);
-                for (int j = 0; j < map.size(); ++j) {
-                    Class attrType = BeanUtils.findPropertyType((String)((String)attMap.get(Integer.toString(j))), (Class[])new Class[]{obj.getClass()});
-                    Object value = ExcelUtilBase.getAttrVal(excelParam.getList().get(i), (String)attMap.get(Integer.toString(j)), attrType);
+
+            // 设置表格内容
+            for (int i = 0; i < excelParam.getList().size(); i++) {
+
+                Row row = sheet.createRow(i + startRow + 1);
+                row.setHeight((short) (25 * 18));
+                for (int j = 0; j < map.size(); j++) {
+                    Class<?> attrType = BeanUtils.findPropertyType(attMap.get(Integer.toString(j)),
+                            new Class[]{obj.getClass()});
+                    Object value = getAttrVal(excelParam.getList().get(i), attMap.get(Integer.toString(j)), attrType);
                     if (null == value) {
                         value = "";
                     }
                     Cell rowCell = row.createCell(j);
-                    rowCell.setCellStyle((CellStyle)cellStyle);
+                    rowCell.setCellStyle(cellStyle);
                     rowCell.setCellValue(value.toString());
                 }
             }
         }
+
+
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         String newFileName = excelParamAbstract.getFileName();
-        if (StringUtils.isEmpty((String)newFileName)) {
+        if (StringUtils.isEmpty(newFileName)) {
             newFileName = df.format(new Date());
         }
+        // 输出Excel文件
         try {
             if (excelParamAbstract.getResponse() != null) {
-                ServletOutputStream outstream = excelParamAbstract.getResponse().getOutputStream();
-                excelParamAbstract.getResponse().setHeader("Content-disposition", "attachment; filename=" + new String(newFileName.getBytes(), "iso-8859-1") + ".xlsx");
+                OutputStream outstream = excelParamAbstract.getResponse().getOutputStream();
+                //excelParamAbstract.getResponse().reset();
+                excelParamAbstract.getResponse().setHeader("Content-disposition",
+                        "attachment; filename=" + new String(newFileName.getBytes(), "iso-8859-1") + ".xlsx");
                 excelParamAbstract.getResponse().setContentType("application/x-download");
-                wb.write((OutputStream)outstream);
+                wb.write(outstream);
                 outstream.flush();
                 outstream.close();
             } else {
                 FileOutputStream out = new FileOutputStream(excelParamAbstract.getOutFilePath());
-                wb.write((OutputStream)out);
+                wb.write(out);
                 out.flush();
                 out.close();
             }
-        }
-        catch (FileNotFoundException e) {
-            throw new FileNotFoundException("\u5bfc\u51fa\u5931\u8d25\uff01" + String.valueOf(e));
-        }
-        catch (IOException e) {
-            throw new IOException("\u5bfc\u51fa\u5931\u8d25\uff01" + String.valueOf(e));
+
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("导出失败！" + e);
+        } catch (IOException e) {
+            throw new IOException("导出失败！" + e);
         }
     }
 
-    public static void setter(Object obj, String att, Object value, Class<?> type, int row, int col, Object key) throws Exception {
+    public static void setter(Object obj, String att, Object value, Class<?> type, int row, int col, Object key)
+            throws Exception {
         try {
-            Method method = obj.getClass().getMethod("set" + StringUtil.toUpperCaseFirstOne(att), type);
+            Method method = obj.getClass().getMethod("set" + com.kuma.boot.office.excelstrategy.StringUtil.toUpperCaseFirstOne(att), type);
             if (value != null) {
                 method.invoke(obj, value);
             }
-        }
-        catch (Exception e) {
-            throw new Exception("\u7b2c" + (row + 1) + " \u884c  " + (col + 1) + "\u5217   \u5c5e\u6027\uff1a" + String.valueOf(key) + " \u8d4b\u503c\u5f02\u5e38  " + String.valueOf(e));
+        } catch (Exception e) {
+            throw new Exception("第" + (row + 1) + " 行  " + (col + 1) + "列   属性：" + key + " 赋值异常  " + e);
         }
     }
 
+
     public static Object getAttrVal(Object obj, String att, Class<?> attType) throws Exception {
         try {
-            Method method = obj.getClass().getMethod("get" + StringUtil.toUpperCaseFirstOne(att), new Class[0]);
-            Object value = method.invoke(obj, new Object[0]);
+            Method method = obj.getClass().getMethod("get" + StringUtil.toUpperCaseFirstOne(att));
+            Object value = method.invoke(obj);
             if (attType == Date.class) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 value = sdf.format(value);
             }
             return value;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public static void getValue(Cell cell, Object obj, String attr, Class attrType, int row, int col, Object key) throws Exception {
+
+    /**
+     * @param cell
+     * @param obj
+     * @param attr
+     * @param attrType
+     * @param row
+     * @param col
+     * @param key
+     * @return void
+     * @Function 得到Excel列的值
+     * @author likaixuan
+     * @since 2019-07-05 15:07
+     */
+    public static void getValue(Cell cell, Object obj, String attr, Class attrType, int row, int col, Object key)
+            throws Exception {
         Object val = null;
+
         if (cell.getCellType() == CellType.BOOLEAN) {
             val = cell.getBooleanCellValue();
+
         } else if (cell.getCellType() == CellType.NUMERIC) {
-            if (DateUtil.isCellDateFormatted((Cell)cell)) {
+            if (DateUtil.isCellDateFormatted(cell)) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 try {
                     if (attrType == String.class) {
-                        val = sdf.format(DateUtil.getJavaDate((double)cell.getNumericCellValue()));
+                        val = sdf.format(DateUtil.getJavaDate(cell.getNumericCellValue()));
+                    } else {
+                        val = dateConvertFormat(sdf.format(DateUtil.getJavaDate(cell.getNumericCellValue())));
                     }
-                    val = ExcelUtilBase.dateConvertFormat(sdf.format(DateUtil.getJavaDate((double)cell.getNumericCellValue())));
+                } catch (ParseException e) {
+                    throw new Exception("第" + (row + 1) + " 行  " + (col + 1) + "列   属性：" + key + " 日期格式转换错误  ");
                 }
-                catch (ParseException e) {
-                    throw new Exception("\u7b2c" + (row + 1) + " \u884c  " + (col + 1) + "\u5217   \u5c5e\u6027\uff1a" + String.valueOf(key) + " \u65e5\u671f\u683c\u5f0f\u8f6c\u6362\u9519\u8bef  ");
-                }
-            } else if (attrType.equals(String.class)) {
-                cell.setCellType(CellType.STRING);
-                val = cell.getStringCellValue();
             } else {
-                val = attrType.equals(BigDecimal.class) ? new BigDecimal(cell.getNumericCellValue()) : (attrType.equals(Long.class) || attrType.equals(Long.TYPE) ? (Number)((long)cell.getNumericCellValue()) : (Number)(attrType.equals(Double.class) || attrType.equals(Double.TYPE) ? (Number)cell.getNumericCellValue() : (Number)(attrType.equals(Float.class) || attrType.equals(Float.TYPE) ? (Number)Float.valueOf((float)cell.getNumericCellValue()) : (Number)(attrType.equals(Integer.TYPE) || attrType.equals(Integer.class) ? (Number)((int)cell.getNumericCellValue()) : (Number)(attrType.equals(Short.class) || attrType.equals(Short.TYPE) ? (Number)((short)cell.getNumericCellValue()) : (Number)cell.getNumericCellValue())))));
+                if (attrType.equals(String.class)) {
+                    cell.setCellType(CellType.STRING);
+                    val = cell.getStringCellValue();
+                } else if (attrType.equals(BigDecimal.class)) {
+                    val = new BigDecimal(cell.getNumericCellValue());
+                } else if (attrType.equals(Long.class) || attrType.equals(long.class)) {
+                    val = (long) cell.getNumericCellValue();
+                } else if (attrType.equals(Double.class) || attrType.equals(double.class)) {
+                    val = cell.getNumericCellValue();
+                } else if (attrType.equals(Float.class) || attrType.equals(float.class)) {
+                    val = (float) cell.getNumericCellValue();
+                } else if (attrType.equals(int.class) || attrType.equals(Integer.class)) {
+                    val = (int) cell.getNumericCellValue();
+                } else if (attrType.equals(Short.class) || attrType.equals(short.class)) {
+                    val = (short) cell.getNumericCellValue();
+                } else {
+                    val = cell.getNumericCellValue();
+                }
             }
+
         } else if (cell.getCellType() == CellType.STRING) {
             String cellVal = null;
             if (cell.getStringCellValue() != null && cell.getStringCellValue().trim().length() > 0) {
                 cellVal = cell.getStringCellValue().trim();
-                val = attrType.equals(Double.TYPE) || attrType.equals(Double.class) ? Double.valueOf(Double.parseDouble(cellVal)) : (attrType.equals(BigDecimal.class) ? new BigDecimal(cellVal) : (attrType.equals(Long.TYPE) || attrType.equals(Long.class) ? Long.valueOf(cellVal) : (attrType.equals(Float.class) || attrType.equals(Float.TYPE) ? Float.valueOf(cellVal) : (attrType.equals(Integer.TYPE) || attrType.equals(Integer.class) ? Integer.valueOf(Integer.parseInt(cellVal)) : (attrType.equals(Short.class) || attrType.equals(Short.TYPE) ? Short.valueOf(cellVal) : (attrType.equals(Date.class) ? ExcelUtilBase.dateConvertFormat(cellVal) : cell.getStringCellValue()))))));
+                if (attrType.equals(double.class) || attrType.equals(Double.class)) {
+                    val = Double.parseDouble(cellVal);
+                } else if (attrType.equals(BigDecimal.class)) {
+                    val = new BigDecimal(cellVal);
+                } else if (attrType.equals(long.class) || attrType.equals(Long.class)) {
+                    val = Long.valueOf(cellVal);
+                } else if (attrType.equals(Float.class) || attrType.equals(float.class)) {
+                    val = Float.valueOf(cellVal);
+                } else if (attrType.equals(int.class) || attrType.equals(Integer.class)) {
+                    val = Integer.parseInt(cellVal);
+                } else if (attrType.equals(Short.class) || attrType.equals(short.class)) {
+                    val = Short.valueOf(cellVal);
+                } else if (attrType.equals(Date.class)) {
+                    val = dateConvertFormat(cellVal);
+                } else {
+                    val = cell.getStringCellValue();
+                }
             } else {
                 val = null;
             }
+
         }
-        ExcelUtilBase.setter(obj, attr, val, attrType, row, col, key);
+        setter(obj, attr, val, attrType, row, col, key);
     }
 
+    /**
+     * String类型日期转为Date类型
+     *
+     * @param dateStr
+     * @return java.util.Date
+     * @throws Exception
+     * @author likaixuan
+     * @since 2019-07-05 16:45
+     */
     public static Date dateConvertFormat(String dateStr) throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = format.parse(dateStr);
         return date;
     }
 
-    public static void templateWrite(ExcelParam excelParam) {
-        HashMap<String, String> resultMap = new HashMap<String, String>(20);
-        File file = new File(excelParam.getFilePath());
-        try {
-            FileInputStream excelFileInputStream = new FileInputStream(file);
-            Workbook workbook = WorkbookFactory.create((InputStream)excelFileInputStream);
-            excelFileInputStream.close();
-            Sheet sheet = workbook.getSheetAt(0);
-            for (int rowNum = 0; rowNum <= sheet.getLastRowNum(); ++rowNum) {
-                Row hssfRow = sheet.getRow(rowNum);
-                if (hssfRow == null) continue;
-                for (int cellNum = 0; cellNum < hssfRow.getLastCellNum(); ++cellNum) {
-                    Cell hssfCell = hssfRow.getCell(cellNum);
-                    if (hssfCell == null || StringUtils.isEmpty((String)hssfCell.getStringCellValue())) continue;
-                    String tempCellValue = sheet.getRow(rowNum).getCell(cellNum).getStringCellValue();
-                    tempCellValue = org.apache.commons.lang3.StringUtils.remove((String)tempCellValue, (char)'\u00a0');
-                    String pattern = "(?s)^#.*}$";
-                    if (!Pattern.matches(pattern, tempCellValue = tempCellValue.trim())) continue;
-                    String variableName = tempCellValue.substring(2, tempCellValue.length() - 1);
-                    resultMap.put(variableName, hssfCell.getAddress().toString());
-                }
-            }
-            Map<String, Object> filedValMap = ExcelUtilBase.getMap(excelParam.getObj());
-            for (String key : resultMap.keySet()) {
-                CellAddress address = new CellAddress((String)resultMap.get(key));
-                Row row = sheet.getRow(address.getRow());
-                Cell cell = row.getCell(address.getColumn());
-                cell.setCellValue(filedValMap.get(key) == null ? null : filedValMap.get(key).toString());
-            }
-            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-            String newFileName = excelParam.getFileName();
-            if (StringUtils.isEmpty((String)newFileName)) {
-                newFileName = df.format(new Date());
-            }
-            try {
-                if (excelParam.getResponse() != null) {
-                    ServletOutputStream outstream = excelParam.getResponse().getOutputStream();
-                    excelParam.getResponse().setHeader("Content-disposition", "attachment; filename=" + new String(newFileName.getBytes(), "iso-8859-1") + ".xlsx");
-                    excelParam.getResponse().setContentType("application/x-download");
-                    workbook.write((OutputStream)outstream);
-                    outstream.flush();
-                    outstream.close();
-                } else {
-                    FileOutputStream out = new FileOutputStream(excelParam.getOutFilePath());
-                    workbook.write((OutputStream)out);
-                    out.flush();
-                    out.close();
-                }
-            }
-            catch (FileNotFoundException e) {
-                throw new FileNotFoundException("\u5bfc\u51fa\u5931\u8d25\uff01" + String.valueOf(e));
-            }
-            catch (IOException e) {
-                throw new IOException("\u5bfc\u51fa\u5931\u8d25\uff01" + String.valueOf(e));
-            }
-        }
-        catch (Exception e) {
-            LogUtils.error((Throwable)e);
-        }
-    }
+    protected static class PoiWriter implements Runnable {
 
-    protected static class PoiWriter
-    implements Runnable {
         private final CountDownLatch doneSignal;
+
         private Sheet sheet;
+
         private int start;
+
         private int end;
+
         private List list;
+
         private Map<String, String> map;
+
         private Map<String, String> attMap;
+
         private Object obj;
 
+
+        /**
+         * sheet的row使用treeMap存储的，是非线程安全的，所以在创建row时需要进行同步操作。
+         *
+         * @param sheet
+         * @param rownum
+         * @return
+         */
         private static synchronized Row getRow(Sheet sheet, int rownum) {
             return sheet.createRow(rownum);
         }
@@ -639,34 +770,132 @@ public class ExcelUtilBase {
             this.obj = object;
         }
 
-        /*
-         * WARNING - Removed try catching itself - possible behaviour change.
-         */
         @Override
         public void run() {
-            int k = this.start;
+            int k = start;
             try {
-                for (int i = 0; i < this.list.size(); ++i) {
-                    Row row = PoiWriter.getRow(this.sheet, k);
-                    for (int j = 0; j < this.map.size(); ++j) {
-                        Class attrType = BeanUtils.findPropertyType((String)this.attMap.get(Integer.toString(j)), (Class[])new Class[]{this.obj.getClass()});
-                        Object value = ExcelUtilBase.getAttrVal(this.list.get(i), this.attMap.get(Integer.toString(j)), attrType);
+                //while (k <= end) {
+                //Row row = getRow(sheet, k);
+
+                for (int i = 0; i < list.size(); i++) {
+                    Row row = getRow(sheet, k);
+                    for (int j = 0; j < map.size(); j++) {
+                        Class<?> attrType = BeanUtils.findPropertyType(attMap.get(Integer.toString(j)),
+                                new Class[]{obj.getClass()});
+                        Object value = getAttrVal(list.get(i), attMap.get(Integer.toString(j)), attrType);
                         if (null == value) {
                             value = "";
                         }
                         row.createCell(j).setCellValue(value.toString());
+                        //style.setAlignment(HorizontalAlignment.CENTER);
                     }
                     ++k;
                 }
-            }
-            catch (Exception e) {
-                LogUtils.error((Throwable)e);
-            }
-            finally {
-                this.doneSignal.countDown();
-                System.out.println("start: " + this.start + " end: " + this.end + " Count: " + this.doneSignal.getCount());
+                //}
+            } catch (Exception e) {
+                LogUtils.error(e);
+            } finally {
+                doneSignal.countDown();
+                System.out.println("start: " + start + " end: " + end
+                        + " Count: " + doneSignal.getCount());
             }
         }
-    }
-}
 
+    }
+
+
+    public static void templateWrite(com.kuma.boot.office.excelstrategy.ExcelParam excelParam) {
+
+        Map<String, String> resultMap = new HashMap(20);
+
+        //根据路径获取文件
+        File file = new File(excelParam.getFilePath());
+        //定义输入流对象
+        FileInputStream excelFileInputStream;
+
+        try {
+            excelFileInputStream = new FileInputStream(file);
+            // 拿到文件转化为JavaPoi可操纵类型
+            Workbook workbook = WorkbookFactory.create(excelFileInputStream);
+            excelFileInputStream.close();
+            ////获取excel表格
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // 循环行Row
+            for (int rowNum = 0; rowNum <= sheet.getLastRowNum(); rowNum++) {
+
+                Row hssfRow = sheet.getRow(rowNum);
+                if (hssfRow == null) {
+                    continue;
+                }
+                // 循环列Cell
+                for (int cellNum = 0; cellNum < hssfRow.getLastCellNum(); cellNum++) {
+
+                    Cell hssfCell = hssfRow.getCell(cellNum);
+                    if (hssfCell == null || StringUtils.isEmpty(hssfCell.getStringCellValue())) {
+                        continue;
+                    }
+
+                    String tempCellValue = sheet.getRow(rowNum).getCell(cellNum).getStringCellValue();
+                    tempCellValue = remove(tempCellValue, (char) 160);
+                    tempCellValue = tempCellValue.trim();
+
+
+                    String pattern = "(?s)^#.*}$";
+                    if (Pattern.matches(pattern, tempCellValue)) {
+                        String variableName = tempCellValue.substring(2, tempCellValue.length() - 1);
+                        resultMap.put(variableName, hssfCell.getAddress().toString());
+                    }
+                }
+            }
+
+            //存储字段和字段对应的值
+            Map<String, Object> filedValMap = getMap(excelParam.getObj());
+            for (String key : resultMap.keySet()) {
+                //获取单元格的row和cell
+                CellAddress address = new CellAddress(resultMap.get(key));
+                // 获取行
+                Row row = sheet.getRow(address.getRow());
+                // 获取列
+                Cell cell = row.getCell(address.getColumn());
+                //设置单元的值
+                cell.setCellValue(filedValMap.get(key) == null ? null : filedValMap.get(key).toString());
+            }
+
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+            String newFileName = excelParam.getFileName();
+            if (StringUtils.isEmpty(newFileName)) {
+                newFileName = df.format(new Date());
+            }
+            // 输出Excel文件
+            try {
+                if (excelParam.getResponse() != null) {
+                    OutputStream outstream = excelParam.getResponse().getOutputStream();
+                    //excelParam.getResponse().reset();
+                    excelParam.getResponse().setHeader("Content-disposition",
+                            "attachment; filename=" + new String(newFileName.getBytes(), "iso-8859-1") + ".xlsx");
+                    excelParam.getResponse().setContentType("application/x-download");
+                    workbook.write(outstream);
+                    outstream.flush();
+                    outstream.close();
+                } else {
+                    FileOutputStream out = new FileOutputStream(excelParam.getOutFilePath());
+                    workbook.write(out);
+                    out.flush();
+                    out.close();
+                }
+            } catch (FileNotFoundException e) {
+                throw new FileNotFoundException("导出失败！" + e);
+            } catch (IOException e) {
+                throw new IOException("导出失败！" + e);
+            }
+
+
+        } catch (Exception e) {
+            LogUtils.error(e);
+        }
+    }
+
+
+}

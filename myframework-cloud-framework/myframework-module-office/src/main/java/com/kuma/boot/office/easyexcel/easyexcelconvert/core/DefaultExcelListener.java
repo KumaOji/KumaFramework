@@ -1,23 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.stream.StreamUtil
- *  cn.hutool.core.util.StrUtil
- *  com.alibaba.excel.context.AnalysisContext
- *  com.alibaba.excel.event.AnalysisEventListener
- *  com.alibaba.excel.exception.ExcelAnalysisException
- *  com.alibaba.excel.exception.ExcelDataConvertException
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.common.utils.validator.ValidatorUtils
- *  jakarta.validation.ConstraintViolation
- *  jakarta.validation.ConstraintViolationException
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelconvert.core;
 
 import cn.hutool.core.stream.StreamUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.exception.ExcelAnalysisException;
@@ -27,67 +26,95 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.validator.ValidatorUtils;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import cn.hutool.core.util.StrUtil;
+
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultExcelListener<T>
-extends AnalysisEventListener<T>
-implements ExcelListener<T> {
+/**
+ * Excel 导入监听
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-31 21:01:29
+ */
+public class DefaultExcelListener<T> extends AnalysisEventListener<T> implements ExcelListener<T> {
+
+    /** 是否Validator检验，默认为是 */
     private final Boolean isValidate;
+
+    /** excel 表头数据 */
     private Map<Integer, String> headMap;
-    private final ExcelResult<T> excelResult = new DefautExcelResult();
+
+    /** 导入回执 */
+    private final ExcelResult<T> excelResult;
 
     public DefaultExcelListener(boolean isValidate) {
+        this.excelResult = new DefautExcelResult<>();
         this.isValidate = isValidate;
     }
 
     public DefaultExcelListener() {
+        this.excelResult = new DefautExcelResult<>();
         this.isValidate = true;
     }
 
+    /**
+     * 处理异常
+     *
+     * @param exception ExcelDataConvertException
+     * @param context Excel 上下文
+     */
+    @Override
     public void onException(Exception exception, AnalysisContext context) throws Exception {
         String errMsg = null;
-        if (exception instanceof ExcelDataConvertException) {
-            ExcelDataConvertException excelDataConvertException = (ExcelDataConvertException)exception;
+        if (exception instanceof ExcelDataConvertException excelDataConvertException) {
+            // 如果是某一个单元格的转换异常 能获取到具体行号
             Integer rowIndex = excelDataConvertException.getRowIndex();
             Integer columnIndex = excelDataConvertException.getColumnIndex();
-            errMsg = StrUtil.format((CharSequence)"\u7b2c{}\u884c-\u7b2c{}\u5217-\u8868\u5934{}: \u89e3\u6790\u5f02\u5e38<br/>", (Object[])new Object[]{rowIndex + 1, columnIndex + 1, this.headMap.get(columnIndex)});
+            errMsg = StrUtil.format(
+                    "第{}行-第{}列-表头{}: 解析异常<br/>", rowIndex + 1, columnIndex + 1, headMap.get(columnIndex));
             if (LogUtils.isDebugEnabled()) {
-                LogUtils.error((String)errMsg, (Object[])new Object[0]);
+                LogUtils.error(errMsg);
             }
         }
-        if (exception instanceof ConstraintViolationException) {
-            ConstraintViolationException constraintViolationException = (ConstraintViolationException)exception;
-            Set constraintViolations = constraintViolationException.getConstraintViolations();
-            String constraintViolationsMsg = StreamUtil.join(constraintViolations.stream(), (CharSequence)", ", ConstraintViolation::getMessage);
-            errMsg = StrUtil.format((CharSequence)"\u7b2c{}\u884c\u6570\u636e\u6821\u9a8c\u5f02\u5e38: {}", (Object[])new Object[]{context.readRowHolder().getRowIndex() + 1, constraintViolationsMsg});
+
+        if (exception instanceof ConstraintViolationException constraintViolationException) {
+            Set<ConstraintViolation<?>> constraintViolations = constraintViolationException.getConstraintViolations();
+            String constraintViolationsMsg =
+                    StreamUtil.join(constraintViolations.stream(), ", ", ConstraintViolation::getMessage);
+            errMsg = StrUtil.format(
+                    "第{}行数据校验异常: {}", context.readRowHolder().getRowIndex() + 1, constraintViolationsMsg);
             if (LogUtils.isDebugEnabled()) {
-                LogUtils.error((String)errMsg, (Object[])new Object[0]);
+                LogUtils.error(errMsg);
             }
         }
-        this.excelResult.getErrorList().add(errMsg);
+
+        excelResult.getErrorList().add(errMsg);
         throw new ExcelAnalysisException(errMsg);
     }
 
+    @Override
     public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
         this.headMap = headMap;
-        LogUtils.debug((String)"\u89e3\u6790\u5230\u4e00\u6761\u8868\u5934\u6570\u636e: {}", (Object[])new Object[]{JacksonUtils.toJSONString(headMap)});
+        LogUtils.debug("解析到一条表头数据: {}", JacksonUtils.toJSONString(headMap));
     }
 
+    @Override
     public void invoke(T data, AnalysisContext context) {
-        if (this.isValidate.booleanValue()) {
-            ValidatorUtils.validate(data, (Class[])new Class[0]);
+        if (isValidate) {
+            ValidatorUtils.validate(data);
         }
-        this.excelResult.getList().add(data);
+        excelResult.getList().add(data);
     }
 
+    @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
-        LogUtils.debug((String)"\u6240\u6709\u6570\u636e\u89e3\u6790\u5b8c\u6210\uff01", (Object[])new Object[0]);
+        LogUtils.debug("所有数据解析完成！");
     }
 
     @Override
     public ExcelResult<T> getExcelResult() {
-        return this.excelResult;
+        return excelResult;
     }
 }
-

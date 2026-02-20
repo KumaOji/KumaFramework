@@ -1,129 +1,184 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.collection.CollUtil
- *  cn.hutool.core.io.resource.ResourceUtil
- *  cn.hutool.core.util.StrUtil
- *  com.alibaba.excel.EasyExcel
- *  com.alibaba.excel.ExcelWriter
- *  com.alibaba.excel.write.builder.ExcelWriterBuilder
- *  com.alibaba.excel.write.builder.ExcelWriterSheetBuilder
- *  com.alibaba.excel.write.handler.WriteHandler
- *  com.alibaba.excel.write.metadata.WriteSheet
- *  com.alibaba.excel.write.metadata.style.WriteCellStyle
- *  com.alibaba.excel.write.metadata.style.WriteFont
- *  com.alibaba.excel.write.style.HorizontalCellStyleStrategy
- *  com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.servlet.http.HttpServletResponse
- *  org.apache.poi.ss.usermodel.HorizontalAlignment
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelimport.excel;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.builder.ExcelWriterBuilder;
-import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
-import com.alibaba.excel.write.handler.WriteHandler;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
+import com.alibaba.excel.write.style.column.AbstractColumnWidthStyleStrategy;
 import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.office.easyexcel.easyexcelimport.constant.ExportConstant;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
 public class ExcelExportUtil<T> {
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+
+    /**
+     * excel文件导出(可以包含多个sheet页)，固定表头(通过实体指定属性的方式)
+     *
+     * @param response
+     * @param fileName 导出文件名
+     * @param head 导出表头(多个sheet页就是多个集合元素)
+     * @param exportData 需要导出数据
+     * @param sheetNames sheet页的名称，为空则默认以:sheet + 数字规则命名
      */
-    public static <T> void exportFile(String fileName, List<T> head, List<List<T>> exportData, List<String> sheetNames, HttpServletResponse response) {
-        if (Objects.isNull(response) || StrUtil.isBlank((CharSequence)fileName) || CollUtil.isEmpty(head)) {
-            LogUtils.info((String)"ExcelExportUtil exportFile required param can't be empty", (Object[])new Object[0]);
+    public static <T> void exportFile(
+            String fileName,
+            List<T> head,
+            List<List<T>> exportData,
+            List<String> sheetNames,
+            HttpServletResponse response) {
+        if (Objects.isNull(response) || StrUtil.isBlank(fileName) || CollUtil.isEmpty(head)) {
+            LogUtils.info("ExcelExportUtil exportFile required param can't be empty");
             return;
         }
         ExcelWriter writer = null;
         try {
-            response.setContentType("application/octet-stream");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-            HorizontalCellStyleStrategy horizontalCellStyleStrategy = ExcelExportUtil.getExportDefaultStyle();
-            writer = ((ExcelWriterBuilder)EasyExcel.write((OutputStream)response.getOutputStream()).registerWriteHandler((WriteHandler)horizontalCellStyleStrategy)).build();
-            for (int itemIndex = 0; itemIndex < exportData.size(); ++itemIndex) {
-                T headData = head.get(itemIndex);
+            response.setContentType(ExportConstant.EXCEL_CONTENT_TYPE);
+            response.setCharacterEncoding(ExportConstant.UTF_8);
+            response.setHeader(
+                    ExportConstant.CONTENT_DISPOSITION,
+                    ExportConstant.ATTACHMENT_FILENAME + fileName + ExportConstant.XLSX_SUFFIX);
+            // 设置导出的表格样式
+            HorizontalCellStyleStrategy horizontalCellStyleStrategy = getExportDefaultStyle();
+            writer = EasyExcel.write(response.getOutputStream())
+                    .registerWriteHandler(horizontalCellStyleStrategy)
+                    .build();
+            for (int itemIndex = 0; itemIndex < exportData.size(); itemIndex++) {
+                // 表头数据
+                Object headData = head.get(itemIndex);
+                // sheet页的数据
                 List<T> list = exportData.get(itemIndex);
-                WriteSheet sheet = ((ExcelWriterSheetBuilder)EasyExcel.writerSheet((Integer)itemIndex, (String)(CollUtil.isEmpty(sheetNames) ? "sheet" + itemIndex + "1" : sheetNames.get(itemIndex))).head(headData.getClass())).build();
+                WriteSheet sheet = EasyExcel.writerSheet(
+                                itemIndex,
+                                CollUtil.isEmpty(sheetNames)
+                                        ? ExportConstant.SHEET_NAME + itemIndex + 1
+                                        : sheetNames.get(itemIndex))
+                        .head(headData.getClass())
+                        .build();
                 writer.write(list, sheet);
             }
-        }
-        catch (Exception e) {
-            LogUtils.error((String)"ExcelExportUtil exportFile in error:{}", (Object[])new Object[]{e});
-        }
-        finally {
+        } catch (Exception e) {
+            LogUtils.error("ExcelExportUtil exportFile in error:{}", e);
+        } finally {
             if (null != writer) {
                 writer.finish();
             }
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * 导出动态表头数据(支持多表单)，表头列不固定，根据程序或者读取数据库生成
+     *
+     * @param fileName 导出文件名
+     * @param head 导出表头列
+     * @param exportData 需要导出的数据
+     * @param sheetNames sheet页名称
+     * @param response 响应流
      */
-    public static <T> void exportWithDynamicData(String fileName, List<List<List<String>>> head, List<List<List<T>>> exportData, List<String> sheetNames, HttpServletResponse response) throws IOException {
+    public static <T> void exportWithDynamicData(
+            String fileName,
+            List<List<List<String>>> head,
+            List<List<List<T>>> exportData,
+            List<String> sheetNames,
+            HttpServletResponse response)
+            throws IOException {
         ExcelWriter writer = null;
         try {
-            response.setContentType("application/octet-stream");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-            HorizontalCellStyleStrategy horizontalCellStyleStrategy = ExcelExportUtil.getExportDefaultStyle();
-            SimpleColumnWidthStyleStrategy columnWidthStyleStrategy = new SimpleColumnWidthStyleStrategy(ExportConstant.DEFAULT_CELL_LENGTH);
-            writer = ((ExcelWriterBuilder)((ExcelWriterBuilder)EasyExcel.write((OutputStream)response.getOutputStream()).registerWriteHandler((WriteHandler)horizontalCellStyleStrategy)).registerWriteHandler((WriteHandler)columnWidthStyleStrategy)).build();
-            for (int i = 0; i < exportData.size(); ++i) {
+            response.setContentType(ExportConstant.EXCEL_CONTENT_TYPE);
+            response.setCharacterEncoding(ExportConstant.UTF_8);
+            response.setHeader(
+                    ExportConstant.CONTENT_DISPOSITION,
+                    ExportConstant.ATTACHMENT_FILENAME + fileName + ExportConstant.XLSX_SUFFIX);
+            // 设置默认样式的excel表格对象
+            HorizontalCellStyleStrategy horizontalCellStyleStrategy = getExportDefaultStyle();
+            AbstractColumnWidthStyleStrategy columnWidthStyleStrategy =
+                    new SimpleColumnWidthStyleStrategy(ExportConstant.DEFAULT_CELL_LENGTH);
+            writer = EasyExcel.write(response.getOutputStream())
+                    .registerWriteHandler(horizontalCellStyleStrategy)
+                    .registerWriteHandler(columnWidthStyleStrategy)
+                    .build();
+            for (int i = 0; i < exportData.size(); i++) {
                 List<List<T>> tableData = exportData.get(i);
-                WriteSheet sheet = ((ExcelWriterSheetBuilder)EasyExcel.writerSheet((Integer)i, (String)(CollUtil.isEmpty(sheetNames) ? "sheet" + i + "1" : sheetNames.get(i))).head(head.get(i))).build();
+                WriteSheet sheet = EasyExcel.writerSheet(
+                                i, CollUtil.isEmpty(sheetNames) ? ExportConstant.SHEET_NAME + i + 1 : sheetNames.get(i))
+                        .head(head.get(i))
+                        .build();
                 writer.write(tableData, sheet);
             }
-        }
-        finally {
+        } finally {
             if (Objects.nonNull(writer)) {
                 writer.finish();
             }
         }
     }
 
-    public static void downloadTemplate(String filePath, String fileName, String fileSuffix, HttpServletResponse response) {
+    /**
+     * 下载指定路径下的模板
+     *
+     * @param filePath 文件所在路径(包含模板名称)：一般是放在项目的resources目录下的temolate
+     * @param fileName 下载时默认的文件名称
+     * @param response 响应流
+     */
+    public static void downloadTemplate(
+            String filePath, String fileName, String fileSuffix, HttpServletResponse response) {
         try {
-            response.setContentType("application/octet-stream");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + fileSuffix);
-            byte[] bytes = ResourceUtil.readBytes((String)filePath);
+            // 设置浏览器以附件形式读取响应流中的数据
+            response.setContentType(ExportConstant.EXCEL_CONTENT_TYPE);
+            response.setCharacterEncoding(ExportConstant.UTF_8);
+            response.setHeader(
+                    ExportConstant.CONTENT_DISPOSITION, ExportConstant.ATTACHMENT_FILENAME + fileName + fileSuffix);
+            byte[] bytes = ResourceUtil.readBytes(filePath);
             response.getOutputStream().write(bytes);
-        }
-        catch (Exception e) {
-            LogUtils.error((String)"ExcelExportUtil downloadTemplate in error:{}", (Object[])new Object[]{e});
+        } catch (Exception e) {
+            LogUtils.error("ExcelExportUtil downloadTemplate in error:{}", e);
         }
     }
 
+    /**
+     * 配置默认的excel表格样式对象
+     *
+     * @return
+     */
     private static HorizontalCellStyleStrategy getExportDefaultStyle() {
         WriteCellStyle headWriteCellStyle = new WriteCellStyle();
+        // 设置头字体
         WriteFont headWriteFont = new WriteFont();
-        headWriteFont.setBold(Boolean.valueOf(true));
+        headWriteFont.setBold(true);
         headWriteCellStyle.setWriteFont(headWriteFont);
+        // 设置头居中
         headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        // 内容策略
         WriteCellStyle contentWriteCellStyle = new WriteCellStyle();
+        // 设置 水平居中
         contentWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
-        HorizontalCellStyleStrategy horizontalCellStyleStrategy = new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
+        HorizontalCellStyleStrategy horizontalCellStyleStrategy =
+                new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
         return horizontalCellStyleStrategy;
     }
 }
-

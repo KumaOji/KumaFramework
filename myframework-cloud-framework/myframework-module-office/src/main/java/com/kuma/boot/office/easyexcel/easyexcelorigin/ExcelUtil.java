@@ -1,144 +1,174 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.EasyExcel
- *  com.alibaba.excel.ExcelWriter
- *  com.alibaba.excel.write.builder.ExcelWriterBuilder
- *  com.alibaba.excel.write.builder.ExcelWriterTableBuilder
- *  com.alibaba.excel.write.handler.WriteHandler
- *  com.alibaba.excel.write.metadata.WriteSheet
- *  com.alibaba.excel.write.metadata.WriteTable
- *  com.alibaba.excel.write.metadata.style.WriteCellStyle
- *  com.alibaba.excel.write.metadata.style.WriteFont
- *  com.alibaba.excel.write.style.HorizontalCellStyleStrategy
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.servlet.http.HttpServletResponse
- *  org.apache.poi.ss.usermodel.HorizontalAlignment
- *  org.apache.poi.ss.usermodel.IndexedColors
- *  org.springframework.web.multipart.MultipartFile
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelorigin;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.builder.ExcelWriterBuilder;
-import com.alibaba.excel.write.builder.ExcelWriterTableBuilder;
-import com.alibaba.excel.write.handler.WriteHandler;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.WriteTable;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.office.easyexcel.easyexcelconvert.core.CommentWriteHandler;
 import com.kuma.boot.office.easyexcel.easyexcelconvert.core.CustomSheetWriteHandler;
 import jakarta.servlet.http.HttpServletResponse;
+import com.kuma.boot.common.utils.lang.StringUtils;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.List;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.springframework.web.multipart.MultipartFile;
 
 public class ExcelUtil {
+
+    /**
+     * 导出数据为excel文件
+     *
+     * @param filename 文件名称
+     * @param dataResult 集合内的bean对象类型要与clazz参数一致
+     * @param clazz 集合内的bean对象类型要与clazz参数一致
+     * @param response HttpServlet响应对象
+     */
     public static void export(String filename, List<?> dataResult, Class<?> clazz, HttpServletResponse response) {
-        OutputStream outputStream;
-        block12: {
-            response.setStatus(200);
-            outputStream = null;
-            ExcelWriter excelWriter = null;
-            try {
-                if (StringUtils.isBlank((String)filename)) {
-                    throw new RuntimeException("'filename' \u4e0d\u80fd\u4e3a\u7a7a");
-                }
-                String fileName = filename.concat(".xlsx");
-                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
-                outputStream = response.getOutputStream();
-                excelWriter = dataResult == null ? ExcelUtil.getTemplateExcelWriter(outputStream) : ExcelUtil.getExportExcelWriter(outputStream);
-                WriteTable writeTable = ((ExcelWriterTableBuilder)((ExcelWriterTableBuilder)EasyExcel.writerTable((Integer)0).head(clazz)).needHead(Boolean.valueOf(true))).build();
-                WriteSheet writeSheet = EasyExcel.writerSheet((String)fileName).build();
-                excelWriter.write(dataResult, writeSheet, writeTable);
-                if (excelWriter == null) break block12;
+        response.setStatus(200);
+        OutputStream outputStream = null;
+        ExcelWriter excelWriter = null;
+        try {
+            if (StringUtils.isBlank(filename)) {
+                throw new RuntimeException("'filename' 不能为空");
             }
-            catch (Exception e) {
+            String fileName = filename.concat(".xlsx");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf-8"));
+            outputStream = response.getOutputStream();
+
+            // 根据不同的策略生成不同的ExcelWriter对象
+            if (dataResult == null) {
+                excelWriter = getTemplateExcelWriter(outputStream);
+            } else {
+                excelWriter = getExportExcelWriter(outputStream);
+            }
+
+            WriteTable writeTable =
+                    EasyExcel.writerTable(0).head(clazz).needHead(true).build();
+            WriteSheet writeSheet = EasyExcel.writerSheet(fileName).build();
+            // 写出数据
+            excelWriter.write(dataResult, writeSheet, writeTable);
+
+        } catch (Exception e) {
+            LogUtils.error("导出excel数据异常：", e);
+            throw new RuntimeException(e);
+        } finally {
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
+            if (outputStream != null) {
                 try {
-                    LogUtils.error((String)"\u5bfc\u51faexcel\u6570\u636e\u5f02\u5e38\uff1a", (Object[])new Object[]{e});
-                    throw new RuntimeException(e);
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    LogUtils.error("导出数据关闭流异常", e);
                 }
-                catch (Throwable throwable) {
-                    if (excelWriter != null) {
-                        excelWriter.finish();
-                    }
-                    if (outputStream != null) {
-                        try {
-                            outputStream.flush();
-                            outputStream.close();
-                        }
-                        catch (IOException e2) {
-                            LogUtils.error((String)"\u5bfc\u51fa\u6570\u636e\u5173\u95ed\u6d41\u5f02\u5e38", (Object[])new Object[]{e2});
-                        }
-                    }
-                    throw throwable;
-                }
-            }
-            excelWriter.finish();
-        }
-        if (outputStream != null) {
-            try {
-                outputStream.flush();
-                outputStream.close();
-            }
-            catch (IOException e) {
-                LogUtils.error((String)"\u5bfc\u51fa\u6570\u636e\u5173\u95ed\u6d41\u5f02\u5e38", (Object[])new Object[]{e});
             }
         }
     }
 
+    /**
+     * 根据不同策略生成不同的ExcelWriter对象， 可根据实际情况修改
+     *
+     * @param outputStream 数据输出流
+     * @return 模板下载ExcelWriter对象
+     */
     private static ExcelWriter getTemplateExcelWriter(OutputStream outputStream) {
-        return ((ExcelWriterBuilder)((ExcelWriterBuilder)((ExcelWriterBuilder)EasyExcel.write((OutputStream)outputStream).registerWriteHandler((WriteHandler)new CommentWriteHandler())).registerWriteHandler((WriteHandler)new CustomSheetWriteHandler())).registerWriteHandler((WriteHandler)ExcelUtil.getStyleStrategy())).build();
+        return EasyExcel.write(outputStream)
+                .registerWriteHandler(new CommentWriteHandler()) // 增加批注策略
+                .registerWriteHandler(new CustomSheetWriteHandler()) // 增加下拉框策略
+                .registerWriteHandler(getStyleStrategy()) // 字体居中策略
+                .build();
     }
 
+    /**
+     * 根据不同策略生成不同的ExcelWriter对象， 可根据实际情况修改
+     *
+     * @param outputStream 数据输出流
+     * @return 数据导出ExcelWriter对象
+     */
     private static ExcelWriter getExportExcelWriter(OutputStream outputStream) {
-        return ((ExcelWriterBuilder)EasyExcel.write((OutputStream)outputStream).registerWriteHandler((WriteHandler)ExcelUtil.getStyleStrategy())).build();
+        return EasyExcel.write(outputStream)
+                .registerWriteHandler(getStyleStrategy()) // 字体居中策略
+                .build();
     }
 
+    /**
+     * 设置表格内容居中显示策略
+     *
+     * @return
+     */
     private static HorizontalCellStyleStrategy getStyleStrategy() {
         WriteCellStyle headWriteCellStyle = new WriteCellStyle();
-        headWriteCellStyle.setFillForegroundColor(Short.valueOf(IndexedColors.GREY_25_PERCENT.getIndex()));
+        // 设置背景颜色
+        headWriteCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        // 设置头字体
         WriteFont headWriteFont = new WriteFont();
-        headWriteFont.setFontHeightInPoints(Short.valueOf((short)13));
-        headWriteFont.setBold(Boolean.valueOf(true));
+        headWriteFont.setFontHeightInPoints((short) 13);
+        headWriteFont.setBold(true);
         headWriteCellStyle.setWriteFont(headWriteFont);
+        // 设置头居中
         headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
+
+        // 内容策略
         WriteCellStyle writeCellStyle = new WriteCellStyle();
+        // 设置内容水平居中
         writeCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
         return new HorizontalCellStyleStrategy(headWriteCellStyle, writeCellStyle);
     }
 
+    /**
+     * 根据Excel模板，批量导入数据
+     *
+     * @param file 导入的Excel
+     * @param clazz 解析的类型
+     * @return 解析完成的数据
+     */
     public static List<?> importExcel(MultipartFile file, Class<?> clazz) {
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("\u6ca1\u6709\u6587\u4ef6\u6216\u8005\u6587\u4ef6\u5185\u5bb9\u4e3a\u7a7a\uff01");
+            throw new RuntimeException("没有文件或者文件内容为空！");
         }
-        List dataList = null;
+        List<Object> dataList = null;
         BufferedInputStream ipt = null;
         try {
             InputStream is = file.getInputStream();
+            // 用缓冲流对数据流进行包装
             ipt = new BufferedInputStream(is);
-            ExcelListener listener = new ExcelListener();
-            EasyExcel.read((InputStream)ipt, clazz, listener).sheet().doRead();
+            // 数据解析监听器
+            com.kuma.boot.office.easyexcel.easyexcelorigin.ExcelListener<Object> listener = new com.kuma.boot.office.easyexcel.easyexcelorigin.ExcelListener<>();
+            // 读取数据
+            EasyExcel.read(ipt, clazz, listener).sheet().doRead();
+            // 获取去读完成之后的数据
             dataList = listener.getDataList();
-        }
-        catch (Exception e) {
-            LogUtils.error((String)String.valueOf(e), (Object[])new Object[0]);
-            throw new RuntimeException("\u6570\u636e\u5bfc\u5165\u5931\u8d25\uff01" + String.valueOf(e));
+        } catch (Exception e) {
+            LogUtils.error(String.valueOf(e));
+            throw new RuntimeException("数据导入失败！" + e);
         }
         return dataList;
     }
 }
-

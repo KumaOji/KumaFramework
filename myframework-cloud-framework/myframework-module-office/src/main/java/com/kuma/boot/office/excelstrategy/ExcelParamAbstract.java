@@ -1,26 +1,47 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  jakarta.servlet.http.HttpServletResponse
- */
 package com.kuma.boot.office.excelstrategy;
 
+
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class ExcelParamAbstract
-implements Serializable {
+/**
+ */
+public abstract class ExcelParamAbstract implements Serializable {
+
+    /**
+     * 	文件地址,本地读取时用
+     */
     protected String filePath;
+
+    /**
+     * 输出流
+     */
     protected HttpServletResponse response;
+
+    /**
+     * 文件名
+     */
     protected String fileName;
+
+    /**
+     * 表头
+     */
     protected Boolean fileNameAsHeadName;
+    /**
+     * 文件输出路径
+     */
     protected String outFilePath;
-    protected List<ExcelParam> list;
+
+    /**
+     * list params
+     */
+    protected List<com.kuma.boot.office.excelstrategy.ExcelParam> list;
+
 
     public String getFilePath() {
-        return this.filePath;
+        return filePath;
     }
 
     public void setFilePath(String filePath) {
@@ -28,7 +49,7 @@ implements Serializable {
     }
 
     public HttpServletResponse getResponse() {
-        return this.response;
+        return response;
     }
 
     public void setResponse(HttpServletResponse response) {
@@ -36,7 +57,7 @@ implements Serializable {
     }
 
     public String getFileName() {
-        return this.fileName;
+        return fileName;
     }
 
     public void setFileName(String fileName) {
@@ -44,7 +65,7 @@ implements Serializable {
     }
 
     public Boolean getFileNameAsHeadName() {
-        return this.fileNameAsHeadName;
+        return fileNameAsHeadName;
     }
 
     public void setFileNameAsHeadName(Boolean fileNameAsHeadName) {
@@ -52,19 +73,18 @@ implements Serializable {
     }
 
     public String getOutFilePath() {
-        return this.outFilePath;
+        return outFilePath;
     }
 
     public void setOutFilePath(String outFilePath) {
         this.outFilePath = outFilePath;
     }
 
-    public List<ExcelParam> getList() {
-        return this.list;
+    public List<com.kuma.boot.office.excelstrategy.ExcelParam> getList() {
+        return list;
     }
 
-    public void setList(List<ExcelParam> list) {
+    public void setList(List<com.kuma.boot.office.excelstrategy.ExcelParam> list) {
         this.list = list;
     }
 }
-

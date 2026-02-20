@@ -1,22 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.bean.BeanUtils
- *  com.kuma.boot.common.utils.io.FileUtils
- *  org.jspecify.annotations.NonNull
- *  org.reactivestreams.Publisher
- *  org.springframework.core.MethodParameter
- *  org.springframework.core.ReactiveAdapter
- *  org.springframework.core.ReactiveAdapterRegistry
- *  org.springframework.core.ResolvableType
- *  org.springframework.http.ReactiveHttpInputMessage
- *  org.springframework.http.codec.multipart.Part
- *  org.springframework.web.reactive.BindingContext
- *  org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver
- *  org.springframework.web.server.ServerWebExchange
- *  reactor.core.publisher.Mono
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.fastexcel.resolver;
 
 import com.kuma.boot.common.utils.bean.BeanUtils;
@@ -26,47 +23,60 @@ import com.kuma.boot.office.fastexcel.annotation.ExcelParam;
 import com.kuma.boot.office.fastexcel.annotation.RequestExcel;
 import com.kuma.boot.office.fastexcel.converter.ExcelHttpMessageReader;
 import com.kuma.boot.office.fastexcel.listener.ExcelMapReadListener;
-import java.util.HashMap;
-import org.jspecify.annotations.NonNull;
-import org.reactivestreams.Publisher;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.ReactiveHttpInputMessage;
-import org.springframework.http.codec.multipart.Part;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-public class ReactiveExcelMethodArgumentResolver
-implements HandlerMethodArgumentResolver {
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * <p>
+ * ReactiveExcelMethodArgumentResolver
+ * </p>
+ *
+ * @author livk
+ */
+public class ReactiveExcelMethodArgumentResolver implements HandlerMethodArgumentResolver {
+
     private final ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
     private final ExcelHttpMessageReader reader = new ExcelHttpMessageReader();
 
+    @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasMethodAnnotation(RequestExcel.class) && parameter.hasParameterAnnotation(ExcelParam.class);
     }
 
-    public @NonNull Mono<Object> resolveArgument(@NonNull MethodParameter parameter, @NonNull BindingContext bindingContext, @NonNull ServerWebExchange exchange) {
-        Class resolvedType = ResolvableType.forMethodParameter((MethodParameter)parameter).resolve();
-        ReactiveAdapter adapter = resolvedType != null ? this.adapterRegistry.getAdapter(resolvedType) : null;
-        RequestExcel requestExcel = (RequestExcel)parameter.getMethodAnnotation(RequestExcel.class);
-        ExcelParam excelParam = (ExcelParam)parameter.getParameterAnnotation(ExcelParam.class);
-        ResolvableType resolvableType = ResolvableType.forMethodParameter((MethodParameter)parameter);
-        Mono mono = Mono.empty();
-        if (requestExcel != null && excelParam != null && this.reader.canRead(resolvableType, exchange.getRequest().getHeaders().getContentType())) {
-            mono = FileUtils.getPartValues((String)excelParam.fileName(), (ServerWebExchange)exchange).flatMap(part -> {
-                ExcelMapReadListener listener = (ExcelMapReadListener)BeanUtils.instantiateClass(requestExcel.parse());
-                HashMap<String, Object> hints = new HashMap<String, Object>();
+    @NonNull
+    @Override
+    public Mono<Object> resolveArgument(@NonNull MethodParameter parameter, @NonNull BindingContext bindingContext,
+                                        @NonNull ServerWebExchange exchange) {
+        Class<?> resolvedType = ResolvableType.forMethodParameter(parameter).resolve();
+        ReactiveAdapter adapter = (resolvedType != null ? adapterRegistry.getAdapter(resolvedType) : null);
+        RequestExcel requestExcel = parameter.getMethodAnnotation(RequestExcel.class);
+        ExcelParam excelParam = parameter.getParameterAnnotation(ExcelParam.class);
+        ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
+        Mono<?> mono = Mono.empty();
+        if (requestExcel != null && excelParam != null
+                && reader.canRead(resolvableType, exchange.getRequest().getHeaders().getContentType())) {
+            mono = FileUtils.getPartValues(excelParam.fileName(), exchange).flatMap(part -> {
+                ExcelMapReadListener<?> listener = BeanUtils.instantiateClass(requestExcel.parse());
+                Map<String, Object> hints = new HashMap<>();
                 hints.put("listener", listener);
                 hints.put("requestExcel", requestExcel);
-                PartServerHttpRequest request = new PartServerHttpRequest(exchange.getRequest(), (Part)part);
-                return this.reader.readMono(resolvableType, (ReactiveHttpInputMessage)request, hints);
+                PartServerHttpRequest request = new PartServerHttpRequest(exchange.getRequest(), part);
+                return reader.readMono(resolvableType, request, hints);
             });
         }
-        return adapter != null ? Mono.just((Object)adapter.fromPublisher((Publisher)mono)) : Mono.from((Publisher)mono);
-    }
-}
 
+        return (adapter != null ? Mono.just(adapter.fromPublisher(mono)) : Mono.from(mono));
+    }
+
+}

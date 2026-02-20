@@ -1,83 +1,117 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.univocity.parsers.common.processor.BeanWriterProcessor
- *  com.univocity.parsers.common.processor.RowWriterProcessor
- *  com.univocity.parsers.csv.CsvWriter
- *  com.univocity.parsers.csv.CsvWriterSettings
- *  jakarta.servlet.http.HttpServletResponse
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.csv;
 
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.office.easyexcel.easyexcelimport.constant.ExportConstant;
 import com.univocity.parsers.common.processor.BeanWriterProcessor;
-import com.univocity.parsers.common.processor.RowWriterProcessor;
 import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.OutputStream;
+
 import java.util.List;
 import java.util.Objects;
 
 public class CsvExportUtil<T> {
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+
+    /**
+     * 导出csv文件(表头和数据都以字符串的形式)
+     *
+     * @param response
+     * @param head
+     * @param rowDataList
      */
-    public static <T> void exportCsvWithString(HttpServletResponse response, String fileName, List<T> head, List<List<T>> rowDataList) {
+    public static <T> void exportCsvWithString(
+            HttpServletResponse response, String fileName, List<T> head, List<List<T>> rowDataList) {
         CsvWriter writer = null;
         try {
-            response.setContentType("application/octet-stream");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".csv");
-            CsvWriterSettings setting = CsvExportUtil.getDefaultWriteSetting();
-            writer = new CsvWriter((OutputStream)response.getOutputStream(), setting);
+            response.setContentType(ExportConstant.EXCEL_CONTENT_TYPE);
+            response.setCharacterEncoding(ExportConstant.UTF_8);
+            response.setHeader(
+                    ExportConstant.CONTENT_DISPOSITION,
+                    ExportConstant.ATTACHMENT_FILENAME + fileName + ExportConstant.CSV_SUFFIX);
+            CsvWriterSettings setting = getDefaultWriteSetting();
+            writer = new CsvWriter(response.getOutputStream(), setting);
             writer.writeHeaders(head);
             writer.writeStringRows(rowDataList);
             writer.flush();
-        }
-        catch (Exception e) {
-            LogUtils.error((String)"CsvExportUtil exportCsv in error:{}", (Object[])new Object[]{e});
-        }
-        finally {
+        } catch (Exception e) {
+            LogUtils.error("CsvExportUtil exportCsv in error:{}", e);
+        } finally {
             if (Objects.nonNull(writer)) {
                 writer.close();
             }
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * 导出csv文件(表头和行都以实体的方式)
+     *
+     * @param response
+     * @param head
+     * @param rowDataList
      */
-    public static <T> void exportCsvWithBean(HttpServletResponse response, String fileName, T head, List<T> rowDataList) {
+    public static <T> void exportCsvWithBean(
+            HttpServletResponse response, String fileName, T head, List<T> rowDataList) {
         CsvWriter writer = null;
         try {
-            response.setContentType("application/octet-stream");
-            response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".csv");
-            CsvWriterSettings setting = CsvExportUtil.getDefaultWriteSetting();
-            BeanWriterProcessor beanWriter = new BeanWriterProcessor(head.getClass());
-            setting.setRowWriterProcessor((RowWriterProcessor)beanWriter);
-            writer = new CsvWriter((OutputStream)response.getOutputStream(), setting);
+            // 设置响应头格式
+            response.setContentType(ExportConstant.EXCEL_CONTENT_TYPE);
+            response.setCharacterEncoding(ExportConstant.UTF_8);
+            response.setHeader(
+                    ExportConstant.CONTENT_DISPOSITION,
+                    ExportConstant.ATTACHMENT_FILENAME + fileName + ExportConstant.CSV_SUFFIX);
+
+            // 设置导出格式
+            CsvWriterSettings setting = getDefaultWriteSetting();
+            // 创见bean处理器，用于处理写入数据
+            BeanWriterProcessor<?> beanWriter = new BeanWriterProcessor<>(head.getClass());
+            setting.setRowWriterProcessor(beanWriter);
+
+            // 导出数据
+            writer = new CsvWriter(response.getOutputStream(), setting);
             writer.processRecords(rowDataList);
             writer.flush();
-        }
-        catch (Exception e) {
-            LogUtils.error((String)"CsvExportUtil exportCsvWithBean in error:{}", (Object[])new Object[]{e});
-        }
-        finally {
+        } catch (Exception e) {
+            LogUtils.error("CsvExportUtil exportCsvWithBean in error:{}", e);
+        } finally {
             if (Objects.nonNull(writer)) {
                 writer.close();
             }
         }
     }
 
+    /**
+     * 获取默认的CSV写入配置对象
+     *
+     * @return
+     */
     private static CsvWriterSettings getDefaultWriteSetting() {
         CsvWriterSettings settings = new CsvWriterSettings();
+        /**
+         * 如果要设置值之间的间隔可以使用下面示例代码 FixedWidthFields lengths = new FixedWidthFields(10, 10, 35, 10,
+         * 40); FixedWidthWriterSettings settings = new FixedWidthWriterSettings(lengths);
+         */
+        // 设置值为null时替换的值
         settings.setNullValue("");
-        settings.setHeaderWritingEnabled(Boolean.TRUE.booleanValue());
+        // 修改分隔符,默认是逗号
+        // settings.getFormat().setDelimiter("");
+        // 设置是否自动写入标题
+        settings.setHeaderWritingEnabled(Boolean.TRUE);
         return settings;
     }
 }
-

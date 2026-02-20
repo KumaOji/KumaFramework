@@ -1,15 +1,13 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.apache.poi.ss.usermodel.Workbook
- */
 package com.kuma.boot.office.excelstrategy.strategy;
 
-import java.io.InputStream;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.io.InputStream;
+
+/**
+ */
 public class Context {
+
     Strategy strategy;
 
     public Context(Strategy strategy) {
@@ -17,7 +15,6 @@ public class Context {
     }
 
     public Workbook executeStrategy(String fileType, InputStream is, Workbook wb) throws Exception {
-        return this.strategy.version(fileType, is, wb);
+        return strategy.version(fileType,is,wb);
     }
 }
-

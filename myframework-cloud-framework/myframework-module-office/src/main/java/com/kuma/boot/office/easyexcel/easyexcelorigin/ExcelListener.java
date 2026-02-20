@@ -1,51 +1,112 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.alibaba.excel.context.AnalysisContext
- *  com.alibaba.excel.event.AnalysisEventListener
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.easyexcel.easyexcelorigin;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ExcelListener<T>
-extends AnalysisEventListener<T> {
+/**
+ * Excel数据解析监听器， 数据解析方法异步执行
+ *
+ * @param <T> Excel中数据的类型
+ */
+// @Getter
+// @Setter
+// @NoArgsConstructor
+public class ExcelListener<T> extends AnalysisEventListener<T> {
+
+    // 加入一个判断标签，判断数据是否已经读取完
     private volatile boolean retryLock = false;
-    private final List<T> dataList = new ArrayList<T>();
+
+    // 解析完成后的数据集合, 监听对象初始化之后，立即初始化集合对象
+    private final List<T> dataList = new ArrayList<>();
+
+    // 每次最多导入条数
     private final int batchSize = 2000;
 
+    /**
+     * 获取解析后的数据集合， 如果数据还没有被解析完成，会对读取该集合的线程进行阻塞，直到数据读取完成之后，进行解锁。 如果一次导入数据超过batchSize条，则以抛异常的形式阻止导入数据
+     *
+     * @return 解析后的数据集合
+     */
     public List<T> getDataList() {
-        while (!this.retryLock) {
+        while (true) {
+            if (retryLock) {
+                if (dataList.size() > batchSize) {
+                    // 手动清空数据内存数据，减少内存消耗
+                    dataList.clear();
+                    throw new RuntimeException("一次最多导入" + batchSize + "条数据");
+                } else {
+                    return dataList;
+                }
+            }
         }
-        if (this.dataList.size() > 2000) {
-            this.dataList.clear();
-            throw new RuntimeException("\u4e00\u6b21\u6700\u591a\u5bfc\u51652000\u6761\u6570\u636e");
-        }
-        return this.dataList;
     }
 
+    /**
+     * Excel每解析一行数据，就会调用一次该方法
+     *
+     * @param data one row value. Is is same as {@link AnalysisContext#readRowHolder()}
+     * @param context analysis context
+     */
+    @Override
     public void invoke(T data, AnalysisContext context) {
-        this.dataList.add(data);
+        dataList.add(data);
     }
 
+    /**
+     * 读取表头内容
+     *
+     * @param headMap 表头部数据
+     * @param context 数据解析上下文
+     */
+    @Override
     public void invokeHeadMap(Map<Integer, String> headMap, AnalysisContext context) {
+        // LogUtils.info("表头：" + headMap);
     }
 
+    /**
+     * 流中的数据解析完成之后，就会调用此方法
+     *
+     * @param context
+     */
+    @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
-        this.retryLock = true;
+        // 数据解析完成，解锁
+        retryLock = true;
     }
 
+    /**
+     * 解析过程如果发生异常，会调用此方法
+     *
+     * @param exception
+     * @param context
+     */
+    @Override
     public void onException(Exception exception, AnalysisContext context) {
-        throw new RuntimeException("Excel\u6570\u636e\u5f02\u5e38\uff0c\u8bf7\u68c0\u67e5\u6216\u8054\u7cfb\u7ba1\u7406\u5458\uff01");
+        throw new RuntimeException("Excel数据异常，请检查或联系管理员！");
     }
 
     public int getBatchSize() {
-        return 2000;
+        return batchSize;
     }
 
     public void setRetryLock(boolean retryLock) {
@@ -53,7 +114,6 @@ extends AnalysisEventListener<T> {
     }
 
     public boolean isRetryLock() {
-        return this.retryLock;
+        return retryLock;
     }
 }
-

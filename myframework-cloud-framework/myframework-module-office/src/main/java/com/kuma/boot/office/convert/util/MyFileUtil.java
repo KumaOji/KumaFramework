@@ -1,72 +1,184 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.io.FileUtil
- *  cn.hutool.core.util.ZipUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.apache.commons.io.FileUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.office.convert.util;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
+import org.apache.commons.io.FileUtils;
+import cn.hutool.core.io.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import org.apache.commons.io.FileUtils;
 
+/**
+ * 文件工具类
+ *
+ * @author kuma
+ * @version 2022.09
+ * @since 2022-11-21 14:10:12
+ */
 public class MyFileUtil {
+
+    /**
+     * 多文件或目录压缩：将`srcPath`目录以及其目录下的所有文件目录打包到`zipPath`+`suffixFileName`文件中 【采用hutool工具类进行打包文件】
+     *
+     * @param srcPath:        需打包的源目录
+     * @param zipPath:        打包后的路径+文件后缀名
+     * @param isWithSrcDir:   是否带目录显示 （true:表示带目录显示）
+     * @param isDeleteSrcZip: 是否删除源目录
+     * @return java.lang.String
+     * @since 2020/8/27 19:25
+     */
     public static File zip(String srcPath, String zipPath, boolean isWithSrcDir, boolean isDeleteSrcZip) {
-        LogUtils.debug((String)"\u3010\u538b\u7f29\u6587\u4ef6\u3011 \u6e90\u76ee\u5f55\u8def\u5f84: \u3010{}\u3011 \u6253\u5305\u540e\u7684\u8def\u5f84+\u6587\u4ef6\u540e\u7f00\u540d: \u3010{}\u3011", (Object[])new Object[]{srcPath, zipPath});
-        File zipFile = ZipUtil.zip((String)srcPath, (String)zipPath, (boolean)isWithSrcDir);
+        LogUtils.debug("【压缩文件】 源目录路径: 【{}】 打包后的路径+文件后缀名: 【{}】", srcPath, zipPath);
+        File zipFile = ZipUtil.zip(srcPath, zipPath, isWithSrcDir);
+        // 删除目录 -> 保证下次生成文件的时候不会累计上次留下的文件
         if (isDeleteSrcZip) {
-            boolean result = MyFileUtil.deleteFileOrFolder(srcPath);
-            LogUtils.info((String)"\u5220\u9664\u6210\u529f", (Object[])new Object[]{result});
+            boolean result = deleteFileOrFolder(srcPath);
+            LogUtils.info("删除成功", result);
         }
         return zipFile;
     }
 
+    /**
+     * 根据路径删除指定的目录或文件，无论存在与否
+     *
+     * @param fullFileOrDirPath: 要删除的目录或文件
+     * @return 删除成功返回 true，否则返回 false
+     * @since 2020/9/5 20:56
+     */
     public static boolean deleteFileOrFolder(String fullFileOrDirPath) {
-        FileUtil.del((String)fullFileOrDirPath);
+        FileUtil.del(fullFileOrDirPath);
         return true;
     }
 
+    /**
+     * 根据路径创建文件
+     *
+     * @param fullFilePath: 文件生成路径
+     * @return 文件信息
+     * @since 2020/9/8 21:41
+     */
     public static File touch(String fullFilePath) {
-        return FileUtil.touch((String)fullFilePath);
+        return FileUtil.touch(fullFilePath);
     }
 
-    public static File unzip(InputStream inputStream, String zipFilePath, String outFileDir, boolean isDeleteZip) throws IOException {
-        LogUtils.debug((String)"\u3010\u89e3\u538b\u6587\u4ef6\u3011 zip\u6587\u4ef6\u8def\u5f84: \u3010{}\u3011 \u89e3\u538b\u540e\u7684\u76ee\u5f55\u8def\u5f84: \u3010{}\u3011", (Object[])new Object[]{zipFilePath, outFileDir});
-        File zipFile = FileUtil.newFile((String)zipFilePath);
-        FileUtils.copyInputStreamToFile((InputStream)inputStream, (File)zipFile);
-        File outFile = ZipUtil.unzip((String)zipFilePath, (String)outFileDir, (Charset)Charset.forName("GBK"));
+    /**
+     * 解压
+     *
+     * @param inputStream: 流
+     * @param zipFilePath: zip文件路径
+     * @param outFileDir:  解压后的目录路径
+     * @param isDeleteZip: 是否删除源zip文件
+     * @return 解压后的文件File信息
+     * @since 2020/9/5 20:50
+     */
+    public static File unzip(InputStream inputStream, String zipFilePath, String outFileDir, boolean isDeleteZip)
+            throws IOException {
+        LogUtils.debug("【解压文件】 zip文件路径: 【{}】 解压后的目录路径: 【{}】", zipFilePath, outFileDir);
+        // zip压缩文件
+        File zipFile = FileUtil.newFile(zipFilePath);
+        // 写入文件
+        FileUtils.copyInputStreamToFile(inputStream, zipFile);
+        // 编码方式 "UTF-8" 、"GBK" 【注： gbk编码才能解决报错: java.lang.IllegalArgumentException: MALFORMED】
+        File outFile = ZipUtil.unzip(zipFilePath, outFileDir, Charset.forName("GBK"));
+        // 删除zip -> 保证下次解压后的文件数据不会累计上次解压留下的文件
         if (isDeleteZip) {
-            MyFileUtil.deleteFileOrFolder(zipFilePath);
+            deleteFileOrFolder(zipFilePath);
         }
         return outFile;
     }
 
+    /**
+     * 读取文件内容
+     *
+     * @param file: 文件数据
+     * @return 文件内容
+     * @since 2020/9/5 23:00
+     */
     public static String readFileContent(File file) {
-        return FileUtil.readUtf8String((File)file);
+        return FileUtil.readUtf8String(file);
     }
 
+    /**
+     * 读取文件内容
+     *
+     * @param filePath: 文件路径
+     * @return 文件内容
+     * @since 2020/9/5 23:00
+     */
     public static String readFileContent(String filePath) {
-        return FileUtil.readUtf8String((String)filePath);
+        return FileUtil.readUtf8String(filePath);
     }
 
+    /**
+     * 读取文件数据
+     *
+     * @param filePath: 文件路径
+     * @return 文件字节码
+     * @since 2020/9/5 23:00
+     */
     public static byte[] readBytes(String filePath) {
-        return FileUtil.readBytes((String)filePath);
+        return FileUtil.readBytes(filePath);
     }
 
+    /**
+     * 写入文件内容
+     *
+     * @param fileContent: 文件内容
+     * @param filePath:    文件路径
+     * @return 文件信息
+     * @since 2020/11/17 21:38
+     */
     public static File writeFileContent(String fileContent, String filePath) {
-        return FileUtil.writeUtf8String((String)fileContent, (String)filePath);
+        return FileUtil.writeUtf8String(fileContent, filePath);
     }
 
+    /**
+     * 字节码写入文件
+     *
+     * @param data:     字节码
+     * @param filePath: 文件路径
+     * @return 文件信息
+     * @since 2020/11/24 14:36
+     */
     public static File writeFileContent(byte[] data, String filePath) {
-        return FileUtil.writeBytes((byte[])data, (String)filePath);
+        return FileUtil.writeBytes(data, filePath);
     }
-}
 
+    // public static void main(String[] args) {
+    //	try {
+    //		String filePath =
+    // "E:\\IT_zhengqing\\code\\me-workspace\\最新代码生成器\\code-api\\document\\import\\bLogUtils.zip";
+    //		String filePathX =
+    // "E:\\IT_zhengqing\\code\\me-workspace\\最新代码生成器\\code-api\\document\\import";
+    //		// File file =
+    //		// FileUtil.newFile(filePath);
+    //		// InputStream fileInputStream = new FileInputStream(file);
+    //		File unzip = ZipUtil.unzip(filePath, filePathX);
+    //		LogUtils.info(unzip);
+    //
+    //		String fileContent = FileUtil.readUtf8String(filePath);
+    //	} catch (Exception e) {
+    //		LogUtils.error(e);
+    //	}
+    //
+    // }
+
+}
