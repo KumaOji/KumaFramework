@@ -16,25 +16,38 @@ dependencyResolutionManagement {
     }
 }
 
-
+//include "myframework-project"
 def oneLayerProjects = ['framework', 'project']
 for (name in oneLayerProjects) {
     include "myframework-boot-${name}"
+    include "myframework-cloud-${name}"
 }
 
-def frameworkSubModules = ['common', 'core', 'data-datasource', 'data-mybatis', 'office',
-                           'mq-common', 'mq-kafka',
+def frameworkBootSubModules = ['common', 'core', 'data-datasource',
+                               'data-mybatis', 'office',
+                           'mq-common', 'mq-kafka','ip2region',
                            'data-common', 'springdoc', 'web',
-                           'cache-jetcache', 'cache-caffeine', 'cache-common', 'cache-redis',
+                           'cache-jetcache', 'cache-caffeine', 'cache-common',
+                               'cache-redis',
                            'infrastruct', "spring", "application"]
-for (name in frameworkSubModules) {
+for (name in frameworkBootSubModules) {
     include "myframework-boot-framework:myframework-module-${name}"
 }
 
-def projectSubModules = ['project1', 'project2', 'project3', 'project4', 'blog']
-for (name in projectSubModules) {
+def frameworkSubModules = ['bootstrap']
+for (name in frameworkSubModules) {
+    include "myframework-cloud-framework:myframework-module-${name}"
+}
+
+def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'blog']
+for (name in projectBootSubModules) {
     include "myframework-boot-project:myframework-project-${name}"
 }
+
+//def projectCloudSubModules = ['']
+//for (name in projectCloudSubModules) {
+//    include "myframework-cloud-project:myframework-project-${name}"
+//}
 
 gradle.settingsEvaluated {
     if (JavaVersion.current() < JavaVersion.VERSION_25) {
@@ -42,6 +55,3 @@ gradle.settingsEvaluated {
     }
 }
 
-include 'myframework-boot-framework:myframework-module-ip2region'
-
-include 'myframework-boot-framework:myframework-module-bootstrap'
