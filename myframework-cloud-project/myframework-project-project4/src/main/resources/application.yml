@@ -1,0 +1,30 @@
+# Project1 - 项目配置（框架配置由 application-framework.yml 提供，未定义项使用框架默认值）
+spring:
+  profiles:
+    active: ${active}
+  application:
+    name: project4
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+        postgresql:
+          url: ${postgresql_url}
+          username: ${postgresql_username}
+          password: ${postgresql_password}
+          driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: ${redis_host}
+      port: ${redis_port}
+      database: ${redis_database}
+      jedis:
+        pool:
+          max-active: ${redis_jedis_pool_max_active}
+          max-idle: ${redis_jedis_pool_max_idle}
+          min-idle: ${redis_jedis_pool_min_idle}

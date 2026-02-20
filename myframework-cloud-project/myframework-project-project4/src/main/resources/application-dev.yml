@@ -1,0 +1,65 @@
+spring:
+  main:
+    lazy-initialization: true
+    banner-mode: console
+    log-startup-info: false
+  banner:
+    location: classpath:banner/banner.txt
+  cache:
+    type: none
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    dynamic:
+      datasource:
+        mysql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
+        postgresql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      acks: "1"
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
+    com.kuma.boot: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+mybatis-plus:
+  global-config:
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    doc-expansion: none
+    try-it-out-enabled: false
+
+kuma:
+  springdoc:
+    title: API 文档
+    description: RESTful API 接口文档
+    version: 1.0.0
+    license-name: Apache 2.0
+    license-url: https://www.apache.org/licenses/LICENSE-2.0.html

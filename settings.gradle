@@ -31,7 +31,7 @@ for (name in frameworkSubModules) {
     include "myframework-cloud-framework:myframework-module-${name}"
 }
 
-def projectSubModules = ['project1', 'project2', 'project3','blog']
+def projectSubModules = ['project1', 'project2', 'project3', 'project4','blog']
 for (name in projectSubModules) {
     include "myframework-cloud-project:myframework-project-${name}"
 }
