@@ -34,7 +34,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
         scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project4"},
         exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
-@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.boot.data.mybatis.delay", "com.kuma.cloud.project4.mapper"})
+@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.boot.data.mybatis.delay", "com.kuma.cloud.project4.mapper"}, annotationClass = org.apache.ibatis.annotations.Mapper.class)
 public class Project4Application extends SpringBootServletInitializer {
 
     @Override

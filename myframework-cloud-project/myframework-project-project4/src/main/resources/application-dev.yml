@@ -60,3 +60,11 @@ kuma:
     version: 1.0.0
     license-name: Apache 2.0
     license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+# 延迟线程池配置
+delay:
+  thread:
+    core: 5
+    max: 10
+    queue: 100
+    keepAlive: 60

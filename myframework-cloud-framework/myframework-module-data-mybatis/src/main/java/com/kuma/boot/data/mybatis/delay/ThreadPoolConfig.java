@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- * 线程池配置类（data-mybatis 延迟消息用）
+ * 线程池配置类
  */
 @EnableAsync
 @Configuration("delayThreadPoolConfig")
@@ -35,33 +35,33 @@ public class ThreadPoolConfig {
     /**
      * 核心线程数量
      */
-    @Value("${import.thread.core}")
+    @Value("${delay.thread.core}")
     private Integer core;
 
     /**
      * 最大线程数
      */
-    @Value("${import.thread.max}")
+    @Value("${delay.thread.max}")
     private Integer max;
 
     /**
      * 排队线程数
      */
-    @Value("${import.thread.queue}")
+    @Value("${delay.thread.queue}")
     private Integer queue;
 
     /**
      * 线程回收时间
      */
-    @Value("${import.thread.keepAlive}")
+    @Value("${delay.thread.keepAlive}")
     private Integer keepAlive;
 
     /**
-     * toolsThreadPool
+     * delayThreadPool
      *
      * @return {@link ThreadPoolExecutor} 线程池
      */
-    @Bean("toolThreadPool")
+    @Bean("delayThreadPool")
     public ThreadPoolExecutor arxmlThreadPoolExecutor() {
         ThreadFactory namedThreadFactory =
                 new ThreadFactoryBuilder().setNameFormat("build-tool-%d").build();

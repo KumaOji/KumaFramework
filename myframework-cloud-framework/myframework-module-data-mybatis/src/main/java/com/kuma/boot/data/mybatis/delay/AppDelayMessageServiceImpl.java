@@ -59,7 +59,7 @@ public class AppDelayMessageServiceImpl extends ServiceImpl<AppDelayMessageMappe
      * @param stage    编译工程:COMPILE; 测试配置:TEST;
      * @param callback 回调函数
      */
-    @Async("toolThreadPool")
+    @Async("delayThreadPool")
     @Override
     public void publish(
             String appId,
@@ -86,7 +86,7 @@ public class AppDelayMessageServiceImpl extends ServiceImpl<AppDelayMessageMappe
      *
      * @param message 消息体
      */
-    @Async("toolThreadPool")
+    @Async("delayThreadPool")
     @Override
     public void callback(AppDelayMessage message) {
         LogUtils.info("@@ 超时回调函数处理, message:{}", JSON.toJSONString(message));
