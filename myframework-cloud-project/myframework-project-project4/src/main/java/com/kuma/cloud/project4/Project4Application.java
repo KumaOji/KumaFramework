@@ -25,16 +25,16 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 /**
- * Project1 启动类
- * <p>project1 无 Mapper 时，仅扫描 com.kuma.boot 以消除 MyBatis 警告</p>
+ * Project4 启动类
+ * <p>project4 无 Mapper 时，仅扫描 com.kuma.boot 以消除 MyBatis 警告</p>
  *
  * @author kuma
  */
 @SpringBootApplication(
-        scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project1"},
+        scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project4"},
         exclude = DruidDataSourceAutoConfigure.class)
-@ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project1"})
-@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.cloud.project1.mapper"})
+@ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
+@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.cloud.project4.mapper"})
 public class Project4Application extends SpringBootServletInitializer {
 
     @Override

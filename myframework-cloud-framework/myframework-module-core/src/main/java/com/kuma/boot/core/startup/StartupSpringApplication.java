@@ -81,7 +81,7 @@ public class StartupSpringApplication extends SpringApplication {
         final ResourceLoader resourceLoader = new DefaultResourceLoader();
         Resource resource = resourceLoader.getResource(DEFAULT_BANNER_LOCATION);
         super.setBanner(new KmcBanner(resource));
-        System.setProperty("spring.banner.location", DEFAULT_BANNER_LOCATION);
+//        System.setProperty("spring.banner.location", DEFAULT_BANNER_LOCATION);
         isKmcBanner = true;
         return this;
     }
