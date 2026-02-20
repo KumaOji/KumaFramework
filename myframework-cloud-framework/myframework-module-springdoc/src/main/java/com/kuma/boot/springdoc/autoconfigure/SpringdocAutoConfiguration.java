@@ -20,7 +20,9 @@ import static com.kuma.boot.springdoc.support.PackageScanUtils.resolvePackagesWi
 import static org.apache.commons.lang3.StringUtils.stripAccents;
 
 import com.kuma.boot.common.constant.StarterNameConstants;
+import com.kuma.boot.common.model.request.PageParam;
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.springdoc.autoconfigure.pageable.PageableRequest;
 import com.kuma.boot.springdoc.autoconfigure.properties.SpringdocProperties;
 import com.kuma.boot.springdoc.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.v3.oas.models.Components;
@@ -46,6 +48,7 @@ import java.net.UnknownHostException;
 import cn.hutool.core.collection.CollUtil;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,6 +127,10 @@ public class SpringdocAutoConfiguration implements InitializingBean {
 
     //@Value("${spring.cloud.client.ip-address}")
     //private String ip;
+    static {
+        // 将 PageParam 在 Swagger 中展开为扁平的 page、size、sort 参数
+        SpringDocUtils.getConfig().replaceParameterObjectWithClass(PageParam.class, PageableRequest.class);
+    }
 
     @Value("${server.port:8080}")
     private int port;
@@ -277,7 +284,7 @@ public class SpringdocAutoConfiguration implements InitializingBean {
 
         Contact contact = new Contact()
                 .name("kuma")
-                .email("981376577@qq.com")
+                .email("2569277704@qq.com")
                 .url("https://github.com/kuma/kuma-cloud-project");
         License license = new License()
                 .name("Apache 2.0")

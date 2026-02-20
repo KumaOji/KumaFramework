@@ -14,5 +14,12 @@ dependencies {
     api projectLibs.spring.web
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.jakarta.annotation.api
+    api projectLibs.jakarta.servlet.api
     api projectLibs.slf4j.api
+    api projectLibs.knife4j
+    api projectLibs.knife4j.core
+    api projectLibs.jackson.databind
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

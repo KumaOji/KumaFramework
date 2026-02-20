@@ -13,6 +13,7 @@ dependencyManagement {
 
 dependencies {
     api project(':myframework-cloud-framework:myframework-module-common')
+    api project(':myframework-cloud-framework:myframework-module-springdoc')
     api project(':myframework-cloud-framework:myframework-module-core')
     api project(':myframework-cloud-framework:myframework-module-cache-common')
     api project(':myframework-cloud-framework:myframework-module-cache-redis')
