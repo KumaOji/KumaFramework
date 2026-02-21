@@ -1,12 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.validation.ConstraintValidator
- *  jakarta.validation.ConstraintValidatorContext
- *  org.springframework.context.i18n.LocaleContextHolder
- */
 package com.kuma.boot.web.validation.spel.jakarta;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -19,29 +10,51 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 
-public class SpelValidator
-implements ConstraintValidator<SpelValid, Object> {
-    private SpelValid spelValid;
+/**
+ * {@link com.kuma.boot.web.validation.spel.jakarta.SpelValid} 的实际校验器
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/4/11
+ */
+public class SpelValidator implements ConstraintValidator<com.kuma.boot.web.validation.spel.jakarta.SpelValid, Object> {
 
-    public void initialize(SpelValid constraintAnnotation) {
+    private com.kuma.boot.web.validation.spel.jakarta.SpelValid spelValid;
+
+    @Override
+    public void initialize( com.kuma.boot.web.validation.spel.jakarta.SpelValid constraintAnnotation) {
         this.spelValid = constraintAnnotation;
     }
 
+    @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
-        if (!this.spelValid.condition().isEmpty() && !SpelParser.parse(this.spelValid.condition(), value, Boolean.class).booleanValue()) {
-            LogUtils.debug((String)"SpelValid condition is not satisfied, skip validation, condition: {}", (Object[])new Object[]{this.spelValid.condition()});
+
+        // 表达式不为空且计算结果为 false，跳过校验
+        if (!spelValid.condition().isEmpty() && !SpelParser.parse(spelValid.condition(), value, Boolean.class)) {
+            LogUtils.debug("SpelValid condition is not satisfied, skip validation, condition: {}", spelValid.condition());
             return true;
         }
-        SpelValidContext spelValidContext = SpelValidContext.builder().locale(LocaleContextHolder.getLocale()).build();
-        ObjectValidResult validateObjectResult = SpelValidExecutor.validateObject(value, this.spelValid.spelGroups(), spelValidContext);
-        this.buildConstraintViolation(validateObjectResult, context);
+
+        // 构建上下文
+        SpelValidContext spelValidContext = SpelValidContext.builder()
+                .locale(LocaleContextHolder.getLocale())
+                .build();
+
+        // 校验对象
+        ObjectValidResult validateObjectResult = SpelValidExecutor.validateObject(value, spelValid.spelGroups(), spelValidContext);
+
+        // 构建错误信息
+        buildConstraintViolation(validateObjectResult, context);
         return validateObjectResult.noneError();
     }
 
-    private void buildConstraintViolation(ObjectValidResult validateObjectResult, ConstraintValidatorContext context) {
+    /**
+     * 生成错误信息并将其添加到验证上下文
+     */
+    private void buildConstraintViolation( ObjectValidResult validateObjectResult, ConstraintValidatorContext context) {
         if (validateObjectResult.noneError()) {
             return;
         }
@@ -50,5 +63,5 @@ implements ConstraintValidator<SpelValid, Object> {
             context.buildConstraintViolationWithTemplate(error.getErrorMessage()).addPropertyNode(error.getFieldName()).addConstraintViolation();
         }
     }
-}
 
+}

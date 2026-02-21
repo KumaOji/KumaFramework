@@ -1,10 +1,17 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.sse;
 
+
+/**
+ * sse消息
+ *
+ * @author zhanghongbin
+ */
 public class SseMessage<T> {
+
+    // 主题：不同位置推送的内容不同
     private String topic = "";
+
+    // 推送消息
     private T data;
 
     public SseMessage(String topic, T data) {
@@ -17,7 +24,7 @@ public class SseMessage<T> {
     }
 
     public String getTopic() {
-        return this.topic;
+        return topic;
     }
 
     public void setTopic(String topic) {
@@ -25,11 +32,10 @@ public class SseMessage<T> {
     }
 
     public T getData() {
-        return this.data;
+        return data;
     }
 
     public void setData(T data) {
         this.data = data;
     }
 }
-

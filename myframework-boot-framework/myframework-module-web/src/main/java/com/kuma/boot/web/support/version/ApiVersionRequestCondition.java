@@ -1,86 +1,124 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.comparator.CompareUtil
- *  cn.hutool.core.text.CharSequenceUtil
- *  cn.hutool.core.util.NumberUtil
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.exception.ApiVersionDeprecatedException
- *  jakarta.servlet.http.HttpServletRequest
- *  org.springframework.web.servlet.mvc.condition.RequestCondition
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.version;
 
 import cn.hutool.core.comparator.CompareUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.common.exception.ApiVersionDeprecatedException;
 import com.kuma.boot.web.annotation.ApiVersion;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 
-public class ApiVersionRequestCondition
-implements RequestCondition<ApiVersionRequestCondition> {
+import static cn.hutool.core.text.CharSequenceUtil.splitToArray;
+
+/**
+ * 优雅的接口版本控制，URL匹配器
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-27 20:20:48
+ */
+public class ApiVersionRequestCondition implements RequestCondition<ApiVersionRequestCondition> {
+
     private ApiVersion apiVersion;
-    private ApiVersionProperties apiVersionProperties;
+    private com.kuma.boot.web.support.version.ApiVersionProperties apiVersionProperties;
+
+    /** {@link RequestMapping} 版本占位符索引 */
     private Integer versionPlaceholderIndex;
 
-    public ApiVersionRequestCondition(ApiVersion apiVersion, ApiVersionProperties apiVersionProperties, Integer versionPlaceholderIndex) {
+    public ApiVersionRequestCondition(
+            ApiVersion apiVersion,
+            com.kuma.boot.web.support.version.ApiVersionProperties apiVersionProperties,
+            Integer versionPlaceholderIndex) {
         this.apiVersion = apiVersion;
         this.apiVersionProperties = apiVersionProperties;
         this.versionPlaceholderIndex = versionPlaceholderIndex;
     }
 
-    public ApiVersionRequestCondition combine(ApiVersionRequestCondition apiVersionRequestCondition) {
-        return new ApiVersionRequestCondition(apiVersionRequestCondition.getApiVersion(), apiVersionRequestCondition.getApiVersionProperties(), apiVersionRequestCondition.getVersionPlaceholderIndex());
+    @Override
+    public ApiVersionRequestCondition combine(
+            ApiVersionRequestCondition apiVersionRequestCondition) {
+        // 最近优先原则：在方法上的 {@link ApiVersion} 可覆盖在类上面的 {@link ApiVersion}
+        return new ApiVersionRequestCondition(
+                apiVersionRequestCondition.getApiVersion(),
+                apiVersionRequestCondition.getApiVersionProperties(),
+                apiVersionRequestCondition.getVersionPlaceholderIndex());
     }
 
+    @Override
     public ApiVersionRequestCondition getMatchingCondition(HttpServletRequest request) {
-        double apiVersionValue;
+        // 校验请求url中是否包含版本信息
         String requestURI = request.getRequestURI();
-        String[] versionPaths = CharSequenceUtil.splitToArray((CharSequence)requestURI, (CharSequence)"/");
-        double pathVersion = Double.parseDouble(versionPaths[this.versionPlaceholderIndex].substring(1));
-        if (pathVersion >= (apiVersionValue = this.getApiVersion().value())) {
-            double minimumVersion = this.apiVersionProperties.getMinimumVersion();
-            if ((this.getApiVersion().deprecated() || minimumVersion > pathVersion) && NumberUtil.equals((double)pathVersion, (double)apiVersionValue)) {
-                throw new ApiVersionDeprecatedException(StrUtil.format((CharSequence)"\u5ba2\u6237\u7aef\u8c03\u7528\u5f03\u7528\u7248\u672cAPI\u63a5\u53e3\uff0crequestURI\uff1a{}", (Object[])new Object[]{requestURI}));
-            }
-            if (this.getApiVersion().deprecated()) {
+        String[] versionPaths = splitToArray(requestURI, "/");
+        double pathVersion = Double.parseDouble(versionPaths[versionPlaceholderIndex].substring(1));
+
+        // pathVersion的值大于等于apiVersionValue皆可匹配，除非ApiVersion的deprecated值已被标注为true
+        double apiVersionValue = this.getApiVersion().value();
+        if (pathVersion >= apiVersionValue) {
+            double minimumVersion = apiVersionProperties.getMinimumVersion();
+            if ((this.getApiVersion().deprecated() || minimumVersion > pathVersion)
+                    && NumberUtil.equals(pathVersion, apiVersionValue)) {
+                // 匹配到弃用版本接口
+                throw new ApiVersionDeprecatedException(
+                        StrUtil.format("客户端调用弃用版本API接口，requestURI：{}", requestURI));
+            } else if (this.getApiVersion().deprecated()) {
+                // 继续匹配
                 return null;
             }
+
+            // 匹配成功
             return this;
         }
+
+        // 继续匹配
         return null;
     }
 
-    public int compareTo(ApiVersionRequestCondition apiVersionRequestCondition, HttpServletRequest request) {
-        return CompareUtil.compare((Comparable)Double.valueOf(apiVersionRequestCondition.getApiVersion().value()), (Comparable)Double.valueOf(this.getApiVersion().value()));
+    @Override
+    public int compareTo(
+            ApiVersionRequestCondition apiVersionRequestCondition, HttpServletRequest request) {
+        // 当出现多个符合匹配条件的ApiVersionCondition，优先匹配版本号较大的
+        return CompareUtil.compare(
+                apiVersionRequestCondition.getApiVersion().value(), getApiVersion().value());
     }
 
     public ApiVersion getApiVersion() {
-        return this.apiVersion;
+        return apiVersion;
     }
 
     public void setApiVersion(ApiVersion apiVersion) {
         this.apiVersion = apiVersion;
     }
 
-    public ApiVersionProperties getApiVersionProperties() {
-        return this.apiVersionProperties;
+    public com.kuma.boot.web.support.version.ApiVersionProperties getApiVersionProperties() {
+        return apiVersionProperties;
     }
 
-    public void setApiVersionProperties(ApiVersionProperties apiVersionProperties) {
+    public void setApiVersionProperties( com.kuma.boot.web.support.version.ApiVersionProperties apiVersionProperties) {
         this.apiVersionProperties = apiVersionProperties;
     }
 
     public Integer getVersionPlaceholderIndex() {
-        return this.versionPlaceholderIndex;
+        return versionPlaceholderIndex;
     }
 
     public void setVersionPlaceholderIndex(Integer versionPlaceholderIndex) {
         this.versionPlaceholderIndex = versionPlaceholderIndex;
     }
 }
-

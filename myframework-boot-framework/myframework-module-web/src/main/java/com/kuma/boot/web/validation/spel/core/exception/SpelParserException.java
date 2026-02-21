@@ -1,10 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.core.exception;
 
-public class SpelParserException
-extends SpelValidatorException {
+/**
+ * 表达式解析异常
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/4/29
+ */
+public class SpelParserException extends SpelValidatorException {
+
     public SpelParserException(String message) {
         super(message);
     }
@@ -16,5 +20,5 @@ extends SpelValidatorException {
     public SpelParserException(Throwable cause) {
         super(cause);
     }
-}
 
+}

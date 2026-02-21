@@ -1,21 +1,28 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.core.util;
 
 import java.math.BigDecimal;
 import java.util.OptionalInt;
 
+/**
+ * 数值类比较工具
+ * 参考 {@link org.hibernate.validator.internal.constraintvalidators.bv.number.bound.NumberComparatorHelper}
+ * 在此基础上拓展比较
+ *
+ * @author oddfar
+ */
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "JavadocReference"})
 public class NumberComparatorUtil {
-    public static final OptionalInt LESS_THAN = OptionalInt.of(-1);
-    public static final OptionalInt FINITE_VALUE = OptionalInt.empty();
-    public static final OptionalInt GREATER_THAN = OptionalInt.of(1);
 
     private NumberComparatorUtil() {
     }
 
+    public static final OptionalInt LESS_THAN = OptionalInt.of(-1);
+
+    public static final OptionalInt FINITE_VALUE = OptionalInt.empty();
+
+    public static final OptionalInt GREATER_THAN = OptionalInt.of(1);
+
     public static int compare(Number number, Number value, OptionalInt treatNanAs) {
-        boolean valueIsDouble;
         if (number == null || value == null || treatNanAs == null || !treatNanAs.isPresent()) {
             throw new IllegalArgumentException("[Number], [Value] and [TreatNanAs] must not be null.");
         }
@@ -23,17 +30,19 @@ public class NumberComparatorUtil {
             return 0;
         }
         boolean numberIsDouble = number instanceof Double || number instanceof Float;
-        boolean bl = valueIsDouble = value instanceof Double || value instanceof Float;
+        boolean valueIsDouble = value instanceof Double || value instanceof Float;
+
         if (numberIsDouble && valueIsDouble) {
-            return NumberComparatorUtil.compare(number.doubleValue(), value.doubleValue());
+            return compare(number.doubleValue(), value.doubleValue());
         }
         if (numberIsDouble) {
-            return NumberComparatorUtil.compare(number.doubleValue(), value, treatNanAs);
+            return compare(number.doubleValue(), value, treatNanAs);
         }
         if (valueIsDouble) {
-            return NumberComparatorUtil.compare(number, value.doubleValue(), treatNanAs);
+            return compare(number, value.doubleValue(), treatNanAs);
         }
-        return BigDecimalUtil.valueOf(number).compareTo(BigDecimalUtil.valueOf(value));
+
+        return com.kuma.boot.web.validation.spel.core.util.BigDecimalUtil.valueOf(number).compareTo(com.kuma.boot.web.validation.spel.core.util.BigDecimalUtil.valueOf(value));
     }
 
     private static int compare(Double number, double value) {
@@ -41,19 +50,23 @@ public class NumberComparatorUtil {
     }
 
     private static int compare(Number number, Double value, OptionalInt treatNanAs) {
-        OptionalInt infinity = NumberComparatorUtil.infinityCheck(value, treatNanAs = OptionalInt.of(-treatNanAs.getAsInt()));
+        // 检查的是 value，所以需要反转
+        //noinspection OptionalGetWithoutIsPresent
+        treatNanAs = OptionalInt.of(-treatNanAs.getAsInt());
+        OptionalInt infinity = infinityCheck(value, treatNanAs);
         if (infinity.isPresent()) {
+            // 这里也要反转
             return -infinity.getAsInt();
         }
-        return BigDecimalUtil.valueOf(number).compareTo(BigDecimal.valueOf(value));
+        return com.kuma.boot.web.validation.spel.core.util.BigDecimalUtil.valueOf(number).compareTo(BigDecimal.valueOf(value));
     }
 
     private static int compare(Double number, Number value, OptionalInt treatNanAs) {
-        OptionalInt infinity = NumberComparatorUtil.infinityCheck(number, treatNanAs);
+        OptionalInt infinity = infinityCheck(number, treatNanAs);
         if (infinity.isPresent()) {
             return infinity.getAsInt();
         }
-        return BigDecimalUtil.valueOf(number).compareTo(BigDecimalUtil.valueOf(value));
+        return com.kuma.boot.web.validation.spel.core.util.BigDecimalUtil.valueOf(number).compareTo(com.kuma.boot.web.validation.spel.core.util.BigDecimalUtil.valueOf(value));
     }
 
     private static OptionalInt infinityCheck(Double number, OptionalInt treatNanAs) {
@@ -67,5 +80,5 @@ public class NumberComparatorUtil {
         }
         return result;
     }
-}
 
+}

@@ -1,86 +1,126 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.servlet.ServletOutputStream
- *  jakarta.servlet.WriteListener
- *  jakarta.servlet.http.HttpServletResponse
- *  jakarta.servlet.http.HttpServletResponseWrapper
- *  org.jspecify.annotations.NonNull
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.multipart;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import org.jspecify.annotations.NonNull;
 
-public class ResponseWrapper
-extends HttpServletResponseWrapper {
-    private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    private final ServletOutputStream out = new WrapperOutputStream(this.buffer);
-    private final PrintWriter writer = new PrintWriter(new OutputStreamWriter((OutputStream)this.buffer, this.getCharacterEncoding()));
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
+/**
+ * <p>
+ * 可用于重写返回值 基于HttpServletResponse
+ * </p>
+ *
+ */
+public class ResponseWrapper extends HttpServletResponseWrapper {
+
+    private final ByteArrayOutputStream buffer;
+
+    private final ServletOutputStream out;
+
+    private final PrintWriter writer;
+
+    /**
+     * Instantiates a new Response wrapper.
+     *
+     * @param response the response
+     * @throws IOException the io exception
+     */
     public ResponseWrapper(HttpServletResponse response) throws IOException {
         super(response);
+        buffer = new ByteArrayOutputStream();
+        out = new WrapperOutputStream(buffer);
+        writer = new PrintWriter(new OutputStreamWriter(buffer, this.getCharacterEncoding()));
     }
 
+    @Override
     public ServletOutputStream getOutputStream() {
-        return this.out;
+        return out;
     }
 
+    @Override
     public PrintWriter getWriter() {
-        return this.writer;
+        return writer;
     }
 
+    @Override
     public void flushBuffer() throws IOException {
-        this.out.flush();
-        this.writer.flush();
+        out.flush();
+        writer.flush();
     }
 
+    @Override
     public void reset() {
-        this.buffer.reset();
+        buffer.reset();
     }
 
+    /**
+     * Get response data byte [ ].
+     *
+     * @return the byte [ ]
+     * @throws IOException the io exception
+     */
     public byte[] getResponseData() throws IOException {
         this.flushBuffer();
-        return this.buffer.toByteArray();
+        return buffer.toByteArray();
     }
 
-    private static class WrapperOutputStream
-    extends ServletOutputStream {
+    private static class WrapperOutputStream extends ServletOutputStream {
+
         private final ByteArrayOutputStream stream;
 
+        /**
+         * Instantiates a new Wrapper output stream.
+         *
+         * @param stream the stream
+         */
         public WrapperOutputStream(ByteArrayOutputStream stream) {
             this.stream = stream;
         }
 
+        @Override
         public void write(int b) {
-            this.stream.write(b);
+            stream.write(b);
         }
 
+        @Override
         public void write(@NonNull byte[] b) {
-            this.stream.writeBytes(b);
+            stream.writeBytes(b);
         }
 
+        @Override
         public void setWriteListener(WriteListener writeListener) {
             try {
                 writeListener.onWritePossible();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        @Override
         public boolean isReady() {
             return false;
         }
     }
 }
-

@@ -58,7 +58,7 @@ public class MailExceptionHandler extends com.kuma.boot.web.exception.handler.Ab
 
     @Override
     protected void initThread() {
-        this.setName("ttc-mail-exception-task");
+        this.setName("kmc-mail-exception-task");
         this.start();
     }
 

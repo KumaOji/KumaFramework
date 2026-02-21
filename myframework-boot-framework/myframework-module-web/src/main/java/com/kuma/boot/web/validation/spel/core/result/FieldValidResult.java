@@ -1,28 +1,29 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.jetbrains.annotations.NotNull
- */
 package com.kuma.boot.web.validation.spel.core.result;
 
-import java.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 
-public class FieldValidResult {
-    private boolean success;
-    @NotNull
-    private String message = "";
-    @NotNull
-    private String fieldName = "";
-    private Object[] args;
+import java.util.Arrays;
 
+/**
+ * 字段校验结果
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/4/29
+ */
+public class FieldValidResult {
+    @Override
     public String toString() {
-        return "FieldValidResult{success=" + this.success + ", message='" + this.message + "', fieldName='" + this.fieldName + "', args=" + Arrays.toString(this.args) + "}";
+        return "FieldValidResult{" +
+                "success=" + success +
+                ", message='" + message + '\'' +
+                ", fieldName='" + fieldName + '\'' +
+                ", args=" + Arrays.toString(args) +
+                '}';
     }
 
     public boolean isSuccess() {
-        return this.success;
+        return success;
     }
 
     public void setSuccess(boolean success) {
@@ -31,7 +32,7 @@ public class FieldValidResult {
 
     @NotNull
     public String getMessage() {
-        return this.message;
+        return message;
     }
 
     public void setMessage(@NotNull String message) {
@@ -40,7 +41,7 @@ public class FieldValidResult {
 
     @NotNull
     public String getFieldName() {
-        return this.fieldName;
+        return fieldName;
     }
 
     public void setFieldName(@NotNull String fieldName) {
@@ -48,23 +49,47 @@ public class FieldValidResult {
     }
 
     public Object[] getArgs() {
-        return this.args;
+        return args;
     }
 
     public void setArgs(Object[] args) {
         this.args = args;
     }
 
+    /**
+     * 校验结果，true表示校验通过，false表示校验失败
+     */
+    private boolean success;
+
+    /**
+     * 校验失败时的错误信息
+     * <p>
+     * 当校验结果为false时，会将错误信息添加到最终的结果中，若此字段为null，则使用默认的错误信息
+     */
+    @NotNull
+    private String message = "";
+
+    /**
+     * 验证的字段名称，用于校验失败时构建错误信息
+     */
+    @NotNull
+    private String fieldName = "";
+
+    /**
+     * 用于错误信息的占位符替换参数
+     */
+    private Object[] args;
+
     public static FieldValidResult of(boolean success) {
-        return FieldValidResult.of(success, "");
+        return of(success, "");
     }
 
     public static FieldValidResult of(boolean success, @NotNull String message) {
-        return FieldValidResult.of(success, message, "", null);
+        return of(success, message, "", null);
     }
 
-    public static FieldValidResult of(boolean success, Object ... args) {
-        return FieldValidResult.of(success, "", "", args);
+    public static FieldValidResult of(boolean success, Object... args) {
+        return of(success, "", "", args);
     }
 
     public static FieldValidResult of(boolean success, @NotNull String message, String fieldName, Object[] args) {
@@ -77,7 +102,7 @@ public class FieldValidResult {
     }
 
     public static FieldValidResult success() {
-        return FieldValidResult.of(true);
+        return of(true);
     }
-}
 
+}

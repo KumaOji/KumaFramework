@@ -1,11 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.model.request.DateQuery
- *  jakarta.validation.ConstraintValidator
- *  jakarta.validation.ConstraintValidatorContext
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.validator;
 
 import com.kuma.boot.common.model.request.DateQuery;
@@ -14,12 +22,14 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class EndDateAfterStartDateValidator
-implements ConstraintValidator<EndDateAfterStartDate, DateQuery> {
+        implements ConstraintValidator<EndDateAfterStartDate, DateQuery> {
+
+    @Override
     public boolean isValid(DateQuery taskForm, ConstraintValidatorContext context) {
         if (taskForm.getStartDate() == null || taskForm.getEndDate() == null) {
             return true;
         }
+
         return taskForm.getEndDate().isAfter(taskForm.getStartDate());
     }
 }
-

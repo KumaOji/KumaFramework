@@ -1,48 +1,67 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.core.result;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 对象校验结果
+ *
+ * @author 阿杆
+ * @version 1.1
+ * @since 2024/4/29
+ */
 public class ObjectValidResult {
-    private final List<FieldError> errors = new ArrayList<FieldError>();
+
+    private final List<com.kuma.boot.web.validation.spel.core.result.FieldError> errors = new ArrayList<>();
+
     public static final ObjectValidResult EMPTY = new ObjectValidResult();
 
     public boolean hasError() {
-        return !this.errors.isEmpty();
+        return !errors.isEmpty();
     }
 
     public boolean noneError() {
-        return this.errors.isEmpty();
+        return errors.isEmpty();
     }
 
-    public List<FieldError> getErrors() {
-        return Collections.unmodifiableList(this.errors);
+    public List<com.kuma.boot.web.validation.spel.core.result.FieldError> getErrors() {
+        return Collections.unmodifiableList(errors);
     }
 
     public int getErrorSize() {
-        return this.errors.size();
+        return errors.size();
     }
 
-    public void addFieldResults(List<FieldValidResult> results) {
-        for (FieldValidResult result : results) {
+    /**
+     * 添加校验结果
+     * <p>
+     * 当校验结果为false时，会将错误信息添加到结果中
+     *
+     * @param results 字段校验结果列表
+     */
+    public void addFieldResults(List<com.kuma.boot.web.validation.spel.core.result.FieldValidResult> results) {
+        for (com.kuma.boot.web.validation.spel.core.result.FieldValidResult result : results) {
             this.addFieldResult(result);
         }
     }
 
-    public void addFieldResult(FieldValidResult result) {
+    /**
+     * 添加校验结果
+     * <p>
+     * 当校验结果为false时，会将错误信息添加到结果中
+     *
+     * @param result 字段校验结果
+     */
+    public void addFieldResult( com.kuma.boot.web.validation.spel.core.result.FieldValidResult result) {
         if (!result.isSuccess()) {
-            this.errors.add(FieldError.of(result.getFieldName(), result.getMessage()));
+            errors.add(com.kuma.boot.web.validation.spel.core.result.FieldError.of(result.getFieldName(), result.getMessage()));
         }
     }
 
-    public void addFieldError(List<FieldError> fieldErrorList) {
+    public void addFieldError(List<com.kuma.boot.web.validation.spel.core.result.FieldError> fieldErrorList) {
         if (fieldErrorList != null && !fieldErrorList.isEmpty()) {
-            this.errors.addAll(fieldErrorList);
+            errors.addAll(fieldErrorList);
         }
     }
 }
-

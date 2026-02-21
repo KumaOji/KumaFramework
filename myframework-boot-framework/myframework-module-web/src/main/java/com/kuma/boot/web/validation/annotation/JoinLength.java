@@ -1,34 +1,55 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.Constraint
- *  jakarta.validation.Payload
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.annotation;
 
 import com.kuma.boot.web.validation.validator.JoinLengthValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-@Target(value={ElementType.FIELD, ElementType.PARAMETER})
-@Retention(value=RetentionPolicy.RUNTIME)
+import java.lang.annotation.*;
+
+/**
+ *
+ *
+ * <pre>
+ * <b>拼接字符串裁剪长度校验</b>
+ * <b>Description:例如1,2,3 按照[,]分割,要验证裁剪后的长度不超过5</b>
+ * </pre>
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:08:17
+ */
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy={JoinLengthValidator.class})
+@Constraint(validatedBy = {JoinLengthValidator.class})
 public @interface JoinLength {
-    public String message() default "\u62fc\u63a5\u6570\u91cf\u957f\u5ea6\u4e0d\u5408\u6cd5";
 
-    public Class<?>[] groups() default {};
+    // 默认错误消息
+    String message() default "拼接数量长度不合法";
 
-    public Class<? extends Payload>[] payload() default {};
+    // 分组
+    Class<?>[] groups() default {};
 
-    public String symbol() default ",";
+    // 负载
+    Class<? extends Payload>[] payload() default {};
 
-    public int limitSize() default 5;
+    String symbol() default ",";
+
+    int limitSize() default 5;
 }
-

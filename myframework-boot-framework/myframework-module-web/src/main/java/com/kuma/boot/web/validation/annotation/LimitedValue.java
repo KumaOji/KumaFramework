@@ -1,36 +1,52 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.Constraint
- *  jakarta.validation.Payload
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.annotation;
 
 import com.kuma.boot.web.validation.validator.LimitedValueValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-@Target(value={ElementType.FIELD, ElementType.PARAMETER})
-@Retention(value=RetentionPolicy.RUNTIME)
+import java.lang.annotation.*;
+
+/**
+ * LimitedValue
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:08:26
+ */
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy={LimitedValueValidator.class})
+@Constraint(validatedBy = {LimitedValueValidator.class})
 public @interface LimitedValue {
-    public String message() default "\u5fc5\u987b\u4e3a\u6307\u5b9a\u503c";
 
-    public Class<?>[] groups() default {};
+    /** 默认错误消息 */
+    String message() default "必须为指定值";
 
-    public Class<? extends Payload>[] payload() default {};
+    /** 分组 */
+    Class<?>[] groups() default {};
 
-    public boolean allowNullValue() default false;
+    /** 负载 */
+    Class<? extends Payload>[] payload() default {};
 
-    public String[] strValues() default {};
+    boolean allowNullValue() default false;
 
-    public int[] intValues() default {};
+    String[] strValues() default {};
+
+    int[] intValues() default {};
 }
-

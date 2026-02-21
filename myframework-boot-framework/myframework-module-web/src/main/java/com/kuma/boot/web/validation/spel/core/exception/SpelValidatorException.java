@@ -1,10 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.core.exception;
 
-public class SpelValidatorException
-extends RuntimeException {
+/**
+ * Spel 验证器异常，是项目中所有异常的父类。
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/4/29
+ */
+public class SpelValidatorException extends RuntimeException {
+
     public SpelValidatorException(String message) {
         super(message);
     }
@@ -16,5 +20,5 @@ extends RuntimeException {
     public SpelValidatorException(Throwable cause) {
         super(cause);
     }
-}
 
+}

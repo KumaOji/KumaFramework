@@ -48,7 +48,7 @@ public class DingTalkExceptionHandler extends com.kuma.boot.web.exception.handle
 
     @Override
     protected void initThread() {
-        this.setName("ttc-dingtalk-exception-task");
+        this.setName("kmc-dingtalk-exception-task");
         this.start();
     }
 }

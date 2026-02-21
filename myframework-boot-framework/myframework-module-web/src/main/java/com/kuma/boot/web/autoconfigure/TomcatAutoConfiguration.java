@@ -74,7 +74,7 @@ public class TomcatAutoConfiguration implements InitializingBean {
 
             factory.addProtocolHandlerCustomizers(protocolHandler -> {
                 ThreadFactory factory1 = Thread.ofVirtual()
-                        .name("ttc_virtual_")
+                        .name("kmc_virtual_")
                         //.inheritInheritableThreadLocals(true)
                         .factory();
                 protocolHandler.setExecutor(Executors.newThreadPerTaskExecutor(factory1));

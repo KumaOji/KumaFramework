@@ -1,31 +1,33 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.enums;
 
+/**
+ * 加解密类型
+ *
+ * @since 1.4.0
+ */
 public enum EncryptTypeEnum {
-    ADDRESS("ADDRESS", "\u5730\u5740"),
-    BANK_CARD_NUM("BANK_CARD_NUM", "\u94f6\u884c\u5361\u53f7"),
-    EMAIL("EMAIL", "\u90ae\u7bb1"),
-    ID_CARD("ID_CARD", "\u8eab\u4efd\u8bc1"),
-    NAME("NAME", "\u59d3\u540d"),
-    PASSWORD("PASSWORD", "\u5bc6\u7801"),
-    PHONE("PHONE", "\u59d3\u540d");
+    ADDRESS("ADDRESS", "地址"),
+    BANK_CARD_NUM("BANK_CARD_NUM", "银行卡号"),
+    EMAIL("EMAIL", "邮箱"),
+    ID_CARD("ID_CARD", "身份证"),
+    NAME("NAME", "姓名"),
+    PASSWORD("PASSWORD", "密码"),
+    PHONE("PHONE", "姓名"),
+    ;
 
     private final String code;
     private final String desc;
 
-    private EncryptTypeEnum(String code, String desc) {
+    EncryptTypeEnum(String code, String desc) {
         this.code = code;
         this.desc = desc;
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public String getDesc() {
-        return this.desc;
+        return desc;
     }
 }
-

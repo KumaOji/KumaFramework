@@ -1,29 +1,45 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.test.util;
 
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
 
+/**
+ * Bean工具类
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/6/13
+ */
 public class BeanUtil {
-    public static <T> String getFieldName(IGetter<T, ?> fn) {
+
+    /**
+     * 获取字段名称
+     */
+    public static <T> String getFieldName( IGetter<T, ?> fn) {
         try {
-            Method writeReplace = fn.getClass().getDeclaredMethod("writeReplace", new Class[0]);
+            // 获取writeReplace方法
+            Method writeReplace = fn.getClass().getDeclaredMethod("writeReplace");
             writeReplace.setAccessible(true);
-            SerializedLambda serializedLambda = (SerializedLambda)writeReplace.invoke(fn, new Object[0]);
-            Object methodName = serializedLambda.getImplMethodName();
-            if (((String)methodName).startsWith("get")) {
-                methodName = ((String)methodName).substring(3);
-            } else if (((String)methodName).startsWith("is")) {
-                methodName = ((String)methodName).substring(2);
+            // 调用writeReplace方法并获取SerializedLambda
+            SerializedLambda serializedLambda = (SerializedLambda) writeReplace.invoke(fn);
+            // 获取方法名
+            String methodName = serializedLambda.getImplMethodName();
+            // 去掉方法名前的get或is，并将首字母转为小写
+            if (methodName.startsWith("get")) {
+                methodName = methodName.substring(3);
+            } else if (methodName.startsWith("is")) {
+                methodName = methodName.substring(2);
             }
-            methodName = ((String)methodName).length() > 1 ? Character.toLowerCase(((String)methodName).charAt(0)) + ((String)methodName).substring(1) : ((String)methodName).toLowerCase();
+            // 将首字母转为小写
+            if (methodName.length() > 1) {
+                methodName = Character.toLowerCase(methodName.charAt(0)) + methodName.substring(1);
+            } else {
+                methodName = methodName.toLowerCase();
+            }
             return methodName;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to get the field name", e);
         }
     }
-}
 
+}

@@ -1,18 +1,20 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.test.util;
+
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 验证失败的字段
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/6/15
+ */
 public class VerifyFailedField {
-    String name;
-    String message;
-
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public void setName(String name) {
@@ -20,12 +22,22 @@ public class VerifyFailedField {
     }
 
     public String getMessage() {
-        return this.message;
+        return message;
     }
 
     public void setMessage(String message) {
         this.message = message;
     }
+
+    /**
+     * 字段名
+     */
+    String name;
+
+    /**
+     * 异常信息
+     */
+    String message;
 
     private VerifyFailedField() {
     }
@@ -34,24 +46,37 @@ public class VerifyFailedField {
         return VerifyFailedField.of(fieldName, null);
     }
 
-    public static <T> VerifyFailedField of(IGetter<T, ?> field) {
+    public static <T> VerifyFailedField of( com.kuma.boot.web.validation.spel.test.util.IGetter<T, ?> field) {
         return VerifyFailedField.of(field, null);
     }
 
     @SafeVarargs
-    public static <T> List<VerifyFailedField> of(IGetter<T, ?> ... fields) {
+    public static <T> List<VerifyFailedField> of( com.kuma.boot.web.validation.spel.test.util.IGetter<T, ?>... fields) {
         return Arrays.stream(fields).map(VerifyFailedField::of).collect(Collectors.toList());
     }
 
-    public static <T> VerifyFailedField of(IGetter<T, ?> field, String errorMessage) {
-        return VerifyFailedField.of(BeanUtil.getFieldName(field), errorMessage);
+    /**
+     * 创建一个验证失败的字段
+     *
+     * @param field        字段
+     * @param errorMessage 期望的错误信息
+     */
+    public static <T> VerifyFailedField of(com.kuma.boot.web.validation.spel.test.util.IGetter<T, ?> field, String errorMessage) {
+        return of(com.kuma.boot.web.validation.spel.test.util.BeanUtil.getFieldName(field), errorMessage);
     }
 
+    /**
+     * 创建一个验证失败的字段
+     *
+     * @param fieldName    字段名
+     * @param errorMessage 期望的错误信息
+     * @return
+     */
     public static VerifyFailedField of(String fieldName, String errorMessage) {
         VerifyFailedField verifyFailedField = new VerifyFailedField();
         verifyFailedField.setName(fieldName);
         verifyFailedField.setMessage(errorMessage);
         return verifyFailedField;
     }
-}
 
+}

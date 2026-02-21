@@ -1,13 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.boot.webmvc.autoconfigure.WebMvcRegistrations
- *  org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.version;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -16,22 +22,32 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.webmvc.autoconfigure.WebMvcRegistrations;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+/**
+ * WebMvcRegistrations
+ *
+ * @author kuma
+ * @version 2022.06
+ * @since 2022-07-27 20:20:42
+ */
 @AutoConfiguration
-@EnableConfigurationProperties(value={ApiVersionProperties.class})
-public class WebMvcRegistrationsConfig
-implements WebMvcRegistrations {
-    private final ApiVersionProperties apiVersionProperties;
+@EnableConfigurationProperties(com.kuma.boot.web.support.version.ApiVersionProperties.class)
+public class WebMvcRegistrationsConfig implements WebMvcRegistrations {
 
-    public WebMvcRegistrationsConfig(ApiVersionProperties apiVersionProperties) {
+    private final com.kuma.boot.web.support.version.ApiVersionProperties apiVersionProperties;
+
+    public WebMvcRegistrationsConfig( com.kuma.boot.web.support.version.ApiVersionProperties apiVersionProperties) {
         this.apiVersionProperties = apiVersionProperties;
     }
 
+    @Override
     public RequestMappingHandlerMapping getRequestMappingHandlerMapping() {
-        if (!this.apiVersionProperties.isEnabled()) {
-            return super.getRequestMappingHandlerMapping();
+        if (!apiVersionProperties.isEnabled()) {
+            return WebMvcRegistrations.super.getRequestMappingHandlerMapping();
         }
-        LogUtils.info((String)"\u3010\u521d\u59cb\u5316\u914d\u7f6e-ApiVersionRequestMappingHandlerMapping\u3011\u9ed8\u8ba4\u914d\u7f6e\u4e3atrue\uff0c\u5f53\u524d\u73af\u5883\u4e3atrue\uff1aRESTful API\u63a5\u53e3\u7248\u672c\u63a7\u5236\uff0c\u6267\u884c\u521d\u59cb\u5316 ...", (Object[])new Object[0]);
-        return new ApiVersionRequestMappingHandlerMapping(this.apiVersionProperties);
+
+        LogUtils.info(
+                "【初始化配置-ApiVersionRequestMappingHandlerMapping】默认配置为true，当前环境为true：RESTful"
+                        + " API接口版本控制，执行初始化 ...");
+        return new com.kuma.boot.web.support.version.ApiVersionRequestMappingHandlerMapping(apiVersionProperties);
     }
 }
-

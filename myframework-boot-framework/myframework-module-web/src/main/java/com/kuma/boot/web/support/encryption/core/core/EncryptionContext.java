@@ -1,18 +1,23 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.support.hash.HashBs
- *  com.kuma.boot.common.support.secret.core.SecretBs
- */
 package com.kuma.boot.web.support.encryption.core.core;
+
 
 import com.kuma.boot.common.support.hash.HashBs;
 import com.kuma.boot.common.support.secret.core.SecretBs;
 
-public class EncryptionContext
-implements com.kuma.boot.web.support.encryption.api.core.EncryptionContext {
+/**
+ * @author binbin.hou
+ * @since 1.0.0
+ */
+public class EncryptionContext implements com.kuma.boot.web.support.encryption.api.core.EncryptionContext {
+
+    /**
+     * 摘要策略
+     */
     private HashBs hashBs;
+
+    /**
+     * 加密策略
+     */
     private SecretBs secretBs;
 
     public static EncryptionContext newInstance() {
@@ -21,7 +26,7 @@ implements com.kuma.boot.web.support.encryption.api.core.EncryptionContext {
 
     @Override
     public HashBs hashBs() {
-        return this.hashBs;
+        return hashBs;
     }
 
     public EncryptionContext hashBs(HashBs hashBs) {
@@ -31,12 +36,12 @@ implements com.kuma.boot.web.support.encryption.api.core.EncryptionContext {
 
     @Override
     public SecretBs secretBs() {
-        return this.secretBs;
+        return secretBs;
     }
 
     public EncryptionContext secretBs(SecretBs secretBs) {
         this.secretBs = secretBs;
         return this;
     }
-}
 
+}

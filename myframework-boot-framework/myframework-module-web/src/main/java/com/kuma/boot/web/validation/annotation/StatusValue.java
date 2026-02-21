@@ -1,39 +1,60 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.Constraint
- *  jakarta.validation.Payload
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.annotation;
 
 import com.kuma.boot.web.validation.validator.StatusValueValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
+import java.lang.annotation.*;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+/**
+ * 状态校验，校验参数的状态是否是 StatusEnum 中的值
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-03 08:03:31
+ */
 @Documented
-@Constraint(validatedBy={StatusValueValidator.class})
-@Target(value={ElementType.FIELD, ElementType.PARAMETER})
-@Retention(value=RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = StatusValueValidator.class)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface StatusValue {
-    public String message() default "\u4e0d\u6b63\u786e\u7684\u72b6\u6001\u6807\u8bc6";
 
-    public Class[] groups() default {};
+    String message() default "不正确的状态标识";
 
-    public Class<? extends Payload>[] payload() default {};
+    Class[] groups() default {};
 
-    public boolean required() default true;
+    Class<? extends Payload>[] payload() default {};
 
-    @Target(value={ElementType.FIELD, ElementType.PARAMETER})
-    @Retention(value=RetentionPolicy.RUNTIME)
+    /**
+     * 是否必填
+     *
+     * <p>如果必填，在校验的时候本字段没值就会报错
+     */
+    boolean required() default true;
+
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @Retention(RUNTIME)
     @Documented
-    public static @interface List {
-        public StatusValue[] value();
+    @interface List {
+
+        StatusValue[] value();
     }
 }
-

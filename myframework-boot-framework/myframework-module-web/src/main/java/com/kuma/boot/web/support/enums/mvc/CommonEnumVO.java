@@ -1,25 +1,38 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.base.CommonEnum
- *  org.apache.commons.collections4.CollectionUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.enums.mvc;
 
 import com.kuma.boot.common.enums.base.CommonEnum;
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
 
+/** 通用枚举 */
 public class CommonEnumVO {
+
     private int code;
+
     private String name;
+
     private String desc;
 
-    public CommonEnumVO() {
-    }
+    public CommonEnumVO() {}
 
     public CommonEnumVO(int code, String name, String desc) {
         this.code = code;
@@ -42,7 +55,7 @@ public class CommonEnumVO {
     }
 
     public int getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(int code) {
@@ -50,7 +63,7 @@ public class CommonEnumVO {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public void setName(String name) {
@@ -58,11 +71,10 @@ public class CommonEnumVO {
     }
 
     public String getDesc() {
-        return this.desc;
+        return desc;
     }
 
     public void setDesc(String desc) {
         this.desc = desc;
     }
 }
-

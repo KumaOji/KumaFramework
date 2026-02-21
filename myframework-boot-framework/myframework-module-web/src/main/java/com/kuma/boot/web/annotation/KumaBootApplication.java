@@ -26,7 +26,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import java.lang.annotation.*;
 
 /**
- * TaoTaoBootApplication
+ * KumaBootApplication
  *
  * @author kuma
  * @version 2021.9

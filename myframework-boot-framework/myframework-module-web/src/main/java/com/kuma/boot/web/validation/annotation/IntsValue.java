@@ -1,32 +1,51 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.Constraint
- *  jakarta.validation.Payload
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.annotation;
 
 import com.kuma.boot.web.validation.validator.IntsValueValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
+import java.lang.annotation.*;
+
+/**
+ * IntEnums
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:30:30
+ */
 @Documented
-@Retention(value=RetentionPolicy.RUNTIME)
-@Target(value={ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER})
-@Constraint(validatedBy={IntsValueValidator.class})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({
+        ElementType.METHOD,
+        ElementType.FIELD,
+        ElementType.ANNOTATION_TYPE,
+        ElementType.CONSTRUCTOR,
+        ElementType.PARAMETER
+})
+@Constraint(validatedBy = IntsValueValidator.class)
 public @interface IntsValue {
-    public int[] value() default {};
 
-    public String message() default "\u5f53\u524d\u503c\u4e0d\u5728\u5b57\u6bb5\u8303\u56f4\u5185";
+    int[] value() default {};
 
-    public Class<?>[] groups() default {};
+    String message() default "当前值不在字段范围内";
 
-    public Class<? extends Payload>[] payload() default {};
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }
-

@@ -1,4 +1,3 @@
-#### 定义项目所有依赖库 https://gitee.com/qin_s/springboot-gradle-multi-module-demo/blob/master/build.gradle.kts
 ## 统一定义版本
 [versions]
 springboot = "4.0.2"

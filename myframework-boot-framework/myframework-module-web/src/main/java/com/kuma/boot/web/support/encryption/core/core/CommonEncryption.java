@@ -1,16 +1,10 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.support.secret.core.HexUtil
- *  com.kuma.boot.common.support.secret.core.SecretBs
- */
 package com.kuma.boot.web.support.encryption.core.core;
+
 
 import com.kuma.boot.common.support.secret.core.HexUtil;
 import com.kuma.boot.common.support.secret.core.SecretBs;
-import com.kuma.boot.web.support.encryption.api.core.EncryptMask;
 import com.kuma.boot.web.support.encryption.api.core.EncryptMaskContext;
+import com.kuma.boot.web.support.encryption.api.core.EncryptMask;
 import com.kuma.boot.web.support.encryption.api.core.Encryption;
 import com.kuma.boot.web.support.encryption.api.core.EncryptionContext;
 import com.kuma.boot.web.support.encryption.api.dto.req.CommonDecryptRequest;
@@ -18,36 +12,55 @@ import com.kuma.boot.web.support.encryption.api.dto.req.CommonEncryptRequest;
 import com.kuma.boot.web.support.encryption.api.dto.resp.CommonDecryptResponse;
 import com.kuma.boot.web.support.encryption.api.dto.resp.CommonEncryptResponse;
 
-public class CommonEncryption
-implements Encryption {
-    protected String getMask(CommonEncryptRequest request) {
+/**
+ * 通用策略
+ *
+ * @author binbin.hou
+ * @since 1.2.0
+ */
+public class CommonEncryption implements Encryption {
+
+    protected String getMask( CommonEncryptRequest request) {
         EncryptMaskContext context = new EncryptMaskContext();
         context.setPlainText(request.getText());
-        EncryptMask encryptMask = request.getEncryptMask();
+
+        final EncryptMask encryptMask = request.getEncryptMask();
         return encryptMask.mask(context);
     }
 
     @Override
-    public CommonEncryptResponse encrypt(CommonEncryptRequest request, EncryptionContext context) {
+    public CommonEncryptResponse encrypt( CommonEncryptRequest request, EncryptionContext context) {
         String plain = request.getText();
+
+        //1. 加密
         String cipher = context.secretBs().encryptToHexString(plain);
+
+        //2. 摘要
         String hash = context.hashBs().execute(plain);
-        String mask = this.getMask(request);
+
+        //3. 掩码
+        String mask = getMask(request);
+
         CommonEncryptResponse response = new CommonEncryptResponse();
         response.setMask(mask);
         response.setCipher(cipher);
         response.setHash(hash);
+
         return response;
     }
 
     @Override
-    public CommonDecryptResponse decrypt(CommonDecryptRequest request, EncryptionContext context) {
+    public CommonDecryptResponse decrypt( CommonDecryptRequest request, EncryptionContext context) {
+        // 初始化一次
         SecretBs secretBs = context.secretBs();
-        byte[] bytes = HexUtil.hexStringToByte((String)request.getCipher());
+
+        // https://www.jianshu.com/p/0d6b661b84dd
+        byte[] bytes = HexUtil.hexStringToByte(request.getCipher());
         String plain = secretBs.decryptToString(bytes);
+
         CommonDecryptResponse response = new CommonDecryptResponse();
         response.setText(plain);
         return response;
     }
-}
 
+}

@@ -1,16 +1,29 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.dto.resp;
 
-public class CommonEncryptResponse
-extends CommonResponse {
+/**
+ * 加密响应
+ * @author binbin.hou
+ * @since 1.0.0
+ */
+public class CommonEncryptResponse extends CommonResponse {
+
+    /**
+     * 密文
+     */
     private String cipher;
+
+    /**
+     * 掩码
+     */
     private String mask;
+
+    /**
+     * 摘要
+     */
     private String hash;
 
     public String getCipher() {
-        return this.cipher;
+        return cipher;
     }
 
     public void setCipher(String cipher) {
@@ -18,7 +31,7 @@ extends CommonResponse {
     }
 
     public String getMask() {
-        return this.mask;
+        return mask;
     }
 
     public void setMask(String mask) {
@@ -26,7 +39,7 @@ extends CommonResponse {
     }
 
     public String getHash() {
-        return this.hash;
+        return hash;
     }
 
     public void setHash(String hash) {
@@ -35,7 +48,11 @@ extends CommonResponse {
 
     @Override
     public String toString() {
-        return "CommonEncryptResponse{cipher='" + this.cipher + "', mask='" + this.mask + "', hash='" + this.hash + "'}";
+        return "CommonEncryptResponse{" +
+                "cipher='" + cipher + '\'' +
+                ", mask='" + mask + '\'' +
+                ", hash='" + hash + '\'' +
+                "}";
     }
-}
 
+}

@@ -1,37 +1,60 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.ArrayUtil
- *  jakarta.validation.ConstraintValidator
- *  jakarta.validation.ConstraintValidatorContext
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.validator;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.kuma.boot.web.validation.annotation.StringEnums;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import java.util.Arrays;
 import java.util.Objects;
 
-public class StringEnumsValidator
-implements ConstraintValidator<StringEnums, String> {
+/**
+ * StringEnumsValidator
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-03 08:04:25
+ */
+public class StringEnumsValidator implements ConstraintValidator<StringEnums, String> {
+
     private String[] enumList;
     private StringEnums constraintAnnotation;
 
-    public void initialize(StringEnums constraintAnnotation) {
+    @Override
+    public void initialize( StringEnums constraintAnnotation) {
         this.enumList = constraintAnnotation.enumList();
         this.constraintAnnotation = constraintAnnotation;
     }
 
+    @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
-        if (Objects.isNull(value) || ArrayUtil.contains((Object[])this.enumList, (Object)value)) {
+        if (Objects.isNull(value) || ArrayUtil.contains(enumList, value)) {
             return true;
+        } else {
+            constraintValidatorContext.disableDefaultConstraintViolation();
+            constraintValidatorContext
+                    .buildConstraintViolationWithTemplate(
+                            String.format(
+                                    "当前值: [%s] 不在字段范围内,字段典范围为[%s]",
+                                    value, Arrays.toString(enumList)))
+                    .addConstraintViolation();
+            return false;
         }
-        constraintValidatorContext.disableDefaultConstraintViolation();
-        constraintValidatorContext.buildConstraintViolationWithTemplate(String.format("\u5f53\u524d\u503c: [%s] \u4e0d\u5728\u5b57\u6bb5\u8303\u56f4\u5185,\u5b57\u6bb5\u5178\u8303\u56f4\u4e3a[%s]", value, Arrays.toString(this.enumList))).addConstraintViolation();
-        return false;
     }
 }
-

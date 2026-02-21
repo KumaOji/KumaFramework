@@ -1,31 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.google.common.base.Preconditions
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  jakarta.servlet.ServletOutputStream
- *  jakarta.servlet.http.HttpServletResponse
- *  org.apache.commons.io.FilenameUtils
- *  org.apache.commons.lang3.ArrayUtils
- *  org.springframework.core.io.FileSystemResource
- *  org.springframework.http.HttpHeaders
- *  org.springframework.http.MediaType
- *  org.springframework.http.ResponseEntity
- *  org.springframework.http.ResponseEntity$BodyBuilder
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.utils;
 
 import com.google.common.base.Preconditions;
 import com.kuma.boot.common.utils.lang.StringUtils;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.core.io.FileSystemResource;
@@ -33,14 +26,41 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+/**
+ * 文件处理工具类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:23:56
+ */
 public class FileUtils {
-    public static final String[] VALID_FILE_TYPE = new String[]{"xlsx", "zip"};
+
+    /** 允许的文件类型，可根据需求添加 */
+    public static final String[] VALID_FILE_TYPE = {"xlsx", "zip"};
+
+    /** IMAGES_STR */
     public static final String IMAGES_STR = "png,jpg,jpeg,gif,tif,bmp";
+
+    /** VIDEO_STR */
     public static final String VIDEO_STR = "avi,wmv,mpeg,mp4,mov,flv,rm,rmvb,3gp";
 
+    /**
+     * 根据文件名获取文件类型：1.图片　2.视频　3.其他
+     *
+     * @param fileName 文件名
+     * @return int
+     * @since 2021-09-02 22:25:58
+     */
     public static int getFileType(String fileName) {
-        String fileType = FilenameUtils.getExtension((String)fileName);
-        assert (fileType != null);
+        String fileType = FilenameUtils.getExtension(fileName);
+        assert fileType != null;
         int type = 3;
         if (IMAGES_STR.contains(fileType)) {
             type = 1;
@@ -50,60 +70,100 @@ public class FileUtils {
         return type;
     }
 
+    /**
+     * 获取文件类型
+     *
+     * @param file 文件
+     * @return {@link String }
+     * @since 2021-09-02 22:24:07
+     */
     private static String getFileType(File file) throws Exception {
-        Preconditions.checkNotNull((Object)file);
+        Preconditions.checkNotNull(file);
         if (file.isDirectory()) {
-            throw new Exception("file\u4e0d\u662f\u6587\u4ef6");
+            throw new Exception("file不是文件");
         }
         String fileName = file.getName();
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
+    /**
+     * 校验文件类型是否是允许下载的类型
+     *
+     * @param fileType fileType
+     * @return {@link Boolean }
+     * @since 2021-09-02 22:24:15
+     */
     private static Boolean fileTypeIsValid(String fileType) {
-        Preconditions.checkNotNull((Object)fileType);
-        fileType = StringUtils.toLowerCase((CharSequence)fileType);
-        return ArrayUtils.contains((Object[])VALID_FILE_TYPE, (Object)fileType);
+        Preconditions.checkNotNull(fileType);
+        fileType = StringUtils.toLowerCase(fileType);
+        return ArrayUtils.contains(VALID_FILE_TYPE, fileType);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * 下载
+     *
+     * @param filePath filePath
+     * @param fileName fileName
+     * @param delete delete
+     * @param response response
+     * @since 2021-09-02 22:24:23
      */
-    public static void download(String filePath, String fileName, Boolean delete, HttpServletResponse response) throws Exception {
+    public static void download(
+            String filePath, String fileName, Boolean delete, HttpServletResponse response)
+            throws Exception {
         File file = new File(filePath);
         if (!file.exists()) {
-            throw new Exception("\u6587\u4ef6\u672a\u627e\u5230");
+            throw new Exception("文件未找到");
         }
-        String fileType = FileUtils.getFileType(file);
-        if (!FileUtils.fileTypeIsValid(fileType).booleanValue()) {
-            throw new Exception("\u6682\u4e0d\u652f\u6301\u8be5\u7c7b\u578b\u6587\u4ef6\u4e0b\u8f7d");
+
+        String fileType = getFileType(file);
+        if (!fileTypeIsValid(fileType)) {
+            throw new Exception("暂不支持该类型文件下载");
         }
-        response.setHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
-        response.setContentType("multipart/form-data");
+        response.setHeader(
+                HttpHeaders.CONTENT_DISPOSITION,
+                "attachment;fileName="
+                        + java.net.URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+        response.setContentType(MediaType.MULTIPART_FORM_DATA_VALUE);
         response.setCharacterEncoding("utf-8");
-        try (FileInputStream inputStream = new FileInputStream(file);
-             ServletOutputStream os = response.getOutputStream();){
-            int length;
+        try (InputStream inputStream = new FileInputStream(file);
+             OutputStream os = response.getOutputStream()) {
             byte[] b = new byte[2048];
-            while ((length = ((InputStream)inputStream).read(b)) > 0) {
+            int length;
+            while ((length = inputStream.read(b)) > 0) {
                 os.write(b, 0, length);
             }
-        }
-        finally {
-            if (delete.booleanValue()) {
-                FileUtils.delete(filePath);
+        } finally {
+            if (delete) {
+                delete(filePath);
             }
         }
     }
 
+    /**
+     * 递归删除文件或目录
+     *
+     * @param filePath filePath
+     * @since 2021-09-02 22:24:30
+     */
     public static void delete(String filePath) {
-        File[] files;
         File file = new File(filePath);
-        if (file.isDirectory() && (files = file.listFiles()) != null) {
-            Arrays.stream(files).forEach(f -> FileUtils.delete(f.getPath()));
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                Arrays.stream(files).forEach(f -> delete(f.getPath()));
+            }
         }
         file.delete();
     }
 
+    /**
+     * 导出文件
+     *
+     * @param file file
+     * @return {@link ResponseEntity }
+     * @since 2021-09-02 22:24:37
+     */
     public static ResponseEntity<FileSystemResource> export(File file) {
         if (file == null) {
             return null;
@@ -113,7 +173,10 @@ public class FileUtils {
         headers.add("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
-        return ((ResponseEntity.BodyBuilder)ResponseEntity.ok().headers(headers)).contentLength(file.length()).contentType(MediaType.parseMediaType((String)"application/octet-stream")).body((Object)new FileSystemResource(file));
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(new FileSystemResource(file));
     }
 }
-

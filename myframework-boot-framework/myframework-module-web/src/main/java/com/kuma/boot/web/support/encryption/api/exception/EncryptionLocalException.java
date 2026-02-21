@@ -1,10 +1,13 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.exception;
 
-public class EncryptionLocalException
-extends RuntimeException {
+/**
+ * 加密机 异常
+ *
+ * @author binbin.hou
+ * @since 1.0.0
+ */
+public class EncryptionLocalException extends RuntimeException {
+
     public EncryptionLocalException() {
     }
 
@@ -24,4 +27,3 @@ extends RuntimeException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
-

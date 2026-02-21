@@ -41,7 +41,7 @@ import java.util.List;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties(ErrorHandlingProperties.class)
 @ConditionalOnProperty(value = "kuma.boot.web.error.handling.enabled", matchIfMissing = true)
-@PropertySource("classpath:/ttc-web-error-handling.properties")
+@PropertySource("classpath:/kmc-web-error-handling.properties")
 public class ErrorHandlingConfiguration {
 
     @Bean

@@ -1,9 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- */
 package com.kuma.boot.web.validation.spel.test.util;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -14,86 +8,135 @@ import com.kuma.boot.web.validation.spel.core.result.ObjectValidResult;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * 测试验证工具抽象类
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/6/13
+ */
 public abstract class AbstractSpelValidator {
-    public abstract ObjectValidResult validate(Object var1, String[] var2, SpelValidContext var3);
 
+    /**
+     * 参数校验
+     * <p>
+     * 调用此方法会触发约束校验
+     *
+     * @param obj        待验证对象
+     * @param spelGroups spel 分组参数
+     * @param context    验证上下文
+     * @return 校验结果
+     */
+    public abstract ObjectValidResult validate(Object obj, String[] spelGroups, SpelValidContext context);
+
+    /**
+     * 验证约束结果是否符合预期
+     */
     public boolean checkConstraintResult(List<VerifyObject> verifyObjectList) {
         int failCount = 0;
         for (VerifyObject verifyObject : verifyObjectList) {
-            if (this.checkConstraintResult(verifyObject)) continue;
-            ++failCount;
+            if (!checkConstraintResult(verifyObject)) {
+                failCount++;
+            }
         }
         return failCount == 0;
     }
 
-    public boolean checkConstraintResult(VerifyObject verifyObject) {
+    /**
+     * 验证约束结果是否符合预期
+     */
+    public boolean checkConstraintResult( VerifyObject verifyObject) {
         Object object = verifyObject.getObject();
         String[] spelGroups = verifyObject.getSpelGroups();
         SpelValidContext context = verifyObject.getContext();
         Collection<VerifyFailedField> verifyFailedFields = verifyObject.getVerifyFailedFields();
         boolean expectException = verifyObject.isExpectException();
+
+        // 设置日志上下文
         LogContext.setValidateObject(object);
-        LogUtils.info((String)"Start checking object: {}", (Object[])new Object[]{object});
+        LogUtils.info("Start checking object: {}", object);
+
         int failCount = 0;
         try {
-            ObjectValidResult validResult = this.validate(object, spelGroups, context);
-            failCount += this.processVerifyResult(verifyFailedFields, ConstraintViolationSet.of(validResult.getErrors()));
-        }
-        catch (Exception e) {
+            // 执行约束校验
+            ObjectValidResult validResult = validate(object, spelGroups, context);
+            failCount += processVerifyResult(verifyFailedFields, ConstraintViolationSet.of(validResult.getErrors()));
+        } catch (Exception e) {
             if (expectException) {
-                LogUtils.info((String)"Passed, Capture exception {}, message: {}", (Object[])new Object[]{e.getClass(), e.getMessage()});
+                LogUtils.info("Passed, Capture exception {}, message: {}", e.getClass(), e.getMessage());
                 expectException = false;
+            } else {
+                LogUtils.error("Failed, Capture exception {}, message: {}", e.getClass(), e.getMessage(), e);
+                failCount++;
             }
-            LogUtils.error((String)"Failed, Capture exception {}, message: {}", (Object[])new Object[]{e.getClass(), e.getMessage(), e});
-            ++failCount;
         }
+
         if (expectException) {
-            LogUtils.error((String)"Failed, No exception captured", (Object[])new Object[0]);
-            ++failCount;
+            LogUtils.error("Failed, No exception captured");
+            failCount++;
         }
+
         if (failCount == 0) {
-            LogUtils.info((String)"Verification end, all passed", (Object[])new Object[0]);
+            LogUtils.info("Verification end, all passed");
         } else {
-            LogUtils.error((String)"Verification end, number of failures: {}", (Object[])new Object[]{failCount});
+            LogUtils.error("Verification end, number of failures: {}", failCount);
         }
-        LogUtils.info((String)"------------------------------------------------------------------------", (Object[])new Object[0]);
+        LogUtils.info("------------------------------------------------------------------------");
         LogContext.clearValidateObject();
+
         return failCount == 0;
     }
 
+    /**
+     * 处理验证结果
+     *
+     * @param verifyFailedFields 预期失败字段
+     * @param violationSet       验证结果
+     * @return 验证失败的次数
+     */
     private int processVerifyResult(Collection<VerifyFailedField> verifyFailedFields, ConstraintViolationSet violationSet) {
-        String fieldNameLogKey = "fieldName";
+        final String fieldNameLogKey = "fieldName";
         int failCount = 0;
+        // 检查结果是否符合预期
         for (VerifyFailedField verifyFailedField : verifyFailedFields) {
             String fieldName = verifyFailedField.getName();
-            LogContext.set("fieldName", fieldName);
+            LogContext.set(fieldNameLogKey, fieldName);
             String message = verifyFailedField.getMessage();
-            LogUtils.info((String)"Expected exception information: {}", (Object[])new Object[]{message == null ? "ignore" : message});
-            boolean fieldMatch = false;
-            boolean find = false;
+
+            LogUtils.info("Expected exception information: {}", message == null ? "ignore" : message);
+
+            boolean fieldMatch = false, find = false;
+
             FieldError fieldError = violationSet.getAndRemove(fieldName, message);
             if (fieldError != null) {
                 find = true;
-                LogUtils.info((String)"Real exception information: {}", (Object[])new Object[]{fieldError.getErrorMessage()});
+                LogUtils.info("Real exception information: {}", fieldError.getErrorMessage());
+
+                // 异常信息不同时验证失败（没填写异常信息则不校验异常信息）
                 if (message != null && !message.equals(fieldError.getErrorMessage())) {
-                    LogUtils.error((String)"Failed", (Object[])new Object[0]);
+                    LogUtils.error("Failed");
                 } else {
                     fieldMatch = true;
-                    LogUtils.info((String)"Passed", (Object[])new Object[0]);
+                    LogUtils.info("Passed");
                 }
             }
+
             if (!find) {
-                LogUtils.error((String)"Excess field", (Object[])new Object[0]);
+                // 多余的字段
+                LogUtils.error("Excess field");
             }
-            if (fieldMatch) continue;
-            ++failCount;
+            if (!fieldMatch) {
+                failCount++;
+            }
         }
-        LogContext.remove("fieldName");
+
+        LogContext.remove(fieldNameLogKey);
+        // 被忽略的字段
         for (FieldError violation : violationSet.getAll()) {
-            LogUtils.error((String)"Field [{}] is ignored", (Object[])new Object[]{violation.getFieldName()});
-            ++failCount;
+            LogUtils.error("Field [{}] is ignored", violation.getFieldName());
+            failCount++;
         }
         return failCount;
     }
-}
 
+}

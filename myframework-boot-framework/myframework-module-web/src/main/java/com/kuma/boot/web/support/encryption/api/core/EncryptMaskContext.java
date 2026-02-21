@@ -1,14 +1,24 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.core;
 
+/**
+ * 掩码上下文
+ *
+ * @since 1.2.0
+ */
 public class EncryptMaskContext {
+
+    /**
+     * 原始文本
+     */
     private String plainText;
+
+    /**
+     * 类别
+     */
     private String type;
 
     public String getPlainText() {
-        return this.plainText;
+        return plainText;
     }
 
     public void setPlainText(String plainText) {
@@ -16,15 +26,19 @@ public class EncryptMaskContext {
     }
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
     public void setType(String type) {
         this.type = type;
     }
 
+    @Override
     public String toString() {
-        return "EncryptMaskContext{plainText='" + this.plainText + "', type='" + this.type + "'}";
+        return "EncryptMaskContext{" +
+                "plainText='" + plainText + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
-}
 
+}

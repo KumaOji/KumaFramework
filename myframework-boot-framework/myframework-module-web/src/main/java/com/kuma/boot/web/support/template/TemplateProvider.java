@@ -1,14 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  jakarta.servlet.http.HttpSession
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.template;
 
 import com.kuma.boot.common.utils.lang.StringUtils;
@@ -16,69 +21,138 @@ import com.kuma.boot.common.utils.servlet.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * 模板访问java代码的注入类 一般通过Html或者tpl访问 如:Html.request()或者tpl.request()
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:19:10
+ */
 public class TemplateProvider {
+
+    /**
+     * request
+     *
+     * @return {@link HttpServletRequest }
+     * @since 2021-09-02 22:19:15
+     */
     public HttpServletRequest request() {
         return RequestUtils.getRequest();
     }
 
+    /**
+     * response
+     *
+     * @return {@link HttpServletResponse }
+     * @since 2021-09-02 22:19:19
+     */
     public HttpServletResponse response() {
         return RequestUtils.getResponse();
     }
 
+    /**
+     * session
+     *
+     * @return {@link HttpSession }
+     * @since 2021-09-02 22:19:25
+     */
     public HttpSession session() {
         return Objects.requireNonNull(RequestUtils.getRequest()).getSession();
     }
 
+    /**
+     * 设置参数 request.setAttribute(key,value)
+     *
+     * @param key   key
+     * @param value value
+     * @since 2021-09-02 22:19:35
+     */
     public void setattr(String key, Object value) {
-        this.request().setAttribute(key, value);
+        request().setAttribute(key, value);
     }
 
+    /**
+     * 获取参数 默认request.getAttribute(key) 支持key,也支持public字段表达式多层数据获取（通过反射深度查找）；格式:
+     * key.字段(或public).字段(或public)
+     *
+     * @param key key
+     * @return {@link Object }
+     * @since 2021-09-02 22:19:44
+     */
     public Object getattr(String key) {
         if (key.contains(".")) {
             Object r = null;
-            String[] path = org.springframework.util.StringUtils.split((String)key, (String)".");
+            String[] path = org.springframework.util.StringUtils.split(key, ".");
             if (path != null && path.length > 0) {
-                for (int i = 0; i < path.length; ++i) {
+                for (int i = 0; i < path.length; i++) {
                     String p = path[i];
                     if (i == 0) {
-                        r = this.request().getAttribute(p);
+                        r = request().getAttribute(p);
                     } else {
                         try {
                             Field f = r.getClass().getDeclaredField(p);
                             f.setAccessible(true);
                             r = f.get(r);
-                        }
-                        catch (Exception exp) {
+                        } catch (Exception exp) {
                             r = null;
                         }
                     }
-                    if (r == null) break;
+                    if (r == null) {
+                        break;
+                    }
                 }
             }
             return r;
+        } else {
+            return request().getAttribute(key);
         }
-        return this.request().getAttribute(key);
     }
 
+    /**
+     * where 三元运算符
+     *
+     * @param istrue   条件bool值
+     * @param trueObj  true 结果
+     * @param falseObj false结果
+     * @return {@link Object }
+     * @since 2021-09-02 22:19:55
+     */
     public Object where(Boolean istrue, Object trueObj, Object falseObj) {
-        return istrue != false ? trueObj : falseObj;
+        return istrue ? trueObj : falseObj;
     }
 
+    /**
+     * 截断字符串，后缀...
+     *
+     * @param str    字符串
+     * @param maxlen 最大长度
+     * @return {@link String }
+     * @since 2021-09-02 22:20:05
+     */
     public String cutString(String str, int maxlen) {
-        if (StringUtils.isEmpty((String)str)) {
+        if (StringUtils.isEmpty(str)) {
             return str;
         }
         if (str.length() <= maxlen) {
             return str;
         }
-        return StringUtils.subString3((String)str, (int)maxlen);
+        return StringUtils.subString3(str, maxlen);
     }
 
+    /**
+     * 日期字符串
+     *
+     * @param date   date
+     * @param format format
+     * @return {@link String }
+     * @since 2021-09-02 22:20:14
+     */
     public String dateString(Date date, String format) {
         if (date == null) {
             return "";
@@ -86,14 +160,20 @@ public class TemplateProvider {
         return new SimpleDateFormat(format).format(date);
     }
 
+    /**
+     * 默认打印
+     *
+     * @param o o
+     * @return {@link String }
+     * @since 2021-09-02 22:20:21
+     */
     public String print(Object o) {
         if (o == null) {
             return "";
         }
         if (o instanceof Date) {
-            return this.dateString((Date)o, "yyyy-MM-dd HH:mm:ss");
+            return dateString((Date) o, "yyyy-MM-dd HH:mm:ss");
         }
         return o.toString();
     }
 }
-

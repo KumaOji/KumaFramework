@@ -27,7 +27,7 @@ import tools.jackson.databind.json.JsonMapper;
  * @since 4.0.0
  */
 @FunctionalInterface
-public interface TtcWebMvcCustomizer {
+public interface KmcWebMvcCustomizer {
 
     /**
      * Customize the JsonMapper.Builder.

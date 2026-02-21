@@ -1,14 +1,16 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.dto.resp;
 
 import java.io.Serializable;
 
-public class CommonResponse
-implements Serializable {
+/**
+ * @author binbin.hou
+ * @since 1.0.0
+ */
+public class CommonResponse implements Serializable {
+
+    @Override
     public String toString() {
         return "CommonResponse{}";
     }
-}
 
+}

@@ -1,41 +1,67 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.Constraint
- *  jakarta.validation.Payload
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.annotation;
 
 import com.kuma.boot.web.validation.validator.EnglishValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import jakarta.validation.constraints.NotNull;
+
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+/**
+ * 验证该字符串是否是字母（包括大写和小写字母）
+ *
+ * @author kuma
+ * @version 2022.05
+ * @since 2022-05-11 10:14:46
+ */
 @Documented
-@Retention(value=RetentionPolicy.RUNTIME)
-@Target(value={ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
-@Constraint(validatedBy={EnglishValidator.class})
-@Repeatable(value=List.class)
+@Retention(RUNTIME)
+@Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
+@Constraint(validatedBy = {EnglishValidator.class})
+@Repeatable(English.List.class)
 public @interface English {
-    public boolean notNull() default true;
 
-    public String message() default "\u5fc5\u987b\u662f\u82f1\u8bed";
+    /**
+     * 是否不允许为空 {@linkplain NotNull}
+     *
+     * @return 默认：true
+     */
+    boolean notNull() default true;
 
-    public Class<?>[] groups() default {};
+    String message() default "必须是英语";
 
-    public Class<? extends Payload>[] payload() default {};
+    Class<?>[] groups() default {};
 
-    @Target(value={ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.TYPE_USE})
-    @Retention(value=RetentionPolicy.RUNTIME)
+    Class<? extends Payload>[] payload() default {};
+
+    /** Defines several {@code @English} annotations on the same element. */
+    @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
+    @Retention(RUNTIME)
     @Documented
-    public static @interface List {
-        public English[] value();
+    public @interface List {
+
+        English[] value();
     }
 }
-

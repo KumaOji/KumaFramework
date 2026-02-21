@@ -1,9 +1,12 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.core;
 
+/**
+ * 掩码
+ *
+ * @since 1.2.0
+ */
 public interface EncryptMask {
-    public String mask(EncryptMaskContext var1);
-}
 
+    String mask(final EncryptMaskContext context);
+
+}

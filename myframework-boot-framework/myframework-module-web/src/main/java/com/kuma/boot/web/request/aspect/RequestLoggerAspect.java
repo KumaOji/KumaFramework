@@ -253,7 +253,7 @@ public class RequestLoggerAspect {
         RequestContextHolder.setRequestAttributes(attributes, true);
         HttpServletRequest request = attributes.getRequest();
 
-        requestLog.setTraceId(MdcUtils.get(CommonConstants.TTC_TRACE_ID));
+        requestLog.setTraceId(MdcUtils.get(CommonConstants.KMC_TRACE_ID));
         requestLog.setApplicationName(applicationName);
         requestLog.setUsername(SecurityUtils.getUsernameWithAnonymous());
         requestLog.setUserId(String.valueOf(SecurityUtils.getUserIdWithAnonymous()));

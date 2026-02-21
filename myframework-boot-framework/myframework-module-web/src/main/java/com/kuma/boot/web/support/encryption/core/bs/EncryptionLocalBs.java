@@ -1,18 +1,6 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.support.hash.HashBs
- *  com.kuma.boot.common.support.hash.api.Hash
- *  com.kuma.boot.common.support.hash.core.Hashes
- *  com.kuma.boot.common.support.secret.api.Secret
- *  com.kuma.boot.common.support.secret.core.SecretBs
- *  com.kuma.boot.common.support.secret.core.secret.Secrets
- *  com.kuma.boot.common.utils.common.ArgUtils
- */
 package com.kuma.boot.web.support.encryption.core.bs;
 
-import com.kuma.boot.web.support.encryption.core.core.EncryptionContext;
+
 import com.kuma.boot.common.support.hash.HashBs;
 import com.kuma.boot.common.support.hash.api.Hash;
 import com.kuma.boot.common.support.hash.core.Hashes;
@@ -20,26 +8,21 @@ import com.kuma.boot.common.support.secret.api.Secret;
 import com.kuma.boot.common.support.secret.core.SecretBs;
 import com.kuma.boot.common.support.secret.core.secret.Secrets;
 import com.kuma.boot.common.utils.common.ArgUtils;
-import com.kuma.boot.web.support.encryption.api.core.EncryptMask;
-import com.kuma.boot.web.support.encryption.api.core.EncryptMaskFactory;
-import com.kuma.boot.web.support.encryption.api.core.Encryption;
-import com.kuma.boot.web.support.encryption.api.core.EncryptionFactory;
+import com.kuma.boot.web.support.encryption.api.core.*;
 import com.kuma.boot.web.support.encryption.api.dto.req.CommonDecryptRequest;
 import com.kuma.boot.web.support.encryption.api.dto.req.CommonEncryptRequest;
 import com.kuma.boot.web.support.encryption.api.dto.resp.CommonEncryptResponse;
 import com.kuma.boot.web.support.encryption.core.core.DefaultEncryptionFactory;
 import com.kuma.boot.web.support.encryption.core.support.mask.DefaultEncryptMaskFactory;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author binbin.hou
+ * @since 1.0.0
+ */
 public final class EncryptionLocalBs {
-    private Charset charset = StandardCharsets.UTF_8;
-    private String salt = "99886622";
-    private Hash hash = Hashes.md5();
-    private Secret secret = Secrets.aes();
-    private EncryptMaskFactory maskFactory = new DefaultEncryptMaskFactory();
-    private EncryptionFactory encryptionFactory = new DefaultEncryptionFactory();
-    private com.kuma.boot.web.support.encryption.api.core.EncryptionContext encryptionContext;
 
     private EncryptionLocalBs() {
     }
@@ -48,71 +31,165 @@ public final class EncryptionLocalBs {
         return new EncryptionLocalBs();
     }
 
+    /**
+     * 编码
+     */
+    private Charset charset = StandardCharsets.UTF_8;
+
+    /**
+     * 秘钥
+     * <p>
+     * 建议用户自己指定
+     */
+    private String salt = "99886622";
+
+    /**
+     * 哈希策略
+     */
+    private Hash hash = Hashes.md5();
+
+    /**
+     * 加密策略
+     */
+    private Secret secret = Secrets.aes();
+
+    /**
+     * 掩码工厂策略
+     *
+     * @since 1.2.0
+     */
+    private com.kuma.boot.web.support.encryption.api.core.EncryptMaskFactory maskFactory = new DefaultEncryptMaskFactory();
+
+    /**
+     * 加密工厂策略
+     *
+     * @since 1.2.0
+     */
+    private com.kuma.boot.web.support.encryption.api.core.EncryptionFactory encryptionFactory = new DefaultEncryptionFactory();
+
+    /**
+     * 上下文
+     */
+    private com.kuma.boot.web.support.encryption.api.core.EncryptionContext encryptionContext;
+
+
     public EncryptionLocalBs charset(Charset charset) {
-        ArgUtils.notNull((Object)charset, (String)"charset");
+        ArgUtils.notNull(charset, "charset");
+
         this.charset = charset;
         return this;
     }
 
     public EncryptionLocalBs salt(String salt) {
-        ArgUtils.notEmpty((String)salt, (String)"salt");
+        ArgUtils.notEmpty(salt, "salt");
+
         this.salt = salt;
         return this;
     }
 
-    public EncryptionLocalBs hash(Hash hash) {
-        ArgUtils.notNull((Object)hash, (String)"hash");
+    public EncryptionLocalBs hash( Hash hash) {
+        ArgUtils.notNull(hash, "hash");
+
         this.hash = hash;
         return this;
     }
 
     public EncryptionLocalBs secret(Secret secret) {
-        ArgUtils.notNull((Object)secret, (String)"secret");
+        ArgUtils.notNull(secret, "secret");
+
         this.secret = secret;
         return this;
     }
 
-    public EncryptionLocalBs maskFactory(EncryptMaskFactory maskFactory) {
-        ArgUtils.notNull((Object)maskFactory, (String)"maskFactory");
+    public EncryptionLocalBs maskFactory( com.kuma.boot.web.support.encryption.api.core.EncryptMaskFactory maskFactory) {
+        ArgUtils.notNull(maskFactory, "maskFactory");
+
         this.maskFactory = maskFactory;
         return this;
     }
 
-    public EncryptionLocalBs encryptionFactory(EncryptionFactory encryptionFactory) {
-        ArgUtils.notNull((Object)encryptionFactory, (String)"encryptionFactory");
+    public EncryptionLocalBs encryptionFactory( com.kuma.boot.web.support.encryption.api.core.EncryptionFactory encryptionFactory) {
+        ArgUtils.notNull(encryptionFactory, "encryptionFactory");
+
         this.encryptionFactory = encryptionFactory;
         return this;
     }
 
+    /**
+     * 初始化
+     *
+     * @return this
+     */
     public synchronized EncryptionLocalBs init() {
-        ArgUtils.notEmpty((String)this.salt, (String)"salt");
-        byte[] salts = this.salt.getBytes(this.charset);
-        HashBs hashBs = HashBs.newInstance().charset(this.charset).hash(this.hash).salt(salts);
-        SecretBs secretBs = SecretBs.newInstance().charset(this.charset.name()).secret(this.secret).key(salts);
-        this.encryptionContext = EncryptionContext.newInstance().hashBs(hashBs).secretBs(secretBs);
+        ArgUtils.notEmpty(salt, "salt");
+
+        final byte[] salts = salt.getBytes(charset);
+        HashBs hashBs = HashBs.newInstance()
+                .charset(charset)
+                .hash(hash)
+                .salt(salts);
+
+        SecretBs secretBs = SecretBs.newInstance()
+                .charset(charset.name())
+                .secret(secret)
+                .key(salts);
+
+        this.encryptionContext = com.kuma.boot.web.support.encryption.core.core.EncryptionContext.newInstance()
+                .hashBs(hashBs)
+                .secretBs(secretBs);
+
         return this;
     }
 
+
+    /**
+     * 加密
+     *
+     * @param plainText 文本
+     * @param type      类别
+     * @return 结果
+     * @since 1.2.0
+     */
     public CommonEncryptResponse encrypt(String plainText, String type) {
-        this.checkStatus();
-        EncryptMask encryptMask = this.maskFactory.get(type);
-        Encryption encryption = this.encryptionFactory.get(type);
+        checkStatus();
+
+        final com.kuma.boot.web.support.encryption.api.core.EncryptMask encryptMask = maskFactory.get(type);
+        final com.kuma.boot.web.support.encryption.api.core.Encryption encryption = encryptionFactory.get(type);
+
         CommonEncryptRequest request = new CommonEncryptRequest();
         request.setText(plainText);
         request.setEncryptMask(encryptMask);
-        return encryption.encrypt(request, this.encryptionContext);
+
+        return encryption.encrypt(request, encryptionContext);
     }
 
+    /**
+     * 解密
+     *
+     * @param cipher 文本
+     * @param type   类别
+     * @return 结果
+     */
     public String decrypt(String cipher, String type) {
-        this.checkStatus();
-        Encryption encryption = this.encryptionFactory.get(type);
+        checkStatus();
+
+        final com.kuma.boot.web.support.encryption.api.core.Encryption encryption = encryptionFactory.get(type);
+
         CommonDecryptRequest request = new CommonDecryptRequest();
         request.setCipher(cipher);
-        return encryption.decrypt(request, this.encryptionContext).getText();
+        return encryption.decrypt(request, encryptionContext).getText();
     }
 
+    /**
+     * 生成摘要
+     *
+     * @param plainText 文本
+     * @return 结果
+     */
     public String hash(String plainText) {
-        this.checkStatus();
+        checkStatus();
+
+        //2. 摘要
         return this.encryptionContext.hashBs().execute(plainText);
     }
 
@@ -121,5 +198,6 @@ public final class EncryptionLocalBs {
             this.init();
         }
     }
-}
 
+
+}

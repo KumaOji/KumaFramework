@@ -1,24 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.holder.TenantContextHolder
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  com.kuma.boot.common.utils.servlet.ResponseUtils
- *  com.kuma.boot.common.utils.servlet.TraceUtils
- *  jakarta.servlet.FilterChain
- *  jakarta.servlet.ServletException
- *  jakarta.servlet.ServletRequest
- *  jakarta.servlet.ServletResponse
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.web.filter.OncePerRequestFilter
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.servlet.filter;
 
 import cn.hutool.core.util.StrUtil;
+import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.holder.TenantContextHolder;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
@@ -26,42 +25,56 @@ import com.kuma.boot.common.utils.servlet.ResponseUtils;
 import com.kuma.boot.common.utils.servlet.TraceUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class TenantFilter
-extends OncePerRequestFilter {
+import java.io.IOException;
+
+/**
+ * 租户过滤器
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:15:01
+ */
+// @WebFilter(filterName = "TenantFilter", urlPatterns = "/*", asyncSupported = true)
+public class TenantFilter extends OncePerRequestFilter {
+
+    @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return RequestUtils.excludeActuator((HttpServletRequest)request);
+        return RequestUtils.excludeActuator(request);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
         try {
-            String tenantId = request.getParameter("kmc-tenant-id");
-            if (StrUtil.isEmpty((CharSequence)tenantId)) {
-                tenantId = request.getHeader("kmc-tenant-id");
+            // 优先获取请求参数中的tenantId值
+            String tenantId = request.getParameter(CommonConstants.KMC_TENANT_ID);
+            if (StrUtil.isEmpty(tenantId)) {
+                tenantId = request.getHeader(CommonConstants.KMC_TENANT_ID);
             }
-            if (StringUtils.isNotBlank((String)tenantId)) {
-                TenantContextHolder.setTenant((String)tenantId);
-                TraceUtils.setKmcTenantId((String)tenantId);
-            } else if (StringUtils.isBlank((String)TenantContextHolder.getTenant())) {
-                TenantContextHolder.setTenant((String)"1");
-                TraceUtils.setKmcTenantId((String)"1");
+
+            // 保存租户id
+            if (StringUtils.isNotBlank(tenantId)) {
+                TenantContextHolder.setTenant(tenantId);
+                TraceUtils.setKmcTenantId(tenantId);
+            } else {
+                if (StringUtils.isBlank(TenantContextHolder.getTenant())) {
+                    TenantContextHolder.setTenant(CommonConstants.KMC_TENANT_ID_DEFAULT);
+                    TraceUtils.setKmcTenantId(CommonConstants.KMC_TENANT_ID_DEFAULT);
+                }
             }
-            ResponseUtils.addResponseHeader((HttpServletResponse)response, (String)"kmc-tenant-id", (String)TenantContextHolder.getTenant());
-            filterChain.doFilter((ServletRequest)request, (ServletResponse)response);
-        }
-        finally {
+
+            ResponseUtils.addResponseHeader(
+                    response, CommonConstants.KMC_TENANT_ID, TenantContextHolder.getTenant());
+
+            filterChain.doFilter(request, response);
+        } finally {
             TenantContextHolder.clear();
             TraceUtils.removeKmcTenantId();
         }
     }
 }
-

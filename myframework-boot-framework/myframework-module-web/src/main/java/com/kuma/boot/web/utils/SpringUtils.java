@@ -1,109 +1,215 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.DisposableBean
- *  org.springframework.context.ApplicationContext
- *  org.springframework.context.ApplicationContextAware
- *  org.springframework.core.env.Environment
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.utils;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 
-public class SpringUtils
-implements ApplicationContextAware,
-DisposableBean {
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Spring工具类
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:27:12
+ */
+public class SpringUtils implements ApplicationContextAware, DisposableBean {
+
+    /** applicationContext */
     private static ApplicationContext applicationContext = null;
-    private static final List<CallBack> CALL_BACKS = new ArrayList<CallBack>();
+
+    /** CALL_BACKS */
+    private static final List<CallBack> CALL_BACKS = new ArrayList<>();
+
+    /** addCallback */
     private static boolean addCallback = true;
 
+    /**
+     * 针对 某些初始化方法，在SpringContextHolder 未初始化时 提交回调方法。 在SpringContextHolder 初始化后，进行回调使用
+     *
+     * @param callBack callBack
+     * @since 2021-09-02 22:27:35
+     */
     public static synchronized void addCallBacks(CallBack callBack) {
         if (addCallback) {
-            CALL_BACKS.add(callBack);
+            SpringUtils.CALL_BACKS.add(callBack);
         } else {
-            LogUtils.warn((String)"CallBack\uff1a{} \u5df2\u65e0\u6cd5\u6dfb\u52a0\uff01\u7acb\u5373\u6267\u884c", (Object[])new Object[]{callBack.getCallBackName()});
+            LogUtils.warn("CallBack：{} 已无法添加！立即执行", callBack.getCallBackName());
             callBack.executor();
         }
     }
 
+    /**
+     * 从静态变量applicationContext中取得Bean, 自动转型为所赋值对象的类型.
+     *
+     * @param name name
+     * @param <T> T
+     * @return T
+     * @since 2021-09-02 22:27:49
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) {
-        SpringUtils.assertContextInjected();
-        return (T)applicationContext.getBean(name);
+        assertContextInjected();
+        return (T) applicationContext.getBean(name);
     }
 
+    /**
+     * 从静态变量applicationContext中取得Bean, 自动转型为所赋值对象的类型.
+     *
+     * @param requiredType requiredType
+     * @param <T> T
+     * @return T
+     * @since 2021-09-02 22:27:57
+     */
     public static <T> T getBean(Class<T> requiredType) {
-        SpringUtils.assertContextInjected();
-        return (T)applicationContext.getBean(requiredType);
+        assertContextInjected();
+        return applicationContext.getBean(requiredType);
     }
 
+    /**
+     * 获取SpringBoot 配置信息
+     *
+     * @param property 属性key
+     * @param defaultValue 默认值
+     * @param requiredType 返回类型
+     * @param <T> T
+     * @return T
+     * @since 2021-09-02 22:28:17
+     */
     public static <T> T getProperties(String property, T defaultValue, Class<T> requiredType) {
-        Object result = defaultValue;
+        T result = defaultValue;
         try {
-            result = SpringUtils.getBean(Environment.class).getProperty(property, requiredType);
-        }
-        catch (Exception exception) {
-            // empty catch block
+            result = getBean(Environment.class).getProperty(property, requiredType);
+        } catch (Exception ignored) {
         }
         return result;
     }
 
+    /**
+     * 获取SpringBoot 配置信息
+     *
+     * @param property 属性key
+     * @return {@link String }
+     * @since 2021-09-02 22:28:29
+     */
     public static String getProperties(String property) {
-        return SpringUtils.getProperties(property, null, String.class);
+        return getProperties(property, null, String.class);
     }
 
+    /**
+     * 获取SpringBoot 配置信息
+     *
+     * @param property 属性key
+     * @param requiredType 返回类型
+     * @param <T> T
+     * @return T
+     * @since 2021-09-02 22:28:40
+     */
     public static <T> T getProperties(String property, Class<T> requiredType) {
-        return SpringUtils.getProperties(property, null, requiredType);
+        return getProperties(property, null, requiredType);
     }
 
+    /**
+     * 检查ApplicationContext不为空
+     *
+     * @since 2021-09-02 22:28:50
+     */
     private static void assertContextInjected() {
         if (applicationContext == null) {
-            throw new IllegalStateException("applicationContext\u5c5e\u6027\u672a\u6ce8\u5165, \u8bf7\u5728applicationContext.xml\u4e2d\u5b9a\u4e49SpringContextHolder\u6216\u5728SpringBoot\u542f\u52a8\u7c7b\u4e2d\u6ce8\u518cSpringContextHolder.");
+            throw new IllegalStateException(
+                    "applicationContext属性未注入, 请在applicationContext"
+                            + ".xml中定义SpringContextHolder或在SpringBoot启动类中注册SpringContextHolder.");
         }
     }
 
+    /**
+     * 清除SpringContextHolder中的ApplicationContext为Null
+     *
+     * @since 2021-09-02 22:28:55
+     */
     private static void clearHolder() {
-        LogUtils.debug((String)("\u6e05\u9664SpringContextHolder\u4e2d\u7684ApplicationContext:" + String.valueOf(applicationContext)), (Object[])new Object[0]);
+        LogUtils.debug("清除SpringContextHolder中的ApplicationContext:" + applicationContext);
         applicationContext = null;
     }
 
+    @Override
     public void destroy() {
         SpringUtils.clearHolder();
     }
 
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         if (SpringUtils.applicationContext != null) {
-            LogUtils.warn((String)("SpringContextHolder\u4e2d\u7684ApplicationContext\u88ab\u8986\u76d6, \u539f\u6709ApplicationContext\u4e3a:" + String.valueOf(SpringUtils.applicationContext)), (Object[])new Object[0]);
+            LogUtils.warn(
+                    "SpringContextHolder中的ApplicationContext被覆盖, 原有ApplicationContext为:"
+                            + SpringUtils.applicationContext);
         }
         SpringUtils.applicationContext = applicationContext;
         if (addCallback) {
-            for (CallBack callBack : CALL_BACKS) {
+            for (CallBack callBack : SpringUtils.CALL_BACKS) {
                 callBack.executor();
             }
             CALL_BACKS.clear();
         }
-        addCallback = false;
+        SpringUtils.addCallback = false;
     }
 
+    /**
+     * 获取ApplicationContext
+     *
+     * @return {@link ApplicationContext }
+     * @since 2021-09-02 22:29:02
+     */
     public static ApplicationContext getApplicationContext() {
-        return applicationContext;
+        return SpringUtils.applicationContext;
     }
 
-    public static interface CallBack {
-        public void executor();
+    /**
+     * 回调方法 针对某些初始化方法，在SpringUtil 初始化前时，<br>
+     * 可提交一个 提交回调任务。<br>
+     * 在SpringUtil 初始化后，进行回调使用
+     *
+     * @author kuma
+     * @version 2021.9
+     * @since 2021-09-02 22:29:11
+     */
+    public interface CallBack {
 
-        default public String getCallBackName() {
+        /**
+         * 回调执行方法
+         *
+         * @since 2021-09-02 22:29:21
+         */
+        void executor();
+
+        /**
+         * 本回调任务名称
+         *
+         * @return {@link String }
+         * @since 2021-09-02 22:29:27
+         */
+        default String getCallBackName() {
             return Thread.currentThread().threadId() + ":" + this.getClass().getName();
         }
     }
 }
-

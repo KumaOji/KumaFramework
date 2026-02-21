@@ -1,45 +1,66 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.context.support.ResourceBundleMessageSource
- */
 package com.kuma.boot.web.validation.spel.core.message;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import java.util.Locale;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
+import java.util.Locale;
+
+/**
+ * 资源包消息解析器
+ *
+ * @author 阿杆
+ * @since 2025/2/25
+ */
 public class ResourceBundleMessageResolver {
-    public static final String DEFAULT_VALIDATION_MESSAGES = "ValidationMessages";
-    private static final ResourceBundleMessageSource MESSAGE_SOURCE = ResourceBundleMessageResolver.initMessageSource();
 
     private ResourceBundleMessageResolver() {
     }
 
+    /**
+     * The name of the default message bundle.
+     */
+    public static final String DEFAULT_VALIDATION_MESSAGES = "ValidationMessages";
+
+    private static final ResourceBundleMessageSource MESSAGE_SOURCE = initMessageSource();
+
     private static ResourceBundleMessageSource initMessageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasenames(new String[]{DEFAULT_VALIDATION_MESSAGES});
+        messageSource.setBasenames(
+                DEFAULT_VALIDATION_MESSAGES
+        );
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
 
+    /**
+     * 重置资源包
+     */
     public static void resetBasenames() {
-        MESSAGE_SOURCE.setBasenames(new String[]{DEFAULT_VALIDATION_MESSAGES});
+        MESSAGE_SOURCE.setBasenames(
+                DEFAULT_VALIDATION_MESSAGES
+        );
     }
 
-    public static void addBasenames(String ... basename) {
+    /**
+     * 添加资源包
+     *
+     * @param basename 资源包名称
+     */
+    public static void addBasenames(String... basename) {
         String[] existingBasename = MESSAGE_SOURCE.getBasenameSet().toArray(new String[0]);
+
+        // 创建一个新的 basename 数组，将新添加的放在前面
         String[] combinedBasename = new String[basename.length + existingBasename.length];
         System.arraycopy(basename, 0, combinedBasename, 0, basename.length);
         System.arraycopy(existingBasename, 0, combinedBasename, basename.length, existingBasename.length);
-        LogUtils.debug((String)"Combined basename: {}", (Object[])new Object[]{combinedBasename});
+        LogUtils.debug("Combined basename: {}", (Object) combinedBasename);
+
+        // 重新设置 basename
         MESSAGE_SOURCE.setBasenames(combinedBasename);
     }
 
-    public static String getMessage(String key, Locale locale, Object ... args) {
+    public static String getMessage(String key, Locale locale, Object... args) {
         return MESSAGE_SOURCE.getMessage(key, args, locale);
     }
-}
 
+}

@@ -1,18 +1,24 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.dto.req;
 
-public class CommonDecryptRequest
-extends CommonRequest {
+/**
+ * 解密入参
+ *
+ * @author binbin.hou
+ * @since 1.0.0
+ */
+public class CommonDecryptRequest extends CommonRequest {
+
+    /**
+     * 密文
+     */
     private String cipher;
 
     public String getCipher() {
-        return this.cipher;
+        return cipher;
     }
 
     public void setCipher(String cipher) {
         this.cipher = cipher;
     }
-}
 
+}

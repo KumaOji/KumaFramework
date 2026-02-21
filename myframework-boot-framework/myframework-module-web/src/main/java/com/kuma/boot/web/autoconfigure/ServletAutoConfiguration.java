@@ -23,9 +23,9 @@ import com.kuma.boot.web.servlet.filter.TenantFilter;
 import com.kuma.boot.web.servlet.filter.TraceFilter;
 import com.kuma.boot.web.servlet.filter.VersionFilter;
 import com.kuma.boot.web.servlet.filter.WebContextFilter;
-import com.kuma.boot.web.servlet.listener.TtcServletContextListener;
-import com.kuma.boot.web.servlet.servlet.TtcAsyncServlet;
-import com.kuma.boot.web.servlet.servlet.TtcServlet;
+import com.kuma.boot.web.servlet.listener.KmcServletContextListener;
+import com.kuma.boot.web.servlet.servlet.KmcAsyncServlet;
+import com.kuma.boot.web.servlet.servlet.KmcServlet;
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -113,35 +113,35 @@ public class ServletAutoConfiguration implements WebApplicationInitializer, Init
 
     // 注册 Servlet 到容器中
     @Bean
-    public ServletRegistrationBean<TtcServlet> ttcServletRegistrationBean() {
-        ServletRegistrationBean<TtcServlet> servletRegistrationBean =
+    public ServletRegistrationBean<KmcServlet> kmcServletRegistrationBean() {
+        ServletRegistrationBean<KmcServlet> servletRegistrationBean =
                 new ServletRegistrationBean<>();
-        servletRegistrationBean.setServlet(new TtcServlet());
+        servletRegistrationBean.setServlet(new KmcServlet());
         servletRegistrationBean.setLoadOnStartup(1);
         servletRegistrationBean.setAsyncSupported(true);
-        servletRegistrationBean.setUrlMappings(List.of("/ttcServlet"));
-        LogUtils.info("注册ttcServlet成功，名称: {}", TtcServlet.class.getName());
+        servletRegistrationBean.setUrlMappings(List.of("/kmcServlet"));
+        LogUtils.info("注册kmcServlet成功，名称: {}", KmcServlet.class.getName());
         return servletRegistrationBean;
     }
 
     @Bean
-    public ServletRegistrationBean<TtcAsyncServlet> ttcAsyncServletRegistrationBean() {
-        ServletRegistrationBean<TtcAsyncServlet> servletRegistrationBean =
+    public ServletRegistrationBean<KmcAsyncServlet> kmcAsyncServletRegistrationBean() {
+        ServletRegistrationBean<KmcAsyncServlet> servletRegistrationBean =
                 new ServletRegistrationBean<>();
-        servletRegistrationBean.setServlet(new TtcAsyncServlet());
+        servletRegistrationBean.setServlet(new KmcAsyncServlet());
         servletRegistrationBean.setLoadOnStartup(1);
         servletRegistrationBean.setAsyncSupported(true);
-        servletRegistrationBean.setUrlMappings(List.of("/ttcAsyncServlet"));
-        LogUtils.info("注册ttcAsyncServlet成功，名称: {}", TtcAsyncServlet.class.getName());
+        servletRegistrationBean.setUrlMappings(List.of("/kmcAsyncServlet"));
+        LogUtils.info("注册kmcAsyncServlet成功，名称: {}", KmcAsyncServlet.class.getName());
         return servletRegistrationBean;
     }
 
     @Bean
-    public ServletListenerRegistrationBean<TtcServletContextListener>
-    ttcServletListenerRegistrationBean() {
-        ServletListenerRegistrationBean<TtcServletContextListener> bean =
+    public ServletListenerRegistrationBean<KmcServletContextListener>
+    kmcServletListenerRegistrationBean() {
+        ServletListenerRegistrationBean<KmcServletContextListener> bean =
                 new ServletListenerRegistrationBean<>();
-        bean.setListener(new TtcServletContextListener());
+        bean.setListener(new KmcServletContextListener());
         return bean;
     }
 

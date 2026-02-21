@@ -333,7 +333,7 @@ public class InnerApiExceptionAdvice implements InitializingBean {
     private String getTraceId() {
         String traceId = TraceContextHolder.getTraceId();
         if (traceId == null) {
-            traceId = TraceUtils.getTtcTraceId();
+            traceId = TraceUtils.getKmcTraceId();
         }
         if (traceId == null) {
             traceId = IdGeneratorUtils.getIdStr();

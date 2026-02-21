@@ -1,17 +1,30 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.api.dto.req;
+
 
 import com.kuma.boot.web.support.encryption.api.core.EncryptMask;
 
-public class CommonEncryptRequest
-extends CommonRequest {
+/**
+ * 加密入参
+ *
+ * @author binbin.hou
+ * @since 1.0.0
+ */
+public class CommonEncryptRequest extends CommonRequest {
+
+    /**
+     * 待加密内容
+     */
     private String text;
+
+    /**
+     * 加密策略
+     *
+     * @since 1.2.0
+     */
     private EncryptMask encryptMask;
 
     public String getText() {
-        return this.text;
+        return text;
     }
 
     public void setText(String text) {
@@ -19,11 +32,10 @@ extends CommonRequest {
     }
 
     public EncryptMask getEncryptMask() {
-        return this.encryptMask;
+        return encryptMask;
     }
 
-    public void setEncryptMask(EncryptMask encryptMask) {
+    public void setEncryptMask( EncryptMask encryptMask) {
         this.encryptMask = encryptMask;
     }
 }
-

@@ -1,41 +1,50 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.core;
+
 
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * Spel校验上下文
+ *
+ * @author 阿杆
+ * @since 2025/4/10
+ */
 public class SpelValidContext {
-    Locale locale;
-    private static final SpelValidContext DEFAULT = SpelValidContext.builder().build();
-
+    @Override
     public boolean equals(Object o) {
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        SpelValidContext that = (SpelValidContext)o;
-        return Objects.equals(this.locale, that.locale);
+
+        if (o == null || getClass() != o.getClass()) return false;
+        SpelValidContext that = (SpelValidContext) o;
+        return Objects.equals(locale, that.locale);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hashCode(this.locale);
+        return Objects.hashCode(locale);
     }
 
+    @Override
     public String toString() {
-        return "SpelValidContext{locale=" + String.valueOf(this.locale) + "}";
+        return "SpelValidContext{" +
+                "locale=" + locale +
+                '}';
     }
 
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
 
+    Locale locale;
+
+    private static final SpelValidContext DEFAULT = SpelValidContext.builder().build();
+
     public static SpelValidContext getDefault() {
         return DEFAULT;
     }
 
     public Locale getLocale() {
-        return this.locale == null ? Locale.getDefault() : this.locale;
+        return locale == null ? Locale.getDefault() : locale;
     }
 
     public static SpelValidContextBuilder builder() {
@@ -48,6 +57,7 @@ public class SpelValidContext {
         private SpelValidContextBuilder() {
         }
 
+
         public SpelValidContextBuilder locale(Locale locale) {
             this.locale = locale;
             return this;
@@ -55,9 +65,8 @@ public class SpelValidContext {
 
         public SpelValidContext build() {
             SpelValidContext spelValidContext = new SpelValidContext();
-            spelValidContext.setLocale(this.locale);
+            spelValidContext.setLocale(locale);
             return spelValidContext;
         }
     }
 }
-

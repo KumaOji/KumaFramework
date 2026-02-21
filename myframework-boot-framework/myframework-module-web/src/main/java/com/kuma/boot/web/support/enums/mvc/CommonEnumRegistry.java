@@ -1,23 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.google.common.collect.Maps
- *  com.kuma.boot.common.enums.base.CommonEnum
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.annotation.PostConstruct
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.beans.factory.annotation.Value
- *  org.springframework.core.io.Resource
- *  org.springframework.core.io.ResourceLoader
- *  org.springframework.core.io.support.ResourcePatternResolver
- *  org.springframework.core.io.support.ResourcePatternUtils
- *  org.springframework.core.type.ClassMetadata
- *  org.springframework.core.type.classreading.MetadataReader
- *  org.springframework.core.type.classreading.SimpleMetadataReaderFactory
- *  org.springframework.stereotype.Component
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.enums.mvc;
 
 import com.google.common.collect.Maps;
@@ -25,10 +21,6 @@ import com.kuma.boot.common.enums.base.CommonEnum;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import jakarta.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -37,53 +29,80 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class CommonEnumRegistry {
+
     private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
     private static final String BASE__ENUM_CLASS_NAME = CommonEnum.class.getName();
     private final Map<String, List<CommonEnum>> nameDict = Maps.newLinkedHashMap();
+
     private final Map<Class<?>, List<CommonEnum>> classDict = Maps.newLinkedHashMap();
-    @Value(value="${baseEnum.basePackage:''}")
+
+    @Value("${baseEnum.basePackage:''}")
     private String basePackage;
-    @Autowired
-    private ResourceLoader resourceLoader;
+
+    @Autowired private ResourceLoader resourceLoader;
 
     @PostConstruct
     public void initDict() {
-        if (StringUtils.isEmpty((String)this.basePackage)) {
+        if (StringUtils.isEmpty(basePackage)) {
             return;
         }
-        ResourcePatternResolver resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver((ResourceLoader)this.resourceLoader);
-        SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+        ResourcePatternResolver resourcePatternResolver =
+                ResourcePatternUtils.getResourcePatternResolver(this.resourceLoader);
+        MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
         try {
-            Resource[] resources;
-            String pkg = this.toPackage(this.basePackage);
-            String packageSearchPath = "classpath*:" + pkg + DEFAULT_RESOURCE_PATTERN;
-            for (Resource resource : resources = resourcePatternResolver.getResources(packageSearchPath)) {
-                if (!resource.isReadable()) continue;
-                try {
-                    String className;
-                    Class<?> cls;
-                    MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
-                    ClassMetadata classMetadata = metadataReader.getClassMetadata();
-                    String[] interfaceNames = classMetadata.getInterfaceNames();
-                    if (!Arrays.asList(interfaceNames).contains(BASE__ENUM_CLASS_NAME) || !(cls = Class.forName(className = classMetadata.getClassName())).isEnum() || !CommonEnum.class.isAssignableFrom(cls)) continue;
-                    ?[] enumConstants = cls.getEnumConstants();
-                    List<CommonEnum> commonEnums = Arrays.stream(enumConstants).filter(e -> e instanceof CommonEnum).map(e -> (CommonEnum)e).toList();
-                    String key = this.convertKeyFromClassName(cls.getSimpleName());
-                    this.nameDict.put(key, commonEnums);
-                    this.classDict.put(cls, commonEnums);
-                }
-                catch (Throwable throwable) {
-                    // empty catch block
+            String pkg = toPackage(this.basePackage);
+            // 对 basePackage 包进行扫描
+            String packageSearchPath =
+                    ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
+                            + pkg
+                            + DEFAULT_RESOURCE_PATTERN;
+            Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
+            for (Resource resource : resources) {
+                if (resource.isReadable()) {
+                    try {
+                        MetadataReader metadataReader =
+                                metadataReaderFactory.getMetadataReader(resource);
+                        ClassMetadata classMetadata = metadataReader.getClassMetadata();
+
+                        String[] interfaceNames = classMetadata.getInterfaceNames();
+                        // 实现 BASE_ENUM_CLASS_NAME 接口
+                        if (Arrays.asList(interfaceNames).contains(BASE__ENUM_CLASS_NAME)) {
+                            String className = classMetadata.getClassName();
+
+                            // 加载 cls
+                            Class<?> cls = Class.forName(className);
+                            if (cls.isEnum() && CommonEnum.class.isAssignableFrom(cls)) {
+                                Object[] enumConstants = cls.getEnumConstants();
+                                List<CommonEnum> commonEnums =
+                                        Arrays.stream(enumConstants)
+                                                .filter(e -> e instanceof CommonEnum)
+                                                .map(e -> (CommonEnum) e)
+                                                .toList();
+
+                                String key = convertKeyFromClassName(cls.getSimpleName());
+
+                                this.nameDict.put(key, commonEnums);
+                                this.classDict.put(cls, commonEnums);
+                            }
+                        }
+                    } catch (Throwable ex) {
+                        // ignore
+                    }
                 }
             }
-        }
-        catch (IOException e2) {
-            LogUtils.error((String)"failed to load dict by auto register", (Object[])new Object[]{e2});
+        } catch (IOException e) {
+            LogUtils.error("failed to load dict by auto register", e);
         }
     }
 
@@ -97,19 +116,18 @@ public class CommonEnumRegistry {
     }
 
     public Map<String, List<CommonEnum>> getNameDict() {
-        return this.nameDict;
+        return nameDict;
     }
 
     public Map<Class<?>, List<CommonEnum>> getClassDict() {
-        return this.classDict;
+        return classDict;
     }
 
     public String getBasePackage() {
-        return this.basePackage;
+        return basePackage;
     }
 
     public ResourceLoader getResourceLoader() {
-        return this.resourceLoader;
+        return resourceLoader;
     }
 }
-

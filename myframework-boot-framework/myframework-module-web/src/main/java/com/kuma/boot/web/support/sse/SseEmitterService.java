@@ -1,112 +1,119 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.extra.spring.SpringUtil
- *  cn.hutool.json.JSONUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.context.ApplicationEvent
- *  org.springframework.web.servlet.mvc.method.annotation.SseEmitter
- *  org.springframework.web.servlet.mvc.method.annotation.SseEmitter$SseEventBuilder
- */
 package com.kuma.boot.web.support.sse;
 
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+/**
+ * @author zhanghongbin
+ */
 public class SseEmitterService {
-    private Map<String, SseEmitterUTF8> sseEmitterMap = new ConcurrentHashMap<String, SseEmitterUTF8>();
+
+    private Map<String, SseEmitterUTF8> sseEmitterMap = new ConcurrentHashMap<>();
 
     public SseEmitter connect(String id) {
-        SseEmitterUTF8 sseEmitter = new SseEmitterUTF8(60000L);
+        // 60秒
+        SseEmitterUTF8 sseEmitter = new SseEmitterUTF8(60_000L);
         try {
-            sseEmitter.send(SseEmitter.event().comment("\u521b\u5efa\u8fde\u63a5\u6210\u529f"));
+            sseEmitter.send(SseEmitter.event().comment("创建连接成功"));
+        } catch (Exception e) {
+            LogUtils.error("创建连接失败 , {} ", e.getMessage());
         }
-        catch (Exception e) {
-            LogUtils.error((String)"\u521b\u5efa\u8fde\u63a5\u5931\u8d25 , {} ", (Object[])new Object[]{e.getMessage()});
-        }
-        sseEmitter.onCompletion(this.completionCallBack(id));
-        sseEmitter.onTimeout(this.timeoutCallBack(id));
-        sseEmitter.onError(this.errorCallBack(id));
-        this.sseEmitterMap.put(id, sseEmitter);
-        LogUtils.info((String)"\u5f53\u524d\u7528\u6237\u603b\u8fde\u63a5\u6570 : {} ", (Object[])new Object[]{this.sseEmitterMap.size()});
-        SpringUtil.getApplicationContext().publishEvent((ApplicationEvent)new SseConnectionEvent(id));
+        sseEmitter.onCompletion(completionCallBack(id));
+        sseEmitter.onTimeout(timeoutCallBack(id));
+        sseEmitter.onError(errorCallBack(id));
+        sseEmitterMap.put(id, sseEmitter);
+        LogUtils.info("当前用户总连接数 : {} ", sseEmitterMap.size());
+        SpringUtil.getApplicationContext().publishEvent(new com.kuma.boot.web.support.sse.SseConnectionEvent(id));
         return sseEmitter;
     }
 
     public SseEmitterUTF8 getSseEmitter(String id) {
-        return this.sseEmitterMap.get(id);
+        return sseEmitterMap.get(id);
     }
 
     public Set<String> getAllSseId() {
         return this.sseEmitterMap.keySet();
     }
 
+    /**
+     * 指定id发送
+     *
+     * @param id id
+     * @param message 消息对象
+     * @return true,false
+     */
     public boolean send(String id, SseMessage<?> message) {
-        if (this.sseEmitterMap.containsKey(id)) {
+        if (sseEmitterMap.containsKey(id)) {
             try {
-                SseEmitter.SseEventBuilder sseEventBuilder = SseEmitter.event().data((Object)JSONUtil.toJsonStr(message));
+                SseEmitter.SseEventBuilder sseEventBuilder = SseEmitter.event().data(JSONUtil.toJsonStr(message));
                 if (!message.getTopic().equals("")) {
                     sseEventBuilder.name(message.getTopic());
                 }
-                this.sseEmitterMap.get(id).send(sseEventBuilder);
+                sseEmitterMap.get(id).send(sseEventBuilder);
                 return true;
-            }
-            catch (Exception e) {
-                LogUtils.error((String)"[{}]\u63a8\u9001\u5f02\u5e38:{}", (Object[])new Object[]{id, e.getMessage()});
+            } catch (Exception e) {
+                LogUtils.error("[{}]推送异常:{}", id, e.getMessage());
             }
         } else {
-            LogUtils.error((String)"{}:\u4e0d\u5b58\u5728", (Object[])new Object[]{id});
+            LogUtils.error("{}:不存在", id);
         }
         return false;
     }
 
-    public void send(SseMessage<?> message) {
+    /**
+     * 群发
+     *
+     * @param message 消息对象
+     */
+    public void send( SseMessage<?> message) {
         SseEmitter.SseEventBuilder sseEventBuilder = SseEmitter.event().data(message);
         if (!message.getTopic().equals("")) {
             sseEventBuilder.name(message.getTopic());
         }
-        this.sseEmitterMap.forEach((k, v) -> {
+        sseEmitterMap.forEach((k, v) -> {
             try {
                 v.send(sseEventBuilder);
-            }
-            catch (Exception e) {
-                LogUtils.error((String)"\u7528\u6237[{}]\u63a8\u9001\u5f02\u5e38:{}", (Object[])new Object[]{k, e.getMessage()});
+            } catch (Exception e) {
+                LogUtils.error("用户[{}]推送异常:{}", k, e.getMessage());
             }
         });
     }
 
+    /**
+     * 指定多个id
+     *
+     * @param ids id列表
+     * @param message 消息对象
+     */
     public void send(Set<String> ids, SseMessage<?> message) {
-        ids.forEach(id -> this.send((String)id, message));
+        ids.forEach(id -> send(id, message));
     }
 
     private Runnable completionCallBack(String id) {
         return () -> {
-            LogUtils.info((String)"\u7ed3\u675f\u8fde\u63a5\uff1a{}", (Object[])new Object[]{id});
-            this.sseEmitterMap.remove(id);
+            LogUtils.info("结束连接：{}", id);
+            sseEmitterMap.remove(id);
         };
     }
 
     private Runnable timeoutCallBack(String id) {
         return () -> {
-            LogUtils.info((String)"\u8fde\u63a5\u8d85\u65f6\uff1a{}", (Object[])new Object[]{id});
-            this.sseEmitterMap.remove(id);
+            LogUtils.info("连接超时：{}", id);
+            sseEmitterMap.remove(id);
         };
     }
 
     private Consumer<Throwable> errorCallBack(String id) {
         return throwable -> {
-            LogUtils.info((String)"\u8fde\u63a5\u5f02\u5e38\uff1a{}", (Object[])new Object[]{id});
-            this.sseEmitterMap.remove(id);
+            LogUtils.info("连接异常：{}", id);
+            sseEmitterMap.remove(id);
         };
     }
 }
-

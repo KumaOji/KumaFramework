@@ -1,51 +1,65 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.ConstraintValidator
- *  jakarta.validation.ConstraintValidatorContext
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.validator;
 
 import com.kuma.boot.web.validation.annotation.LimitedValue;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class LimitedValueValidator
-implements ConstraintValidator<LimitedValue, Object> {
+/**
+ * LimitedValueValidator
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-03 08:04:23
+ */
+public class LimitedValueValidator implements ConstraintValidator<LimitedValue, Object> {
+
     private String[] strValues;
     private int[] intValues;
     private boolean allowNullValue;
 
-    public void initialize(LimitedValue constraintAnnotation) {
-        this.strValues = constraintAnnotation.strValues();
-        this.intValues = constraintAnnotation.intValues();
-        this.allowNullValue = constraintAnnotation.allowNullValue();
+    @Override
+    public void initialize( LimitedValue constraintAnnotation) {
+        strValues = constraintAnnotation.strValues();
+        intValues = constraintAnnotation.intValues();
+        allowNullValue = constraintAnnotation.allowNullValue();
     }
 
+    @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
-        block4: {
-            block3: {
-                if (value == null && this.allowNullValue) {
+        if (value == null && allowNullValue) {
+            return true;
+        }
+
+        if (value instanceof String) {
+            for (String s : strValues) {
+                if (s.equals(value)) {
                     return true;
                 }
-                if (!(value instanceof String)) break block3;
-                for (String s : this.strValues) {
-                    if (!s.equals(value)) continue;
-                    return true;
-                }
-                break block4;
             }
-            if (!(value instanceof Integer)) break block4;
-            int[] nArray = this.intValues;
-            int n = nArray.length;
-            for (int i = 0; i < n; ++i) {
-                Integer s = nArray[i];
-                if (s != value) continue;
-                return true;
+        } else if (value instanceof Integer) {
+            for (Integer s : intValues) {
+                if (s == value) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 }
-

@@ -1,19 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.lambda.StreamUtils
- *  com.kuma.boot.common.utils.lang.ObjectUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  jakarta.servlet.ReadListener
- *  jakarta.servlet.ServletInputStream
- *  jakarta.servlet.ServletRequest
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletRequestWrapper
- *  org.springframework.http.HttpHeaders
- *  org.springframework.util.CollectionUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.multipart;
 
 import com.kuma.boot.common.utils.lambda.StreamUtils;
@@ -25,174 +25,239 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import org.springframework.http.HttpHeaders;
-import org.springframework.util.CollectionUtils;
+import java.util.*;
 
-public class RequestWrapper
-extends HttpServletRequestWrapper {
+/**
+ * The type Request wrapper.
+ *
+ */
+public class RequestWrapper extends HttpServletRequestWrapper {
+
     private final HttpHeaders headers = new HttpHeaders();
-    private final Map<String, String[]> parameter = new LinkedHashMap<String, String[]>(16);
+
+    private final Map<String, String[]> parameter = new LinkedHashMap<>(16);
+
     private String body;
+
     private boolean bodyReviseStatus = false;
 
+    /**
+     * Instantiates a new Request wrapper.
+     *
+     * @param request the request
+     */
     public RequestWrapper(HttpServletRequest request) {
         super(request);
-        this.headers.putAll(RequestUtils.headers((HttpServletRequest)request));
-        this.parameter.putAll(request.getParameterMap());
+        headers.putAll(RequestUtils.headers(request));
+        parameter.putAll(request.getParameterMap());
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     */
     public void setBody(String body) {
-        this.bodyReviseStatus = true;
+        bodyReviseStatus = true;
         this.body = body;
     }
 
+    /**
+     * Add header.
+     *
+     * @param name  the name
+     * @param value the value
+     */
     public void addHeader(String name, String value) {
-        this.headers.add(name, value);
+        headers.add(name, value);
     }
 
+    /**
+     * Put parameter.
+     *
+     * @param name   the name
+     * @param values the values
+     */
     public void putParameter(String name, String[] values) {
-        this.parameter.merge(name, values, (oldValues, newValues) -> (String[])StreamUtils.concat((Object[][])new String[][]{oldValues, newValues}).distinct().toArray(String[]::new));
+        parameter.merge(
+                name,
+                values,
+                (oldValues, newValues) ->
+                        StreamUtils.concat(oldValues, newValues).distinct().toArray(String[]::new));
     }
 
+    /**
+     * Put parameter.
+     *
+     * @param name  the name
+     * @param value the value
+     */
     public void putParameter(String name, String value) {
-        this.putParameter(name, new String[]{value});
+        putParameter(name, new String[] {value});
     }
 
+    @Override
     public ServletInputStream getInputStream() throws IOException {
-        return this.bodyReviseStatus ? new RequestServletInputStream(this.getRequest(), this.body) : super.getInputStream();
+        return bodyReviseStatus
+                ? new RequestServletInputStream(getRequest(), body)
+                : super.getInputStream();
     }
 
+    @Override
     public int getContentLength() {
         try {
-            return this.bodyReviseStatus ? this.body.getBytes(this.getRequest().getCharacterEncoding()).length : super.getContentLength();
-        }
-        catch (UnsupportedEncodingException e) {
+            return bodyReviseStatus
+                    ? body.getBytes(getRequest().getCharacterEncoding()).length
+                    : super.getContentLength();
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @Override
     public long getContentLengthLong() {
         try {
-            return this.bodyReviseStatus ? (long)this.body.getBytes(this.getRequest().getCharacterEncoding()).length : super.getContentLengthLong();
-        }
-        catch (UnsupportedEncodingException e) {
+            return bodyReviseStatus
+                    ? body.getBytes(getRequest().getCharacterEncoding()).length
+                    : super.getContentLengthLong();
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @Override
     public String getContentType() {
-        return this.bodyReviseStatus ? "application/json" : super.getContentType();
+        return bodyReviseStatus ? MediaType.APPLICATION_JSON_VALUE : super.getContentType();
     }
 
+    @Override
     public String getParameter(String name) {
-        Object[] values = this.getParameterValues(name);
-        return ObjectUtils.isEmpty((Object[])values) ? null : values[0];
+        String[] values = getParameterValues(name);
+        return ObjectUtils.isEmpty(values) ? null : values[0];
     }
 
+    @Override
     public Map<String, String[]> getParameterMap() {
-        return this.parameter;
+        return parameter;
     }
 
+    @Override
     public Enumeration<String> getParameterNames() {
-        return Collections.enumeration(this.parameter.keySet());
+        return Collections.enumeration(parameter.keySet());
     }
 
+    @Override
     public String[] getParameterValues(String name) {
-        return this.parameter.get(name);
+        return parameter.get(name);
     }
 
+    @Override
     public String getHeader(String name) {
-        if ("Content-Type".equalsIgnoreCase(name) && this.bodyReviseStatus) {
-            return this.getContentType();
+        if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) && bodyReviseStatus) {
+            return getContentType();
         }
-        return this.headers.getFirst(name);
+        return headers.getFirst(name);
     }
 
+    @Override
     public Enumeration<String> getHeaderNames() {
-        Set headerNames = this.headers.toSingleValueMap().keySet();
-        if (this.bodyReviseStatus) {
-            headerNames.add("Content-Type");
+        Set<String> headerNames = headers.toSingleValueMap().keySet();
+        if (bodyReviseStatus) {
+            headerNames.add(HttpHeaders.CONTENT_TYPE);
         }
-        return Collections.enumeration(this.headers.toSingleValueMap().keySet());
+        return Collections.enumeration(headers.toSingleValueMap().keySet());
     }
 
+    @Override
     public Enumeration<String> getHeaders(String name) {
-        List list;
-        HashSet<String> headerValues = new HashSet<String>();
-        if ("Content-Type".equalsIgnoreCase(name) && this.bodyReviseStatus) {
-            headerValues.add(this.getContentType());
+        Set<String> headerValues = new HashSet<>();
+        if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(name) && bodyReviseStatus) {
+            headerValues.add(getContentType());
         }
-        if (!CollectionUtils.isEmpty((Collection)(list = this.headers.get(name)))) {
+        List<String> list = headers.get(name);
+        if (!CollectionUtils.isEmpty(list)) {
             headerValues.addAll(list);
         }
         return Collections.enumeration(headerValues);
     }
 
-    private static class RequestServletInputStream
-    extends ServletInputStream {
+    private static class RequestServletInputStream extends ServletInputStream {
+
         private final InputStream in;
 
-        public RequestServletInputStream(ServletRequest request, String json) throws UnsupportedEncodingException {
-            this.in = new ByteArrayInputStream(json.getBytes(request.getCharacterEncoding()));
+        /**
+         * Instantiates a new Request servlet input stream.
+         *
+         * @param request the request
+         * @param json    the json
+         * @throws UnsupportedEncodingException the unsupported encoding exception
+         */
+        public RequestServletInputStream(ServletRequest request, String json)
+                throws UnsupportedEncodingException {
+            in = new ByteArrayInputStream(json.getBytes(request.getCharacterEncoding()));
         }
 
+        @Override
         public boolean isFinished() {
             return false;
         }
 
+        @Override
         public boolean isReady() {
             return false;
         }
 
+        @Override
         public void setReadListener(ReadListener listener) {
             try {
                 listener.onDataAvailable();
-            }
-            catch (IOException e) {
-                LogUtils.error((Throwable)e);
+            } catch (IOException e) {
+                LogUtils.error(e);
             }
         }
 
+        @Override
         public int read() throws IOException {
-            return this.in.read();
+            return in.read();
         }
     }
 
-    private static class HeaderEnumeration
-    implements Enumeration<String> {
+    private static class HeaderEnumeration implements Enumeration<String> {
+
         private final String contentType;
+
         private boolean hasMoreElements = false;
 
+        /**
+         * Instantiates a new Header enumeration.
+         *
+         * @param contentType the content type
+         */
         public HeaderEnumeration(String contentType) {
             this.contentType = contentType;
         }
 
         @Override
         public boolean hasMoreElements() {
-            return !this.hasMoreElements;
+            return !hasMoreElements;
         }
 
         @Override
         public String nextElement() {
-            if (this.hasMoreElements) {
+            if (hasMoreElements) {
                 throw new NoSuchElementException();
+            } else {
+                hasMoreElements = true;
+                return contentType;
             }
-            this.hasMoreElements = true;
-            return this.contentType;
         }
     }
 }
-

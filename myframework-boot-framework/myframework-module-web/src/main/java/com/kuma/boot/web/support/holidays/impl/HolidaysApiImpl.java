@@ -1,13 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.core.io.Resource
- *  org.springframework.core.io.ResourceLoader
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.support.holidays.impl;
 
 import com.kuma.boot.common.utils.json.JacksonUtils;
@@ -15,19 +21,25 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.support.holidays.config.HolidaysApiProperties;
 import com.kuma.boot.web.support.holidays.core.DaysType;
 import com.kuma.boot.web.support.holidays.core.HolidaysApi;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
-public class HolidaysApiImpl
-implements HolidaysApi,
-InitializingBean {
-    private static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = new HashMap<Integer, Map<String, Byte>>();
+/**
+ * 节假日实现
+ */
+public class HolidaysApiImpl implements HolidaysApi, InitializingBean {
+    /**
+     * 存储节假日
+     */
+    private static final Map<Integer, Map<String, Byte>> YEAR_DATA_MAP = new HashMap<>();
+
     private final ResourceLoader resourceLoader;
     private final HolidaysApiProperties properties;
 
@@ -40,57 +52,53 @@ InitializingBean {
     public DaysType getDaysType(LocalDate localDate) {
         int year = localDate.getYear();
         Map<String, Byte> dataMap = YEAR_DATA_MAP.get(year);
+        // 对于没有数据的，我们按正常的周六日来判断，
         if (dataMap == null) {
-            LogUtils.error((String)"\u6ca1\u6709\u5bf9\u5e94\u5e74:[{}]\u7684\u6570\u636e\uff0c\u8bf7\u5347\u7ea7\u6216\u8005\u81ea\u884c\u7ef4\u62a4\u6570\u636e\uff01", (Object[])new Object[]{year});
-            return HolidaysApiImpl.isWeekDay(localDate);
+            LogUtils.error("没有对应年:[{}]的数据，请升级或者自行维护数据！", year);
+            return isWeekDay(localDate);
         }
+        // 日期信息
         int monthValue = localDate.getMonthValue();
         int dayOfMonth = localDate.getDayOfMonth();
+        // 月份和日期
         String monthAndDay = String.format("%02d%02d", monthValue, dayOfMonth);
         Byte result = dataMap.get(monthAndDay);
         if (result != null) {
             return DaysType.from(result);
+        } else {
+            return isWeekDay(localDate);
         }
-        return HolidaysApiImpl.isWeekDay(localDate);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        Map dataMap;
-        InputStream inputStream;
-        Resource resource;
-        int[] years;
-        for (int year : years = new int[]{2019, 2020, 2021, 2022, 2023, 2024, 2025}) {
-            resource = this.resourceLoader.getResource("classpath:data/" + year + "_data.json");
-            inputStream = resource.getInputStream();
-            try {
-                dataMap = JacksonUtils.readMap((InputStream)inputStream, Byte.class);
+        int[] years = new int[] {2019, 2020, 2021, 2022, 2023, 2024, 2025};
+        for (int year : years) {
+            Resource resource = resourceLoader.getResource("classpath:data/" + year + "_data.json");
+            try (InputStream inputStream = resource.getInputStream()) {
+                Map<String, Byte> dataMap = JacksonUtils.readMap(inputStream, Byte.class);
                 YEAR_DATA_MAP.put(year, dataMap);
             }
-            finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
         }
-        List<HolidaysApiProperties.ExtData> extDataList = this.properties.getExtData();
+        List<HolidaysApiProperties.ExtData> extDataList = properties.getExtData();
         for (HolidaysApiProperties.ExtData extData : extDataList) {
             String dataPath = extData.getDataPath();
-            resource = this.resourceLoader.getResource(dataPath);
-            inputStream = resource.getInputStream();
-            try {
-                dataMap = JacksonUtils.readMap((InputStream)inputStream, Byte.class);
+            Resource resource = resourceLoader.getResource(dataPath);
+            try (InputStream inputStream = resource.getInputStream()) {
+                Map<String, Byte> dataMap = JacksonUtils.readMap(inputStream, Byte.class);
                 YEAR_DATA_MAP.put(extData.getYear(), dataMap);
-            }
-            finally {
-                if (inputStream == null) continue;
-                inputStream.close();
             }
         }
     }
 
+    /**
+     * 判断是否工作日
+     *
+     * @param localDate LocalDate
+     * @return DaysType
+     */
     private static DaysType isWeekDay(LocalDate localDate) {
         int week = localDate.getDayOfWeek().getValue();
         return week == 6 || week == 7 ? DaysType.REST_DAYS : DaysType.WEEKDAYS;
     }
 }
-

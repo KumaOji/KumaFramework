@@ -1,13 +1,16 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.validation.spel.test.util;
 
-import java.io.Serializable;
-
+/**
+ * getter，用于获取对象的属性值
+ *
+ * @author 阿杆
+ * @version 1.0
+ * @since 2024/6/15
+ */
 @FunctionalInterface
-public interface IGetter<T, R>
-extends Serializable {
-    public R apply(T var1);
-}
+public interface IGetter<T, R> extends java.io.Serializable {
 
+    @SuppressWarnings("unused")
+    R apply(T t);
+
+}

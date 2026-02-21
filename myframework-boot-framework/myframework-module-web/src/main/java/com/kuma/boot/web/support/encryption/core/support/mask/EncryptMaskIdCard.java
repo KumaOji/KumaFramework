@@ -1,16 +1,17 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.web.support.encryption.core.support.mask;
+
 
 import com.kuma.boot.web.support.encryption.api.core.EncryptMaskContext;
 import com.kuma.boot.web.support.encryption.core.util.InnerMaskUtil;
 
-public class EncryptMaskIdCard
-extends AbstractEncryptMask {
+/**
+ * @since 1.2.0
+ */
+public class EncryptMaskIdCard extends com.kuma.boot.web.support.encryption.core.support.mask.AbstractEncryptMask {
+
     @Override
-    protected String doMask(EncryptMaskContext context) {
+    protected String doMask( EncryptMaskContext context) {
         return InnerMaskUtil.idCard(context.getPlainText());
     }
-}
 
+}

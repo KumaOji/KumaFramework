@@ -1,10 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.validation.ConstraintValidator
- *  jakarta.validation.ConstraintValidatorContext
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.web.validation.validator;
 
 import com.kuma.boot.web.support.enums.StatusEnum;
@@ -12,23 +21,37 @@ import com.kuma.boot.web.validation.annotation.StatusValue;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class StatusValueValidator
-implements ConstraintValidator<StatusValue, String> {
+/**
+ * 校验状态，判断是否为 StatusEnum 中的值
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-03 08:04:24
+ */
+public class StatusValueValidator implements ConstraintValidator<StatusValue, String> {
+
     private Boolean required;
 
-    public void initialize(StatusValue constraintAnnotation) {
+    @Override
+    public void initialize( StatusValue constraintAnnotation) {
         this.required = constraintAnnotation.required();
     }
 
+    @Override
     public boolean isValid(String statusValue, ConstraintValidatorContext context) {
-        if (this.required.booleanValue() && statusValue == null) {
+
+        // 如果是必填的
+        if (required && statusValue == null) {
             return false;
         }
-        if (!this.required.booleanValue() && statusValue == null) {
+
+        // 如果不是必填，为空的话就通过
+        if (!required && statusValue == null) {
             return true;
         }
+
+        // 校验值是否是枚举中的值
         StatusEnum statusEnum = StatusEnum.codeToEnum(statusValue);
         return statusEnum != null;
     }
 }
-

@@ -88,7 +88,7 @@ public class DoubtApiInterceptor implements HandlerInterceptor {
 
                 Collector collector = ContextUtils.getBean(Collector.class, true);
                 if (Objects.nonNull(collector)) {
-                    collector.value("ttc.monitor.doubtapi.info").set(statisticMap);
+                    collector.value("kmc.monitor.doubtapi.info").set(statisticMap);
                 }
             }
         }
