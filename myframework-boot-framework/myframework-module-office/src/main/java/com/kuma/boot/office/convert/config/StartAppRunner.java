@@ -41,9 +41,10 @@ public class StartAppRunner implements CommandLineRunner {
              实现匹配文件授权 -> 去掉头部水印 `Evaluation Only. Created with Aspose.Words. Copyright 2003-2018 Aspose Pty Ltd.` |
                                          `Evaluation Only. Created with Aspose.Cells for Java. Copyright 2003 - 2020 Aspose Pty Ltd.`
             */
-            InputStream is = new ClassPathResource("license.xml").getInputStream();
-            License license = new License();
-            license.setLicense(is);
+            LogUtils.info("暂时不考虑去除水印");
+//            InputStream is = new ClassPathResource("license.xml").getInputStream();
+//            License license = new License();
+//            license.setLicense(is);
         } catch (Exception e) {
             LogUtils.error("《`aspose-words`授权》 失败： {}", e.getMessage());
         }

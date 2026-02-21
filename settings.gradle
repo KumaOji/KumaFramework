@@ -50,5 +50,6 @@ gradle.settingsEvaluated {
     }
 }
 
-
-include 'myframework-boot-framework:myframework-module-security'
+include 'myframework-boot-framework:myframework-module-actuate'
+include 'myframework-boot-framework:myframework-module-security-common'
+include 'myframework-boot-framework:myframework-module-security-spring'

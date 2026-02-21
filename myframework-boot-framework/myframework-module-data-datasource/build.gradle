@@ -5,7 +5,7 @@ plugins {
 description = 'Myframework 数据源模块'
 
 dependencies {
-    api project(':myframework-boot-framework:myframework-module-common')
+    api project(':myframework-boot-framework:myframework-module-data-common')
     api project(':myframework-boot-framework:myframework-module-core')
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.cloud.context

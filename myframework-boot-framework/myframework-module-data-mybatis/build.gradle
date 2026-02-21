@@ -6,6 +6,7 @@ description = 'Myframework data-mybatis模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
+    api project(':myframework-boot-framework:myframework-module-data-common')
     api project(':myframework-boot-framework:myframework-module-data-datasource')
     api project(':myframework-boot-framework:myframework-module-cache-common')
     api project(':myframework-boot-framework:myframework-module-cache-redis')

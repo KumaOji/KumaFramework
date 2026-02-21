@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<License>
+    <Data>
+        <LicensedTo>Kuma</LicensedTo>
+        <LicenseType>Developer</LicenseType>
+        <SerialNumber>XXXX-XXXX-XXXX-XXXX</SerialNumber>
+        <Product>Aspose.Words for Java</Product>
+        <EditionType>Enterprise</EditionType>
+        <LicenseExpiry>2026-12-31</LicenseExpiry>
+    </Data>
+
+    <Permissions>
+        <AllowPrint>true</AllowPrint>
+        <AllowCopy>true</AllowCopy>
+        <AllowModification>true</AllowModification>
+    </Permissions>
+
+    <Signature>
+        <Algorithm>RSA</Algorithm>
+        <Value>...</Value>
+    </Signature>
+</License>

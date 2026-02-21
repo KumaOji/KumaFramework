@@ -6,4 +6,8 @@ description = 'Myframework web模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
+    api projectLibs.hutool.core
+    api projectLibs.jackson.databind
+    implementation "org.springframework.boot:spring-boot-starter-web:4.0.2"
+    implementation "org.springframework:spring-web:7.0.3"
 }
