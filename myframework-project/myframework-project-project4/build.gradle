@@ -15,6 +15,7 @@ dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
     api project(':myframework-boot-framework:myframework-module-springdoc')
     api project(':myframework-boot-framework:myframework-module-core')
+    api project(':myframework-boot-framework:myframework-module-office')
     api project(':myframework-boot-framework:myframework-module-cache-common')
     api project(':myframework-boot-framework:myframework-module-cache-redis')
     api project(':myframework-boot-framework:myframework-module-cache-caffeine')

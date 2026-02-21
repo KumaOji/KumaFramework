@@ -31,6 +31,8 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven { url = 'https://maven.aliyun.com/repository/public' }
+        maven { url = 'https://repo.e-iceblue.com/nexus/content/groups/public/' }
+        maven { url = 'https://releases.aspose.com/java/repo/' }
     }
 }
 

@@ -50,3 +50,5 @@ gradle.settingsEvaluated {
     }
 }
 
+
+include 'myframework-boot-framework:myframework-module-security'

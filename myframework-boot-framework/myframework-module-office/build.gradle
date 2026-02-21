@@ -6,4 +6,22 @@ description = 'Myframework office模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
+    implementation "com.aspose:aspose-words:26.1:jdk17"
+    api projectLibs.aspose.cells
+    api projectLibs.spire.doc.free
+    api projectLibs.spire.pdf.free
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot
+    api projectLibs.spring.cloud.context
+    api projectLibs.univocity.parsers
+    api projectLibs.jakarta.servlet.api
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.easyexcel
+    api projectLibs.jakarta.validation.api
+    api projectLibs.spring.boot.starter.validation
+    api projectLibs.commons.lang3
+    api projectLibs.guava
+    api projectLibs.xhtmlrenderer
 }
+
