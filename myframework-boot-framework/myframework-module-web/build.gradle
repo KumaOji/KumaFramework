@@ -7,10 +7,13 @@ description = 'Myframework web模块'
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
     api project(':myframework-boot-framework:myframework-module-core')
+    api project(':myframework-boot-framework:myframework-module-security-spring')
     api projectLibs.hutool.core
     api projectLibs.jackson.databind
     api projectLibs.javax.json.api
     api projectLibs.fastjson2
+    api projectLibs.swagger.annotations
+    api projectLibs.commons.lang3
     implementation "org.springframework.boot:spring-boot-starter-web:4.0.2"
     implementation "org.springframework:spring-web:7.0.3"
     implementation "io.micrometer:micrometer-tracing-api:1.1.4"
