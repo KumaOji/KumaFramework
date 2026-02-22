@@ -1,0 +1,85 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package com.kuma.boot.security.spring.constants;
+
+public interface ErrorCodes {
+    public static final int OK = 20000;
+    public static final int NO_CONTENT = 20400;
+    public static final int UNAUTHORIZED = 40100;
+    public static final int ACCESS_DENIED = 40101;
+    public static final int ACCOUNT_DISABLED = 40102;
+    public static final int ACCOUNT_ENDPOINT_LIMITED = 40103;
+    public static final int ACCOUNT_EXPIRED = 40104;
+    public static final int ACCOUNT_LOCKED = 40105;
+    public static final int BAD_CREDENTIALS = 40106;
+    public static final int CREDENTIALS_EXPIRED = 40107;
+    public static final int INVALID_CLIENT = 40108;
+    public static final int INVALID_TOKEN = 40109;
+    public static final int INVALID_GRANT = 40110;
+    public static final int UNAUTHORIZED_CLIENT = 40110;
+    public static final int USERNAME_NOT_FOUND = 40111;
+    public static final int SESSION_EXPIRED = 40112;
+    public static final int FORBIDDEN = 40300;
+    public static final int INSUFFICIENT_SCOPE = 40301;
+    public static final int SQL_INJECTION_REQUEST = 40302;
+    public static final int METHOD_NOT_ALLOWED = 40500;
+    public static final int HTTP_REQUEST_METHOD_NOT_SUPPORTED = 40501;
+    public static final int NOT_ACCEPTABLE = 40600;
+    public static final int UNSUPPORTED_GRANT_TYPE = 40601;
+    public static final int UNSUPPORTED_RESPONSE_TYPE = 40602;
+    public static final int UNSUPPORTED_TOKEN_TYPE = 40603;
+    public static final int CACHE_MODULE_406_BEGIN = 40603;
+    public static final int CACHE_MODULE_406_END = 40607;
+    public static final int CAPTCHA_MODULE_406_BEGIN = 40607;
+    public static final int CAPTCHA_MODULE_406_END = 40613;
+    public static final int OAUTH2_MODULE_406_BEGIN = 40613;
+    public static final int OAUTH2_MODULE_406_END = 40614;
+    public static final int REST_MODULE_406_BEGIN = 40614;
+    public static final int REST_MODULE_406_END = 40617;
+    public static final int MESSAGE_MODULE_406_BEGIN = 40617;
+    public static final int MESSAGE_MODULE_406_END = 40619;
+    public static final int PRECONDITION_FAILED = 41200;
+    public static final int INVALID_REDIRECT_URI = 41201;
+    public static final int INVALID_REQUEST = 41202;
+    public static final int INVALID_SCOPE = 41203;
+    public static final int ACCESS_MODULE_406_BEGIN = 41203;
+    public static final int UNSUPPORTED_MEDIA_TYPE = 41500;
+    public static final int HTTP_MEDIA_TYPE_NOT_ACCEPTABLE = 41501;
+    public static final int INTERNAL_SERVER_ERROR = 50000;
+    public static final int SERVER_ERROR = 50001;
+    public static final int HTTP_MESSAGE_NOT_READABLE_EXCEPTION = 50002;
+    public static final int ILLEGAL_ARGUMENT_EXCEPTION = 50003;
+    public static final int IO_EXCEPTION = 50004;
+    public static final int MISSING_SERVLET_REQUEST_PARAMETER_EXCEPTION = 50005;
+    public static final int NULL_POINTER_EXCEPTION = 50006;
+    public static final int TYPE_MISMATCH_EXCEPTION = 50007;
+    public static final int OSS_MODULE_500_BEGIN = 50007;
+    public static final int OSS_MODULE_500_END = 50019;
+    public static final int SMS_MODULE_500_BEGIN = 50019;
+    public static final int SMS_MODULE_500_END = 50021;
+    public static final int NOT_IMPLEMENTED = 50100;
+    public static final int PROPERTY_VALUE_IS_NOT = 50101;
+    public static final int URL_FORMAT_INCORRECT = 50101;
+    public static final int ILLEGAL_SYMMETRIC_KEY = 50102;
+    public static final int SERVICE_UNAVAILABLE = 50300;
+    public static final int COOKIE_THEFT = 50301;
+    public static final int INVALID_COOKIE = 50302;
+    public static final int PROVIDER_NOT_FOUND = 50303;
+    public static final int TEMPORARILY_UNAVAILABLE = 50304;
+    public static final int REST_MODULE_503_BEGIN = 50304;
+    public static final int REST_MODULE_503_END = 50305;
+    public static final int OSS_MODULE_503_BEGIN = 50305;
+    public static final int OSS_MODULE_503_END = 50306;
+    public static final int DATABASE = 60000;
+    public static final int TRANSACTION_ROLLBACK = 60001;
+    public static final int DATABASE_VALIDATION = 60100;
+    public static final int METHOD_ARGUMENT_NOT_VALID = 60101;
+    public static final int DATABASE_EXECUTION = 60200;
+    public static final int BAD_SQL_GRAMMAR = 60201;
+    public static final int DATA_INTEGRITY_VIOLATION = 60202;
+    public static final int BASIC_FACILITIES = 70000;
+    public static final int REDIS = 70100;
+    public static final int PIPELINE_INVALID_COMMANDS = 70101;
+}
+
