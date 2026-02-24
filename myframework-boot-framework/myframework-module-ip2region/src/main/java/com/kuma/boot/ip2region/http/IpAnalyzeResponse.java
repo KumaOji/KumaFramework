@@ -1,19 +1,60 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ip2region.http;
 
 public class IpAnalyzeResponse {
+
+    /**
+     * 状态码
+     */
     private String status;
+
+    /**
+     * 是否成功
+     */
     private Boolean successFlag;
+
+    /**
+     * 失败原因
+     */
     private String msg;
+
+    /**
+     * 省份名称
+     */
     private String province;
+
+    /**
+     * 城市名称
+     */
     private String city;
+
+    /**
+     * 经度
+     */
     private Double x;
+
+    /**
+     * 维度
+     */
     private Double y;
 
     public String getStatus() {
-        return this.status;
+        return status;
     }
 
     public void setStatus(String status) {
@@ -21,7 +62,7 @@ public class IpAnalyzeResponse {
     }
 
     public Boolean getSuccessFlag() {
-        return this.successFlag;
+        return successFlag;
     }
 
     public void setSuccessFlag(Boolean successFlag) {
@@ -29,7 +70,7 @@ public class IpAnalyzeResponse {
     }
 
     public String getMsg() {
-        return this.msg;
+        return msg;
     }
 
     public void setMsg(String msg) {
@@ -37,7 +78,7 @@ public class IpAnalyzeResponse {
     }
 
     public String getProvince() {
-        return this.province;
+        return province;
     }
 
     public void setProvince(String province) {
@@ -45,7 +86,7 @@ public class IpAnalyzeResponse {
     }
 
     public String getCity() {
-        return this.city;
+        return city;
     }
 
     public void setCity(String city) {
@@ -53,7 +94,7 @@ public class IpAnalyzeResponse {
     }
 
     public Double getX() {
-        return this.x;
+        return x;
     }
 
     public void setX(Double x) {
@@ -61,7 +102,7 @@ public class IpAnalyzeResponse {
     }
 
     public Double getY() {
-        return this.y;
+        return y;
     }
 
     public void setY(Double y) {
@@ -73,49 +114,49 @@ public class IpAnalyzeResponse {
     }
 
     public static final class IpAnalyzeResponseBuilder {
-        private IpAnalyzeResponse ipAnalyzeResponse = new IpAnalyzeResponse();
+        private IpAnalyzeResponse ipAnalyzeResponse;
 
         private IpAnalyzeResponseBuilder() {
+            ipAnalyzeResponse = new IpAnalyzeResponse();
         }
 
         public IpAnalyzeResponseBuilder status(String status) {
-            this.ipAnalyzeResponse.setStatus(status);
+            ipAnalyzeResponse.setStatus(status);
             return this;
         }
 
         public IpAnalyzeResponseBuilder successFlag(Boolean successFlag) {
-            this.ipAnalyzeResponse.setSuccessFlag(successFlag);
+            ipAnalyzeResponse.setSuccessFlag(successFlag);
             return this;
         }
 
         public IpAnalyzeResponseBuilder msg(String msg) {
-            this.ipAnalyzeResponse.setMsg(msg);
+            ipAnalyzeResponse.setMsg(msg);
             return this;
         }
 
         public IpAnalyzeResponseBuilder province(String province) {
-            this.ipAnalyzeResponse.setProvince(province);
+            ipAnalyzeResponse.setProvince(province);
             return this;
         }
 
         public IpAnalyzeResponseBuilder city(String city) {
-            this.ipAnalyzeResponse.setCity(city);
+            ipAnalyzeResponse.setCity(city);
             return this;
         }
 
         public IpAnalyzeResponseBuilder x(Double x) {
-            this.ipAnalyzeResponse.setX(x);
+            ipAnalyzeResponse.setX(x);
             return this;
         }
 
         public IpAnalyzeResponseBuilder y(Double y) {
-            this.ipAnalyzeResponse.setY(y);
+            ipAnalyzeResponse.setY(y);
             return this;
         }
 
         public IpAnalyzeResponse build() {
-            return this.ipAnalyzeResponse;
+            return ipAnalyzeResponse;
         }
     }
 }
-

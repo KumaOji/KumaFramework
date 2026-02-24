@@ -1,42 +1,116 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.jspecify.annotations.Nullable
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ip2region.model;
 
 import com.kuma.boot.ip2region.utils.IpInfoUtil;
-import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 
+import java.util.function.Function;
+
+/**
+ * ip 搜索器
+ *
+ * @author dream.lu
+ */
 public interface Ip2regionSearcher {
-    public @Nullable IpInfo memorySearch(long var1);
 
-    public @Nullable IpInfo memorySearch(String var1);
+    /**
+     * ip 位置 搜索
+     *
+     * @param ip ip
+     * @return 位置
+     */
+    @Nullable
+    IpInfo memorySearch(long ip);
 
-    default public @Nullable String getInfo(long ip, Function<IpInfo, String> function) {
-        return IpInfoUtil.readInfo(this.memorySearch(ip), function);
+    /**
+     * ip 位置 搜索
+     *
+     * @param ip ip
+     * @return 位置
+     */
+    @Nullable
+    IpInfo memorySearch(String ip);
+
+    /**
+     * 读取 ipInfo 中的信息
+     *
+     * @param ip       ip
+     * @param function Function
+     * @return 地址
+     */
+    @Nullable
+    default String getInfo(long ip, Function<IpInfo, String> function) {
+        return IpInfoUtil.readInfo(memorySearch(ip), function);
     }
 
-    default public @Nullable String getInfo(String ip, Function<IpInfo, String> function) {
-        return IpInfoUtil.readInfo(this.memorySearch(ip), function);
+    /**
+     * 读取 ipInfo 中的信息
+     *
+     * @param ip       ip
+     * @param function Function
+     * @return 地址
+     */
+    @Nullable
+    default String getInfo(String ip, Function<IpInfo, String> function) {
+        return IpInfoUtil.readInfo(memorySearch(ip), function);
     }
 
-    default public @Nullable String getAddress(long ip) {
-        return this.getInfo(ip, IpInfo::getAddress);
+    /**
+     * 获取地址信息
+     *
+     * @param ip ip
+     * @return 地址
+     */
+    @Nullable
+    default String getAddress(long ip) {
+        return getInfo(ip, IpInfo::getAddress);
     }
 
-    default public @Nullable String getAddress(String ip) {
-        return this.getInfo(ip, IpInfo::getAddress);
+    /**
+     * 获取地址信息
+     *
+     * @param ip ip
+     * @return 地址
+     */
+    @Nullable
+    default String getAddress(String ip) {
+        return getInfo(ip, IpInfo::getAddress);
     }
 
-    default public @Nullable String getAddressAndIsp(long ip) {
-        return this.getInfo(ip, IpInfo::getAddressAndIsp);
+    /**
+     * 获取地址信息包含 isp
+     *
+     * @param ip ip
+     * @return 地址
+     */
+    @Nullable
+    default String getAddressAndIsp(long ip) {
+        return getInfo(ip, IpInfo::getAddressAndIsp);
     }
 
-    default public @Nullable String getAddressAndIsp(String ip) {
-        return this.getInfo(ip, IpInfo::getAddressAndIsp);
+    /**
+     * 获取地址信息包含 isp
+     *
+     * @param ip ip
+     * @return 地址
+     */
+    @Nullable
+    default String getAddressAndIsp(String ip) {
+        return getInfo(ip, IpInfo::getAddressAndIsp);
     }
 }
-

@@ -1,27 +1,61 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonProperty
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ip2region.http;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 
-public class IpAnalyzeAddressDetail
-implements Serializable {
+public class IpAnalyzeAddressDetail implements Serializable {
+
+    /**
+     * 城市
+     */
     private String city;
-    @JsonProperty(value="city_code")
+
+    /**
+     * 百度城市代码
+     */
+    @JsonProperty("city_code")
     private Integer cityCode;
+
+    /**
+     *  区县
+     */
     private String district;
+
+    /**
+     *  省份
+     */
     private String province;
+
+    /**
+     * 街道
+     */
     private String street;
-    @JsonProperty(value="street_number")
+
+    /**
+     * 门地址
+     */
+    @JsonProperty("street_number")
     private String streetNumber;
 
     public String getCity() {
-        return this.city;
+        return city;
     }
 
     public void setCity(String city) {
@@ -29,7 +63,7 @@ implements Serializable {
     }
 
     public Integer getCityCode() {
-        return this.cityCode;
+        return cityCode;
     }
 
     public void setCityCode(Integer cityCode) {
@@ -37,7 +71,7 @@ implements Serializable {
     }
 
     public String getDistrict() {
-        return this.district;
+        return district;
     }
 
     public void setDistrict(String district) {
@@ -45,7 +79,7 @@ implements Serializable {
     }
 
     public String getProvince() {
-        return this.province;
+        return province;
     }
 
     public void setProvince(String province) {
@@ -53,7 +87,7 @@ implements Serializable {
     }
 
     public String getStreet() {
-        return this.street;
+        return street;
     }
 
     public void setStreet(String street) {
@@ -61,11 +95,10 @@ implements Serializable {
     }
 
     public String getStreetNumber() {
-        return this.streetNumber;
+        return streetNumber;
     }
 
     public void setStreetNumber(String streetNumber) {
         this.streetNumber = streetNumber;
     }
 }
-

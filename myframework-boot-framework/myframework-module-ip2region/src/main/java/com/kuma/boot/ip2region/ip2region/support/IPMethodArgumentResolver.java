@@ -1,23 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.servlet.http.HttpServletRequest
- *  org.springframework.core.MethodParameter
- *  org.springframework.util.Assert
- *  org.springframework.web.bind.support.WebDataBinderFactory
- *  org.springframework.web.context.request.NativeWebRequest
- *  org.springframework.web.method.support.HandlerMethodArgumentResolver
- *  org.springframework.web.method.support.ModelAndViewContainer
- *  org.xbill.DNS.Address
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ip2region.ip2region.support;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.ip2region.ip2region.annotation.IP;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.UnknownHostException;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -26,28 +27,42 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.xbill.DNS.Address;
 
-public class IPMethodArgumentResolver
-implements HandlerMethodArgumentResolver {
+import java.net.UnknownHostException;
+
+/**
+ * <p>
+ * IPMethodArgumentResolver
+ * </p>
+ *
+ *
+ */
+public class IPMethodArgumentResolver implements HandlerMethodArgumentResolver {
+
+    @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        IP ip = (IP)parameter.getParameterAnnotation(IP.class);
+        IP ip = parameter.getParameterAnnotation(IP.class);
         return ip != null && ip.dns();
     }
 
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest request = (HttpServletRequest)webRequest.getNativeRequest(HttpServletRequest.class);
-        Assert.notNull((Object)request, (String)"request not be null");
+    @Override
+    public Object resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory)
+            throws Exception {
+        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        Assert.notNull(request, "request not be null");
         String param = request.getParameter(parameter.getParameterName());
-        return this.DNSForIp(param);
+        return DNSForIp(param);
     }
 
     private String DNSForIp(String ip) {
         try {
-            return Address.getByName((String)ip).getHostAddress();
-        }
-        catch (UnknownHostException e) {
-            LogUtils.error((String)"\u57df\u540d\u89e3\u6790\u5931\u8d25:{} msg:{}", (Object[])new Object[]{ip, e.getMessage(), e});
+            return Address.getByName(ip).getHostAddress();
+        } catch (UnknownHostException e) {
+            LogUtils.error("域名解析失败:{} msg:{}", ip, e.getMessage(), e);
             return ip;
         }
     }
 }
-

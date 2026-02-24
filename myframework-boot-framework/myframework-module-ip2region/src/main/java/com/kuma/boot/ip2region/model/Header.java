@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ip2region.model;
 
 public class Header {
@@ -11,16 +24,21 @@ public class Header {
     public final int endIndexPtr;
 
     public Header(byte[] buff) {
-        assert (buff.length >= 16);
-        this.version = Searcher.getInt2(buff, 0);
-        this.indexPolicy = Searcher.getInt2(buff, 2);
-        this.createdAt = Searcher.getInt(buff, 4);
-        this.startIndexPtr = Searcher.getInt(buff, 8);
-        this.endIndexPtr = Searcher.getInt(buff, 12);
+        assert buff.length >= 16;
+        version = Searcher.getInt2(buff, 0);
+        indexPolicy = Searcher.getInt2(buff, 2);
+        createdAt = Searcher.getInt(buff, 4);
+        startIndexPtr = Searcher.getInt(buff, 8);
+        endIndexPtr = Searcher.getInt(buff, 12);
     }
 
+    @Override
     public String toString() {
-        return "{Version: " + this.version + ",IndexPolicy" + this.indexPolicy + ",CreatedAt" + this.createdAt + ",StartIndexPtr" + this.startIndexPtr + ",EndIndexPtr" + this.endIndexPtr + "}";
+        return "{" + "Version: "
+                + version + ',' + "IndexPolicy"
+                + indexPolicy + ',' + "CreatedAt"
+                + createdAt + ',' + "StartIndexPtr"
+                + startIndexPtr + ',' + "EndIndexPtr"
+                + endIndexPtr + '}';
     }
 }
-
