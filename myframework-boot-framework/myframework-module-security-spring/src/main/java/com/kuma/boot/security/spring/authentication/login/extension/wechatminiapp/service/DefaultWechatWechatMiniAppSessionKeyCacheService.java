@@ -1,29 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  org.springframework.beans.factory.annotation.Autowired
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.service;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/** // 小程序sessionkey缓存 过期时间应该小于微信官方文档的声明 1 在此处配置 优先级最高 2 注册为Spring Bean 可以免配置 */
 public class DefaultWechatWechatMiniAppSessionKeyCacheService
-implements WechatMiniAppSessionKeyCacheService {
-    @Autowired
-    private RedisRepository redisRepository;
+        implements WechatMiniAppSessionKeyCacheService {
+
+    @Autowired private RedisRepository redisRepository;
 
     @Override
     public String put(String cacheKey, String sessionKey) {
-        this.redisRepository.set(cacheKey, (Object)sessionKey);
+        redisRepository.set(cacheKey, sessionKey);
         return sessionKey;
     }
 
     @Override
     public String get(String cacheKey) {
-        return (String)this.redisRepository.get(cacheKey);
+        // 模拟 sessionkey 缓存
+        return (String) redisRepository.get(cacheKey);
     }
 }
-

@@ -1,27 +1,29 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.servlet.FilterChain
- *  jakarta.servlet.ReadListener
- *  jakarta.servlet.ServletException
- *  jakarta.servlet.ServletInputStream
- *  jakarta.servlet.ServletRequest
- *  jakarta.servlet.ServletResponse
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletRequestWrapper
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.lang.NonNull
- *  org.springframework.web.filter.OncePerRequestFilter
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.filter;
 
+import static java.util.Optional.ofNullable;
+
+import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.security.spring.authentication.login.social.justauth.consts.SecurityConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,118 +32,171 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import org.springframework.lang.NonNull;
+import org.springframework.http.MediaType;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class JsonRequestFilter
-extends OncePerRequestFilter {
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        filterChain.doFilter((ServletRequest)new JsonRequest(request), (ServletResponse)response);
+/**
+ * 增加对 Json 格式的解析, 解析数据时默认使用 UTF-8 格式, 覆写了
+ * <pre>
+ *     JsonRequest#getParameter(String);
+ *     JsonRequest#getInputStream();
+ * </pre>, 添加了
+ * <pre>
+ *     JsonRequest#getFormMap();
+ *     JsonRequest#getBody();
+ * </pre><br><br>
+ * 解决  Json 格式的{@code getInputStream()}被读取一次后, 不能再次读取的问题.
+ *
+ * @author YongWu zheng
+ * @version V1.0  Created by 2020/6/9 14:01
+ */
+public class JsonRequestFilter extends OncePerRequestFilter {
+
+    /**
+     * Creates a new instance.
+     */
+    public JsonRequestFilter() {}
+
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            FilterChain filterChain)
+            throws ServletException, IOException {
+        filterChain.doFilter(new JsonRequest(request), response);
     }
 
-    public static class JsonRequest
-    extends HttpServletRequestWrapper {
+    public static class JsonRequest extends HttpServletRequestWrapper {
+
         private final byte[] body;
+
         private final Map<String, Object> formMap;
 
         JsonRequest(HttpServletRequest request) {
             super(request);
-            boolean isJsonContentType;
             String contentType = request.getContentType();
             String method = request.getMethod();
-            boolean isPostOrPutRequest = "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method);
-            boolean bl = isJsonContentType = contentType != null && contentType.contains("application/json");
+            boolean isPostOrPutRequest =
+                    SecurityConstants.POST_METHOD.equalsIgnoreCase(method)
+                            || SecurityConstants.PUT_METHOD.equalsIgnoreCase(method);
+            boolean isJsonContentType =
+                    contentType != null && contentType.contains(MediaType.APPLICATION_JSON_VALUE);
             if (isPostOrPutRequest && isJsonContentType) {
-                Object map = null;
-                Object bytes = null;
-                this.formMap = Optional.ofNullable(map).orElse(new HashMap(0));
-                this.body = bytes;
+                Map<String, Object> map = null;
+                byte[] bytes = null;
+                try {
+                    // 获取 表单 字节数据
+                    //					bytes = readAllBytes(request.getInputStream());
+                    //					if (bytes.length != 0) {
+                    //						String jsonData = new String(bytes, StandardCharsets.UTF_8).trim();
+                    //						// 转换为 map 类型, 并放入 request 域方便下次调用
+                    //						//noinspection unchecked
+                    //						map = MvcUtil.json2Object(jsonData, Map.class);
+                    //					}
+                } catch (Exception e) {
+                    LogUtils.error(String.format("读取请求数据失败: %s", e.getMessage()), e);
+                }
+                formMap = ofNullable(map).orElse(new HashMap<>(0));
+                body = bytes;
             } else {
-                this.body = null;
-                this.formMap = null;
+                body = null;
+                formMap = null;
             }
         }
 
+        @Override
         public ServletInputStream getInputStream() throws IOException {
-            if (this.body == null) {
+            if (body == null) {
                 return super.getInputStream();
             }
-            return new BodyInputStream(this.body);
+            return new BodyInputStream(body);
         }
 
+        @Override
         public String getParameter(String name) {
             String parameter = super.getParameter(name);
-            if (parameter == null && this.formMap != null) {
-                return (String)this.formMap.get(name);
+            if (parameter == null && formMap != null) {
+                return (String) formMap.get(name);
             }
             return parameter;
         }
 
         public byte[] getBody() {
-            return this.body;
+            return body;
         }
 
         public Map<String, Object> getFormMap() {
-            return this.formMap;
+            return formMap;
         }
     }
 
-    private static class BodyInputStream
-    extends ServletInputStream {
+    private static class BodyInputStream extends ServletInputStream {
+
         private final InputStream delegate;
 
         public BodyInputStream(byte[] body) {
             this.delegate = new ByteArrayInputStream(body);
         }
 
+        @Override
         public boolean isFinished() {
             return false;
         }
 
+        @Override
         public boolean isReady() {
             return true;
         }
 
+        @Override
         public void setReadListener(ReadListener readListener) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public int read() throws IOException {
             return this.delegate.read();
         }
 
+        @Override
         public int read(@NonNull byte[] b, int off, int len) throws IOException {
             return this.delegate.read(b, off, len);
         }
 
+        @Override
         public int read(@NonNull byte[] b) throws IOException {
             return this.delegate.read(b);
         }
 
+        @Override
         public long skip(long n) throws IOException {
             return this.delegate.skip(n);
         }
 
+        @Override
         public int available() throws IOException {
             return this.delegate.available();
         }
 
+        @Override
         public void close() throws IOException {
             this.delegate.close();
         }
 
+        @Override
         public synchronized void mark(int readlimit) {
             this.delegate.mark(readlimit);
         }
 
+        @Override
         public synchronized void reset() throws IOException {
             this.delegate.reset();
         }
 
+        @Override
         public boolean markSupported() {
             return this.delegate.markSupported();
         }
     }
 }
-

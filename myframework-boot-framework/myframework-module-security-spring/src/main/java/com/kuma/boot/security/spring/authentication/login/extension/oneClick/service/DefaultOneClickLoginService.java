@@ -1,35 +1,58 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.dromara.hutool.core.map.MapUtil
- *  org.springframework.security.core.userdetails.UserDetails
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.oneClick.service;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-
 import java.util.Map;
-import org.dromara.hutool.core.map.MapUtil;
+import cn.hutool.core.map.MapUtil;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class DefaultOneClickLoginService
-implements OneClickLoginService {
+public class DefaultOneClickLoginService implements OneClickLoginService {
+
     @Override
     public String callback(String accessToken, Map<String, String> otherParamMap) {
+
+        // todo 需要校验参数
         String opToken = otherParamMap.get("opToken");
         String operator = otherParamMap.get("operator");
+
         String phoneNumber = null;
+        //        try {
+        //            phoneNumber = Auth.getPhoneNumber(accessToken, opToken, operator);
+        //        } catch (Exception e) {
+        //            throw new
+        // Auth2Exception(ErrorCodeEnum.QUERY_MOBILE_FAILURE_OF_ONE_CLICK_LOGIN, accessToken);
+        //        }
+        //
+        //        //noinspection ConstantConditions
+        //        if (StrUtil.isEmpty(phoneNumber)) {
+        //            throw new
+        // Auth2Exception(ErrorCodeEnum.QUERY_MOBILE_FAILURE_OF_ONE_CLICK_LOGIN, accessToken);
+        //        }
+
         return phoneNumber;
     }
 
     @Override
     public void otherParamsHandler(UserDetails userDetails, Map<String, String> otherParamMap) {
         if (MapUtil.isNotEmpty(otherParamMap) && !otherParamMap.isEmpty()) {
-            LogUtils.info((String)"\u767b\u5f55\u7528\u6237: {}", (Object[])new Object[]{userDetails.getUsername()});
-            LogUtils.info((String)"\u767b\u5f55\u65f6\u7684\u5176\u4ed6\u8bf7\u6c42\u53c2\u6570: {}", (Object[])new Object[]{otherParamMap.toString()});
+            // handler otherParamMap
+            LogUtils.info("登录用户: {}", userDetails.getUsername());
+            LogUtils.info("登录时的其他请求参数: {}", otherParamMap.toString());
         }
     }
 }
-

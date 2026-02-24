@@ -1,28 +1,42 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.util.Assert
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.core.authority;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.Assert;
 
-public class TtcGrantedAuthority
-implements GrantedAuthority {
-    private String authority;
+/**
+ * <p>自定义 GrantedAuthority
+ *
+ * @see SimpleGrantedAuthority
+ */
+public class KmcGrantedAuthority implements GrantedAuthority {
 
-    public TtcGrantedAuthority(String authority) {
-        Assert.hasText((String)authority, (String)"A granted authority textual representation is required");
+    public KmcGrantedAuthority(String authority) {
+        Assert.hasText(authority, "A granted authority textual representation is required");
         this.authority = authority;
     }
 
+    private String authority;
+
+    @Override
     public String getAuthority() {
         return this.authority;
     }
@@ -31,23 +45,25 @@ implements GrantedAuthority {
         this.authority = authority;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TtcGrantedAuthority that = (TtcGrantedAuthority)o;
-        return Objects.equal((Object)this.authority, (Object)that.authority);
+        KmcGrantedAuthority that = (KmcGrantedAuthority) o;
+        return Objects.equal(authority, that.authority);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.authority});
+        return Objects.hashCode(authority);
     }
 
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("authority", (Object)this.authority).toString();
+        return MoreObjects.toStringHelper(this).add("authority", authority).toString();
     }
 }
-

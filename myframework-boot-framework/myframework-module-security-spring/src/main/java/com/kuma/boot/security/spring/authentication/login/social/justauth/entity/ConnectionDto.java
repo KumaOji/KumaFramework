@@ -1,23 +1,62 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.entity;
 
 import java.io.Serializable;
+import org.springframework.security.core.SpringSecurityCoreVersion;
 
-public class ConnectionDto
-implements Serializable {
-    private static final long serialVersionUID = 620L;
+/**
+ * 查询本地账号下的第三方绑定账号 dto
+ * @author YongWu zheng
+ * @weixin z56133
+ * @since 2021.3.3 20:03
+ */
+public class ConnectionDto implements Serializable {
+    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+
+    /**
+     * 本地主键 id
+     */
     private String id;
+
+    /**
+     * 本地用户 id
+     */
     private String userId;
+
+    /**
+     * 第三方服务商 id
+     */
     private String providerId;
+
+    /**
+     * 第三方用户 id
+     */
     private String providerUserId;
+
+    /**
+     * 第三方用户 token id
+     */
     private Long tokenId;
 
-    public ConnectionDto() {
-    }
+    public ConnectionDto() {}
 
-    public ConnectionDto(String id, String userId, String providerId, String providerUserId, Long tokenId) {
+    public ConnectionDto(
+            String id, String userId, String providerId, String providerUserId, Long tokenId) {
         this.id = id;
         this.userId = userId;
         this.providerId = providerId;
@@ -26,7 +65,7 @@ implements Serializable {
     }
 
     public String getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(String id) {
@@ -34,7 +73,7 @@ implements Serializable {
     }
 
     public String getUserId() {
-        return this.userId;
+        return userId;
     }
 
     public void setUserId(String userId) {
@@ -42,7 +81,7 @@ implements Serializable {
     }
 
     public String getProviderId() {
-        return this.providerId;
+        return providerId;
     }
 
     public void setProviderId(String providerId) {
@@ -50,7 +89,7 @@ implements Serializable {
     }
 
     public String getProviderUserId() {
-        return this.providerUserId;
+        return providerUserId;
     }
 
     public void setProviderUserId(String providerUserId) {
@@ -58,7 +97,7 @@ implements Serializable {
     }
 
     public Long getTokenId() {
-        return this.tokenId;
+        return tokenId;
     }
 
     public void setTokenId(Long tokenId) {
@@ -70,14 +109,14 @@ implements Serializable {
     }
 
     public static final class ConnectionDtoBuilder {
+
         private String id;
         private String userId;
         private String providerId;
         private String providerUserId;
         private Long tokenId;
 
-        private ConnectionDtoBuilder() {
-        }
+        private ConnectionDtoBuilder() {}
 
         public ConnectionDtoBuilder id(String id) {
             this.id = id;
@@ -106,13 +145,12 @@ implements Serializable {
 
         public ConnectionDto build() {
             ConnectionDto connectionDto = new ConnectionDto();
-            connectionDto.setId(this.id);
-            connectionDto.setUserId(this.userId);
-            connectionDto.setProviderId(this.providerId);
-            connectionDto.setProviderUserId(this.providerUserId);
-            connectionDto.setTokenId(this.tokenId);
+            connectionDto.setId(id);
+            connectionDto.setUserId(userId);
+            connectionDto.setProviderId(providerId);
+            connectionDto.setProviderUserId(providerUserId);
+            connectionDto.setTokenId(tokenId);
             return connectionDto;
         }
     }
 }
-

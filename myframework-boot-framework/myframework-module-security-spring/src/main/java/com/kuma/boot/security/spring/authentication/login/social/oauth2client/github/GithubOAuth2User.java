@@ -1,15 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonProperty
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.oauth2.core.user.OAuth2User
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.github;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kuma.boot.security.spring.utils.AuthorityUtils;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,86 +27,122 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class GithubOAuth2User
-implements OAuth2User,
-Serializable {
-    private static final long serialVersionUID = 1L;
+public class GithubOAuth2User implements OAuth2User, Serializable {
+
+    @Serial private static final long serialVersionUID = 1L;
+
+    // 统一赋予USER角色
     private Set<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
     private String nameAttributeKey;
-    @JsonProperty(value="gists_url")
+
+    @JsonProperty("gists_url")
     private String gistsUrl;
-    @JsonProperty(value="repos_url")
+
+    @JsonProperty("repos_url")
     private String reposUrl;
-    @JsonProperty(value="following_url")
+
+    @JsonProperty("following_url")
     private String followingUrl;
-    @JsonProperty(value="twitter_username")
+
+    @JsonProperty("twitter_username")
     private String twitterUsername;
-    @JsonProperty(value="bio")
+
+    @JsonProperty("bio")
     private String bio;
-    @JsonProperty(value="created_at")
+
+    @JsonProperty("created_at")
     private String createdAt;
-    @JsonProperty(value="login")
+
+    @JsonProperty("login")
     private String login;
-    @JsonProperty(value="type")
+
+    @JsonProperty("type")
     private String type;
-    @JsonProperty(value="blog")
+
+    @JsonProperty("blog")
     private String blog;
-    @JsonProperty(value="subscriptions_url")
+
+    @JsonProperty("subscriptions_url")
     private String subscriptionsUrl;
-    @JsonProperty(value="updated_at")
+
+    @JsonProperty("updated_at")
     private String updatedAt;
-    @JsonProperty(value="site_admin")
+
+    @JsonProperty("site_admin")
     private boolean siteAdmin;
-    @JsonProperty(value="company")
+
+    @JsonProperty("company")
     private String company;
-    @JsonProperty(value="id")
+
+    @JsonProperty("id")
     private int id;
-    @JsonProperty(value="public_repos")
+
+    @JsonProperty("public_repos")
     private int publicRepos;
-    @JsonProperty(value="gravatar_id")
+
+    @JsonProperty("gravatar_id")
     private String gravatarId;
-    @JsonProperty(value="email")
+
+    @JsonProperty("email")
     private String email;
-    @JsonProperty(value="organizations_url")
+
+    @JsonProperty("organizations_url")
     private String organizationsUrl;
-    @JsonProperty(value="hireable")
+
+    @JsonProperty("hireable")
     private boolean hireable;
-    @JsonProperty(value="starred_url")
+
+    @JsonProperty("starred_url")
     private String starredUrl;
-    @JsonProperty(value="followers_url")
+
+    @JsonProperty("followers_url")
     private String followersUrl;
-    @JsonProperty(value="public_gists")
+
+    @JsonProperty("public_gists")
     private int publicGists;
-    @JsonProperty(value="url")
+
+    @JsonProperty("url")
     private String url;
-    @JsonProperty(value="received_events_url")
+
+    @JsonProperty("received_events_url")
     private String receivedEventsUrl;
-    @JsonProperty(value="followers")
+
+    @JsonProperty("followers")
     private int followers;
-    @JsonProperty(value="avatar_url")
+
+    @JsonProperty("avatar_url")
     private String avatarUrl;
-    @JsonProperty(value="events_url")
+
+    @JsonProperty("events_url")
     private String eventsUrl;
-    @JsonProperty(value="html_url")
+
+    @JsonProperty("html_url")
     private String htmlUrl;
-    @JsonProperty(value="following")
+
+    @JsonProperty("following")
     private int following;
-    @JsonProperty(value="name")
+
+    @JsonProperty("name")
     private String name;
-    @JsonProperty(value="location")
+
+    @JsonProperty("location")
     private String location;
-    @JsonProperty(value="node_id")
+
+    @JsonProperty("node_id")
     private String nodeId;
 
+    @Override
     public String getName() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
+    @Override
     public Map<String, Object> getAttributes() {
-        return this.attributes;
+        return attributes;
     }
 
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
     }
@@ -111,7 +156,7 @@ Serializable {
     }
 
     public String getNameAttributeKey() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
     public void setNameAttributeKey(String nameAttributeKey) {
@@ -119,7 +164,7 @@ Serializable {
     }
 
     public String getGistsUrl() {
-        return this.gistsUrl;
+        return gistsUrl;
     }
 
     public void setGistsUrl(String gistsUrl) {
@@ -127,7 +172,7 @@ Serializable {
     }
 
     public String getReposUrl() {
-        return this.reposUrl;
+        return reposUrl;
     }
 
     public void setReposUrl(String reposUrl) {
@@ -135,7 +180,7 @@ Serializable {
     }
 
     public String getFollowingUrl() {
-        return this.followingUrl;
+        return followingUrl;
     }
 
     public void setFollowingUrl(String followingUrl) {
@@ -143,7 +188,7 @@ Serializable {
     }
 
     public String getTwitterUsername() {
-        return this.twitterUsername;
+        return twitterUsername;
     }
 
     public void setTwitterUsername(String twitterUsername) {
@@ -151,7 +196,7 @@ Serializable {
     }
 
     public String getBio() {
-        return this.bio;
+        return bio;
     }
 
     public void setBio(String bio) {
@@ -159,7 +204,7 @@ Serializable {
     }
 
     public String getCreatedAt() {
-        return this.createdAt;
+        return createdAt;
     }
 
     public void setCreatedAt(String createdAt) {
@@ -167,7 +212,7 @@ Serializable {
     }
 
     public String getLogin() {
-        return this.login;
+        return login;
     }
 
     public void setLogin(String login) {
@@ -175,7 +220,7 @@ Serializable {
     }
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
     public void setType(String type) {
@@ -183,7 +228,7 @@ Serializable {
     }
 
     public String getBlog() {
-        return this.blog;
+        return blog;
     }
 
     public void setBlog(String blog) {
@@ -191,7 +236,7 @@ Serializable {
     }
 
     public String getSubscriptionsUrl() {
-        return this.subscriptionsUrl;
+        return subscriptionsUrl;
     }
 
     public void setSubscriptionsUrl(String subscriptionsUrl) {
@@ -199,7 +244,7 @@ Serializable {
     }
 
     public String getUpdatedAt() {
-        return this.updatedAt;
+        return updatedAt;
     }
 
     public void setUpdatedAt(String updatedAt) {
@@ -207,7 +252,7 @@ Serializable {
     }
 
     public boolean isSiteAdmin() {
-        return this.siteAdmin;
+        return siteAdmin;
     }
 
     public void setSiteAdmin(boolean siteAdmin) {
@@ -215,7 +260,7 @@ Serializable {
     }
 
     public String getCompany() {
-        return this.company;
+        return company;
     }
 
     public void setCompany(String company) {
@@ -223,7 +268,7 @@ Serializable {
     }
 
     public int getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(int id) {
@@ -231,7 +276,7 @@ Serializable {
     }
 
     public int getPublicRepos() {
-        return this.publicRepos;
+        return publicRepos;
     }
 
     public void setPublicRepos(int publicRepos) {
@@ -239,7 +284,7 @@ Serializable {
     }
 
     public String getGravatarId() {
-        return this.gravatarId;
+        return gravatarId;
     }
 
     public void setGravatarId(String gravatarId) {
@@ -247,7 +292,7 @@ Serializable {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -255,7 +300,7 @@ Serializable {
     }
 
     public String getOrganizationsUrl() {
-        return this.organizationsUrl;
+        return organizationsUrl;
     }
 
     public void setOrganizationsUrl(String organizationsUrl) {
@@ -263,7 +308,7 @@ Serializable {
     }
 
     public boolean isHireable() {
-        return this.hireable;
+        return hireable;
     }
 
     public void setHireable(boolean hireable) {
@@ -271,7 +316,7 @@ Serializable {
     }
 
     public String getStarredUrl() {
-        return this.starredUrl;
+        return starredUrl;
     }
 
     public void setStarredUrl(String starredUrl) {
@@ -279,7 +324,7 @@ Serializable {
     }
 
     public String getFollowersUrl() {
-        return this.followersUrl;
+        return followersUrl;
     }
 
     public void setFollowersUrl(String followersUrl) {
@@ -287,7 +332,7 @@ Serializable {
     }
 
     public int getPublicGists() {
-        return this.publicGists;
+        return publicGists;
     }
 
     public void setPublicGists(int publicGists) {
@@ -295,7 +340,7 @@ Serializable {
     }
 
     public String getUrl() {
-        return this.url;
+        return url;
     }
 
     public void setUrl(String url) {
@@ -303,7 +348,7 @@ Serializable {
     }
 
     public String getReceivedEventsUrl() {
-        return this.receivedEventsUrl;
+        return receivedEventsUrl;
     }
 
     public void setReceivedEventsUrl(String receivedEventsUrl) {
@@ -311,7 +356,7 @@ Serializable {
     }
 
     public int getFollowers() {
-        return this.followers;
+        return followers;
     }
 
     public void setFollowers(int followers) {
@@ -319,7 +364,7 @@ Serializable {
     }
 
     public String getAvatarUrl() {
-        return this.avatarUrl;
+        return avatarUrl;
     }
 
     public void setAvatarUrl(String avatarUrl) {
@@ -327,7 +372,7 @@ Serializable {
     }
 
     public String getEventsUrl() {
-        return this.eventsUrl;
+        return eventsUrl;
     }
 
     public void setEventsUrl(String eventsUrl) {
@@ -335,7 +380,7 @@ Serializable {
     }
 
     public String getHtmlUrl() {
-        return this.htmlUrl;
+        return htmlUrl;
     }
 
     public void setHtmlUrl(String htmlUrl) {
@@ -343,7 +388,7 @@ Serializable {
     }
 
     public int getFollowing() {
-        return this.following;
+        return following;
     }
 
     public void setFollowing(int following) {
@@ -355,7 +400,7 @@ Serializable {
     }
 
     public String getLocation() {
-        return this.location;
+        return location;
     }
 
     public void setLocation(String location) {
@@ -363,11 +408,10 @@ Serializable {
     }
 
     public String getNodeId() {
-        return this.nodeId;
+        return nodeId;
     }
 
     public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 }
-

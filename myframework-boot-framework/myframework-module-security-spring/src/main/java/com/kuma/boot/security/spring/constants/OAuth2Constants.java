@@ -1,30 +1,51 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.constants;
 
-public interface OAuth2Constants
-extends BaseConstants {
-    public static final String PROPERTY_OAUTH2_AUTHENTICATION = "ttc.oauth2.authentication";
-    public static final String PROPERTY_OAUTH2_AUTHORIZATION = "ttc.oauth2.authorization";
-    public static final String ITEM_COMPLIANCE_AUTO_UNLOCK = "ttc.oauth2.authentication.auto-unlock";
-    public static final String REGION_OAUTH2_AUTHORIZATION = "data:oauth2:authorization";
-    public static final String REGION_OAUTH2_AUTHORIZATION_CONSENT = "data:oauth2:authorization:consent";
-    public static final String REGION_OAUTH2_REGISTERED_CLIENT = "data:oauth2:registered:client";
-    public static final String REGION_OAUTH2_APPLICATION = "data:oauth2:application";
-    public static final String REGION_OAUTH2_COMPLIANCE = "data:oauth2:compliance";
-    public static final String REGION_OAUTH2_PERMISSION = "data:oauth2:permission";
-    public static final String REGION_OAUTH2_SCOPE = "data:oauth2:scope";
-    public static final String REGION_OAUTH2_APPLICATION_SCOPE = "data:oauth2:application:scope";
-    public static final String REGION_OAUTH2_IOT_PRODUCT = "data:oauth2:iot:product";
-    public static final String REGION_OAUTH2_IOT_DEVICE = "data:oauth2:iot:device";
-    public static final String CACHE_NAME_TOKEN_SIGN_IN_FAILURE_LIMITED = "cache:token:sign_in:failure_limited:";
-    public static final String CACHE_NAME_TOKEN_LOCKED_USER_DETAIL = "cache:token:locked:user_details:";
-    public static final String CACHE_SECURITY_PREFIX = "cache:security:";
-    public static final String CACHE_SECURITY_METADATA_PREFIX = "cache:security:metadata:";
-    public static final String CACHE_NAME_SECURITY_METADATA_ATTRIBUTES = "cache:security:metadata:attributes:";
-    public static final String CACHE_NAME_SECURITY_METADATA_INDEXES = "cache:security:metadata:indexes:";
-    public static final String CACHE_NAME_SECURITY_METADATA_INDEXABLE = "cache:security:metadata:indexable:";
-    public static final String CACHE_NAME_SECURITY_METADATA_COMPATIBLE = "cache:security:metadata:compatible:";
-}
+/**
+ * <p>OAuth2 模块通用常量
+ *
+ */
+public interface OAuth2Constants extends com.kuma.boot.security.spring.constants.BaseConstants {
 
+    String PROPERTY_OAUTH2_AUTHENTICATION = PROPERTY_PREFIX_OAUTH2 + ".authentication";
+    String PROPERTY_OAUTH2_AUTHORIZATION = PROPERTY_PREFIX_OAUTH2 + ".authorization";
+    String ITEM_COMPLIANCE_AUTO_UNLOCK = PROPERTY_OAUTH2_AUTHENTICATION + ".auto-unlock";
+
+    String REGION_OAUTH2_AUTHORIZATION = AREA_PREFIX + "oauth2:authorization";
+    String REGION_OAUTH2_AUTHORIZATION_CONSENT = AREA_PREFIX + "oauth2:authorization:consent";
+    String REGION_OAUTH2_REGISTERED_CLIENT = AREA_PREFIX + "oauth2:registered:client";
+    String REGION_OAUTH2_APPLICATION = AREA_PREFIX + "oauth2:application";
+    String REGION_OAUTH2_COMPLIANCE = AREA_PREFIX + "oauth2:compliance";
+    String REGION_OAUTH2_PERMISSION = AREA_PREFIX + "oauth2:permission";
+    String REGION_OAUTH2_SCOPE = AREA_PREFIX + "oauth2:scope";
+    String REGION_OAUTH2_APPLICATION_SCOPE = AREA_PREFIX + "oauth2:application:scope";
+    String REGION_OAUTH2_IOT_PRODUCT = AREA_PREFIX + "oauth2:iot:product";
+    String REGION_OAUTH2_IOT_DEVICE = AREA_PREFIX + "oauth2:iot:device";
+
+    String CACHE_NAME_TOKEN_SIGN_IN_FAILURE_LIMITED =
+            CACHE_TOKEN_BASE_PREFIX + "sign_in:failure_limited:";
+    String CACHE_NAME_TOKEN_LOCKED_USER_DETAIL = CACHE_TOKEN_BASE_PREFIX + "locked:user_details:";
+
+    String CACHE_SECURITY_PREFIX = CACHE_PREFIX + "security:";
+    String CACHE_SECURITY_METADATA_PREFIX = CACHE_SECURITY_PREFIX + "metadata:";
+
+    String CACHE_NAME_SECURITY_METADATA_ATTRIBUTES = CACHE_SECURITY_METADATA_PREFIX + "attributes:";
+    String CACHE_NAME_SECURITY_METADATA_INDEXES = CACHE_SECURITY_METADATA_PREFIX + "indexes:";
+    String CACHE_NAME_SECURITY_METADATA_INDEXABLE = CACHE_SECURITY_METADATA_PREFIX + "indexable:";
+    String CACHE_NAME_SECURITY_METADATA_COMPATIBLE = CACHE_SECURITY_METADATA_PREFIX + "compatible:";
+}

@@ -1,26 +1,19 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- *  org.apache.commons.lang3.ObjectUtils
- *  org.apache.commons.lang3.StringUtils
- *  org.springframework.http.HttpMethod
- *  org.springframework.util.Assert
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.security.spring.access.security;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import java.io.Serializable;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
-public final class SecurityRequest
-implements Serializable {
+public final class SecurityRequest implements Serializable {
     private String pattern;
     private String httpMethod;
     private boolean hasWildcard;
@@ -29,11 +22,11 @@ implements Serializable {
     }
 
     public SecurityRequest(String pattern) {
-        this(pattern, null);
+        this(pattern, (String)null);
     }
 
     public SecurityRequest(String pattern, String httpMethod) {
-        Assert.hasText((String)pattern, (String)"Pattern cannot be null or empty");
+        Assert.hasText(pattern, "Pattern cannot be null or empty");
         this.pattern = pattern;
         this.hasWildcard = this.containSpecialCharacters(pattern);
         this.httpMethod = this.checkHttpMethod(httpMethod);
@@ -60,37 +53,36 @@ implements Serializable {
     }
 
     private String checkHttpMethod(String method) {
-        HttpMethod httpMethod;
-        if (StringUtils.isNotBlank((CharSequence)method) && ObjectUtils.isNotEmpty((Object)(httpMethod = HttpMethod.valueOf((String)method)))) {
-            return httpMethod.name();
+        if (StringUtils.isNotBlank(method)) {
+            HttpMethod httpMethod = HttpMethod.valueOf(method);
+            if (ObjectUtils.isNotEmpty(httpMethod)) {
+                return httpMethod.name();
+            }
         }
+
         return null;
     }
 
     private boolean containSpecialCharacters(String source) {
-        if (StringUtils.isNotBlank((CharSequence)source)) {
-            return StringUtils.containsAny((CharSequence)source, (CharSequence[])new String[]{"*", "?", "{"});
-        }
-        return false;
+        return StringUtils.isNotBlank(source) ? StringUtils.containsAny(source, new String[]{"*", "?", "{"}) : false;
     }
 
     public boolean equals(Object o) {
         if (this == o) {
             return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            SecurityRequest that = (SecurityRequest)o;
+            return Objects.equal(this.pattern, that.pattern) && Objects.equal(this.httpMethod, that.httpMethod);
+        } else {
             return false;
         }
-        SecurityRequest that = (SecurityRequest)o;
-        return Objects.equal((Object)this.pattern, (Object)that.pattern) && Objects.equal((Object)this.httpMethod, (Object)that.httpMethod);
     }
 
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.pattern, this.httpMethod});
+        return Objects.hashCode(new Object[]{this.pattern, this.httpMethod});
     }
 
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("pattern", (Object)this.pattern).add("httpMethod", (Object)this.httpMethod).toString();
+        return MoreObjects.toStringHelper(this).add("pattern", this.pattern).add("httpMethod", this.httpMethod).toString();
     }
 }
-

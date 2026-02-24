@@ -1,16 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.security.justauth.justauth.request.Auth2DefaultRequest
- *  jakarta.servlet.http.HttpServletRequest
- *  me.zhyd.oauth.model.AuthCallback
- *  me.zhyd.oauth.model.AuthResponse
- *  me.zhyd.oauth.model.AuthUser
- *  org.springframework.security.oauth2.core.OAuth2AuthenticationException
- *  org.springframework.security.oauth2.core.OAuth2Error
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.service;
 
 import com.kuma.boot.security.justauth.justauth.request.Auth2DefaultRequest;
@@ -22,21 +25,53 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.util.Assert;
 
-public class DefaultAuth2UserService
-implements Auth2UserService {
+/**
+ * An implementation of an {@link com.kuma.boot.security.spring.authentication.login.social.justauth.service.Auth2UserService} that supports standard OAuth 2.0
+ * Provider's.
+ *
+ * @author YongWu zheng
+ * @version V1.0  Created by 2020/10/10 7:54
+ * @see com.kuma.boot.security.spring.authentication.login.social.justauth.service.Auth2UserService
+ * @see Auth2DefaultRequest
+ * @see AuthUser
+ * @since 2.0.0
+ */
+public class DefaultAuth2UserService implements com.kuma.boot.security.spring.authentication.login.social.justauth.service.Auth2UserService {
+
     @Override
-    public AuthUser loadUser(Auth2DefaultRequest auth2Request, HttpServletRequest request) throws OAuth2AuthenticationException {
-        Assert.notNull((Object)auth2Request, (String)"auth2Request cannot be null");
-        AuthCallback authCallback = AuthCallback.builder().code(request.getParameter("code")).state(request.getParameter("state")).auth_code(request.getParameter("auth_code")).authorization_code(request.getParameter("authorization_code")).oauth_token(request.getParameter("oauth_token")).oauth_verifier(request.getParameter("oauth_verifier")).build();
+    public AuthUser loadUser(Auth2DefaultRequest auth2Request, HttpServletRequest request)
+            throws OAuth2AuthenticationException {
+
+        Assert.notNull(auth2Request, "auth2Request cannot be null");
+
+        AuthCallback authCallback =
+                AuthCallback.builder()
+                        .code(request.getParameter("code"))
+                        .state(request.getParameter("state"))
+                        .auth_code(request.getParameter("auth_code"))
+                        .authorization_code(request.getParameter("authorization_code"))
+                        .oauth_token(request.getParameter("oauth_token"))
+                        .oauth_verifier(request.getParameter("oauth_verifier"))
+                        .build();
+
+        //noinspection rawtypes
         AuthResponse authResponse = auth2Request.login(authCallback);
+
         if (authResponse.ok()) {
-            AuthUser authUser = (AuthUser)authResponse.getData();
+            AuthUser authUser = (AuthUser) authResponse.getData();
+            // 因为原有的 source 不是 camel 风格, 与 providerId 有出入, 覆盖原有的 source 使其与 providerId 字符串一样
             authUser.setSource(auth2Request.getProviderId());
+
             return authUser;
+        } else {
+            String msg = authResponse.getMsg();
+            OAuth2Error oauth2Error =
+                    new OAuth2Error(
+                            msg,
+                            String.format(
+                                    " for Client Registration: %s", auth2Request.getProviderId()),
+                            request.getRequestURI());
+            throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
         }
-        String msg = authResponse.getMsg();
-        OAuth2Error oauth2Error = new OAuth2Error(msg, String.format(" for Client Registration: %s", auth2Request.getProviderId()), request.getRequestURI());
-        throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
     }
 }
-

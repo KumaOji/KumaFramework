@@ -1,22 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.apache.commons.io.IOUtils
- *  org.apache.commons.lang3.StringUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.core.io.UrlResource
- *  org.springframework.util.AntPathMatcher
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.access.vip;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -24,81 +27,127 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.AntPathMatcher;
 
-public class UrlSecurityPermsLoad
-implements InitializingBean {
-    private final Map<String, String> urlPerms = new LinkedHashMap<String, String>();
+import static org.apache.commons.lang3.StringUtils.splitPreserveAllTokens;
+
+/**
+ * 初始化时, 从每个模块去加载 url 需要的权限 文件名 authority.conf 文件格式 ,
+ * <p>
+ * 每行一个 url      权限限制;   url 是 ant 格式,   例:
+ * <p>
+ * /login=anon              登录路径不需要任何权限
+ * <p>
+ * /home/**=authc           首页登录就可以访问
+ * <p>
+ * /connect/**=(a||b)&&c 有 c 角色并且有 a 角色或者 b 角色时可访问连接管理
+ */
+public class UrlSecurityPermsLoad implements InitializingBean {
+
+    private final Map<String, String> urlPerms = new LinkedHashMap<>();
     private AntPathMatcher antPathMatcher = new AntPathMatcher();
+
     private final RedisRepository redisRepository;
 
+    /**
+     * url安全烫发负载
+     *
+     * @param redisRepository 复述,库
+     * @since 2023-07-04 13:03:11
+     */
     public UrlSecurityPermsLoad(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 
+    /**
+     * 在属性设置
+     *
+     * @since 2023-07-04 13:03:11
+     */
+    @Override
     public void afterPropertiesSet() throws Exception {
-        this.loadPerm();
+        loadPerm();
     }
 
+    /**
+     * 查找可匹配 url 的角色列表
+     *
+     * @param url
+     * @return {@link String }
+     * @since 2023-07-04 13:03:11
+     */
     public String findMatchRoles(String url) {
-        for (String next : this.urlPerms.keySet()) {
-            if (!this.antPathMatcher.match(next, url)) continue;
-            return this.urlPerms.get(next);
+        for (String next : urlPerms.keySet()) {
+            if (antPathMatcher.match(next, url)) {
+                return urlPerms.get(next);
+            }
         }
         return "";
     }
 
+    /**
+     * 添加 url 权限配置, 这个是加在内存中的, 不会持久化 这个会加到最后
+     *
+     * @param pattern
+     * @param expression
+     */
     public void addUrlPerm(String pattern, String expression) {
-        this.urlPerms.put(pattern, expression);
+        urlPerms.put(pattern, expression);
     }
 
+    /**
+     * @return 可以免登录地址列表
+     */
     public List<String> findAnonUrls() {
-        ArrayList<String> antMatchPatterns = new ArrayList<String>();
-        for (Map.Entry<String, String> urlPermEntry : this.urlPerms.entrySet()) {
-            String value = urlPermEntry.getValue();
-            if (!StringUtils.isNotBlank((CharSequence)value) || !value.contains("anon")) continue;
-            antMatchPatterns.add(urlPermEntry.getKey());
+        List<String> antMatchPatterns = new ArrayList<>();
+        for (Map.Entry<String, String> urlPermEntry : urlPerms.entrySet()) {
+            final String value = urlPermEntry.getValue();
+            if (StringUtils.isNotBlank(value) && value.contains("anon")) {
+                antMatchPatterns.add(urlPermEntry.getKey());
+            }
         }
         return antMatchPatterns;
     }
 
     public void loadPerm() {
         try {
-            ClassLoader classLoader = UrlSecurityPermsLoad.class.getClassLoader();
-            Enumeration<URL> resources = classLoader.getResources("authority.conf");
+            final ClassLoader classLoader = UrlSecurityPermsLoad.class.getClassLoader();
+            final Enumeration<URL> resources = classLoader.getResources("authority.conf");
             while (resources.hasMoreElements()) {
-                URL url = resources.nextElement();
+                final URL url = resources.nextElement();
                 UrlResource urlResource = new UrlResource(url);
-                InputStream inputStream = urlResource.getInputStream();
-                try {
-                    List lines = IOUtils.readLines((InputStream)inputStream, (Charset)StandardCharsets.UTF_8);
+                try (final InputStream inputStream = urlResource.getInputStream(); ) {
+                    final List<String> lines =
+                            IOUtils.readLines(inputStream, StandardCharsets.UTF_8);
                     for (String line : lines) {
-                        if (StringUtils.isBlank((CharSequence)line) || line.startsWith("#")) continue;
-                        String[] splitLine = StringUtils.splitPreserveAllTokens((String)(line = StringUtils.trim((String)line)), (String)"=", (int)2);
-                        if (splitLine.length != 2) {
-                            LogUtils.warn((String)"\u9519\u8bef\u7684\u6743\u9650\u914d\u7f6e:{}", (Object[])new Object[]{line});
+                        if (StringUtils.isBlank(line) || line.startsWith("#")) {
+                            // 忽略注释和空行
                             continue;
                         }
-                        this.urlPerms.put(splitLine[0], splitLine[1]);
+                        // 去两端空格
+                        line = StringUtils.trim(line);
+
+                        final String[] splitLine = splitPreserveAllTokens(line, "=", 2);
+                        if (splitLine.length != 2) {
+                            LogUtils.warn("错误的权限配置:{}", line);
+                            continue;
+                        }
+                        urlPerms.put(splitLine[0], splitLine[1]);
                     }
                 }
-                finally {
-                    if (inputStream == null) continue;
-                    inputStream.close();
-                }
             }
-        }
-        catch (Exception e) {
-            LogUtils.error((Throwable)e, (String)"authority.conf\u4e0d\u5b58\u5728", (Object[])new Object[0]);
-            Object object = this.redisRepository.get("lsxxx");
+        } catch (Exception e) {
+            LogUtils.error(e, "authority.conf不存在");
+
+            // 使用redis加载权限
+            Object lsxxx = redisRepository.get("lsxxx");
         }
     }
 
     public Map<String, String> getUrlPerms() {
-        return this.urlPerms;
+        return urlPerms;
     }
 }
-

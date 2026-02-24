@@ -1,32 +1,28 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonAutoDetect
- *  com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility
- *  com.fasterxml.jackson.core.JsonParser
- *  com.fasterxml.jackson.core.type.TypeReference
- *  com.fasterxml.jackson.databind.DeserializationContext
- *  com.fasterxml.jackson.databind.JsonNode
- *  com.fasterxml.jackson.databind.ObjectMapper
- *  com.fasterxml.jackson.databind.annotation.JsonDeserialize
- *  com.fasterxml.jackson.databind.deser.std.StdDeserializer
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.security.authentication.AnonymousAuthenticationToken
- *  org.springframework.security.core.authority.SimpleGrantedAuthority
- *  org.springframework.security.web.authentication.WebAuthenticationDetails
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.deserializes;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -34,43 +30,76 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import tools.jackson.databind.json.JsonMapper;
 
+/**
+ * AnonymousAuthenticationToken Jackson 反序列化
+ * @author YongWu zheng
+ * @version V2.0  Created by 2020/10/28 10:58
+ */
 public class AnonymousAuthenticationTokenJsonDeserializer
-extends StdDeserializer<AnonymousAuthenticationToken> {
-    private final Logger log = LoggerFactory.getLogger(((Object)((Object)this)).getClass());
+        extends StdDeserializer<AnonymousAuthenticationToken> {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public AnonymousAuthenticationTokenJsonDeserializer() {
         super(AnonymousAuthenticationToken.class);
     }
 
-    public AnonymousAuthenticationToken deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    @Override
+    public AnonymousAuthenticationToken deserialize(JsonParser p, DeserializationContext ctxt) {
+
+//        JsonMapper mapper = (JsonMapper) p.getCodec();
+        JsonMapper mapper = null;
+
+        final JsonNode jsonNode = mapper.readTree(p);
+
+        // 获取 authorities
+        Collection<? extends GrantedAuthority> authorities =
+                mapper.convertValue(
+                        jsonNode.get("authorities"),
+                        new TypeReference<Collection<SimpleGrantedAuthority>>() {});
+
+        final JsonNode detailsNode = jsonNode.get("details");
+
+        final Integer key = jsonNode.get("keyHash").asInt();
+        final String principal = jsonNode.get("principal").asText("anonymousUser");
+
+        // 创建 AnonymousAuthenticationToken 对象
         AnonymousAuthenticationToken token;
-        ObjectMapper mapper = (ObjectMapper)p.getCodec();
-        JsonNode jsonNode = (JsonNode)mapper.readTree(p);
-        Collection authorities = (Collection)mapper.convertValue((Object)jsonNode.get("authorities"), (TypeReference)new TypeReference<Collection<SimpleGrantedAuthority>>(this){});
-        JsonNode detailsNode = jsonNode.get("details");
-        Integer key = jsonNode.get("keyHash").asInt();
-        String principal = jsonNode.get("principal").asText("anonymousUser");
         try {
-            Constructor declaredConstructor = AnonymousAuthenticationToken.class.getDeclaredConstructor(Integer.class, Object.class, Collection.class);
+            final Constructor<AnonymousAuthenticationToken> declaredConstructor =
+                    AnonymousAuthenticationToken.class.getDeclaredConstructor(
+                            Integer.class, Object.class, Collection.class);
             declaredConstructor.setAccessible(true);
-            token = (AnonymousAuthenticationToken)declaredConstructor.newInstance(key, principal, authorities);
+            token = declaredConstructor.newInstance(key, principal, authorities);
+        } catch (NoSuchMethodException
+                 | InstantiationException
+                 | IllegalAccessException
+                 | InvocationTargetException e) {
+            final String msg =
+                    String.format(
+                            "AnonymousAuthenticationToken Jackson 反序列化错误: principal 反序列化错误: %s",
+                            e.getMessage());
+            log.error(msg);
+            throw new RuntimeException(msg);
         }
-        catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            String msg = String.format("AnonymousAuthenticationToken Jackson \u53cd\u5e8f\u5217\u5316\u9519\u8bef: principal \u53cd\u5e8f\u5217\u5316\u9519\u8bef: %s", e.getMessage());
-            this.log.error(msg);
-            throw new IOException(msg);
-        }
-        WebAuthenticationDetails details = (WebAuthenticationDetails)mapper.convertValue((Object)detailsNode, (TypeReference)new TypeReference<WebAuthenticationDetails>(this){});
-        token.setDetails((Object)details);
+
+        // 创建 details 对象
+        WebAuthenticationDetails details =
+                mapper.convertValue(detailsNode, new TypeReference<WebAuthenticationDetails>() {});
+        token.setDetails(details);
+
         return token;
     }
 
-    @JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.ANY, getterVisibility=JsonAutoDetect.Visibility.NONE, isGetterVisibility=JsonAutoDetect.Visibility.NONE)
-    @JsonDeserialize(using=AnonymousAuthenticationTokenJsonDeserializer.class)
-    public static interface AnonymousAuthenticationTokenMixin {
-    }
+    @JsonAutoDetect(
+            fieldVisibility = JsonAutoDetect.Visibility.ANY,
+            getterVisibility = JsonAutoDetect.Visibility.NONE,
+            isGetterVisibility = JsonAutoDetect.Visibility.NONE)
+    @JsonDeserialize(using = AnonymousAuthenticationTokenJsonDeserializer.class)
+    public interface AnonymousAuthenticationTokenMixin {}
 }
-

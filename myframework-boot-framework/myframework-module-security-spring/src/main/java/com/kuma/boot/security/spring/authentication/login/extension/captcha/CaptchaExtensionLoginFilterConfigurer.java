@@ -1,19 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.context.ApplicationContext
- *  org.springframework.context.support.MessageSourceAccessor
- *  org.springframework.http.HttpMethod
- *  org.springframework.security.authentication.AuthenticationProvider
- *  org.springframework.security.config.annotation.web.HttpSecurityBuilder
- *  org.springframework.security.core.userdetails.UserDetailsChecker
- *  org.springframework.security.crypto.password.PasswordEncoder
- *  org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
- *  org.springframework.security.web.util.matcher.RequestMatcher
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.captcha;
+
+import static com.kuma.boot.security.spring.utils.OAuth2AuthorizationUtils.getBeanProvider;
+import static com.kuma.boot.security.spring.utils.OAuth2AuthorizationUtils.oAuth2AuthenticationProperties;
 
 import com.kuma.boot.security.spring.authentication.login.extension.AbstractExtensionLoginFilterConfigurer;
 import com.kuma.boot.security.spring.authentication.login.extension.ExtensionLoginFilterSecurityConfigurer;
@@ -22,8 +26,7 @@ import com.kuma.boot.security.spring.authentication.login.extension.captcha.serv
 import com.kuma.boot.security.spring.authentication.login.extension.captcha.service.DefaultCaptchaCheckService;
 import com.kuma.boot.security.spring.authentication.login.extension.captcha.service.DefaultCaptchaUserDetailsService;
 import com.kuma.boot.security.spring.oauth2.token.JwtTokenGenerator;
-import com.kuma.boot.security.spring.properties.OAuth2AuthenticationProperties;
-import com.kuma.boot.security.spring.utils.OAuth2AuthorizationUtils;
+import com.kuma.boot.security.spring.autoconfigure.properties.OAuth2AuthenticationProperties.ExtensionLogin.CaptchaLogin;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.HttpMethod;
@@ -36,55 +39,89 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 public class CaptchaExtensionLoginFilterConfigurer<H extends HttpSecurityBuilder<H>>
-extends AbstractExtensionLoginFilterConfigurer<H, CaptchaExtensionLoginFilterConfigurer<H>, CaptchaAuthenticationFilter, ExtensionLoginFilterSecurityConfigurer<H>> {
+        extends AbstractExtensionLoginFilterConfigurer<
+        H,
+        CaptchaExtensionLoginFilterConfigurer<H>,
+        com.kuma.boot.security.spring.authentication.login.extension.captcha.CaptchaAuthenticationFilter,
+        ExtensionLoginFilterSecurityConfigurer<H>> {
+
     private CaptchaUserDetailsService captchaUserDetailsService;
+
     private CaptchaCheckService captchaCheckService;
 
-    public CaptchaExtensionLoginFilterConfigurer(ExtensionLoginFilterSecurityConfigurer<H> securityConfigurer) {
-        super(securityConfigurer, new CaptchaAuthenticationFilter(), "/login/captcha");
+    public CaptchaExtensionLoginFilterConfigurer(
+            ExtensionLoginFilterSecurityConfigurer<H> securityConfigurer) {
+        super(securityConfigurer, new com.kuma.boot.security.spring.authentication.login.extension.captcha.CaptchaAuthenticationFilter(), "/login/captcha");
     }
 
-    public CaptchaExtensionLoginFilterConfigurer<H> captchaUserDetailsService(CaptchaUserDetailsService captchaUserDetailsService) {
+    public CaptchaExtensionLoginFilterConfigurer<H> captchaUserDetailsService(
+            CaptchaUserDetailsService captchaUserDetailsService) {
         this.captchaUserDetailsService = captchaUserDetailsService;
         return this;
     }
 
-    public CaptchaExtensionLoginFilterConfigurer<H> captchaCheckService(CaptchaCheckService captchaCheckService) {
+    public CaptchaExtensionLoginFilterConfigurer<H> captchaCheckService(
+            CaptchaCheckService captchaCheckService) {
         this.captchaCheckService = captchaCheckService;
         return this;
     }
 
-    public CaptchaExtensionLoginFilterConfigurer<H> jwtTokenGenerator(JwtTokenGenerator jwtTokenGenerator) {
+    public CaptchaExtensionLoginFilterConfigurer<H> jwtTokenGenerator(
+            JwtTokenGenerator jwtTokenGenerator) {
         this.setJwtTokenGenerator(jwtTokenGenerator);
         return this;
     }
 
     @Override
     protected RequestMatcher createLoginProcessingUrlMatcher(String loginProcessingUrl) {
-        return PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, loginProcessingUrl);
+        return PathPatternRequestMatcher.withDefaults()
+                .matcher(HttpMethod.POST, loginProcessingUrl);
     }
 
     @Override
     protected AuthenticationProvider authenticationProvider(H http) {
-        ApplicationContext applicationContext = (ApplicationContext)http.getSharedObject(ApplicationContext.class);
-        CaptchaUserDetailsService captchaUserDetailsService = this.captchaUserDetailsService != null ? this.captchaUserDetailsService : (CaptchaUserDetailsService)OAuth2AuthorizationUtils.getBeanProvider(applicationContext, CaptchaUserDetailsService.class).getIfAvailable(DefaultCaptchaUserDetailsService::new);
-        Assert.notNull((Object)captchaUserDetailsService, (String)"captchaUserDetailsService is required");
-        CaptchaCheckService captchaCheckService = this.captchaCheckService != null ? this.captchaCheckService : (CaptchaCheckService)OAuth2AuthorizationUtils.getBeanProvider(applicationContext, CaptchaCheckService.class).getIfAvailable(DefaultCaptchaCheckService::new);
-        Assert.notNull((Object)captchaCheckService, (String)"captchaService is required");
-        CaptchaAuthenticationFilter captchaAuthenticationFilter = (CaptchaAuthenticationFilter)((Object)this.getAuthenticationFilter());
-        OAuth2AuthorizationUtils.oAuth2AuthenticationProperties(applicationContext).ifAvailable(properties -> {
-            OAuth2AuthenticationProperties.ExtensionLogin.CaptchaLogin captchaLogin = properties.getExtensionLogin().getCaptchaLogin();
-            captchaAuthenticationFilter.setUsernameParameter(captchaLogin.getUsernameParameter());
-            captchaAuthenticationFilter.setPasswordParameter(captchaLogin.getPasswordParameter());
-            captchaAuthenticationFilter.setTypeParameter(captchaLogin.getTypeParameter());
-            captchaAuthenticationFilter.setVerificationCodeParameter(captchaLogin.getVerificationCodeParameter());
-            captchaAuthenticationFilter.setFilterProcessesUrl(captchaLogin.getLoginUrl());
-        });
-        CaptchaAuthenticationProvider provider = new CaptchaAuthenticationProvider(captchaUserDetailsService, captchaCheckService);
-        OAuth2AuthorizationUtils.getBeanProvider(applicationContext, PasswordEncoder.class).ifAvailable(provider::setPasswordEncoder);
-        OAuth2AuthorizationUtils.getBeanProvider(applicationContext, UserDetailsChecker.class).ifAvailable(provider::setPostAuthenticationChecks);
-        OAuth2AuthorizationUtils.getBeanProvider(applicationContext, MessageSourceAccessor.class).ifAvailable(provider::setMessages);
+        ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
+
+        CaptchaUserDetailsService captchaUserDetailsService =
+                this.captchaUserDetailsService != null
+                        ? this.captchaUserDetailsService
+                        : getBeanProvider(applicationContext, CaptchaUserDetailsService.class)
+                        .getIfAvailable(DefaultCaptchaUserDetailsService::new);
+        Assert.notNull(captchaUserDetailsService, "captchaUserDetailsService is required");
+
+        CaptchaCheckService captchaCheckService =
+                this.captchaCheckService != null
+                        ? this.captchaCheckService
+                        : getBeanProvider(applicationContext, CaptchaCheckService.class)
+                        .getIfAvailable(DefaultCaptchaCheckService::new);
+        Assert.notNull(captchaCheckService, "captchaService is required");
+
+        com.kuma.boot.security.spring.authentication.login.extension.captcha.CaptchaAuthenticationFilter captchaAuthenticationFilter = this.getAuthenticationFilter();
+        oAuth2AuthenticationProperties(applicationContext)
+                .ifAvailable(
+                        (properties) -> {
+                            CaptchaLogin captchaLogin =
+                                    properties.getExtensionLogin().getCaptchaLogin();
+                            captchaAuthenticationFilter.setUsernameParameter(
+                                    captchaLogin.getUsernameParameter());
+                            captchaAuthenticationFilter.setPasswordParameter(
+                                    captchaLogin.getPasswordParameter());
+                            captchaAuthenticationFilter.setTypeParameter(
+                                    captchaLogin.getTypeParameter());
+                            captchaAuthenticationFilter.setVerificationCodeParameter(
+                                    captchaLogin.getVerificationCodeParameter());
+                            captchaAuthenticationFilter.setFilterProcessesUrl(
+                                    captchaLogin.getLoginUrl());
+                        });
+
+        com.kuma.boot.security.spring.authentication.login.extension.captcha.CaptchaAuthenticationProvider provider =
+                new com.kuma.boot.security.spring.authentication.login.extension.captcha.CaptchaAuthenticationProvider(captchaUserDetailsService, captchaCheckService);
+        getBeanProvider(applicationContext, PasswordEncoder.class)
+                .ifAvailable(provider::setPasswordEncoder);
+        getBeanProvider(applicationContext, UserDetailsChecker.class)
+                .ifAvailable(provider::setPostAuthenticationChecks);
+        getBeanProvider(applicationContext, MessageSourceAccessor.class)
+                .ifAvailable(provider::setMessages);
         return provider;
     }
 }
-

@@ -1,28 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.security.justauth.justauth.AuthTokenPo
- *  com.kuma.boot.security.justauth.justauth.request.Auth2DefaultRequest
- *  com.xkcoding.http.exception.SimpleHttpException
- *  me.zhyd.oauth.cache.AuthStateCache
- *  me.zhyd.oauth.config.AuthConfig
- *  me.zhyd.oauth.config.AuthSource
- *  me.zhyd.oauth.enums.AuthResponseStatus
- *  me.zhyd.oauth.exception.AuthException
- *  me.zhyd.oauth.model.AuthCallback
- *  me.zhyd.oauth.model.AuthResponse
- *  me.zhyd.oauth.model.AuthToken
- *  me.zhyd.oauth.model.AuthUser
- *  me.zhyd.oauth.request.AuthDefaultRequest
- *  me.zhyd.oauth.utils.AuthChecker
- *  me.zhyd.oauth.utils.StringUtils
- *  me.zhyd.oauth.utils.UuidUtils
- *  org.springframework.lang.NonNull
- *  org.springframework.lang.Nullable
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -42,120 +33,177 @@ import me.zhyd.oauth.model.AuthToken;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthDefaultRequest;
 import me.zhyd.oauth.utils.AuthChecker;
+import me.zhyd.oauth.utils.StringUtils;
 import me.zhyd.oauth.utils.UuidUtils;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-public class JustAuthDefaultRequestAdapter
-extends AuthDefaultRequest
-implements Auth2DefaultRequest {
+/**
+ * {@link AuthDefaultRequest} 的适配器
+ *
+ * @author YongWu zheng
+ * @version V2.0  Created by 2020.11.19 12:35
+ */
+public class JustAuthDefaultRequestAdapter extends AuthDefaultRequest
+        implements Auth2DefaultRequest {
+
     private final String providerId;
+
     private AuthDefaultRequest authDefaultRequest;
 
-    public JustAuthDefaultRequestAdapter(AuthConfig config, AuthSource source, AuthStateCache authStateCache) {
+    /**
+     * 构造 {@link AuthDefaultRequest} 的适配器
+     *
+     * @param config         {@link AuthDefaultRequest} 的 {@link AuthConfig}
+     * @param source         {@link AuthDefaultRequest} 的 {@link AuthSource}
+     * @param authStateCache {@link AuthDefaultRequest} 的 {@link AuthStateCache}
+     */
+    public JustAuthDefaultRequestAdapter(
+            AuthConfig config, AuthSource source, AuthStateCache authStateCache) {
         super(config, source, authStateCache);
         String providerId = JustAuthRequestHolder.getProviderId(source);
-        if (!StringUtils.hasText((String)providerId)) {
-            throw new RuntimeException("AuthSource \u5fc5\u987b\u662f me.zhyd.oauth.config.AuthDefaultSource \u6216 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource \u5b50\u7c7b");
+        if (org.springframework.util.StringUtils.hasText(providerId)) {
+            this.providerId = providerId;
+        } else {
+            throw new RuntimeException(
+                    "AuthSource 必须是 me.zhyd.oauth.config.AuthDefaultSource 或 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource 子类");
         }
-        this.providerId = providerId;
     }
 
     public void setAuthDefaultRequest(AuthDefaultRequest authDefaultRequest) {
         this.authDefaultRequest = authDefaultRequest;
     }
 
+    @Override
     public String getRealState(String state) {
-        if (me.zhyd.oauth.utils.StringUtils.isEmpty((String)state)) {
+        if (StringUtils.isEmpty(state)) {
             state = UuidUtils.getUUID();
         }
+
+        // 缓存 state
         this.authStateCache.cache(state, state);
         return state;
     }
 
+    /**
+     * 统一的登录入口。当通过{@link AuthDefaultRequest#authorize(String)}授权成功后，会跳转到调用方的相关回调方法中
+     * 方法的入参可以使用{@code AuthCallback}，{@code AuthCallback}类中封装好了OAuth2授权回调所需要的参数
+     *
+     * @param authCallback 用于接收回调参数的实体
+     * @return AuthResponse
+     * @see AuthDefaultRequest#login(AuthCallback)
+     */
+    @SuppressWarnings("rawtypes")
+    @Override
     public AuthResponse login(AuthCallback authCallback) {
         try {
-            AuthChecker.checkCode((AuthSource)this.source, (AuthCallback)authCallback);
+            AuthChecker.checkCode(this.source, authCallback);
+
             if (!this.config.isIgnoreCheckState()) {
-                AuthChecker.checkState((String)authCallback.getState(), (AuthSource)this.source, (AuthStateCache)this.authStateCache);
+                AuthChecker.checkState(authCallback.getState(), this.source, this.authStateCache);
             }
+
             AuthToken authToken = this.getAccessToken(authCallback);
             AuthUser user = this.getUserInfo(authToken);
-            return AuthResponse.builder().code(AuthResponseStatus.SUCCESS.getCode()).data((Object)user).build();
-        }
-        catch (Exception e) {
-            LogUtils.error((String)("Failed to login with oauth authorization. error: " + e.getMessage()), (Object[])new Object[]{e});
-            return Auth2DefaultRequest.responseError((Exception)e);
+            return AuthResponse.builder()
+                    .code(AuthResponseStatus.SUCCESS.getCode())
+                    .data(user)
+                    .build();
+        } catch (Exception e) {
+            LogUtils.error("Failed to login with oauth authorization. error: " + e.getMessage(), e);
+            return Auth2DefaultRequest.responseError(e);
         }
     }
 
-    public AuthTokenPo refreshToken(AuthTokenPo authToken) throws SimpleHttpException, AuthException {
+    @Override
+    public AuthTokenPo refreshToken(AuthTokenPo authToken)
+            throws SimpleHttpException, AuthException {
         if (this.authDefaultRequest == null) {
-            throw new RuntimeException("AuthDefaultRequest \u4e0d\u80fd\u4e3a null \u503c, \u5fc5\u987b\u901a\u8fc7\u65b9\u6cd5 setAuthDefaultRequest(AuthDefaultRequest) \u8bbe\u7f6e");
+            throw new RuntimeException(
+                    "AuthDefaultRequest 不能为 null 值, 必须通过方法 setAuthDefaultRequest(AuthDefaultRequest) 设置");
         }
-        AuthResponse authResponse = this.authDefaultRequest.refresh((AuthToken)authToken);
-        return Auth2DefaultRequest.getAuthTokenPo((Integer)this.config.getHttpConfig().getTimeout(), (Long)authToken.getId(), (AuthResponse)authResponse);
+        //noinspection rawtypes
+        AuthResponse authResponse = this.authDefaultRequest.refresh(authToken);
+        return Auth2DefaultRequest.getAuthTokenPo(
+                this.config.getHttpConfig().getTimeout(), authToken.getId(), authResponse);
     }
 
+    @Override
     public AuthSource getAuthSource() {
         return this.source;
     }
 
+    @Override
     public AuthStateCache getAuthStateCache() {
         return this.authStateCache;
     }
 
+    /**
+     * 获取access token
+     *
+     * @param authCallback 授权成功后的回调参数
+     * @return token
+     * @see AuthDefaultRequest#authorize(String)
+     */
+    @Override
     public AuthToken getAccessToken(AuthCallback authCallback) throws SimpleHttpException {
         try {
-            Method method = this.getMethod("getAccessToken", AuthCallback.class);
-            Object result = method.invoke((Object)this.authDefaultRequest, authCallback);
-            return (AuthToken)result;
-        }
-        catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            Method method = getMethod("getAccessToken", AuthCallback.class);
+            Object result = method.invoke(this.authDefaultRequest, authCallback);
+            return (AuthToken) result;
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             String errMsg = e.getMessage();
-            if (e instanceof InvocationTargetException) {
-                InvocationTargetException invocationTargetException = (InvocationTargetException)e;
+            if (e instanceof InvocationTargetException invocationTargetException) {
                 errMsg = invocationTargetException.getTargetException().getMessage();
             }
-            String msg = "\u4ece\u7b2c\u4e09\u65b9\u83b7\u53d6 accessToken \u65f6\u65b9\u6cd5\u8c03\u7528\u5f02\u5e38: " + errMsg;
-            throw new SimpleHttpException(msg, (Throwable)e);
+            String msg = "从第三方获取 accessToken 时方法调用异常: " + errMsg;
+            throw new SimpleHttpException(msg, e);
         }
     }
 
+    /**
+     * 使用token换取用户信息
+     *
+     * @param authToken token信息
+     * @return 用户信息
+     * @see AuthDefaultRequest#getAccessToken(AuthCallback)
+     */
+    @Override
     @Nullable
     public AuthUser getUserInfo(AuthToken authToken) throws SimpleHttpException {
         try {
-            Method method = this.getMethod("getUserInfo", AuthToken.class);
-            Object result = method.invoke((Object)this.authDefaultRequest, authToken);
-            return (AuthUser)result;
-        }
-        catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            Method method = getMethod("getUserInfo", AuthToken.class);
+            Object result = method.invoke(this.authDefaultRequest, authToken);
+            return (AuthUser) result;
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             String errMsg = e.getMessage();
-            if (e instanceof InvocationTargetException) {
-                InvocationTargetException invocationTargetException = (InvocationTargetException)e;
+            if (e instanceof InvocationTargetException invocationTargetException) {
                 errMsg = invocationTargetException.getTargetException().getMessage();
             }
-            String msg = "\u4ece\u7b2c\u4e09\u65b9\u83b7\u53d6\u7528\u6237\u4fe1\u606f\u65f6\u65b9\u6cd5\u8c03\u7528\u5f02\u5e38: " + errMsg;
-            throw new SimpleHttpException(msg, (Throwable)e);
+            String msg = "从第三方获取用户信息时方法调用异常: " + errMsg;
+            throw new SimpleHttpException(msg, e);
         }
     }
 
+    @Override
     public String getProviderId() {
         return this.providerId;
     }
 
+    @Override
     public String authorize(String state) {
         if (this.authDefaultRequest == null) {
-            throw new RuntimeException("AuthDefaultRequest \u4e0d\u80fd\u4e3a null \u503c, \u5fc5\u987b\u901a\u8fc7\u65b9\u6cd5 setAuthDefaultRequest(AuthDefaultRequest) \u8bbe\u7f6e");
+            throw new RuntimeException(
+                    "AuthDefaultRequest 不能为 null 值, 必须通过方法 setAuthDefaultRequest(AuthDefaultRequest) 设置");
         }
         return this.authDefaultRequest.authorize(state);
     }
 
-    private Method getMethod(@NonNull String methodName, Class<?> ... parameterTypes) throws NoSuchMethodException {
-        Method method = this.authDefaultRequest.getClass().getDeclaredMethod(methodName, parameterTypes);
+    private Method getMethod(@NonNull String methodName, @NonNull Class<?>... parameterTypes)
+            throws NoSuchMethodException {
+        final Method method =
+                this.authDefaultRequest.getClass().getDeclaredMethod(methodName, parameterTypes);
         method.setAccessible(true);
         return method;
     }
 }
-

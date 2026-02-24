@@ -1,58 +1,86 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse
- *  org.springframework.util.LinkedMultiValueMap
- *  org.springframework.util.MultiValueMap
- *  org.springframework.util.StringUtils
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.filter.login;
 
 import java.util.Map;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
+/**
+ * Utility methods for an OAuth 2.0 Authorization Response.
+ *
+ * @author Joe Grandja
+ * @since 5.1
+ * @see OAuth2AuthorizationResponse
+ */
+@SuppressWarnings("AlibabaClassNamingShouldBeCamel")
 final class Auth2AuthorizationResponseUtils {
-    private Auth2AuthorizationResponseUtils() {
-    }
+
+    private Auth2AuthorizationResponseUtils() {}
 
     static MultiValueMap<String, String> toMultiMap(Map<String, String[]> map) {
-        LinkedMultiValueMap params = new LinkedMultiValueMap(map.size());
-        map.forEach((arg_0, arg_1) -> Auth2AuthorizationResponseUtils.lambda$toMultiMap$0((MultiValueMap)params, arg_0, arg_1));
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>(map.size());
+        map.forEach(
+                (key, values) -> {
+                    for (String value : values) {
+                        params.add(key, value);
+                    }
+                });
         return params;
     }
 
     static boolean isAuthorizationResponse(MultiValueMap<String, String> request) {
-        return Auth2AuthorizationResponseUtils.isAuthorizationResponseSuccess(request) || Auth2AuthorizationResponseUtils.isAuthorizationResponseError(request);
+        return isAuthorizationResponseSuccess(request) || isAuthorizationResponseError(request);
     }
 
     static boolean isAuthorizationResponseSuccess(MultiValueMap<String, String> request) {
-        return StringUtils.hasText((String)((String)request.getFirst((Object)"code"))) && StringUtils.hasText((String)((String)request.getFirst((Object)"state")));
+        return StringUtils.hasText(request.getFirst(OAuth2ParameterNames.CODE))
+                && StringUtils.hasText(request.getFirst(OAuth2ParameterNames.STATE));
     }
 
     static boolean isAuthorizationResponseError(MultiValueMap<String, String> request) {
-        return StringUtils.hasText((String)((String)request.getFirst((Object)"error"))) && StringUtils.hasText((String)((String)request.getFirst((Object)"state")));
+        return StringUtils.hasText(request.getFirst(OAuth2ParameterNames.ERROR))
+                && StringUtils.hasText(request.getFirst(OAuth2ParameterNames.STATE));
     }
 
-    static OAuth2AuthorizationResponse convert(MultiValueMap<String, String> request, String redirectUri) {
-        String code = (String)request.getFirst((Object)"code");
-        String errorCode = (String)request.getFirst((Object)"error");
-        String state = (String)request.getFirst((Object)"state");
-        if (StringUtils.hasText((String)code)) {
-            return OAuth2AuthorizationResponse.success((String)code).redirectUri(redirectUri).state(state).build();
+    @SuppressWarnings("unused")
+    static OAuth2AuthorizationResponse convert(
+            MultiValueMap<String, String> request, String redirectUri) {
+        String code = request.getFirst(OAuth2ParameterNames.CODE);
+        String errorCode = request.getFirst(OAuth2ParameterNames.ERROR);
+        String state = request.getFirst(OAuth2ParameterNames.STATE);
+        if (StringUtils.hasText(code)) {
+            return OAuth2AuthorizationResponse.success(code)
+                    .redirectUri(redirectUri)
+                    .state(state)
+                    .build();
         }
-        String errorDescription = (String)request.getFirst((Object)"error_description");
-        String errorUri = (String)request.getFirst((Object)"error_uri");
-        return OAuth2AuthorizationResponse.error((String)errorCode).redirectUri(redirectUri).errorDescription(errorDescription).errorUri(errorUri).state(state).build();
-    }
-
-    private static /* synthetic */ void lambda$toMultiMap$0(MultiValueMap params, String key, String[] values) {
-        for (String value : values) {
-            params.add((Object)key, (Object)value);
-        }
+        String errorDescription = request.getFirst(OAuth2ParameterNames.ERROR_DESCRIPTION);
+        String errorUri = request.getFirst(OAuth2ParameterNames.ERROR_URI);
+        // @formatter:off
+        return OAuth2AuthorizationResponse.error(errorCode)
+                .redirectUri(redirectUri)
+                .errorDescription(errorDescription)
+                .errorUri(errorUri)
+                .state(state)
+                .build();
+        // @formatter:on
     }
 }
-

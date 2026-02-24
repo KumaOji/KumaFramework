@@ -1,81 +1,121 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
- *  org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.core.convert.converter.Converter
- *  org.springframework.http.MediaType
- *  org.springframework.http.converter.FormHttpMessageConverter
- *  org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
- *  org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
- *  org.springframework.security.oauth2.client.endpoint.DefaultRefreshTokenTokenResponseClient
- *  org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
- *  org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler
- *  org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
- *  org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager
- *  org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository
- *  org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter
- *  org.springframework.web.client.ResponseErrorHandler
- *  org.springframework.web.client.RestOperations
- *  org.springframework.web.client.RestTemplate
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-package com.kuma.boot.security.spring.configuration;
+
+package com.kuma.boot.security.spring.autoconfigure;
 
 import com.kuma.boot.security.spring.authentication.login.social.oauth2client.SocialDelegateClientRegistrationRepository;
 import com.kuma.boot.security.spring.authentication.login.social.oauth2client.SocialDelegateMapOAuth2AccessTokenResponseConverter;
-import com.kuma.boot.security.spring.authentication.login.social.oauth2client.SocialDelegateOAuth2RefreshTokenRequestEntityConverter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientPropertiesMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
-import org.springframework.security.oauth2.client.endpoint.DefaultRefreshTokenTokenResponseClient;
-import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
-import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-@Configuration(proxyBeanMethods=false)
+/**
+ * 兼容微信刷新token
+ *
+ * @author kuma
+ * @version 2023.07
+ * @since 2023-07-10 11:43:29
+ */
+@Configuration(proxyBeanMethods = false)
 public class OAuth2ClientManagerConfiguration {
+
+    /**
+     * 委托客户注册存储库
+     *
+     * @param properties 属性
+     * @return {@link SocialDelegateClientRegistrationRepository }
+     * @since 2023-07-10 17:14:19
+     */
     @Bean
-    public SocialDelegateClientRegistrationRepository delegateClientRegistrationRepository(OAuth2ClientProperties properties) {
-        SocialDelegateClientRegistrationRepository clientRegistrationRepository = new SocialDelegateClientRegistrationRepository();
+    public SocialDelegateClientRegistrationRepository delegateClientRegistrationRepository(
+            OAuth2ClientProperties properties) {
+        SocialDelegateClientRegistrationRepository clientRegistrationRepository =
+                new SocialDelegateClientRegistrationRepository();
         if (properties != null) {
-            Map clientRegistrations = new OAuth2ClientPropertiesMapper(properties).asClientRegistrations();
-            ArrayList registrations = new ArrayList(clientRegistrations.values());
+            Map<String, ClientRegistration> clientRegistrations =
+                    new OAuth2ClientPropertiesMapper(properties).asClientRegistrations();
+            List<ClientRegistration> registrations = new ArrayList<>(clientRegistrations.values());
             registrations.forEach(clientRegistrationRepository::addClientRegistration);
         }
         return clientRegistrationRepository;
     }
 
+    /**
+     * O auth 2 authorized client manager o auth 2 authorized client manager.
+     *
+     * @param clientRegistrationRepository the client registration repository
+     * @param authorizedClientRepository   the authorized client repository
+     * @return the o auth 2 authorized client manager
+     */
     @Bean
-    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager(ClientRegistrationRepository clientRegistrationRepository, OAuth2AuthorizedClientRepository authorizedClientRepository) {
-        DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientRepository);
-        DefaultRefreshTokenTokenResponseClient defaultRefreshTokenTokenResponseClient = new DefaultRefreshTokenTokenResponseClient();
-        defaultRefreshTokenTokenResponseClient.setRequestEntityConverter((Converter)new SocialDelegateOAuth2RefreshTokenRequestEntityConverter());
-        OAuth2AccessTokenResponseHttpMessageConverter messageConverter = new OAuth2AccessTokenResponseHttpMessageConverter();
-        messageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, new MediaType("application", "*+json")));
-        messageConverter.setAccessTokenResponseConverter((Converter)new SocialDelegateMapOAuth2AccessTokenResponseConverter());
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(), messageConverter));
-        restTemplate.setErrorHandler((ResponseErrorHandler)new OAuth2ErrorResponseErrorHandler());
-        defaultRefreshTokenTokenResponseClient.setRestOperations((RestOperations)restTemplate);
-        authorizedClientManager.setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder().authorizationCode().refreshToken(refreshTokenGrantBuilder -> refreshTokenGrantBuilder.accessTokenResponseClient((OAuth2AccessTokenResponseClient)defaultRefreshTokenTokenResponseClient)).clientCredentials().build());
+    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager(
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AuthorizedClientRepository authorizedClientRepository) {
+        DefaultOAuth2AuthorizedClientManager authorizedClientManager =
+                new DefaultOAuth2AuthorizedClientManager(
+                        clientRegistrationRepository, authorizedClientRepository);
+//        DefaultRefreshTokenTokenResponseClient defaultRefreshTokenTokenResponseClient =
+//                new DefaultRefreshTokenTokenResponseClient();
+//
+//        defaultRefreshTokenTokenResponseClient.setRequestEntityConverter(
+//                new SocialDelegateOAuth2RefreshTokenRequestEntityConverter());
+        OAuth2AccessTokenResponseHttpMessageConverter messageConverter =
+                new OAuth2AccessTokenResponseHttpMessageConverter();
+        // 微信返回的content-type 是 text-plain
+        messageConverter.setSupportedMediaTypes(
+                Arrays.asList(
+                        MediaType.APPLICATION_JSON,
+                        MediaType.TEXT_PLAIN,
+                        new MediaType("application", "*+json")));
+
+        // 兼容微信解析
+        messageConverter.setAccessTokenResponseConverter(
+                new SocialDelegateMapOAuth2AccessTokenResponseConverter());
+
+        RestTemplate restTemplate =
+                new RestTemplate(Arrays.asList(new FormHttpMessageConverter(), messageConverter));
+
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+//        defaultRefreshTokenTokenResponseClient.setRestOperations(restTemplate);
+
+//        authorizedClientManager.setAuthorizedClientProvider(
+//                OAuth2AuthorizedClientProviderBuilder.builder()
+//                        .authorizationCode()
+//                        .refreshToken(
+//                                (refreshTokenGrantBuilder) -> {
+//                                    refreshTokenGrantBuilder.accessTokenResponseClient(
+//                                            defaultRefreshTokenTokenResponseClient);
+//                                })
+//                        .clientCredentials()
+//                        .build());
         return authorizedClientManager;
     }
 }
-

@@ -1,87 +1,98 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.common.model.Result
- *  jakarta.servlet.ServletException
- *  jakarta.servlet.ServletRequest
- *  jakarta.servlet.ServletResponse
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  jakarta.servlet.http.HttpSession
- *  org.apache.commons.lang3.ObjectUtils
- *  org.apache.commons.lang3.StringUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.http.HttpStatus
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.web.DefaultRedirectStrategy
- *  org.springframework.security.web.RedirectStrategy
- *  org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
- *  org.springframework.security.web.util.UrlUtils
- *  org.springframework.util.Assert
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.response.failure;
 
-import com.kuma.boot.common.model.Result;
+import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.exception.SecurityGlobalExceptionHandler;
 import com.kuma.boot.security.spring.utils.WebUtils;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.util.Assert;
 
-public class FormLoginAuthenticationFailureHandler
-extends SimpleUrlAuthenticationFailureHandler {
-    private static final Logger log = LoggerFactory.getLogger(FormLoginAuthenticationFailureHandler.class);
+/**
+ * <p> Description : 表单登录失败处理器 </p>
+ *
+ * @author kuma
+ * @version 2023.04
+ * @since 2023-06-29 16:41:41
+ */
+public class FormLoginAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(FormLoginAuthenticationFailureHandler.class);
+
     private String defaultFailureUrl;
     private boolean forwardToDestination = false;
     private boolean allowSessionCreation = true;
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-    public FormLoginAuthenticationFailureHandler() {
-    }
+    public FormLoginAuthenticationFailureHandler() {}
 
     public FormLoginAuthenticationFailureHandler(String defaultFailureUrl) {
-        this.setDefaultFailureUrl(defaultFailureUrl);
+        setDefaultFailureUrl(defaultFailureUrl);
     }
 
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
+    @Override
+    public void onAuthenticationFailure(
+            HttpServletRequest request, HttpServletResponse response, AuthenticationException e)
+            throws IOException, ServletException {
         if (this.defaultFailureUrl == null) {
-            if (this.logger.isTraceEnabled()) {
-                this.logger.trace((Object)"Sending 401 Unauthorized error since no failure URL is set");
+            if (logger.isTraceEnabled()) {
+                logger.trace("Sending 401 Unauthorized error since no failure URL is set");
             } else {
-                this.logger.debug((Object)"Sending 401 Unauthorized error");
+                logger.debug("Sending 401 Unauthorized error");
             }
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+            response.sendError(
+                    HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
             return;
         }
-        String errorMessage = "\u8bf7\u5237\u65b0\u91cd\u8bd5\uff01";
-        Result<String> result = SecurityGlobalExceptionHandler.resolveSecurityException((Exception)((Object)e), request.getRequestURI());
-        if (ObjectUtils.isNotEmpty(result) && StringUtils.isNotBlank((CharSequence)result.getMessage())) {
+
+        String errorMessage = "请刷新重试！";
+
+        Result<String> result =
+                SecurityGlobalExceptionHandler.resolveSecurityException(e, request.getRequestURI());
+        if (ObjectUtils.isNotEmpty(result) && StringUtils.isNotBlank(result.getMessage())) {
             errorMessage = result.getMessage();
         } else {
-            errorMessage = ((Object)((Object)e)).getClass().getSimpleName();
-            log.info("Form Login Authentication Failure Handler,  Can not find the exception name [{}] in dictionary, please do optimize ", (Object)errorMessage);
+            errorMessage = e.getClass().getSimpleName();
+            log.info(
+                    "Form Login Authentication Failure Handler,  Can not find the exception name [{}] in dictionary, please do optimize ",
+                    errorMessage);
         }
-        this.saveException(request, errorMessage);
+
+        saveException(request, errorMessage);
+
         if (this.isUseForward()) {
             log.info("Forwarding to " + this.defaultFailureUrl);
-            request.getRequestDispatcher(this.defaultFailureUrl).forward((ServletRequest)request, (ServletResponse)response);
+            request.getRequestDispatcher(this.defaultFailureUrl).forward(request, response);
         } else {
             this.redirectStrategy.sendRedirect(request, response, this.defaultFailureUrl);
         }
@@ -89,42 +100,62 @@ extends SimpleUrlAuthenticationFailureHandler {
 
     protected final void saveException(HttpServletRequest request, String message) {
         if (this.isUseForward()) {
-            request.setAttribute("SPRING_SECURITY_LAST_EXCEPTION", (Object)message);
+            request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, message);
             return;
         }
         HttpSession session = WebUtils.getSession(request);
         if (session != null || this.isAllowSessionCreation()) {
-            request.getSession().setAttribute("SPRING_SECURITY_LAST_EXCEPTION", (Object)message);
+            request.getSession().setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, message);
         }
     }
 
+    /**
+     * The URL which will be used as the failure destination.
+     *
+     * @param defaultFailureUrl the failure URL, for example "/loginFailed.jsp".
+     */
+    @Override
     public void setDefaultFailureUrl(String defaultFailureUrl) {
-        Assert.isTrue((boolean)UrlUtils.isValidRedirectUrl((String)defaultFailureUrl), () -> "'" + defaultFailureUrl + "' is not a valid redirect URL");
+        Assert.isTrue(
+                UrlUtils.isValidRedirectUrl(defaultFailureUrl),
+                () -> "'" + defaultFailureUrl + "' is not a valid redirect URL");
         this.defaultFailureUrl = defaultFailureUrl;
     }
 
+    @Override
     protected boolean isUseForward() {
         return this.forwardToDestination;
     }
 
+    /**
+     * If set to <tt>true</tt>, performs a forward to the failure destination URL instead of a
+     * redirect. Defaults to <tt>false</tt>.
+     */
+    @Override
     public void setUseForward(boolean forwardToDestination) {
         this.forwardToDestination = forwardToDestination;
     }
 
+    /**
+     * Allows overriding of the behaviour when redirecting to a target URL.
+     */
+    @Override
     public void setRedirectStrategy(RedirectStrategy redirectStrategy) {
         this.redirectStrategy = redirectStrategy;
     }
 
+    @Override
     protected RedirectStrategy getRedirectStrategy() {
         return this.redirectStrategy;
     }
 
+    @Override
     protected boolean isAllowSessionCreation() {
         return this.allowSessionCreation;
     }
 
+    @Override
     public void setAllowSessionCreation(boolean allowSessionCreation) {
         this.allowSessionCreation = allowSessionCreation;
     }
 }
-

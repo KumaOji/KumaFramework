@@ -1,25 +1,36 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.client;
 
 public class WechatMiniAppUserInfo {
-    private String openId;
-    private String sessionKey;
-    private String avatarUrl;
-    private String city;
-    private String country;
-    private String gender;
-    private String language;
-    private String nickName;
-    private String realName;
-    private String province;
-    private Integer stuId;
+    public WechatMiniAppUserInfo() {}
 
-    public WechatMiniAppUserInfo() {
-    }
-
-    public WechatMiniAppUserInfo(String openId, String sessionKey, String avatarUrl, String city, String country, String gender, String language, String nickName, String realName, String province, Integer stuId) {
+    public WechatMiniAppUserInfo(
+            String openId,
+            String sessionKey,
+            String avatarUrl,
+            String city,
+            String country,
+            String gender,
+            String language,
+            String nickName,
+            String realName,
+            String province,
+            Integer stuId) {
         this.openId = openId;
         this.sessionKey = sessionKey;
         this.avatarUrl = avatarUrl;
@@ -33,8 +44,30 @@ public class WechatMiniAppUserInfo {
         this.stuId = stuId;
     }
 
+    // OPEN_id
+    private String openId;
+    // 会话密钥
+    private String sessionKey;
+    // 头像路径
+    private String avatarUrl;
+    // 城市
+    private String city;
+    // 国家
+    private String country;
+    // 性别
+    private String gender;
+    // 语言
+    private String language;
+    // 昵称
+    private String nickName;
+    // 备注名或真实名
+    private String realName;
+    // 省份
+    private String province;
+    private Integer stuId;
+
     public String getOpenId() {
-        return this.openId;
+        return openId;
     }
 
     public void setOpenId(String openId) {
@@ -42,7 +75,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getSessionKey() {
-        return this.sessionKey;
+        return sessionKey;
     }
 
     public void setSessionKey(String sessionKey) {
@@ -50,7 +83,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getAvatarUrl() {
-        return this.avatarUrl;
+        return avatarUrl;
     }
 
     public void setAvatarUrl(String avatarUrl) {
@@ -58,7 +91,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getCity() {
-        return this.city;
+        return city;
     }
 
     public void setCity(String city) {
@@ -66,7 +99,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getCountry() {
-        return this.country;
+        return country;
     }
 
     public void setCountry(String country) {
@@ -74,7 +107,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getGender() {
-        return this.gender;
+        return gender;
     }
 
     public void setGender(String gender) {
@@ -82,7 +115,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getLanguage() {
-        return this.language;
+        return language;
     }
 
     public void setLanguage(String language) {
@@ -90,7 +123,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getNickName() {
-        return this.nickName;
+        return nickName;
     }
 
     public void setNickName(String nickName) {
@@ -98,7 +131,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getRealName() {
-        return this.realName;
+        return realName;
     }
 
     public void setRealName(String realName) {
@@ -106,7 +139,7 @@ public class WechatMiniAppUserInfo {
     }
 
     public String getProvince() {
-        return this.province;
+        return province;
     }
 
     public void setProvince(String province) {
@@ -114,11 +147,10 @@ public class WechatMiniAppUserInfo {
     }
 
     public Integer getStuId() {
-        return this.stuId;
+        return stuId;
     }
 
     public void setStuId(Integer stuId) {
         this.stuId = stuId;
     }
 }
-

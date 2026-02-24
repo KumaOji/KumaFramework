@@ -1,33 +1,50 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.dromara.hutool.core.map.MapUtil
- *  org.dromara.hutool.core.text.StrUtil
- *  org.springframework.stereotype.Component
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.compliance.processor.loginrisk;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.dromara.hutool.core.map.MapUtil;
-import org.dromara.hutool.core.text.StrUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.stereotype.Component;
 
+/**
+ * 登录ip风险实现
+ */
 @Component
-public class IPRiskHandle
-extends AbstractLoginHandle {
+public class IPRiskHandle extends com.kuma.boot.security.spring.authentication.compliance.processor.loginrisk.AbstractLoginHandle {
+
     @Override
-    public void filterRisk(List<RiskRule> filter, Map<Integer, RiskRule> ruleMap, UserAccount account) {
-        List<String> acceptIpList;
-        RiskRule ipRisk;
-        if (MapUtil.isNotEmpty(ruleMap) && null != (ipRisk = ruleMap.get(3)) && StrUtil.isNotEmpty((CharSequence)ipRisk.getAcceptIp()) && !(acceptIpList = Arrays.asList(ipRisk.getAcceptIp().split(","))).contains(account.getIp())) {
-            filter.add(ipRisk);
+    public void filterRisk(
+            List<RiskRule> filter, Map<Integer, RiskRule> ruleMap, UserAccount account) {
+        if (MapUtil.isNotEmpty(ruleMap)) {
+            RiskRule ipRisk = ruleMap.get(3);
+            // 判断是否配置登录ip白名单
+            if (null != ipRisk && StrUtil.isNotEmpty(ipRisk.getAcceptIp())) {
+                List<String> acceptIpList = Arrays.asList(ipRisk.getAcceptIp().split(","));
+                // 当前登录ip是否在白名单内，如果不在，则添加到filter中
+                if (!acceptIpList.contains(account.getIp())) {
+                    filter.add(ipRisk);
+                }
+            }
         }
         if (this.nextHandle != null) {
             this.nextHandle.filterRisk(filter, ruleMap, account);
         }
     }
 }
-

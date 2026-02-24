@@ -1,22 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.common.JsonUtils
- *  org.apache.commons.collections4.CollectionUtils
- *  org.apache.commons.lang3.ObjectUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.context.ApplicationListener
- *  org.springframework.stereotype.Component
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.metadata.listener;
 
-import com.kuma.boot.common.utils.common.JsonUtils;
+import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.security.spring.event.RemoteRequestMappingGatherEvent;
 import com.kuma.boot.security.spring.event.domain.RequestMapping;
 import com.kuma.boot.security.spring.event.metadata.processor.RequestMappingStoreProcessor;
-import java.util.Collection;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -25,24 +28,37 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * <p>SecurityMetadata远程变更事件监听 </p>
+ *
+ */
 @Component
 public class RemoteRequestMappingGatherListener
-implements ApplicationListener<RemoteRequestMappingGatherEvent> {
-    private static final Logger log = LoggerFactory.getLogger(RemoteRequestMappingGatherListener.class);
+        implements ApplicationListener<RemoteRequestMappingGatherEvent> {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(RemoteRequestMappingGatherListener.class);
+
     private final RequestMappingStoreProcessor requestMappingStoreProcessor;
 
-    public RemoteRequestMappingGatherListener(RequestMappingStoreProcessor requestMappingStoreProcessor) {
+    public RemoteRequestMappingGatherListener(
+            RequestMappingStoreProcessor requestMappingStoreProcessor) {
         this.requestMappingStoreProcessor = requestMappingStoreProcessor;
     }
 
+    @Override
     public void onApplicationEvent(RemoteRequestMappingGatherEvent event) {
-        List requestMappings;
+
         log.info(" Request mapping gather REMOTE listener, response event!");
+
         String requestMapping = event.getData();
-        log.debug(" Fetch data [{}]", (Object)requestMapping);
-        if (ObjectUtils.isNotEmpty((Object)requestMapping) && CollectionUtils.isNotEmpty((Collection)(requestMappings = JsonUtils.toList((String)requestMapping, RequestMapping.class)))) {
-            this.requestMappingStoreProcessor.postProcess(requestMappings);
+        log.debug(" Fetch data [{}]", requestMapping);
+        if (ObjectUtils.isNotEmpty(requestMapping)) {
+            List<RequestMapping> requestMappings =
+                    JacksonUtils.toList(requestMapping, RequestMapping.class);
+            if (CollectionUtils.isNotEmpty(requestMappings)) {
+                requestMappingStoreProcessor.postProcess(requestMappings);
+            }
         }
     }
 }
-

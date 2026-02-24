@@ -1,13 +1,30 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.mfa.totp;
 
+/**
+ * @author: ReLive27
+ * @since: 2023/1/12 19:27
+ */
 public interface MfaAuthenticationManager {
-    public String generateSecret();
 
-    public boolean validCode(String var1, String var2);
+    String generateSecret();
 
-    public String getUriForImage(String var1, String var2, String var3) throws Exception;
+    boolean validCode(String secret, String code);
+
+    String getUriForImage(String label, String secret, String issuer) throws Exception;
 }
-

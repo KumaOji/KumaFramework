@@ -1,27 +1,63 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.core.jwt.model;
 
 import java.time.LocalDateTime;
 
+/** 认证信息 */
 public class AuthInfo {
+
+    // 令牌
     private String token;
+    // 令牌类型
     private String tokenType;
+    // 刷新令牌
     private String refreshToken;
+    // 用户名
     private String name;
+    // 账号名
     private String account;
+    // 头像
     private String avatar;
+    // 工作描述
     private String workDescribe;
+    // 用户id
     private Long userId;
+    // 过期时间（秒）
     private long expire;
+    // 到期时间
     private LocalDateTime expiration;
+    // 有效期
     private Long expireMillis;
 
-    public AuthInfo() {
-    }
+    public AuthInfo() {}
 
-    public AuthInfo(String token, String tokenType, String refreshToken, String name, String account, String avatar, String workDescribe, Long userId, long expire, LocalDateTime expiration, Long expireMillis) {
+    public AuthInfo(
+            String token,
+            String tokenType,
+            String refreshToken,
+            String name,
+            String account,
+            String avatar,
+            String workDescribe,
+            Long userId,
+            long expire,
+            LocalDateTime expiration,
+            Long expireMillis) {
         this.token = token;
         this.tokenType = tokenType;
         this.refreshToken = refreshToken;
@@ -36,7 +72,7 @@ public class AuthInfo {
     }
 
     public String getToken() {
-        return this.token;
+        return token;
     }
 
     public AuthInfo setToken(String token) {
@@ -45,7 +81,7 @@ public class AuthInfo {
     }
 
     public String getTokenType() {
-        return this.tokenType;
+        return tokenType;
     }
 
     public AuthInfo setTokenType(String tokenType) {
@@ -54,7 +90,7 @@ public class AuthInfo {
     }
 
     public String getRefreshToken() {
-        return this.refreshToken;
+        return refreshToken;
     }
 
     public AuthInfo setRefreshToken(String refreshToken) {
@@ -63,7 +99,7 @@ public class AuthInfo {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public AuthInfo setName(String name) {
@@ -72,7 +108,7 @@ public class AuthInfo {
     }
 
     public String getAccount() {
-        return this.account;
+        return account;
     }
 
     public AuthInfo setAccount(String account) {
@@ -81,7 +117,7 @@ public class AuthInfo {
     }
 
     public String getAvatar() {
-        return this.avatar;
+        return avatar;
     }
 
     public AuthInfo setAvatar(String avatar) {
@@ -90,7 +126,7 @@ public class AuthInfo {
     }
 
     public String getWorkDescribe() {
-        return this.workDescribe;
+        return workDescribe;
     }
 
     public AuthInfo setWorkDescribe(String workDescribe) {
@@ -99,7 +135,7 @@ public class AuthInfo {
     }
 
     public Long getUserId() {
-        return this.userId;
+        return userId;
     }
 
     public AuthInfo setUserId(Long userId) {
@@ -108,7 +144,7 @@ public class AuthInfo {
     }
 
     public long getExpire() {
-        return this.expire;
+        return expire;
     }
 
     public AuthInfo setExpire(long expire) {
@@ -117,7 +153,7 @@ public class AuthInfo {
     }
 
     public LocalDateTime getExpiration() {
-        return this.expiration;
+        return expiration;
     }
 
     public AuthInfo setExpiration(LocalDateTime expiration) {
@@ -126,7 +162,7 @@ public class AuthInfo {
     }
 
     public Long getExpireMillis() {
-        return this.expireMillis;
+        return expireMillis;
     }
 
     public AuthInfo setExpireMillis(Long expireMillis) {
@@ -134,4 +170,3 @@ public class AuthInfo {
         return this;
     }
 }
-

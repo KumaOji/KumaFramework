@@ -1,24 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.totp.code.CodeGenerator
- *  com.kuma.boot.totp.code.CodeVerifier
- *  com.kuma.boot.totp.code.DefaultCodeGenerator
- *  com.kuma.boot.totp.code.DefaultCodeVerifier
- *  com.kuma.boot.totp.code.HashingAlgorithm
- *  com.kuma.boot.totp.exceptions.QrGenerationException
- *  com.kuma.boot.totp.qr.QrData
- *  com.kuma.boot.totp.qr.QrDataFactory
- *  com.kuma.boot.totp.qr.QrGenerator
- *  com.kuma.boot.totp.qr.ZxingPngQrGenerator
- *  com.kuma.boot.totp.secret.DefaultSecretGenerator
- *  com.kuma.boot.totp.secret.SecretGenerator
- *  com.kuma.boot.totp.time.SystemTimeProvider
- *  com.kuma.boot.totp.time.TimeProvider
- *  com.kuma.boot.totp.util.Utils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.mfa.totp;
+
+import static com.kuma.boot.totp.util.Utils.getDataUriForImage;
 
 import com.kuma.boot.totp.code.CodeGenerator;
 import com.kuma.boot.totp.code.CodeVerifier;
@@ -34,22 +32,30 @@ import com.kuma.boot.totp.secret.DefaultSecretGenerator;
 import com.kuma.boot.totp.secret.SecretGenerator;
 import com.kuma.boot.totp.time.SystemTimeProvider;
 import com.kuma.boot.totp.time.TimeProvider;
-import com.kuma.boot.totp.util.Utils;
 
-public class DefaultTotpManager
-implements MfaAuthenticationManager {
+/**
+ * @author: ReLive27
+ * @since: 2023/1/12 19:40
+ */
+public class DefaultTotpManager implements MfaAuthenticationManager {
     private static final int DEFAULT_SECRET_LENGTH = 64;
     private static final int DEFAULT_CODE_LENGTH = 6;
     private static final int DEFAULT_TIME_PERIOD = 30;
-    private final QrDataFactory qrDataFactory = new QrDataFactory(HashingAlgorithm.SHA256, 6, 30);
-    private final QrGenerator qrGenerator = new ZxingPngQrGenerator();
-    private final SecretGenerator secretGenerator = new DefaultSecretGenerator(64);
+    private final QrDataFactory qrDataFactory;
+    private final QrGenerator qrGenerator;
+    private final SecretGenerator secretGenerator;
     private final CodeVerifier verifier;
 
     public DefaultTotpManager() {
-        SystemTimeProvider timeProvider = new SystemTimeProvider();
-        DefaultCodeGenerator codeGenerator = new DefaultCodeGenerator(HashingAlgorithm.SHA256, 6);
-        this.verifier = new DefaultCodeVerifier((CodeGenerator)codeGenerator, (TimeProvider)timeProvider);
+        this.qrDataFactory =
+                new QrDataFactory(
+                        HashingAlgorithm.SHA256, DEFAULT_CODE_LENGTH, DEFAULT_TIME_PERIOD);
+        this.qrGenerator = new ZxingPngQrGenerator();
+        this.secretGenerator = new DefaultSecretGenerator(DEFAULT_SECRET_LENGTH);
+        TimeProvider timeProvider = new SystemTimeProvider();
+        CodeGenerator codeGenerator =
+                new DefaultCodeGenerator(HashingAlgorithm.SHA256, DEFAULT_CODE_LENGTH);
+        this.verifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
     }
 
     @Override
@@ -63,10 +69,14 @@ implements MfaAuthenticationManager {
     }
 
     @Override
-    public String getUriForImage(String label, String secret, String issuer) throws QrGenerationException {
-        QrData data = this.qrDataFactory.newBuilder().label(label).secret(secret).issuer(issuer).build();
-        String qrCodeImage = Utils.getDataUriForImage((byte[])this.qrGenerator.generate(data), (String)this.qrGenerator.getImageMimeType());
+    public String getUriForImage(String label, String secret, String issuer)
+            throws QrGenerationException {
+        QrData data = qrDataFactory.newBuilder().label(label).secret(secret).issuer(issuer).build();
+
+        // Generate the QR code image data as a base64 string which
+        // can be used in an <img> tag:
+        String qrCodeImage =
+                getDataUriForImage(qrGenerator.generate(data), qrGenerator.getImageMimeType());
         return qrCodeImage;
     }
 }
-

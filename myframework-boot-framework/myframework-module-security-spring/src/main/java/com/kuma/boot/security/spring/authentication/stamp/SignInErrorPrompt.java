@@ -1,27 +1,40 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  io.swagger.v3.oas.annotations.media.Schema
- *  jakarta.validation.constraints.NotBlank
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.stamp;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
-@Schema(title="\u767b\u5f55\u9519\u8bef\u63d0\u793a\u4fe1\u606f")
+/**
+ * <p>登录提示信息 </p>
+ *
+ */
+@Schema(title = "登录错误提示信息")
 public class SignInErrorPrompt {
-    @NotBlank(message="\u767b\u5f55\u7528\u6237\u540d\u4e0d\u80fd\u4e3a\u7a7a")
-    @Schema(name="\u767b\u5f55\u7528\u6237\u540d", title="\u5fc5\u987b\u662f\u6709\u6548\u7684\u7528\u6237\u540d")
-    private @NotBlank(message="\u767b\u5f55\u7528\u6237\u540d\u4e0d\u80fd\u4e3a\u7a7a") String username;
+
+    @NotBlank(message = "登录用户名不能为空")
+    @Schema(name = "登录用户名", title = "必须是有效的用户名")
+    private String username;
 
     public String getUsername() {
-        return this.username;
+        return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
     }
 }
-

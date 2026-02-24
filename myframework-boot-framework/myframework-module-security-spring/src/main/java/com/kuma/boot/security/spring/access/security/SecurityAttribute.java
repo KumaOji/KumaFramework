@@ -1,18 +1,15 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.security.spring.access.security;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import java.io.Serializable;
 
-public class SecurityAttribute
-implements Serializable {
+public class SecurityAttribute implements Serializable {
     private String attributeId;
     private String attributeCode;
     private String attributeName;
@@ -89,20 +86,19 @@ implements Serializable {
     public boolean equals(Object o) {
         if (this == o) {
             return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            SecurityAttribute that = (SecurityAttribute)o;
+            return Objects.equal(this.attributeId, that.attributeId);
+        } else {
             return false;
         }
-        SecurityAttribute that = (SecurityAttribute)o;
-        return Objects.equal((Object)this.attributeId, (Object)that.attributeId);
     }
 
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.attributeId});
+        return Objects.hashCode(new Object[]{this.attributeId});
     }
 
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("attributeId", (Object)this.attributeId).add("attributeCode", (Object)this.attributeCode).add("attributeName", (Object)this.attributeName).add("authorities", (Object)this.webExpression).add("permissions", (Object)this.permissions).add("url", (Object)this.url).add("requestMethod", (Object)this.requestMethod).add("serviceId", (Object)this.serviceId).toString();
+        return MoreObjects.toStringHelper(this).add("attributeId", this.attributeId).add("attributeCode", this.attributeCode).add("attributeName", this.attributeName).add("authorities", this.webExpression).add("permissions", this.permissions).add("url", this.url).add("requestMethod", this.requestMethod).add("serviceId", this.serviceId).toString();
     }
 }
-

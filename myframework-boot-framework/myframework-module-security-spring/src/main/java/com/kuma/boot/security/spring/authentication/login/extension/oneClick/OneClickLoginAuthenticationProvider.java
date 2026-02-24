@@ -1,25 +1,26 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.context.MessageSource
- *  org.springframework.context.MessageSourceAware
- *  org.springframework.context.support.MessageSourceAccessor
- *  org.springframework.security.authentication.AuthenticationProvider
- *  org.springframework.security.core.Authentication
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.core.SpringSecurityMessageSource
- *  org.springframework.security.core.userdetails.UserDetails
- *  org.springframework.security.core.userdetails.UsernameNotFoundException
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.oneClick;
+
+import static java.util.Objects.nonNull;
 
 import com.kuma.boot.security.spring.authentication.login.extension.oneClick.service.OneClickLoginService;
 import com.kuma.boot.security.spring.authentication.login.extension.oneClick.service.OneClickUserDetailsService;
 import java.util.Map;
-import java.util.Objects;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
@@ -32,57 +33,84 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.Assert;
 
+/**
+ * 基于阿里云app手机号码一键登录
+ */
 public class OneClickLoginAuthenticationProvider
-implements AuthenticationProvider,
-InitializingBean,
-MessageSourceAware {
+        implements AuthenticationProvider, InitializingBean, MessageSourceAware {
+
     private MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+
     private final OneClickUserDetailsService oneClickUserDetailsService;
     private final OneClickLoginService oneClickLoginService;
 
-    public OneClickLoginAuthenticationProvider(OneClickUserDetailsService oneClickUserDetailsService, OneClickLoginService oneClickLoginService) {
+    public OneClickLoginAuthenticationProvider(
+            OneClickUserDetailsService oneClickUserDetailsService,
+            OneClickLoginService oneClickLoginService) {
         this.oneClickUserDetailsService = oneClickUserDetailsService;
         this.oneClickLoginService = oneClickLoginService;
     }
 
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Map<String, String> otherParamMap;
-        UserDetails user;
-        Assert.isInstanceOf(OneClickLoginAuthenticationToken.class, (Object)authentication, () -> this.messages.getMessage("AccountVerificationAuthenticationProvider.onlySupports", "Only AccountVerificationAuthenticationProvider is supported"));
-        if (!this.supports(authentication.getClass())) {
+    @Override
+    public Authentication authenticate(Authentication authentication)
+            throws AuthenticationException {
+        Assert.isInstanceOf(
+                OneClickLoginAuthenticationToken.class,
+                authentication,
+                () ->
+                        messages.getMessage(
+                                "AccountVerificationAuthenticationProvider.onlySupports",
+                                "Only AccountVerificationAuthenticationProvider is supported"));
+
+        if (!supports(authentication.getClass())) {
             return null;
         }
-        OneClickLoginAuthenticationToken authenticationToken = (OneClickLoginAuthenticationToken)authentication;
+        OneClickLoginAuthenticationToken authenticationToken =
+                (OneClickLoginAuthenticationToken) authentication;
+
         if (authentication.isAuthenticated()) {
             return authentication;
         }
+
+        UserDetails user;
         try {
-            user = this.oneClickUserDetailsService.loadUserByOneClick((String)authenticationToken.getPrincipal());
-        }
-        catch (UsernameNotFoundException e) {
+            user =
+                    this.oneClickUserDetailsService.loadUserByOneClick(
+                            (String) authenticationToken.getPrincipal());
+        } catch (UsernameNotFoundException e) {
             user = null;
         }
+
+        Map<String, String> otherParamMap;
         if (user == null) {
-            user = this.oneClickUserDetailsService.registerUser((String)authenticationToken.getPrincipal());
+            user =
+                    this.oneClickUserDetailsService.registerUser(
+                            (String) authenticationToken.getPrincipal());
         }
-        if (Objects.nonNull(otherParamMap = authenticationToken.getOtherParamMap()) && !otherParamMap.isEmpty()) {
+
+        // 一键登录的其他参数处理
+        otherParamMap = authenticationToken.getOtherParamMap();
+        if (nonNull(otherParamMap) && !otherParamMap.isEmpty()) {
             this.oneClickLoginService.otherParamsHandler(user, otherParamMap);
         }
-        OneClickLoginAuthenticationToken authenticationResult = new OneClickLoginAuthenticationToken(user, otherParamMap, user.getAuthorities());
+        OneClickLoginAuthenticationToken authenticationResult =
+                new OneClickLoginAuthenticationToken(user, otherParamMap, user.getAuthorities());
         authenticationResult.setDetails(authenticationToken.getDetails());
         return authenticationResult;
     }
 
+    @Override
     public boolean supports(Class<?> authentication) {
         return OneClickLoginAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull((Object)this.oneClickUserDetailsService, (String)"oneClickUserDetailsService must not be null");
+        Assert.notNull(oneClickUserDetailsService, "oneClickUserDetailsService must not be null");
     }
 
+    @Override
     public void setMessageSource(MessageSource messageSource) {
         this.messages = new MessageSourceAccessor(messageSource);
     }
 }
-

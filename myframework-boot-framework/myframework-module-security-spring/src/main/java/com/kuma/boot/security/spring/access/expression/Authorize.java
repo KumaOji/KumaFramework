@@ -1,10 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.intellij.lang.annotations.Language
- *  org.springframework.security.access.prepost.PreAuthorize
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.security.spring.access.expression;
 
 import java.lang.annotation.Documented;
@@ -16,17 +14,16 @@ import java.lang.annotation.Target;
 import org.intellij.lang.annotations.Language;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-@Target(value={ElementType.METHOD, ElementType.TYPE})
-@Retention(value=RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@PreAuthorize(value="@authorizeCheck.checkAuthority(#root)")
+@PreAuthorize("@authorizeCheck.checkAuthority(#root)")
 public @interface Authorize {
-    public String[] value();
+    String[] value();
 
-    @Language(value="SpEL")
-    public String tenantId() default "";
+    @Language("SpEL")
+    String tenantId() default "";
 
-    public boolean anyMatch() default true;
+    boolean anyMatch() default true;
 }
-

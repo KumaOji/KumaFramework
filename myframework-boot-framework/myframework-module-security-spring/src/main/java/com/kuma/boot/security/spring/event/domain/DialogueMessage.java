@@ -1,37 +1,61 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  io.swagger.v3.oas.annotations.media.Schema
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.domain;
 
 import com.google.common.base.MoreObjects;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * <p>对话消息传递对象
+ *
+ * @author : gengwei.zheng
+ * @since : 2023/3/11 18:38
+ */
 public class DialogueMessage {
-    @Schema(name="\u5bf9\u8bdd\u8be6\u60c5ID")
+
+    @Schema(name = "对话详情ID")
     private String detailId;
-    @Schema(name="\u63a5\u6536\u4ebaID")
+
+    @Schema(name = "接收人ID")
     private String receiverId;
-    @Schema(name="\u63a5\u6536\u4eba\u540d\u79f0", title="\u5197\u4f59\u4fe1\u606f\uff0c\u589e\u52a0\u8be5\u5b57\u6bb5\u51cf\u5c11\u91cd\u590d\u67e5\u8be2")
+
+    @Schema(name = "接收人名称", title = "冗余信息，增加该字段减少重复查询")
     private String receiverName;
-    @Schema(name="\u53d1\u9001\u4eba\u5934\u50cf")
+
+    @Schema(name = "发送人头像")
     private String receiverAvatar;
-    @Schema(name="\u516c\u544a\u5185\u5bb9")
+
+    @Schema(name = "公告内容")
     private String content;
-    @Schema(name="\u5bf9\u8bddID")
+
+    @Schema(name = "对话ID")
     private String dialogueId;
-    @Schema(name="\u53d1\u9001\u4ebaID")
+
+    @Schema(name = "发送人ID")
     private String senderId;
-    @Schema(name="\u53d1\u9001\u4eba\u540d\u79f0", title="\u5197\u4f59\u4fe1\u606f\uff0c\u589e\u52a0\u8be5\u5b57\u6bb5\u51cf\u5c11\u91cd\u590d\u67e5\u8be2")
+
+    @Schema(name = "发送人名称", title = "冗余信息，增加该字段减少重复查询")
     private String senderName;
-    @Schema(name="\u53d1\u9001\u4eba\u5934\u50cf")
+
+    @Schema(name = "发送人头像")
     private String senderAvatar;
 
     public String getDetailId() {
-        return this.detailId;
+        return detailId;
     }
 
     public void setDetailId(String detailId) {
@@ -39,7 +63,7 @@ public class DialogueMessage {
     }
 
     public String getReceiverId() {
-        return this.receiverId;
+        return receiverId;
     }
 
     public void setReceiverId(String receiverId) {
@@ -47,7 +71,7 @@ public class DialogueMessage {
     }
 
     public String getReceiverName() {
-        return this.receiverName;
+        return receiverName;
     }
 
     public void setReceiverName(String receiverName) {
@@ -55,7 +79,7 @@ public class DialogueMessage {
     }
 
     public String getReceiverAvatar() {
-        return this.receiverAvatar;
+        return receiverAvatar;
     }
 
     public void setReceiverAvatar(String receiverAvatar) {
@@ -63,7 +87,7 @@ public class DialogueMessage {
     }
 
     public String getContent() {
-        return this.content;
+        return content;
     }
 
     public void setContent(String content) {
@@ -71,7 +95,7 @@ public class DialogueMessage {
     }
 
     public String getDialogueId() {
-        return this.dialogueId;
+        return dialogueId;
     }
 
     public void setDialogueId(String dialogueId) {
@@ -79,7 +103,7 @@ public class DialogueMessage {
     }
 
     public String getSenderId() {
-        return this.senderId;
+        return senderId;
     }
 
     public void setSenderId(String senderId) {
@@ -87,7 +111,7 @@ public class DialogueMessage {
     }
 
     public String getSenderName() {
-        return this.senderName;
+        return senderName;
     }
 
     public void setSenderName(String senderName) {
@@ -95,15 +119,25 @@ public class DialogueMessage {
     }
 
     public String getSenderAvatar() {
-        return this.senderAvatar;
+        return senderAvatar;
     }
 
     public void setSenderAvatar(String senderAvatar) {
         this.senderAvatar = senderAvatar;
     }
 
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("detailId", (Object)this.detailId).add("receiverId", (Object)this.receiverId).add("receiverName", (Object)this.receiverName).add("receiverAvatar", (Object)this.receiverAvatar).add("content", (Object)this.content).add("dialogueId", (Object)this.dialogueId).add("senderId", (Object)this.senderId).add("senderName", (Object)this.senderName).add("senderAvatar", (Object)this.senderAvatar).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("detailId", detailId)
+                .add("receiverId", receiverId)
+                .add("receiverName", receiverName)
+                .add("receiverAvatar", receiverAvatar)
+                .add("content", content)
+                .add("dialogueId", dialogueId)
+                .add("senderId", senderId)
+                .add("senderName", senderName)
+                .add("senderAvatar", senderAvatar)
+                .toString();
     }
 }
-

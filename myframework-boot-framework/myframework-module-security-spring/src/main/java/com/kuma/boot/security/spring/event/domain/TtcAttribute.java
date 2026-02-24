@@ -1,11 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- *  io.swagger.v3.oas.annotations.media.Schema
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.domain;
 
 import com.google.common.base.MoreObjects;
@@ -14,29 +22,42 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.HashSet;
 import java.util.Set;
 
-@Schema(title="\u7cfb\u7edf\u5b89\u5168\u5c5e\u6027\u6570\u636e")
-public class TtcAttribute {
-    @Schema(title="\u5143\u6570\u636eID")
+/**
+ * <p>系统安全属性实体 </p>
+ *
+ */
+@Schema(title = "系统安全属性数据")
+public class KmcAttribute {
+
+    @Schema(title = "元数据ID")
     private String attributeId;
-    @Schema(title="\u9ed8\u8ba4\u6743\u9650\u4ee3\u7801")
+
+    @Schema(title = "默认权限代码")
     private String attributeCode;
-    @Schema(name="\u8bf7\u6c42\u65b9\u6cd5")
+
+    @Schema(name = "请求方法")
     private String requestMethod;
-    @Schema(name="\u670d\u52a1ID")
+
+    @Schema(name = "服务ID")
     private String serviceId;
-    @Schema(name="\u63a5\u53e3\u6240\u5728\u7c7b")
+
+    @Schema(name = "接口所在类")
     private String className;
-    @Schema(name="\u63a5\u53e3\u5bf9\u5e94\u65b9\u6cd5")
+
+    @Schema(name = "接口对应方法")
     private String methodName;
-    @Schema(name="\u8bf7\u6c42URL")
+
+    @Schema(name = "请求URL")
     private String url;
-    @Schema(title="\u8868\u8fbe\u5f0f", description="Security\u8868\u8fbe\u5f0f\u5b57\u7b26\u4e32\uff0c\u901a\u8fc7\u8be5\u503c\u8bbe\u7f6e\u52a8\u6001\u6743\u9650")
+
+    @Schema(title = "表达式", description = "Security表达式字符串，通过该值设置动态权限")
     private String webExpression;
-    @Schema(name="\u5c5e\u6027\u5bf9\u5e94\u6743\u9650", title="\u6839\u636e\u5c5e\u6027\u5173\u8054\u6743\u9650\u6570\u636e")
-    private Set<TtcPermission> permissions = new HashSet<TtcPermission>();
+
+    @Schema(name = "属性对应权限", title = "根据属性关联权限数据")
+    private Set<KmcPermission> permissions = new HashSet<>();
 
     public String getAttributeId() {
-        return this.attributeId;
+        return attributeId;
     }
 
     public void setAttributeId(String attributeId) {
@@ -44,7 +65,7 @@ public class TtcAttribute {
     }
 
     public String getAttributeCode() {
-        return this.attributeCode;
+        return attributeCode;
     }
 
     public void setAttributeCode(String attributeCode) {
@@ -52,7 +73,7 @@ public class TtcAttribute {
     }
 
     public String getRequestMethod() {
-        return this.requestMethod;
+        return requestMethod;
     }
 
     public void setRequestMethod(String requestMethod) {
@@ -60,7 +81,7 @@ public class TtcAttribute {
     }
 
     public String getServiceId() {
-        return this.serviceId;
+        return serviceId;
     }
 
     public void setServiceId(String serviceId) {
@@ -68,7 +89,7 @@ public class TtcAttribute {
     }
 
     public String getClassName() {
-        return this.className;
+        return className;
     }
 
     public void setClassName(String className) {
@@ -76,7 +97,7 @@ public class TtcAttribute {
     }
 
     public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
     public void setMethodName(String methodName) {
@@ -84,7 +105,7 @@ public class TtcAttribute {
     }
 
     public String getUrl() {
-        return this.url;
+        return url;
     }
 
     public void setUrl(String url) {
@@ -92,38 +113,49 @@ public class TtcAttribute {
     }
 
     public String getWebExpression() {
-        return this.webExpression;
+        return webExpression;
     }
 
     public void setWebExpression(String webExpression) {
         this.webExpression = webExpression;
     }
 
-    public Set<TtcPermission> getPermissions() {
-        return this.permissions;
+    public Set<KmcPermission> getPermissions() {
+        return permissions;
     }
 
-    public void setPermissions(Set<TtcPermission> permissions) {
+    public void setPermissions(Set<KmcPermission> permissions) {
         this.permissions = permissions;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TtcAttribute that = (TtcAttribute)o;
-        return Objects.equal((Object)this.attributeId, (Object)that.attributeId);
+        KmcAttribute that = (KmcAttribute) o;
+        return Objects.equal(attributeId, that.attributeId);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.attributeId});
+        return Objects.hashCode(attributeId);
     }
 
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("attributeId", (Object)this.attributeId).add("attributeCode", (Object)this.attributeCode).add("requestMethod", (Object)this.requestMethod).add("serviceId", (Object)this.serviceId).add("className", (Object)this.className).add("methodName", (Object)this.methodName).add("url", (Object)this.url).add("webExpression", (Object)this.webExpression).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("attributeId", attributeId)
+                .add("attributeCode", attributeCode)
+                .add("requestMethod", requestMethod)
+                .add("serviceId", serviceId)
+                .add("className", className)
+                .add("methodName", methodName)
+                .add("url", url)
+                .add("webExpression", webExpression)
+                .toString();
     }
 }
-

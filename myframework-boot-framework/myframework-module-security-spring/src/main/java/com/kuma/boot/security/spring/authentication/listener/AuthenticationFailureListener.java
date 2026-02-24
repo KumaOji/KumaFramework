@@ -1,18 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.apache.commons.collections4.MapUtils
- *  org.apache.commons.lang3.ObjectUtils
- *  org.apache.commons.lang3.StringUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.context.ApplicationListener
- *  org.springframework.security.authentication.UsernamePasswordAuthenticationToken
- *  org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent
- *  org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent
- *  org.springframework.security.core.Authentication
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.listener;
 
 import com.kuma.boot.security.spring.authentication.compliance.OAuth2AccountStatusManager;
@@ -22,7 +23,7 @@ import java.time.Duration;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -30,56 +31,110 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 
+/**
+ * <p>登出成功监听 </p>
+ *
+ */
 public class AuthenticationFailureListener
-implements ApplicationListener<AbstractAuthenticationFailureEvent> {
+        implements ApplicationListener<AbstractAuthenticationFailureEvent> {
+
     private static final Logger log = LoggerFactory.getLogger(AuthenticationFailureListener.class);
+
     private final SignInFailureLimitedStampManager stampManager;
     private final OAuth2AccountStatusManager accountStatusManager;
-    private final AuthenticationFailureHandler authenticationFailureHandler;
+    private final com.kuma.boot.security.spring.authentication.listener.AuthenticationFailureHandler authenticationFailureHandler;
 
-    public AuthenticationFailureListener(SignInFailureLimitedStampManager stampManager, OAuth2AccountStatusManager accountStatusManager, AuthenticationFailureHandler authenticationFailureHandler) {
+    public AuthenticationFailureListener(
+            SignInFailureLimitedStampManager stampManager,
+            OAuth2AccountStatusManager accountStatusManager,
+            com.kuma.boot.security.spring.authentication.listener.AuthenticationFailureHandler authenticationFailureHandler) {
         this.stampManager = stampManager;
         this.accountStatusManager = accountStatusManager;
         this.authenticationFailureHandler = authenticationFailureHandler;
     }
 
+    @Override
     public void onApplicationEvent(AbstractAuthenticationFailureEvent event) {
-        log.debug(" User sign in catch failure event : [{}].", (Object)event.getClass().getName());
+
+        log.debug(" User sign in catch failure event : [{}].", event.getClass().getName());
+
         if (event instanceof AuthenticationFailureBadCredentialsEvent) {
             Authentication authentication = event.getAuthentication();
+
             String username = null;
-            username = this.authenticationFailureHandler.handle(event);
+
+            username = authenticationFailureHandler.handle(event);
+
+            // if (authentication instanceof OAuth2AuthorizationGrantAuthenticationToken) {
+            //
+            //    log.debug(
+            //            " Toke object in failure event  is
+            // OAuth2AuthorizationGrantAuthenticationToken");
+            //
+            //    OAuth2AuthorizationGrantAuthenticationToken token =
+            //            (OAuth2AuthorizationGrantAuthenticationToken) authentication;
+            //    Map<String, Object> params = token.getAdditionalParameters();
+            //    username = getPrincipal(params);
+            // }
+
             if (authentication instanceof UsernamePasswordAuthenticationToken) {
+
                 log.debug(" Toke object in failure event  is UsernamePasswordAuthenticationToken");
-                UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken)authentication;
+
+                UsernamePasswordAuthenticationToken token =
+                        (UsernamePasswordAuthenticationToken) authentication;
                 Object principal = token.getPrincipal();
                 if (principal instanceof String) {
-                    username = (String)principal;
+                    username = (String) principal;
                 }
             }
-            if (StringUtils.isNotBlank((CharSequence)username)) {
-                log.debug(" Parse the username in failure event is [{}].", (Object)username);
-                int maxTimes = this.stampManager.getAuthenticationProperties().getSignInFailureLimited().getMaxTimes();
-                Duration expire = this.stampManager.getAuthenticationProperties().getSignInFailureLimited().getExpire();
+
+            if (StringUtils.isNotBlank(username)) {
+
+                log.debug(" Parse the username in failure event is [{}].", username);
+
+                int maxTimes =
+                        stampManager
+                                .getAuthenticationProperties()
+                                .getSignInFailureLimited()
+                                .getMaxTimes();
+                Duration expire =
+                        stampManager
+                                .getAuthenticationProperties()
+                                .getSignInFailureLimited()
+                                .getExpire();
                 try {
-                    int times = this.stampManager.counting(username, maxTimes, expire, true, "AuthenticationFailureListener");
-                    log.debug(" Sign in user input password error [{}] items", (Object)times);
-                }
-                catch (MaximumLimitExceededException e) {
-                    log.warn(" User [{}] password error [{}] items, LOCK ACCOUNT!", (Object)username, (Object)maxTimes);
-                    this.accountStatusManager.lock(username);
+                    int times =
+                            stampManager.counting(
+                                    username,
+                                    maxTimes,
+                                    expire,
+                                    true,
+                                    "AuthenticationFailureListener");
+                    log.debug(" Sign in user input password error [{}] items", times);
+                } catch (MaximumLimitExceededException e) {
+                    log.warn(
+                            " User [{}] password error [{}] items, LOCK ACCOUNT!",
+                            username,
+                            maxTimes);
+                    accountStatusManager.lock(username);
                 }
             }
         }
     }
 
     private String getPrincipal(Map<String, Object> params) {
-        Object value;
-        if (MapUtils.isNotEmpty(params) && params.containsKey("username") && ObjectUtils.isNotEmpty((Object)(value = params.get("username")))) {
-            return (String)value;
+        if (MapUtils.isNotEmpty(params)) {
+//            if (params.containsKey(OAuth2ParameterNames.USERNAME)) {
+//                Object value = params.get(OAuth2ParameterNames.USERNAME);
+//                if (ObjectUtils.isNotEmpty(value)) {
+//                    return (String) value;
+//                }
+//            }
         }
+
         return null;
     }
 }
-

@@ -1,33 +1,27 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.fasterxml.jackson.databind.ObjectMapper
- *  jakarta.servlet.ServletException
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.core.convert.converter.Converter
- *  org.springframework.http.HttpMethod
- *  org.springframework.security.authentication.AuthenticationManager
- *  org.springframework.security.authentication.AuthenticationServiceException
- *  org.springframework.security.authentication.BadCredentialsException
- *  org.springframework.security.core.Authentication
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
- *  org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
- *  org.springframework.security.web.util.matcher.RequestMatcher
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.client.WechatMiniAppRequest;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,42 +31,56 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
+import tools.jackson.databind.json.JsonMapper;
 
-public class WechatMiniAppAuthenticationFilter
-extends AbstractAuthenticationProcessingFilter {
-    private static final PathPatternRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login/wechat/miniapp");
-    private final ObjectMapper om = new ObjectMapper();
-    private Converter<HttpServletRequest, WechatMiniAppAuthenticationToken> miniAppAuthenticationTokenConverter = this.defaultConverter();
+public class WechatMiniAppAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    private static final PathPatternRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER =
+            PathPatternRequestMatcher.withDefaults()
+                    .matcher(HttpMethod.POST, "/login/wechat/miniapp");
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
+    private Converter<HttpServletRequest, WechatMiniAppAuthenticationToken>
+            miniAppAuthenticationTokenConverter;
     private boolean postOnly = true;
 
     public WechatMiniAppAuthenticationFilter() {
-        super((RequestMatcher)DEFAULT_ANT_PATH_REQUEST_MATCHER);
+        super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
+        this.miniAppAuthenticationTokenConverter = defaultConverter();
     }
 
     public WechatMiniAppAuthenticationFilter(AuthenticationManager authenticationManager) {
-        super((RequestMatcher)DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
+        super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
+        this.miniAppAuthenticationTokenConverter = defaultConverter();
     }
 
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+    @Override
+    public Authentication attemptAuthentication(
+            HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException, IOException, ServletException {
         if (this.postOnly && !HttpMethod.POST.matches(request.getMethod())) {
-            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+            throw new AuthenticationServiceException(
+                    "Authentication method not supported: " + request.getMethod());
         }
-        WechatMiniAppAuthenticationToken authRequest = (WechatMiniAppAuthenticationToken)((Object)this.miniAppAuthenticationTokenConverter.convert((Object)request));
+
+        WechatMiniAppAuthenticationToken authRequest =
+                miniAppAuthenticationTokenConverter.convert(request);
         if (authRequest == null) {
-            throw new BadCredentialsException("fail to extract miniapp authentication request params");
+            throw new BadCredentialsException(
+                    "fail to extract miniapp authentication request params");
         }
-        this.setDetails(request, authRequest);
-        return this.getAuthenticationManager().authenticate((Authentication)authRequest);
+        setDetails(request, authRequest);
+        return this.getAuthenticationManager().authenticate(authRequest);
     }
 
-    protected void setDetails(HttpServletRequest request, WechatMiniAppAuthenticationToken authRequest) {
-        authRequest.setDetails(this.authenticationDetailsSource.buildDetails((Object)request));
+    protected void setDetails(
+            HttpServletRequest request, WechatMiniAppAuthenticationToken authRequest) {
+        authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
     }
 
-    public void setConverter(Converter<HttpServletRequest, WechatMiniAppAuthenticationToken> converter) {
-        Assert.notNull(converter, (String)"Converter must not be null");
+    public void setConverter(
+            Converter<HttpServletRequest, WechatMiniAppAuthenticationToken> converter) {
+        Assert.notNull(converter, "Converter must not be null");
         this.miniAppAuthenticationTokenConverter = converter;
     }
 
@@ -82,34 +90,13 @@ extends AbstractAuthenticationProcessingFilter {
 
     private Converter<HttpServletRequest, WechatMiniAppAuthenticationToken> defaultConverter() {
         return request -> {
-            WechatMiniAppAuthenticationToken wechatMiniAppAuthenticationToken;
-            block8: {
-                BufferedReader reader = request.getReader();
-                try {
-                    WechatMiniAppRequest wechatMiniAppRequest = (WechatMiniAppRequest)this.om.readValue((Reader)reader, WechatMiniAppRequest.class);
-                    wechatMiniAppAuthenticationToken = new WechatMiniAppAuthenticationToken(wechatMiniAppRequest);
-                    if (reader == null) break block8;
-                }
-                catch (Throwable throwable) {
-                    try {
-                        if (reader != null) {
-                            try {
-                                reader.close();
-                            }
-                            catch (Throwable throwable2) {
-                                throwable.addSuppressed(throwable2);
-                            }
-                        }
-                        throw throwable;
-                    }
-                    catch (IOException e) {
-                        return null;
-                    }
-                }
-                reader.close();
+            try (BufferedReader reader = request.getReader()) {
+                WechatMiniAppRequest wechatMiniAppRequest =
+                        this.jsonMapper.readValue(reader, WechatMiniAppRequest.class);
+                return new WechatMiniAppAuthenticationToken(wechatMiniAppRequest);
+            } catch (IOException e) {
+                return null;
             }
-            return wechatMiniAppAuthenticationToken;
         };
     }
 }
-

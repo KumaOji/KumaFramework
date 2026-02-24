@@ -1,20 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.compliance.processor.loginrisk;
 
 import java.util.Date;
 
 public class LoginLog {
+
     private Integer id;
+
     private String account;
+
     private Integer result;
+
     private String cityCode;
+
     private String ip;
+
     private Date time;
 
     public Integer getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(Integer id) {
@@ -22,7 +41,7 @@ public class LoginLog {
     }
 
     public String getAccount() {
-        return this.account;
+        return account;
     }
 
     public void setAccount(String account) {
@@ -30,7 +49,7 @@ public class LoginLog {
     }
 
     public Integer getResult() {
-        return this.result;
+        return result;
     }
 
     public void setResult(Integer result) {
@@ -38,7 +57,7 @@ public class LoginLog {
     }
 
     public String getCityCode() {
-        return this.cityCode;
+        return cityCode;
     }
 
     public void setCityCode(String cityCode) {
@@ -46,7 +65,7 @@ public class LoginLog {
     }
 
     public String getIp() {
-        return this.ip;
+        return ip;
     }
 
     public void setIp(String ip) {
@@ -54,11 +73,10 @@ public class LoginLog {
     }
 
     public Date getTime() {
-        return this.time;
+        return time;
     }
 
     public void setTime(Date time) {
         this.time = time;
     }
 }
-

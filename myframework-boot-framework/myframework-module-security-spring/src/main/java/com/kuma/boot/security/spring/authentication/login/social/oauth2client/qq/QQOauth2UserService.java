@@ -1,39 +1,28 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.fasterxml.jackson.core.JsonProcessingException
- *  com.fasterxml.jackson.core.type.TypeReference
- *  com.fasterxml.jackson.databind.ObjectMapper
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.core.ParameterizedTypeReference
- *  org.springframework.http.RequestEntity
- *  org.springframework.http.ResponseEntity
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.core.authority.SimpleGrantedAuthority
- *  org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler
- *  org.springframework.security.oauth2.client.registration.ClientRegistration
- *  org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
- *  org.springframework.security.oauth2.client.userinfo.OAuth2UserService
- *  org.springframework.security.oauth2.core.OAuth2AccessToken
- *  org.springframework.security.oauth2.core.user.OAuth2User
- *  org.springframework.security.oauth2.core.user.OAuth2UserAuthority
- *  org.springframework.web.client.ResponseErrorHandler
- *  org.springframework.web.client.RestOperations
- *  org.springframework.web.client.RestTemplate
- *  org.springframework.web.util.UriComponentsBuilder
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.qq;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import com.kuma.boot.common.utils.log.LogUtils;
-
-import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -46,69 +35,126 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.json.JsonMapper;
 
-public class QQOauth2UserService
-implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class QQOauth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+
     private static final String QQ_OPEN_ID_URL = "https://graph.qq.com/oauth2.0/me";
+
     private final RestOperations restOperations;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
     public QQOauth2UserService() {
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setErrorHandler((ResponseErrorHandler)new OAuth2ErrorResponseErrorHandler());
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         this.restOperations = restTemplate;
     }
 
+    @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         ClientRegistration clientRegistration = userRequest.getClientRegistration();
         String registrationId = clientRegistration.getRegistrationId();
+
         String tokenValue = userRequest.getAccessToken().getTokenValue();
-        RequestEntity openIdRequest = RequestEntity.get((URI)UriComponentsBuilder.fromUriString((String)QQ_OPEN_ID_URL).queryParam("access_token", new Object[]{tokenValue}).build().toUri()).build();
-        ResponseEntity openIdResponse = this.restOperations.exchange(openIdRequest, (ParameterizedTypeReference)new ParameterizedTypeReference<String>(this){});
-        LogUtils.info((String)"qq\u7684openId\u54cd\u5e94\u4fe1\u606f\uff1a{}", (Object[])new Object[]{openIdResponse});
+        // openId请求
+        RequestEntity<?> openIdRequest =
+                RequestEntity.get(
+                                UriComponentsBuilder.fromUriString(QQ_OPEN_ID_URL)
+                                        .queryParam("access_token", tokenValue)
+                                        .build()
+                                        .toUri())
+                        .build();
+
+        // openId响应
+        ResponseEntity<String> openIdResponse =
+                restOperations.exchange(openIdRequest, new ParameterizedTypeReference<String>() {});
+
+        LogUtils.info("qq的openId响应信息：{}", openIdResponse);
+
+        // openId响应是类似callback( {"client_id":"YOUR_APPID","openid":"YOUR_OPENID"} );这样的字符串
         String openId = null;
         try {
-            openId = this.extractQqOpenId(Objects.requireNonNull((String)openIdResponse.getBody()));
+            openId = extractQqOpenId(Objects.requireNonNull(openIdResponse.getBody()));
+        } catch (JacksonException e) {
+            LogUtils.error(e);
         }
-        catch (JsonProcessingException e) {
-            LogUtils.error((Throwable)e);
-        }
-        RequestEntity userInfoRequest = RequestEntity.get((URI)UriComponentsBuilder.fromUriString((String)clientRegistration.getProviderDetails().getUserInfoEndpoint().getUri()).queryParam("access_token", new Object[]{tokenValue}).queryParam("openid", new Object[]{openId}).queryParam("oauth_consumer_key", new Object[]{clientRegistration.getClientId()}).build().toUri()).build();
-        ResponseEntity userInfoResponse = this.restOperations.exchange(userInfoRequest, (ParameterizedTypeReference)new ParameterizedTypeReference<String>(this){});
-        LogUtils.info((String)"qq\u7684userInfo\u54cd\u5e94\u4fe1\u606f\uff1a{}", (Object[])new Object[]{userInfoResponse});
-        String userNameAttributeName = clientRegistration.getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+
+        // userInfo请求
+        RequestEntity<?> userInfoRequest =
+                RequestEntity.get(
+                                UriComponentsBuilder.fromUriString(
+                                                clientRegistration
+                                                        .getProviderDetails()
+                                                        .getUserInfoEndpoint()
+                                                        .getUri())
+                                        .queryParam("access_token", tokenValue)
+                                        .queryParam("openid", openId)
+                                        .queryParam(
+                                                "oauth_consumer_key",
+                                                clientRegistration.getClientId())
+                                        .build()
+                                        .toUri())
+                        .build();
+
+        // userInfo响应
+        ResponseEntity<String> userInfoResponse =
+                restOperations.exchange(
+                        userInfoRequest, new ParameterizedTypeReference<String>() {});
+
+        LogUtils.info("qq的userInfo响应信息：{}", userInfoResponse);
+
+        String userNameAttributeName =
+                clientRegistration
+                        .getProviderDetails()
+                        .getUserInfoEndpoint()
+                        .getUserNameAttributeName();
         Map<String, Object> userAttributes = null;
         try {
-            userAttributes = this.extractQqUserInfo(Objects.requireNonNull((String)userInfoResponse.getBody()));
+            userAttributes = extractQqUserInfo(Objects.requireNonNull(userInfoResponse.getBody()));
+        } catch (JacksonException e) {
+            LogUtils.error(e);
         }
-        catch (JsonProcessingException e) {
-            LogUtils.error((Throwable)e);
-        }
-        LinkedHashSet<GrantedAuthority> authorities = new LinkedHashSet<GrantedAuthority>();
-        authorities.add((GrantedAuthority)new OAuth2UserAuthority(userAttributes));
+        Set<GrantedAuthority> authorities = new LinkedHashSet<>();
+        authorities.add(new OAuth2UserAuthority(userAttributes));
         OAuth2AccessToken token = userRequest.getAccessToken();
         for (String authority : token.getScopes()) {
-            authorities.add((GrantedAuthority)new SimpleGrantedAuthority("SCOPE_" + authority));
+            authorities.add(new SimpleGrantedAuthority("SCOPE_" + authority));
         }
-        QQOAuth2User qqoAuth2User = (QQOAuth2User)this.objectMapper.convertValue(userAttributes, QQOAuth2User.class);
+
+        com.kuma.boot.security.spring.authentication.login.social.oauth2client.qq.QQOAuth2User qqoAuth2User = jsonMapper.convertValue(userAttributes, com.kuma.boot.security.spring.authentication.login.social.oauth2client.qq.QQOAuth2User.class);
         qqoAuth2User.setAttributes(userAttributes);
         qqoAuth2User.setAuthorities(authorities);
         qqoAuth2User.setNameAttributeKey(userNameAttributeName);
+
+        //		return new DefaultOAuth2User(authorities, userAttributes, userNameAttributeName);
         return qqoAuth2User;
     }
 
-    private String extractQqOpenId(String openIdResponse) throws JsonProcessingException {
-        String openId = openIdResponse.substring(openIdResponse.indexOf(40) + 1, openIdResponse.indexOf(41));
-        Map map = (Map)this.objectMapper.readValue(openId, (TypeReference)new TypeReference<Map<String, String>>(this){});
-        return (String)map.get("openid");
+    /**
+     * 提取qq的openId
+     *
+     * @param openIdResponse qq的openId响应字符串
+     * @return qq的openId
+     */
+    private String extractQqOpenId(String openIdResponse) throws JacksonException {
+        String openId =
+                openIdResponse.substring(
+                        openIdResponse.indexOf('(') + 1, openIdResponse.indexOf(')'));
+        Map<String, String> map = jsonMapper.readValue(openId, new TypeReference<>() {});
+        return map.get("openid");
     }
 
-    private Map<String, Object> extractQqUserInfo(String userInfoResponse) throws JsonProcessingException {
-        return (Map)this.objectMapper.readValue(userInfoResponse, (TypeReference)new TypeReference<Map<String, Object>>(this){});
+    /**
+     * 提取qq的用户信息
+     *
+     * @param userInfoResponse qq的用户信息响应字符串
+     * @return qq的用户信息
+     */
+    private Map<String, Object> extractQqUserInfo(String userInfoResponse)
+            throws JacksonException {
+        return jsonMapper.readValue(userInfoResponse, new TypeReference<>() {});
     }
 }
-

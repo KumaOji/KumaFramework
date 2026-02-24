@@ -1,12 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonFormat
- *  com.fasterxml.jackson.annotation.JsonProperty
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.oauth2.core.user.OAuth2User
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.weibo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,226 +28,1303 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class WeiboOAuth2User
-implements OAuth2User {
+public class WeiboOAuth2User implements OAuth2User {
+    // 统一赋予USER角色
     private Set<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
     private String nameAttributeKey;
-    @JsonProperty(value="id")
+
+    /**
+     * 用户UID
+     */
+    @JsonProperty("id")
     private long id;
-    @JsonProperty(value="idstr")
+
+    /**
+     * 字符串型的用户UID
+     */
+    @JsonProperty("idstr")
     private String idstr;
-    @JsonProperty(value="screen_name")
+
+    /**
+     * 用户昵称
+     */
+    @JsonProperty("screen_name")
     private String screenName;
-    @JsonProperty(value="name")
+
+    /**
+     * 友好显示名称
+     */
+    @JsonProperty("name")
     private String name;
-    @JsonProperty(value="province")
+
+    /**
+     * 用户所在省级ID
+     */
+    @JsonProperty("province")
     private String province;
-    @JsonProperty(value="city")
+
+    /**
+     * 用户所在城市ID
+     */
+    @JsonProperty("city")
     private String city;
-    @JsonProperty(value="location")
+
+    /**
+     * 用户所在地
+     */
+    @JsonProperty("location")
     private String location;
-    @JsonProperty(value="description")
+
+    /**
+     * 用户个人描述
+     */
+    @JsonProperty("description")
     private String description;
-    @JsonProperty(value="url")
+
+    /**
+     * 用户博客地址
+     */
+    @JsonProperty("url")
     private String url;
-    @JsonProperty(value="profile_image_url")
+
+    /**
+     * 用户头像地址（中图），50×50像素
+     */
+    @JsonProperty("profile_image_url")
     private String profileImageUrl;
-    @JsonProperty(value="profile_url")
+
+    /**
+     * 用户的微博统一URL地址
+     */
+    @JsonProperty("profile_url")
     private String profileUrl;
-    @JsonProperty(value="domain")
+
+    /**
+     * 用户的个性化域名
+     */
+    @JsonProperty("domain")
     private String domain;
-    @JsonProperty(value="weihao")
+
+    /**
+     * 用户的微号
+     */
+    @JsonProperty("weihao")
     private String weihao;
-    @JsonProperty(value="gender")
+
+    /**
+     * 性别，m：男、f：女、n：未知
+     */
+    @JsonProperty("gender")
     private String gender;
-    @JsonProperty(value="followers_count")
+
+    /**
+     * 粉丝数
+     */
+    @JsonProperty("followers_count")
     private int followersCount;
-    @JsonProperty(value="friends_count")
+
+    /**
+     * 关注数
+     */
+    @JsonProperty("friends_count")
     private int friendsCount;
-    @JsonProperty(value="statuses_count")
+
+    /**
+     * 微博数
+     */
+    @JsonProperty("statuses_count")
     private int statusesCount;
-    @JsonProperty(value="favourites_count")
+
+    /**
+     * 收藏数
+     */
+    @JsonProperty("favourites_count")
     private int favouritesCount;
-    @JsonProperty(value="created_at")
-    @JsonFormat(pattern="E MMM dd HH:mm:ss '+0800' yyyy", locale="en")
+
+    /**
+     * 用户创建（注册）时间
+     */
+    @JsonProperty("created_at")
+    @JsonFormat(pattern = "E MMM dd HH:mm:ss '+0800' yyyy", locale = "en")
     private LocalDateTime createdAt;
-    @JsonProperty(value="following")
+
+    /**
+     * 暂未支持
+     */
+    @JsonProperty("following")
     private boolean following;
-    @JsonProperty(value="allow_all_act_msg")
+
+    /**
+     * 是否允许所有人给我发私信，true：是，false：否
+     */
+    @JsonProperty("allow_all_act_msg")
     private boolean allowAllActMsg;
-    @JsonProperty(value="geo_enabled")
+
+    /**
+     * 是否允许标识用户的地理位置，true：是，false：否
+     */
+    @JsonProperty("geo_enabled")
     private boolean geoEnabled;
-    @JsonProperty(value="verified")
+
+    /**
+     * 是否是微博认证用户，即加V用户，true：是，false：否
+     */
+    @JsonProperty("verified")
     private boolean verified;
-    @JsonProperty(value="verified_type")
+
+    /**
+     * 暂未支持
+     */
+    @JsonProperty("verified_type")
     private int verifiedType;
-    @JsonProperty(value="remark")
+
+    /**
+     * 用户备注信息，只有在查询用户关系时才返回此字段
+     */
+    @JsonProperty("remark")
     private String remark;
-    @JsonProperty(value="status")
+
+    /**
+     * 用户的最近一条微博信息字段
+     */
+    @JsonProperty("status")
     private Status status;
-    @JsonProperty(value="allow_all_comment")
+
+    /**
+     * 是否允许所有人对我的微博进行评论，true：是，false：否
+     */
+    @JsonProperty("allow_all_comment")
     private boolean allowAllComment;
-    @JsonProperty(value="avatar_large")
+
+    /**
+     * 用户头像地址（大图），180×180像素
+     */
+    @JsonProperty("avatar_large")
     private String avatarLarge;
-    @JsonProperty(value="avatar_hd")
+
+    /**
+     * 用户头像地址（高清），高清头像原图
+     */
+    @JsonProperty("avatar_hd")
     private String avatarHd;
-    @JsonProperty(value="verified_reason")
+
+    /**
+     * 认证原因
+     */
+    @JsonProperty("verified_reason")
     private String verifiedReason;
-    @JsonProperty(value="follow_me")
+
+    /**
+     * 该用户是否关注当前登录用户，true：是，false：否
+     */
+    @JsonProperty("follow_me")
     private boolean followMe;
-    @JsonProperty(value="online_status")
+
+    /**
+     * 用户的在线状态，0：不在线、1：在线
+     */
+    @JsonProperty("online_status")
     private int onlineStatus;
-    @JsonProperty(value="bi_followers_count")
+
+    /**
+     * 用户的互粉数
+     */
+    @JsonProperty("bi_followers_count")
     private int biFollowersCount;
-    @JsonProperty(value="lang")
+
+    /**
+     * 用户当前的语言版本，zh-cn：简体中文，zh-tw：繁体中文，en：英语
+     */
+    @JsonProperty("lang")
     private String lang;
-    @JsonProperty(value="is_teenager")
+
+    @JsonProperty("is_teenager")
     private int isTeenager;
-    @JsonProperty(value="vplus_ability")
+
+    @JsonProperty("vplus_ability")
     private int vplusAbility;
-    @JsonProperty(value="like_me")
+
+    @JsonProperty("like_me")
     private boolean likeMe;
-    @JsonProperty(value="verified_contact_mobile")
+
+    @JsonProperty("verified_contact_mobile")
     private String verifiedContactMobile;
-    @JsonProperty(value="light_ring")
+
+    @JsonProperty("light_ring")
     private boolean lightRing;
-    @JsonProperty(value="wenda_ability")
+
+    @JsonProperty("wenda_ability")
     private int wendaAbility;
-    @JsonProperty(value="video_total_counter")
+
+    @JsonProperty("video_total_counter")
     private VideoTotalCounter videoTotalCounter;
-    @JsonProperty(value="nft_ability")
+
+    @JsonProperty("nft_ability")
     private int nftAbility;
-    @JsonProperty(value="ecommerce_ability")
+
+    @JsonProperty("ecommerce_ability")
     private int ecommerceAbility;
-    @JsonProperty(value="verified_contact_email")
+
+    @JsonProperty("verified_contact_email")
     private String verifiedContactEmail;
-    @JsonProperty(value="pay_date")
+
+    @JsonProperty("pay_date")
     private String payDate;
-    @JsonProperty(value="credit_score")
+
+    @JsonProperty("credit_score")
     private int creditScore;
-    @JsonProperty(value="user_ability_extend")
+
+    @JsonProperty("user_ability_extend")
     private int userAbilityExtend;
-    @JsonProperty(value="pay_remind")
+
+    @JsonProperty("pay_remind")
     private int payRemind;
-    @JsonProperty(value="brand_ability")
+
+    @JsonProperty("brand_ability")
     private int brandAbility;
-    @JsonProperty(value="super_topic_not_syn_count")
+
+    @JsonProperty("super_topic_not_syn_count")
     private int superTopicNotSynCount;
-    @JsonProperty(value="live_ability")
+
+    @JsonProperty("live_ability")
     private int liveAbility;
-    @JsonProperty(value="cardid")
+
+    @JsonProperty("cardid")
     private String cardid;
-    @JsonProperty(value="is_teenager_list")
+
+    @JsonProperty("is_teenager_list")
     private int isTeenagerList;
-    @JsonProperty(value="video_status_count")
+
+    @JsonProperty("video_status_count")
     private int videoStatusCount;
-    @JsonProperty(value="newbrand_ability")
+
+    @JsonProperty("newbrand_ability")
     private int newbrandAbility;
-    @JsonProperty(value="verified_level")
+
+    @JsonProperty("verified_level")
     private int verifiedLevel;
-    @JsonProperty(value="urisk")
+
+    @JsonProperty("urisk")
     private int urisk;
-    @JsonProperty(value="star")
+
+    @JsonProperty("star")
     private int star;
-    @JsonProperty(value="status_total_counter")
+
+    @JsonProperty("status_total_counter")
     private StatusTotalCounter statusTotalCounter;
-    @JsonProperty(value="has_service_tel")
+
+    @JsonProperty("has_service_tel")
     private boolean hasServiceTel;
-    @JsonProperty(value="block_app")
+
+    @JsonProperty("block_app")
     private int blockApp;
-    @JsonProperty(value="planet_video")
+
+    @JsonProperty("planet_video")
     private int planetVideo;
-    @JsonProperty(value="gongyi_ability")
+
+    @JsonProperty("gongyi_ability")
     private int gongyiAbility;
-    @JsonProperty(value="hardfan_ability")
+
+    @JsonProperty("hardfan_ability")
     private int hardfanAbility;
-    @JsonProperty(value="insecurity")
+
+    @JsonProperty("insecurity")
     private Insecurity insecurity;
-    @JsonProperty(value="verified_source")
+
+    @JsonProperty("verified_source")
     private String verifiedSource;
-    @JsonProperty(value="urank")
+
+    @JsonProperty("urank")
     private int urank;
-    @JsonProperty(value="verified_trade")
+
+    @JsonProperty("verified_trade")
     private String verifiedTrade;
-    @JsonProperty(value="green_mode")
+
+    @JsonProperty("green_mode")
     private int greenMode;
-    @JsonProperty(value="mb_expire_time")
+
+    @JsonProperty("mb_expire_time")
     private int mbExpireTime;
-    @JsonProperty(value="verified_source_url")
+
+    @JsonProperty("verified_source_url")
     private String verifiedSourceUrl;
-    @JsonProperty(value="video_mark")
+
+    @JsonProperty("video_mark")
     private int videoMark;
-    @JsonProperty(value="live_status")
+
+    @JsonProperty("live_status")
     private int liveStatus;
-    @JsonProperty(value="special_follow")
+
+    @JsonProperty("special_follow")
     private boolean specialFollow;
-    @JsonProperty(value="followers_count_str")
+
+    @JsonProperty("followers_count_str")
     private String followersCountStr;
-    @JsonProperty(value="chaohua_ability")
+
+    @JsonProperty("chaohua_ability")
     private int chaohuaAbility;
-    @JsonProperty(value="like")
+
+    @JsonProperty("like")
     private boolean like;
-    @JsonProperty(value="verified_type_ext")
+
+    @JsonProperty("verified_type_ext")
     private int verifiedTypeExt;
-    @JsonProperty(value="pagefriends_count")
+
+    @JsonProperty("pagefriends_count")
     private int pagefriendsCount;
-    @JsonProperty(value="cover_image_phone")
+
+    @JsonProperty("cover_image_phone")
     private String coverImagePhone;
-    @JsonProperty(value="ptype")
+
+    @JsonProperty("ptype")
     private int ptype;
-    @JsonProperty(value="verified_reason_url")
+
+    @JsonProperty("verified_reason_url")
     private String verifiedReasonUrl;
-    @JsonProperty(value="block_word")
+
+    @JsonProperty("block_word")
     private int blockWord;
-    @JsonProperty(value="verified_state")
+
+    @JsonProperty("verified_state")
     private int verifiedState;
-    @JsonProperty(value="avatar_type")
+
+    @JsonProperty("avatar_type")
     private int avatarType;
-    @JsonProperty(value="hongbaofei")
+
+    @JsonProperty("hongbaofei")
     private int hongbaofei;
-    @JsonProperty(value="video_play_count")
+
+    @JsonProperty("video_play_count")
     private int videoPlayCount;
-    @JsonProperty(value="mbtype")
+
+    @JsonProperty("mbtype")
     private int mbtype;
-    @JsonProperty(value="user_ability")
+
+    @JsonProperty("user_ability")
     private int userAbility;
-    @JsonProperty(value="story_read_state")
+
+    @JsonProperty("story_read_state")
     private int storyReadState;
-    @JsonProperty(value="mbrank")
+
+    @JsonProperty("mbrank")
     private int mbrank;
-    @JsonProperty(value="class")
+
+    @JsonProperty("class")
     private int jsonMemberClass;
-    @JsonProperty(value="pc_new")
+
+    @JsonProperty("pc_new")
     private int pcNew;
-    @JsonProperty(value="paycolumn_ability")
+
+    @JsonProperty("paycolumn_ability")
     private int paycolumnAbility;
-    @JsonProperty(value="brand_account")
+
+    @JsonProperty("brand_account")
     private int brandAccount;
-    @JsonProperty(value="verified_contact_name")
+
+    @JsonProperty("verified_contact_name")
     private String verifiedContactName;
-    @JsonProperty(value="vclub_member")
+
+    @JsonProperty("vclub_member")
     private int vclubMember;
-    @JsonProperty(value="is_guardian")
+
+    @JsonProperty("is_guardian")
     private int isGuardian;
-    @JsonProperty(value="svip")
+
+    @JsonProperty("svip")
     private int svip;
-    @JsonProperty(value="verified_reason_modified")
+
+    @JsonProperty("verified_reason_modified")
     private String verifiedReasonModified;
+
     private Integer block;
-    @JsonProperty(value="block_me")
+
+    @JsonProperty("block_me")
     private Integer blockMe;
 
+    @Override
     public String getName() {
-        return this.idstr;
+        return idstr;
     }
 
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
     }
 
+    @Override
     public Map<String, Object> getAttributes() {
-        return this.attributes;
+        return attributes;
+    }
+
+    /**
+     * 微博（status）
+     *
+     * @since 0.0.1
+     * @see <a href=
+     * "https://open.weibo.com/wiki/%E5%B8%B8%E8%A7%81%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">常见返回对象数据结构</a>
+     */
+    public static class Status {
+
+        /**
+         *
+         */
+        private Integer version;
+
+        /**
+         *
+         */
+        private String picStatus;
+
+        /**
+         *
+         */
+        @JsonProperty("show_mlevel")
+        private Integer showMlevel;
+
+        /**
+         * 微博创建时间
+         */
+        @JsonFormat(pattern = "E MMM dd HH:mm:ss '+0800' yyyy", locale = "en")
+        @JsonProperty("created_at")
+        private LocalDateTime createdAt;
+
+        /**
+         * 微博ID
+         */
+        @JsonProperty("id")
+        private long id;
+
+        /**
+         * 微博MID
+         */
+        @JsonProperty("mid")
+        private String mid;
+
+        /**
+         * 字符串型的微博ID
+         */
+        @JsonProperty("idstr")
+        private String idstr;
+
+        /**
+         * 微博信息内容
+         */
+        @JsonProperty("text")
+        private String text;
+
+        /**
+         * 微博来源
+         */
+        @JsonProperty("source")
+        private String source;
+
+        /**
+         * 是否已收藏，true：是，false：否
+         */
+        @JsonProperty("favorited")
+        private boolean favorited;
+
+        /**
+         * 是否被截断，true：是，false：否
+         */
+        @JsonProperty("truncated")
+        private boolean truncated;
+
+        /**
+         * （暂未支持）回复ID
+         */
+        @JsonProperty("in_reply_to_status_id")
+        private String inReplyToStatusId;
+
+        /**
+         * （暂未支持）回复人UID
+         */
+        @JsonProperty("in_reply_to_user_id")
+        private String inReplyToUserId;
+
+        /**
+         * （暂未支持）回复人昵称
+         */
+        @JsonProperty("in_reply_to_screen_name")
+        private String inReplyToScreenName;
+
+        /**
+         * 缩略图片地址，没有时不返回此字段
+         */
+        @JsonProperty("thumbnail_pic")
+        private String thumbnailPic;
+
+        /**
+         * 中等尺寸图片地址，没有时不返回此字段
+         */
+        @JsonProperty("bmiddle_pic")
+        private String bmiddlePic;
+
+        /**
+         * 原始图片地址，没有时不返回此字段
+         */
+        @JsonProperty("original_pic")
+        private String originalPic;
+
+        /**
+         * 地理信息字段
+         * @see <a href=
+         * "https://open.weibo.com/wiki/%E5%B8%B8%E8%A7%81%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84#.E5.9C.B0.E7.90.86.E4.BF.A1.E6.81.AF.EF.BC.88geo.EF.BC.89">地理信息（geo）</a>
+         */
+        @JsonProperty("geo")
+        private Object geo;
+
+        /**
+         * 转发数
+         */
+        @JsonProperty("reposts_count")
+        private int repostsCount;
+
+        /**
+         * 评论数
+         */
+        @JsonProperty("comments_count")
+        private int commentsCount;
+
+        /**
+         * 表态数
+         */
+        @JsonProperty("attitudes_count")
+        private int attitudesCount;
+
+        /**
+         * 暂未支持
+         */
+        @JsonProperty("mlevel")
+        private int mlevel;
+
+        /**
+         * 微博的可见性及指定可见分组信息。该object中type取值，0：普通微博，1：私密微博，3：指定分组微博，4：密友微博；list_id为分组的组号
+         */
+        @JsonProperty("visible")
+        private Visible visible;
+
+        @JsonProperty("isLongText")
+        private boolean isLongText;
+
+        @JsonProperty("hot_weibo_tags")
+        private List<Object> hotWeiboTags;
+
+        @JsonProperty("annotations")
+        private List<AnnotationsItem> annotations;
+
+        @JsonProperty("mblogtype")
+        private int mblogtype;
+
+        @JsonProperty("rid")
+        private String rid;
+
+        @JsonProperty("positive_recom_flag")
+        private int positiveRecomFlag;
+
+        @JsonProperty("can_reprint")
+        private boolean canReprint;
+
+        @JsonProperty("is_show_bulletin")
+        private int isShowBulletin;
+
+        @JsonProperty("hide_flag")
+        private int hideFlag;
+
+        @JsonProperty("hasActionTypeCard")
+        private int hasActionTypeCard;
+
+        @JsonProperty("new_comment_style")
+        private int newCommentStyle;
+
+        @JsonProperty("mblog_vip_type")
+        private int mblogVipType;
+
+        @JsonProperty("content_auth")
+        private int contentAuth;
+
+        @JsonProperty("gif_ids")
+        private String gifIds;
+
+        @JsonProperty("source_type")
+        private int sourceType;
+
+        @JsonProperty("pic_urls")
+        private List<PicUrlsItem> picUrls;
+
+        @JsonProperty("biz_feature")
+        private long bizFeature;
+
+        @JsonProperty("userType")
+        private int userType;
+
+        @JsonProperty("text_tag_tips")
+        private List<Object> textTagTips;
+
+        @JsonProperty("darwin_tags")
+        private List<Object> darwinTags;
+
+        @JsonProperty("pending_approval_count")
+        private int pendingApprovalCount;
+
+        @JsonProperty("pic_num")
+        private int picNum;
+
+        @JsonProperty("is_paid")
+        private boolean isPaid;
+
+        @JsonProperty("reward_exhibition_type")
+        private int rewardExhibitionType;
+
+        @JsonProperty("reprint_cmt_count")
+        private int reprintCmtCount;
+
+        @JsonProperty("can_edit")
+        private boolean canEdit;
+
+        @JsonProperty("textLength")
+        private int textLength;
+
+        @JsonProperty("source_allowclick")
+        private int sourceAllowclick;
+
+        @JsonProperty("show_additional_indication")
+        private int showAdditionalIndication;
+
+        @JsonProperty("comment_manage_info")
+        private CommentManageInfo commentManageInfo;
+
+        @JsonProperty("more_info_type")
+        private int moreInfoType;
+
+        public Integer getVersion() {
+            return version;
+        }
+
+        public void setVersion(Integer version) {
+            this.version = version;
+        }
+
+        public String getPicStatus() {
+            return picStatus;
+        }
+
+        public void setPicStatus(String picStatus) {
+            this.picStatus = picStatus;
+        }
+
+        public Integer getShowMlevel() {
+            return showMlevel;
+        }
+
+        public void setShowMlevel(Integer showMlevel) {
+            this.showMlevel = showMlevel;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public String getMid() {
+            return mid;
+        }
+
+        public void setMid(String mid) {
+            this.mid = mid;
+        }
+
+        public String getIdstr() {
+            return idstr;
+        }
+
+        public void setIdstr(String idstr) {
+            this.idstr = idstr;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public void setSource(String source) {
+            this.source = source;
+        }
+
+        public boolean isFavorited() {
+            return favorited;
+        }
+
+        public void setFavorited(boolean favorited) {
+            this.favorited = favorited;
+        }
+
+        public boolean isTruncated() {
+            return truncated;
+        }
+
+        public void setTruncated(boolean truncated) {
+            this.truncated = truncated;
+        }
+
+        public String getInReplyToStatusId() {
+            return inReplyToStatusId;
+        }
+
+        public void setInReplyToStatusId(String inReplyToStatusId) {
+            this.inReplyToStatusId = inReplyToStatusId;
+        }
+
+        public String getInReplyToUserId() {
+            return inReplyToUserId;
+        }
+
+        public void setInReplyToUserId(String inReplyToUserId) {
+            this.inReplyToUserId = inReplyToUserId;
+        }
+
+        public String getInReplyToScreenName() {
+            return inReplyToScreenName;
+        }
+
+        public void setInReplyToScreenName(String inReplyToScreenName) {
+            this.inReplyToScreenName = inReplyToScreenName;
+        }
+
+        public String getThumbnailPic() {
+            return thumbnailPic;
+        }
+
+        public void setThumbnailPic(String thumbnailPic) {
+            this.thumbnailPic = thumbnailPic;
+        }
+
+        public String getBmiddlePic() {
+            return bmiddlePic;
+        }
+
+        public void setBmiddlePic(String bmiddlePic) {
+            this.bmiddlePic = bmiddlePic;
+        }
+
+        public String getOriginalPic() {
+            return originalPic;
+        }
+
+        public void setOriginalPic(String originalPic) {
+            this.originalPic = originalPic;
+        }
+
+        public Object getGeo() {
+            return geo;
+        }
+
+        public void setGeo(Object geo) {
+            this.geo = geo;
+        }
+
+        public int getRepostsCount() {
+            return repostsCount;
+        }
+
+        public void setRepostsCount(int repostsCount) {
+            this.repostsCount = repostsCount;
+        }
+
+        public int getCommentsCount() {
+            return commentsCount;
+        }
+
+        public void setCommentsCount(int commentsCount) {
+            this.commentsCount = commentsCount;
+        }
+
+        public int getAttitudesCount() {
+            return attitudesCount;
+        }
+
+        public void setAttitudesCount(int attitudesCount) {
+            this.attitudesCount = attitudesCount;
+        }
+
+        public int getMlevel() {
+            return mlevel;
+        }
+
+        public void setMlevel(int mlevel) {
+            this.mlevel = mlevel;
+        }
+
+        public Visible getVisible() {
+            return visible;
+        }
+
+        public void setVisible(Visible visible) {
+            this.visible = visible;
+        }
+
+        public boolean isLongText() {
+            return isLongText;
+        }
+
+        public void setLongText(boolean longText) {
+            isLongText = longText;
+        }
+
+        public List<Object> getHotWeiboTags() {
+            return hotWeiboTags;
+        }
+
+        public void setHotWeiboTags(List<Object> hotWeiboTags) {
+            this.hotWeiboTags = hotWeiboTags;
+        }
+
+        public List<AnnotationsItem> getAnnotations() {
+            return annotations;
+        }
+
+        public void setAnnotations(List<AnnotationsItem> annotations) {
+            this.annotations = annotations;
+        }
+
+        public int getMblogtype() {
+            return mblogtype;
+        }
+
+        public void setMblogtype(int mblogtype) {
+            this.mblogtype = mblogtype;
+        }
+
+        public String getRid() {
+            return rid;
+        }
+
+        public void setRid(String rid) {
+            this.rid = rid;
+        }
+
+        public int getPositiveRecomFlag() {
+            return positiveRecomFlag;
+        }
+
+        public void setPositiveRecomFlag(int positiveRecomFlag) {
+            this.positiveRecomFlag = positiveRecomFlag;
+        }
+
+        public boolean isCanReprint() {
+            return canReprint;
+        }
+
+        public void setCanReprint(boolean canReprint) {
+            this.canReprint = canReprint;
+        }
+
+        public int getIsShowBulletin() {
+            return isShowBulletin;
+        }
+
+        public void setIsShowBulletin(int isShowBulletin) {
+            this.isShowBulletin = isShowBulletin;
+        }
+
+        public int getHideFlag() {
+            return hideFlag;
+        }
+
+        public void setHideFlag(int hideFlag) {
+            this.hideFlag = hideFlag;
+        }
+
+        public int getHasActionTypeCard() {
+            return hasActionTypeCard;
+        }
+
+        public void setHasActionTypeCard(int hasActionTypeCard) {
+            this.hasActionTypeCard = hasActionTypeCard;
+        }
+
+        public int getNewCommentStyle() {
+            return newCommentStyle;
+        }
+
+        public void setNewCommentStyle(int newCommentStyle) {
+            this.newCommentStyle = newCommentStyle;
+        }
+
+        public int getMblogVipType() {
+            return mblogVipType;
+        }
+
+        public void setMblogVipType(int mblogVipType) {
+            this.mblogVipType = mblogVipType;
+        }
+
+        public int getContentAuth() {
+            return contentAuth;
+        }
+
+        public void setContentAuth(int contentAuth) {
+            this.contentAuth = contentAuth;
+        }
+
+        public String getGifIds() {
+            return gifIds;
+        }
+
+        public void setGifIds(String gifIds) {
+            this.gifIds = gifIds;
+        }
+
+        public int getSourceType() {
+            return sourceType;
+        }
+
+        public void setSourceType(int sourceType) {
+            this.sourceType = sourceType;
+        }
+
+        public List<PicUrlsItem> getPicUrls() {
+            return picUrls;
+        }
+
+        public void setPicUrls(List<PicUrlsItem> picUrls) {
+            this.picUrls = picUrls;
+        }
+
+        public long getBizFeature() {
+            return bizFeature;
+        }
+
+        public void setBizFeature(long bizFeature) {
+            this.bizFeature = bizFeature;
+        }
+
+        public int getUserType() {
+            return userType;
+        }
+
+        public void setUserType(int userType) {
+            this.userType = userType;
+        }
+
+        public List<Object> getTextTagTips() {
+            return textTagTips;
+        }
+
+        public void setTextTagTips(List<Object> textTagTips) {
+            this.textTagTips = textTagTips;
+        }
+
+        public List<Object> getDarwinTags() {
+            return darwinTags;
+        }
+
+        public void setDarwinTags(List<Object> darwinTags) {
+            this.darwinTags = darwinTags;
+        }
+
+        public int getPendingApprovalCount() {
+            return pendingApprovalCount;
+        }
+
+        public void setPendingApprovalCount(int pendingApprovalCount) {
+            this.pendingApprovalCount = pendingApprovalCount;
+        }
+
+        public int getPicNum() {
+            return picNum;
+        }
+
+        public void setPicNum(int picNum) {
+            this.picNum = picNum;
+        }
+
+        public boolean isPaid() {
+            return isPaid;
+        }
+
+        public void setPaid(boolean paid) {
+            isPaid = paid;
+        }
+
+        public int getRewardExhibitionType() {
+            return rewardExhibitionType;
+        }
+
+        public void setRewardExhibitionType(int rewardExhibitionType) {
+            this.rewardExhibitionType = rewardExhibitionType;
+        }
+
+        public int getReprintCmtCount() {
+            return reprintCmtCount;
+        }
+
+        public void setReprintCmtCount(int reprintCmtCount) {
+            this.reprintCmtCount = reprintCmtCount;
+        }
+
+        public boolean isCanEdit() {
+            return canEdit;
+        }
+
+        public void setCanEdit(boolean canEdit) {
+            this.canEdit = canEdit;
+        }
+
+        public int getTextLength() {
+            return textLength;
+        }
+
+        public void setTextLength(int textLength) {
+            this.textLength = textLength;
+        }
+
+        public int getSourceAllowclick() {
+            return sourceAllowclick;
+        }
+
+        public void setSourceAllowclick(int sourceAllowclick) {
+            this.sourceAllowclick = sourceAllowclick;
+        }
+
+        public int getShowAdditionalIndication() {
+            return showAdditionalIndication;
+        }
+
+        public void setShowAdditionalIndication(int showAdditionalIndication) {
+            this.showAdditionalIndication = showAdditionalIndication;
+        }
+
+        public CommentManageInfo getCommentManageInfo() {
+            return commentManageInfo;
+        }
+
+        public void setCommentManageInfo(CommentManageInfo commentManageInfo) {
+            this.commentManageInfo = commentManageInfo;
+        }
+
+        public int getMoreInfoType() {
+            return moreInfoType;
+        }
+
+        public void setMoreInfoType(int moreInfoType) {
+            this.moreInfoType = moreInfoType;
+        }
+    }
+
+    public static class StatusTotalCounter {
+
+        @JsonProperty("total_cnt")
+        private int totalCnt;
+
+        @JsonProperty("repost_cnt")
+        private int repostCnt;
+
+        @JsonProperty("comment_like_cnt")
+        private int commentLikeCnt;
+
+        @JsonProperty("like_cnt")
+        private int likeCnt;
+
+        @JsonProperty("comment_cnt")
+        private int commentCnt;
+
+        public int getTotalCnt() {
+            return totalCnt;
+        }
+
+        public void setTotalCnt(int totalCnt) {
+            this.totalCnt = totalCnt;
+        }
+
+        public int getRepostCnt() {
+            return repostCnt;
+        }
+
+        public void setRepostCnt(int repostCnt) {
+            this.repostCnt = repostCnt;
+        }
+
+        public int getCommentLikeCnt() {
+            return commentLikeCnt;
+        }
+
+        public void setCommentLikeCnt(int commentLikeCnt) {
+            this.commentLikeCnt = commentLikeCnt;
+        }
+
+        public int getLikeCnt() {
+            return likeCnt;
+        }
+
+        public void setLikeCnt(int likeCnt) {
+            this.likeCnt = likeCnt;
+        }
+
+        public int getCommentCnt() {
+            return commentCnt;
+        }
+
+        public void setCommentCnt(int commentCnt) {
+            this.commentCnt = commentCnt;
+        }
+    }
+
+    public static class VideoTotalCounter {
+
+        @JsonProperty("play_cnt")
+        private int playCnt;
+
+        public int getPlayCnt() {
+            return playCnt;
+        }
+
+        public void setPlayCnt(int playCnt) {
+            this.playCnt = playCnt;
+        }
+    }
+
+    public static class Visible {
+
+        @JsonProperty("list_id")
+        private int listId;
+
+        @JsonProperty("type")
+        private int type;
+
+        public int getListId() {
+            return listId;
+        }
+
+        public void setListId(int listId) {
+            this.listId = listId;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+    }
+
+    public static class AnnotationsItem {
+
+        @JsonProperty("mapi_request")
+        private boolean mapiRequest;
+
+        @JsonProperty("client_mblogid")
+        private String clientMblogid;
+
+        @JsonProperty("photo_sub_type")
+        private String photoSubType;
+
+        public boolean isMapiRequest() {
+            return mapiRequest;
+        }
+
+        public void setMapiRequest(boolean mapiRequest) {
+            this.mapiRequest = mapiRequest;
+        }
+
+        public String getClientMblogid() {
+            return clientMblogid;
+        }
+
+        public void setClientMblogid(String clientMblogid) {
+            this.clientMblogid = clientMblogid;
+        }
+
+        public String getPhotoSubType() {
+            return photoSubType;
+        }
+
+        public void setPhotoSubType(String photoSubType) {
+            this.photoSubType = photoSubType;
+        }
+    }
+
+    public static class CommentManageInfo {
+
+        @JsonProperty("comment_permission_type")
+        private int commentPermissionType;
+
+        @JsonProperty("comment_sort_type")
+        private int commentSortType;
+
+        @JsonProperty("approval_comment_type")
+        private int approvalCommentType;
+
+        public int getCommentPermissionType() {
+            return commentPermissionType;
+        }
+
+        public void setCommentPermissionType(int commentPermissionType) {
+            this.commentPermissionType = commentPermissionType;
+        }
+
+        public int getCommentSortType() {
+            return commentSortType;
+        }
+
+        public void setCommentSortType(int commentSortType) {
+            this.commentSortType = commentSortType;
+        }
+
+        public int getApprovalCommentType() {
+            return approvalCommentType;
+        }
+
+        public void setApprovalCommentType(int approvalCommentType) {
+            this.approvalCommentType = approvalCommentType;
+        }
+    }
+
+    public static class PicUrlsItem {
+        @JsonProperty("thumbnail_pic")
+        private String thumbnailPic;
+
+        public String getThumbnailPic() {
+            return thumbnailPic;
+        }
+
+        public void setThumbnailPic(String thumbnailPic) {
+            this.thumbnailPic = thumbnailPic;
+        }
+    }
+
+    public static class Insecurity {
+
+        @JsonProperty("sexual_content")
+        private boolean sexualContent;
+
+        public boolean isSexualContent() {
+            return sexualContent;
+        }
+
+        public void setSexualContent(boolean sexualContent) {
+            this.sexualContent = sexualContent;
+        }
     }
 
     public void setAuthorities(Set<GrantedAuthority> authorities) {
@@ -252,7 +1336,7 @@ implements OAuth2User {
     }
 
     public String getNameAttributeKey() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
     public void setNameAttributeKey(String nameAttributeKey) {
@@ -260,7 +1344,7 @@ implements OAuth2User {
     }
 
     public long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(long id) {
@@ -268,7 +1352,7 @@ implements OAuth2User {
     }
 
     public String getIdstr() {
-        return this.idstr;
+        return idstr;
     }
 
     public void setIdstr(String idstr) {
@@ -276,7 +1360,7 @@ implements OAuth2User {
     }
 
     public String getScreenName() {
-        return this.screenName;
+        return screenName;
     }
 
     public void setScreenName(String screenName) {
@@ -288,7 +1372,7 @@ implements OAuth2User {
     }
 
     public String getProvince() {
-        return this.province;
+        return province;
     }
 
     public void setProvince(String province) {
@@ -296,7 +1380,7 @@ implements OAuth2User {
     }
 
     public String getCity() {
-        return this.city;
+        return city;
     }
 
     public void setCity(String city) {
@@ -304,7 +1388,7 @@ implements OAuth2User {
     }
 
     public String getLocation() {
-        return this.location;
+        return location;
     }
 
     public void setLocation(String location) {
@@ -312,7 +1396,7 @@ implements OAuth2User {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
@@ -320,7 +1404,7 @@ implements OAuth2User {
     }
 
     public String getUrl() {
-        return this.url;
+        return url;
     }
 
     public void setUrl(String url) {
@@ -328,7 +1412,7 @@ implements OAuth2User {
     }
 
     public String getProfileImageUrl() {
-        return this.profileImageUrl;
+        return profileImageUrl;
     }
 
     public void setProfileImageUrl(String profileImageUrl) {
@@ -336,7 +1420,7 @@ implements OAuth2User {
     }
 
     public String getProfileUrl() {
-        return this.profileUrl;
+        return profileUrl;
     }
 
     public void setProfileUrl(String profileUrl) {
@@ -344,7 +1428,7 @@ implements OAuth2User {
     }
 
     public String getDomain() {
-        return this.domain;
+        return domain;
     }
 
     public void setDomain(String domain) {
@@ -352,7 +1436,7 @@ implements OAuth2User {
     }
 
     public String getWeihao() {
-        return this.weihao;
+        return weihao;
     }
 
     public void setWeihao(String weihao) {
@@ -360,7 +1444,7 @@ implements OAuth2User {
     }
 
     public String getGender() {
-        return this.gender;
+        return gender;
     }
 
     public void setGender(String gender) {
@@ -368,7 +1452,7 @@ implements OAuth2User {
     }
 
     public int getFollowersCount() {
-        return this.followersCount;
+        return followersCount;
     }
 
     public void setFollowersCount(int followersCount) {
@@ -376,7 +1460,7 @@ implements OAuth2User {
     }
 
     public int getFriendsCount() {
-        return this.friendsCount;
+        return friendsCount;
     }
 
     public void setFriendsCount(int friendsCount) {
@@ -384,7 +1468,7 @@ implements OAuth2User {
     }
 
     public int getStatusesCount() {
-        return this.statusesCount;
+        return statusesCount;
     }
 
     public void setStatusesCount(int statusesCount) {
@@ -392,7 +1476,7 @@ implements OAuth2User {
     }
 
     public int getFavouritesCount() {
-        return this.favouritesCount;
+        return favouritesCount;
     }
 
     public void setFavouritesCount(int favouritesCount) {
@@ -400,7 +1484,7 @@ implements OAuth2User {
     }
 
     public LocalDateTime getCreatedAt() {
-        return this.createdAt;
+        return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
@@ -408,7 +1492,7 @@ implements OAuth2User {
     }
 
     public boolean isFollowing() {
-        return this.following;
+        return following;
     }
 
     public void setFollowing(boolean following) {
@@ -416,7 +1500,7 @@ implements OAuth2User {
     }
 
     public boolean isAllowAllActMsg() {
-        return this.allowAllActMsg;
+        return allowAllActMsg;
     }
 
     public void setAllowAllActMsg(boolean allowAllActMsg) {
@@ -424,7 +1508,7 @@ implements OAuth2User {
     }
 
     public boolean isGeoEnabled() {
-        return this.geoEnabled;
+        return geoEnabled;
     }
 
     public void setGeoEnabled(boolean geoEnabled) {
@@ -432,7 +1516,7 @@ implements OAuth2User {
     }
 
     public boolean isVerified() {
-        return this.verified;
+        return verified;
     }
 
     public void setVerified(boolean verified) {
@@ -440,7 +1524,7 @@ implements OAuth2User {
     }
 
     public int getVerifiedType() {
-        return this.verifiedType;
+        return verifiedType;
     }
 
     public void setVerifiedType(int verifiedType) {
@@ -448,7 +1532,7 @@ implements OAuth2User {
     }
 
     public String getRemark() {
-        return this.remark;
+        return remark;
     }
 
     public void setRemark(String remark) {
@@ -456,7 +1540,7 @@ implements OAuth2User {
     }
 
     public Status getStatus() {
-        return this.status;
+        return status;
     }
 
     public void setStatus(Status status) {
@@ -464,7 +1548,7 @@ implements OAuth2User {
     }
 
     public boolean isAllowAllComment() {
-        return this.allowAllComment;
+        return allowAllComment;
     }
 
     public void setAllowAllComment(boolean allowAllComment) {
@@ -472,7 +1556,7 @@ implements OAuth2User {
     }
 
     public String getAvatarLarge() {
-        return this.avatarLarge;
+        return avatarLarge;
     }
 
     public void setAvatarLarge(String avatarLarge) {
@@ -480,7 +1564,7 @@ implements OAuth2User {
     }
 
     public String getAvatarHd() {
-        return this.avatarHd;
+        return avatarHd;
     }
 
     public void setAvatarHd(String avatarHd) {
@@ -488,7 +1572,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedReason() {
-        return this.verifiedReason;
+        return verifiedReason;
     }
 
     public void setVerifiedReason(String verifiedReason) {
@@ -496,7 +1580,7 @@ implements OAuth2User {
     }
 
     public boolean isFollowMe() {
-        return this.followMe;
+        return followMe;
     }
 
     public void setFollowMe(boolean followMe) {
@@ -504,7 +1588,7 @@ implements OAuth2User {
     }
 
     public int getOnlineStatus() {
-        return this.onlineStatus;
+        return onlineStatus;
     }
 
     public void setOnlineStatus(int onlineStatus) {
@@ -512,7 +1596,7 @@ implements OAuth2User {
     }
 
     public int getBiFollowersCount() {
-        return this.biFollowersCount;
+        return biFollowersCount;
     }
 
     public void setBiFollowersCount(int biFollowersCount) {
@@ -520,7 +1604,7 @@ implements OAuth2User {
     }
 
     public String getLang() {
-        return this.lang;
+        return lang;
     }
 
     public void setLang(String lang) {
@@ -528,7 +1612,7 @@ implements OAuth2User {
     }
 
     public int getIsTeenager() {
-        return this.isTeenager;
+        return isTeenager;
     }
 
     public void setIsTeenager(int isTeenager) {
@@ -536,7 +1620,7 @@ implements OAuth2User {
     }
 
     public int getVplusAbility() {
-        return this.vplusAbility;
+        return vplusAbility;
     }
 
     public void setVplusAbility(int vplusAbility) {
@@ -544,7 +1628,7 @@ implements OAuth2User {
     }
 
     public boolean isLikeMe() {
-        return this.likeMe;
+        return likeMe;
     }
 
     public void setLikeMe(boolean likeMe) {
@@ -552,7 +1636,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedContactMobile() {
-        return this.verifiedContactMobile;
+        return verifiedContactMobile;
     }
 
     public void setVerifiedContactMobile(String verifiedContactMobile) {
@@ -560,7 +1644,7 @@ implements OAuth2User {
     }
 
     public boolean isLightRing() {
-        return this.lightRing;
+        return lightRing;
     }
 
     public void setLightRing(boolean lightRing) {
@@ -568,7 +1652,7 @@ implements OAuth2User {
     }
 
     public int getWendaAbility() {
-        return this.wendaAbility;
+        return wendaAbility;
     }
 
     public void setWendaAbility(int wendaAbility) {
@@ -576,7 +1660,7 @@ implements OAuth2User {
     }
 
     public VideoTotalCounter getVideoTotalCounter() {
-        return this.videoTotalCounter;
+        return videoTotalCounter;
     }
 
     public void setVideoTotalCounter(VideoTotalCounter videoTotalCounter) {
@@ -584,7 +1668,7 @@ implements OAuth2User {
     }
 
     public int getNftAbility() {
-        return this.nftAbility;
+        return nftAbility;
     }
 
     public void setNftAbility(int nftAbility) {
@@ -592,7 +1676,7 @@ implements OAuth2User {
     }
 
     public int getEcommerceAbility() {
-        return this.ecommerceAbility;
+        return ecommerceAbility;
     }
 
     public void setEcommerceAbility(int ecommerceAbility) {
@@ -600,7 +1684,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedContactEmail() {
-        return this.verifiedContactEmail;
+        return verifiedContactEmail;
     }
 
     public void setVerifiedContactEmail(String verifiedContactEmail) {
@@ -608,7 +1692,7 @@ implements OAuth2User {
     }
 
     public String getPayDate() {
-        return this.payDate;
+        return payDate;
     }
 
     public void setPayDate(String payDate) {
@@ -616,7 +1700,7 @@ implements OAuth2User {
     }
 
     public int getCreditScore() {
-        return this.creditScore;
+        return creditScore;
     }
 
     public void setCreditScore(int creditScore) {
@@ -624,7 +1708,7 @@ implements OAuth2User {
     }
 
     public int getUserAbilityExtend() {
-        return this.userAbilityExtend;
+        return userAbilityExtend;
     }
 
     public void setUserAbilityExtend(int userAbilityExtend) {
@@ -632,7 +1716,7 @@ implements OAuth2User {
     }
 
     public int getPayRemind() {
-        return this.payRemind;
+        return payRemind;
     }
 
     public void setPayRemind(int payRemind) {
@@ -640,7 +1724,7 @@ implements OAuth2User {
     }
 
     public int getBrandAbility() {
-        return this.brandAbility;
+        return brandAbility;
     }
 
     public void setBrandAbility(int brandAbility) {
@@ -648,7 +1732,7 @@ implements OAuth2User {
     }
 
     public int getSuperTopicNotSynCount() {
-        return this.superTopicNotSynCount;
+        return superTopicNotSynCount;
     }
 
     public void setSuperTopicNotSynCount(int superTopicNotSynCount) {
@@ -656,7 +1740,7 @@ implements OAuth2User {
     }
 
     public int getLiveAbility() {
-        return this.liveAbility;
+        return liveAbility;
     }
 
     public void setLiveAbility(int liveAbility) {
@@ -664,7 +1748,7 @@ implements OAuth2User {
     }
 
     public String getCardid() {
-        return this.cardid;
+        return cardid;
     }
 
     public void setCardid(String cardid) {
@@ -672,7 +1756,7 @@ implements OAuth2User {
     }
 
     public int getIsTeenagerList() {
-        return this.isTeenagerList;
+        return isTeenagerList;
     }
 
     public void setIsTeenagerList(int isTeenagerList) {
@@ -680,7 +1764,7 @@ implements OAuth2User {
     }
 
     public int getVideoStatusCount() {
-        return this.videoStatusCount;
+        return videoStatusCount;
     }
 
     public void setVideoStatusCount(int videoStatusCount) {
@@ -688,7 +1772,7 @@ implements OAuth2User {
     }
 
     public int getNewbrandAbility() {
-        return this.newbrandAbility;
+        return newbrandAbility;
     }
 
     public void setNewbrandAbility(int newbrandAbility) {
@@ -696,7 +1780,7 @@ implements OAuth2User {
     }
 
     public int getVerifiedLevel() {
-        return this.verifiedLevel;
+        return verifiedLevel;
     }
 
     public void setVerifiedLevel(int verifiedLevel) {
@@ -704,7 +1788,7 @@ implements OAuth2User {
     }
 
     public int getUrisk() {
-        return this.urisk;
+        return urisk;
     }
 
     public void setUrisk(int urisk) {
@@ -712,7 +1796,7 @@ implements OAuth2User {
     }
 
     public int getStar() {
-        return this.star;
+        return star;
     }
 
     public void setStar(int star) {
@@ -720,7 +1804,7 @@ implements OAuth2User {
     }
 
     public StatusTotalCounter getStatusTotalCounter() {
-        return this.statusTotalCounter;
+        return statusTotalCounter;
     }
 
     public void setStatusTotalCounter(StatusTotalCounter statusTotalCounter) {
@@ -728,7 +1812,7 @@ implements OAuth2User {
     }
 
     public boolean isHasServiceTel() {
-        return this.hasServiceTel;
+        return hasServiceTel;
     }
 
     public void setHasServiceTel(boolean hasServiceTel) {
@@ -736,7 +1820,7 @@ implements OAuth2User {
     }
 
     public int getBlockApp() {
-        return this.blockApp;
+        return blockApp;
     }
 
     public void setBlockApp(int blockApp) {
@@ -744,7 +1828,7 @@ implements OAuth2User {
     }
 
     public int getPlanetVideo() {
-        return this.planetVideo;
+        return planetVideo;
     }
 
     public void setPlanetVideo(int planetVideo) {
@@ -752,7 +1836,7 @@ implements OAuth2User {
     }
 
     public int getGongyiAbility() {
-        return this.gongyiAbility;
+        return gongyiAbility;
     }
 
     public void setGongyiAbility(int gongyiAbility) {
@@ -760,7 +1844,7 @@ implements OAuth2User {
     }
 
     public int getHardfanAbility() {
-        return this.hardfanAbility;
+        return hardfanAbility;
     }
 
     public void setHardfanAbility(int hardfanAbility) {
@@ -768,7 +1852,7 @@ implements OAuth2User {
     }
 
     public Insecurity getInsecurity() {
-        return this.insecurity;
+        return insecurity;
     }
 
     public void setInsecurity(Insecurity insecurity) {
@@ -776,7 +1860,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedSource() {
-        return this.verifiedSource;
+        return verifiedSource;
     }
 
     public void setVerifiedSource(String verifiedSource) {
@@ -784,7 +1868,7 @@ implements OAuth2User {
     }
 
     public int getUrank() {
-        return this.urank;
+        return urank;
     }
 
     public void setUrank(int urank) {
@@ -792,7 +1876,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedTrade() {
-        return this.verifiedTrade;
+        return verifiedTrade;
     }
 
     public void setVerifiedTrade(String verifiedTrade) {
@@ -800,7 +1884,7 @@ implements OAuth2User {
     }
 
     public int getGreenMode() {
-        return this.greenMode;
+        return greenMode;
     }
 
     public void setGreenMode(int greenMode) {
@@ -808,7 +1892,7 @@ implements OAuth2User {
     }
 
     public int getMbExpireTime() {
-        return this.mbExpireTime;
+        return mbExpireTime;
     }
 
     public void setMbExpireTime(int mbExpireTime) {
@@ -816,7 +1900,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedSourceUrl() {
-        return this.verifiedSourceUrl;
+        return verifiedSourceUrl;
     }
 
     public void setVerifiedSourceUrl(String verifiedSourceUrl) {
@@ -824,7 +1908,7 @@ implements OAuth2User {
     }
 
     public int getVideoMark() {
-        return this.videoMark;
+        return videoMark;
     }
 
     public void setVideoMark(int videoMark) {
@@ -832,7 +1916,7 @@ implements OAuth2User {
     }
 
     public int getLiveStatus() {
-        return this.liveStatus;
+        return liveStatus;
     }
 
     public void setLiveStatus(int liveStatus) {
@@ -840,7 +1924,7 @@ implements OAuth2User {
     }
 
     public boolean isSpecialFollow() {
-        return this.specialFollow;
+        return specialFollow;
     }
 
     public void setSpecialFollow(boolean specialFollow) {
@@ -848,7 +1932,7 @@ implements OAuth2User {
     }
 
     public String getFollowersCountStr() {
-        return this.followersCountStr;
+        return followersCountStr;
     }
 
     public void setFollowersCountStr(String followersCountStr) {
@@ -856,7 +1940,7 @@ implements OAuth2User {
     }
 
     public int getChaohuaAbility() {
-        return this.chaohuaAbility;
+        return chaohuaAbility;
     }
 
     public void setChaohuaAbility(int chaohuaAbility) {
@@ -864,7 +1948,7 @@ implements OAuth2User {
     }
 
     public boolean isLike() {
-        return this.like;
+        return like;
     }
 
     public void setLike(boolean like) {
@@ -872,7 +1956,7 @@ implements OAuth2User {
     }
 
     public int getVerifiedTypeExt() {
-        return this.verifiedTypeExt;
+        return verifiedTypeExt;
     }
 
     public void setVerifiedTypeExt(int verifiedTypeExt) {
@@ -880,7 +1964,7 @@ implements OAuth2User {
     }
 
     public int getPagefriendsCount() {
-        return this.pagefriendsCount;
+        return pagefriendsCount;
     }
 
     public void setPagefriendsCount(int pagefriendsCount) {
@@ -888,7 +1972,7 @@ implements OAuth2User {
     }
 
     public String getCoverImagePhone() {
-        return this.coverImagePhone;
+        return coverImagePhone;
     }
 
     public void setCoverImagePhone(String coverImagePhone) {
@@ -896,7 +1980,7 @@ implements OAuth2User {
     }
 
     public int getPtype() {
-        return this.ptype;
+        return ptype;
     }
 
     public void setPtype(int ptype) {
@@ -904,7 +1988,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedReasonUrl() {
-        return this.verifiedReasonUrl;
+        return verifiedReasonUrl;
     }
 
     public void setVerifiedReasonUrl(String verifiedReasonUrl) {
@@ -912,7 +1996,7 @@ implements OAuth2User {
     }
 
     public int getBlockWord() {
-        return this.blockWord;
+        return blockWord;
     }
 
     public void setBlockWord(int blockWord) {
@@ -920,7 +2004,7 @@ implements OAuth2User {
     }
 
     public int getVerifiedState() {
-        return this.verifiedState;
+        return verifiedState;
     }
 
     public void setVerifiedState(int verifiedState) {
@@ -928,7 +2012,7 @@ implements OAuth2User {
     }
 
     public int getAvatarType() {
-        return this.avatarType;
+        return avatarType;
     }
 
     public void setAvatarType(int avatarType) {
@@ -936,7 +2020,7 @@ implements OAuth2User {
     }
 
     public int getHongbaofei() {
-        return this.hongbaofei;
+        return hongbaofei;
     }
 
     public void setHongbaofei(int hongbaofei) {
@@ -944,7 +2028,7 @@ implements OAuth2User {
     }
 
     public int getVideoPlayCount() {
-        return this.videoPlayCount;
+        return videoPlayCount;
     }
 
     public void setVideoPlayCount(int videoPlayCount) {
@@ -952,7 +2036,7 @@ implements OAuth2User {
     }
 
     public int getMbtype() {
-        return this.mbtype;
+        return mbtype;
     }
 
     public void setMbtype(int mbtype) {
@@ -960,7 +2044,7 @@ implements OAuth2User {
     }
 
     public int getUserAbility() {
-        return this.userAbility;
+        return userAbility;
     }
 
     public void setUserAbility(int userAbility) {
@@ -968,7 +2052,7 @@ implements OAuth2User {
     }
 
     public int getStoryReadState() {
-        return this.storyReadState;
+        return storyReadState;
     }
 
     public void setStoryReadState(int storyReadState) {
@@ -976,7 +2060,7 @@ implements OAuth2User {
     }
 
     public int getMbrank() {
-        return this.mbrank;
+        return mbrank;
     }
 
     public void setMbrank(int mbrank) {
@@ -984,7 +2068,7 @@ implements OAuth2User {
     }
 
     public int getJsonMemberClass() {
-        return this.jsonMemberClass;
+        return jsonMemberClass;
     }
 
     public void setJsonMemberClass(int jsonMemberClass) {
@@ -992,7 +2076,7 @@ implements OAuth2User {
     }
 
     public int getPcNew() {
-        return this.pcNew;
+        return pcNew;
     }
 
     public void setPcNew(int pcNew) {
@@ -1000,7 +2084,7 @@ implements OAuth2User {
     }
 
     public int getPaycolumnAbility() {
-        return this.paycolumnAbility;
+        return paycolumnAbility;
     }
 
     public void setPaycolumnAbility(int paycolumnAbility) {
@@ -1008,7 +2092,7 @@ implements OAuth2User {
     }
 
     public int getBrandAccount() {
-        return this.brandAccount;
+        return brandAccount;
     }
 
     public void setBrandAccount(int brandAccount) {
@@ -1016,7 +2100,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedContactName() {
-        return this.verifiedContactName;
+        return verifiedContactName;
     }
 
     public void setVerifiedContactName(String verifiedContactName) {
@@ -1024,7 +2108,7 @@ implements OAuth2User {
     }
 
     public int getVclubMember() {
-        return this.vclubMember;
+        return vclubMember;
     }
 
     public void setVclubMember(int vclubMember) {
@@ -1032,7 +2116,7 @@ implements OAuth2User {
     }
 
     public int getIsGuardian() {
-        return this.isGuardian;
+        return isGuardian;
     }
 
     public void setIsGuardian(int isGuardian) {
@@ -1040,7 +2124,7 @@ implements OAuth2User {
     }
 
     public int getSvip() {
-        return this.svip;
+        return svip;
     }
 
     public void setSvip(int svip) {
@@ -1048,7 +2132,7 @@ implements OAuth2User {
     }
 
     public String getVerifiedReasonModified() {
-        return this.verifiedReasonModified;
+        return verifiedReasonModified;
     }
 
     public void setVerifiedReasonModified(String verifiedReasonModified) {
@@ -1056,7 +2140,7 @@ implements OAuth2User {
     }
 
     public Integer getBlock() {
-        return this.block;
+        return block;
     }
 
     public void setBlock(Integer block) {
@@ -1064,734 +2148,10 @@ implements OAuth2User {
     }
 
     public Integer getBlockMe() {
-        return this.blockMe;
+        return blockMe;
     }
 
     public void setBlockMe(Integer blockMe) {
         this.blockMe = blockMe;
     }
-
-    public static class Status {
-        private Integer version;
-        private String picStatus;
-        @JsonProperty(value="show_mlevel")
-        private Integer showMlevel;
-        @JsonFormat(pattern="E MMM dd HH:mm:ss '+0800' yyyy", locale="en")
-        @JsonProperty(value="created_at")
-        private LocalDateTime createdAt;
-        @JsonProperty(value="id")
-        private long id;
-        @JsonProperty(value="mid")
-        private String mid;
-        @JsonProperty(value="idstr")
-        private String idstr;
-        @JsonProperty(value="text")
-        private String text;
-        @JsonProperty(value="source")
-        private String source;
-        @JsonProperty(value="favorited")
-        private boolean favorited;
-        @JsonProperty(value="truncated")
-        private boolean truncated;
-        @JsonProperty(value="in_reply_to_status_id")
-        private String inReplyToStatusId;
-        @JsonProperty(value="in_reply_to_user_id")
-        private String inReplyToUserId;
-        @JsonProperty(value="in_reply_to_screen_name")
-        private String inReplyToScreenName;
-        @JsonProperty(value="thumbnail_pic")
-        private String thumbnailPic;
-        @JsonProperty(value="bmiddle_pic")
-        private String bmiddlePic;
-        @JsonProperty(value="original_pic")
-        private String originalPic;
-        @JsonProperty(value="geo")
-        private Object geo;
-        @JsonProperty(value="reposts_count")
-        private int repostsCount;
-        @JsonProperty(value="comments_count")
-        private int commentsCount;
-        @JsonProperty(value="attitudes_count")
-        private int attitudesCount;
-        @JsonProperty(value="mlevel")
-        private int mlevel;
-        @JsonProperty(value="visible")
-        private Visible visible;
-        @JsonProperty(value="isLongText")
-        private boolean isLongText;
-        @JsonProperty(value="hot_weibo_tags")
-        private List<Object> hotWeiboTags;
-        @JsonProperty(value="annotations")
-        private List<AnnotationsItem> annotations;
-        @JsonProperty(value="mblogtype")
-        private int mblogtype;
-        @JsonProperty(value="rid")
-        private String rid;
-        @JsonProperty(value="positive_recom_flag")
-        private int positiveRecomFlag;
-        @JsonProperty(value="can_reprint")
-        private boolean canReprint;
-        @JsonProperty(value="is_show_bulletin")
-        private int isShowBulletin;
-        @JsonProperty(value="hide_flag")
-        private int hideFlag;
-        @JsonProperty(value="hasActionTypeCard")
-        private int hasActionTypeCard;
-        @JsonProperty(value="new_comment_style")
-        private int newCommentStyle;
-        @JsonProperty(value="mblog_vip_type")
-        private int mblogVipType;
-        @JsonProperty(value="content_auth")
-        private int contentAuth;
-        @JsonProperty(value="gif_ids")
-        private String gifIds;
-        @JsonProperty(value="source_type")
-        private int sourceType;
-        @JsonProperty(value="pic_urls")
-        private List<PicUrlsItem> picUrls;
-        @JsonProperty(value="biz_feature")
-        private long bizFeature;
-        @JsonProperty(value="userType")
-        private int userType;
-        @JsonProperty(value="text_tag_tips")
-        private List<Object> textTagTips;
-        @JsonProperty(value="darwin_tags")
-        private List<Object> darwinTags;
-        @JsonProperty(value="pending_approval_count")
-        private int pendingApprovalCount;
-        @JsonProperty(value="pic_num")
-        private int picNum;
-        @JsonProperty(value="is_paid")
-        private boolean isPaid;
-        @JsonProperty(value="reward_exhibition_type")
-        private int rewardExhibitionType;
-        @JsonProperty(value="reprint_cmt_count")
-        private int reprintCmtCount;
-        @JsonProperty(value="can_edit")
-        private boolean canEdit;
-        @JsonProperty(value="textLength")
-        private int textLength;
-        @JsonProperty(value="source_allowclick")
-        private int sourceAllowclick;
-        @JsonProperty(value="show_additional_indication")
-        private int showAdditionalIndication;
-        @JsonProperty(value="comment_manage_info")
-        private CommentManageInfo commentManageInfo;
-        @JsonProperty(value="more_info_type")
-        private int moreInfoType;
-
-        public Integer getVersion() {
-            return this.version;
-        }
-
-        public void setVersion(Integer version) {
-            this.version = version;
-        }
-
-        public String getPicStatus() {
-            return this.picStatus;
-        }
-
-        public void setPicStatus(String picStatus) {
-            this.picStatus = picStatus;
-        }
-
-        public Integer getShowMlevel() {
-            return this.showMlevel;
-        }
-
-        public void setShowMlevel(Integer showMlevel) {
-            this.showMlevel = showMlevel;
-        }
-
-        public LocalDateTime getCreatedAt() {
-            return this.createdAt;
-        }
-
-        public void setCreatedAt(LocalDateTime createdAt) {
-            this.createdAt = createdAt;
-        }
-
-        public long getId() {
-            return this.id;
-        }
-
-        public void setId(long id) {
-            this.id = id;
-        }
-
-        public String getMid() {
-            return this.mid;
-        }
-
-        public void setMid(String mid) {
-            this.mid = mid;
-        }
-
-        public String getIdstr() {
-            return this.idstr;
-        }
-
-        public void setIdstr(String idstr) {
-            this.idstr = idstr;
-        }
-
-        public String getText() {
-            return this.text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
-        }
-
-        public String getSource() {
-            return this.source;
-        }
-
-        public void setSource(String source) {
-            this.source = source;
-        }
-
-        public boolean isFavorited() {
-            return this.favorited;
-        }
-
-        public void setFavorited(boolean favorited) {
-            this.favorited = favorited;
-        }
-
-        public boolean isTruncated() {
-            return this.truncated;
-        }
-
-        public void setTruncated(boolean truncated) {
-            this.truncated = truncated;
-        }
-
-        public String getInReplyToStatusId() {
-            return this.inReplyToStatusId;
-        }
-
-        public void setInReplyToStatusId(String inReplyToStatusId) {
-            this.inReplyToStatusId = inReplyToStatusId;
-        }
-
-        public String getInReplyToUserId() {
-            return this.inReplyToUserId;
-        }
-
-        public void setInReplyToUserId(String inReplyToUserId) {
-            this.inReplyToUserId = inReplyToUserId;
-        }
-
-        public String getInReplyToScreenName() {
-            return this.inReplyToScreenName;
-        }
-
-        public void setInReplyToScreenName(String inReplyToScreenName) {
-            this.inReplyToScreenName = inReplyToScreenName;
-        }
-
-        public String getThumbnailPic() {
-            return this.thumbnailPic;
-        }
-
-        public void setThumbnailPic(String thumbnailPic) {
-            this.thumbnailPic = thumbnailPic;
-        }
-
-        public String getBmiddlePic() {
-            return this.bmiddlePic;
-        }
-
-        public void setBmiddlePic(String bmiddlePic) {
-            this.bmiddlePic = bmiddlePic;
-        }
-
-        public String getOriginalPic() {
-            return this.originalPic;
-        }
-
-        public void setOriginalPic(String originalPic) {
-            this.originalPic = originalPic;
-        }
-
-        public Object getGeo() {
-            return this.geo;
-        }
-
-        public void setGeo(Object geo) {
-            this.geo = geo;
-        }
-
-        public int getRepostsCount() {
-            return this.repostsCount;
-        }
-
-        public void setRepostsCount(int repostsCount) {
-            this.repostsCount = repostsCount;
-        }
-
-        public int getCommentsCount() {
-            return this.commentsCount;
-        }
-
-        public void setCommentsCount(int commentsCount) {
-            this.commentsCount = commentsCount;
-        }
-
-        public int getAttitudesCount() {
-            return this.attitudesCount;
-        }
-
-        public void setAttitudesCount(int attitudesCount) {
-            this.attitudesCount = attitudesCount;
-        }
-
-        public int getMlevel() {
-            return this.mlevel;
-        }
-
-        public void setMlevel(int mlevel) {
-            this.mlevel = mlevel;
-        }
-
-        public Visible getVisible() {
-            return this.visible;
-        }
-
-        public void setVisible(Visible visible) {
-            this.visible = visible;
-        }
-
-        public boolean isLongText() {
-            return this.isLongText;
-        }
-
-        public void setLongText(boolean longText) {
-            this.isLongText = longText;
-        }
-
-        public List<Object> getHotWeiboTags() {
-            return this.hotWeiboTags;
-        }
-
-        public void setHotWeiboTags(List<Object> hotWeiboTags) {
-            this.hotWeiboTags = hotWeiboTags;
-        }
-
-        public List<AnnotationsItem> getAnnotations() {
-            return this.annotations;
-        }
-
-        public void setAnnotations(List<AnnotationsItem> annotations) {
-            this.annotations = annotations;
-        }
-
-        public int getMblogtype() {
-            return this.mblogtype;
-        }
-
-        public void setMblogtype(int mblogtype) {
-            this.mblogtype = mblogtype;
-        }
-
-        public String getRid() {
-            return this.rid;
-        }
-
-        public void setRid(String rid) {
-            this.rid = rid;
-        }
-
-        public int getPositiveRecomFlag() {
-            return this.positiveRecomFlag;
-        }
-
-        public void setPositiveRecomFlag(int positiveRecomFlag) {
-            this.positiveRecomFlag = positiveRecomFlag;
-        }
-
-        public boolean isCanReprint() {
-            return this.canReprint;
-        }
-
-        public void setCanReprint(boolean canReprint) {
-            this.canReprint = canReprint;
-        }
-
-        public int getIsShowBulletin() {
-            return this.isShowBulletin;
-        }
-
-        public void setIsShowBulletin(int isShowBulletin) {
-            this.isShowBulletin = isShowBulletin;
-        }
-
-        public int getHideFlag() {
-            return this.hideFlag;
-        }
-
-        public void setHideFlag(int hideFlag) {
-            this.hideFlag = hideFlag;
-        }
-
-        public int getHasActionTypeCard() {
-            return this.hasActionTypeCard;
-        }
-
-        public void setHasActionTypeCard(int hasActionTypeCard) {
-            this.hasActionTypeCard = hasActionTypeCard;
-        }
-
-        public int getNewCommentStyle() {
-            return this.newCommentStyle;
-        }
-
-        public void setNewCommentStyle(int newCommentStyle) {
-            this.newCommentStyle = newCommentStyle;
-        }
-
-        public int getMblogVipType() {
-            return this.mblogVipType;
-        }
-
-        public void setMblogVipType(int mblogVipType) {
-            this.mblogVipType = mblogVipType;
-        }
-
-        public int getContentAuth() {
-            return this.contentAuth;
-        }
-
-        public void setContentAuth(int contentAuth) {
-            this.contentAuth = contentAuth;
-        }
-
-        public String getGifIds() {
-            return this.gifIds;
-        }
-
-        public void setGifIds(String gifIds) {
-            this.gifIds = gifIds;
-        }
-
-        public int getSourceType() {
-            return this.sourceType;
-        }
-
-        public void setSourceType(int sourceType) {
-            this.sourceType = sourceType;
-        }
-
-        public List<PicUrlsItem> getPicUrls() {
-            return this.picUrls;
-        }
-
-        public void setPicUrls(List<PicUrlsItem> picUrls) {
-            this.picUrls = picUrls;
-        }
-
-        public long getBizFeature() {
-            return this.bizFeature;
-        }
-
-        public void setBizFeature(long bizFeature) {
-            this.bizFeature = bizFeature;
-        }
-
-        public int getUserType() {
-            return this.userType;
-        }
-
-        public void setUserType(int userType) {
-            this.userType = userType;
-        }
-
-        public List<Object> getTextTagTips() {
-            return this.textTagTips;
-        }
-
-        public void setTextTagTips(List<Object> textTagTips) {
-            this.textTagTips = textTagTips;
-        }
-
-        public List<Object> getDarwinTags() {
-            return this.darwinTags;
-        }
-
-        public void setDarwinTags(List<Object> darwinTags) {
-            this.darwinTags = darwinTags;
-        }
-
-        public int getPendingApprovalCount() {
-            return this.pendingApprovalCount;
-        }
-
-        public void setPendingApprovalCount(int pendingApprovalCount) {
-            this.pendingApprovalCount = pendingApprovalCount;
-        }
-
-        public int getPicNum() {
-            return this.picNum;
-        }
-
-        public void setPicNum(int picNum) {
-            this.picNum = picNum;
-        }
-
-        public boolean isPaid() {
-            return this.isPaid;
-        }
-
-        public void setPaid(boolean paid) {
-            this.isPaid = paid;
-        }
-
-        public int getRewardExhibitionType() {
-            return this.rewardExhibitionType;
-        }
-
-        public void setRewardExhibitionType(int rewardExhibitionType) {
-            this.rewardExhibitionType = rewardExhibitionType;
-        }
-
-        public int getReprintCmtCount() {
-            return this.reprintCmtCount;
-        }
-
-        public void setReprintCmtCount(int reprintCmtCount) {
-            this.reprintCmtCount = reprintCmtCount;
-        }
-
-        public boolean isCanEdit() {
-            return this.canEdit;
-        }
-
-        public void setCanEdit(boolean canEdit) {
-            this.canEdit = canEdit;
-        }
-
-        public int getTextLength() {
-            return this.textLength;
-        }
-
-        public void setTextLength(int textLength) {
-            this.textLength = textLength;
-        }
-
-        public int getSourceAllowclick() {
-            return this.sourceAllowclick;
-        }
-
-        public void setSourceAllowclick(int sourceAllowclick) {
-            this.sourceAllowclick = sourceAllowclick;
-        }
-
-        public int getShowAdditionalIndication() {
-            return this.showAdditionalIndication;
-        }
-
-        public void setShowAdditionalIndication(int showAdditionalIndication) {
-            this.showAdditionalIndication = showAdditionalIndication;
-        }
-
-        public CommentManageInfo getCommentManageInfo() {
-            return this.commentManageInfo;
-        }
-
-        public void setCommentManageInfo(CommentManageInfo commentManageInfo) {
-            this.commentManageInfo = commentManageInfo;
-        }
-
-        public int getMoreInfoType() {
-            return this.moreInfoType;
-        }
-
-        public void setMoreInfoType(int moreInfoType) {
-            this.moreInfoType = moreInfoType;
-        }
-    }
-
-    public static class VideoTotalCounter {
-        @JsonProperty(value="play_cnt")
-        private int playCnt;
-
-        public int getPlayCnt() {
-            return this.playCnt;
-        }
-
-        public void setPlayCnt(int playCnt) {
-            this.playCnt = playCnt;
-        }
-    }
-
-    public static class StatusTotalCounter {
-        @JsonProperty(value="total_cnt")
-        private int totalCnt;
-        @JsonProperty(value="repost_cnt")
-        private int repostCnt;
-        @JsonProperty(value="comment_like_cnt")
-        private int commentLikeCnt;
-        @JsonProperty(value="like_cnt")
-        private int likeCnt;
-        @JsonProperty(value="comment_cnt")
-        private int commentCnt;
-
-        public int getTotalCnt() {
-            return this.totalCnt;
-        }
-
-        public void setTotalCnt(int totalCnt) {
-            this.totalCnt = totalCnt;
-        }
-
-        public int getRepostCnt() {
-            return this.repostCnt;
-        }
-
-        public void setRepostCnt(int repostCnt) {
-            this.repostCnt = repostCnt;
-        }
-
-        public int getCommentLikeCnt() {
-            return this.commentLikeCnt;
-        }
-
-        public void setCommentLikeCnt(int commentLikeCnt) {
-            this.commentLikeCnt = commentLikeCnt;
-        }
-
-        public int getLikeCnt() {
-            return this.likeCnt;
-        }
-
-        public void setLikeCnt(int likeCnt) {
-            this.likeCnt = likeCnt;
-        }
-
-        public int getCommentCnt() {
-            return this.commentCnt;
-        }
-
-        public void setCommentCnt(int commentCnt) {
-            this.commentCnt = commentCnt;
-        }
-    }
-
-    public static class Insecurity {
-        @JsonProperty(value="sexual_content")
-        private boolean sexualContent;
-
-        public boolean isSexualContent() {
-            return this.sexualContent;
-        }
-
-        public void setSexualContent(boolean sexualContent) {
-            this.sexualContent = sexualContent;
-        }
-    }
-
-    public static class PicUrlsItem {
-        @JsonProperty(value="thumbnail_pic")
-        private String thumbnailPic;
-
-        public String getThumbnailPic() {
-            return this.thumbnailPic;
-        }
-
-        public void setThumbnailPic(String thumbnailPic) {
-            this.thumbnailPic = thumbnailPic;
-        }
-    }
-
-    public static class CommentManageInfo {
-        @JsonProperty(value="comment_permission_type")
-        private int commentPermissionType;
-        @JsonProperty(value="comment_sort_type")
-        private int commentSortType;
-        @JsonProperty(value="approval_comment_type")
-        private int approvalCommentType;
-
-        public int getCommentPermissionType() {
-            return this.commentPermissionType;
-        }
-
-        public void setCommentPermissionType(int commentPermissionType) {
-            this.commentPermissionType = commentPermissionType;
-        }
-
-        public int getCommentSortType() {
-            return this.commentSortType;
-        }
-
-        public void setCommentSortType(int commentSortType) {
-            this.commentSortType = commentSortType;
-        }
-
-        public int getApprovalCommentType() {
-            return this.approvalCommentType;
-        }
-
-        public void setApprovalCommentType(int approvalCommentType) {
-            this.approvalCommentType = approvalCommentType;
-        }
-    }
-
-    public static class AnnotationsItem {
-        @JsonProperty(value="mapi_request")
-        private boolean mapiRequest;
-        @JsonProperty(value="client_mblogid")
-        private String clientMblogid;
-        @JsonProperty(value="photo_sub_type")
-        private String photoSubType;
-
-        public boolean isMapiRequest() {
-            return this.mapiRequest;
-        }
-
-        public void setMapiRequest(boolean mapiRequest) {
-            this.mapiRequest = mapiRequest;
-        }
-
-        public String getClientMblogid() {
-            return this.clientMblogid;
-        }
-
-        public void setClientMblogid(String clientMblogid) {
-            this.clientMblogid = clientMblogid;
-        }
-
-        public String getPhotoSubType() {
-            return this.photoSubType;
-        }
-
-        public void setPhotoSubType(String photoSubType) {
-            this.photoSubType = photoSubType;
-        }
-    }
-
-    public static class Visible {
-        @JsonProperty(value="list_id")
-        private int listId;
-        @JsonProperty(value="type")
-        private int type;
-
-        public int getListId() {
-            return this.listId;
-        }
-
-        public void setListId(int listId) {
-            this.listId = listId;
-        }
-
-        public int getType() {
-            return this.type;
-        }
-
-        public void setType(int type) {
-            this.type = type;
-        }
-    }
 }
-

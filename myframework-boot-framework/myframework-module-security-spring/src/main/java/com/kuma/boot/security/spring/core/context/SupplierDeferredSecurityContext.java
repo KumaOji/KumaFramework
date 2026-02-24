@@ -1,44 +1,55 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.logging.Log
- *  org.apache.commons.logging.LogFactory
- *  org.springframework.core.log.LogMessage
- *  org.springframework.security.core.context.DeferredSecurityContext
- *  org.springframework.security.core.context.SecurityContext
- *  org.springframework.security.core.context.SecurityContextHolderStrategy
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.core.context;
 
 import java.util.function.Supplier;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.log.LogMessage;
 import org.springframework.security.core.context.DeferredSecurityContext;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 
-public final class SupplierDeferredSecurityContext
-implements DeferredSecurityContext {
-    private static final Log logger = LogFactory.getLog(SupplierDeferredSecurityContext.class);
+public final class SupplierDeferredSecurityContext implements DeferredSecurityContext {
+
+    private static final Logger logger = LoggerFactory.getLogger(SupplierDeferredSecurityContext.class);
     private final Supplier<SecurityContext> supplier;
+
     private final SecurityContextHolderStrategy strategy;
+
     private SecurityContext securityContext;
+
     private boolean missingContext;
 
-    public SupplierDeferredSecurityContext(Supplier<SecurityContext> supplier, SecurityContextHolderStrategy strategy) {
+    public SupplierDeferredSecurityContext(
+            Supplier<SecurityContext> supplier, SecurityContextHolderStrategy strategy) {
         this.supplier = supplier;
         this.strategy = strategy;
     }
 
+    @Override
     public SecurityContext get() {
-        this.init();
+        init();
         return this.securityContext;
     }
 
+    @Override
     public boolean isGenerated() {
-        this.init();
+        init();
         return this.missingContext;
     }
 
@@ -46,14 +57,14 @@ implements DeferredSecurityContext {
         if (this.securityContext != null) {
             return;
         }
+
         this.securityContext = this.supplier.get();
-        boolean bl = this.missingContext = this.securityContext == null;
+        this.missingContext = (this.securityContext == null);
         if (this.missingContext) {
             this.securityContext = this.strategy.createEmptyContext();
             if (logger.isTraceEnabled()) {
-                logger.trace((Object)LogMessage.format((String)"Created %s", (Object)this.securityContext));
+                logger.trace(String.valueOf(LogMessage.format("Created %s", this.securityContext)));
             }
         }
     }
 }
-

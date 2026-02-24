@@ -1,50 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.servlet.Filter
- *  jakarta.servlet.http.HttpServletRequest
- *  org.springframework.context.ApplicationContext
- *  org.springframework.http.MediaType
- *  org.springframework.security.authentication.AuthenticationDetailsSource
- *  org.springframework.security.authentication.AuthenticationManager
- *  org.springframework.security.authentication.AuthenticationProvider
- *  org.springframework.security.config.annotation.SecurityConfigurerAdapter
- *  org.springframework.security.config.annotation.web.HttpSecurityBuilder
- *  org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer
- *  org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
- *  org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer$AuthorizedUrl
- *  org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer
- *  org.springframework.security.web.AuthenticationEntryPoint
- *  org.springframework.security.web.DefaultSecurityFilterChain
- *  org.springframework.security.web.PortMapper
- *  org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
- *  org.springframework.security.web.authentication.AuthenticationEntryPointFailureHandler
- *  org.springframework.security.web.authentication.AuthenticationFailureHandler
- *  org.springframework.security.web.authentication.AuthenticationSuccessHandler
- *  org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
- *  org.springframework.security.web.authentication.RememberMeServices
- *  org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
- *  org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
- *  org.springframework.security.web.authentication.logout.LogoutFilter
- *  org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
- *  org.springframework.security.web.savedrequest.RequestCache
- *  org.springframework.security.web.util.matcher.AndRequestMatcher
- *  org.springframework.security.web.util.matcher.MediaTypeRequestMatcher
- *  org.springframework.security.web.util.matcher.NegatedRequestMatcher
- *  org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher
- *  org.springframework.security.web.util.matcher.RequestMatcher
- *  org.springframework.util.Assert
- *  org.springframework.web.accept.ContentNegotiationStrategy
- *  org.springframework.web.accept.HeaderContentNegotiationStrategy
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension;
 
 import com.kuma.boot.security.spring.authentication.response.entrypoint.JsonAuthenticationEntryPoint;
 import com.kuma.boot.security.spring.authentication.response.failure.JsonExtensionLoginAuthenticationFailureHandler;
 import com.kuma.boot.security.spring.authentication.response.success.JsonExtensionLoginAuthenticationSuccessHandler;
 import com.kuma.boot.security.spring.oauth2.token.JwtTokenGenerator;
-import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,263 +56,611 @@ import org.springframework.util.Assert;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 
-public abstract class AbstractExtensionLoginFilterConfigurer<H extends HttpSecurityBuilder<H>, C extends AbstractExtensionLoginFilterConfigurer<H, C, F, A>, F extends AbstractAuthenticationProcessingFilter, A extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, H>>
-extends AbstractHttpConfigurer<AbstractExtensionLoginFilterConfigurer<H, C, F, A>, H> {
+/**
+ * 认证过滤器{@link AbstractAuthenticationProcessingFilter}s
+ *
+ * @author kuma
+ * @version 2023.07
+ * @see AbstractHttpConfigurer
+ * @since 2023-07-10 17:41:35
+ */
+public abstract class AbstractExtensionLoginFilterConfigurer<
+        H extends HttpSecurityBuilder<H>,
+        C extends AbstractExtensionLoginFilterConfigurer<H, C, F, A>,
+        F extends AbstractAuthenticationProcessingFilter,
+        A extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, H>>
+        extends AbstractHttpConfigurer<AbstractExtensionLoginFilterConfigurer<H, C, F, A>, H> {
+
+    /**
+     * 配置器适配器
+     */
     private final A configurerAdapter;
+
+    /**
+     * 授权过滤器
+     */
     private F authFilter;
+
+    /**
+     * 身份验证详细信息来源
+     */
     private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource;
+
+    /**
+     * 成功处理程序
+     */
     private AuthenticationSuccessHandler successHandler;
+
+    /**
+     * 认证入口点
+     */
     private AuthenticationEntryPoint authenticationEntryPoint;
+
+    /**
+     * 登录处理url
+     */
     private String loginProcessingUrl;
+
+    /**
+     * 故障处理程序
+     */
     private AuthenticationFailureHandler failureHandler;
+
+    /**
+     * 允许所有
+     */
     private boolean permitAll;
+
+    /**
+     * 失效网址
+     */
     private String failureUrl;
+
     private JwtTokenGenerator jwtTokenGenerator;
 
-    public AbstractExtensionLoginFilterConfigurer(A configurerAdapter, F authenticationFilter, String defaultLoginProcessingUrl) {
+    /**
+     * 抽象扩展登录过滤器配置程序
+     *
+     * @param configurerAdapter         配置器适配器
+     * @param authenticationFilter      身份验证过滤器
+     * @param defaultLoginProcessingUrl 默认登录处理url
+     * @since 2023-07-10 17:41:36
+     */
+    public AbstractExtensionLoginFilterConfigurer(
+            A configurerAdapter, F authenticationFilter, String defaultLoginProcessingUrl) {
         this.configurerAdapter = configurerAdapter;
         this.authFilter = authenticationFilter;
         if (defaultLoginProcessingUrl != null) {
-            this.loginProcessingUrl(defaultLoginProcessingUrl);
+            loginProcessingUrl(defaultLoginProcessingUrl);
         }
     }
 
+    /**
+     * 默认成功url
+     *
+     * @param defaultSuccessUrl 默认成功url
+     * @return {@link C }
+     * @since 2023-07-10 17:41:37
+     */
     public final C defaultSuccessUrl(String defaultSuccessUrl) {
-        return this.defaultSuccessUrl(defaultSuccessUrl, false);
+        return defaultSuccessUrl(defaultSuccessUrl, false);
     }
 
+    /**
+     * 默认成功url
+     *
+     * @param defaultSuccessUrl 默认成功url
+     * @param alwaysUse         始终使用
+     * @return {@link C }
+     * @since 2023-07-10 17:41:37
+     */
     public final C defaultSuccessUrl(String defaultSuccessUrl, boolean alwaysUse) {
-        SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
+        SavedRequestAwareAuthenticationSuccessHandler handler =
+                new SavedRequestAwareAuthenticationSuccessHandler();
         handler.setDefaultTargetUrl(defaultSuccessUrl);
         handler.setAlwaysUseDefaultTargetUrl(alwaysUse);
-        return this.successHandler((AuthenticationSuccessHandler)handler);
+        return successHandler(handler);
     }
 
+    /**
+     * 登录处理url
+     *
+     * @param loginProcessingUrl 登录处理url
+     * @return {@link C }
+     * @since 2023-07-10 17:41:37
+     */
     public C loginProcessingUrl(String loginProcessingUrl) {
         this.loginProcessingUrl = loginProcessingUrl;
-        this.authFilter.setRequiresAuthenticationRequestMatcher(this.createLoginProcessingUrlMatcher(loginProcessingUrl));
-        return this.getSelf();
+        this.authFilter.setRequiresAuthenticationRequestMatcher(
+                createLoginProcessingUrlMatcher(loginProcessingUrl));
+        return getSelf();
     }
 
-    protected abstract RequestMatcher createLoginProcessingUrlMatcher(String var1);
+    /**
+     * 创建登录处理url匹配器
+     *
+     * @param loginProcessingUrl 登录处理url
+     * @return {@link RequestMatcher }
+     * @since 2023-07-10 17:41:38
+     */
+    protected abstract RequestMatcher createLoginProcessingUrlMatcher(String loginProcessingUrl);
 
-    public final C authenticationDetailsSource(AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
+    /**
+     * 身份验证详细信息来源
+     *
+     * @param authenticationDetailsSource 身份验证详细信息来源
+     * @return {@link C }
+     * @since 2023-07-10 17:41:38
+     */
+    public final C authenticationDetailsSource(
+            AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
         this.authenticationDetailsSource = authenticationDetailsSource;
-        return this.getSelf();
+        return getSelf();
     }
 
+    /**
+     * 成功处理程序
+     *
+     * @param successHandler 成功处理程序
+     * @return {@link C }
+     * @since 2023-07-10 17:41:38
+     */
     public final C successHandler(AuthenticationSuccessHandler successHandler) {
         this.successHandler = successHandler;
-        return this.getSelf();
+        return getSelf();
     }
 
+    /**
+     * 认证入口点
+     *
+     * @param authenticationEntryPoint 认证入口点
+     * @return {@link C }
+     * @since 2023-07-10 17:41:38
+     */
     public final C authenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
         this.authenticationEntryPoint = authenticationEntryPoint;
-        return this.getSelf();
+        return getSelf();
     }
 
+    /**
+     * 允许所有
+     *
+     * @return {@link C }
+     * @since 2023-07-10 17:41:39
+     */
     public final C permitAll() {
-        return this.permitAll(true);
+        return permitAll(true);
     }
 
+    /**
+     * 允许所有
+     *
+     * @param permitAll 允许所有
+     * @return {@link C }
+     * @since 2023-07-10 17:41:39
+     */
     public final C permitAll(boolean permitAll) {
         this.permitAll = permitAll;
-        return this.getSelf();
+        return getSelf();
     }
 
+    /**
+     * 失效网址
+     *
+     * @param authenticationFailureUrl 认证失败url
+     * @return {@link C }
+     * @since 2023-07-10 17:41:39
+     */
     public final C failureUrl(String authenticationFailureUrl) {
-        C result = this.failureHandler((AuthenticationFailureHandler)new SimpleUrlAuthenticationFailureHandler(authenticationFailureUrl));
+        C result =
+                failureHandler(new SimpleUrlAuthenticationFailureHandler(authenticationFailureUrl));
         this.failureUrl = authenticationFailureUrl;
         return result;
     }
 
+    /**
+     * 故障处理程序
+     *
+     * @param authenticationFailureHandler 身份验证失败处理程序
+     * @return {@link C }
+     * @since 2023-07-10 17:41:40
+     */
     public final C failureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
         this.failureUrl = null;
         this.failureHandler = authenticationFailureHandler;
-        return this.getSelf();
+        return getSelf();
     }
 
+    /**
+     * 与
+     *
+     * @return {@link A }
+     * @since 2023-07-10 17:41:40
+     */
     public A with() {
         return this.configurerAdapter;
     }
 
+    /**
+     * init
+     *
+     * @param http http
+     * @since 2023-07-10 17:41:40
+     */
+    @Override
     public void init(H http) {
-        this.updateAccessDefaults(http);
-        this.registerDefaultAuthenticationEntryPoint(http);
-        AuthenticationProvider authenticationProvider = this.authenticationProvider(http);
-        http.authenticationProvider((AuthenticationProvider)this.postProcess(authenticationProvider));
+        updateAccessDefaults(http);
+        // updateAuthenticationDefaults();
+        registerDefaultAuthenticationEntryPoint(http);
+
+        AuthenticationProvider authenticationProvider = authenticationProvider(http);
+        http.authenticationProvider(postProcess(authenticationProvider));
+
         if (this.successHandler == null) {
-            this.successHandler(this.defaultSuccessHandler(http));
+            successHandler(defaultSuccessHandler(http));
         }
         if (this.failureHandler == null) {
-            this.failureHandler(this.defaultFailureHandler(http));
+            failureHandler(defaultFailureHandler(http));
         }
     }
 
-    protected abstract AuthenticationProvider authenticationProvider(H var1);
+    /**
+     * 身份验证提供程序
+     *
+     * @param http http
+     * @return {@link AuthenticationProvider }
+     * @since 2023-07-10 17:41:40
+     */
+    protected abstract AuthenticationProvider authenticationProvider(H http);
 
+    /**
+     * 默认成功处理程序
+     *
+     * @param http http
+     * @return {@link AuthenticationSuccessHandler }
+     * @since 2023-07-10 17:41:41
+     */
     protected AuthenticationSuccessHandler defaultSuccessHandler(H http) {
         if (this.jwtTokenGenerator == null) {
-            ApplicationContext applicationContext = (ApplicationContext)http.getSharedObject(ApplicationContext.class);
-            this.jwtTokenGenerator = this.getBeanOrNull(applicationContext, JwtTokenGenerator.class);
+            ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
+            jwtTokenGenerator = getBeanOrNull(applicationContext, JwtTokenGenerator.class);
         }
-        Assert.notNull((Object)this.jwtTokenGenerator, (String)"jwtTokenGenerator is required");
-        SavedRequestAwareAuthenticationSuccessHandler savedRequestAwareAuthenticationSuccessHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        Assert.notNull(jwtTokenGenerator, "jwtTokenGenerator is required");
+
+        SavedRequestAwareAuthenticationSuccessHandler
+                savedRequestAwareAuthenticationSuccessHandler =
+                new SavedRequestAwareAuthenticationSuccessHandler();
         savedRequestAwareAuthenticationSuccessHandler.setDefaultTargetUrl("/login");
         savedRequestAwareAuthenticationSuccessHandler.setAlwaysUseDefaultTargetUrl(false);
-        return new JsonExtensionLoginAuthenticationSuccessHandler(savedRequestAwareAuthenticationSuccessHandler, this.jwtTokenGenerator);
+
+        return new JsonExtensionLoginAuthenticationSuccessHandler(
+                savedRequestAwareAuthenticationSuccessHandler, jwtTokenGenerator);
     }
 
     public JwtTokenGenerator getJwtTokenGenerator() {
-        return this.jwtTokenGenerator;
+        return jwtTokenGenerator;
     }
 
     public void setJwtTokenGenerator(JwtTokenGenerator jwtTokenGenerator) {
         this.jwtTokenGenerator = jwtTokenGenerator;
     }
 
+    /**
+     * 默认故障处理程序
+     *
+     * @param http http
+     * @return {@link AuthenticationFailureHandler }
+     * @since 2023-07-10 17:41:41
+     */
     protected AuthenticationFailureHandler defaultFailureHandler(H http) {
         return new JsonExtensionLoginAuthenticationFailureHandler();
     }
 
+    /**
+     * 更新身份验证默认值
+     *
+     * @since 2023-07-10 17:41:41
+     */
     protected final void updateAuthenticationDefaults() {
         if (this.failureHandler == null) {
-            this.failureHandler((AuthenticationFailureHandler)new AuthenticationEntryPointFailureHandler((AuthenticationEntryPoint)new JsonAuthenticationEntryPoint()));
+            failureHandler(
+                    new AuthenticationEntryPointFailureHandler(new JsonAuthenticationEntryPoint()));
         }
     }
 
+    /**
+     * 注册默认身份验证入口点
+     *
+     * @param http http
+     * @since 2023-07-10 17:41:42
+     */
     protected final void registerDefaultAuthenticationEntryPoint(H http) {
-        if (this.authenticationEntryPoint != null) {
+        if (authenticationEntryPoint != null) {
             this.authenticationEntryPoint = new JsonAuthenticationEntryPoint();
         }
-        this.registerAuthenticationEntryPoint(http, this.authenticationEntryPoint);
+        registerAuthenticationEntryPoint(http, this.authenticationEntryPoint);
     }
 
-    protected final void registerAuthenticationEntryPoint(H http, AuthenticationEntryPoint authenticationEntryPoint) {
-        ExceptionHandlingConfigurer exceptionHandling = (ExceptionHandlingConfigurer)http.getConfigurer(ExceptionHandlingConfigurer.class);
+    /**
+     * 注册认证入口点
+     *
+     * @param http                     http
+     * @param authenticationEntryPoint 认证入口点
+     * @since 2023-07-10 17:41:42
+     */
+    @SuppressWarnings("unchecked")
+    protected final void registerAuthenticationEntryPoint(
+            H http, AuthenticationEntryPoint authenticationEntryPoint) {
+        ExceptionHandlingConfigurer<H> exceptionHandling =
+                http.getConfigurer(ExceptionHandlingConfigurer.class);
         if (exceptionHandling == null) {
             return;
         }
-        exceptionHandling.defaultAuthenticationEntryPointFor((AuthenticationEntryPoint)this.postProcess(authenticationEntryPoint), this.getAuthenticationEntryPointMatcher(http));
+        exceptionHandling.defaultAuthenticationEntryPointFor(
+                postProcess(authenticationEntryPoint), getAuthenticationEntryPointMatcher(http));
     }
 
+    /**
+     * 获取身份验证入口点匹配器
+     *
+     * @param http http
+     * @return {@link RequestMatcher }
+     * @since 2023-07-10 17:41:43
+     */
     protected final RequestMatcher getAuthenticationEntryPointMatcher(H http) {
-        ContentNegotiationStrategy contentNegotiationStrategy = (ContentNegotiationStrategy)http.getSharedObject(ContentNegotiationStrategy.class);
+        ContentNegotiationStrategy contentNegotiationStrategy =
+                http.getSharedObject(ContentNegotiationStrategy.class);
         if (contentNegotiationStrategy == null) {
             contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
         }
-        MediaTypeRequestMatcher mediaMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy, new MediaType[]{MediaType.APPLICATION_XHTML_XML, new MediaType("image", "*"), MediaType.TEXT_HTML, MediaType.TEXT_PLAIN});
+        MediaTypeRequestMatcher mediaMatcher =
+                new MediaTypeRequestMatcher(
+                        contentNegotiationStrategy,
+                        MediaType.APPLICATION_XHTML_XML,
+                        new MediaType("image", "*"),
+                        MediaType.TEXT_HTML,
+                        MediaType.TEXT_PLAIN);
+
         mediaMatcher.setIgnoredMediaTypes(Collections.singleton(MediaType.ALL));
-        NegatedRequestMatcher notXRequestedWith = new NegatedRequestMatcher((RequestMatcher)new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"));
+        RequestMatcher notXRequestedWith =
+                new NegatedRequestMatcher(
+                        new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"));
         return new AndRequestMatcher(Arrays.asList(notXRequestedWith, mediaMatcher));
     }
 
-    public void configure(H http) throws Exception {
-        RememberMeServices rememberMeServices;
-        SessionAuthenticationStrategy sessionAuthenticationStrategy;
-        RequestCache requestCache;
-        PortMapper portMapper = (PortMapper)http.getSharedObject(PortMapper.class);
-        if (portMapper != null && this.authenticationEntryPoint instanceof LoginUrlAuthenticationEntryPoint) {
-            ((LoginUrlAuthenticationEntryPoint)this.authenticationEntryPoint).setPortMapper(portMapper);
+    /**
+     * 配置
+     *
+     * @param http http
+     * @since 2023-07-10 17:41:43
+     */
+    @Override
+    public void configure(H http) {
+        PortMapper portMapper = http.getSharedObject(PortMapper.class);
+        if (portMapper != null
+                && this.authenticationEntryPoint instanceof LoginUrlAuthenticationEntryPoint) {
+            ((LoginUrlAuthenticationEntryPoint) this.authenticationEntryPoint)
+                    .setPortMapper(portMapper);
         }
-        if ((requestCache = (RequestCache)http.getSharedObject(RequestCache.class)) != null && this.successHandler instanceof SavedRequestAwareAuthenticationSuccessHandler) {
-            ((SavedRequestAwareAuthenticationSuccessHandler)this.successHandler).setRequestCache(requestCache);
+
+        RequestCache requestCache = http.getSharedObject(RequestCache.class);
+        if (requestCache != null
+                && this.successHandler instanceof SavedRequestAwareAuthenticationSuccessHandler) {
+            ((SavedRequestAwareAuthenticationSuccessHandler) this.successHandler)
+                    .setRequestCache(requestCache);
         }
-        this.authFilter.setAuthenticationManager((AuthenticationManager)http.getSharedObject(AuthenticationManager.class));
+
+        this.authFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
         this.authFilter.setAuthenticationSuccessHandler(this.successHandler);
         this.authFilter.setAuthenticationFailureHandler(this.failureHandler);
         if (this.authenticationDetailsSource != null) {
             this.authFilter.setAuthenticationDetailsSource(this.authenticationDetailsSource);
         }
-        if ((sessionAuthenticationStrategy = (SessionAuthenticationStrategy)http.getSharedObject(SessionAuthenticationStrategy.class)) != null) {
+
+        SessionAuthenticationStrategy sessionAuthenticationStrategy =
+                http.getSharedObject(SessionAuthenticationStrategy.class);
+        if (sessionAuthenticationStrategy != null) {
             this.authFilter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy);
         }
-        if ((rememberMeServices = (RememberMeServices)http.getSharedObject(RememberMeServices.class)) != null) {
+
+        RememberMeServices rememberMeServices = http.getSharedObject(RememberMeServices.class);
+        if (rememberMeServices != null) {
             this.authFilter.setRememberMeServices(rememberMeServices);
         }
-        AbstractAuthenticationProcessingFilter filter = (AbstractAuthenticationProcessingFilter)this.postProcess(this.authFilter);
-        http.addFilterBefore((Filter)filter, LogoutFilter.class);
+
+        F filter = postProcess(this.authFilter);
+        http.addFilterBefore(filter, LogoutFilter.class);
     }
 
+    /**
+     * 获取bean或null
+     *
+     * @param applicationContext 应用程序上下文
+     * @param beanType           bean类型
+     * @return {@link T }
+     * @since 2023-07-10 17:41:44
+     */
     public final <T> T getBeanOrNull(ApplicationContext applicationContext, Class<T> beanType) {
         String[] beanNames = applicationContext.getBeanNamesForType(beanType);
         if (beanNames.length == 1) {
-            return (T)applicationContext.getBean(beanNames[0], beanType);
+            return applicationContext.getBean(beanNames[0], beanType);
         }
         return null;
     }
 
+    /**
+     * Gets the Authentication Filter
+     *
+     * @return {@link F }
+     * @since 2023-07-10 17:41:44
+     */
     protected final F getAuthenticationFilter() {
         return this.authFilter;
     }
 
+    /**
+     * Sets the Authentication Filter
+     *
+     * @param authFilter the Authentication Filter
+     * @since 2023-07-10 17:41:44
+     */
     protected final void setAuthenticationFilter(F authFilter) {
         this.authFilter = authFilter;
     }
 
+    /**
+     * Gets the Authentication Entry Point
+     *
+     * @return {@link AuthenticationEntryPoint }
+     * @since 2023-07-10 17:41:44
+     */
     protected final AuthenticationEntryPoint getAuthenticationEntryPoint() {
         return this.authenticationEntryPoint;
     }
 
+    /**
+     * Gets the URL to submit an authentication request to (i.e. where username/password must be
+     * submitted)
+     *
+     * @return {@link String }
+     * @since 2023-07-10 17:41:44
+     */
     protected final String getLoginProcessingUrl() {
         return this.loginProcessingUrl;
     }
 
+    /**
+     * Gets the URL to send users to if authentication fails
+     *
+     * @return {@link String }
+     * @since 2023-07-10 17:41:44
+     */
     protected final String getFailureUrl() {
         return this.failureUrl;
     }
 
+    /**
+     * Updates the default values for access.
+     *
+     * @param http http
+     * @since 2023-07-10 17:41:44
+     */
     protected final void updateAccessDefaults(H http) {
         if (this.permitAll) {
-            PermitAllSupport.permitAll(http, new String[]{this.loginProcessingUrl, this.failureUrl});
+            PermitAllSupport.permitAll(http, this.loginProcessingUrl, this.failureUrl);
         }
     }
 
+    /**
+     * 获取自我
+     *
+     * @return {@link C }
+     * @since 2023-07-10 17:41:44
+     */
+    @SuppressWarnings("unchecked")
     private C getSelf() {
-        return (C)((Object)this);
+        return (C) this;
     }
 
+    /**
+     * 允许所有支持
+     *
+     * @author kuma
+     * @version 2023.07
+     * @since 2023-07-10 17:41:45
+     */
     static final class PermitAllSupport {
-        private PermitAllSupport() {
-        }
 
-        private static void permitAll(HttpSecurityBuilder<? extends HttpSecurityBuilder<?>> http, String ... urls) {
+        /**
+         * 允许所有支持
+         *
+         * @return
+         * @since 2023-07-10 17:41:45
+         */
+        private PermitAllSupport() {}
+
+        /**
+         * 允许所有
+         *
+         * @param http http
+         * @param urls 网址
+         * @since 2023-07-10 17:41:46
+         */
+        private static void permitAll(
+                HttpSecurityBuilder<? extends HttpSecurityBuilder<?>> http, String... urls) {
             for (String url : urls) {
-                if (url == null) continue;
-                PermitAllSupport.permitAll(http, new ExactUrlRequestMatcher(url));
+                if (url != null) {
+                    permitAll(http, new ExactUrlRequestMatcher(url));
+                }
             }
         }
 
-        static void permitAll(HttpSecurityBuilder<? extends HttpSecurityBuilder<?>> http, RequestMatcher ... requestMatchers) {
-            AuthorizeHttpRequestsConfigurer configurer = (AuthorizeHttpRequestsConfigurer)http.getConfigurer(AuthorizeHttpRequestsConfigurer.class);
-            Assert.state((configurer != null ? 1 : 0) != 0, (String)"permitAll only works with HttpSecurity.authorizeRequests()");
-            ((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)configurer.getRegistry().requestMatchers(requestMatchers)).permitAll();
+        /**
+         * 允许所有
+         *
+         * @param http            http
+         * @param requestMatchers 请求匹配器
+         * @since 2023-07-10 17:41:46
+         */
+        @SuppressWarnings("unchecked")
+        static void permitAll(
+                HttpSecurityBuilder<? extends HttpSecurityBuilder<?>> http,
+                RequestMatcher... requestMatchers) {
+            AuthorizeHttpRequestsConfigurer<?> configurer =
+                    http.getConfigurer(AuthorizeHttpRequestsConfigurer.class);
+            Assert.state(
+                    configurer != null,
+                    "permitAll only works with HttpSecurity.authorizeRequests()");
+            configurer.getRegistry().requestMatchers(requestMatchers).permitAll();
         }
 
-        private static final class ExactUrlRequestMatcher
-        implements RequestMatcher {
+        /**
+         * 精确网址请求匹配器
+         *
+         * @author kuma
+         * @version 2023.07
+         * @see RequestMatcher
+         * @since 2023-07-10 17:41:46
+         */
+        private static final class ExactUrlRequestMatcher implements RequestMatcher {
+
             private final String processUrl;
 
+            /**
+             * 精确网址请求匹配器
+             *
+             * @param processUrl 进程url
+             * @return
+             * @since 2023-07-10 17:41:47
+             */
             private ExactUrlRequestMatcher(String processUrl) {
                 this.processUrl = processUrl;
             }
 
+            /**
+             * 匹配
+             *
+             * @param request 请求
+             * @return boolean
+             * @since 2023-07-10 17:41:47
+             */
+            @Override
             public boolean matches(HttpServletRequest request) {
-                Object uri = request.getRequestURI();
+                String uri = request.getRequestURI();
                 String query = request.getQueryString();
                 if (query != null) {
-                    uri = (String)uri + "?" + query;
+                    uri += "?" + query;
                 }
                 if ("".equals(request.getContextPath())) {
-                    return ((String)uri).equals(this.processUrl);
+                    return uri.equals(this.processUrl);
                 }
-                return ((String)uri).equals(request.getContextPath() + this.processUrl);
+                return uri.equals(request.getContextPath() + this.processUrl);
             }
 
+            @Override
             public String toString() {
                 return "ExactUrl [processUrl='" + this.processUrl + "']";
             }
         }
     }
 }
-

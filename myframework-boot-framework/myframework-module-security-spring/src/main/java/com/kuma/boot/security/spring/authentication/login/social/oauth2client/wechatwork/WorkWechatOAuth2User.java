@@ -1,11 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonAlias
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.oauth2.core.user.OAuth2User
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.wechatwork;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -18,28 +26,37 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class WorkWechatOAuth2User
-implements OAuth2User {
+public class WorkWechatOAuth2User implements OAuth2User {
+
+    // 统一赋予USER角色
     private Set<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
     private String nameAttributeKey;
+
     private Integer errcode;
     private String errmsg;
-    @JsonAlias(value={"OpenId"})
+
+    @JsonAlias("OpenId")
     private String openId;
-    @JsonAlias(value={"UserId"})
+
+    @JsonAlias("UserId")
     private String userId;
 
+    @Override
     public Map<String, Object> getAttributes() {
-        return this.attributes;
+        // todo 这里放一些有用的额外参数
+        return attributes;
     }
 
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // todo 微信用户你想赋权的可以在这里或者set方法中实现。
         return this.authorities;
     }
 
+    @Override
     public String getName() {
-        return Optional.ofNullable(this.userId).orElse(this.openId);
+        return Optional.ofNullable(userId).orElse(openId);
     }
 
     public void setAuthorities(Set<GrantedAuthority> authorities) {
@@ -51,7 +68,7 @@ implements OAuth2User {
     }
 
     public String getNameAttributeKey() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
     public void setNameAttributeKey(String nameAttributeKey) {
@@ -59,7 +76,7 @@ implements OAuth2User {
     }
 
     public Integer getErrcode() {
-        return this.errcode;
+        return errcode;
     }
 
     public void setErrcode(Integer errcode) {
@@ -67,7 +84,7 @@ implements OAuth2User {
     }
 
     public String getErrmsg() {
-        return this.errmsg;
+        return errmsg;
     }
 
     public void setErrmsg(String errmsg) {
@@ -75,7 +92,7 @@ implements OAuth2User {
     }
 
     public String getOpenId() {
-        return this.openId;
+        return openId;
     }
 
     public void setOpenId(String openId) {
@@ -83,11 +100,10 @@ implements OAuth2User {
     }
 
     public String getUserId() {
-        return this.userId;
+        return userId;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
     }
 }
-

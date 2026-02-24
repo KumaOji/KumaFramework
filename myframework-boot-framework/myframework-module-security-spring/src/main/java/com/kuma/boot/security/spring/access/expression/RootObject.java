@@ -1,12 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.aopalliance.intercept.MethodInvocation
- *  org.springframework.security.access.expression.SecurityExpressionRoot
- *  org.springframework.security.access.expression.method.MethodSecurityExpressionOperations
- *  org.springframework.security.core.Authentication
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.security.spring.access.expression;
 
 import java.util.function.Supplier;
@@ -15,9 +11,7 @@ import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 
-public class RootObject
-extends SecurityExpressionRoot
-implements MethodSecurityExpressionOperations {
+public class RootObject extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
     private Object filterObject;
     private Object returnObject;
     private Object target;
@@ -71,4 +65,3 @@ implements MethodSecurityExpressionOperations {
         this.methodInvocation = methodInvocation;
     }
 }
-

@@ -1,15 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonAutoDetect
- *  com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility
- *  com.fasterxml.jackson.annotation.JsonCreator
- *  com.fasterxml.jackson.annotation.JsonIgnoreProperties
- *  com.fasterxml.jackson.annotation.JsonProperty
- *  com.fasterxml.jackson.annotation.JsonTypeInfo
- *  com.fasterxml.jackson.annotation.JsonTypeInfo$Id
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.deserializes;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -18,12 +22,31 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, property="@class")
-@JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.NONE, getterVisibility=JsonAutoDetect.Visibility.PUBLIC_ONLY, isGetterVisibility=JsonAutoDetect.Visibility.NONE)
-@JsonIgnoreProperties(ignoreUnknown=true)
+/**
+ * Jackson Mixin class helps in serialize/deserialize
+ * {@link org.springframework.security.core.authority.SimpleGrantedAuthority}.
+ *
+ * <pre>
+ *     JsonMapper mapper = JsonMapper.builder().build();
+ *     mapper.registerModule(new CoreJackson2Module());
+ * </pre>
+ *
+ * @author Jitendra Singh
+ * @since 4.2
+ */
+@SuppressWarnings("AlibabaAbstractClassShouldStartWithAbstractNaming")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.PUBLIC_ONLY,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SimpleGrantedAuthorityMixin {
-    @JsonCreator
-    public SimpleGrantedAuthorityMixin(@JsonProperty(value="authority") String role) {
-    }
-}
 
+    /**
+     * Mixin Constructor.
+     * @param role the role
+     */
+    @JsonCreator
+    public SimpleGrantedAuthorityMixin(@JsonProperty("authority") String role) {}
+}

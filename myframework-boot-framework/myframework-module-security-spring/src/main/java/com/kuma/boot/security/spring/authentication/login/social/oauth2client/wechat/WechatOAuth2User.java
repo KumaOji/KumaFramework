@@ -1,10 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.oauth2.core.user.OAuth2User
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.wechat;
 
 import com.kuma.boot.security.spring.utils.AuthorityUtils;
@@ -16,11 +25,16 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class WechatOAuth2User
-implements OAuth2User {
+/**
+ * 微信授权的OAuth2User用户信息
+ */
+public class WechatOAuth2User implements OAuth2User {
+
+    // 统一赋予USER角色
     private Set<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
     private String nameAttributeKey;
+
     private String openid;
     private String nickname;
     private Integer sex;
@@ -31,16 +45,22 @@ implements OAuth2User {
     private List<String> privilege;
     private String unionid;
 
+    @Override
     public Map<String, Object> getAttributes() {
-        return this.attributes;
+        // todo 这里放一些有用的额外参数
+        return attributes;
     }
 
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // todo 微信用户你想赋权的可以在这里或者set方法中实现。
         return this.authorities;
     }
 
+    @Override
     public String getName() {
-        return this.nameAttributeKey;
+        // todo 根据业务需要调整
+        return nameAttributeKey;
     }
 
     public void setAuthorities(Set<GrantedAuthority> authorities) {
@@ -52,7 +72,7 @@ implements OAuth2User {
     }
 
     public String getNameAttributeKey() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
     public void setNameAttributeKey(String nameAttributeKey) {
@@ -60,7 +80,7 @@ implements OAuth2User {
     }
 
     public String getOpenid() {
-        return this.openid;
+        return openid;
     }
 
     public void setOpenid(String openid) {
@@ -68,7 +88,7 @@ implements OAuth2User {
     }
 
     public String getNickname() {
-        return this.nickname;
+        return nickname;
     }
 
     public void setNickname(String nickname) {
@@ -76,7 +96,7 @@ implements OAuth2User {
     }
 
     public Integer getSex() {
-        return this.sex;
+        return sex;
     }
 
     public void setSex(Integer sex) {
@@ -84,7 +104,7 @@ implements OAuth2User {
     }
 
     public String getProvince() {
-        return this.province;
+        return province;
     }
 
     public void setProvince(String province) {
@@ -92,7 +112,7 @@ implements OAuth2User {
     }
 
     public String getCity() {
-        return this.city;
+        return city;
     }
 
     public void setCity(String city) {
@@ -100,7 +120,7 @@ implements OAuth2User {
     }
 
     public String getCountry() {
-        return this.country;
+        return country;
     }
 
     public void setCountry(String country) {
@@ -108,7 +128,7 @@ implements OAuth2User {
     }
 
     public String getHeadimgurl() {
-        return this.headimgurl;
+        return headimgurl;
     }
 
     public void setHeadimgurl(String headimgurl) {
@@ -116,7 +136,7 @@ implements OAuth2User {
     }
 
     public List<String> getPrivilege() {
-        return this.privilege;
+        return privilege;
     }
 
     public void setPrivilege(List<String> privilege) {
@@ -124,11 +144,10 @@ implements OAuth2User {
     }
 
     public String getUnionid() {
-        return this.unionid;
+        return unionid;
     }
 
     public void setUnionid(String unionid) {
         this.unionid = unionid;
     }
 }
-

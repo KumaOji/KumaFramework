@@ -1,38 +1,97 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.security.justauth.justauth.AuthTokenPo
- *  com.kuma.boot.security.justauth.justauth.EnableRefresh
- *  org.springframework.lang.NonNull
- *  org.springframework.lang.Nullable
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.repository;
 
 import com.kuma.boot.security.justauth.justauth.AuthTokenPo;
 import com.kuma.boot.security.justauth.justauth.EnableRefresh;
 import java.util.List;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+/**
+ * A data access interface for managing a global store of users connections token to service providers.
+ * Provides data access operations.
+ * @author YongWu zheng
+ * @version V2.0  Created by 2020-10-08 20:10
+ */
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface UsersConnectionTokenRepository {
+
+    /**
+     * 根据 tokenId 获取 tokenId
+     * @param tokenId   tokenId
+     * @return  AuthTokenPo
+     * @throws Exception 查询错误
+     */
     @Nullable
-    public AuthTokenPo findAuthTokenById(@NonNull String var1) throws Exception;
+    AuthTokenPo findAuthTokenById(@NonNull String tokenId) throws Exception;
 
+    /**
+     * 持久化 authToken, 并把返回的 authToken id 保存在 authToken 中
+     * @param authToken     authToken
+     * @return  AuthTokenPo
+     * @throws Exception    持久化 authToken 异常
+     */
     @NonNull
-    public AuthTokenPo saveAuthToken(@NonNull AuthTokenPo var1) throws Exception;
+    AuthTokenPo saveAuthToken(@NonNull AuthTokenPo authToken) throws Exception;
 
+    /**
+     * 更新 {@link AuthTokenPo}
+     * @param authToken     更新 {@link AuthTokenPo}
+     * @return  AuthTokenPo
+     * @throws Exception    数据更新异常
+     */
     @NonNull
-    public AuthTokenPo updateAuthToken(@NonNull AuthTokenPo var1) throws Exception;
+    AuthTokenPo updateAuthToken(@NonNull AuthTokenPo authToken) throws Exception;
 
-    public void delAuthTokenById(@NonNull String var1) throws Exception;
+    /**
+     * 删除 id = tokenId 的记录
+     * @param tokenId   tokenId
+     * @throws Exception 删除错误
+     */
+    void delAuthTokenById(@NonNull String tokenId) throws Exception;
 
+    /**
+     * 获取最大 TokenId
+     * @return 获取最大 TokenId
+     * @throws Exception sql 执行错误
+     */
     @NonNull
-    public Long getMaxTokenId() throws Exception;
+    Long getMaxTokenId() throws Exception;
 
+    /**
+     * 获取 ID 范围在 startId(包含) 与 endId(包含) 之间且过期时间小于等于 expiredTime 且 enableRefresh=1 的 token 数据.<br>
+     *     用于定时 refreshToken 任务, 不做 spring cache 缓存处理
+     * @param expiredTime   过期时间
+     * @param startId       起始 id, 包含
+     * @param endId         结束 id, 包含
+     * @return  符合条件的 {@link AuthTokenPo} 列表
+     * @throws Exception   查询错误
+     */
     @NonNull
-    public List<AuthTokenPo> findAuthTokenByExpireTimeAndBetweenId(@NonNull Long var1, @NonNull Long var2, @NonNull Long var3) throws Exception;
+    List<AuthTokenPo> findAuthTokenByExpireTimeAndBetweenId(
+            @NonNull Long expiredTime, @NonNull Long startId, @NonNull Long endId) throws Exception;
 
-    public void updateEnableRefreshByTokenId(@NonNull EnableRefresh var1, @NonNull Long var2) throws Exception;
+    /**
+     * 根据 tokenId 更新 auth_token 表中的 enableRefresh 字段
+     * @param enableRefresh {@link EnableRefresh}
+     * @param tokenId       token id
+     * @throws Exception    更新异常
+     */
+    void updateEnableRefreshByTokenId(@NonNull EnableRefresh enableRefresh, @NonNull Long tokenId)
+            throws Exception;
 }
-

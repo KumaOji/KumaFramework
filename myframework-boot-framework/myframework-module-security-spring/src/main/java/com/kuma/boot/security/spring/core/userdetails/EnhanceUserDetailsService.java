@@ -1,12 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.core.userdetails.UserDetails
- *  org.springframework.security.core.userdetails.UserDetailsService
- *  org.springframework.security.core.userdetails.UsernameNotFoundException
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.core.userdetails;
 
 import com.kuma.boot.security.spring.core.AccessPrincipal;
@@ -15,10 +22,34 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public interface EnhanceUserDetailsService
-extends UserDetailsService {
-    public UserDetails loadUserBySocial(String var1, AccessPrincipal var2) throws AuthenticationException;
+/**
+ * <p>自定义UserDetailsService接口，方便以后扩展 </p>
+ *
+ * @author kuma
+ * @version 2023.07
+ * @since 2023-07-04 10:05:41
+ */
+public interface EnhanceUserDetailsService extends UserDetailsService {
 
-    public TtcUser loadTtcUserByUsername(String var1) throws UsernameNotFoundException;
+    /**
+     * 通过社交集成的唯一id，获取用户信息
+     * <p>
+     * 如果是短信验证码，openId就是手机号码
+     *
+     * @param source          社交集成提供商类型
+     * @param accessPrincipal 社交登录提供的相关信息
+     * @return {@link UserDetails }
+     * @since 2023-07-04 10:05:41
+     */
+    UserDetails loadUserBySocial(String source, AccessPrincipal accessPrincipal)
+            throws AuthenticationException;
+
+    /**
+     * 系统用户名
+     *
+     * @param username 用户账号
+     * @return {@link KmcUser }
+     * @since 2023-07-04 10:05:41
+     */
+    KmcUser loadKmcUserByUsername(String username) throws UsernameNotFoundException;
 }
-

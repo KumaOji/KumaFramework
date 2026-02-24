@@ -1,20 +1,62 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.compliance.processor.loginrisk;
 
 public class RiskRule {
+
     private Integer id;
+
+    /**
+     * 风险名称
+     */
     private String riskName;
+
+    /**
+     * 白名单ip
+     */
     private String acceptIp;
+
+    /**
+     * 触发次数
+     */
     private Integer triggerNumber;
+
+    /**
+     * 触发时间
+     */
     private Integer triggerTime;
+
+    /**
+     * 触发时间类型
+     */
     private Integer triggerTimeType;
+
+    /**
+     * 异常登录时间 （json）
+     */
     private String unusualLoginTime;
+
+    /**
+     * 采取的操作措施 1：提示 2：发送短信  3：阻断登录  4：封号
+     */
     private Integer operate;
 
     public Integer getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(Integer id) {
@@ -22,7 +64,7 @@ public class RiskRule {
     }
 
     public String getRiskName() {
-        return this.riskName;
+        return riskName;
     }
 
     public void setRiskName(String riskName) {
@@ -30,7 +72,7 @@ public class RiskRule {
     }
 
     public String getAcceptIp() {
-        return this.acceptIp;
+        return acceptIp;
     }
 
     public void setAcceptIp(String acceptIp) {
@@ -38,7 +80,7 @@ public class RiskRule {
     }
 
     public Integer getTriggerNumber() {
-        return this.triggerNumber;
+        return triggerNumber;
     }
 
     public void setTriggerNumber(Integer triggerNumber) {
@@ -46,7 +88,7 @@ public class RiskRule {
     }
 
     public Integer getTriggerTime() {
-        return this.triggerTime;
+        return triggerTime;
     }
 
     public void setTriggerTime(Integer triggerTime) {
@@ -54,7 +96,7 @@ public class RiskRule {
     }
 
     public Integer getTriggerTimeType() {
-        return this.triggerTimeType;
+        return triggerTimeType;
     }
 
     public void setTriggerTimeType(Integer triggerTimeType) {
@@ -62,7 +104,7 @@ public class RiskRule {
     }
 
     public String getUnusualLoginTime() {
-        return this.unusualLoginTime;
+        return unusualLoginTime;
     }
 
     public void setUnusualLoginTime(String unusualLoginTime) {
@@ -70,11 +112,10 @@ public class RiskRule {
     }
 
     public Integer getOperate() {
-        return this.operate;
+        return operate;
     }
 
     public void setOperate(Integer operate) {
         this.operate = operate;
     }
 }
-

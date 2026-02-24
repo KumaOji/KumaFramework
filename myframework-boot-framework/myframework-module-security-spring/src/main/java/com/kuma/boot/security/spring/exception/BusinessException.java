@@ -1,12 +1,29 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.exception;
 
 import com.kuma.boot.security.spring.enums.ErrorCodeEnum;
 
-public abstract class BusinessException
-extends RuntimeException {
+/**
+ * 业务异常
+ */
+@SuppressWarnings("AlibabaAbstractClassShouldStartWithAbstractNaming")
+public abstract class BusinessException extends RuntimeException {
+
     private final ErrorCodeEnum errorCodeEnum;
     private final Object data;
 
@@ -23,11 +40,10 @@ extends RuntimeException {
     }
 
     public ErrorCodeEnum getErrorCodeEnum() {
-        return this.errorCodeEnum;
+        return errorCodeEnum;
     }
 
     public Object getData() {
-        return this.data;
+        return data;
     }
 }
-

@@ -1,21 +1,69 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.security.authentication.AccountStatusException
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.exception;
 
 import org.springframework.security.authentication.AccountStatusException;
 
-public class OAuth2CaptchaException
-extends AccountStatusException {
+/**
+ * <p>OAuth2 验证码基础 Exception
+ * <p>
+ * 这里没有用基础定义的 PlatformAuthorizationException。主要问题是在自定义表单登录时，如果使用基础的 {@link org.springframework.security.core.AuthenticationException}，
+ * 在 Spring Security 标准代码中该Exception将不会抛出，而是进行二次的用户验证，这将导致在验证过程中直接跳过验证码的校验。
+ *
+ * @author kuma
+ * @version 2023.07
+ * @since 2023-07-04 10:07:06
+ */
+public class OAuth2CaptchaException extends AccountStatusException {
+
+    /**
+     * oauth2 captcha例外
+     *
+     * @param msg 味精
+     * @since 2023-07-04 10:07:06
+     */
     public OAuth2CaptchaException(String msg) {
         super(msg);
     }
 
+    /**
+     * oauth2 captcha例外
+     *
+     * @param msg   味精
+     * @param cause 导致
+     * @since 2023-07-04 10:07:06
+     */
     public OAuth2CaptchaException(String msg, Throwable cause) {
         super(msg, cause);
     }
-}
 
+    //    @Override
+    //    public Feedback getFeedback() {
+    //        return Feedback.ERROR;
+    //    }
+    //
+    //    @Override
+    //    public Result<String> getResult() {
+    //        Result<String> result = Result.failure();
+    //        result.code(getFeedback().getCode());
+    //        result.message(getFeedback().getMessage());
+    //        result.status(getFeedback().getStatus());
+    //        result.stackTrace(super.getStackTrace());
+    //        result.detail(super.getMessage());
+    //        return result;
+    //    }
+}

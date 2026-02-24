@@ -1,27 +1,52 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.domain;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
+/**
+ * <p>Controller 请求注解元数据封装实体
+ *
+ * @author : gengwei.zheng
+ * @since : 2020/6/2 19:52
+ */
 public class RequestMapping {
+
     private String mappingId;
+
     private String mappingCode;
+
     private String requestMethod;
+
     private String serviceId;
+
     private String className;
+
     private String methodName;
+
     private String url;
+
     private String description;
 
+    public RequestMapping() {}
+
     public String getMappingId() {
-        return this.mappingId;
+        return mappingId;
     }
 
     public void setMappingId(String mappingId) {
@@ -29,7 +54,7 @@ public class RequestMapping {
     }
 
     public String getMappingCode() {
-        return this.mappingCode;
+        return mappingCode;
     }
 
     public void setMappingCode(String mappingCode) {
@@ -37,7 +62,7 @@ public class RequestMapping {
     }
 
     public String getRequestMethod() {
-        return this.requestMethod;
+        return requestMethod;
     }
 
     public void setRequestMethod(String requestMethod) {
@@ -45,7 +70,7 @@ public class RequestMapping {
     }
 
     public String getServiceId() {
-        return this.serviceId;
+        return serviceId;
     }
 
     public void setServiceId(String serviceId) {
@@ -53,7 +78,7 @@ public class RequestMapping {
     }
 
     public String getClassName() {
-        return this.className;
+        return className;
     }
 
     public void setClassName(String className) {
@@ -61,7 +86,7 @@ public class RequestMapping {
     }
 
     public String getMethodName() {
-        return this.methodName;
+        return methodName;
     }
 
     public void setMethodName(String methodName) {
@@ -69,7 +94,7 @@ public class RequestMapping {
     }
 
     public String getUrl() {
-        return this.url;
+        return url;
     }
 
     public void setUrl(String url) {
@@ -77,30 +102,41 @@ public class RequestMapping {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        RequestMapping that = (RequestMapping)o;
-        return Objects.equal((Object)this.mappingId, (Object)that.mappingId);
+        RequestMapping that = (RequestMapping) o;
+        return Objects.equal(mappingId, that.mappingId);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.mappingId});
+        return Objects.hashCode(mappingId);
     }
 
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("mappingId", (Object)this.mappingId).add("mappingCode", (Object)this.mappingCode).add("requestMethod", (Object)this.requestMethod).add("serviceId", (Object)this.serviceId).add("className", (Object)this.className).add("methodName", (Object)this.methodName).add("url", (Object)this.url).add("description", (Object)this.description).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("mappingId", mappingId)
+                .add("mappingCode", mappingCode)
+                .add("requestMethod", requestMethod)
+                .add("serviceId", serviceId)
+                .add("className", className)
+                .add("methodName", methodName)
+                .add("url", url)
+                .add("description", description)
+                .toString();
     }
 }
-

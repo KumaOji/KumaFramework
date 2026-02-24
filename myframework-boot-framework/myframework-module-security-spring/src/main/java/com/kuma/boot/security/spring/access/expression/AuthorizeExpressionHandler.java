@@ -1,22 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.aopalliance.intercept.MethodInvocation
- *  org.springframework.aop.framework.AopProxyUtils
- *  org.springframework.aop.support.AopUtils
- *  org.springframework.context.expression.MethodBasedEvaluationContext
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
- *  org.springframework.security.access.expression.method.MethodSecurityExpressionOperations
- *  org.springframework.security.core.Authentication
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.security.spring.access.expression;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.aopalliance.intercept.MethodInvocation;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
@@ -25,16 +17,15 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 
-public class AuthorizeExpressionHandler
-extends DefaultMethodSecurityExpressionHandler {
-    public EvaluationContext createEvaluationContext(Supplier<Authentication> authentication, MethodInvocation mi) {
-        MethodBasedEvaluationContext context = new MethodBasedEvaluationContext((Object)this.createSecurityExpressionRoot(authentication, mi), AopUtils.getMostSpecificMethod((Method)mi.getMethod(), (Class)AopProxyUtils.ultimateTargetClass((Object)Objects.requireNonNull(mi.getThis()))), mi.getArguments(), this.getParameterNameDiscoverer());
+public class AuthorizeExpressionHandler extends DefaultMethodSecurityExpressionHandler {
+    public EvaluationContext createEvaluationContext(Supplier<? extends @Nullable Authentication> authentication, MethodInvocation mi) {
+        MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(this.createSecurityExpressionRoot((Authentication)authentication.get(), mi), AopUtils.getMostSpecificMethod(mi.getMethod(), AopProxyUtils.ultimateTargetClass(Objects.requireNonNull(mi.getThis()))), mi.getArguments(), this.getParameterNameDiscoverer());
         context.setBeanResolver(this.getBeanResolver());
         return context;
     }
 
     protected MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, MethodInvocation invocation) {
-        return this.createSecurityExpressionRoot(() -> authentication, invocation);
+        return this.createSecurityExpressionRoot((Supplier)(() -> authentication), (MethodInvocation)invocation);
     }
 
     private MethodSecurityExpressionOperations createSecurityExpressionRoot(Supplier<Authentication> authentication, MethodInvocation invocation) {
@@ -48,4 +39,3 @@ extends DefaultMethodSecurityExpressionHandler {
         return root;
     }
 }
-

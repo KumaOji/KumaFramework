@@ -1,18 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.collections4.CollectionUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.context.ApplicationListener
- *  org.springframework.stereotype.Component
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.metadata.listener;
 
 import com.kuma.boot.security.spring.event.LocalRequestMappingGatherEvent;
+import com.kuma.boot.security.spring.event.domain.RequestMapping;
 import com.kuma.boot.security.spring.event.metadata.processor.RequestMappingStoreProcessor;
-import java.util.Collection;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -20,22 +26,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * <p>本地RequestMapping收集监听 </p>
+ * <p>
+ * 主要在单体式架构，以及 UUA 服务自身使用
+ *
+ */
 @Component
 public class LocalRequestMappingGatherListener
-implements ApplicationListener<LocalRequestMappingGatherEvent> {
-    private static final Logger log = LoggerFactory.getLogger(LocalRequestMappingGatherListener.class);
+        implements ApplicationListener<LocalRequestMappingGatherEvent> {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(LocalRequestMappingGatherListener.class);
+
     private final RequestMappingStoreProcessor requestMappingStoreProcessor;
 
-    public LocalRequestMappingGatherListener(RequestMappingStoreProcessor requestMappingStoreProcessor) {
+    public LocalRequestMappingGatherListener(
+            RequestMappingStoreProcessor requestMappingStoreProcessor) {
         this.requestMappingStoreProcessor = requestMappingStoreProcessor;
     }
 
+    @Override
     public void onApplicationEvent(LocalRequestMappingGatherEvent event) {
+
         log.info(" Request mapping gather LOCAL listener, response event!");
-        List requestMappings = (List)event.getData();
-        if (CollectionUtils.isNotEmpty((Collection)requestMappings)) {
-            this.requestMappingStoreProcessor.postProcess(requestMappings);
+
+        List<RequestMapping> requestMappings = event.getData();
+        if (CollectionUtils.isNotEmpty(requestMappings)) {
+            requestMappingStoreProcessor.postProcess(requestMappings);
         }
     }
 }
-

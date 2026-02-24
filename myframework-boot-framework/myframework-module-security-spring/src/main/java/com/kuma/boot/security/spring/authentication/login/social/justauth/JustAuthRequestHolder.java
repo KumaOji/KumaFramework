@@ -1,68 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.security.justauth.justauth.JustAuthProperties
- *  com.kuma.boot.security.justauth.justauth.cache.AuthStateRedisCache
- *  com.kuma.boot.security.justauth.justauth.cache.AuthStateSessionCache
- *  com.kuma.boot.security.justauth.justauth.enums.StateCacheType
- *  com.kuma.boot.security.justauth.justauth.request.Auth2DefaultRequest
- *  com.kuma.boot.security.justauth.justauth.source.AuthCustomizeSource
- *  com.kuma.boot.security.justauth.justauth.source.AuthGitlabPrivateSource
- *  me.zhyd.oauth.cache.AuthDefaultStateCache
- *  me.zhyd.oauth.cache.AuthStateCache
- *  me.zhyd.oauth.config.AuthConfig
- *  me.zhyd.oauth.config.AuthConfig$AuthConfigBuilder
- *  me.zhyd.oauth.config.AuthDefaultSource
- *  me.zhyd.oauth.config.AuthSource
- *  me.zhyd.oauth.enums.scope.AuthBaiduScope
- *  me.zhyd.oauth.enums.scope.AuthCodingScope
- *  me.zhyd.oauth.enums.scope.AuthFacebookScope
- *  me.zhyd.oauth.enums.scope.AuthGiteeScope
- *  me.zhyd.oauth.enums.scope.AuthGithubScope
- *  me.zhyd.oauth.enums.scope.AuthGitlabScope
- *  me.zhyd.oauth.enums.scope.AuthGoogleScope
- *  me.zhyd.oauth.enums.scope.AuthHuaweiScope
- *  me.zhyd.oauth.enums.scope.AuthJdScope
- *  me.zhyd.oauth.enums.scope.AuthKujialeScope
- *  me.zhyd.oauth.enums.scope.AuthLinkedinScope
- *  me.zhyd.oauth.enums.scope.AuthMiScope
- *  me.zhyd.oauth.enums.scope.AuthMicrosoftScope
- *  me.zhyd.oauth.enums.scope.AuthPinterestScope
- *  me.zhyd.oauth.enums.scope.AuthQqScope
- *  me.zhyd.oauth.enums.scope.AuthRenrenScope
- *  me.zhyd.oauth.enums.scope.AuthScope
- *  me.zhyd.oauth.enums.scope.AuthStackoverflowScope
- *  me.zhyd.oauth.enums.scope.AuthWeChatEnterpriseWebScope
- *  me.zhyd.oauth.enums.scope.AuthWechatMpScope
- *  me.zhyd.oauth.enums.scope.AuthWeiboScope
- *  me.zhyd.oauth.request.AuthDefaultRequest
- *  me.zhyd.oauth.utils.AuthScopeUtils
- *  org.apache.commons.lang3.StringUtils
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext
- *  org.springframework.cglib.proxy.Callback
- *  org.springframework.cglib.proxy.Enhancer
- *  org.springframework.cglib.proxy.MethodInterceptor
- *  org.springframework.context.ApplicationContext
- *  org.springframework.context.ApplicationContextAware
- *  org.springframework.lang.NonNull
- *  org.springframework.lang.Nullable
- *  org.springframework.util.CollectionUtils
- *  org.springframework.util.StringUtils
- *  org.springframework.web.context.WebApplicationContext
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth;
+
+import static java.lang.String.join;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+import static me.zhyd.oauth.config.AuthDefaultSource.ALIPAY;
+import static me.zhyd.oauth.utils.AuthScopeUtils.getDefaultScopes;
+import static org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase;
+import static org.springframework.util.StringUtils.hasText;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.security.justauth.justauth.cache.AuthStateRedisCache;
 import com.kuma.boot.security.justauth.justauth.cache.AuthStateSessionCache;
 import com.kuma.boot.security.justauth.justauth.enums.StateCacheType;
 import com.kuma.boot.security.justauth.justauth.request.Auth2DefaultRequest;
+import com.kuma.boot.security.justauth.justauth.request.AuthCustomizeRequest;
 import com.kuma.boot.security.justauth.justauth.source.AuthCustomizeSource;
 import com.kuma.boot.security.justauth.justauth.source.AuthGitlabPrivateSource;
+import com.kuma.boot.security.spring.authentication.login.social.justauth.consts.SecurityConstants;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.properties.BaseAuth2Properties;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.properties.HttpConfigProperties;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.properties.JustAuthProperties;
@@ -71,7 +42,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import me.zhyd.oauth.cache.AuthDefaultStateCache;
 import me.zhyd.oauth.cache.AuthStateCache;
@@ -100,70 +70,121 @@ import me.zhyd.oauth.enums.scope.AuthWeChatEnterpriseWebScope;
 import me.zhyd.oauth.enums.scope.AuthWechatMpScope;
 import me.zhyd.oauth.enums.scope.AuthWeiboScope;
 import me.zhyd.oauth.request.AuthDefaultRequest;
-import me.zhyd.oauth.utils.AuthScopeUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
-import org.springframework.cglib.proxy.Callback;
+import org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
-public final class JustAuthRequestHolder
-implements InitializingBean,
-ApplicationContextAware {
+/**
+ * JustAuth内置的各api需要的url， 用枚举类分平台类型管理
+ *
+ * @author YongWu zheng
+ * @version V1.0  Created by 2020-10-06 18:09
+ */
+public final class JustAuthRequestHolder implements InitializingBean, ApplicationContextAware {
+
+    private JustAuthRequestHolder() {}
+
     private static volatile JustAuthRequestHolder INSTANCE;
-    private static final String FIELD_SEPARATOR = "_";
-    private static final String CLIENT_ID_FIELD_NAME = "clientId";
-    private static final String CLIENT_SECRET_FIELD_NAME = "clientSecret";
-    private static final Map<String, Auth2DefaultRequest> PROVIDER_ID_AUTH_REQUEST_MAP;
-    private static final Map<AuthSource, String> SOURCE_PROVIDER_ID_MAP;
-    private ApplicationContext applicationContext;
-    private static volatile AuthCustomizeSource authCustomizeSource;
-    private static volatile AuthGitlabPrivateSource authGitlabPrivateSource;
-    public static final String AUTH_REQUEST_PACKAGE = "me.zhyd.oauth.request.";
-    public static final String AUTH_REQUEST_PREFIX = "Auth";
-    public static final String AUTH_REQUEST_SUFFIX = "Request";
 
-    private JustAuthRequestHolder() {
-    }
-
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
+    /**
+     * 获取单例模式 {@link JustAuthRequestHolder}
+     *
+     * @return 返回  {@link JustAuthRequestHolder}
      */
     public static JustAuthRequestHolder getInstance() {
-        if (Objects.nonNull(INSTANCE)) {
+        if (nonNull(INSTANCE)) {
             return INSTANCE;
         }
-        Class<JustAuthRequestHolder> clazz = JustAuthRequestHolder.class;
         synchronized (JustAuthRequestHolder.class) {
-            if (Objects.isNull(INSTANCE)) {
-                JustAuthRequestHolder justAuthRequestHolder;
-                INSTANCE = justAuthRequestHolder = new JustAuthRequestHolder();
+            if (isNull(INSTANCE)) {
+                //noinspection UnnecessaryLocalVariable
+                final JustAuthRequestHolder justAuthRequestHolder = new JustAuthRequestHolder();
+                INSTANCE = justAuthRequestHolder;
             }
-            // ** MonitorExit[var0] (shouldn't be in output)
             return INSTANCE;
         }
     }
 
-    public static synchronized void setAuthCustomizeSource(AuthCustomizeSource authCustomizeSource) {
+    /**
+     * 字段分隔符
+     */
+    private static final String FIELD_SEPARATOR = "_";
+
+    /**
+     * CLIENT_ID_FIELD_NAME
+     */
+    private static final String CLIENT_ID_FIELD_NAME = "clientId";
+
+    /**
+     * CLIENT_SECRET_FIELD_NAME
+     */
+    private static final String CLIENT_SECRET_FIELD_NAME = "clientSecret";
+
+    /**
+     * key 为 providerId, value 为 {@link Auth2DefaultRequest} 的子类对象
+     */
+    private static final Map<String, Auth2DefaultRequest> PROVIDER_ID_AUTH_REQUEST_MAP =
+            new ConcurrentHashMap<>();
+
+    /**
+     * key 为 {@link AuthSource}, value 为 providerId
+     */
+    private static final Map<AuthSource, String> SOURCE_PROVIDER_ID_MAP = new ConcurrentHashMap<>();
+
+    private ApplicationContext applicationContext;
+
+    /**
+     * 自定义 OAuth2 Login source, 应用启动时自动注入, 如果未实现此为 null 值, 注意: {@link AuthCustomizeSource} 与
+     * {@link AuthCustomizeRequest} 必须同时实现.
+     */
+    private static volatile AuthCustomizeSource authCustomizeSource = null;
+
+    /**
+     * 自定义 OAuth2 Login source, 应用启动时自动注入, 如果未实现此为 null 值, 注意: {@link AuthGitlabPrivateSource} 与
+     * {@link AuthCustomizeRequest} 必须同时实现.
+     */
+    private static volatile AuthGitlabPrivateSource authGitlabPrivateSource = null;
+
+    /**
+     * 当 {@link #authCustomizeSource} 为 null 时, authCustomizeSource 将会被设置到
+     * {@link #authCustomizeSource}; 否则什么都不做.
+     *
+     * @param authCustomizeSource auth2 Customize Source
+     */
+    public static synchronized void setAuthCustomizeSource(
+            AuthCustomizeSource authCustomizeSource) {
         if (JustAuthRequestHolder.authCustomizeSource == null) {
             JustAuthRequestHolder.authCustomizeSource = authCustomizeSource;
         }
     }
 
-    public static synchronized void setAuthGitlabPrivateSource(AuthGitlabPrivateSource authGitlabPrivateSource) {
+    /**
+     * 当 {@link #authGitlabPrivateSource} 为 null 时, authGitlabPrivateSource 将会被设置到
+     * {@link #authGitlabPrivateSource}; 否则什么都不做.
+     *
+     * @param authGitlabPrivateSource auth2 GitlabPrivate Source
+     */
+    public static synchronized void setAuthGitlabPrivateSource(
+            AuthGitlabPrivateSource authGitlabPrivateSource) {
         if (JustAuthRequestHolder.authGitlabPrivateSource == null) {
             JustAuthRequestHolder.authGitlabPrivateSource = authGitlabPrivateSource;
         }
     }
 
+    /**
+     * 根据 providerId 获取 {@link Auth2DefaultRequest}
+     *
+     * @param providerId providerId
+     * @return 返回 {@link Auth2DefaultRequest},  当没有对应的 {@link Auth2DefaultRequest} 时, 返回 null
+     */
     @Nullable
     public static Auth2DefaultRequest getAuth2DefaultRequest(String providerId) {
         if (PROVIDER_ID_AUTH_REQUEST_MAP.isEmpty() || providerId == null) {
@@ -172,6 +193,12 @@ ApplicationContextAware {
         return PROVIDER_ID_AUTH_REQUEST_MAP.get(providerId);
     }
 
+    /**
+     * 根据 {@link AuthSource} 获取 providerId
+     *
+     * @param source {@link AuthSource}
+     * @return 返回 providerId, 没有对应的第三方则返回 null
+     */
     public static String getProviderId(AuthSource source) {
         if (SOURCE_PROVIDER_ID_MAP.isEmpty() || null == source) {
             return null;
@@ -179,165 +206,245 @@ ApplicationContextAware {
         return SOURCE_PROVIDER_ID_MAP.get(source);
     }
 
+    /**
+     * 获取有效的 providerIds
+     *
+     * @return 有效的 providerId Set
+     */
     public static Collection<String> getValidProviderIds() {
         return Collections.unmodifiableCollection(PROVIDER_ID_AUTH_REQUEST_MAP.keySet());
     }
 
+    /**
+     * 获取有效的 providerIds
+     *
+     * @return 有效的 providerId Set
+     */
     public static Collection<String> getAllProviderIds() {
         return Collections.unmodifiableCollection(SOURCE_PROVIDER_ID_MAP.values());
     }
 
-    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+    @Override
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext)
+            throws BeansException {
         this.applicationContext = applicationContext;
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        Field[] declaredFields;
-        AuthStateCache authStateCache;
-        block12: {
-            block11: {
-                try {
-                    JustAuthRequestHolder.setAuthCustomizeSource((AuthCustomizeSource)this.applicationContext.getBean(AuthCustomizeSource.class));
-                }
-                catch (Exception e) {
-                    if (!LogUtils.isDebugEnabled()) break block11;
-                    LogUtils.debug((String)"\u6ca1\u6709\u81ea\u5b9a\u4e49\u5b9e\u73b0 {}", (Object[])new Object[]{AuthCustomizeSource.class.getName()});
-                }
-            }
-            try {
-                JustAuthRequestHolder.setAuthGitlabPrivateSource((AuthGitlabPrivateSource)this.applicationContext.getBean(AuthGitlabPrivateSource.class));
-            }
-            catch (Exception e) {
-                if (!LogUtils.isDebugEnabled()) break block12;
-                LogUtils.debug((String)"\u6ca1\u6709\u81ea\u5b9a\u4e49\u5b9e\u73b0 {}", (Object[])new Object[]{AuthGitlabPrivateSource.class.getName()});
+
+        try {
+            JustAuthRequestHolder.setAuthCustomizeSource(
+                    applicationContext.getBean(AuthCustomizeSource.class));
+        } catch (Exception e) {
+            if (LogUtils.isDebugEnabled()) {
+                LogUtils.debug("没有自定义实现 {}", AuthCustomizeSource.class.getName());
             }
         }
-        JustAuthProperties auth2Properties = (JustAuthProperties)this.applicationContext.getBean(JustAuthProperties.class);
-        com.kuma.boot.security.justauth.justauth.JustAuthProperties justAuthProperties = auth2Properties.getJustAuth();
+
+        try {
+            JustAuthRequestHolder.setAuthGitlabPrivateSource(
+                    applicationContext.getBean(AuthGitlabPrivateSource.class));
+        } catch (Exception e) {
+            if (LogUtils.isDebugEnabled()) {
+                LogUtils.debug("没有自定义实现 {}", AuthGitlabPrivateSource.class.getName());
+            }
+        }
+
+        // 获取 auth2Properties
+        JustAuthProperties auth2Properties = applicationContext.getBean(JustAuthProperties.class);
+
+        com.kuma.boot.security.justauth.justauth.JustAuthProperties justAuthProperties =
+                auth2Properties.getJustAuth();
         StateCacheType stateCacheType = justAuthProperties.getCacheType();
-        if (stateCacheType.equals((Object)StateCacheType.REDIS)) {
-            Class<?> stringRedisTemplateClass = Class.forName("org.springframework.data.redis.core.StringRedisTemplate");
-            Object stringRedisTemplate = this.applicationContext.getBean(stringRedisTemplateClass);
-            authStateCache = this.getAuthStateCache(stateCacheType, auth2Properties, stringRedisTemplate);
+
+        // 获取 stateCache
+        AuthStateCache authStateCache;
+        if (stateCacheType.equals(StateCacheType.REDIS)) {
+            final Class<?> stringRedisTemplateClass =
+                    Class.forName("org.springframework.data.redis.core.StringRedisTemplate");
+            Object stringRedisTemplate = applicationContext.getBean(stringRedisTemplateClass);
+            authStateCache =
+                    getAuthStateCache(stateCacheType, auth2Properties, stringRedisTemplate);
         } else {
-            authStateCache = this.getAuthStateCache(stateCacheType, auth2Properties, null);
+            authStateCache = getAuthStateCache(stateCacheType, auth2Properties, null);
         }
+
+        /* 获取 Auth2Properties 对象的字段与对应的值:
+         *  1. 以此获取所有 BaseAuth2Properties 子类字段及对应的 providerId, AuthDefaultSource, 并存储再 SOURCE_PROVIDER_ID_MAP 中;
+         *  2. 以此获取所有 BaseAuth2Properties 子类对象, 检查其字段是否带有有效的 clientId 与 clientSecret 值,
+         *     如果有效, 则存储再 PROVIDER_ID_AUTH_REQUEST_MAP 中.
+         */
         Class<JustAuthProperties> aClass = JustAuthProperties.class;
-        for (Field field : declaredFields = aClass.getDeclaredFields()) {
-            AuthDefaultSource source;
-            String providerId;
-            Object baseProperties;
-            block13: {
-                field.setAccessible(true);
-                baseProperties = field.get(auth2Properties);
-                if (!(baseProperties instanceof BaseAuth2Properties)) continue;
-                providerId = field.getName();
-                CharSequence[] splits = org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase((String)providerId);
-                source = null;
+        Field[] declaredFields = aClass.getDeclaredFields();
+        for (Field field : declaredFields) {
+            field.setAccessible(true);
+            Object baseProperties = field.get(auth2Properties);
+            if (baseProperties instanceof BaseAuth2Properties) {
+                String providerId = field.getName();
+
+                String[] splits = splitByCharacterTypeCamelCase(providerId);
+                AuthSource source = null;
                 try {
-                    source = AuthDefaultSource.valueOf((String)String.join((CharSequence)FIELD_SEPARATOR, splits).toUpperCase());
-                    SOURCE_PROVIDER_ID_MAP.put((AuthSource)source, providerId);
-                }
-                catch (Exception e) {
-                    if (authCustomizeSource != null && JustAuthRequestHolder.getProviderIdBySource((AuthSource)authCustomizeSource).equals(providerId)) {
-                        source = authCustomizeSource;
-                        providerId = ((BaseAuth2Properties)baseProperties).getCustomizeProviderId();
-                        Class<?> authCustomizeSourceClass = authCustomizeSource.getClass();
-                        Field nameField = authCustomizeSourceClass.getSuperclass().getDeclaredField("name");
+                    source = AuthDefaultSource.valueOf(join(FIELD_SEPARATOR, splits).toUpperCase());
+                    SOURCE_PROVIDER_ID_MAP.put(source, providerId);
+                } catch (Exception e) {
+                    if (JustAuthRequestHolder.authCustomizeSource != null
+                            && getProviderIdBySource(JustAuthRequestHolder.authCustomizeSource)
+                            .equals(providerId)) {
+                        source = JustAuthRequestHolder.authCustomizeSource;
+                        providerId =
+                                ((BaseAuth2Properties) baseProperties).getCustomizeProviderId();
+                        // 重新设置 AuthCustomizeSource 的 name 字段的值, 比如 providerId = customUms, 那么 name
+                        // = CUSTOM_UMS
+                        Class<? extends AuthCustomizeSource> authCustomizeSourceClass =
+                                JustAuthRequestHolder.authCustomizeSource.getClass();
+                        Field nameField =
+                                authCustomizeSourceClass.getSuperclass().getDeclaredField("name");
                         nameField.setAccessible(true);
-                        nameField.set(authCustomizeSource, String.join((CharSequence)FIELD_SEPARATOR, org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase((String)providerId)).toUpperCase());
-                        SOURCE_PROVIDER_ID_MAP.put((AuthSource)authCustomizeSource, providerId);
+                        nameField.set(
+                                JustAuthRequestHolder.authCustomizeSource,
+                                join(FIELD_SEPARATOR, splitByCharacterTypeCamelCase(providerId))
+                                        .toUpperCase());
+
+                        SOURCE_PROVIDER_ID_MAP.put(
+                                JustAuthRequestHolder.authCustomizeSource, providerId);
+                    } else if (JustAuthRequestHolder.authGitlabPrivateSource != null
+                            && getProviderIdBySource(JustAuthRequestHolder.authGitlabPrivateSource)
+                            .equals(providerId)) {
+                        source = JustAuthRequestHolder.authGitlabPrivateSource;
+                        SOURCE_PROVIDER_ID_MAP.put(
+                                JustAuthRequestHolder.authCustomizeSource, providerId);
                     }
-                    if (authGitlabPrivateSource == null || !JustAuthRequestHolder.getProviderIdBySource((AuthSource)authGitlabPrivateSource).equals(providerId)) break block13;
-                    source = authGitlabPrivateSource;
-                    SOURCE_PROVIDER_ID_MAP.put((AuthSource)authCustomizeSource, providerId);
+                }
+
+                BaseAuth2Properties baseAuth2Properties = ((BaseAuth2Properties) baseProperties);
+                if (baseAuth2Properties.getClientId() != null
+                        && baseAuth2Properties.getClientSecret() != null) {
+                    if (source == null) {
+                        throw new RuntimeException(
+                                String.format(
+                                        "获取不到 %s 相对应的 me.zhyd.oauth.config.AuthSource",
+                                        providerId));
+                    }
+
+                    Auth2DefaultRequest auth2DefaultRequest =
+                            getAuth2DefaultRequest(source, auth2Properties, authStateCache);
+                    if (null != auth2DefaultRequest) {
+                        PROVIDER_ID_AUTH_REQUEST_MAP.put(providerId, auth2DefaultRequest);
+                    }
                 }
             }
-            BaseAuth2Properties baseAuth2Properties = (BaseAuth2Properties)baseProperties;
-            if (baseAuth2Properties.getClientId() == null || baseAuth2Properties.getClientSecret() == null) continue;
-            if (source == null) {
-                throw new RuntimeException(String.format("\u83b7\u53d6\u4e0d\u5230 %s \u76f8\u5bf9\u5e94\u7684 me.zhyd.oauth.config.AuthSource", providerId));
-            }
-            Auth2DefaultRequest auth2DefaultRequest = this.getAuth2DefaultRequest((AuthSource)source, auth2Properties, authStateCache);
-            if (null == auth2DefaultRequest) continue;
-            PROVIDER_ID_AUTH_REQUEST_MAP.put(providerId, auth2DefaultRequest);
         }
     }
 
+    /**
+     * 获取 {@link Auth2DefaultRequest}
+     *
+     * @return {@link Auth2DefaultRequest}
+     */
     @Nullable
-    private Auth2DefaultRequest getAuth2DefaultRequest(@NonNull AuthSource source, @NonNull JustAuthProperties justAuthProperties, @NonNull AuthStateCache authStateCache) throws IllegalAccessException, ClassNotFoundException {
-        com.kuma.boot.security.justauth.justauth.JustAuthProperties justAuth = justAuthProperties.getJustAuth();
-        AuthConfig config = this.getAuthConfig(justAuthProperties, source);
-        List<String> scopes = this.getScopesBySource(justAuthProperties, source);
+    private Auth2DefaultRequest getAuth2DefaultRequest(
+            @NonNull AuthSource source,
+            @NonNull JustAuthProperties justAuthProperties,
+            @NonNull AuthStateCache authStateCache)
+            throws IllegalAccessException, ClassNotFoundException {
+
+        com.kuma.boot.security.justauth.justauth.JustAuthProperties justAuth =
+                justAuthProperties.getJustAuth();
+        AuthConfig config = getAuthConfig(justAuthProperties, source);
+        // 设置自定义 scopes, 如果没有设置自定义 scopes 则返回默认 scopes
+        List<String> scopes = getScopesBySource(justAuthProperties, source);
         config.setScopes(scopes);
+        // 设置是否启用代理
         HttpConfigProperties proxy = justAuthProperties.getProxy();
         config.setHttpConfig(proxy.getHttpConfig());
-        config.setIgnoreCheckState(justAuth.getIgnoreCheckState().booleanValue());
+        // 设置是否忽略 state 检测
+        config.setIgnoreCheckState(justAuth.getIgnoreCheckState());
+
         if (source instanceof AuthCustomizeSource || source instanceof AuthGitlabPrivateSource) {
-            if (justAuthProperties.getCustomize().getCustomizeIsForeign().booleanValue()) {
-                config.getHttpConfig().setTimeout((int)proxy.getForeignTimeout().toMillis());
+            if (justAuthProperties.getCustomize().getCustomizeIsForeign()) {
+                config.getHttpConfig().setTimeout((int) proxy.getForeignTimeout().toMillis());
             }
             return this.getAuthDefaultRequestAdapter(config, source, authStateCache, null, null);
         }
+
         if (!(source instanceof AuthDefaultSource)) {
             return null;
         }
+
+        // 是否支持第三方授权登录
         boolean isNotSupport = false;
-        switch ((AuthDefaultSource)source) {
-            case CODING: {
+
+        //noinspection AlibabaSwitchStatement
+        switch ((AuthDefaultSource) source) {
+            case CODING:
+                //				config.setCodingGroupName(auth2Properties.getCoding().getCodingGroupName());
                 break;
-            }
-            case ALIPAY: {
+            case ALIPAY:
                 BaseAuth2Properties alipay = justAuthProperties.getAlipay();
-                return this.getAuthDefaultRequestAdapter(config, source, authStateCache, alipay.getProxyHost(), alipay.getProxyPort());
-            }
-            case QQ: {
-                config.setUnionId(justAuthProperties.getQq().getUnionId().booleanValue());
+                // config.setAlipayPublicKey(alipay.getAlipayPublicKey());
+                return this.getAuthDefaultRequestAdapter(
+                        config,
+                        source,
+                        authStateCache,
+                        alipay.getProxyHost(),
+                        alipay.getProxyPort());
+            case QQ:
+                config.setUnionId(justAuthProperties.getQq().getUnionId());
                 break;
-            }
-            case WECHAT_ENTERPRISE: {
+            case WECHAT_ENTERPRISE:
                 config.setAgentId(justAuthProperties.getWechatEnterprise().getAgentId());
                 break;
-            }
-            case XMLY: {
+            case XMLY:
                 BaseAuth2Properties xmly = justAuthProperties.getXmly();
                 config.setDeviceId(xmly.getDeviceId());
                 config.setClientOsType(xmly.getClientOsType());
                 config.setPackId(xmly.getPackId());
                 break;
-            }
-            case STACK_OVERFLOW: {
-                config.setStackOverflowKey(justAuthProperties.getStackOverflow().getStackOverflowKey());
-                config.getHttpConfig().setTimeout((int)proxy.getForeignTimeout().toMillis());
+            case STACK_OVERFLOW:
+                config.setStackOverflowKey(
+                        justAuthProperties.getStackOverflow().getStackOverflowKey());
+                config.getHttpConfig().setTimeout((int) proxy.getForeignTimeout().toMillis());
                 break;
-            }
             case GITHUB:
             case GOOGLE:
             case FACEBOOK:
             case MICROSOFT:
             case PINTEREST:
             case GITLAB:
-            case TWITTER: {
-                config.getHttpConfig().setTimeout((int)proxy.getForeignTimeout().toMillis());
+            case TWITTER:
+                config.getHttpConfig().setTimeout((int) proxy.getForeignTimeout().toMillis());
                 break;
-            }
-            case CSDN: {
+            case CSDN:
                 isNotSupport = true;
                 break;
-            }
+            default:
         }
+
         if (isNotSupport) {
             return null;
         }
         return this.getAuthDefaultRequestAdapter(config, source, authStateCache, null, null);
     }
 
+    /**
+     * 根据 source 获取对应的自定义 scopes, 没有自定义的 {@link AuthScope} 返回默认 scopes; 注意: 自定义第三方授权登录时, 要自己在
+     * AuthCustomizeRequest 中自定义 scopes.
+     *
+     * @param justAuthProperties {@link JustAuthProperties}
+     * @param source             {@link AuthSource}
+     * @return 返回 source 相对应的 scopes, 如果 source 相对应的自定义 scopes 为 null 值则返回默认 scopes
+     * @throws IllegalAccessException 反射异常
+     */
     @Nullable
-    private List<String> getScopesBySource(@NonNull JustAuthProperties justAuthProperties, @NonNull AuthSource source) throws IllegalAccessException {
-        List<String> customAuthScopes = this.getCustomAuthScopes(justAuthProperties, source);
+    private List<String> getScopesBySource(
+            @NonNull JustAuthProperties justAuthProperties, @NonNull AuthSource source)
+            throws IllegalAccessException {
+        List<String> customAuthScopes = getCustomAuthScopes(justAuthProperties, source);
         if (CollectionUtils.isEmpty(customAuthScopes)) {
-            List defaultScopes = AuthScopeUtils.getDefaultScopes((AuthScope[])this.getDefaultScopeBySource(source));
-            if (CollectionUtils.isEmpty((Collection)defaultScopes)) {
+            List<String> defaultScopes = getDefaultScopes(getDefaultScopeBySource(source));
+            if (CollectionUtils.isEmpty(defaultScopes)) {
                 return null;
             }
             return defaultScopes;
@@ -345,216 +452,389 @@ ApplicationContextAware {
         return customAuthScopes;
     }
 
+    /**
+     * 根据 source 返回相对应的默认 {@link AuthScope} 数组, 注意: 自定义的 AuthSource 返回 null, 没有想对应的
+     * {@link AuthScope} 返回 null.
+     *
+     * @param source {@link AuthSource}
+     * @return 返回 source 相对应的默认 {@link AuthScope} 数组
+     */
     @Nullable
     private AuthScope[] getDefaultScopeBySource(@NonNull AuthSource source) {
         if (source instanceof AuthCustomizeSource) {
-            return ((AuthCustomizeSource)source).getDefaultScopes();
+            return ((AuthCustomizeSource) source).getDefaultScopes();
         }
-        switch ((AuthDefaultSource)source) {
-            case STACK_OVERFLOW: {
+        //noinspection AlibabaSwitchStatement
+        switch ((AuthDefaultSource) source) {
+            case STACK_OVERFLOW:
                 return AuthStackoverflowScope.values();
-            }
-            case WECHAT_ENTERPRISE_WEB: {
+            case WECHAT_ENTERPRISE_WEB:
                 return AuthWeChatEnterpriseWebScope.values();
-            }
-            case BAIDU: {
+            case BAIDU:
                 return AuthBaiduScope.values();
-            }
-            case CODING: {
+            case CODING:
                 return AuthCodingScope.values();
-            }
-            case PINTEREST: {
+            case PINTEREST:
                 return AuthPinterestScope.values();
-            }
-            case GITHUB: {
+            case GITHUB:
                 return AuthGithubScope.values();
-            }
-            case MI: {
+            case MI:
                 return AuthMiScope.values();
-            }
-            case RENREN: {
+            case RENREN:
                 return AuthRenrenScope.values();
-            }
-            case HUAWEI: {
+            case HUAWEI:
                 return AuthHuaweiScope.values();
-            }
-            case QQ: {
+            case QQ:
                 return AuthQqScope.values();
-            }
-            case FACEBOOK: {
+            case FACEBOOK:
                 return AuthFacebookScope.values();
-            }
-            case WECHAT_MP: {
+            case WECHAT_MP:
                 return AuthWechatMpScope.values();
-            }
-            case JD: {
+            case JD:
                 return AuthJdScope.values();
-            }
-            case GITEE: {
+            case GITEE:
                 return AuthGiteeScope.values();
-            }
-            case WEIBO: {
+            case WEIBO:
                 return AuthWeiboScope.values();
-            }
-            case MICROSOFT: {
+            case MICROSOFT:
                 return AuthMicrosoftScope.values();
-            }
-            case GITLAB: {
+            case GITLAB:
                 return AuthGitlabScope.values();
-            }
-            case GOOGLE: {
+            case GOOGLE:
                 return AuthGoogleScope.values();
-            }
-            case KUJIALE: {
+            case KUJIALE:
                 return AuthKujialeScope.values();
-            }
-            case LINKEDIN: {
+            case LINKEDIN:
                 return AuthLinkedinScope.values();
-            }
+            default:
+                return null;
         }
-        return null;
     }
 
+    /**
+     * 根据 source 从 auth2Properties 中获取相对应的自定义 scopes. 没有设置自定义 scopes 时返回 null.
+     *
+     * @param justAuthProperties {@link JustAuthProperties}
+     * @param source             {@link AuthSource}
+     * @return 返回根据 source 从 auth2Properties 中获取相对应的自定义 scopes. 没有设置自定义 scopes 时返回 null.
+     * @throws IllegalAccessException 反射异常
+     */
     @Nullable
-    private List<String> getCustomAuthScopes(@NonNull JustAuthProperties justAuthProperties, @NonNull AuthSource source) throws IllegalAccessException {
-        String providerId = JustAuthRequestHolder.getProviderId(source);
-        BaseAuth2Properties providerProperties = this.getBaseAuth2PropertiesByProviderId(justAuthProperties, providerId);
-        if (Objects.isNull(providerProperties)) {
+    private List<String> getCustomAuthScopes(
+            @NonNull JustAuthProperties justAuthProperties, @NonNull AuthSource source)
+            throws IllegalAccessException {
+        // 根据 AuthDefaultSource 获取对应的 Auth2Properties 字段名称(即providerId)
+        String providerId = getProviderId(source);
+
+        // 根据 providerId 从 Auth2Properties 获取对应的 BaseAuth2Properties 对象.
+        BaseAuth2Properties providerProperties =
+                getBaseAuth2PropertiesByProviderId(justAuthProperties, providerId);
+
+        if (isNull(providerProperties)) {
             return null;
         }
+
         return providerProperties.getScopes();
     }
 
+    /**
+     * 根据 {@link AuthSource} 获取对应的 {@link JustAuthProperties} 字段名称(即 providerId)
+     *
+     * @param source {@link AuthSource}
+     * @return {@link AuthSource} 对应的 {@link JustAuthProperties} 字段名称(即 providerId)
+     */
+    @SuppressWarnings("unused")
     public static String getProviderIdBySource(@NonNull AuthSource source) {
         String[] splits = source.getName().split(FIELD_SEPARATOR);
-        return JustAuthRequestHolder.toProviderId(splits);
+        return toProviderId(splits);
     }
 
+    /**
+     * 获取 {@link AuthDefaultRequest} 的适配器
+     *
+     * @param config          {@link AuthDefaultRequest} 的 {@link AuthConfig}
+     * @param source          {@link AuthDefaultRequest} 的 {@link AuthSource}
+     * @param authStateCache  {@link AuthDefaultRequest} 的 {@link AuthStateCache}
+     * @param alipayProxyHost 支付宝有自己的代理, 默认代理对支付宝不生效, 支付宝代理主机:
+     * @param alipayProxyPort 支付宝有自己的代理, 默认代理对支付宝不生效, 支付宝代理端口:
+     * @return {@link AuthDefaultRequest} 相对应的适配器
+     */
     @NonNull
-    private JustAuthDefaultRequestAdapter getAuthDefaultRequestAdapter(@NonNull AuthConfig config, @NonNull AuthSource source, @NonNull AuthStateCache authStateCache, @Nullable String alipayProxyHost, @Nullable Integer alipayProxyPort) throws ClassNotFoundException {
-        JustAuthDefaultRequestAdapter adapter = new JustAuthDefaultRequestAdapter(config, source, authStateCache);
-        Class[] argumentTypes = new Class[]{AuthConfig.class, AuthStateCache.class};
-        Object[] arguments = new Object[]{config, authStateCache};
-        if (AuthDefaultSource.ALIPAY.equals((Object)source) && StringUtils.hasText((String)alipayProxyHost) && Objects.nonNull(alipayProxyPort)) {
-            argumentTypes = new Class[]{AuthConfig.class, AuthStateCache.class, String.class, Integer.class};
-            arguments = new Object[]{config, authStateCache, alipayProxyHost, alipayProxyPort};
+    private com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter getAuthDefaultRequestAdapter(
+            @NonNull AuthConfig config,
+            @NonNull AuthSource source,
+            @NonNull AuthStateCache authStateCache,
+            @Nullable String alipayProxyHost,
+            @Nullable Integer alipayProxyPort)
+            throws ClassNotFoundException {
+        final com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter adapter =
+                new com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter(config, source, authStateCache);
+        Class<?>[] argumentTypes = new Class[] {AuthConfig.class, AuthStateCache.class};
+        Object[] arguments = new Object[] {config, authStateCache};
+        if (ALIPAY.equals(source) && hasText(alipayProxyHost) && nonNull(alipayProxyPort)) {
+            argumentTypes =
+                    new Class[] {
+                            AuthConfig.class, AuthStateCache.class, String.class, Integer.class
+                    };
+            arguments = new Object[] {config, authStateCache, alipayProxyHost, alipayProxyPort};
         }
-        AuthDefaultRequest proxyObject = this.createProxy(JustAuthRequestHolder.getAuthRequestClassBySource(source), argumentTypes, arguments, adapter);
+        final AuthDefaultRequest proxyObject =
+                createProxy(getAuthRequestClassBySource(source), argumentTypes, arguments, adapter);
         adapter.setAuthDefaultRequest(proxyObject);
         return adapter;
     }
 
+    /**
+     * 创建 {@code targetClass} 的代理对象, 主要是替换 {@link AuthDefaultRequest} 的 {@code getRealState(state)}
+     * 方法 为 {@link com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter#getRealState(String)} 方法.
+     *
+     * @param targetClass   代理的目标对象 Class, 必须是 {@link AuthDefaultRequest} 的子类 Class
+     * @param argumentTypes 目标对象构造参数类型数组
+     * @param arguments     目标对象构造参数值数组与 argumentTypes 一一对应
+     * @param adapter       {@link com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter}
+     * @return targetClass 的代理对象
+     */
     @NonNull
-    private AuthDefaultRequest createProxy(Class<?> targetClass, Class<?>[] argumentTypes, Object[] arguments, JustAuthDefaultRequestAdapter adapter) throws ClassNotFoundException {
+    private AuthDefaultRequest createProxy(
+            Class<?> targetClass,
+            Class<?>[] argumentTypes,
+            Object[] arguments,
+            com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter adapter)
+            throws ClassNotFoundException {
+
         if (!AuthDefaultRequest.class.isAssignableFrom(targetClass)) {
-            throw new ClassNotFoundException(targetClass.getName() + " \u5fc5\u987b\u662f me.zhyd.oauth.request.AuthDefaultRequest \u7684\u5b50\u7c7b");
+            throw new ClassNotFoundException(
+                    targetClass.getName() + " 必须是 me.zhyd.oauth.request.AuthDefaultRequest 的子类");
         }
-        Enhancer enhancer = new Enhancer();
+
+        final Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(targetClass);
-        enhancer.setCallback((Callback)((MethodInterceptor)(target, method, args, methodProxy) -> {
-            if (target instanceof AuthDefaultRequest && !(target instanceof JustAuthDefaultRequestAdapter) && "getRealState".equals(method.getName())) {
-                return adapter.getRealState((String)args[0]);
-            }
-            return methodProxy.invokeSuper(target, args);
-        }));
-        return (AuthDefaultRequest)enhancer.create((Class[])argumentTypes, arguments);
+        enhancer.setCallback(
+                (MethodInterceptor)
+                        (target, method, args, methodProxy) -> {
+                            // 替换 AuthDefaultRequest 的 getRealState(state) 方法为
+                            // AuthDefaultRequestAdapter 的 getRealState(state) 方法
+                            if (target instanceof AuthDefaultRequest
+                                    && !(target instanceof com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter)
+                                    && "getRealState".equals(method.getName())) {
+                                return adapter.getRealState((String) args[0]);
+                            }
+                            return methodProxy.invokeSuper(target, args);
+                        });
+
+        return (AuthDefaultRequest) enhancer.create(argumentTypes, arguments);
     }
 
-    private AuthStateCache getAuthStateCache(StateCacheType type, JustAuthProperties justAuthProperties, Object stringRedisTemplate) {
+    /**
+     * 获取 {@link AuthStateCache} 对象
+     *
+     * @param type                {@link StateCacheType}
+     * @param justAuthProperties  auth2Properties
+     * @param stringRedisTemplate stringRedisTemplate
+     * @return {@link AuthStateCache}
+     */
+    private AuthStateCache getAuthStateCache(
+            StateCacheType type,
+            JustAuthProperties justAuthProperties,
+            Object stringRedisTemplate) {
         switch (type) {
-            case DEFAULT: {
+            case DEFAULT:
                 return AuthDefaultStateCache.INSTANCE;
-            }
-            case SESSION: {
+            case SESSION:
                 return new AuthStateSessionCache(justAuthProperties.getJustAuth());
-            }
-            case REDIS: {
+            case REDIS:
                 if (stringRedisTemplate == null) {
-                    throw new RuntimeException(String.format("applicationContext \u4e2d\u83b7\u53d6\u4e0d\u5230 %s, %s \u7c7b\u578b\u7684\u7f13\u5b58\u65e0\u6cd5\u521b\u5efa!", "org.springframework.data.redis.core.StringRedisTemplate", type.name()));
+                    throw new RuntimeException(
+                            String.format(
+                                    "applicationContext 中获取不到 %s, %s 类型的缓存无法创建!",
+                                    "org.springframework.data.redis.core.StringRedisTemplate",
+                                    type.name()));
                 }
-                return new AuthStateRedisCache(justAuthProperties.getJustAuth(), stringRedisTemplate);
-            }
+                return new AuthStateRedisCache(
+                        justAuthProperties.getJustAuth(), stringRedisTemplate);
+            default:
+                LogUtils.error(
+                        "{} 类型不匹配, 使用 {} 类型缓存替代",
+                        StateCacheType.class.getName(),
+                        StateCacheType.DEFAULT.name());
+                return AuthDefaultStateCache.INSTANCE;
         }
-        LogUtils.error((String)"{} \u7c7b\u578b\u4e0d\u5339\u914d, \u4f7f\u7528 {} \u7c7b\u578b\u7f13\u5b58\u66ff\u4ee3", (Object[])new Object[]{StateCacheType.class.getName(), StateCacheType.DEFAULT.name()});
-        return AuthDefaultStateCache.INSTANCE;
     }
 
-    private AuthConfig getAuthConfig(@NonNull JustAuthProperties justAuthProperties, @NonNull AuthSource source) throws IllegalAccessException, NullPointerException {
-        Field[] declaredFields;
+    /**
+     * 根据 auth2Properties 与 source 构建 {@link AuthConfig} 对象.
+     *
+     * @param justAuthProperties auth2Properties
+     * @param source             {@link AuthSource}
+     * @return 返回 {@link AuthConfig} 对象
+     * @throws IllegalAccessException IllegalAccessException
+     * @throws NullPointerException   NullPointerException
+     */
+    private AuthConfig getAuthConfig(
+            @NonNull JustAuthProperties justAuthProperties, @NonNull AuthSource source)
+            throws IllegalAccessException, NullPointerException {
         AuthConfig.AuthConfigBuilder builder = AuthConfig.builder();
-        String providerId = JustAuthRequestHolder.getProviderId(source);
-        BaseAuth2Properties providerProperties = this.getBaseAuth2PropertiesByProviderId(justAuthProperties, providerId);
-        Objects.requireNonNull(providerProperties, String.format("\u83b7\u53d6\u4e0d\u5230 %s \u7c7b\u578b\u6240\u5bf9\u5e94\u7684 BaseAuth2Properties \u7684\u5b50\u7c7b", source.getName()));
+
+        // 根据 AuthDefaultSource 获取对应的 Auth2Properties 字段名称(即providerId)
+        String providerId = getProviderId(source);
+
+        // 根据 providerId 从 Auth2Properties 获取对应的 BaseAuth2Properties 对象.
+        BaseAuth2Properties providerProperties =
+                getBaseAuth2PropertiesByProviderId(justAuthProperties, providerId);
+
+        requireNonNull(
+                providerProperties,
+                String.format("获取不到 %s 类型所对应的 BaseAuth2Properties 的子类", source.getName()));
+
+        // 设置 clientId 与 clientSecret
         Class<BaseAuth2Properties> baseClass = BaseAuth2Properties.class;
-        for (Field field : declaredFields = baseClass.getDeclaredFields()) {
+        Field[] declaredFields = baseClass.getDeclaredFields();
+        for (Field field : declaredFields) {
             field.setAccessible(true);
             if (CLIENT_ID_FIELD_NAME.equals(field.getName())) {
-                String clientId = (String)field.get(providerProperties);
-                Objects.requireNonNull(clientId, String.format("\u83b7\u53d6\u4e0d\u5230 %s \u7c7b\u578b\u6240\u5bf9\u5e94\u7684 %s \u7684\u503c", source.getName(), CLIENT_ID_FIELD_NAME));
+                String clientId = (String) field.get(providerProperties);
+                requireNonNull(
+                        clientId,
+                        String.format(
+                                "获取不到 %s 类型所对应的 %s 的值", source.getName(), CLIENT_ID_FIELD_NAME));
                 builder.clientId(clientId);
             }
-            if (!CLIENT_SECRET_FIELD_NAME.equals(field.getName())) continue;
-            String clientSecret = (String)field.get(providerProperties);
-            Objects.requireNonNull(clientSecret, String.format("\u83b7\u53d6\u4e0d\u5230 %s \u7c7b\u578b\u6240\u5bf9\u5e94\u7684 %s \u7684\u503c", source.getName(), CLIENT_SECRET_FIELD_NAME));
-            builder.clientSecret(clientSecret);
+            if (CLIENT_SECRET_FIELD_NAME.equals(field.getName())) {
+                String clientSecret = (String) field.get(providerProperties);
+                requireNonNull(
+                        clientSecret,
+                        String.format(
+                                "获取不到 %s 类型所对应的 %s 的值",
+                                source.getName(), CLIENT_SECRET_FIELD_NAME));
+                builder.clientSecret(clientSecret);
+            }
         }
-        String redirectUri = justAuthProperties.getDomain() + this.getServletContextPath() + justAuthProperties.getRedirectUrlPrefix() + "/" + providerId;
+
+        // 构建 redirectUri
+        String redirectUri =
+                justAuthProperties.getDomain()
+                        + getServletContextPath()
+                        + justAuthProperties.getRedirectUrlPrefix()
+                        + SecurityConstants.URL_SEPARATOR
+                        + providerId;
+
         return builder.redirectUri(redirectUri).build();
     }
 
+    /**
+     * 根据 providerId 从 {@link JustAuthProperties} 获取对应的 {@link BaseAuth2Properties} 对象.
+     *
+     * @param justAuthProperties {@link JustAuthProperties}
+     * @param providerId         providerId
+     * @return 返回 providerId 在 {@link JustAuthProperties} 中相对应的 {@link BaseAuth2Properties} 对象,
+     * 不存在则返回 null
+     * @throws IllegalAccessException 反射异常
+     */
     @Nullable
-    private BaseAuth2Properties getBaseAuth2PropertiesByProviderId(JustAuthProperties justAuthProperties, String providerId) throws IllegalAccessException {
-        Class<?> aClass = justAuthProperties.getClass();
+    private BaseAuth2Properties getBaseAuth2PropertiesByProviderId(
+            JustAuthProperties justAuthProperties, String providerId)
+            throws IllegalAccessException {
+        Class<? extends JustAuthProperties> aClass = justAuthProperties.getClass();
         Field[] declaredFields = aClass.getDeclaredFields();
+        // 第三方属性(providerId,clientId, clientSecret)对象
         Object providerProperties = null;
         for (Field field : declaredFields) {
-            BaseAuth2Properties baseAuth2Properties;
-            String customizeProviderId;
             field.setAccessible(true);
             if (field.getName().equals(providerId)) {
                 providerProperties = field.get(justAuthProperties);
                 break;
+            } else if ("customize".equals(field.getName())) {
+                BaseAuth2Properties baseAuth2Properties =
+                        (BaseAuth2Properties) field.get(justAuthProperties);
+                String customizeProviderId = baseAuth2Properties.getCustomizeProviderId();
+                if (hasText(customizeProviderId) && customizeProviderId.equals(providerId)) {
+                    providerProperties = baseAuth2Properties;
+                    break;
+                }
             }
-            if (!"customize".equals(field.getName()) || !StringUtils.hasText((String)(customizeProviderId = (baseAuth2Properties = (BaseAuth2Properties)field.get(justAuthProperties)).getCustomizeProviderId())) || !customizeProviderId.equals(providerId)) continue;
-            providerProperties = baseAuth2Properties;
-            break;
         }
-        return (BaseAuth2Properties)providerProperties;
+        return (BaseAuth2Properties) providerProperties;
     }
 
+    /**
+     * {@link AuthDefaultRequest} 子类的包名
+     */
+    public static final String AUTH_REQUEST_PACKAGE = "me.zhyd.oauth.request.";
+
+    /**
+     * {@link AuthDefaultRequest} 子类类名前缀
+     */
+    public static final String AUTH_REQUEST_PREFIX = "Auth";
+
+    /**
+     * {@link AuthDefaultRequest} 子类类名后缀
+     */
+    public static final String AUTH_REQUEST_SUFFIX = "Request";
+
+    /**
+     * 根据 {@link AuthSource} 获取对应的 {@link AuthDefaultRequest} 子类的 Class
+     *
+     * @param source {@link AuthSource}
+     * @return 返回 {@link AuthSource} 对应的 {@link AuthDefaultRequest} 子类的 Class
+     */
     @NonNull
-    public static Class<?> getAuthRequestClassBySource(@NonNull AuthSource source) throws ClassNotFoundException {
+    public static Class<?> getAuthRequestClassBySource(@NonNull AuthSource source)
+            throws ClassNotFoundException {
         if (source instanceof AuthCustomizeSource) {
-            if (authCustomizeSource == null) {
-                throw new RuntimeException("\u5fc5\u987b\u5b9e\u73b0 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource \u4e14\u6ce8\u5165 IOC \u5bb9\u5668");
+            if (JustAuthRequestHolder.authCustomizeSource == null) {
+                throw new RuntimeException(
+                        "必须实现 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource 且注入 IOC 容器");
             }
-            return authCustomizeSource.getCustomizeRequestClass();
+            return JustAuthRequestHolder.authCustomizeSource.getCustomizeRequestClass();
         }
+
         if (source instanceof AuthGitlabPrivateSource) {
-            if (authGitlabPrivateSource == null) {
-                throw new RuntimeException("\u5fc5\u987b\u5b9e\u73b0 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource \u4e14\u6ce8\u5165 IOC \u5bb9\u5668");
+            if (JustAuthRequestHolder.authGitlabPrivateSource == null) {
+                throw new RuntimeException(
+                        "必须实现 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource 且注入 IOC 容器");
             }
-            return authGitlabPrivateSource.getCustomizeRequestClass();
+            return JustAuthRequestHolder.authGitlabPrivateSource.getCustomizeRequestClass();
         }
+
         if (!(source instanceof AuthDefaultSource)) {
-            throw new RuntimeException("AuthSource \u5fc5\u987b\u662f me.zhyd.oauth.config.AuthDefaultSource \u6216 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource \u5b50\u7c7b");
+            throw new RuntimeException(
+                    "AuthSource 必须是 me.zhyd.oauth.config.AuthDefaultSource 或 top.dcenter.ums.security.core.oauth.justauth.source.AuthCustomizeSource 子类");
         }
-        String[] splits = ((AuthDefaultSource)source).name().split(FIELD_SEPARATOR);
-        String authRequestClassName = AUTH_REQUEST_PACKAGE + JustAuthRequestHolder.toAuthRequestClassName(splits);
+
+        String[] splits = ((AuthDefaultSource) source).name().split(FIELD_SEPARATOR);
+        String authRequestClassName = AUTH_REQUEST_PACKAGE + toAuthRequestClassName(splits);
         return Class.forName(authRequestClassName);
     }
 
+    /**
+     * 获取 servletContextPath
+     *
+     * @return servletContextPath
+     */
     private String getServletContextPath() {
         String contextPath;
         try {
-            contextPath = Objects.requireNonNull(((AnnotationConfigServletWebServerApplicationContext)this.applicationContext).getServletContext()).getContextPath();
-        }
-        catch (Exception e) {
-            contextPath = Objects.requireNonNull(((WebApplicationContext)this.applicationContext).getServletContext()).getContextPath();
+            contextPath =
+                    requireNonNull(
+                            ((AnnotationConfigServletWebServerApplicationContext)
+                                    applicationContext)
+                                    .getServletContext())
+                            .getContextPath();
+
+        } catch (Exception e) {
+            contextPath =
+                    requireNonNull(((WebApplicationContext) applicationContext).getServletContext())
+                            .getContextPath();
         }
         return contextPath;
     }
 
+    /**
+     * 根据传入的字符串数组转换为类名格式的字符串, 另外 DingTalk -> DingTalk, WECHAT -> WeChat.
+     *
+     * @param splits 字符串数组, 例如: [WECHAT, OPEN]
+     * @return 返回类名格式的字符串, 如传入的数组是: [STACK, OVERFLOW] 那么返回 AuthStackOverflowRequest
+     */
     @NonNull
     private static String toAuthRequestClassName(String[] splits) {
         StringBuilder sb = new StringBuilder();
@@ -569,20 +849,28 @@ ApplicationContextAware {
                 sb.append("WeChat");
                 continue;
             }
-            if ("enterprise".equalsIgnoreCase(split) && splits.length == 2 && "wechat".equalsIgnoreCase(splits[0])) {
+            if ("enterprise".equalsIgnoreCase(split)
+                    && splits.length == 2
+                    && "wechat".equalsIgnoreCase(splits[0])) {
                 sb.append("EnterpriseQrcode");
                 continue;
             }
             if (split.length() > 1) {
                 sb.append(split.substring(0, 1).toUpperCase()).append(split.substring(1));
-                continue;
+            } else {
+                sb.append(split.toUpperCase());
             }
-            sb.append(split.toUpperCase());
         }
         sb.append(AUTH_REQUEST_SUFFIX);
         return sb.toString();
     }
 
+    /**
+     * 根据传入的字符串数组转换为驼峰格式的字符串
+     *
+     * @param splits 字符串数组, 例如: [WECHAT, OPEN]
+     * @return 驼峰格式的字符串, 如传入的数组是: [WECHAT, OPEN] 那么返回 wechatOpen
+     */
     @NonNull
     private static String toProviderId(String[] splits) {
         if (splits.length == 1) {
@@ -590,22 +878,15 @@ ApplicationContextAware {
         }
         StringBuilder sb = new StringBuilder();
         for (String split : splits) {
-            if ((split = split.toLowerCase()).length() > 1) {
+            split = split.toLowerCase();
+            if (split.length() > 1) {
                 sb.append(split.substring(0, 1).toUpperCase()).append(split.substring(1));
-                continue;
+            } else {
+                sb.append(split.toUpperCase());
             }
-            sb.append(split.toUpperCase());
         }
         String firstChar = String.valueOf(sb.charAt(0)).toLowerCase();
         sb.replace(0, 1, firstChar);
         return sb.toString();
     }
-
-    static {
-        PROVIDER_ID_AUTH_REQUEST_MAP = new ConcurrentHashMap<String, Auth2DefaultRequest>();
-        SOURCE_PROVIDER_ID_MAP = new ConcurrentHashMap<AuthSource, String>();
-        authCustomizeSource = null;
-        authGitlabPrivateSource = null;
-    }
 }
-

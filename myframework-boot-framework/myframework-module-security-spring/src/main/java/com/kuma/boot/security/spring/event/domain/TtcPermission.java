@@ -1,28 +1,43 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- *  io.swagger.v3.oas.annotations.media.Schema
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.domain;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name="\u7cfb\u7edf\u6743\u9650")
-public class TtcPermission {
-    @Schema(name="\u6743\u9650ID")
+/**
+ * <p>系统权限实体 </p>
+ *
+ */
+@Schema(name = "系统权限")
+public class KmcPermission {
+
+    @Schema(name = "权限ID")
     private String permissionId;
-    @Schema(name="\u6743\u9650\u4ee3\u7801")
+
+    @Schema(name = "权限代码")
     private String permissionCode;
-    @Schema(name="\u6743\u9650\u540d\u79f0")
+
+    @Schema(name = "权限名称")
     private String permissionName;
 
     public String getPermissionId() {
-        return this.permissionId;
+        return permissionId;
     }
 
     public void setPermissionId(String permissionId) {
@@ -30,7 +45,7 @@ public class TtcPermission {
     }
 
     public String getPermissionCode() {
-        return this.permissionCode;
+        return permissionCode;
     }
 
     public void setPermissionCode(String permissionCode) {
@@ -38,30 +53,36 @@ public class TtcPermission {
     }
 
     public String getPermissionName() {
-        return this.permissionName;
+        return permissionName;
     }
 
     public void setPermissionName(String permissionName) {
         this.permissionName = permissionName;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TtcPermission that = (TtcPermission)o;
-        return Objects.equal((Object)this.permissionId, (Object)that.permissionId);
+        KmcPermission that = (KmcPermission) o;
+        return Objects.equal(permissionId, that.permissionId);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.permissionId});
+        return Objects.hashCode(permissionId);
     }
 
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("permissionId", (Object)this.permissionId).add("permissionCode", (Object)this.permissionCode).add("permissionName", (Object)this.permissionName).toString();
+        return MoreObjects.toStringHelper(this)
+                .add("permissionId", permissionId)
+                .add("permissionCode", permissionCode)
+                .add("permissionName", permissionName)
+                .toString();
     }
 }
-

@@ -1,34 +1,54 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.lang3.ObjectUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.context.ApplicationListener
- *  org.springframework.stereotype.Component
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.event.metadata.listener;
 
 import com.kuma.boot.security.spring.event.LocalChangeUserStatusEvent;
-import com.kuma.boot.security.spring.event.domain.TtcUserStatus;
+import com.kuma.boot.security.spring.event.domain.KmcUserStatus;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * <p>本地用户状态变更监听 </p>
+ */
 @Component
 public class LocalChangeUserStatusListener
-implements ApplicationListener<LocalChangeUserStatusEvent> {
+        implements ApplicationListener<LocalChangeUserStatusEvent> {
+
     private static final Logger log = LoggerFactory.getLogger(LocalChangeUserStatusListener.class);
 
+    //	private final SysUserService sysUserService;
+    //
+    //	public LocalChangeUserStatusListener(SysUserService sysUserService) {
+    //		this.sysUserService = sysUserService;
+    //	}
+
+    @Override
     public void onApplicationEvent(LocalChangeUserStatusEvent event) {
         log.info(" Change user status gather LOCAL listener, response event!");
-        TtcUserStatus ttcUserStatus = (TtcUserStatus)event.getData();
-        if (ObjectUtils.isNotEmpty((Object)ttcUserStatus)) {
-            // empty if block
+
+        KmcUserStatus kmcUserStatus = event.getData();
+        if (ObjectUtils.isNotEmpty(kmcUserStatus)) {
+            //			DataItemStatus dataItemStatus = DataItemStatus.valueOf(userStatus.getStatus());
+            //			if (ObjectUtils.isNotEmpty(dataItemStatus)) {
+            //				sysUserService.changeStatus(userStatus.getUserId(), dataItemStatus);
+            //			}
         }
     }
 }
-

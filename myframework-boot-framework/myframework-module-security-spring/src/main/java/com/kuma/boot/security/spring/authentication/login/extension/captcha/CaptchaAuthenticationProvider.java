@@ -1,33 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.context.MessageSource
- *  org.springframework.context.MessageSourceAware
- *  org.springframework.context.support.MessageSourceAccessor
- *  org.springframework.security.authentication.AccountExpiredException
- *  org.springframework.security.authentication.AuthenticationProvider
- *  org.springframework.security.authentication.BadCredentialsException
- *  org.springframework.security.authentication.CredentialsExpiredException
- *  org.springframework.security.authentication.DisabledException
- *  org.springframework.security.authentication.InternalAuthenticationServiceException
- *  org.springframework.security.authentication.LockedException
- *  org.springframework.security.core.Authentication
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.core.SpringSecurityMessageSource
- *  org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
- *  org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
- *  org.springframework.security.core.userdetails.UserCache
- *  org.springframework.security.core.userdetails.UserDetails
- *  org.springframework.security.core.userdetails.UserDetailsChecker
- *  org.springframework.security.core.userdetails.UsernameNotFoundException
- *  org.springframework.security.core.userdetails.cache.NullUserCache
- *  org.springframework.security.crypto.factory.PasswordEncoderFactories
- *  org.springframework.security.crypto.password.PasswordEncoder
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.captcha;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -47,6 +33,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
@@ -59,125 +46,144 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
+/**
+ * 用户名+短信+校验码 登录
+ *
+ * @author kuma
+ * @version 2023.04
+ * @since 2023-06-29 14:13:50
+ */
 public class CaptchaAuthenticationProvider
-implements AuthenticationProvider,
-InitializingBean,
-MessageSourceAware {
+        implements AuthenticationProvider, InitializingBean, MessageSourceAware {
+
     private volatile String userNotFoundEncodedPassword;
     private final UserCache userCache = new NullUserCache();
     private PasswordEncoder passwordEncoder;
     private static final String USER_NOT_FOUND_PASSWORD = "userNotFoundPassword";
-    private final UserDetailsChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks(this);
-    private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks(this);
+    private final UserDetailsChecker preAuthenticationChecks = new DefaultPreAuthenticationChecks();
+    private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
+
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final CaptchaUserDetailsService captchaUserDetailsService;
     private final CaptchaCheckService captchaCheckService;
     private MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-    public CaptchaAuthenticationProvider(CaptchaUserDetailsService captchaUserDetailsService, CaptchaCheckService captchaCheckService) {
+    public CaptchaAuthenticationProvider(
+            CaptchaUserDetailsService captchaUserDetailsService,
+            CaptchaCheckService captchaCheckService) {
         this.captchaUserDetailsService = captchaUserDetailsService;
         this.captchaCheckService = captchaCheckService;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String username = this.determineUsername(authentication);
+    @Override
+    public Authentication authenticate(Authentication authentication)
+            throws AuthenticationException {
+        String username = determineUsername(authentication);
         boolean cacheWasUsed = true;
         UserDetails user = this.userCache.getUserFromCache(username);
         if (user == null) {
             cacheWasUsed = false;
             try {
-                user = this.retrieveUser(username, (CaptchaAuthenticationToken)authentication);
+                user = retrieveUser(username, (CaptchaAuthenticationToken) authentication);
+            } catch (UsernameNotFoundException ex) {
+                LogUtils.error("Failed to find user '" + username + "'");
+                throw new BadCredentialsException("用户不存在");
             }
-            catch (UsernameNotFoundException ex) {
-                LogUtils.error((String)("Failed to find user '" + username + "'"), (Object[])new Object[0]);
-                throw new BadCredentialsException("\u7528\u6237\u4e0d\u5b58\u5728");
-            }
-            Assert.notNull((Object)user, (String)"retrieveUser returned null - a violation of the interface contract");
+            Assert.notNull(
+                    user, "retrieveUser returned null - a violation of the interface contract");
         }
         try {
             this.preAuthenticationChecks.check(user);
-            this.additionalAuthenticationChecks(user, (CaptchaAuthenticationToken)authentication);
-        }
-        catch (AuthenticationException ex) {
+            additionalAuthenticationChecks(user, (CaptchaAuthenticationToken) authentication);
+        } catch (AuthenticationException ex) {
             if (!cacheWasUsed) {
                 throw ex;
             }
+            // There was a problem, so try again after checking
+            // we're using latest data (i.e. not from the cache)
             cacheWasUsed = false;
-            user = this.retrieveUser(username, (CaptchaAuthenticationToken)authentication);
+            user = retrieveUser(username, (CaptchaAuthenticationToken) authentication);
             this.preAuthenticationChecks.check(user);
-            this.additionalAuthenticationChecks(user, (CaptchaAuthenticationToken)authentication);
+            additionalAuthenticationChecks(user, (CaptchaAuthenticationToken) authentication);
         }
         this.postAuthenticationChecks.check(user);
         if (!cacheWasUsed) {
             this.userCache.putUserInCache(user);
         }
-        return this.createSuccessAuthentication(user.getUsername(), authentication, user);
+
+        return createSuccessAuthentication(user.getUsername(), authentication, user);
     }
 
-    protected void additionalAuthenticationChecks(UserDetails userDetails, CaptchaAuthenticationToken captchaAuthenticationToken) throws AuthenticationException {
+    protected void additionalAuthenticationChecks(
+            UserDetails userDetails, CaptchaAuthenticationToken captchaAuthenticationToken)
+            throws AuthenticationException {
         if (captchaAuthenticationToken.getCredentials() == null) {
-            LogUtils.error((String)"Failed to authenticate since no credentials provided", (Object[])new Object[0]);
-            throw new BadCredentialsException("\u7528\u6237\u5bc6\u7801\u9519\u8bef");
+            LogUtils.error("Failed to authenticate since no credentials provided");
+            throw new BadCredentialsException("用户密码错误");
         }
         String presentedPassword = captchaAuthenticationToken.getCredentials().toString();
-        if (!this.passwordEncoder.matches((CharSequence)presentedPassword, userDetails.getPassword())) {
-            LogUtils.error((String)"Failed to authenticate since password does not match stored value", (Object[])new Object[0]);
-            throw new BadCredentialsException("\u7528\u6237\u5bc6\u7801\u9519\u8bef");
+        if (!this.passwordEncoder.matches(presentedPassword, userDetails.getPassword())) {
+            LogUtils.error("Failed to authenticate since password does not match stored value");
+            throw new BadCredentialsException("用户密码错误");
         }
         String verificationCode = captchaAuthenticationToken.getVerificationCode();
-        if (!this.captchaCheckService.verifyCaptcha(verificationCode)) {
-            throw new BadCredentialsException("\u6821\u9a8c\u9519\u8bef");
+        if (!captchaCheckService.verifyCaptcha(verificationCode)) {
+            throw new BadCredentialsException("校验错误");
         }
     }
 
-    protected final UserDetails retrieveUser(String username, CaptchaAuthenticationToken authentication) throws AuthenticationException {
-        this.prepareTimingAttackProtection();
+    protected final UserDetails retrieveUser(
+            String username, CaptchaAuthenticationToken authentication)
+            throws AuthenticationException {
+        prepareTimingAttackProtection();
         try {
-            UserDetails loadedUser = this.captchaUserDetailsService.loadUserByUsername((String)authentication.getPrincipal(), authentication.getType());
+            UserDetails loadedUser =
+                    captchaUserDetailsService.loadUserByUsername(
+                            (String) authentication.getPrincipal(), authentication.getType());
             if (loadedUser == null) {
-                throw new InternalAuthenticationServiceException("\u7528\u6237\u4e0d\u5b58\u5728");
+                throw new InternalAuthenticationServiceException("用户不存在");
             }
             return loadedUser;
-        }
-        catch (UsernameNotFoundException ex) {
-            this.mitigateAgainstTimingAttack(authentication);
+        } catch (UsernameNotFoundException ex) {
+            mitigateAgainstTimingAttack(authentication);
             throw ex;
-        }
-        catch (InternalAuthenticationServiceException ex) {
+        } catch (InternalAuthenticationServiceException ex) {
             throw ex;
-        }
-        catch (Exception ex) {
-            throw new InternalAuthenticationServiceException(ex.getMessage(), (Throwable)ex);
+        } catch (Exception ex) {
+            throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
         }
     }
 
     private void prepareTimingAttackProtection() {
         if (this.userNotFoundEncodedPassword == null) {
-            this.userNotFoundEncodedPassword = this.passwordEncoder.encode((CharSequence)USER_NOT_FOUND_PASSWORD);
+            this.userNotFoundEncodedPassword = this.passwordEncoder.encode(USER_NOT_FOUND_PASSWORD);
         }
     }
 
     private void mitigateAgainstTimingAttack(CaptchaAuthenticationToken authentication) {
         if (authentication.getCredentials() != null) {
             String presentedPassword = authentication.getCredentials().toString();
-            this.passwordEncoder.matches((CharSequence)presentedPassword, this.userNotFoundEncodedPassword);
+            this.passwordEncoder.matches(presentedPassword, this.userNotFoundEncodedPassword);
         }
     }
 
     private String determineUsername(Authentication authentication) {
-        return authentication.getPrincipal() == null ? "NONE_PROVIDED" : authentication.getName();
+        return (authentication.getPrincipal() == null) ? "NONE_PROVIDED" : authentication.getName();
     }
 
+    @Override
     public boolean supports(Class<?> authentication) {
         return CaptchaAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull((Object)this.captchaUserDetailsService, (String)"captchaUserDetailsService must not be null");
-        Assert.notNull((Object)this.captchaCheckService, (String)"captchaService must not be null");
+        Assert.notNull(captchaUserDetailsService, "captchaUserDetailsService must not be null");
+        Assert.notNull(captchaCheckService, "captchaService must not be null");
     }
 
+    @Override
     public void setMessageSource(MessageSource messageSource) {
         this.messages = new MessageSourceAccessor(messageSource);
     }
@@ -198,53 +204,65 @@ MessageSourceAware {
         this.messages = messages;
     }
 
-    protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails userDetails) {
-        CaptchaAuthenticationToken captchaAuthenticationToken;
-        Collection authorities = this.authoritiesMapper.mapAuthorities(userDetails.getAuthorities());
+    /**
+     * 认证成功将非授信凭据转为授信凭据. 封装用户信息 角色信息。
+     *
+     * @param authentication the authentication
+     * @param userDetails    the user
+     * @return the authentication
+     */
+    protected Authentication createSuccessAuthentication(
+            Object principal, Authentication authentication, UserDetails userDetails) {
+        Collection<? extends GrantedAuthority> authorities =
+                authoritiesMapper.mapAuthorities(userDetails.getAuthorities());
+
         String type = "";
         String verificationCode = "";
-        if (authentication instanceof CaptchaAuthenticationToken) {
-            captchaAuthenticationToken = (CaptchaAuthenticationToken)authentication;
+        if (authentication instanceof CaptchaAuthenticationToken captchaAuthenticationToken) {
             type = captchaAuthenticationToken.getType();
             verificationCode = captchaAuthenticationToken.getVerificationCode();
         }
-        captchaAuthenticationToken = new CaptchaAuthenticationToken(principal, null, verificationCode, type, authorities);
+
+        CaptchaAuthenticationToken captchaAuthenticationToken =
+                new CaptchaAuthenticationToken(
+                        principal, null, verificationCode, type, authorities);
         captchaAuthenticationToken.setDetails(authentication.getDetails());
+
         return captchaAuthenticationToken;
     }
 
-    private class DefaultPreAuthenticationChecks
-    implements UserDetailsChecker {
-        private DefaultPreAuthenticationChecks(CaptchaAuthenticationProvider captchaAuthenticationProvider) {
-        }
+    private class DefaultPreAuthenticationChecks implements UserDetailsChecker {
 
+        @Override
         public void check(UserDetails user) {
+            // 用户是否被锁定
             if (!user.isAccountNonLocked()) {
-                LogUtils.error((String)"Failed to authenticate since user account is locked", (Object[])new Object[0]);
-                throw new LockedException("\u7528\u6237\u5df2\u88ab\u9501\u5b9a");
+                LogUtils.error("Failed to authenticate since user account is locked");
+                throw new LockedException("用户已被锁定");
             }
+            // 用户启用
             if (!user.isEnabled()) {
-                LogUtils.error((String)"Failed to authenticate since user account is disabled", (Object[])new Object[0]);
-                throw new DisabledException("\u7528\u6237\u672a\u542f\u7528");
+                LogUtils.error("Failed to authenticate since user account is disabled");
+                throw new DisabledException("用户未启用");
             }
+            // 账号是否过期
             if (!user.isAccountNonExpired()) {
-                LogUtils.error((String)"Failed to authenticate since user account has expired", (Object[])new Object[0]);
-                throw new AccountExpiredException("\u7528\u6237\u8d26\u53f7\u5df2\u8fc7\u671f");
+                LogUtils.error("Failed to authenticate since user account has expired");
+                throw new AccountExpiredException("用户账号已过期");
             }
         }
     }
 
-    private class DefaultPostAuthenticationChecks
-    implements UserDetailsChecker {
-        private DefaultPostAuthenticationChecks(CaptchaAuthenticationProvider captchaAuthenticationProvider) {
-        }
+    private class DefaultPostAuthenticationChecks implements UserDetailsChecker {
 
+        @Override
         public void check(UserDetails user) {
+            // 用户密码是否过期
             if (!user.isCredentialsNonExpired()) {
-                LogUtils.error((String)"Failed to authenticate since user account credentials have expired", (Object[])new Object[0]);
-                throw new CredentialsExpiredException("\u7528\u6237\u8d26\u53f7\u5df2\u8fc7\u671f");
+                LogUtils.error(
+                        "Failed to authenticate since user account credentials have expired");
+                throw new CredentialsExpiredException("用户账号已过期");
             }
         }
     }
 }
-

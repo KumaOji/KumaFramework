@@ -1,27 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.dromara.hutool.core.text.StrUtil
- *  org.springframework.core.convert.converter.Converter
- *  org.springframework.http.HttpMethod
- *  org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
- *  org.springframework.security.authentication.AuthenticationManager
- *  org.springframework.security.authentication.AuthenticationServiceException
- *  org.springframework.security.core.Authentication
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
- *  org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
- *  org.springframework.security.web.util.matcher.RequestMatcher
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.form.qrcode;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.dromara.hutool.core.text.StrUtil;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -31,60 +28,80 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
-public class FormQrcodeAuthenticationFilter
-extends AbstractAuthenticationProcessingFilter {
+public class FormQrcodeAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
     public static final String SPRING_SECURITY_FORM_UUID_KEY = "uuid";
-    private static final PathPatternRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/form/login/qrcode");
-    private String uuidParameter = "uuid";
-    private Converter<HttpServletRequest, FormQrcodeAuthenticationToken> qrcodeAuthenticationTokenConverter = this.defaultConverter();
+
+    private static final PathPatternRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER =
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/form/login/qrcode");
+
+    private String uuidParameter = SPRING_SECURITY_FORM_UUID_KEY;
+
+    private Converter<HttpServletRequest, FormQrcodeAuthenticationToken>
+            qrcodeAuthenticationTokenConverter;
+
     private boolean postOnly = true;
 
     public FormQrcodeAuthenticationFilter() {
-        super((RequestMatcher)DEFAULT_ANT_PATH_REQUEST_MATCHER);
+        super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
+        this.qrcodeAuthenticationTokenConverter = defaultConverter();
     }
 
     public FormQrcodeAuthenticationFilter(AuthenticationManager authenticationManager) {
-        super((RequestMatcher)DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
+        super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
+        this.qrcodeAuthenticationTokenConverter = defaultConverter();
     }
 
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    @Override
+    public Authentication attemptAuthentication(
+            HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
         if (this.postOnly && !HttpMethod.POST.matches(request.getMethod())) {
-            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+            throw new AuthenticationServiceException(
+                    "Authentication method not supported: " + request.getMethod());
         }
-        FormQrcodeAuthenticationToken authRequest = (FormQrcodeAuthenticationToken)((Object)this.qrcodeAuthenticationTokenConverter.convert((Object)request));
-        this.setDetails(request, authRequest);
-        return this.getAuthenticationManager().authenticate((Authentication)authRequest);
+
+        FormQrcodeAuthenticationToken authRequest =
+                qrcodeAuthenticationTokenConverter.convert(request);
+        // Allow subclasses to set the "details" property
+        setDetails(request, authRequest);
+        return this.getAuthenticationManager().authenticate(authRequest);
     }
 
     private Converter<HttpServletRequest, FormQrcodeAuthenticationToken> defaultConverter() {
         return request -> {
             String username = request.getParameter(this.uuidParameter);
-            username = username != null ? username.trim() : "";
+            username = (username != null) ? username.trim() : "";
+
             String authorization = request.getHeader("Authorization");
-            if (StrUtil.isBlank((CharSequence)authorization)) {
+            if (StrUtil.isBlank(authorization)) {
                 throw new AuthenticationCredentialsNotFoundException("");
             }
+
             return new FormQrcodeAuthenticationToken(username, "");
         };
     }
 
-    protected void setDetails(HttpServletRequest request, FormQrcodeAuthenticationToken authRequest) {
-        authRequest.setDetails(this.authenticationDetailsSource.buildDetails((Object)request));
+    protected void setDetails(
+            HttpServletRequest request, FormQrcodeAuthenticationToken authRequest) {
+        authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
     }
 
     public void setUsernameParameter(String usernameParameter) {
-        Assert.hasText((String)usernameParameter, (String)"Username parameter must not be empty or null");
+        Assert.hasText(usernameParameter, "Username parameter must not be empty or null");
+        // this.usernameParameter = usernameParameter;
     }
 
     public void setPasswordParameter(String passwordParameter) {
-        Assert.hasText((String)passwordParameter, (String)"Password parameter must not be empty or null");
+        Assert.hasText(passwordParameter, "Password parameter must not be empty or null");
+        // this.passwordParameter = passwordParameter;
     }
 
-    public void setConverter(Converter<HttpServletRequest, FormQrcodeAuthenticationToken> converter) {
-        Assert.notNull(converter, (String)"Converter must not be null");
+    public void setConverter(
+            Converter<HttpServletRequest, FormQrcodeAuthenticationToken> converter) {
+        Assert.notNull(converter, "Converter must not be null");
         this.qrcodeAuthenticationTokenConverter = converter;
     }
 
@@ -92,4 +109,3 @@ extends AbstractAuthenticationProcessingFilter {
         this.postOnly = postOnly;
     }
 }
-

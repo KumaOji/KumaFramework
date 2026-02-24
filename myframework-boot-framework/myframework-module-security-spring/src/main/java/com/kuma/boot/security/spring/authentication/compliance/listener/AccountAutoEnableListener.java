@@ -1,45 +1,60 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.apache.commons.lang3.StringUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.data.redis.connection.Message
- *  org.springframework.data.redis.listener.KeyExpirationEventMessageListener
- *  org.springframework.data.redis.listener.RedisMessageListenerContainer
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.compliance.listener;
 
 import com.kuma.boot.security.spring.authentication.compliance.OAuth2AccountStatusManager;
+import com.kuma.boot.security.spring.constants.OAuth2Constants;
+import com.kuma.boot.security.spring.constants.SymbolConstants;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.lang3.StringUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
-public class AccountAutoEnableListener
-extends KeyExpirationEventMessageListener {
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+
+/**
+ * <p>账户锁定状态监听 </p>
+ */
+public class AccountAutoEnableListener extends KeyExpirationEventMessageListener {
+
     private static final Logger log = LoggerFactory.getLogger(AccountAutoEnableListener.class);
+
     private final OAuth2AccountStatusManager accountStatusManager;
 
-    public AccountAutoEnableListener(RedisMessageListenerContainer listenerContainer, OAuth2AccountStatusManager accountStatusManager) {
+    public AccountAutoEnableListener(
+            RedisMessageListenerContainer listenerContainer,
+            OAuth2AccountStatusManager accountStatusManager) {
         super(listenerContainer);
         this.accountStatusManager = accountStatusManager;
     }
 
+    @Override
     public void onMessage(Message message, byte[] pattern) {
         String key = new String(message.getBody(), StandardCharsets.UTF_8);
-        if (StringUtils.contains((CharSequence)key, (CharSequence)"cache:token:locked:user_details:")) {
-            String userId = StringUtils.substringAfterLast((String)key, (String)":");
-            log.info(" Parse the user [{}] at expired redis cache key [{}]", (Object)userId, (Object)key);
-            if (StringUtils.isNotBlank((CharSequence)userId)) {
-                log.debug(" Automatically unlock user account [{}]", (Object)userId);
-                this.accountStatusManager.enable(userId);
+        if (StringUtils.contains(key, OAuth2Constants.CACHE_NAME_TOKEN_LOCKED_USER_DETAIL)) {
+            String userId = substringAfterLast(key, SymbolConstants.COLON);
+            log.info(" Parse the user [{}] at expired redis cache key [{}]", userId, key);
+            if (StringUtils.isNotBlank(userId)) {
+                log.debug(" Automatically unlock user account [{}]", userId);
+                accountStatusManager.enable(userId);
             }
         }
     }
 }
-

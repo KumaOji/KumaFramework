@@ -1,49 +1,96 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.xkcoding.http.config.HttpConfig
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth.properties;
 
 import com.xkcoding.http.config.HttpConfig;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.Proxy.Type;
 import java.time.Duration;
 
+/**
+ * JustAuth 代理配置
+ * @author YongWu zheng
+ * @version V2.0  Created by 2021-05-10 10:14
+ */
 public class HttpConfigProperties {
-    private Boolean enable = false;
-    private Proxy.Type proxy = Proxy.Type.HTTP;
-    private String hostname;
-    private Integer port;
-    private Duration timeout = Duration.ofSeconds(3L);
-    private Duration foreignTimeout = Duration.ofSeconds(15L);
 
+    /**
+     * 当 enable = true 时, 返回 HttpConfig 对象, 否则返回为 null.
+     * @return  当 enable = true 时, 返回 HttpConfig 对象, 否则返回为 null.
+     */
     public HttpConfig getHttpConfig() {
-        if (!this.enable.booleanValue()) {
-            return HttpConfig.builder().timeout((int)this.timeout.toMillis()).build();
+        if (!enable) {
+            return HttpConfig.builder().timeout((int) timeout.toMillis()).build();
         }
-        return HttpConfig.builder().proxy(new Proxy(this.proxy, new InetSocketAddress(this.hostname, (int)this.port))).timeout((int)this.timeout.toMillis()).build();
+        return HttpConfig.builder()
+                .proxy(new Proxy(proxy, new InetSocketAddress(hostname, port)))
+                .timeout((int) timeout.toMillis())
+                .build();
     }
 
+    /**
+     * 是否支持代理, 默认为: false. <br>
+     */
+    private Boolean enable = false;
+
+    /**
+     * 针对国外服务可以单独设置代理类型, 默认 Proxy.Type.HTTP, enable = true 时生效.
+     */
+    private Type proxy = Type.HTTP;
+
+    /**
+     * 代理 host, enable = true 时生效.
+     */
+    private String hostname;
+
+    /**
+     * 代理端口, enable = true 时生效.
+     */
+    private Integer port;
+
+    /**
+     * 代理超时, 默认 PT3S
+     */
+    private Duration timeout = Duration.ofSeconds(3);
+
+    /**
+     * 用于国外网站代理超时, 默认 PT15S
+     */
+    private Duration foreignTimeout = Duration.ofSeconds(15);
+
     public Boolean getEnable() {
-        return this.enable;
+        return enable;
     }
 
     public void setEnable(Boolean enable) {
         this.enable = enable;
     }
 
-    public Proxy.Type getProxy() {
-        return this.proxy;
+    public Type getProxy() {
+        return proxy;
     }
 
-    public void setProxy(Proxy.Type proxy) {
+    public void setProxy(Type proxy) {
         this.proxy = proxy;
     }
 
     public String getHostname() {
-        return this.hostname;
+        return hostname;
     }
 
     public void setHostname(String hostname) {
@@ -51,7 +98,7 @@ public class HttpConfigProperties {
     }
 
     public Integer getPort() {
-        return this.port;
+        return port;
     }
 
     public void setPort(Integer port) {
@@ -59,7 +106,7 @@ public class HttpConfigProperties {
     }
 
     public Duration getTimeout() {
-        return this.timeout;
+        return timeout;
     }
 
     public void setTimeout(Duration timeout) {
@@ -67,11 +114,10 @@ public class HttpConfigProperties {
     }
 
     public Duration getForeignTimeout() {
-        return this.foreignTimeout;
+        return foreignTimeout;
     }
 
     public void setForeignTimeout(Duration foreignTimeout) {
         this.foreignTimeout = foreignTimeout;
     }
 }
-

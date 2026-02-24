@@ -1,19 +1,34 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.client;
 
 public class WechatMiniAppRequest {
+
     private String clientId;
     private String openId;
     private String unionId;
     private String iv;
     private String encryptedData;
+
     private String signature;
     private String rawData;
 
     public String getClientId() {
-        return this.clientId;
+        return clientId;
     }
 
     public void setClientId(String clientId) {
@@ -21,7 +36,7 @@ public class WechatMiniAppRequest {
     }
 
     public String getOpenId() {
-        return this.openId;
+        return openId;
     }
 
     public void setOpenId(String openId) {
@@ -29,7 +44,7 @@ public class WechatMiniAppRequest {
     }
 
     public String getUnionId() {
-        return this.unionId;
+        return unionId;
     }
 
     public void setUnionId(String unionId) {
@@ -37,7 +52,7 @@ public class WechatMiniAppRequest {
     }
 
     public String getIv() {
-        return this.iv;
+        return iv;
     }
 
     public void setIv(String iv) {
@@ -45,7 +60,7 @@ public class WechatMiniAppRequest {
     }
 
     public String getEncryptedData() {
-        return this.encryptedData;
+        return encryptedData;
     }
 
     public void setEncryptedData(String encryptedData) {
@@ -53,7 +68,7 @@ public class WechatMiniAppRequest {
     }
 
     public String getSignature() {
-        return this.signature;
+        return signature;
     }
 
     public void setSignature(String signature) {
@@ -61,11 +76,10 @@ public class WechatMiniAppRequest {
     }
 
     public String getRawData() {
-        return this.rawData;
+        return rawData;
     }
 
     public void setRawData(String rawData) {
         this.rawData = rawData;
     }
 }
-

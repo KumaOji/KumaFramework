@@ -1,19 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.context.MessageSource
- *  org.springframework.context.MessageSourceAware
- *  org.springframework.context.support.MessageSourceAccessor
- *  org.springframework.security.authentication.AuthenticationProvider
- *  org.springframework.security.core.Authentication
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.security.core.SpringSecurityMessageSource
- *  org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
- *  org.springframework.security.core.authority.mapping.NullAuthoritiesMapper
- *  org.springframework.security.core.userdetails.UserDetails
- *  org.springframework.util.Assert
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp;
 
 import com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.client.WechatMiniAppRequest;
@@ -27,51 +27,84 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 
+/** 微信小程序登录 */
 public class WechatMiniAppAuthenticationProvider
-implements AuthenticationProvider,
-MessageSourceAware {
+        implements AuthenticationProvider, MessageSourceAware {
+
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final WechatMiniAppUserDetailsService wechatMiniAppUserDetailsService;
     private WechatMiniAppSessionKeyCacheService wechatMiniAppSessionKeyCacheService;
     private MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-    public WechatMiniAppAuthenticationProvider(WechatMiniAppUserDetailsService wechatMiniAppUserDetailsService, WechatMiniAppSessionKeyCacheService wechatMiniAppSessionKeyCacheService) {
+    public WechatMiniAppAuthenticationProvider(
+            WechatMiniAppUserDetailsService wechatMiniAppUserDetailsService,
+            WechatMiniAppSessionKeyCacheService wechatMiniAppSessionKeyCacheService) {
         this.wechatMiniAppUserDetailsService = wechatMiniAppUserDetailsService;
         this.wechatMiniAppSessionKeyCacheService = wechatMiniAppSessionKeyCacheService;
     }
 
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        Assert.isInstanceOf(WechatMiniAppAuthenticationToken.class, (Object)authentication, () -> this.messages.getMessage("MiniAppAuthenticationProvider.onlySupports", "Only MiniAppAuthenticationToken is supported"));
-        WechatMiniAppAuthenticationToken unAuthenticationToken = (WechatMiniAppAuthenticationToken)authentication;
-        WechatMiniAppRequest credentials = (WechatMiniAppRequest)unAuthenticationToken.getCredentials();
+    @Override
+    public Authentication authenticate(Authentication authentication)
+            throws AuthenticationException {
+        Assert.isInstanceOf(
+                WechatMiniAppAuthenticationToken.class,
+                authentication,
+                () ->
+                        messages.getMessage(
+                                "MiniAppAuthenticationProvider.onlySupports",
+                                "Only MiniAppAuthenticationToken is supported"));
+
+        WechatMiniAppAuthenticationToken unAuthenticationToken =
+                (WechatMiniAppAuthenticationToken) authentication;
+        WechatMiniAppRequest credentials =
+                (WechatMiniAppRequest) unAuthenticationToken.getCredentials();
+
         String clientId = credentials.getClientId();
         String openId = credentials.getOpenId();
-        UserDetails userDetails = this.wechatMiniAppUserDetailsService.loadByOpenId(clientId, openId);
+
+        UserDetails userDetails = wechatMiniAppUserDetailsService.loadByOpenId(clientId, openId);
         if (Objects.isNull(userDetails)) {
-            userDetails = this.wechatMiniAppUserDetailsService.register(credentials, this.wechatMiniAppSessionKeyCacheService.get(clientId + "::" + openId));
+            userDetails =
+                    wechatMiniAppUserDetailsService.register(
+                            credentials,
+                            wechatMiniAppSessionKeyCacheService.get(clientId + "::" + openId));
         }
-        return this.createSuccessAuthentication(authentication, userDetails);
+        return createSuccessAuthentication(authentication, userDetails);
     }
 
+    @Override
     public boolean supports(Class<?> authentication) {
         return WechatMiniAppAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
+    @Override
     public void setMessageSource(MessageSource messageSource) {
         this.messages = new MessageSourceAccessor(messageSource);
     }
 
-    protected Authentication createSuccessAuthentication(Authentication authentication, UserDetails user) {
-        Collection authorities = this.authoritiesMapper.mapAuthorities(user.getAuthorities());
-        WechatMiniAppAuthenticationToken authenticationToken = new WechatMiniAppAuthenticationToken(user, authorities);
+    /**
+     * 认证成功将非授信凭据转为授信凭据. 封装用户信息 角色信息。
+     *
+     * @param authentication the authentication
+     * @param user the user
+     * @return the authentication
+     */
+    protected Authentication createSuccessAuthentication(
+            Authentication authentication, UserDetails user) {
+
+        Collection<? extends GrantedAuthority> authorities =
+                authoritiesMapper.mapAuthorities(user.getAuthorities());
+        WechatMiniAppAuthenticationToken authenticationToken =
+                new WechatMiniAppAuthenticationToken(user, authorities);
         authenticationToken.setDetails(authentication.getPrincipal());
+
         return authenticationToken;
     }
 }
-

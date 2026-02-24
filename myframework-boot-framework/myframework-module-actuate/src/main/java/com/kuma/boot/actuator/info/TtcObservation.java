@@ -1,26 +1,47 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  io.micrometer.observation.Observation
- *  io.micrometer.observation.ObservationRegistry
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.actuator.info;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import org.springframework.stereotype.Component;
 
+/**
+ * KmcObservation
+ *
+ * @author kuma
+ * @version 2026.01
+ * @since 2025-12-19 09:30:45
+ */
 public class KmcObservation {
+
     private final ObservationRegistry observationRegistry;
 
-    public KmcObservation(ObservationRegistry observationRegistry) {
+    public KmcObservation( ObservationRegistry observationRegistry ) {
         this.observationRegistry = observationRegistry;
     }
 
     public void doSomething() {
-        Observation.createNotStarted((String)"doSomething", (ObservationRegistry)this.observationRegistry).lowCardinalityKeyValue("locale", "en-US").highCardinalityKeyValue("userId", "42").observe(() -> LogUtils.info((String)"ObservationRegistry doSomething==========================\u6267\u884c", (Object[])new Object[0]));
+        Observation.createNotStarted("doSomething", this.observationRegistry)
+                .lowCardinalityKeyValue("locale", "en-US")
+                .highCardinalityKeyValue("userId", "42")
+                .observe(() -> {
+                    LogUtils.info("ObservationRegistry doSomething==========================执行");
+                });
     }
 }
-

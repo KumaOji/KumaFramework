@@ -1,18 +1,35 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.constants;
 
+/**
+ * <p>自定义请求头
+ *
+ */
 public interface HttpHeaders {
-    public static final String UNKNOWN = "unknown";
-    public static final String PROXY_CLIENT_IP = "Proxy-Client-IP";
-    public static final String WL_PROXY_CLIENT_IP = "WL-Proxy-Client-IP";
-    public static final String HTTP_CLIENT_IP = "HTTP_CLIENT_IP";
-    public static final String HTTP_X_FORWARDED_FOR = "HTTP_X_FORWARDED_FOR";
-    public static final String X_REAL_IP = "X-Real-IP";
-    public static final String X_TTC_SESSION = "X-Ttc-Session";
-    public static final String X_TTC_FROM_IN = "X-Ttc-From-In";
-    public static final String X_TTC_TENANT_ID = "X-Ttc-Tenant-Id";
-    public static final String X_TTC__OPEN_ID = "X-Ttc-Open-Id";
-}
 
+    String UNKNOWN = "unknown";
+    String PROXY_CLIENT_IP = "Proxy-Client-IP";
+    String WL_PROXY_CLIENT_IP = "WL-Proxy-Client-IP";
+    String HTTP_CLIENT_IP = "HTTP_CLIENT_IP";
+    String HTTP_X_FORWARDED_FOR = "HTTP_X_FORWARDED_FOR";
+    String X_REAL_IP = "X-Real-IP";
+    String X_KMC_SESSION = "X-Kmc-Session";
+    String X_KMC_FROM_IN = "X-Kmc-From-In";
+    String X_KMC_TENANT_ID = "X-Kmc-Tenant-Id";
+    String X_KMC__OPEN_ID = "X-Kmc-Open-Id";
+}

@@ -1,12 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.security.config.Customizer
- *  org.springframework.security.config.annotation.SecurityConfigurerAdapter
- *  org.springframework.security.config.annotation.web.HttpSecurityBuilder
- *  org.springframework.security.web.DefaultSecurityFilterChain
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension;
 
 import com.kuma.boot.security.spring.authentication.login.extension.account.AccountExtensionLoginFilterConfigurer;
@@ -25,8 +32,17 @@ import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 
+/**
+ * 基于spring security自定义扩展登录方式(基于json请求)
+ *
+ * @author kuma
+ * @version 2023.07
+ * @see SecurityConfigurerAdapter
+ * @since 2023-07-10 17:42:42
+ */
 public class ExtensionLoginFilterSecurityConfigurer<H extends HttpSecurityBuilder<H>>
-extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, H> {
+        extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, H> {
+
     private AccountExtensionLoginFilterConfigurer<H> accountLoginFilterConfigurer;
     private CaptchaExtensionLoginFilterConfigurer<H> captchaLoginFilterConfigurer;
     private EmailExtensionLoginFilterConfigurer<H> emailLoginFilterConfigurer;
@@ -39,220 +55,364 @@ extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, H> {
     private WechatMpExtensionLoginFilterConfigurer<H> wechatMpLoginFilterConfigurer;
     private WechatMiniAppExtensionLoginFilterConfigurer<H> wechatMiniAppLoginFilterConfigurer;
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public EmailExtensionLoginFilterConfigurer<H> emailLogin() {
-        return this.lazyInitEmailLoginFilterConfigurer();
+        return lazyInitEmailLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> emailLogin(Customizer<EmailExtensionLoginFilterConfigurer<H>> emailLoginConfigurerCustomizer) {
-        emailLoginConfigurerCustomizer.customize(this.lazyInitEmailLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param emailLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> emailLogin(
+            Customizer<EmailExtensionLoginFilterConfigurer<H>> emailLoginConfigurerCustomizer) {
+        emailLoginConfigurerCustomizer.customize(lazyInitEmailLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public QrcodeExtensionLoginFilterConfigurer<H> qrcodeLogin() {
-        return this.lazyInitQrcodeLoginFilterConfigurer();
+        return lazyInitQrcodeLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> qrcodeLogin(Customizer<QrcodeExtensionLoginFilterConfigurer<H>> qrcodeLoginConfigurerCustomizer) {
-        qrcodeLoginConfigurerCustomizer.customize(this.lazyInitQrcodeLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param qrcodeLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> qrcodeLogin(
+            Customizer<QrcodeExtensionLoginFilterConfigurer<H>> qrcodeLoginConfigurerCustomizer) {
+        qrcodeLoginConfigurerCustomizer.customize(lazyInitQrcodeLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public OneClickExtensionLoginFilterConfigurer<H> oneClickLogin() {
-        return this.lazyInitOneClickLoginFilterConfigurer();
+        return lazyInitOneClickLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> oneClickLogin(Customizer<OneClickExtensionLoginFilterConfigurer<H>> oneClickLoginConfigurerCustomizer) {
-        oneClickLoginConfigurerCustomizer.customize(this.lazyInitOneClickLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param oneClickLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> oneClickLogin(
+            Customizer<OneClickExtensionLoginFilterConfigurer<H>>
+                    oneClickLoginConfigurerCustomizer) {
+        oneClickLoginConfigurerCustomizer.customize(lazyInitOneClickLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public WechatMpExtensionLoginFilterConfigurer<H> wechatMpLogin() {
-        return this.lazyInitMpLoginFilterConfigurer();
+        return lazyInitMpLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> wechatMpLogin(Customizer<WechatMpExtensionLoginFilterConfigurer<H>> wechcatMpLoginConfigurerCustomizer) {
-        wechcatMpLoginConfigurerCustomizer.customize(this.lazyInitMpLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param wechcatMpLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> wechatMpLogin(
+            Customizer<WechatMpExtensionLoginFilterConfigurer<H>>
+                    wechcatMpLoginConfigurerCustomizer) {
+        wechcatMpLoginConfigurerCustomizer.customize(lazyInitMpLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public GesturesExtensionLoginFilterConfigurer<H> gesturesLogin() {
-        return this.lazyInitGesturesLoginFilterConfigurer();
+        return lazyInitGesturesLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> gesturesLogin(Customizer<GesturesExtensionLoginFilterConfigurer<H>> gesturesLoginConfigurerCustomizer) {
-        gesturesLoginConfigurerCustomizer.customize(this.lazyInitGesturesLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param gesturesLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> gesturesLogin(
+            Customizer<GesturesExtensionLoginFilterConfigurer<H>>
+                    gesturesLoginConfigurerCustomizer) {
+        gesturesLoginConfigurerCustomizer.customize(lazyInitGesturesLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public FingerprintExtensionLoginFilterConfigurer<H> fingerprintLogin() {
-        return this.lazyInitFingerprintLoginFilterConfigurer();
+        return lazyInitFingerprintLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> fingerprintLogin(Customizer<FingerprintExtensionLoginFilterConfigurer<H>> fingerprintLoginConfigurerCustomizer) {
-        fingerprintLoginConfigurerCustomizer.customize(this.lazyInitFingerprintLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param fingerprintLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> fingerprintLogin(
+            Customizer<FingerprintExtensionLoginFilterConfigurer<H>>
+                    fingerprintLoginConfigurerCustomizer) {
+        fingerprintLoginConfigurerCustomizer.customize(lazyInitFingerprintLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public FaceExtensionLoginFilterConfigurer<H> faceLogin() {
-        return this.lazyInitFaceLoginFilterConfigurer();
+        return lazyInitFaceLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> faceLogin(Customizer<FaceExtensionLoginFilterConfigurer<H>> faceLoginConfigurerCustomizer) {
-        faceLoginConfigurerCustomizer.customize(this.lazyInitFaceLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param faceLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> faceLogin(
+            Customizer<FaceExtensionLoginFilterConfigurer<H>> faceLoginConfigurerCustomizer) {
+        faceLoginConfigurerCustomizer.customize(lazyInitFaceLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public AccountExtensionLoginFilterConfigurer<H> accountLogin() {
-        return this.lazyInitAccountLoginFilterConfigurer();
+        return lazyInitAccountLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> accountLogin(Customizer<AccountExtensionLoginFilterConfigurer<H>> accountLoginConfigurerCustomizer) {
-        accountLoginConfigurerCustomizer.customize(this.lazyInitAccountLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param accountLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> accountLogin(
+            Customizer<AccountExtensionLoginFilterConfigurer<H>> accountLoginConfigurerCustomizer) {
+        accountLoginConfigurerCustomizer.customize(lazyInitAccountLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public CaptchaExtensionLoginFilterConfigurer<H> captchaLogin() {
-        return this.lazyInitCaptchaLoginFilterConfigurer();
+        return lazyInitCaptchaLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> captchaLogin(Customizer<CaptchaExtensionLoginFilterConfigurer<H>> captchaLoginConfigurerCustomizer) {
-        captchaLoginConfigurerCustomizer.customize(this.lazyInitCaptchaLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param captchaLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> captchaLogin(
+            Customizer<CaptchaExtensionLoginFilterConfigurer<H>> captchaLoginConfigurerCustomizer) {
+        captchaLoginConfigurerCustomizer.customize(lazyInitCaptchaLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Captcha login captcha login filter configurer.
+     *
+     * @return the captcha login filter configurer
+     */
     public SmsExtensionLoginFilterConfigurer<H> smsLogin() {
-        return this.lazyInitSmsLoginFilterConfigurer();
+        return lazyInitSmsLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> smsLogin(Customizer<SmsExtensionLoginFilterConfigurer<H>> smsLoginConfigurerCustomizer) {
-        smsLoginConfigurerCustomizer.customize(this.lazyInitSmsLoginFilterConfigurer());
+    /**
+     * Captcha login login filter security configurer.
+     *
+     * @param smsLoginConfigurerCustomizer the captcha login filter configurer customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> smsLogin(
+            Customizer<SmsExtensionLoginFilterConfigurer<H>> smsLoginConfigurerCustomizer) {
+        smsLoginConfigurerCustomizer.customize(lazyInitSmsLoginFilterConfigurer());
         return this;
     }
 
+    /**
+     * Mini app login mini app login filter configurer.
+     *
+     * @return the mini app login filter configurer
+     */
     public WechatMiniAppExtensionLoginFilterConfigurer<H> wechatMiniAppLogin() {
-        return this.lazyInitMiniAppLoginFilterConfigurer();
+        return lazyInitMiniAppLoginFilterConfigurer();
     }
 
-    public ExtensionLoginFilterSecurityConfigurer<H> wechatMiniAppLogin(Customizer<WechatMiniAppExtensionLoginFilterConfigurer<H>> wechatMiniAppLoginConfigurerCustomizer) {
-        wechatMiniAppLoginConfigurerCustomizer.customize(this.lazyInitMiniAppLoginFilterConfigurer());
+    /**
+     * Mini app login login filter security configurer.
+     *
+     * @param wechatMiniAppLoginConfigurerCustomizer the mini app login filter configurer
+     *                                               customizer
+     * @return the login filter security configurer
+     */
+    public ExtensionLoginFilterSecurityConfigurer<H> wechatMiniAppLogin(
+            Customizer<WechatMiniAppExtensionLoginFilterConfigurer<H>>
+                    wechatMiniAppLoginConfigurerCustomizer) {
+        wechatMiniAppLoginConfigurerCustomizer.customize(lazyInitMiniAppLoginFilterConfigurer());
         return this;
     }
 
-    public void init(H builder) throws Exception {
-        this.init(this.emailLoginFilterConfigurer, builder);
-        this.init(this.accountLoginFilterConfigurer, builder);
-        this.init(this.captchaLoginFilterConfigurer, builder);
-        this.init(this.faceLoginFilterConfigurer, builder);
-        this.init(this.fingerprintLoginFilterConfigurer, builder);
-        this.init(this.gesturesLoginFilterConfigurer, builder);
-        this.init(this.wechatMpLoginFilterConfigurer, builder);
-        this.init(this.oneClickLoginFilterConfigurer, builder);
-        this.init(this.qrcodeLoginFilterConfigurer, builder);
-        this.init(this.smsLoginFilterConfigurer, builder);
-        this.init(this.wechatMiniAppLoginFilterConfigurer, builder);
+    @Override
+    public void init(H builder)  {
+        init(emailLoginFilterConfigurer, builder);
+        init(accountLoginFilterConfigurer, builder);
+        init(captchaLoginFilterConfigurer, builder);
+        init(faceLoginFilterConfigurer, builder);
+        init(fingerprintLoginFilterConfigurer, builder);
+        init(gesturesLoginFilterConfigurer, builder);
+        init(wechatMpLoginFilterConfigurer, builder);
+        init(oneClickLoginFilterConfigurer, builder);
+        init(qrcodeLoginFilterConfigurer, builder);
+        init(smsLoginFilterConfigurer, builder);
+        init(wechatMiniAppLoginFilterConfigurer, builder);
     }
 
-    public void configure(H builder) throws Exception {
-        this.configure(this.emailLoginFilterConfigurer, builder);
-        this.configure(this.accountLoginFilterConfigurer, builder);
-        this.configure(this.captchaLoginFilterConfigurer, builder);
-        this.configure(this.faceLoginFilterConfigurer, builder);
-        this.configure(this.fingerprintLoginFilterConfigurer, builder);
-        this.configure(this.gesturesLoginFilterConfigurer, builder);
-        this.configure(this.wechatMpLoginFilterConfigurer, builder);
-        this.configure(this.oneClickLoginFilterConfigurer, builder);
-        this.configure(this.qrcodeLoginFilterConfigurer, builder);
-        this.configure(this.smsLoginFilterConfigurer, builder);
-        this.configure(this.wechatMiniAppLoginFilterConfigurer, builder);
+    @Override
+    public void configure(H builder) {
+        configure(emailLoginFilterConfigurer, builder);
+        configure(accountLoginFilterConfigurer, builder);
+        configure(captchaLoginFilterConfigurer, builder);
+        configure(faceLoginFilterConfigurer, builder);
+        configure(fingerprintLoginFilterConfigurer, builder);
+        configure(gesturesLoginFilterConfigurer, builder);
+        configure(wechatMpLoginFilterConfigurer, builder);
+        configure(oneClickLoginFilterConfigurer, builder);
+        configure(qrcodeLoginFilterConfigurer, builder);
+        configure(smsLoginFilterConfigurer, builder);
+        configure(wechatMiniAppLoginFilterConfigurer, builder);
     }
 
-    private <E extends AbstractExtensionLoginFilterConfigurer<H, ?, ?, ?>> void init(E e, H builder) {
+    private <E extends com.kuma.boot.security.spring.authentication.login.extension.AbstractExtensionLoginFilterConfigurer<H, ?, ?, ?>> void init(
+            E e, H builder) {
         if (e != null) {
             e.init(builder);
         }
     }
 
-    private <E extends AbstractExtensionLoginFilterConfigurer<H, ?, ?, ?>> void configure(E e, H builder) throws Exception {
+    private <E extends com.kuma.boot.security.spring.authentication.login.extension.AbstractExtensionLoginFilterConfigurer<H, ?, ?, ?>> void configure(
+            E e, H builder) {
         if (e != null) {
             e.configure(builder);
         }
     }
 
     private EmailExtensionLoginFilterConfigurer<H> lazyInitEmailLoginFilterConfigurer() {
-        if (this.emailLoginFilterConfigurer == null) {
-            this.emailLoginFilterConfigurer = new EmailExtensionLoginFilterConfigurer(this);
+        if (emailLoginFilterConfigurer == null) {
+            this.emailLoginFilterConfigurer = new EmailExtensionLoginFilterConfigurer<>(this);
         }
-        return this.emailLoginFilterConfigurer;
+        return emailLoginFilterConfigurer;
     }
 
     private SmsExtensionLoginFilterConfigurer<H> lazyInitSmsLoginFilterConfigurer() {
-        if (this.smsLoginFilterConfigurer == null) {
-            this.smsLoginFilterConfigurer = new SmsExtensionLoginFilterConfigurer(this);
+        if (smsLoginFilterConfigurer == null) {
+            this.smsLoginFilterConfigurer = new SmsExtensionLoginFilterConfigurer<>(this);
         }
-        return this.smsLoginFilterConfigurer;
+        return smsLoginFilterConfigurer;
     }
 
     private WechatMiniAppExtensionLoginFilterConfigurer<H> lazyInitMiniAppLoginFilterConfigurer() {
-        if (this.wechatMiniAppLoginFilterConfigurer == null) {
-            this.wechatMiniAppLoginFilterConfigurer = new WechatMiniAppExtensionLoginFilterConfigurer(this);
+        if (wechatMiniAppLoginFilterConfigurer == null) {
+            this.wechatMiniAppLoginFilterConfigurer =
+                    new WechatMiniAppExtensionLoginFilterConfigurer<>(this);
         }
-        return this.wechatMiniAppLoginFilterConfigurer;
+        return wechatMiniAppLoginFilterConfigurer;
     }
 
     private CaptchaExtensionLoginFilterConfigurer<H> lazyInitCaptchaLoginFilterConfigurer() {
-        if (this.captchaLoginFilterConfigurer == null) {
-            this.captchaLoginFilterConfigurer = new CaptchaExtensionLoginFilterConfigurer(this);
+        if (captchaLoginFilterConfigurer == null) {
+            this.captchaLoginFilterConfigurer = new CaptchaExtensionLoginFilterConfigurer<>(this);
         }
-        return this.captchaLoginFilterConfigurer;
+        return captchaLoginFilterConfigurer;
     }
 
     private AccountExtensionLoginFilterConfigurer<H> lazyInitAccountLoginFilterConfigurer() {
-        if (this.accountLoginFilterConfigurer == null) {
-            this.accountLoginFilterConfigurer = new AccountExtensionLoginFilterConfigurer(this);
+        if (accountLoginFilterConfigurer == null) {
+            this.accountLoginFilterConfigurer = new AccountExtensionLoginFilterConfigurer<>(this);
         }
-        return this.accountLoginFilterConfigurer;
+        return accountLoginFilterConfigurer;
     }
 
     private FaceExtensionLoginFilterConfigurer<H> lazyInitFaceLoginFilterConfigurer() {
-        if (this.faceLoginFilterConfigurer == null) {
-            this.faceLoginFilterConfigurer = new FaceExtensionLoginFilterConfigurer(this);
+        if (faceLoginFilterConfigurer == null) {
+            this.faceLoginFilterConfigurer = new FaceExtensionLoginFilterConfigurer<>(this);
         }
-        return this.faceLoginFilterConfigurer;
+        return faceLoginFilterConfigurer;
     }
 
-    private FingerprintExtensionLoginFilterConfigurer<H> lazyInitFingerprintLoginFilterConfigurer() {
-        if (this.fingerprintLoginFilterConfigurer == null) {
-            this.fingerprintLoginFilterConfigurer = new FingerprintExtensionLoginFilterConfigurer(this);
+    private FingerprintExtensionLoginFilterConfigurer<H>
+    lazyInitFingerprintLoginFilterConfigurer() {
+        if (fingerprintLoginFilterConfigurer == null) {
+            this.fingerprintLoginFilterConfigurer =
+                    new FingerprintExtensionLoginFilterConfigurer<>(this);
         }
-        return this.fingerprintLoginFilterConfigurer;
+        return fingerprintLoginFilterConfigurer;
     }
 
     private GesturesExtensionLoginFilterConfigurer<H> lazyInitGesturesLoginFilterConfigurer() {
-        if (this.gesturesLoginFilterConfigurer == null) {
-            this.gesturesLoginFilterConfigurer = new GesturesExtensionLoginFilterConfigurer(this);
+        if (gesturesLoginFilterConfigurer == null) {
+            this.gesturesLoginFilterConfigurer = new GesturesExtensionLoginFilterConfigurer<>(this);
         }
-        return this.gesturesLoginFilterConfigurer;
+        return gesturesLoginFilterConfigurer;
     }
 
     private WechatMpExtensionLoginFilterConfigurer<H> lazyInitMpLoginFilterConfigurer() {
-        if (this.wechatMpLoginFilterConfigurer == null) {
-            this.wechatMpLoginFilterConfigurer = new WechatMpExtensionLoginFilterConfigurer(this);
+        if (wechatMpLoginFilterConfigurer == null) {
+            this.wechatMpLoginFilterConfigurer = new WechatMpExtensionLoginFilterConfigurer<>(this);
         }
-        return this.wechatMpLoginFilterConfigurer;
+        return wechatMpLoginFilterConfigurer;
     }
 
     private OneClickExtensionLoginFilterConfigurer<H> lazyInitOneClickLoginFilterConfigurer() {
-        if (this.oneClickLoginFilterConfigurer == null) {
-            this.oneClickLoginFilterConfigurer = new OneClickExtensionLoginFilterConfigurer(this);
+        if (oneClickLoginFilterConfigurer == null) {
+            this.oneClickLoginFilterConfigurer = new OneClickExtensionLoginFilterConfigurer<>(this);
         }
-        return this.oneClickLoginFilterConfigurer;
+        return oneClickLoginFilterConfigurer;
     }
 
     private QrcodeExtensionLoginFilterConfigurer<H> lazyInitQrcodeLoginFilterConfigurer() {
-        if (this.qrcodeLoginFilterConfigurer == null) {
-            this.qrcodeLoginFilterConfigurer = new QrcodeExtensionLoginFilterConfigurer(this);
+        if (qrcodeLoginFilterConfigurer == null) {
+            this.qrcodeLoginFilterConfigurer = new QrcodeExtensionLoginFilterConfigurer<>(this);
         }
-        return this.qrcodeLoginFilterConfigurer;
+        return qrcodeLoginFilterConfigurer;
     }
 }
-

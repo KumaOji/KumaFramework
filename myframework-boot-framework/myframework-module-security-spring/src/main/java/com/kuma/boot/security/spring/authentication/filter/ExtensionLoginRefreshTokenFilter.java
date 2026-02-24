@@ -1,34 +1,28 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.servlet.FilterChain
- *  jakarta.servlet.ServletException
- *  jakarta.servlet.ServletRequest
- *  jakarta.servlet.ServletResponse
- *  jakarta.servlet.http.HttpServletRequest
- *  jakarta.servlet.http.HttpServletResponse
- *  org.springframework.http.HttpMethod
- *  org.springframework.http.HttpOutputMessage
- *  org.springframework.http.converter.HttpMessageConverter
- *  org.springframework.http.server.ServletServerHttpResponse
- *  org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
- *  org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter
- *  org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
- *  org.springframework.web.filter.OncePerRequestFilter
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.filter;
 
 import com.kuma.boot.security.spring.oauth2.token.OAuth2AccessTokenStore;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
@@ -36,33 +30,52 @@ import org.springframework.security.oauth2.core.http.converter.OAuth2AccessToken
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class ExtensionLoginRefreshTokenFilter
-extends OncePerRequestFilter {
+/**
+ * 扩展和oauth2登录刷新令牌过滤器
+ *
+ * @author kuma
+ * @version 2023.07
+ * @see OncePerRequestFilter
+ * @since 2023-07-12 09:17:53
+ */
+public class ExtensionLoginRefreshTokenFilter extends OncePerRequestFilter {
+
     private OAuth2AccessTokenStore oAuth2AccessTokenStore;
-    private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter = new OAuth2AccessTokenResponseHttpMessageConverter();
-    private static final PathPatternRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login/token/refresh_token");
+
+    private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter =
+            new OAuth2AccessTokenResponseHttpMessageConverter();
+
+    private static final PathPatternRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER =
+            PathPatternRequestMatcher.withDefaults()
+                    .matcher(HttpMethod.POST, "/login/token/refresh_token");
 
     public ExtensionLoginRefreshTokenFilter(OAuth2AccessTokenStore oAuth2AccessTokenStore) {
         this.oAuth2AccessTokenStore = oAuth2AccessTokenStore;
     }
 
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         if (!DEFAULT_ANT_PATH_REQUEST_MATCHER.matches(request)) {
-            filterChain.doFilter((ServletRequest)request, (ServletResponse)response);
+            filterChain.doFilter(request, response);
             return;
         }
+
+        // 刷新token 并且返回新token
         String refreshToken = request.getParameter("refresh_token");
-        OAuth2AccessTokenResponse accessTokenResponse = this.oAuth2AccessTokenStore.freshToken(refreshToken);
+
+        OAuth2AccessTokenResponse accessTokenResponse =
+                oAuth2AccessTokenStore.freshToken(refreshToken);
         ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
-        this.accessTokenHttpResponseConverter.write((Object)accessTokenResponse, null, (HttpOutputMessage)httpResponse);
+        this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
     }
 
     public OAuth2AccessTokenStore getoAuth2AccessTokenStore() {
-        return this.oAuth2AccessTokenStore;
+        return oAuth2AccessTokenStore;
     }
 
     public void setoAuth2AccessTokenStore(OAuth2AccessTokenStore oAuth2AccessTokenStore) {
         this.oAuth2AccessTokenStore = oAuth2AccessTokenStore;
     }
 }
-

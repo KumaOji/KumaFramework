@@ -1,11 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonProperty
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.oauth2.core.user.OAuth2User
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.qq;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,33 +25,45 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class QQOAuth2User
-implements OAuth2User {
+public class QQOAuth2User implements OAuth2User {
+
+    // 统一赋予USER角色
     private Set<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
     private String nameAttributeKey;
+
     private String nickname;
-    @JsonProperty(value="figureurl")
+
+    @JsonProperty("figureurl")
     private String figureUrl30;
-    @JsonProperty(value="figureurl_1")
+
+    @JsonProperty("figureurl_1")
     private String figureUrl50;
-    @JsonProperty(value="figureurl_2")
+
+    @JsonProperty("figureurl_2")
     private String figureUrl100;
-    @JsonProperty(value="figureurl_qq_1")
+
+    @JsonProperty("figureurl_qq_1")
     private String qqFigureUrl40;
-    @JsonProperty(value="figureurl_qq_2")
+
+    @JsonProperty("figureurl_qq_2")
     private String qqFigureUrl100;
+
     private String gender;
+    // 携带openId备用
     private String openId;
 
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
     }
 
+    @Override
     public Map<String, Object> getAttributes() {
-        return this.attributes;
+        return attributes;
     }
 
+    @Override
     public String getName() {
         return this.nameAttributeKey;
     }
@@ -57,7 +77,7 @@ implements OAuth2User {
     }
 
     public String getNameAttributeKey() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
     public void setNameAttributeKey(String nameAttributeKey) {
@@ -65,7 +85,7 @@ implements OAuth2User {
     }
 
     public String getNickname() {
-        return this.nickname;
+        return nickname;
     }
 
     public void setNickname(String nickname) {
@@ -73,7 +93,7 @@ implements OAuth2User {
     }
 
     public String getFigureUrl30() {
-        return this.figureUrl30;
+        return figureUrl30;
     }
 
     public void setFigureUrl30(String figureUrl30) {
@@ -81,7 +101,7 @@ implements OAuth2User {
     }
 
     public String getFigureUrl50() {
-        return this.figureUrl50;
+        return figureUrl50;
     }
 
     public void setFigureUrl50(String figureUrl50) {
@@ -89,7 +109,7 @@ implements OAuth2User {
     }
 
     public String getFigureUrl100() {
-        return this.figureUrl100;
+        return figureUrl100;
     }
 
     public void setFigureUrl100(String figureUrl100) {
@@ -97,7 +117,7 @@ implements OAuth2User {
     }
 
     public String getQqFigureUrl40() {
-        return this.qqFigureUrl40;
+        return qqFigureUrl40;
     }
 
     public void setQqFigureUrl40(String qqFigureUrl40) {
@@ -105,7 +125,7 @@ implements OAuth2User {
     }
 
     public String getQqFigureUrl100() {
-        return this.qqFigureUrl100;
+        return qqFigureUrl100;
     }
 
     public void setQqFigureUrl100(String qqFigureUrl100) {
@@ -113,7 +133,7 @@ implements OAuth2User {
     }
 
     public String getGender() {
-        return this.gender;
+        return gender;
     }
 
     public void setGender(String gender) {
@@ -121,11 +141,10 @@ implements OAuth2User {
     }
 
     public String getOpenId() {
-        return this.openId;
+        return openId;
     }
 
     public void setOpenId(String openId) {
         this.openId = openId;
     }
 }
-

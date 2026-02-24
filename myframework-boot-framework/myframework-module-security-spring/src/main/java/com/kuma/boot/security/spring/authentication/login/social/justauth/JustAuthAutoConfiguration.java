@@ -1,23 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.beans.factory.annotation.Qualifier
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.jdbc.core.JdbcTemplate
- *  org.springframework.security.crypto.encrypt.Encryptors
- *  org.springframework.security.crypto.encrypt.TextEncryptor
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.justauth;
 
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.security.spring.authentication.login.social.justauth.consts.SecurityConstants;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.properties.JustAuthProperties;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.properties.RepositoryProperties;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.repository.UsersConnectionRepository;
@@ -49,60 +49,106 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.StringUtils;
 
-public class JustAuthAutoConfiguration
-implements InitializingBean {
+/**
+ * OAuth2 grant flow auto configuration
+ *
+ * @author YongWu zheng
+ * @version V2.0  Created by 2020/10/5 21:47
+ */
+@SuppressWarnings({"AlibabaClassNamingShouldBeCamel"})
+// @AutoConfigureAfter(value = {Auth2PropertiesAutoConfiguration.class})
+// @Configuration
+public class JustAuthAutoConfiguration implements InitializingBean {
+
     private final RepositoryProperties repositoryProperties;
     private final JustAuthProperties justAuthProperties;
     private final DataSource dataSource;
 
-    public JustAuthAutoConfiguration(RepositoryProperties repositoryProperties, JustAuthProperties justAuthProperties, DataSource dataSource) {
+    public JustAuthAutoConfiguration(
+            RepositoryProperties repositoryProperties,
+            JustAuthProperties justAuthProperties,
+            DataSource dataSource) {
         this.repositoryProperties = repositoryProperties;
         this.justAuthProperties = justAuthProperties;
         this.dataSource = dataSource;
     }
 
     @Bean
-    @ConditionalOnMissingBean(type={"top.dcenter.ums.security.core.oauth.userdetails.converter.AuthenticationToUserDetailsConverter"})
+    @ConditionalOnMissingBean(
+            type = {
+                    "top.dcenter.ums.security.core.oauth.userdetails.converter.AuthenticationToUserDetailsConverter"
+            })
     public AuthenticationToUserDetailsConverter authenticationToUserDetailsConverter() {
         return new Oauth2TokenAuthenticationTokenToUserConverter();
     }
 
     @Bean
-    @ConditionalOnMissingBean(type={"top.dcenter.ums.security.core.oauth.service.Auth2UserService"})
+    @ConditionalOnMissingBean(type = "top.dcenter.ums.security.core.oauth.service.Auth2UserService")
     public Auth2UserService auth2UserService() {
         return new DefaultAuth2UserService();
     }
 
     @Bean
-    @ConditionalOnMissingBean(type={"org.springframework.jdbc.core.JdbcTemplate"})
-    @ConditionalOnProperty(prefix="ums.oauth", name={"enable-user-connection-and-auth-token-table"}, havingValue="true")
+    @ConditionalOnMissingBean(type = "org.springframework.jdbc.core.JdbcTemplate")
+    @ConditionalOnProperty(
+            prefix = "ums.oauth",
+            name = "enable-user-connection-and-auth-token-table",
+            havingValue = "true")
     public JdbcTemplate auth2UserConnectionJdbcTemplate() {
-        return new JdbcTemplate(this.dataSource);
+        return new JdbcTemplate(dataSource);
     }
 
     @Bean
-    @ConditionalOnProperty(prefix="ums.oauth", name={"enable-user-connection-and-auth-token-table"}, havingValue="true")
-    public UsersConnectionRepository usersConnectionRepository(UsersConnectionRepositoryFactory usersConnectionRepositoryFactory, JdbcTemplate auth2UserConnectionJdbcTemplate, @Qualifier(value="connectionTextEncryptor") TextEncryptor connectionTextEncryptor) {
-        return usersConnectionRepositoryFactory.getUsersConnectionRepository(auth2UserConnectionJdbcTemplate, connectionTextEncryptor, this.repositoryProperties);
+    @ConditionalOnProperty(
+            prefix = "ums.oauth",
+            name = "enable-user-connection-and-auth-token-table",
+            havingValue = "true")
+    public UsersConnectionRepository usersConnectionRepository(
+            UsersConnectionRepositoryFactory usersConnectionRepositoryFactory,
+            JdbcTemplate auth2UserConnectionJdbcTemplate,
+            @Qualifier("connectionTextEncryptor") TextEncryptor connectionTextEncryptor) {
+        return usersConnectionRepositoryFactory.getUsersConnectionRepository(
+                auth2UserConnectionJdbcTemplate, connectionTextEncryptor, repositoryProperties);
     }
 
     @Bean
-    @ConditionalOnMissingBean(type={"top.dcenter.ums.security.core.oauth.repository.factory.UsersConnectionRepositoryFactory"})
-    @ConditionalOnProperty(prefix="ums.oauth", name={"enable-user-connection-and-auth-token-table"}, havingValue="true")
+    @ConditionalOnMissingBean(
+            type = {
+                    "top.dcenter.ums.security.core.oauth.repository.factory.UsersConnectionRepositoryFactory"
+            })
+    @ConditionalOnProperty(
+            prefix = "ums.oauth",
+            name = "enable-user-connection-and-auth-token-table",
+            havingValue = "true")
     public UsersConnectionRepositoryFactory usersConnectionRepositoryFactory() {
         return new Auth2JdbcUsersConnectionRepositoryFactory();
     }
 
     @Bean
     public TextEncryptor connectionTextEncryptor(RepositoryProperties repositoryProperties) {
-        return Encryptors.text((CharSequence)repositoryProperties.getTextEncryptorPassword(), (CharSequence)repositoryProperties.getTextEncryptorSalt());
+        return Encryptors.text(
+                repositoryProperties.getTextEncryptorPassword(),
+                repositoryProperties.getTextEncryptorSalt());
     }
 
     @Bean
-    @ConditionalOnMissingBean(type={"top.dcenter.ums.security.core.oauth.signup.ConnectionService"})
-    @ConditionalOnProperty(prefix="ums.oauth", name={"enable-user-connection-and-auth-token-table"}, havingValue="true")
-    public ConnectionService connectionSignUp(UmsUserDetailsService userDetailsService, @Autowired(required=false) UsersConnectionTokenRepository usersConnectionTokenRepository, UsersConnectionRepository usersConnectionRepository, @Autowired(required=false) Auth2StateCoder auth2StateCoder) {
-        return new DefaultConnectionService(userDetailsService, this.justAuthProperties, usersConnectionRepository, usersConnectionTokenRepository, auth2StateCoder);
+    @ConditionalOnMissingBean(type = "top.dcenter.ums.security.core.oauth.signup.ConnectionService")
+    @ConditionalOnProperty(
+            prefix = "ums.oauth",
+            name = "enable-user-connection-and-auth-token-table",
+            havingValue = "true")
+    public ConnectionService connectionSignUp(
+            UmsUserDetailsService userDetailsService,
+            @Autowired(required = false)
+            UsersConnectionTokenRepository usersConnectionTokenRepository,
+            UsersConnectionRepository usersConnectionRepository,
+            @Autowired(required = false) Auth2StateCoder auth2StateCoder) {
+        return new DefaultConnectionService(
+                userDetailsService,
+                justAuthProperties,
+                usersConnectionRepository,
+                usersConnectionTokenRepository,
+                auth2StateCoder);
     }
 
     @Bean
@@ -110,83 +156,145 @@ implements InitializingBean {
         return JustAuthRequestHolder.getInstance();
     }
 
+    @SuppressWarnings("AlibabaMethodTooLong")
+    @Override
     public void afterPropertiesSet() throws Exception {
-        block58: {
-            if (!this.repositoryProperties.getEnableStartUpInitializeTable().booleanValue() || !this.justAuthProperties.getEnableUserConnectionAndAuthTokenTable().booleanValue()) {
-                return;
+
+        if (!repositoryProperties.getEnableStartUpInitializeTable()
+                || !justAuthProperties.getEnableUserConnectionAndAuthTokenTable()) {
+            // 不支持在启动时检查并自动创建 userConnectionTableName 与 authTokenTableName, 直接退出
+            return;
+        }
+
+        // ====== 是否要初始化数据库 ======
+        // 如果 Auth2JdbcUsersConnectionRepository, Auth2JdbcUsersConnectionTokenRepository 所需的表
+        // user_connection, 未创建则创建它
+        try (Connection connection = dataSource.getConnection()) {
+            if (connection == null) {
+                LogUtils.error(
+                        "错误: 初始化第三方登录的 {} 用户表时发生错误",
+                        repositoryProperties.getUserConnectionTableName());
+                throw new Exception(
+                        String.format(
+                                "初始化第三方登录的 %s 用户表时发生错误",
+                                repositoryProperties.getUserConnectionTableName()));
             }
-            try (Connection connection = this.dataSource.getConnection();){
-                String database;
-                if (connection == null) {
-                    LogUtils.error((String)"\u9519\u8bef: \u521d\u59cb\u5316\u7b2c\u4e09\u65b9\u767b\u5f55\u7684 {} \u7528\u6237\u8868\u65f6\u53d1\u751f\u9519\u8bef", (Object[])new Object[]{this.repositoryProperties.getUserConnectionTableName()});
-                    throw new Exception(String.format("\u521d\u59cb\u5316\u7b2c\u4e09\u65b9\u767b\u5f55\u7684 %s \u7528\u6237\u8868\u65f6\u53d1\u751f\u9519\u8bef", this.repositoryProperties.getUserConnectionTableName()));
-                }
-                try (PreparedStatement preparedStatement = connection.prepareStatement(this.repositoryProperties.getQueryDatabaseNameSql());
-                     ResultSet resultSet = preparedStatement.executeQuery();){
+
+            String database;
+
+            try (final PreparedStatement preparedStatement =
+                         connection.prepareStatement(
+                                 repositoryProperties.getQueryDatabaseNameSql());
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                resultSet.next();
+                database =
+                        resultSet.getString(
+                                SecurityConstants.QUERY_TABLE_EXIST_SQL_RESULT_SET_COLUMN_INDEX);
+            }
+
+            if (StringUtils.hasText(database)) {
+                String queryUserConnectionTableExistSql =
+                        repositoryProperties.getQueryUserConnectionTableExistSql(database);
+
+                try (final PreparedStatement preparedStatement1 =
+                             connection.prepareStatement(queryUserConnectionTableExistSql);
+                     ResultSet resultSet = preparedStatement1.executeQuery()) {
                     resultSet.next();
-                    database = resultSet.getString(1);
-                }
-                if (StringUtils.hasText((String)database)) {
-                    int tableCount;
-                    ResultSet resultSet;
-                    block57: {
-                        String queryUserConnectionTableExistSql = this.repositoryProperties.getQueryUserConnectionTableExistSql(database);
-                        try (PreparedStatement preparedStatement1 = connection.prepareStatement(queryUserConnectionTableExistSql);){
-                            resultSet = preparedStatement1.executeQuery();
-                            try {
-                                resultSet.next();
-                                tableCount = resultSet.getInt(1);
-                                if (tableCount >= 1) break block57;
-                                String creatUserConnectionTableSql = this.repositoryProperties.getCreatUserConnectionTableSql();
-                                try (PreparedStatement preparedStatement = connection.prepareStatement(creatUserConnectionTableSql);){
-                                    preparedStatement.executeUpdate();
-                                    LogUtils.info((String)"{} \u8868\u521b\u5efa\u6210\u529f\uff0cSQL\uff1a{}", (Object[])new Object[]{this.repositoryProperties.getUserConnectionTableName(), creatUserConnectionTableSql});
-                                    if (!connection.getAutoCommit()) {
-                                        connection.commit();
-                                    }
-                                }
-                            }
-                            finally {
-                                if (resultSet != null) {
-                                    resultSet.close();
-                                }
-                            }
-                        }
-                    }
-                    if (!this.justAuthProperties.getEnableAuthTokenTable().booleanValue()) {
-                        return;
-                    }
-                    try (PreparedStatement preparedStatement2 = connection.prepareStatement(this.repositoryProperties.getQueryAuthTokenTableExistSql(database));){
-                        resultSet = preparedStatement2.executeQuery();
-                        try {
-                            resultSet.next();
-                            tableCount = resultSet.getInt(1);
-                            if (tableCount < 1) {
-                                String createAuthTokenTableSql = this.repositoryProperties.getCreateAuthTokenTableSql();
-                                connection.prepareStatement(createAuthTokenTableSql).executeUpdate();
-                                LogUtils.info((String)"{} \u8868\u521b\u5efa\u6210\u529f\uff0cSQL\uff1a{}", (Object[])new Object[]{this.repositoryProperties.getAuthTokenTableName(), createAuthTokenTableSql});
-                                if (!connection.getAutoCommit()) {
-                                    connection.commit();
-                                }
-                            }
-                            break block58;
-                        }
-                        finally {
-                            if (resultSet != null) {
-                                resultSet.close();
+                    int tableCount =
+                            resultSet.getInt(
+                                    SecurityConstants
+                                            .QUERY_TABLE_EXIST_SQL_RESULT_SET_COLUMN_INDEX);
+                    if (tableCount < 1) {
+                        String creatUserConnectionTableSql =
+                                repositoryProperties.getCreatUserConnectionTableSql();
+                        try (final PreparedStatement preparedStatement =
+                                     connection.prepareStatement(creatUserConnectionTableSql)) {
+                            preparedStatement.executeUpdate();
+                            LogUtils.info(
+                                    "{} 表创建成功，SQL：{}",
+                                    repositoryProperties.getUserConnectionTableName(),
+                                    creatUserConnectionTableSql);
+                            if (!connection.getAutoCommit()) {
+                                connection.commit();
                             }
                         }
                     }
                 }
-                LogUtils.error((String)"\u9519\u8bef: \u521d\u59cb\u5316\u7b2c\u4e09\u65b9\u767b\u5f55\u7684 {} \u7528\u6237\u8868\u65f6\u53d1\u751f\u9519\u8bef", (Object[])new Object[]{this.repositoryProperties.getUserConnectionTableName()});
-                throw new Exception(String.format("\u521d\u59cb\u5316\u7b2c\u4e09\u65b9\u767b\u5f55\u7684 %s \u7528\u6237\u8868\u65f6\u53d1\u751f\u9519\u8bef", this.repositoryProperties.getUserConnectionTableName()));
+
+                // 不支持第三方 token 表(auth_token) 直接退出
+                if (!justAuthProperties.getEnableAuthTokenTable()) {
+                    return;
+                }
+                //noinspection TryStatementWithMultipleResources,TryStatementWithMultipleResources
+                try (final PreparedStatement preparedStatement2 =
+                             connection.prepareStatement(
+                                     repositoryProperties.getQueryAuthTokenTableExistSql(
+                                             database));
+                     ResultSet resultSet = preparedStatement2.executeQuery()) {
+                    resultSet.next();
+                    int tableCount =
+                            resultSet.getInt(
+                                    SecurityConstants
+                                            .QUERY_TABLE_EXIST_SQL_RESULT_SET_COLUMN_INDEX);
+                    if (tableCount < 1) {
+                        String createAuthTokenTableSql =
+                                repositoryProperties.getCreateAuthTokenTableSql();
+                        connection.prepareStatement(createAuthTokenTableSql).executeUpdate();
+                        LogUtils.info(
+                                "{} 表创建成功，SQL：{}",
+                                repositoryProperties.getAuthTokenTableName(),
+                                createAuthTokenTableSql);
+                        if (!connection.getAutoCommit()) {
+                            connection.commit();
+                        }
+                    }
+                }
+            } else {
+                LogUtils.error(
+                        "错误: 初始化第三方登录的 {} 用户表时发生错误",
+                        repositoryProperties.getUserConnectionTableName());
+                throw new Exception(
+                        String.format(
+                                "初始化第三方登录的 %s 用户表时发生错误",
+                                repositoryProperties.getUserConnectionTableName()));
             }
         }
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix="ums.oauth", name={"enable-user-connection-and-auth-token-table"}, havingValue="true")
+    @ConditionalOnProperty(
+            prefix = "ums.oauth",
+            name = "enable-user-connection-and-auth-token-table",
+            havingValue = "true")
+    static class JobAutoConfiguration {
+
+        private final JustAuthProperties justAuthProperties;
+
+        public JobAutoConfiguration(JustAuthProperties justAuthProperties) {
+            this.justAuthProperties = justAuthProperties;
+        }
+
+        //		@Bean
+        //		@ConditionalOnProperty(prefix = "ums.oauth", name = "enable-refresh-token-job",
+        // havingValue = "true")
+        //		public RefreshTokenJob refreshTokenJob(@Autowired(required = false)
+        //											   UsersConnectionTokenRepository usersConnectionTokenRepository,
+        //											   UsersConnectionRepository usersConnectionRepository,
+        //											   @Qualifier("refreshTokenTaskExecutor") ExecutorService
+        // refreshTokenTaskExecutor) {
+        //			return new RefreshTokenJobImpl(usersConnectionRepository,
+        // usersConnectionTokenRepository,
+        //				auth2Properties, refreshTokenTaskExecutor);
+        //		}
+    }
+
+    @Configuration
+    @ConditionalOnProperty(
+            prefix = "ums.oauth",
+            name = "enable-user-connection-and-auth-token-table",
+            havingValue = "true")
     static class AuthTokenAutoConfiguration {
+
         private final RepositoryProperties repositoryProperties;
 
         public AuthTokenAutoConfiguration(RepositoryProperties repositoryProperties) {
@@ -194,21 +302,21 @@ implements InitializingBean {
         }
 
         @Bean
-        @ConditionalOnMissingBean(type={"top.dcenter.ums.security.core.oauth.repository.UsersConnectionTokenRepository"})
-        @ConditionalOnProperty(prefix="ums.oauth", name={"enable-auth-token-table"}, havingValue="true")
-        public UsersConnectionTokenRepository usersConnectionTokenRepository(@Qualifier(value="connectionTextEncryptor") TextEncryptor connectionTextEncryptor, JdbcTemplate auth2UserConnectionJdbcTemplate) {
-            return new Auth2JdbcUsersConnectionTokenRepository(auth2UserConnectionJdbcTemplate, connectionTextEncryptor, this.repositoryProperties.getAuthTokenTableName());
-        }
-    }
-
-    @Configuration
-    @ConditionalOnProperty(prefix="ums.oauth", name={"enable-user-connection-and-auth-token-table"}, havingValue="true")
-    static class JobAutoConfiguration {
-        private final JustAuthProperties justAuthProperties;
-
-        public JobAutoConfiguration(JustAuthProperties justAuthProperties) {
-            this.justAuthProperties = justAuthProperties;
+        @ConditionalOnMissingBean(
+                type = {
+                        "top.dcenter.ums.security.core.oauth.repository.UsersConnectionTokenRepository"
+                })
+        @ConditionalOnProperty(
+                prefix = "ums.oauth",
+                name = "enable-auth-token-table",
+                havingValue = "true")
+        public UsersConnectionTokenRepository usersConnectionTokenRepository(
+                @Qualifier("connectionTextEncryptor") TextEncryptor connectionTextEncryptor,
+                JdbcTemplate auth2UserConnectionJdbcTemplate) {
+            return new Auth2JdbcUsersConnectionTokenRepository(
+                    auth2UserConnectionJdbcTemplate,
+                    connectionTextEncryptor,
+                    repositoryProperties.getAuthTokenTableName());
         }
     }
 }
-

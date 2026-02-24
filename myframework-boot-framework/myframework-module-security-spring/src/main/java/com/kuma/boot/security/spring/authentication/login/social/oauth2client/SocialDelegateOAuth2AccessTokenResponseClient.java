@@ -1,44 +1,98 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.security.oauth2.client.endpoint.AbstractOAuth2AuthorizationGrantRequest
- *  org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
- *  org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
- *  org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
- *  org.springframework.web.client.RestOperations
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client;
 
 import com.kuma.boot.security.spring.authentication.login.social.oauth2client.weibo.WeiboOAuth2AccessTokenResponseClient;
 import java.util.Collections;
-import org.springframework.security.oauth2.client.endpoint.AbstractOAuth2AuthorizationGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.web.client.RestOperations;
 
+/**
+ * 社交委托oauth2访问令牌响应客户端
+ *
+ * @author kuma
+ * @version 2023.07
+ * @see OAuth2AccessTokenResponseClient
+ * @since 2023-07-10 17:40:54
+ */
 public class SocialDelegateOAuth2AccessTokenResponseClient
-implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
+        implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
+
+    /**
+     * 委托
+     */
     private final OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegate;
+
+    /**
+     * 休息操作
+     */
     private final RestOperations restOperations;
 
-    public SocialDelegateOAuth2AccessTokenResponseClient(OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegate, RestOperations restOperations) {
+    /**
+     * 社交委托oauth2访问令牌响应客户端
+     *
+     * @param delegate       委托
+     * @param restOperations 休息操作
+     * @since 2023-07-10 17:40:54
+     */
+    public SocialDelegateOAuth2AccessTokenResponseClient(
+            OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> delegate,
+            RestOperations restOperations) {
         this.delegate = delegate;
+
         this.restOperations = restOperations;
     }
 
-    public OAuth2AccessTokenResponse getTokenResponse(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
-        String registrationId = authorizationGrantRequest.getClientRegistration().getRegistrationId();
-        if (SocialClientProviders.WORK_WECHAT_SCAN_CLIENT.registrationId().equals(registrationId)) {
-            OAuth2AccessTokenResponse tokenResponse = this.delegate.getTokenResponse((AbstractOAuth2AuthorizationGrantRequest)authorizationGrantRequest);
-            String code = authorizationGrantRequest.getAuthorizationExchange().getAuthorizationResponse().getCode();
-            return OAuth2AccessTokenResponse.withResponse((OAuth2AccessTokenResponse)tokenResponse).additionalParameters(Collections.singletonMap("code", code)).build();
+    /**
+     * 获取令牌响应
+     *
+     * @param authorizationGrantRequest 授权授予请求
+     * @return {@link OAuth2AccessTokenResponse }
+     * @since 2023-07-10 17:40:55
+     */
+    @Override
+    public OAuth2AccessTokenResponse getTokenResponse(
+            OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
+        String registrationId =
+                authorizationGrantRequest.getClientRegistration().getRegistrationId();
+
+        if (com.kuma.boot.security.spring.authentication.login.social.oauth2client.SocialClientProviders.WORK_WECHAT_SCAN_CLIENT.registrationId().equals(registrationId)) {
+            // todo 缓存获取token 如果获取不到再请求 并放入缓存  企业微信的token不允许频繁获取
+            OAuth2AccessTokenResponse tokenResponse =
+                    delegate.getTokenResponse(authorizationGrantRequest);
+            String code =
+                    authorizationGrantRequest
+                            .getAuthorizationExchange()
+                            .getAuthorizationResponse()
+                            .getCode();
+
+            return OAuth2AccessTokenResponse.withResponse(tokenResponse)
+                    .additionalParameters(Collections.singletonMap(OAuth2ParameterNames.CODE, code))
+                    .build();
         }
+
         if ("weibo".equals(registrationId)) {
-            return new WeiboOAuth2AccessTokenResponseClient(this.restOperations).getTokenResponse(authorizationGrantRequest);
+            return new WeiboOAuth2AccessTokenResponseClient(restOperations)
+                    .getTokenResponse(authorizationGrantRequest);
         }
-        return this.delegate.getTokenResponse((AbstractOAuth2AuthorizationGrantRequest)authorizationGrantRequest);
+
+        return delegate.getTokenResponse(authorizationGrantRequest);
     }
 }
-

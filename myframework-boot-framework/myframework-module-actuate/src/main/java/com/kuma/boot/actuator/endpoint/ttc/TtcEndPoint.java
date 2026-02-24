@@ -1,15 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.json.JSONObject
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  jakarta.annotation.Nullable
- *  org.springframework.boot.actuate.endpoint.annotation.Endpoint
- *  org.springframework.boot.actuate.endpoint.annotation.ReadOperation
- *  org.springframework.boot.actuate.endpoint.annotation.Selector
- *  org.springframework.boot.actuate.endpoint.annotation.WriteOperation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.actuator.endpoint.kmc;
 
 import cn.hutool.json.JSONObject;
@@ -20,39 +24,47 @@ import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 
-@Endpoint(id="kmc")
+/**
+ * KmcEndPoint
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:08:52
+ */
+@Endpoint(id = "kmc")
 public class KmcEndPoint {
+
     private String STATUS = "up";
-    private String DETAIL = "\u4e00\u5207\u6b63\u5e38";
+    private String DETAIL = "一切正常";
 
     @ReadOperation
     public JSONObject test() {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.set("status", (Object)this.STATUS);
-        jsonObject.set("detail", (Object)this.DETAIL);
+        jsonObject.set("status", STATUS);
+        jsonObject.set("detail", DETAIL);
         return jsonObject;
     }
 
     @ReadOperation
-    public JSONObject testSelector(@Selector String name) {
+    public JSONObject testSelector( @Selector String name ) {
         JSONObject jsonObject = new JSONObject();
         if ("status".equals(name)) {
-            jsonObject.set("status", (Object)this.STATUS);
+            jsonObject.set("status", STATUS);
         } else if ("detail".equals(name)) {
-            jsonObject.set("detail", (Object)this.DETAIL);
+            jsonObject.set("detail", DETAIL);
         }
         return jsonObject;
     }
 
+    // 动态修改指标
     @WriteOperation
-    public void test4(@Selector String name, @Nullable String value) {
-        if (!StringUtils.isEmpty((String)value)) {
+    public void test4( @Selector String name, @Nullable String value ) {
+        if (!StringUtils.isEmpty(value)) {
             if ("status".equals(name)) {
-                this.STATUS = value;
+                STATUS = value;
             } else if ("detail".equals(name)) {
-                this.DETAIL = value;
+                DETAIL = value;
             }
         }
     }
 }
-

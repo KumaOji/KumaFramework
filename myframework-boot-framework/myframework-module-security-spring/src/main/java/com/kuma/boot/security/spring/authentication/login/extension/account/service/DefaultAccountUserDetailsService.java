@@ -1,32 +1,44 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.LoginTypeEnum
- *  org.springframework.security.core.userdetails.UserDetails
- *  org.springframework.security.core.userdetails.UsernameNotFoundException
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.extension.account.service;
 
 import com.kuma.boot.common.enums.LoginTypeEnum;
-import com.kuma.boot.security.spring.core.userdetails.TtcUser;
+import com.kuma.boot.security.spring.core.userdetails.KmcUser;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public class DefaultAccountUserDetailsService
-implements AccountUserDetailsService {
+/**
+ * 默认账户用户详细信息服务
+ *
+ * @author kuma
+ * @version 2023.04
+ * @since 2023-06-29 11:12:07
+ */
+public class DefaultAccountUserDetailsService implements com.kuma.boot.security.spring.authentication.login.extension.account.service.AccountUserDetailsService {
+
     @Override
-    public UserDetails loadUserByUsername(String username, String type) throws UsernameNotFoundException {
-        if (LoginTypeEnum.B_PC_ACCOUNT.getType().equals(type)) {
-            // empty if block
-        }
-        if (LoginTypeEnum.C_PC_ACCOUNT.getType().equals(type)) {
-            // empty if block
-        }
-        if (LoginTypeEnum.C_APP_ACCOUNT.getType().equals(type)) {
-            // empty if block
-        }
-        return new TtcUser();
+    public UserDetails loadUserByUsername(String username, String type)
+            throws UsernameNotFoundException {
+        if (LoginTypeEnum.B_PC_ACCOUNT.getType().equals(type)) {}
+
+        if (LoginTypeEnum.C_PC_ACCOUNT.getType().equals(type)) {}
+
+        if (LoginTypeEnum.C_APP_ACCOUNT.getType().equals(type)) {}
+
+        return new KmcUser();
     }
 }
-

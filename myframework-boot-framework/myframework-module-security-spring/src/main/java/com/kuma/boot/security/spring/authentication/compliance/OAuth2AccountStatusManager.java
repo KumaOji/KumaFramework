@@ -1,76 +1,93 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.DataItemStatusEnum
- *  org.apache.commons.lang3.ObjectUtils
- *  org.apache.commons.lang3.StringUtils
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.security.core.userdetails.UserDetailsService
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.compliance;
 
 import com.kuma.boot.common.enums.DataItemStatusEnum;
 import com.kuma.boot.security.spring.authentication.compliance.processor.changer.AccountStatusChanger;
 import com.kuma.boot.security.spring.authentication.stamp.LockedUserDetailsStampManager;
 import com.kuma.boot.security.spring.core.userdetails.EnhanceUserDetailsService;
-import com.kuma.boot.security.spring.core.userdetails.TtcUser;
-import com.kuma.boot.security.spring.event.domain.TtcUserStatus;
+import com.kuma.boot.security.spring.core.userdetails.KmcUser;
+import com.kuma.boot.security.spring.event.domain.KmcUserStatus;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+/**
+ * <p>账户锁定处理服务 </p>
+ */
 public class OAuth2AccountStatusManager {
+
     private static final Logger log = LoggerFactory.getLogger(OAuth2AccountStatusManager.class);
+
     private final UserDetailsService userDetailsService;
     private final AccountStatusChanger accountStatusChanger;
     private final LockedUserDetailsStampManager lockedUserDetailsStampManager;
 
-    public OAuth2AccountStatusManager(UserDetailsService userDetailsService, AccountStatusChanger accountStatusChanger, LockedUserDetailsStampManager lockedUserDetailsStampManager) {
+    public OAuth2AccountStatusManager(
+            UserDetailsService userDetailsService,
+            AccountStatusChanger accountStatusChanger,
+            LockedUserDetailsStampManager lockedUserDetailsStampManager) {
         this.userDetailsService = userDetailsService;
         this.lockedUserDetailsStampManager = lockedUserDetailsStampManager;
         this.accountStatusChanger = accountStatusChanger;
     }
 
     private EnhanceUserDetailsService getUserDetailsService() {
-        return (EnhanceUserDetailsService)this.userDetailsService;
+        return (EnhanceUserDetailsService) userDetailsService;
     }
 
     private String getUserId(String username) {
-        EnhanceUserDetailsService enhanceUserDetailsService = this.getUserDetailsService();
-        TtcUser user = enhanceUserDetailsService.loadTtcUserByUsername(username);
-        if (ObjectUtils.isNotEmpty((Object)((Object)user))) {
+        EnhanceUserDetailsService enhanceUserDetailsService = getUserDetailsService();
+        KmcUser user = enhanceUserDetailsService.loadKmcUserByUsername(username);
+        if (ObjectUtils.isNotEmpty(user)) {
             return String.valueOf(user.getUserId());
         }
-        log.warn(" Can not found the userid for [{}]", (Object)username);
+
+        log.warn(" Can not found the userid for [{}]", username);
         return null;
     }
 
     public void lock(String username) {
-        String userId = this.getUserId(username);
-        if (ObjectUtils.isNotEmpty((Object)userId)) {
-            this.accountStatusChanger.process(new TtcUserStatus(userId, DataItemStatusEnum.LOCKING.name()));
-            this.lockedUserDetailsStampManager.put(userId, username);
-            log.info(" User count [{}] has been locked, and record into cache!", (Object)username);
+        String userId = getUserId(username);
+        if (ObjectUtils.isNotEmpty(userId)) {
+            accountStatusChanger.process(
+                    new KmcUserStatus(userId, DataItemStatusEnum.LOCKING.name()));
+            lockedUserDetailsStampManager.put(userId, username);
+            log.info(" User count [{}] has been locked, and record into cache!", username);
         }
     }
 
     public void enable(String userId) {
-        if (ObjectUtils.isNotEmpty((Object)userId)) {
-            this.accountStatusChanger.process(new TtcUserStatus(userId, DataItemStatusEnum.ENABLE.name()));
+        if (ObjectUtils.isNotEmpty(userId)) {
+            accountStatusChanger.process(
+                    new KmcUserStatus(userId, DataItemStatusEnum.ENABLE.name()));
         }
     }
 
     public void releaseFromCache(String username) {
-        String value;
-        String userId = this.getUserId(username);
-        if (ObjectUtils.isNotEmpty((Object)userId) && StringUtils.isNotEmpty((CharSequence)(value = (String)this.lockedUserDetailsStampManager.get(userId)))) {
-            this.lockedUserDetailsStampManager.delete(userId);
-            log.info(" User count [{}] locked info has been release!", (Object)username);
+        String userId = getUserId(username);
+        if (ObjectUtils.isNotEmpty(userId)) {
+            String value = (String) lockedUserDetailsStampManager.get(userId);
+            if (StringUtils.isNotEmpty(value)) {
+                this.lockedUserDetailsStampManager.delete(userId);
+                log.info(" User count [{}] locked info has been release!", username);
+            }
         }
     }
 }
-

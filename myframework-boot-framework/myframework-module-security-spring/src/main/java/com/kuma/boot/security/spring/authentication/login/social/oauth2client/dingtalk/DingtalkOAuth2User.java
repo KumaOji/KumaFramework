@@ -1,13 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.security.core.GrantedAuthority
- *  org.springframework.security.oauth2.core.user.OAuth2User
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.security.spring.authentication.login.social.oauth2client.dingtalk;
 
 import com.kuma.boot.security.spring.utils.AuthorityUtils;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,35 +26,77 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class DingtalkOAuth2User
-implements OAuth2User,
-Serializable {
-    private static final long serialVersionUID = 1L;
+public class DingtalkOAuth2User implements OAuth2User, Serializable {
+
+    @Serial private static final long serialVersionUID = 1L;
+
+    // 统一赋予USER角色
     private Set<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
     private String nameAttributeKey;
+
     private String accessToken;
+
+    /**
+     * 所选企业corpId
+     */
     private String corpId;
+
+    /**
+     * 超时时间
+     */
     private Long expireIn;
+
     private String refreshToken;
+
+    /**
+     * 头像url
+     */
     private String avatarUrl;
+
+    /**
+     * 个人邮箱
+     */
     private String email;
+
+    /**
+     * 手机号
+     */
     private String mobile;
+
+    /**
+     * 昵称
+     */
     private String nick;
+
+    /**
+     * openId
+     */
     private String openId;
+
+    /**
+     * 手机号对应的国家号
+     */
     private String stateCode;
+
+    /**
+     * unionId
+     */
     private String unionId;
 
+    @Override
     public String getName() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
+    @Override
     public Map<String, Object> getAttributes() {
-        return this.attributes;
+        return attributes;
     }
 
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorities;
+        return authorities;
     }
 
     public void setAuthorities(Set<GrantedAuthority> authorities) {
@@ -56,7 +108,7 @@ Serializable {
     }
 
     public String getNameAttributeKey() {
-        return this.nameAttributeKey;
+        return nameAttributeKey;
     }
 
     public void setNameAttributeKey(String nameAttributeKey) {
@@ -64,7 +116,7 @@ Serializable {
     }
 
     public String getAccessToken() {
-        return this.accessToken;
+        return accessToken;
     }
 
     public void setAccessToken(String accessToken) {
@@ -72,7 +124,7 @@ Serializable {
     }
 
     public String getCorpId() {
-        return this.corpId;
+        return corpId;
     }
 
     public void setCorpId(String corpId) {
@@ -80,7 +132,7 @@ Serializable {
     }
 
     public Long getExpireIn() {
-        return this.expireIn;
+        return expireIn;
     }
 
     public void setExpireIn(Long expireIn) {
@@ -88,7 +140,7 @@ Serializable {
     }
 
     public String getRefreshToken() {
-        return this.refreshToken;
+        return refreshToken;
     }
 
     public void setRefreshToken(String refreshToken) {
@@ -96,7 +148,7 @@ Serializable {
     }
 
     public String getAvatarUrl() {
-        return this.avatarUrl;
+        return avatarUrl;
     }
 
     public void setAvatarUrl(String avatarUrl) {
@@ -104,7 +156,7 @@ Serializable {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -112,7 +164,7 @@ Serializable {
     }
 
     public String getMobile() {
-        return this.mobile;
+        return mobile;
     }
 
     public void setMobile(String mobile) {
@@ -120,7 +172,7 @@ Serializable {
     }
 
     public String getNick() {
-        return this.nick;
+        return nick;
     }
 
     public void setNick(String nick) {
@@ -128,7 +180,7 @@ Serializable {
     }
 
     public String getOpenId() {
-        return this.openId;
+        return openId;
     }
 
     public void setOpenId(String openId) {
@@ -136,7 +188,7 @@ Serializable {
     }
 
     public String getStateCode() {
-        return this.stateCode;
+        return stateCode;
     }
 
     public void setStateCode(String stateCode) {
@@ -144,11 +196,10 @@ Serializable {
     }
 
     public String getUnionId() {
-        return this.unionId;
+        return unionId;
     }
 
     public void setUnionId(String unionId) {
         this.unionId = unionId;
     }
 }
-
