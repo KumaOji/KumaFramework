@@ -1,15 +1,21 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'com.kuma.cloud'
-version = '1.0.0'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework IP 地址解析模块'
 
 dependencies {
+    api project(':myframework-boot-framework:myframework-module-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.context
+    api projectLibs.spring.beans
+    api projectLibs.spring.cloud.context
+    api projectLibs.ip2region
+    api projectLibs.hutool.json
+    api projectLibs.hutool.http
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

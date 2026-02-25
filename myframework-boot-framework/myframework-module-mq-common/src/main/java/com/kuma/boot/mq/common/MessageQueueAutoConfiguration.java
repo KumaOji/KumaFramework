@@ -1,7 +1,4 @@
 /*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
  *  com.kuma.boot.common.utils.log.LogUtils
  *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
  *  org.springframework.boot.context.properties.EnableConfigurationProperties

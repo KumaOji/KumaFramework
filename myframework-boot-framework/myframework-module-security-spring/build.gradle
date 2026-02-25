@@ -2,11 +2,26 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework spring模块'
+description = 'Myframework security-spring 模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-security-common')
-    api projectLibs.hutool.core
+    api project(':myframework-boot-framework:myframework-module-cache-redis')
     api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.data.redis
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.hutool.crypto
+    api projectLibs.hutool.json
+    api projectLibs.guava
+    api projectLibs.commons.lang3
+    api projectLibs.commons.collections4
+    api projectLibs.commons.codec
+    api projectLibs.commons.io
+    api projectLibs.jackson.databind
+    api projectLibs.justauth
     compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

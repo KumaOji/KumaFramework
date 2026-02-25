@@ -6,6 +6,7 @@ description = 'Myframework cache-redis模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
+    api project(':myframework-boot-framework:myframework-module-lock')
     api projectLibs.guava
     api projectLibs.commons.collections4
     api projectLibs.hutool.core

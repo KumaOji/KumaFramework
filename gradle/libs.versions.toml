@@ -47,6 +47,7 @@ spring-web = "7.0.3"
 spring-webflux = "7.0.3"
 spring-expression = "7.0.3"
 spring-messaging = "7.0.3"
+spring-tx = "7.0.3"
 jakarta-servlet-api = "6.0.0"
 jakarta-validation-api = "3.0.2"
 swagger-annotations = "2.2.29"
@@ -86,6 +87,7 @@ javax-json-api = "1.1.4"
 javax-json-impl = "1.1.4"
 spring-cloud-context-ver = "5.0.1"
 taobao-text = "0.0.3"
+justauth = "1.16.7"
 druid = "1.2.27"
 jdom2 = "2.0.6.1"
 antlr4 = "4.13.2"
@@ -95,6 +97,7 @@ javers = "7.10.0"
 jedis = "7.2.1"
 commons-pool2 = "2.13.1"
 univocity-parsers = "2.9.1"
+ip2region = "3.3.4"
 easypoi = "4.4.0"
 fastexcel = "1.3.0"
 aspose-cells = "26.1"
@@ -107,6 +110,10 @@ spire-doc = "12.10.0"
 poi = "5.3.0"
 poi-ooxml = "5.3.0"
 poi-ooxml-full = "5.3.0"
+sentinel = "1.8.8"
+micrometer-tracing = "1.1.4"
+skywalking-apm-toolkit = "9.0.0"
+cglib = "3.3.0"
 
 ## 统一定义依赖
 [libraries]
@@ -165,6 +172,8 @@ spring-web = { module = "org.springframework:spring-web", version.ref = "spring-
 spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "spring-webflux" }
 spring-expression = { module = "org.springframework:spring-expression", version.ref = "spring-expression" }
 spring-messaging = { module = "org.springframework:spring-messaging", version.ref = "spring-messaging" }
+spring-tx = { module = "org.springframework:spring-tx", version.ref = "spring-tx" }
+curator-recipes = { module = "org.apache.curator:curator-recipes", version.ref = "curator" }
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet-api" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation-api" }
 swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger-annotations" }
@@ -219,6 +228,7 @@ kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafk
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring-context" }
 spring-cloud-context = { module = "org.springframework.cloud:spring-cloud-context", version.ref = "spring-cloud-context-ver" }
 taobao-text-ui = { module = "com.taobao.text:text-ui", version.ref = "taobao-text" }
+justauth = { module = "me.zhyd.oauth:JustAuth", version.ref = "justauth" }
 druid-starter = { module = "com.alibaba:druid-spring-boot-3-starter", version.ref = "druid" }
 jdom2 = { module = "org.jdom:jdom2", version.ref = "jdom2" }
 antlr4-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr4" }
@@ -230,6 +240,7 @@ disruptor = { module = "com.lmax:disruptor", version.ref = "disruptor" }
 javers-core = { module = "org.javers:javers-core", version.ref = "javers" }
 jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
 commons-pool2 = { module = "org.apache.commons:commons-pool2", version.ref = "commons-pool2" }
+ip2region = { module = "org.lionsoul:ip2region", version.ref = "ip2region" }
 univocity-parsers = { module = "com.univocity:univocity-parsers", version.ref = "univocity-parsers" }
 easypoi-base = { module = "cn.afterturn:easypoi-base", version.ref = "easypoi" }
 easypoi-web = { module = "cn.afterturn:easypoi-web", version.ref = "easypoi" }
@@ -242,6 +253,11 @@ spire-pdf-free = { module = "e-iceblue:spire.pdf.free", version.ref = "spire-pdf
 poi = { module = "org.apache.poi:poi", version.ref = "poi" }
 poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi-ooxml" }
 poi-ooxml-full = { module = "org.apache.poi:poi-ooxml-full", version.ref = "poi-ooxml-full" }
+sentinel-core = { module = "com.alibaba.csp:sentinel-core", version.ref = "sentinel" }
+micrometer-tracing-api = { module = "io.micrometer:micrometer-tracing-api", version.ref = "micrometer-tracing" }
+micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer-tracing" }
+skywalking-apm-toolkit-trace = { module = "org.apache.skywalking:apm-toolkit-trace", version.ref = "skywalking-apm-toolkit" }
+cglib = { module = "cglib:cglib", version.ref = "cglib" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

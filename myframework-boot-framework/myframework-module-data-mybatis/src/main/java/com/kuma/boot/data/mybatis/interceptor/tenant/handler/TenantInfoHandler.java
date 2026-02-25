@@ -1,7 +1,4 @@
 /*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
  *  com.alibaba.druid.DbType
  */
 package com.kuma.boot.data.mybatis.interceptor.tenant.handler;

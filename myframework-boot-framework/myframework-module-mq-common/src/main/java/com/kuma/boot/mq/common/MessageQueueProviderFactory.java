@@ -1,7 +1,4 @@
 /*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
  *  com.kuma.boot.common.utils.context.ContextUtils
  *  com.kuma.boot.common.utils.lang.StringUtils
  *  org.springframework.util.Assert

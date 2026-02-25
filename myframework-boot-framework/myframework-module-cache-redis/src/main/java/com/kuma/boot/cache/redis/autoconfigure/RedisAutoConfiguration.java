@@ -17,6 +17,9 @@
 package com.kuma.boot.cache.redis.autoconfigure;
 
 import com.kuma.boot.cache.redis.autoconfigure.properties.RedisProperties;
+import com.kuma.boot.cache.redis.lock.RedissonDistributedLock;
+import com.kuma.boot.lock.support.DistributedLock;
+import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfigurationV4;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
@@ -33,6 +36,7 @@ import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -138,6 +142,13 @@ public class RedisAutoConfiguration implements InitializingBean {
     @ConditionalOnMissingBean(ValueOperations.class)
     public ValueOperations<String, Object> valueOperations(RedisTemplate<String, Object> redisTemplate) {
         return redisTemplate.opsForValue();
+    }
+
+    @Bean
+    @ConditionalOnBean(RedissonClient.class)
+    @ConditionalOnMissingBean(DistributedLock.class)
+    public DistributedLock distributedLock(RedissonClient redissonClient) {
+        return new RedissonDistributedLock(redissonClient);
     }
 
 //    @Bean("stringRedisTemplate")

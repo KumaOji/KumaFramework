@@ -8,14 +8,18 @@ dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
     api project(':myframework-boot-framework:myframework-module-core')
     api project(':myframework-boot-framework:myframework-module-security-spring')
+    api project(':myframework-boot-framework:myframework-module-ip2region')
+    api project(':myframework-boot-framework:myframework-module-cache-redis')
     api projectLibs.hutool.core
     api projectLibs.jackson.databind
     api projectLibs.javax.json.api
     api projectLibs.fastjson2
     api projectLibs.swagger.annotations
     api projectLibs.commons.lang3
-    implementation "org.springframework.boot:spring-boot-starter-web:4.0.2"
-    implementation "org.springframework:spring-web:7.0.3"
-    implementation "io.micrometer:micrometer-tracing-api:1.1.4"
-    implementation "io.micrometer:micrometer-tracing-bridge-brave:1.1.4"
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.web
+    implementation projectLibs.micrometer.tracing.api
+    implementation projectLibs.micrometer.tracing.bridge.brave
+    implementation projectLibs.sentinel.core
+    implementation projectLibs.skywalking.apm.toolkit.trace
 }
