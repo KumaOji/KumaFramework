@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.core.core;
 
 import com.kuma.boot.ratelimit.ratelimitbs.api.core.IRateLimitContext;
@@ -10,18 +23,56 @@ import com.kuma.boot.ratelimit.ratelimitbs.api.support.IRateLimitRejectListener;
 import com.kuma.boot.ratelimit.ratelimitbs.api.support.IRateLimitTokenService;
 import com.kuma.boot.ratelimit.ratelimitbs.extend.cache.ICommonCacheService;
 import com.kuma.boot.ratelimit.ratelimitbs.extend.timer.ITimer;
+
 import java.lang.reflect.Method;
 
-public class RateLimitContext
-implements IRateLimitContext {
+public class RateLimitContext implements IRateLimitContext {
+
+    /**
+     * 时间戳
+     */
     private ITimer timer;
+
+    /**
+     * 配置服务类
+     */
     private IRateLimitConfigService configService;
+
+    /**
+     * 方法服务类
+     */
     private IRateLimitMethodService methodService;
+
+    /**
+     * 标识服务
+     */
     private IRateLimitTokenService tokenService;
+
+    /**
+     * 缓存服务
+     */
     private ICommonCacheService cacheService;
+
+    /**
+     * 拒绝时的监听策略
+     */
     private IRateLimitRejectListener rejectListener;
+
+    /**
+     * 访问的方法
+     */
     private Method method;
+
+    /**
+     * 访问的方法参数
+     */
     private Object[] args;
+
+    /**
+     * 命名空间
+     *
+     * @since 1.1.0
+     */
     private String cacheKeyNamespace;
 
     public static RateLimitContext newInstance() {
@@ -30,7 +81,7 @@ implements IRateLimitContext {
 
     @Override
     public ITimer timer() {
-        return this.timer;
+        return timer;
     }
 
     public RateLimitContext timer(ITimer timer) {
@@ -40,7 +91,7 @@ implements IRateLimitContext {
 
     @Override
     public IRateLimitConfigService configService() {
-        return this.configService;
+        return configService;
     }
 
     public RateLimitContext configService(IRateLimitConfigService configService) {
@@ -50,7 +101,7 @@ implements IRateLimitContext {
 
     @Override
     public IRateLimitMethodService methodService() {
-        return this.methodService;
+        return methodService;
     }
 
     public RateLimitContext methodService(IRateLimitMethodService methodService) {
@@ -60,7 +111,7 @@ implements IRateLimitContext {
 
     @Override
     public IRateLimitTokenService tokenService() {
-        return this.tokenService;
+        return tokenService;
     }
 
     public RateLimitContext tokenService(IRateLimitTokenService tokenService) {
@@ -70,7 +121,7 @@ implements IRateLimitContext {
 
     @Override
     public IRateLimitRejectListener rejectListener() {
-        return this.rejectListener;
+        return rejectListener;
     }
 
     public RateLimitContext rejectListener(IRateLimitRejectListener rejectListener) {
@@ -80,7 +131,7 @@ implements IRateLimitContext {
 
     @Override
     public Method method() {
-        return this.method;
+        return method;
     }
 
     public RateLimitContext method(Method method) {
@@ -90,7 +141,7 @@ implements IRateLimitContext {
 
     @Override
     public Object[] args() {
-        return this.args;
+        return args;
     }
 
     public RateLimitContext args(Object[] args) {
@@ -100,7 +151,7 @@ implements IRateLimitContext {
 
     @Override
     public ICommonCacheService cacheService() {
-        return this.cacheService;
+        return cacheService;
     }
 
     public RateLimitContext cacheService(ICommonCacheService cacheService) {
@@ -110,7 +161,7 @@ implements IRateLimitContext {
 
     @Override
     public String cacheKeyNamespace() {
-        return this.cacheKeyNamespace;
+        return cacheKeyNamespace;
     }
 
     public RateLimitContext cacheKeyNamespace(String cacheKeyNamespace) {
@@ -118,4 +169,3 @@ implements IRateLimitContext {
         return this;
     }
 }
-

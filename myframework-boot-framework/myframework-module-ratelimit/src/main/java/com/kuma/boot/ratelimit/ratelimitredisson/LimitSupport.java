@@ -1,37 +1,68 @@
 /*
- *  com.kuma.boot.common.support.expression.ExpressionResolver
- *  com.kuma.boot.common.support.expression.SpringExpressionResolver
- *  com.kuma.boot.common.utils.servlet.RequestUtils
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitredisson;
+
 
 import com.kuma.boot.common.support.expression.ExpressionResolver;
 import com.kuma.boot.common.support.expression.SpringExpressionResolver;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitredisson.annotation.Limit;
+
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The type Limit support.
+ *
+ * @author livk
+ */
 public class LimitSupport {
-    private final ExpressionResolver resolver = new SpringExpressionResolver();
-    private final LimitExecutor limitExecutor;
 
-    public LimitSupport(LimitExecutor limitExecutor) {
+    /**
+     * SpEL表达式解析器
+     */
+    private final ExpressionResolver resolver = new SpringExpressionResolver();
+
+    private final com.kuma.boot.ratelimit.ratelimitredisson.LimitExecutor limitExecutor;
+
+    public LimitSupport(com.kuma.boot.ratelimit.ratelimitredisson.LimitExecutor limitExecutor) {
         this.limitExecutor = limitExecutor;
     }
 
+    /**
+     * Exec boolean.
+     *
+     * @param limit  the limit
+     * @param method the method
+     * @param args   the args
+     * @return the boolean
+     */
     public boolean exec(Limit limit, Method method, Object[] args) {
         String key = limit.key();
         int rate = limit.rate();
         int rateInterval = limit.rateInterval();
         TimeUnit unit = limit.rateIntervalUnit();
-        Object spELKey = this.resolver.evaluate(key, method, args);
+        String spELKey = resolver.evaluate(key, method, args);
         if (limit.restrictIp()) {
             String ip = RequestUtils.getIpAddress();
-            spELKey = (String)spELKey + "#" + ip;
+            spELKey = spELKey + "#" + ip;
         }
-        return this.limitExecutor.tryAccess((String)spELKey, rate, Duration.ofMillis(unit.toMillis(rateInterval)));
+        return limitExecutor.tryAccess(spELKey, rate, Duration.ofMillis(unit.toMillis(rateInterval)));
     }
-}
 
+}

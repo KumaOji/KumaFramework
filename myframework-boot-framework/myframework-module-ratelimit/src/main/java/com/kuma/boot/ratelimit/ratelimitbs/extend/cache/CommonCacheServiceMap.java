@@ -1,6 +1,19 @@
 /*
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.extend.cache;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -10,14 +23,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class CommonCacheServiceMap
-extends AbstractCommonCacheService {
+/**
+ * 基于 map 的本地实现
+ *
+ */
+public class CommonCacheServiceMap extends com.kuma.boot.ratelimit.ratelimitbs.extend.cache.AbstractCommonCacheService {
+
+    /**
+     * 存储信息
+     */
     private Map<String, CommonCacheValueDto> cacheMap;
+
+    /**
+     * 清空任务-延迟秒数
+     */
     private final long cleanDelaySeconds;
+
+    /**
+     * 清空任务-周期秒数
+     */
     private final long cleanPeriodSeconds;
 
     public CommonCacheServiceMap() {
-        this(10L, 60L);
+        this(10, 60);
     }
 
     public CommonCacheServiceMap(long cleanDelaySeconds, long cleanPeriodSeconds) {
@@ -27,110 +55,147 @@ extends AbstractCommonCacheService {
         this.initCleanTask();
     }
 
+    /**
+     * 初始化缓存
+     */
     protected void initMap() {
-        this.cacheMap = new ConcurrentHashMap<String, CommonCacheValueDto>();
+        this.cacheMap = new ConcurrentHashMap<>();
     }
 
+    /**
+     * 初始化清理任务
+     */
     protected void initCleanTask() {
-        CommonCacheCleanTask cleanTask = new CommonCacheCleanTask(this.cacheMap);
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(cleanTask, this.cleanDelaySeconds, this.cleanPeriodSeconds, TimeUnit.SECONDS);
+        final Runnable cleanTask = new com.kuma.boot.ratelimit.ratelimitbs.extend.cache.CommonCacheCleanTask(this.cacheMap);
+
+        // 这里的调度参数，没有必要暴露。
+        // 采用和 redis 类似的惰性淘汰即可。
+        Executors.newScheduledThreadPool(1)
+                .scheduleAtFixedRate(cleanTask, cleanDelaySeconds, cleanPeriodSeconds, TimeUnit.SECONDS);
     }
 
     @Override
     public synchronized void set(String key, String value, long expireMills) {
-        long actualMills = 0L;
-        if (expireMills <= 0L) {
-            LogUtils.info((String)"\u8fc7\u671f\u65f6\u95f4\u5c0f\u4e8e\u7b49\u4e8e0\uff0c\u8ba4\u4e3a\u4e0d\u8fc7\u671f", (Object[])new Object[0]);
+        long actualMills = 0;
+        if (expireMills <= 0) {
+            LogUtils.info("过期时间小于等于0，认为不过期");
         } else {
             long currentMills = System.currentTimeMillis();
             actualMills = currentMills + expireMills;
         }
+
         CommonCacheValueDto dto = CommonCacheValueDto.of(value, actualMills);
-        this.cacheMap.put(key, dto);
+        cacheMap.put(key, dto);
     }
 
     @Override
     public synchronized String set(String key, String value, String nxxx, String expx, int time) {
         this.set(key, value, time);
+
+        // 兼容 jedis
         return "OK";
     }
 
     @Override
     public String get(String key) {
-        this.checkExpireAndRemove(key);
-        CommonCacheValueDto dto = this.cacheMap.get(key);
+        checkExpireAndRemove(key);
+
+        CommonCacheValueDto dto = cacheMap.get(key);
         if (dto == null) {
             return null;
         }
+
         return dto.getValue();
     }
 
     @Override
     public boolean contains(String key) {
-        this.checkExpireAndRemove(key);
-        return this.cacheMap.containsKey(key);
+        checkExpireAndRemove(key);
+
+        return cacheMap.containsKey(key);
     }
 
     @Override
     public synchronized void remove(String key) {
-        this.cacheMap.remove(key);
+        cacheMap.remove(key);
     }
 
+    /**
+     *
+     * @param key 获取 key
+     * @return 结果
+     */
     @Override
     public long ttl(String key) {
-        this.checkExpireAndRemove(key);
-        CommonCacheValueDto dto = this.cacheMap.get(key);
+        checkExpireAndRemove(key);
+
+        CommonCacheValueDto dto = cacheMap.get(key);
+        // 信息不存在
         if (dto == null) {
             return -2L;
         }
+        // 没有指定过期时间
         Long expireTime = dto.getExpireTime();
         if (expireTime == null) {
             return -1L;
         }
+
+        // 获取真实的过期时间
         long currentTime = System.currentTimeMillis();
         return expireTime - currentTime;
     }
 
     @Override
     public void expireAt(String key, long unixTime) {
-        if (this.contains(key)) {
-            CommonCacheValueDto dto = this.cacheMap.get(key);
+        // 判断 key 是否存在
+        if (contains(key)) {
+            CommonCacheValueDto dto = cacheMap.get(key);
             dto.setExpireTime(unixTime);
-            this.cacheMap.put(key, dto);
+
+            cacheMap.put(key, dto);
         }
     }
 
     @Override
     public long expireAt(String key) {
-        this.checkExpireAndRemove(key);
-        CommonCacheValueDto dto = this.cacheMap.get(key);
+        checkExpireAndRemove(key);
+
+        CommonCacheValueDto dto = cacheMap.get(key);
+        // 信息不存在
         if (dto == null) {
-            return -2L;
+            return -2;
         }
+
         Long expireTime = dto.getExpireTime();
         if (expireTime == null) {
-            return -1L;
+            return -1;
         }
+
         return expireTime;
     }
 
     @Override
-    public Object eval(String var1, int var2, String ... var3) {
+    public Object eval(String var1, int var2, String... var3) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 当一个信息过期的时候，将其清空。惰性淘汰
+     * @param key 键
+     */
     private synchronized void checkExpireAndRemove(String key) {
-        CommonCacheValueDto dto = this.cacheMap.get(key);
+        // 1. 获取
+        CommonCacheValueDto dto = cacheMap.get(key);
         if (dto == null) {
             return;
         }
+
         Long expireTime = dto.getExpireTime();
         if (expireTime != null) {
             long currentMills = System.currentTimeMillis();
             if (expireTime <= currentMills) {
-                this.cacheMap.remove(key);
+                cacheMap.remove(key);
             }
         }
     }
 }
-

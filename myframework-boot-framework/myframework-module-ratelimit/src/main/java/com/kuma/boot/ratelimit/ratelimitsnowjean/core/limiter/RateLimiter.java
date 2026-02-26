@@ -1,22 +1,19 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.core.limiter;
 
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.entity.RateLimiterRule;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.client.MonitorService;
 
 public interface RateLimiter {
-    public MonitorService getMonitorService();
 
-    public void init(RateLimiterRule var1);
+    MonitorService getMonitorService();
 
-    public boolean tryAcquire();
+    void init(RateLimiterRule rule);
 
-    public boolean tryAcquire(String var1);
+    boolean tryAcquire();
 
-    public String getId();
+    boolean tryAcquire(String s);
 
-    public RateLimiterRule getRule();
+    String getId();
+
+    RateLimiterRule getRule();
 }
-

@@ -1,10 +1,19 @@
 /*
- *  org.springframework.beans.factory.annotation.Qualifier
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.data.redis.connection.RedisConnectionFactory
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitenhance.config;
 
 import com.kuma.boot.ratelimit.ratelimitenhance.helper.RedisHelper;
@@ -15,17 +24,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
+/** 基于redis分布式限流自动配置 */
 @Configuration
-@ConditionalOnClass(value={RedisConnectionFactory.class})
+@ConditionalOnClass(RedisConnectionFactory.class)
 public class RedisLimitingAutoConfiguration {
-    @Bean(value={"redisHelper"})
+
+    @Bean(value = "redisHelper")
     public RedisHelper redisHelper() {
         return new RedisHelper();
     }
 
-    @Bean(value={"redisLimitHelper"})
-    public RedisLimitHelper redisLimitHelper(@Qualifier(value="redisHelper") RedisHelper redisHelper) {
+    @Bean(value = "redisLimitHelper")
+    public RedisLimitHelper redisLimitHelper(@Qualifier("redisHelper") RedisHelper redisHelper) {
         return new RedisLimitHelper(redisHelper);
     }
 }
-

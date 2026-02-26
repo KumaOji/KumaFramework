@@ -1,23 +1,39 @@
 /*
- *  org.apache.curator.framework.CuratorFramework
- *  org.apache.curator.framework.recipes.locks.InterProcessLock
- *  org.apache.curator.framework.recipes.locks.InterProcessMutex
- *  org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.lock.support.zookeeper;
 
 import com.kuma.boot.lock.enums.LockScopeEnum;
 import com.kuma.boot.lock.enums.LockTypeEnums;
 import com.kuma.boot.lock.exception.LockException;
 import com.kuma.boot.lock.support.AbstractLockSupport;
-import java.util.concurrent.TimeUnit;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.locks.InterProcessLock;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 
-public class CuratorLock
-extends AbstractLockSupport<InterProcessLock> {
+import java.util.concurrent.TimeUnit;
+
+/**
+ * <p>
+ * CuratorLock
+ * </p>
+ */
+public class CuratorLock extends AbstractLockSupport<InterProcessLock> {
+
     private final CuratorFramework curatorFramework;
 
     public CuratorLock(CuratorFramework curatorFramework) {
@@ -30,10 +46,9 @@ extends AbstractLockSupport<InterProcessLock> {
             key = "/".concat(key);
         }
         return switch (type) {
-            default -> throw new MatchException(null, null);
-            case LockTypeEnums.LOCK, LockTypeEnums.FAIR -> new InterProcessMutex(this.curatorFramework, key);
-            case LockTypeEnums.READ -> new InterProcessReadWriteLock(this.curatorFramework, key).readLock();
-            case LockTypeEnums.WRITE -> new InterProcessReadWriteLock(this.curatorFramework, key).writeLock();
+            case LOCK, FAIR -> new InterProcessMutex(curatorFramework, key);
+            case READ -> new InterProcessReadWriteLock(curatorFramework, key).readLock();
+            case WRITE -> new InterProcessReadWriteLock(curatorFramework, key).writeLock();
         };
     }
 
@@ -61,11 +76,9 @@ extends AbstractLockSupport<InterProcessLock> {
     protected boolean unlock(String key, InterProcessLock lock) {
         try {
             lock.release();
-            return !this.isLocked(lock);
-        }
-        catch (Exception e) {
+            return !isLocked(lock);
+        } catch (Exception e) {
             throw new LockException(e);
         }
     }
 }
-

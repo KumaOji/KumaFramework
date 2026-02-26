@@ -1,8 +1,3 @@
-/*
- *  com.alibaba.fastjson2.JSON
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.core.observer;
 
 import com.alibaba.fastjson2.JSON;
@@ -12,57 +7,72 @@ import com.kuma.boot.ratelimit.ratelimitsnowjean.core.config.RateLimiterConfig;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.core.exception.SnowJeanException;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.core.limiter.RateLimiter;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.entity.MonitorBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * 观察者模式（一对多）
+ */
 public class RateLimiterObserver {
-    private static Map<String, RateLimiter> map = new ConcurrentHashMap<String, RateLimiter>();
+    private static Map<String, RateLimiter> map = new ConcurrentHashMap<>();
     private static Logger logger = LoggerFactory.getLogger(RateLimiterObserver.class);
 
+    /**
+     * 注册限流器
+     */
     public static void registered(RateLimiter limiter, RateLimiterConfig config) {
         if (map.containsKey(limiter.getId())) {
             throw new SnowJeanException("Repeat registration for current limiting rules:" + limiter.getId());
         }
         map.put(limiter.getId(), limiter);
-        if (!limiter.getRule().getLimiterModel().equals((Object)LimiterModel.CLOUD)) {
+        if (!limiter.getRule().getLimiterModel().equals(LimiterModel.CLOUD)) {
+            //本地限流只注册
             return;
         }
-        RateLimiterObserver.update(limiter, config);
-        RateLimiterObserver.monitor(limiter, config);
+        update(limiter, config);
+        monitor(limiter, config);
     }
 
     public static Map<String, RateLimiter> getMap() {
         return map;
     }
 
+    /**
+     * 发送心跳并更新限流规则
+     */
     private static void update(RateLimiter limiter, RateLimiterConfig config) {
         config.getScheduledThreadExecutor().scheduleWithFixedDelay(() -> {
-            String rules = config.getTicketServer().connect(RateLimiterConfig.http_heart, JSON.toJSONString((Object)limiter.getRule()));
-            if (rules == null) {
+            String rules = config.getTicketServer().connect(RateLimiterConfig.http_heart, JSON.toJSONString(limiter.getRule()));
+            if (rules == null) { //TicketServer挂掉
                 logger.debug("update limiter fail, automatically switch to local current limit");
                 RateLimiterRule rule = limiter.getRule();
                 rule.setLimiterModel(LimiterModel.POINT);
                 limiter.init(rule);
                 return;
             }
-            RateLimiterRule rateLimiterRule = (RateLimiterRule)JSON.parseObject((String)rules, RateLimiterRule.class);
-            if (rateLimiterRule.getVersion() > limiter.getRule().getVersion()) {
-                logger.info("update rule version: {} -> {}", (Object)limiter.getRule().getVersion(), (Object)rateLimiterRule.getVersion());
+            RateLimiterRule rateLimiterRule = JSON.parseObject(rules, RateLimiterRule.class);
+            if (rateLimiterRule.getVersion() > limiter.getRule().getVersion()) { //版本升级
+                logger.info("update rule version: {} -> {}", limiter.getRule().getVersion(), rateLimiterRule.getVersion());
                 map.get(limiter.getId()).init(rateLimiterRule);
-            } else if (rateLimiterRule.getLimiterModel().equals((Object)LimiterModel.POINT)) {
+            } else if (rateLimiterRule.getLimiterModel().equals(LimiterModel.POINT)) { //本地/分布式切换
                 rateLimiterRule.setLimiterModel(LimiterModel.CLOUD);
                 map.get(limiter.getId()).init(rateLimiterRule);
             }
-        }, 0L, 1L, TimeUnit.SECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
+    /**
+     * 监控数据上报
+     */
     private static void monitor(RateLimiter limiter, RateLimiterConfig config) {
         config.getScheduledThreadExecutor().scheduleWithFixedDelay(() -> {
-            if (limiter.getRule().getMonitor() == 0L) {
+            if (limiter.getRule().getMonitor() == 0) {
+                //监控功能已关闭
                 return;
             }
             List<MonitorBean> monitorBeans = limiter.getMonitorService().getAndDelete();
@@ -73,7 +83,7 @@ public class RateLimiterObserver {
             if (result == null) {
                 logger.debug("http_monitor data update fail");
             }
-        }, 0L, 3L, TimeUnit.SECONDS);
+        }, 0, 3, TimeUnit.SECONDS);
     }
-}
 
+}

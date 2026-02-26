@@ -1,11 +1,25 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.lock.support.local;
 
 import com.kuma.boot.lock.enums.LockScopeEnum;
 import com.kuma.boot.lock.enums.LockTypeEnums;
 import com.kuma.boot.lock.support.AbstractLockSupport;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -13,18 +27,24 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class LocalLock
-extends AbstractLockSupport<Lock> {
-    private static final Map<String, Lock> CACHE_LOCK = new ConcurrentHashMap<String, Lock>();
+/**
+ * <p>
+ * LocalLock
+ * </p>
+ *
+ *
+ */
+public class LocalLock extends AbstractLockSupport<Lock> {
+
+    private static final Map<String, Lock> CACHE_LOCK = new ConcurrentHashMap<>();
 
     @Override
     protected Lock getLock(LockTypeEnums type, String key) {
         return CACHE_LOCK.computeIfAbsent(key, s -> switch (type) {
-            default -> throw new MatchException(null, null);
-            case LockTypeEnums.LOCK -> new ReentrantLock();
-            case LockTypeEnums.FAIR -> new ReentrantLock(true);
-            case LockTypeEnums.READ -> new ReentrantReadWriteLock().readLock();
-            case LockTypeEnums.WRITE -> new ReentrantReadWriteLock().writeLock();
+            case LOCK -> new ReentrantLock();
+            case FAIR -> new ReentrantLock(true);
+            case READ -> new ReentrantReadWriteLock().readLock();
+            case WRITE -> new ReentrantReadWriteLock().writeLock();
         });
     }
 
@@ -41,17 +61,14 @@ extends AbstractLockSupport<Lock> {
     @Override
     protected boolean unlock(String key, Lock lock) {
         lock.unlock();
-        return !this.isLocked(lock);
+        return !isLocked(lock);
     }
 
     @Override
     protected boolean isLocked(Lock lock) {
-        if (lock instanceof ReentrantLock) {
-            ReentrantLock reentrantLock = (ReentrantLock)lock;
+        if (lock instanceof ReentrantLock reentrantLock) {
             return reentrantLock.isLocked() && reentrantLock.isHeldByCurrentThread();
-        }
-        if (lock instanceof ReentrantReadWriteLock.WriteLock) {
-            ReentrantReadWriteLock.WriteLock writeLock = (ReentrantReadWriteLock.WriteLock)lock;
+        } else if (lock instanceof ReentrantReadWriteLock.WriteLock writeLock) {
             return writeLock.getHoldCount() != 0 && writeLock.isHeldByCurrentThread();
         }
         return false;
@@ -62,4 +79,3 @@ extends AbstractLockSupport<Lock> {
         return LockScopeEnum.STANDALONE_LOCK;
     }
 }
-

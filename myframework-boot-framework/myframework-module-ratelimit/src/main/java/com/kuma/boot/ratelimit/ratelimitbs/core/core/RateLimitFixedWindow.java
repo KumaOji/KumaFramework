@@ -1,40 +1,69 @@
 /*
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.core.core;
 
-import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.ratelimit.ratelimitbs.api.core.IRateLimitContext;
 import com.kuma.boot.ratelimit.ratelimitbs.api.dto.RateLimitConfigDto;
 import com.kuma.boot.ratelimit.ratelimitbs.extend.cache.ICommonCacheService;
+import cn.hutool.core.util.StrUtil;
 
-public class RateLimitFixedWindow
-extends AbstractRateLimit {
+/**
+ * 固定时间窗口
+ */
+public class RateLimitFixedWindow extends com.kuma.boot.ratelimit.ratelimitbs.core.core.AbstractRateLimit {
+
+    /**
+     * 固定窗口的实现方式比较简单，直接设置过期时间即可。
+     *
+     * @param cacheKey 缓存标识
+     * @param configDto 配置
+     * @param rateLimitContext 上下文
+     * @return 结果
+     */
     @Override
     protected boolean doAcquire(String cacheKey, RateLimitConfigDto configDto, IRateLimitContext rateLimitContext) {
-        long configCount;
-        long cacheCount;
-        long newCount;
-        ICommonCacheService cacheService = rateLimitContext.cacheService();
-        int permits = configDto.getPermits();
+        final ICommonCacheService cacheService = rateLimitContext.cacheService();
+        final int permits = configDto.getPermits();
+
         String cacheValue = cacheService.get(cacheKey);
-        if (StrUtil.isEmpty((CharSequence)cacheKey)) {
-            long expireMills = configDto.getTimeUnit().toMillis(configDto.getInterval());
-            LogUtils.info((String)"cacheKey: {} \u5bf9\u5e94\u7684\u5386\u53f2\u914d\u7f6e\u4e3a\u7a7a\uff0c\u8fdb\u884c\u521d\u59cb\u5316", (Object[])new Object[0]);
+        if (StrUtil.isEmpty(cacheKey)) {
+            final long expireMills = configDto.getTimeUnit().toMillis(configDto.getInterval());
+            LogUtils.info("cacheKey: {} 对应的历史配置为空，进行初始化");
+            // 模式初始化为0次
             cacheValue = "0";
             cacheService.set(cacheKey, cacheValue, expireMills);
         }
-        if ((newCount = (cacheCount = Long.parseLong(cacheValue)) + (long)permits) > (configCount = configDto.getCount().longValue())) {
-            LogUtils.warn((String)"newCount {} \u5927\u4e8e\u914d\u7f6e\u7684 {}", (Object[])new Object[]{newCount, configCount});
+
+        long cacheCount = Long.parseLong(cacheValue);
+
+        long newCount = cacheCount + permits;
+        final long configCount = configDto.getCount();
+        if (newCount > configCount) {
+            LogUtils.warn("newCount {} 大于配置的 {}", newCount, configCount);
             return false;
+        } else {
+            long ttlMills = cacheService.ttl(cacheKey);
+            if (ttlMills > 0) {
+                // 直接 set 一个值，redis 会将其有效期设置为永远。
+                cacheService.set(cacheKey, cacheValue, ttlMills);
+            }
+
+            return true;
         }
-        long ttlMills = cacheService.ttl(cacheKey);
-        if (ttlMills > 0L) {
-            cacheService.set(cacheKey, cacheValue, ttlMills);
-        }
-        return true;
     }
 }
-

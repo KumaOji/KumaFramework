@@ -1,18 +1,36 @@
 /*
- *  com.kuma.boot.common.enums.ResultEnum
- *  com.kuma.boot.common.enums.StatusEnum
- *  com.kuma.boot.common.exception.BootException
- *  com.kuma.boot.common.model.Code
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitguava;
 
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.enums.StatusEnum;
+import com.kuma.boot.common.exception.BaseException;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.model.Code;
 
-public class GuavaLimitException
-extends BootException {
+/**
+ * 幂等校验异常
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 22:19:03
+ */
+public class GuavaLimitException extends BootException {
+
     public GuavaLimitException() {
     }
 
@@ -52,7 +70,8 @@ extends BootException {
         super(code, message);
     }
 
-    public GuavaLimitException(StatusEnum status, Code code, String message) {
+    public GuavaLimitException(StatusEnum status, Code code,
+                               String message) {
         super(status, code, message);
     }
 
@@ -60,7 +79,8 @@ extends BootException {
         super(code, e);
     }
 
-    public GuavaLimitException(StatusEnum status, Code code, Throwable e) {
+    public GuavaLimitException(StatusEnum status, Code code,
+                               Throwable e) {
         super(status, code, e);
     }
 
@@ -68,8 +88,8 @@ extends BootException {
         super(code, e, message);
     }
 
-    public GuavaLimitException(StatusEnum status, Code code, Throwable e, String message) {
+    public GuavaLimitException(StatusEnum status, Code code,
+                               Throwable e, String message) {
         super(status, code, e, message);
     }
 }
-

@@ -1,32 +1,47 @@
 /*
- *  cn.hutool.core.util.ArrayUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  jakarta.servlet.http.HttpServletRequest
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.core.support.token;
 
-import cn.hutool.core.util.ArrayUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitbs.api.support.IRateLimitTokenService;
 import jakarta.servlet.http.HttpServletRequest;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 
-public class RateLimitTokenService
-implements IRateLimitTokenService {
+/**
+ * 默认基于 ip 获取对应的地址
+ */
+public class RateLimitTokenService implements IRateLimitTokenService {
+
     @Override
     public String getTokenId(Object[] params) {
-        if (ArrayUtil.isEmpty((Object[])params)) {
-            LogUtils.warn((String)"Param is empty, return empty", (Object[])new Object[0]);
-            return "";
+        if (ArrayUtil.isEmpty(params)) {
+            LogUtils.warn("Param is empty, return empty");
+            return StrUtil.EMPTY;
         }
+
         for (Object param : params) {
-            if (!(param instanceof HttpServletRequest)) continue;
-            HttpServletRequest request = (HttpServletRequest)param;
-            return RequestUtils.getRemoteAddr((HttpServletRequest)request);
+            if (param instanceof HttpServletRequest request) {
+                return RequestUtils.getRemoteAddr(request);
+            }
         }
-        LogUtils.warn((String)"Param is not found in request, return empty", (Object[])new Object[0]);
-        return "";
+
+        LogUtils.warn("Param is not found in request, return empty");
+        return StrUtil.EMPTY;
     }
 }
-

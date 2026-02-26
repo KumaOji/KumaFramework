@@ -1,23 +1,35 @@
 /*
- *  org.redisson.api.RRateLimiter
- *  org.redisson.api.RateType
- *  org.redisson.api.RedissonClient
- *  org.springframework.util.StringUtils
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitredisson.executor;
 
 import com.kuma.boot.ratelimit.ratelimitredisson.LimitExecutor;
 import com.kuma.boot.ratelimit.ratelimitredisson.exception.LimitException;
-
-import java.time.Duration;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
 import org.springframework.util.StringUtils;
 
-public class RedissonLimitExecutor
-extends ReentrantLimitExecutor
-implements LimitExecutor {
+import java.time.Duration;
+
+/**
+ * @author livk
+ */
+public class RedissonLimitExecutor extends ReentrantLimitExecutor implements LimitExecutor {
+
     private final RedissonClient redissonClient;
 
     public RedissonLimitExecutor(RedissonClient redissonClient) {
@@ -26,12 +38,12 @@ implements LimitExecutor {
 
     @Override
     protected boolean reentrantTryAccess(String compositeKey, int rate, Duration rateInterval) {
-        if (StringUtils.hasText((String)compositeKey)) {
-            RRateLimiter limiter = this.redissonClient.getRateLimiter(compositeKey);
-            limiter.trySetRate(RateType.OVERALL, (long)rate, rateInterval);
-            return limiter.tryAcquire(1L);
+        if (StringUtils.hasText(compositeKey)) {
+            RRateLimiter limiter = redissonClient.getRateLimiter(compositeKey);
+            limiter.trySetRate(RateType.OVERALL, rate, rateInterval);
+            return limiter.tryAcquire(1);
         }
         throw new LimitException("Composite key is null or empty");
     }
-}
 
+}

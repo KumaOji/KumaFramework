@@ -1,17 +1,42 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.core.support.proxy.dynamic;
 
 import com.kuma.boot.ratelimit.ratelimitbs.core.bs.RateLimitBs;
 import com.kuma.boot.ratelimit.ratelimitbs.core.support.proxy.AbstractProxy;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.CompletionService;
 
-public class DynamicProxy
-extends AbstractProxy
-implements InvocationHandler {
+/**
+ * <p> 动态代理 </p>
+ *
+ * 1. 对于 executor 的抽象，使用 {@link CompletionService}
+ * 2. 确保唯一初始化 executor，在任务执行的最后关闭 executor。
+ * 3. 异步执行结果的获取，异常信息的获取。
+ *
+ */
+public class DynamicProxy extends AbstractProxy implements InvocationHandler {
+
+    /**
+     * 被代理的对象
+     */
     private final Object target;
 
     public DynamicProxy(Object target) {
@@ -23,15 +48,33 @@ implements InvocationHandler {
         this.target = target;
     }
 
+    /**
+     * 这种方式虽然实现了异步执行，但是存在一个缺陷：
+     * 强制用户返回值为 Future 的子类。
+     *
+     * 如何实现不影响原来的值，要怎么实现呢？
+     * @param proxy 原始对象
+     * @param method 方法
+     * @param args 入参
+     * @return 结果
+     * @throws Throwable 异常
+     */
     @Override
+    @SuppressWarnings("all")
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        this.rateLimitBs.tryAcquire(method, args);
-        return method.invoke(this.target, args);
+        // 1. 添加判断
+        super.rateLimitBs.tryAcquire(method, args);
+
+        // 2. 返回以前的结果
+        return method.invoke(target, args);
     }
 
+    @Override
     public Object proxy() {
-        DynamicProxy handler = new DynamicProxy(this.target);
-        return Proxy.newProxyInstance(handler.getClass().getClassLoader(), this.target.getClass().getInterfaces(), handler);
+        // 我们要代理哪个真实对象，就将该对象传进去，最后是通过该真实对象来调用其方法的
+        InvocationHandler handler = new DynamicProxy(target);
+
+        return Proxy.newProxyInstance(
+                handler.getClass().getClassLoader(), target.getClass().getInterfaces(), handler);
     }
 }
-

@@ -1,14 +1,19 @@
 /*
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.config.BeanFactoryPostProcessor
- *  org.springframework.beans.factory.config.ConfigurableListableBeanFactory
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.context.annotation.Import
- *  org.springframework.context.annotation.ImportAware
- *  org.springframework.core.annotation.AnnotationAttributes
- *  org.springframework.core.type.AnnotationMetadata
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.spring.config;
 
 import com.kuma.boot.ratelimit.ratelimitbs.api.core.IRateLimit;
@@ -28,7 +33,6 @@ import com.kuma.boot.ratelimit.ratelimitbs.extend.timer.ITimer;
 import com.kuma.boot.ratelimit.ratelimitbs.extend.timer.Timers;
 import com.kuma.boot.ratelimit.ratelimitbs.spring.annotation.EnableRateLimit;
 import com.kuma.boot.ratelimit.ratelimitbs.spring.aop.RateLimitAspect;
-import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -39,71 +43,100 @@ import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
+/**
+ * 限流配置
+ * <p>
+ * https://blog.csdn.net/u013905744/article/details/91364736
+ */
 @Configuration
-@Import(value={RateLimitAspect.class})
-public class RateLimitConfig
-implements ImportAware,
-BeanFactoryPostProcessor {
+@Import(RateLimitAspect.class)
+// @ComponentScan(basePackages = "com.github.houbb.rate.limit.spring")
+public class RateLimitConfig implements ImportAware, BeanFactoryPostProcessor {
+
+    /**
+     * 属性信息
+     */
     private AnnotationAttributes enableAttributes;
+
+    /**
+     * bean 工厂
+     */
     private ConfigurableListableBeanFactory beanFactory;
 
-    @Bean(value={"rateLimitBs"})
+    @Bean("rateLimitBs")
     public RateLimitBs rateLimitBs() {
-        IRateLimit rateLimit = (IRateLimit)this.beanFactory.getBean(this.enableAttributes.getString("value"), IRateLimit.class);
-        ITimer timer = (ITimer)this.beanFactory.getBean(this.enableAttributes.getString("timer"), ITimer.class);
-        ICommonCacheService cacheService = (ICommonCacheService)this.beanFactory.getBean(this.enableAttributes.getString("cacheService"), ICommonCacheService.class);
-        IRateLimitConfigService configService = (IRateLimitConfigService)this.beanFactory.getBean(this.enableAttributes.getString("configService"), IRateLimitConfigService.class);
-        IRateLimitTokenService tokenService = (IRateLimitTokenService)this.beanFactory.getBean(this.enableAttributes.getString("tokenService"), IRateLimitTokenService.class);
-        IRateLimitMethodService methodService = (IRateLimitMethodService)this.beanFactory.getBean(this.enableAttributes.getString("methodService"), IRateLimitMethodService.class);
-        IRateLimitRejectListener rejectListener = (IRateLimitRejectListener)this.beanFactory.getBean(this.enableAttributes.getString("rejectListener"), IRateLimitRejectListener.class);
-        String cacheKeyNamespace = this.enableAttributes.getString("cacheKeyNamespace");
-        return RateLimitBs.newInstance().rateLimit(rateLimit).timer(timer).cacheService(cacheService).configService(configService).tokenService(tokenService).methodService(methodService).rejectListener(rejectListener).cacheKeyNamespace(cacheKeyNamespace);
+        IRateLimit rateLimit = beanFactory.getBean(enableAttributes.getString("value"), IRateLimit.class);
+        ITimer timer = beanFactory.getBean(enableAttributes.getString("timer"), ITimer.class);
+        ICommonCacheService cacheService =
+                beanFactory.getBean(enableAttributes.getString("cacheService"), ICommonCacheService.class);
+        IRateLimitConfigService configService =
+                beanFactory.getBean(enableAttributes.getString("configService"), IRateLimitConfigService.class);
+        IRateLimitTokenService tokenService =
+                beanFactory.getBean(enableAttributes.getString("tokenService"), IRateLimitTokenService.class);
+        IRateLimitMethodService methodService =
+                beanFactory.getBean(enableAttributes.getString("methodService"), IRateLimitMethodService.class);
+        IRateLimitRejectListener rejectListener =
+                beanFactory.getBean(enableAttributes.getString("rejectListener"), IRateLimitRejectListener.class);
+        String cacheKeyNamespace = enableAttributes.getString("cacheKeyNamespace");
+
+        return RateLimitBs.newInstance()
+                .rateLimit(rateLimit)
+                .timer(timer)
+                .cacheService(cacheService)
+                .configService(configService)
+                .tokenService(tokenService)
+                .methodService(methodService)
+                .rejectListener(rejectListener)
+                .cacheKeyNamespace(cacheKeyNamespace);
     }
 
-    @Bean(value={"rateLimit"})
+    @Bean("rateLimit")
     public IRateLimit rateLimit() {
         return RateLimits.tokenBucket();
     }
 
-    @Bean(value={"rateLimitTimer"})
+    @Bean("rateLimitTimer")
     public ITimer rateLimitTimer() {
         return Timers.system();
     }
 
-    @Bean(value={"rateLimitCacheService"})
+    @Bean("rateLimitCacheService")
     public ICommonCacheService rateLimitCacheService() {
         return new CommonCacheServiceMap();
     }
 
-    @Bean(value={"rateLimitConfigService"})
+    @Bean("rateLimitConfigService")
     public IRateLimitConfigService rateLimitConfigService() {
         return new RateLimitConfigService();
     }
 
-    @Bean(value={"rateLimitTokenService"})
+    @Bean("rateLimitTokenService")
     public IRateLimitTokenService rateLimitTokenService() {
         return new RateLimitTokenService();
     }
 
-    @Bean(value={"rateLimitMethodService"})
+    @Bean("rateLimitMethodService")
     public IRateLimitMethodService rateLimitMethodService() {
         return new RateLimitMethodService();
     }
 
-    @Bean(value={"rateLimitRejectListener"})
+    @Bean("rateLimitRejectListener")
     public IRateLimitRejectListener rateLimitRejectListener() {
         return new RateLimitRejectListenerException();
     }
 
+    @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
     }
 
+    @Override
     public void setImportMetadata(AnnotationMetadata annotationMetadata) {
-        this.enableAttributes = AnnotationAttributes.fromMap((Map)annotationMetadata.getAnnotationAttributes(EnableRateLimit.class.getName(), false));
-        if (this.enableAttributes == null) {
-            throw new IllegalArgumentException("@EnableRateLimit is not present on importing class " + annotationMetadata.getClassName());
+        enableAttributes = AnnotationAttributes.fromMap(
+                annotationMetadata.getAnnotationAttributes(EnableRateLimit.class.getName(), false));
+        if (enableAttributes == null) {
+            throw new IllegalArgumentException(
+                    "@EnableRateLimit is not present on importing class " + annotationMetadata.getClassName());
         }
     }
 }
-

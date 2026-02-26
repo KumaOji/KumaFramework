@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitredisson.annotation;
 
 import java.lang.annotation.ElementType;
@@ -9,17 +22,43 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
-@Target(value={ElementType.METHOD})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * The interface Limit.
+ *
+ * @author livk
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Limit {
-    public String key() default "";
 
-    public int rateInterval();
+    /**
+     * 资源的key
+     * @return String string
+     */
+    String key() default "";
 
-    public TimeUnit rateIntervalUnit() default TimeUnit.SECONDS;
+    /**
+     * 单位时间
+     * @return int int
+     */
+    int rateInterval();
 
-    public int rate();
+    /**
+     * 单位(默认秒)
+     * @return TimeUnit time unit
+     */
+    TimeUnit rateIntervalUnit() default TimeUnit.SECONDS;
 
-    public boolean restrictIp() default false;
+    /**
+     * 单位时间产生的令牌个数
+     * @return int int
+     */
+    int rate();
+
+    /**
+     * 是否限制IP
+     * @return boolean boolean
+     */
+    boolean restrictIp() default false;
+
 }
-

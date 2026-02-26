@@ -1,35 +1,98 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.entity;
 
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.enums.AcquireModel;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.enums.LimiterModel;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.enums.RuleAuthority;
+
 import java.util.concurrent.TimeUnit;
 
-public class RateLimiterRule
-implements Comparable<RateLimiterRule> {
+/**
+ * 限流规则
+ */
+public class RateLimiterRule implements Comparable<RateLimiterRule> {
+    // APP
+    /**
+     * app name
+     */
     private String app = "Application";
+    /**
+     * 限流规则名称
+     */
     private String id = "id";
+    /**
+     * 相同的限流规则，不同的实例标识(不需要用户配置)
+     */
     private String name;
+
+    /**
+     * 是否关闭限流功能
+     */
     private boolean enable;
+
+    //QPS
+    /**
+     * 单位时间存放的令牌数
+     */
     private long limit;
-    private long period = 1L;
-    private long initialDelay = 0L;
+    /**
+     * 单位时间大小
+     */
+    private long period = 1;
+    /**
+     * 第一次放入令牌的延迟时间
+     */
+    private long initialDelay = 0;
+    /**
+     * 时间单位
+     */
     private TimeUnit unit = TimeUnit.SECONDS;
-    private long batch = 1L;
+
+    //get bucket
+    /**
+     * 每批次取多少个令牌
+     */
+    private long batch = 1;
+    /**
+     * 现有令牌数/批次令牌数<=? [0,1]
+     */
     private double remaining = 0.5;
-    private long monitor = 10L;
+
+    //Monitor
+    /**
+     * 监控时长，秒，0为关闭
+     */
+    private long monitor = 10;
+
+    //Select
+    /**
+     * 控制行为：快速失败/阻塞
+     */
     private AcquireModel acquireModel = AcquireModel.FAILFAST;
+    /**
+     * 部署方式（本地/分布式）
+     */
     private LimiterModel limiterModel = LimiterModel.POINT;
+    /**
+     * 黑名单/白名单/无
+     */
     private RuleAuthority ruleAuthority = RuleAuthority.NULL;
+    /**
+     * 黑白名单列表
+     */
     private String[] limitUser;
+
+    //System
+    /**
+     * APP-ID实例数(不需要用户配置)
+     */
     private int number;
+    /**
+     * 版本号(不需要用户配置)
+     */
     private long version;
 
     public String getApp() {
-        return this.app;
+        return app;
     }
 
     public void setApp(String app) {
@@ -37,7 +100,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public String getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(String id) {
@@ -45,7 +108,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public void setName(String name) {
@@ -53,7 +116,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public long getLimit() {
-        return this.limit;
+        return limit;
     }
 
     public void setLimit(long limit) {
@@ -61,7 +124,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public long getPeriod() {
-        return this.period;
+        return period;
     }
 
     public void setPeriod(long period) {
@@ -69,7 +132,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public long getInitialDelay() {
-        return this.initialDelay;
+        return initialDelay;
     }
 
     public void setInitialDelay(long initialDelay) {
@@ -77,7 +140,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public TimeUnit getUnit() {
-        return this.unit;
+        return unit;
     }
 
     public void setUnit(TimeUnit unit) {
@@ -85,7 +148,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public long getBatch() {
-        return this.batch;
+        return batch;
     }
 
     public void setBatch(long batch) {
@@ -93,7 +156,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public double getRemaining() {
-        return this.remaining;
+        return remaining;
     }
 
     public void setRemaining(double remaining) {
@@ -101,7 +164,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public long getMonitor() {
-        return this.monitor;
+        return monitor;
     }
 
     public void setMonitor(long monitor) {
@@ -109,7 +172,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public AcquireModel getAcquireModel() {
-        return this.acquireModel;
+        return acquireModel;
     }
 
     public void setAcquireModel(AcquireModel acquireModel) {
@@ -117,7 +180,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public LimiterModel getLimiterModel() {
-        return this.limiterModel;
+        return limiterModel;
     }
 
     public void setLimiterModel(LimiterModel limiterModel) {
@@ -125,7 +188,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public RuleAuthority getRuleAuthority() {
-        return this.ruleAuthority;
+        return ruleAuthority;
     }
 
     public void setRuleAuthority(RuleAuthority ruleAuthority) {
@@ -133,7 +196,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public String[] getLimitUser() {
-        return this.limitUser;
+        return limitUser;
     }
 
     public void setLimitUser(String[] limitUser) {
@@ -141,7 +204,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public int getNumber() {
-        return this.number;
+        return number;
     }
 
     public void setNumber(int number) {
@@ -149,7 +212,7 @@ implements Comparable<RateLimiterRule> {
     }
 
     public long getVersion() {
-        return this.version;
+        return version;
     }
 
     public void setVersion(long version) {
@@ -157,22 +220,22 @@ implements Comparable<RateLimiterRule> {
     }
 
     public boolean isEnable() {
-        return this.enable;
+        return enable;
     }
 
     public void setEnable(boolean enable) {
         this.enable = enable;
     }
 
+
     @Override
     public int compareTo(RateLimiterRule o) {
         if (this.version < o.getVersion()) {
             return -1;
-        }
-        if (this.version == o.getVersion()) {
+        } else if (this.version == o.getVersion()) {
             return 0;
         }
         return 1;
     }
-}
 
+}

@@ -1,10 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.lock.annotation;
 
 import com.kuma.boot.lock.enums.LockScopeEnum;
 import com.kuma.boot.lock.enums.LockTypeEnums;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -13,25 +27,63 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
-@Target(value={ElementType.TYPE, ElementType.METHOD})
-@Retention(value=RetentionPolicy.RUNTIME)
+/**
+ * 分布式锁
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:27:07
+ */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 public @interface Lock {
-    public String key();
 
-    public long waitTime() default 0L;
+    /**
+     * 锁的key
+     */
+    String key();
 
-    public long leaseTime() default -1L;
+    /**
+     * 获取锁的最大尝试时间(单位 {@code unit}) 该值大于0则使用 locker.tryLock 方法加锁，否则使用 locker.lock 方法
+     */
+    long waitTime() default 0;
 
-    public TimeUnit unit() default TimeUnit.SECONDS;
+    /**
+     * 加锁的时间(单位 {@code unit})，超过这个时间后锁便自动解锁； 如果leaseTime为-1，则保持锁定直到显式解锁
+     */
+    long leaseTime() default -1;
 
-    public boolean async() default false;
+    /**
+     * 参数的时间单位
+     */
+    TimeUnit unit() default TimeUnit.SECONDS;
 
-    public LockTypeEnums type() default LockTypeEnums.LOCK;
+    /**
+     * scope为{@link LockScopeEnum#STANDALONE_LOCK}
+     * async强制为false
+     *
+     * @return the boolean
+     */
+    boolean async() default false;
 
-    public LockScopeEnum scope();
+    /**
+     * Type lock type.
+     */
+    LockTypeEnums type() default LockTypeEnums.LOCK;
 
-    public boolean transactional() default false;
+    /**
+     * Scope lock scope.
+     *
+     * @return the lock scope
+     */
+    LockScopeEnum scope();
+
+    /**
+     * 需要添加 @transactional
+     *
+     * @return the lock scope
+     */
+    boolean transactional() default false;
 }
-

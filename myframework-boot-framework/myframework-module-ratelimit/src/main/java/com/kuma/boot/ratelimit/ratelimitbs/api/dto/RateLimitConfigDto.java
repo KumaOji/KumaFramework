@@ -1,21 +1,55 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitbs.api.dto;
 
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-public class RateLimitConfigDto
-implements Serializable {
+public class RateLimitConfigDto implements Serializable {
+
+    /**
+     * 每次访问消耗的令牌数
+     */
     private int permits;
+
+    /**
+     * 单位
+     */
     private TimeUnit timeUnit;
+
+    /**
+     * 时间间隔
+     */
     private long interval;
+
+    /**
+     * 次数
+     */
     private Long count;
+
+    /**
+     * 是否启用
+     *
+     * @since 1.1.0
+     */
     private boolean enable;
 
     public int getPermits() {
-        return this.permits;
+        return permits;
     }
 
     public void setPermits(int permits) {
@@ -23,7 +57,7 @@ implements Serializable {
     }
 
     public TimeUnit getTimeUnit() {
-        return this.timeUnit;
+        return timeUnit;
     }
 
     public void setTimeUnit(TimeUnit timeUnit) {
@@ -31,7 +65,7 @@ implements Serializable {
     }
 
     public long getInterval() {
-        return this.interval;
+        return interval;
     }
 
     public void setInterval(long interval) {
@@ -39,7 +73,7 @@ implements Serializable {
     }
 
     public Long getCount() {
-        return this.count;
+        return count;
     }
 
     public void setCount(Long count) {
@@ -47,15 +81,20 @@ implements Serializable {
     }
 
     public boolean isEnable() {
-        return this.enable;
+        return enable;
     }
 
     public void setEnable(boolean enable) {
         this.enable = enable;
     }
 
+    @Override
     public String toString() {
-        return "RateLimitConfigDto{permits=" + this.permits + ", timeUnit=" + String.valueOf((Object)this.timeUnit) + ", interval=" + this.interval + ", count=" + this.count + ", enable=" + this.enable + "}";
+        return "RateLimitConfigDto{" + "permits="
+                + permits + ", timeUnit="
+                + timeUnit + ", interval="
+                + interval + ", count="
+                + count + ", enable="
+                + enable + '}';
     }
 }
-

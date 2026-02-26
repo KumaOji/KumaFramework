@@ -1,31 +1,60 @@
 /*
- *  com.kuma.boot.common.utils.servlet.RequestUtils
- *  jakarta.servlet.http.HttpServletRequest
+ * Copyright 2021-2024 spring-boot-extension the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitredisson.executor;
 
 import com.kuma.boot.common.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitredisson.LimitExecutor;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.time.Duration;
 
-public abstract class ReentrantLimitExecutor
-implements LimitExecutor {
+/**
+ * The type Reentrant limit executor.
+ *
+ * @author livk
+ */
+public abstract class ReentrantLimitExecutor implements LimitExecutor {
+
+    /**
+     * The constant ATTRIBUTE_NAME.
+     */
     public static final String ATTRIBUTE_NAME = "limit";
 
-    protected abstract boolean reentrantTryAccess(String var1, int var2, Duration var3);
+    /**
+     * 同一个request仅只被限流一次 在给定的时间段里最多的访问限制次数(超出次数返回false)；等下个时间段开始，才允许再次被访问(返回true)，周而复始
+     * @param compositeKey 资源Key
+     * @param rate 最多的访问限制次数
+     * @param rateInterval 给定的时间段(单位秒)
+     * @return boolean
+     */
+    protected abstract boolean reentrantTryAccess(String compositeKey, int rate, Duration rateInterval);
 
     @Override
     public boolean tryAccess(String compositeKey, int rate, Duration rateInterval) {
-        Boolean bool;
         HttpServletRequest request = RequestUtils.getRequest();
         Object limitAttribute = request.getAttribute(ATTRIBUTE_NAME);
-        if (limitAttribute instanceof Boolean && (bool = (Boolean)limitAttribute).booleanValue()) {
+        if (limitAttribute instanceof Boolean bool && bool) {
             return true;
         }
-        boolean bool2 = this.reentrantTryAccess(compositeKey, rate, rateInterval);
-        request.setAttribute(ATTRIBUTE_NAME, (Object)bool2);
-        return bool2;
+        else {
+            boolean bool = reentrantTryAccess(compositeKey, rate, rateInterval);
+            request.setAttribute(ATTRIBUTE_NAME, bool);
+            return bool;
+        }
     }
-}
 
+}

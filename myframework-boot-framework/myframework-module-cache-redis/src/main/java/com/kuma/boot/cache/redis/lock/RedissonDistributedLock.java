@@ -16,6 +16,10 @@
 
 package com.kuma.boot.cache.redis.lock;
 
+import com.kuma.boot.lock.enums.LockScopeEnum;
+import com.kuma.boot.lock.enums.LockTypeEnums;
+import com.kuma.boot.lock.exception.LockException;
+import com.kuma.boot.lock.exception.UnSupportLockException;
 import com.kuma.boot.lock.support.DistributedLock;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.RLock;
@@ -36,10 +40,15 @@ public class RedissonDistributedLock implements DistributedLock {
     }
 
     @Override
-    public boolean tryLock(String key, long time, TimeUnit unit) {
-        RLock lock = redissonClient.getLock(key);
+    public boolean tryLock(LockTypeEnums type, String key, long leaseTime, long waitTime, TimeUnit unit, boolean async) {
+        if (async) {
+            throw new UnSupportLockException("Async lock of RedissonDistributedLock is not supported");
+        }
+        RLock lock = getLock(type, key);
         try {
-            boolean acquired = lock.tryLock(0, time, unit);
+            long wt = waitTime < 0 ? 0 : waitTime;
+            long lt = leaseTime < 0 ? -1 : leaseTime;
+            boolean acquired = lock.tryLock(wt, lt, unit);
             if (acquired) {
                 currentLock.set(lock);
             }
@@ -48,6 +57,35 @@ public class RedissonDistributedLock implements DistributedLock {
             Thread.currentThread().interrupt();
             return false;
         }
+    }
+
+    @Override
+    public void lock(LockTypeEnums type, String key, long leaseTime, TimeUnit unit, boolean async) {
+        if (async) {
+            throw new UnSupportLockException("Async lock of RedissonDistributedLock is not supported");
+        }
+        RLock lock = getLock(type, key);
+        try {
+            if (leaseTime < 0 || unit == null) {
+                lock.lock();
+            } else {
+                lock.lock(leaseTime, unit);
+            }
+            currentLock.set(lock);
+        } catch (Exception e) {
+            currentLock.remove();
+            throw new LockException(e);
+        }
+    }
+
+    private RLock getLock(LockTypeEnums type, String key) {
+        return switch (type) {
+            case LOCK -> redissonClient.getLock(key);
+            case FAIR -> redissonClient.getFairLock(key);
+            case READ -> redissonClient.getReadWriteLock(key).readLock();
+            case WRITE -> redissonClient.getReadWriteLock(key).writeLock();
+            default -> redissonClient.getLock(key);
+        };
     }
 
     @Override
@@ -62,5 +100,10 @@ public class RedissonDistributedLock implements DistributedLock {
                 currentLock.remove();
             }
         }
+    }
+
+    @Override
+    public LockScopeEnum scope() {
+        return LockScopeEnum.DISTRIBUTED_LOCK;
     }
 }

@@ -1,18 +1,36 @@
 /*
- *  org.redisson.api.RLock
- *  org.redisson.api.RedissonClient
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.lock.support.redisson;
 
 import com.kuma.boot.lock.enums.LockScopeEnum;
 import com.kuma.boot.lock.enums.LockTypeEnums;
 import com.kuma.boot.lock.support.AbstractLockSupport;
-import java.util.concurrent.TimeUnit;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
-public class RedissonLock
-extends AbstractLockSupport<RLock> {
+import java.util.concurrent.TimeUnit;
+
+/**
+ * <p>
+ * RedissonLock
+ * </p>
+ */
+public class RedissonLock extends AbstractLockSupport<RLock> {
+
     private final RedissonClient redissonClient;
 
     public RedissonLock(RedissonClient redissonClient) {
@@ -22,11 +40,10 @@ extends AbstractLockSupport<RLock> {
     @Override
     protected RLock getLock(LockTypeEnums type, String key) {
         return switch (type) {
-            default -> throw new MatchException(null, null);
-            case LockTypeEnums.LOCK -> this.redissonClient.getLock(key);
-            case LockTypeEnums.FAIR -> this.redissonClient.getFairLock(key);
-            case LockTypeEnums.READ -> this.redissonClient.getReadWriteLock(key).readLock();
-            case LockTypeEnums.WRITE -> this.redissonClient.getReadWriteLock(key).writeLock();
+            case LOCK -> redissonClient.getLock(key);
+            case FAIR -> redissonClient.getFairLock(key);
+            case READ -> redissonClient.getReadWriteLock(key).readLock();
+            case WRITE -> redissonClient.getReadWriteLock(key).writeLock();
         };
     }
 
@@ -42,7 +59,7 @@ extends AbstractLockSupport<RLock> {
 
     @Override
     protected boolean tryLockAsync(RLock lock, long leaseTime, long waitTime, TimeUnit unit) throws Exception {
-        return (Boolean)lock.tryLockAsync(waitTime, leaseTime, unit).get();
+        return lock.tryLockAsync(waitTime, leaseTime, unit).get();
     }
 
     @Override
@@ -68,7 +85,6 @@ extends AbstractLockSupport<RLock> {
     @Override
     protected boolean unlock(String key, RLock lock) {
         lock.unlock();
-        return !this.isLocked(lock);
+        return !isLocked(lock);
     }
 }
-

@@ -1,11 +1,10 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.common;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ */
 public class DateTimeUtil {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -24,4 +23,3 @@ public class DateTimeUtil {
         return LocalDateTime.parse(substring, formatter);
     }
 }
-

@@ -1,117 +1,154 @@
 /*
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.exception.LockException
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.aspectj.lang.ProceedingJoinPoint
- *  org.aspectj.lang.annotation.Around
- *  org.aspectj.lang.annotation.Aspect
- *  org.aspectj.lang.reflect.MethodSignature
- *  org.springframework.beans.factory.ObjectProvider
- *  org.springframework.core.DefaultParameterNameDiscoverer
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.expression.Expression
- *  org.springframework.expression.spel.standard.SpelExpressionParser
- *  org.springframework.expression.spel.support.StandardEvaluationContext
- *  org.springframework.transaction.support.TransactionSynchronization
- *  org.springframework.transaction.support.TransactionSynchronizationManager
- *  org.springframework.util.Assert
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.lock.aop;
 
-import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.common.exception.LockException;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.lock.annotation.Lock;
 import com.kuma.boot.lock.enums.LockScopeEnum;
 import com.kuma.boot.lock.exception.UnSupportLockException;
 import com.kuma.boot.lock.support.DistributedLock;
-import java.util.Objects;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+import org.springframework.transaction.support.TransactionSynchronization;
+/**
+ * 分布式锁切面
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:27:36
+ */
 @Aspect
 public class LockAop {
+
+    /**
+     * lock的实现类集合
+     */
     private final ObjectProvider<DistributedLock> distributedLockProvider;
+
+    /**
+     * 用于SpEL表达式解析.
+     */
     private final SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
+
+    /**
+     * 用于获取方法参数定义名字.
+     */
     private final DefaultParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 
     public LockAop(ObjectProvider<DistributedLock> distributedLockProvider) {
         this.distributedLockProvider = distributedLockProvider;
     }
 
-    @Around(value="@within(onLock) || @annotation(onLock)")
+    @Around("@within(onLock) || @annotation(onLock)")
     public Object aroundLock(ProceedingJoinPoint point, Lock onLock) throws Throwable {
-        Assert.notNull((Object)onLock, (String)"lock is null");
+        Assert.notNull(onLock, "lock is null");
         LockScopeEnum scope = onLock.scope();
-        final DistributedLock distributedLock = this.distributedLockProvider.orderedStream().filter(lock -> lock.scope().equals((Object)scope)).findFirst().orElseThrow(() -> new UnSupportLockException("\u7f3a\u5c11scope\uff1a" + String.valueOf((Object)scope) + "\u7684\u9501\u5b9e\u73b0"));
+        DistributedLock distributedLock = distributedLockProvider
+                .orderedStream()
+                .filter(lock -> lock.scope().equals(scope))
+                .findFirst()
+                .orElseThrow(() -> new UnSupportLockException("缺少scope：" + scope + "的锁实现"));
+
         String lockKey = onLock.key();
-        if (StrUtil.isEmpty((CharSequence)lockKey)) {
+        if (StrUtil.isEmpty(lockKey)) {
             throw new LockException("lockKey is null");
         }
+
         if (lockKey.contains("#")) {
-            MethodSignature methodSignature = (MethodSignature)point.getSignature();
+            MethodSignature methodSignature = (MethodSignature) point.getSignature();
             Object[] args = point.getArgs();
-            lockKey = this.getValBySpEl(lockKey, methodSignature, args);
+            lockKey = getValBySpEl(lockKey, methodSignature, args);
         }
-        boolean async = !LockScopeEnum.STANDALONE_LOCK.equals((Object)scope) && onLock.async();
-        boolean isLock = distributedLock.tryLock(onLock.type(), lockKey, onLock.leaseTime(), onLock.waitTime(), onLock.unit(), async);
+
+        boolean async = !LockScopeEnum.STANDALONE_LOCK.equals(scope) && onLock.async();
+        boolean isLock = distributedLock.tryLock(
+                onLock.type(), lockKey, onLock.leaseTime(), onLock.waitTime(), onLock.unit(), async);
+
         try {
             if (isLock) {
-                LogUtils.info((String)"\u83b7\u53d6\u9501[\u6210\u529f]\uff0c\u52a0\u9501\u5b8c\u6210\uff0c\u5f00\u59cb\u6267\u884c\u4e1a\u52a1\u903b\u8f91...", (Object[])new Object[0]);
-                if (onLock.transactional()) {
-                    TransactionSynchronizationManager.registerSynchronization((TransactionSynchronization)new TransactionSynchronization(){
-                        {
-                            Objects.requireNonNull(this$0);
-                        }
+                LogUtils.info("获取锁[成功]，加锁完成，开始执行业务逻辑...");
 
+                if(onLock.transactional()){
+                    // 注册事务同步回调，在事务提交后释放锁
+                    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
                         public void afterCommit() {
                             distributedLock.unlock();
-                            LogUtils.info((String)"abandon lock after commit", (Object[])new Object[0]);
+                            LogUtils.info("abandon lock after commit");
                         }
 
+                        @Override
                         public void afterCompletion(int status) {
-                            if (status != 0) {
+                            if (status != STATUS_COMMITTED) {
                                 distributedLock.unlock();
-                                LogUtils.info((String)"abandon lock after completion", (Object[])new Object[0]);
+                                LogUtils.info("abandon lock after completion");
                             }
                         }
                     });
                 }
-                Object object = point.proceed();
-                return object;
+
+                return point.proceed();
             }
-            LogUtils.error((String)"\u83b7\u53d6\u5206\u5e03\u5f0f\u9501[\u5931\u8d25]", (Object[])new Object[0]);
-            throw new LockException("\u83b7\u53d6\u9501\u5931\u8d25!");
-        }
-        finally {
+
+            LogUtils.error("获取分布式锁[失败]");
+            throw new LockException("获取锁失败!");
+        } finally {
             if (isLock) {
                 distributedLock.unlock();
             }
         }
     }
 
+    /**
+     * 解析spEL表达式
+     *
+     * @param spEl            spEl
+     * @param methodSignature 方法签名
+     * @param args            参数
+     * @return 表达式值
+     * @since 2021-09-02 20:28:11
+     */
     private String getValBySpEl(String spEl, MethodSignature methodSignature, Object[] args) {
-        String[] paramNames = this.nameDiscoverer.getParameterNames(methodSignature.getMethod());
+        // 获取方法形参名数组
+        String[] paramNames = nameDiscoverer.getParameterNames(methodSignature.getMethod());
         if (paramNames != null && paramNames.length > 0) {
-            Expression expression = this.spelExpressionParser.parseExpression(spEl);
-            StandardEvaluationContext context = new StandardEvaluationContext();
-            for (int i = 0; i < args.length; ++i) {
+            Expression expression = spelExpressionParser.parseExpression(spEl);
+            // spring的表达式上下文对象
+            EvaluationContext context = new StandardEvaluationContext();
+            // 给上下文赋值
+            for (int i = 0; i < args.length; i++) {
                 context.setVariable(paramNames[i], args[i]);
             }
-            return Objects.requireNonNull(expression.getValue((EvaluationContext)context)).toString();
+            return Objects.requireNonNull(expression.getValue(context)).toString();
         }
         return null;
     }
 }
-

@@ -1,160 +1,208 @@
-/*
- *  com.alibaba.fastjson2.JSON
- *  com.kuma.boot.common.utils.log.LogUtils
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.core.limiter;
 
 import com.alibaba.fastjson2.JSON;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.entity.RateLimiterRule;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.enums.LimiterModel;
-import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.enums.RuleAuthority;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.core.config.RateLimiterConfig;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.core.monitor.MonitorServiceImpl;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.client.MonitorService;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.entity.MonitorBean;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-public class RateLimiterDefault
-implements RateLimiter {
-    private final AtomicLong bucket = new AtomicLong(0L);
+/**
+ * 令牌桶算法、漏桶算法
+ * 单点、无锁、纳秒级流控
+ * 分布式、无锁、秒级流控
+ */
+public class RateLimiterDefault implements com.kuma.boot.ratelimit.ratelimitsnowjean.core.limiter.RateLimiter {
+    private final AtomicLong bucket = new AtomicLong(0); //令牌桶初始容量：0
     private RateLimiterRule rule;
     private RateLimiterConfig config;
     private ScheduledFuture<?> scheduledFuture;
-    private MonitorService monitorService = new MonitorServiceImpl();
 
     @Override
     public MonitorService getMonitorService() {
-        return this.monitorService;
+        return monitorService;
     }
+
+    private MonitorService monitorService = new MonitorServiceImpl();
 
     RateLimiterDefault(RateLimiterRule rule, RateLimiterConfig config) {
         this.config = config;
-        this.init(rule);
+        init(rule);
     }
 
     @Override
     public void init(RateLimiterRule rule) {
         this.rule = rule;
-        this.putPointBucket();
+        putPointBucket();
     }
 
+    /**
+     * 1.黑/白名单
+     */
     @Override
     public boolean tryAcquire(String o) {
-        return (switch (this.rule.getRuleAuthority()) {
-            case RuleAuthority.AUTHORITY_BLACK -> Stream.of(this.rule.getLimitUser()).noneMatch(s -> s.equals(o));
-            case RuleAuthority.AUTHORITY_WHITE -> Arrays.asList(this.rule.getLimitUser()).contains(o);
-            default -> true;
-        }) && this.tryAcquire();
+        boolean allow;
+        switch (rule.getRuleAuthority()) {
+            case AUTHORITY_BLACK:
+                allow = Stream.of(rule.getLimitUser()).noneMatch(s -> s.equals(o));
+                break;
+            case AUTHORITY_WHITE:
+                allow = Arrays.asList(rule.getLimitUser()).contains(o);
+                break;
+            default:
+                allow = true;
+        }
+        return allow && tryAcquire();
     }
 
+    /**
+     * 2.Check
+     */
     @Override
     public boolean tryAcquire() {
-        if (this.rule.isEnable()) {
+        if (rule.isEnable()) {
+            //限流功能已关闭
             return true;
         }
-        return this.tryAcquireMonitor();
+        return tryAcquireMonitor();
     }
 
+
+    /**
+     * 3.Monitor
+     */
     private boolean tryAcquireMonitor() {
-        if (this.rule.getLimiterModel() == LimiterModel.POINT) {
-            return this.tryAcquirePut();
+        if (rule.getLimiterModel() == LimiterModel.POINT) {
+            //本地限流不支持监控
+            return tryAcquirePut();
         }
         MonitorBean monitor = new MonitorBean();
         monitor.setLocalDateTime(LocalDateTime.now());
         monitor.setPre(1);
-        monitor.setApp(this.rule.getApp());
-        monitor.setId(this.rule.getId());
-        monitor.setName(this.rule.getName());
-        monitor.setMonitor(this.rule.getMonitor());
-        boolean b = this.tryAcquirePut();
+        monitor.setApp(rule.getApp());
+        monitor.setId(rule.getId());
+        monitor.setName(rule.getName());
+        monitor.setMonitor(rule.getMonitor());
+        boolean b = tryAcquirePut(); //fact
         if (b) {
             monitor.setAfter(1);
         }
-        this.config.getScheduledThreadExecutor().execute(() -> this.monitorService.save(monitor));
+        config.getScheduledThreadExecutor().execute(() -> { //异步执行
+            monitorService.save(monitor);
+        });
         return b;
     }
 
+    /**
+     * 4.putCloudBucket
+     */
     private boolean tryAcquirePut() {
-        boolean result = this.tryAcquireFact();
-        this.putCloudBucket();
+        boolean result = tryAcquireFact();
+        //分布式方式下检查剩余令牌数
+        putCloudBucket();
         return result;
     }
 
+    /**
+     * 5.tryAcquireFact
+     */
     private boolean tryAcquireFact() {
-        if (this.rule.getLimit() == 0L) {
+        if (rule.getLimit() == 0) {
             return false;
         }
         boolean result = false;
-        switch (this.rule.getAcquireModel()) {
-            case FAILFAST: {
-                result = this.tryAcquireFailed();
+        switch (rule.getAcquireModel()) {
+            case FAILFAST:
+                result = tryAcquireFailed();
                 break;
-            }
-            case BLOCKING: {
-                result = this.tryAcquireSucceed();
-            }
+            case BLOCKING:
+                result = tryAcquireSucceed();
+                break;
         }
         return result;
     }
 
+    /**
+     * CAS获取令牌,没有令牌立即失败
+     */
     private boolean tryAcquireFailed() {
-        long l = this.bucket.longValue();
-        while (l > 0L) {
-            if (this.bucket.compareAndSet(l, l - 1L)) {
+        long l = bucket.longValue();
+        while (l > 0) {
+            if (bucket.compareAndSet(l, l - 1)) {
                 return true;
             }
-            l = this.bucket.longValue();
+            l = bucket.longValue();
         }
         return false;
     }
 
+    /**
+     * CAS获取令牌,阻塞直到成功
+     */
     private boolean tryAcquireSucceed() {
-        long l = this.bucket.longValue();
-        while (l <= 0L || !this.bucket.compareAndSet(l, l - 1L)) {
-            this.sleep();
-            l = this.bucket.longValue();
+        long l = bucket.longValue();
+        while (!(l > 0 && bucket.compareAndSet(l, l - 1))) {
+            sleep();
+            l = bucket.longValue();
         }
         return true;
     }
 
+    /**
+     * 线程休眠
+     */
     private void sleep() {
-        if (this.rule.getUnit().toMillis(this.rule.getPeriod()) < 1L) {
+        //大于1ms强制休眠
+        if (rule.getUnit().toMillis(rule.getPeriod()) < 1) {
             return;
         }
         try {
-            Thread.sleep(this.rule.getUnit().toMillis(this.rule.getPeriod()));
-        }
-        catch (InterruptedException e) {
-            LogUtils.error((Throwable)e);
+            Thread.sleep(rule.getUnit().toMillis(rule.getPeriod()));
+        } catch (InterruptedException e) {
+            LogUtils.error(e);
         }
     }
 
+    /**
+     * 本地限流，放入令牌
+     */
     private void putPointBucket() {
         if (this.scheduledFuture != null) {
             this.scheduledFuture.cancel(true);
         }
-        if (this.rule.getLimit() == 0L || !this.rule.getLimiterModel().equals((Object)LimiterModel.POINT)) {
+        if (rule.getLimit() == 0 || !rule.getLimiterModel().equals(LimiterModel.POINT)) {
             return;
         }
-        this.scheduledFuture = this.config.getScheduledThreadExecutor().scheduleAtFixedRate(() -> this.bucket.set(this.rule.getLimit()), this.rule.getInitialDelay(), this.rule.getPeriod(), this.rule.getUnit());
+        this.scheduledFuture = config.getScheduledThreadExecutor().scheduleAtFixedRate(() -> bucket.set(rule.getLimit()), rule.getInitialDelay(), rule.getPeriod(), rule.getUnit());
     }
 
+    /**
+     * 集群限流，取批令牌
+     */
     private void putCloudBucket() {
-        if (!this.rule.getLimiterModel().equals((Object)LimiterModel.CLOUD) || (double)this.bucket.get() / 1.0 * (double)this.rule.getBatch() > this.rule.getRemaining()) {
+        //校验
+        if (!rule.getLimiterModel().equals(LimiterModel.CLOUD) ||
+                bucket.get() / 1.0 * rule.getBatch() > rule.getRemaining()) {
             return;
         }
-        this.config.getScheduledThreadExecutor().execute(() -> {
-            if ((double)this.bucket.get() / 1.0 * (double)this.rule.getBatch() <= this.rule.getRemaining()) {
-                AtomicLong atomicLong = this.bucket;
-                synchronized (atomicLong) {
-                    String result;
-                    if ((double)this.bucket.get() / 1.0 * (double)this.rule.getBatch() <= this.rule.getRemaining() && (result = this.config.getTicketServer().connect(RateLimiterConfig.http_token, JSON.toJSONString((Object)this.rule))) != null) {
-                        this.bucket.getAndAdd(Long.parseLong(result));
+        //异步任务
+        config.getScheduledThreadExecutor().execute(() -> {
+            //DCL,再次校验
+            if (bucket.get() / 1.0 * rule.getBatch() <= rule.getRemaining()) {
+                synchronized (bucket) {
+                    if (bucket.get() / 1.0 * rule.getBatch() <= rule.getRemaining()) {
+                        String result = config.getTicketServer().connect(RateLimiterConfig.http_token, JSON.toJSONString(rule));
+                        if (result != null) {
+                            bucket.getAndAdd(Long.parseLong(result));
+                        }
                     }
                 }
             }
@@ -163,12 +211,13 @@ implements RateLimiter {
 
     @Override
     public String getId() {
-        return this.rule.getId();
+        return rule.getId();
     }
 
     @Override
     public RateLimiterRule getRule() {
         return this.rule;
     }
-}
 
+
+}

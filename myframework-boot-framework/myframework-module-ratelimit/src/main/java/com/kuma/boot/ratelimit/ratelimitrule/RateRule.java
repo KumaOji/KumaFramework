@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.ratelimit.ratelimitrule;
 
 import java.lang.annotation.Documented;
@@ -11,15 +8,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
-@Target(value={ElementType.ANNOTATION_TYPE})
-@Retention(value=RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 public @interface RateRule {
-    public long limit() default 10L;
 
-    public long timeDuration() default 60L;
+    /**
+     * 限流次数
+     */
+    long limit() default 10;
 
-    public TimeUnit timeUnit() default TimeUnit.SECONDS;
+    /**
+     * 限流时间
+     */
+    long timeDuration() default 60;
+
+    /**
+     * 限流时间单位
+     */
+    TimeUnit timeUnit() default TimeUnit.SECONDS;
+
 }
-

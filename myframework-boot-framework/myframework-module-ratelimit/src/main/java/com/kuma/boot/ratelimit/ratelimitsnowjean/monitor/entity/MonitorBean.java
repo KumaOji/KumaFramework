@@ -1,14 +1,13 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.entity;
 
 import com.kuma.boot.ratelimit.ratelimitsnowjean.monitor.common.DateTimeUtil;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class MonitorBean
-implements Comparable<MonitorBean> {
+/**
+ */
+public class MonitorBean implements Comparable<MonitorBean> {
     private String app;
     private String id;
     private String name;
@@ -27,11 +26,11 @@ implements Comparable<MonitorBean> {
     }
 
     public LocalDateTime getLocalDateTime() {
-        return this.localDateTime;
+        return localDateTime;
     }
 
     public long getMonitor() {
-        return this.monitor;
+        return monitor;
     }
 
     public void setMonitor(long monitor) {
@@ -47,8 +46,9 @@ implements Comparable<MonitorBean> {
         return this.getLocalDateTime().compareTo(o.getLocalDateTime());
     }
 
+
     public String getApp() {
-        return this.app;
+        return app;
     }
 
     public void setApp(String app) {
@@ -56,7 +56,7 @@ implements Comparable<MonitorBean> {
     }
 
     public String getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(String id) {
@@ -64,7 +64,7 @@ implements Comparable<MonitorBean> {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public void setName(String name) {
@@ -72,7 +72,7 @@ implements Comparable<MonitorBean> {
     }
 
     public int getPre() {
-        return this.pre;
+        return pre;
     }
 
     public void setPre(int pre) {
@@ -80,27 +80,28 @@ implements Comparable<MonitorBean> {
     }
 
     public int getAfter() {
-        return this.after;
+        return after;
     }
 
     public void setAfter(int after) {
         this.after = after;
     }
 
+
     public String getTime() {
-        return this.localDateTime != null ? this.localDateTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) : "";
+        return localDateTime != null ? localDateTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) : "";
     }
 
     public String getDateTime() {
-        return DateTimeUtil.toString(this.localDateTime);
+        return DateTimeUtil.toString(localDateTime);
     }
 
     public void setTime(String time) {
         this.time = time;
     }
 
+
     public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
     }
 }
-

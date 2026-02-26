@@ -1,19 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitredis;
 
 import java.util.concurrent.TimeUnit;
 
-public class RateLimiterException
-extends RuntimeException {
+/**
+ * 限流异常
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:01:42
+ */
+public class RateLimiterException extends RuntimeException {
+
     private final String key;
     private final long max;
     private final long ttl;
     private final TimeUnit timeUnit;
 
     public RateLimiterException(String key, long max, long ttl, TimeUnit timeUnit) {
-        super(String.format("\u60a8\u7684\u8bbf\u95ee\u6b21\u6570\u5df2\u8d85\u9650\uff1a%s\uff0c\u901f\u7387\uff1a%d/%ds", key, max, timeUnit.toSeconds(ttl)));
+        super(String.format("您的访问次数已超限：%s，速率：%d/%ds", key, max, timeUnit.toSeconds(ttl)));
         this.key = key;
         this.max = max;
         this.ttl = ttl;
@@ -21,19 +41,18 @@ extends RuntimeException {
     }
 
     public String getKey() {
-        return this.key;
+        return key;
     }
 
     public long getMax() {
-        return this.max;
+        return max;
     }
 
     public long getTtl() {
-        return this.ttl;
+        return ttl;
     }
 
     public TimeUnit getTimeUnit() {
-        return this.timeUnit;
+        return timeUnit;
     }
 }
-

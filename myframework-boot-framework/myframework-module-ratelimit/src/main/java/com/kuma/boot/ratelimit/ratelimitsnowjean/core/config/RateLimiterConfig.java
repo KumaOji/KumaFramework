@@ -1,56 +1,50 @@
-/*
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.core.config;
 
 import com.kuma.boot.ratelimit.ratelimitsnowjean.core.exception.SnowJeanException;
 import com.kuma.boot.ratelimit.ratelimitsnowjean.core.ticket.TicketServer;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.concurrent.*;
+
+/**
+ * 单例模式
+ * DCL双检查锁
+ */
 public class RateLimiterConfig {
-    private static volatile RateLimiterConfig rateLimiterConfig;
-    private static Logger logger;
-    private TicketServer ticketServer;
-    private ScheduledExecutorService scheduledThreadExecutor;
-    public static String http_monitor;
-    public static String http_heart;
-    public static String http_token;
+    private static volatile RateLimiterConfig rateLimiterConfig; //单例
+    private static Logger logger = LoggerFactory.getLogger(RateLimiterConfig.class);
+
+    private TicketServer ticketServer; //发票服务器
+    private ScheduledExecutorService scheduledThreadExecutor; //调度线程池
+
+    //Ticket server interface
+    public static String http_monitor = "monitor";
+    public static String http_heart = "heart";
+    public static String http_token = "token";
 
     private RateLimiterConfig() {
+        //禁止new实例
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
     public static RateLimiterConfig getInstance() {
-        if (rateLimiterConfig != null) return rateLimiterConfig;
-        Class<RateLimiterConfig> clazz = RateLimiterConfig.class;
-        synchronized (RateLimiterConfig.class) {
-            if (rateLimiterConfig != null) return rateLimiterConfig;
-            rateLimiterConfig = new RateLimiterConfig();
-            logger.info("Starting [SnowJean]");
-            // ** MonitorExit[var0] (shouldn't be in output)
-            return rateLimiterConfig;
+        if (rateLimiterConfig == null) {
+            synchronized (RateLimiterConfig.class) {
+                if (rateLimiterConfig == null) {
+                    rateLimiterConfig = new RateLimiterConfig();
+                    logger.info("Starting [SnowJean]");
+                }
+            }
         }
+        return rateLimiterConfig;
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public ScheduledExecutorService getScheduledThreadExecutor() {
         if (this.scheduledThreadExecutor == null) {
-            RateLimiterConfig rateLimiterConfig = this;
-            synchronized (rateLimiterConfig) {
+            synchronized (this) {
                 if (this.scheduledThreadExecutor == null) {
-                    this.setScheduledThreadExecutor(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() * 2, new ThreadPoolExecutor.DiscardOldestPolicy()));
+                    setScheduledThreadExecutor(new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors() * 2, new ThreadPoolExecutor.DiscardOldestPolicy()));
                 }
             }
         }
@@ -62,22 +56,18 @@ public class RateLimiterConfig {
     }
 
     public TicketServer getTicketServer() {
-        if (this.ticketServer == null) {
+        if (ticketServer == null) {
             throw new SnowJeanException("error: ticketServer == null");
         }
-        return this.ticketServer;
+        return ticketServer;
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public void setTicketServer(Map<String, Integer> ip) {
         if (ip.size() < 1) {
             throw new SnowJeanException("ip.size()<1 is not pass!");
         }
         if (this.ticketServer == null) {
-            RateLimiterConfig rateLimiterConfig = this;
-            synchronized (rateLimiterConfig) {
+            synchronized (this) {
                 if (this.ticketServer == null) {
                     this.ticketServer = new TicketServer();
                 }
@@ -86,11 +76,4 @@ public class RateLimiterConfig {
         this.ticketServer.setServer(ip);
     }
 
-    static {
-        logger = LoggerFactory.getLogger(RateLimiterConfig.class);
-        http_monitor = "monitor";
-        http_heart = "heart";
-        http_token = "token";
-    }
 }
-

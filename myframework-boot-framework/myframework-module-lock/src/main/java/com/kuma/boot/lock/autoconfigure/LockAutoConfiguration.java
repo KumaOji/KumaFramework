@@ -1,19 +1,22 @@
 /*
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.apache.curator.framework.CuratorFramework
- *  org.redisson.api.RedissonClient
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.ObjectProvider
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.lock.autoconfigure;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.lock.aop.LockAop;
 import com.kuma.boot.lock.autoconfigure.properties.LockProperties;
@@ -33,35 +36,39 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * RedisLockAutoConfiguration
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-07 21:17:02
+ */
 @AutoConfiguration
-@EnableConfigurationProperties(value={LockProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.lock", name={"enabled"}, havingValue="true")
-public class LockAutoConfiguration
-implements InitializingBean {
-    public void afterPropertiesSet() throws Exception {
-        LogUtils.started(LockAutoConfiguration.class, (String)"kuma-boot-starter-lock", (String[])new String[0]);
-    }
+@EnableConfigurationProperties({LockProperties.class})
+@ConditionalOnProperty(prefix = LockProperties.PREFIX, name = "enabled", havingValue = "true")
+public class LockAutoConfiguration implements InitializingBean {
 
-    @Bean
-    public LockAop distributedLockAop(ObjectProvider<DistributedLock> distributedLockProvider) {
-        return new LockAop(distributedLockProvider);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        LogUtils.started(LockAutoConfiguration.class, StarterNameConstants.LOCK_STARTER);
     }
 
     @Configuration
-    @ConditionalOnBean(value={CuratorFramework.class})
-    @ConditionalOnProperty(prefix="kuma.boot.lock", name={"type"}, havingValue="zookeeper")
-    public static class ZookeeperLockAutoConfiguration {
+    @ConditionalOnProperty(prefix = LockProperties.PREFIX, name = "type", havingValue = "local")
+    public static class LocalLockAutoConfiguration {
+
         @Bean
         @ConditionalOnMissingBean
-        public DistributedLock curatorDistributedLock(CuratorFramework curatorFramework) {
-            return new CuratorLock(curatorFramework);
+        public DistributedLock localDistributedLock() {
+            return new LocalLock();
         }
     }
 
     @Configuration
-    @ConditionalOnBean(value={RedissonClient.class})
-    @ConditionalOnProperty(prefix="kuma.boot.lock", name={"type"}, havingValue="redis")
+    @ConditionalOnBean(RedissonClient.class)
+    @ConditionalOnProperty(prefix = LockProperties.PREFIX, name = "type", havingValue = "redis")
     public static class RedisLockAutoConfiguration {
+
         @Bean
         @ConditionalOnMissingBean
         public DistributedLock redissonDistributedLock(RedissonClient redissonClient) {
@@ -70,13 +77,19 @@ implements InitializingBean {
     }
 
     @Configuration
-    @ConditionalOnProperty(prefix="kuma.boot.lock", name={"type"}, havingValue="local")
-    public static class LocalLockAutoConfiguration {
+    @ConditionalOnBean(CuratorFramework.class)
+    @ConditionalOnProperty(prefix = LockProperties.PREFIX, name = "type", havingValue = "zookeeper")
+    public static class ZookeeperLockAutoConfiguration {
+
         @Bean
         @ConditionalOnMissingBean
-        public DistributedLock localDistributedLock() {
-            return new LocalLock();
+        public DistributedLock curatorDistributedLock(CuratorFramework curatorFramework) {
+            return new CuratorLock(curatorFramework);
         }
     }
-}
 
+    @Bean
+    public LockAop distributedLockAop(ObjectProvider<DistributedLock> distributedLockProvider) {
+        return new LockAop(distributedLockProvider);
+    }
+}

@@ -1,26 +1,23 @@
 /*
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.redisson.api.RedissonClient
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.context.annotation.Bean
- *  org.springframework.core.env.Environment
- *  org.springframework.core.io.ClassPathResource
- *  org.springframework.core.io.Resource
- *  org.springframework.data.redis.core.StringRedisTemplate
- *  org.springframework.data.redis.core.script.DefaultRedisScript
- *  org.springframework.data.redis.core.script.RedisScript
- *  org.springframework.scripting.ScriptSource
- *  org.springframework.scripting.support.ResourceScriptSource
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.ratelimit.ratelimitredis;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-
-import java.util.List;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,25 +27,35 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ResourceScriptSource;
 
+import java.util.List;
+
+/**
+ * redis x限流自动配置类
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-03 09:24:19
+ */
 @AutoConfiguration
-@ConditionalOnBean(value={RedissonClient.class})
-@ConditionalOnProperty(prefix="kuma.boot.ratelimit.enable", value={"true"}, matchIfMissing=true)
-public class RedisRateLimiterAutoConfiguration
-implements InitializingBean {
+@ConditionalOnBean(RedissonClient.class)
+@ConditionalOnProperty(prefix = "kuma.boot.ratelimit.enable", value = "true", matchIfMissing = true)
+public class RedisRateLimiterAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(RedisRateLimiterAutoConfiguration.class, (String)"kuma-boot-starter-cache-redis", (String[])new String[0]);
+        LogUtils.started(RedisRateLimiterAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 
+    @SuppressWarnings("unchecked")
     private RedisScript<List<Long>> redisRateLimiterScript() {
-        DefaultRedisScript redisScript = new DefaultRedisScript();
-        redisScript.setScriptSource((ScriptSource)new ResourceScriptSource((Resource)new ClassPathResource("META-INF/scripts/kuma_rate_limiter.lua")));
+        DefaultRedisScript redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptSource(
+                new ResourceScriptSource(new ClassPathResource("META-INF/scripts/kuma_rate_limiter.lua")));
         redisScript.setResultType(List.class);
         return redisScript;
     }
@@ -56,14 +63,13 @@ implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public RedisRateLimiterClient redisRateLimiterClient(StringRedisTemplate redisTemplate, Environment environment) {
-        RedisScript<List<Long>> redisRateLimiterScript = this.redisRateLimiterScript();
+        RedisScript<List<Long>> redisRateLimiterScript = redisRateLimiterScript();
         return new RedisRateLimiterClient(redisTemplate, redisRateLimiterScript, environment);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RedisRateLimiterAspect redisRateLimiterAspect(RedisRateLimiterClient rateLimiterClient) {
-        return new RedisRateLimiterAspect(rateLimiterClient);
+    public com.kuma.boot.ratelimit.ratelimitredis.RedisRateLimiterAspect redisRateLimiterAspect(RedisRateLimiterClient rateLimiterClient) {
+        return new com.kuma.boot.ratelimit.ratelimitredis.RedisRateLimiterAspect(rateLimiterClient);
     }
 }
-

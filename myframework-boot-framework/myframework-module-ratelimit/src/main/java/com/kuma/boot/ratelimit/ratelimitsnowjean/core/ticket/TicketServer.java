@@ -1,72 +1,78 @@
-/*
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- */
 package com.kuma.boot.ratelimit.ratelimitsnowjean.core.ticket;
 
 import com.kuma.boot.ratelimit.ratelimitsnowjean.commoon.http.HttpUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * 发票服务器,负载均衡
+ * 自动故障服务检测与切换
+ */
 public class TicketServer {
     private Logger logger = LoggerFactory.getLogger(TicketServer.class);
-    private List<String> serverList = new CopyOnWriteArrayList<String>();
-    private List<String> backupsList = new CopyOnWriteArrayList<String>();
+    private List<String> serverList = new CopyOnWriteArrayList<>(); //读多写少
+    private List<String> backupsList = new CopyOnWriteArrayList<>();
     private ReentrantLock lock = new ReentrantLock();
     private int pos = 0;
-    private long start = 0L;
+    private long start = 0;
+
 
     public void setServer(Map<String, Integer> ip) {
-        this.serverList.clear();
-        HashMap<String, Integer> serverMap = new HashMap<String, Integer>(ip);
+        // 清空List
+        serverList.clear();
+        // 重建一个Map，避免服务器的上下线导致的并发问题
+        Map<String, Integer> serverMap = new HashMap<>(ip);
+        // 取得Ip地址List
         for (String server : serverMap.keySet()) {
-            int weight = (Integer)serverMap.get(server);
-            for (int i = 0; i < weight; ++i) {
-                this.serverList.add(server);
+            int weight = serverMap.get(server);
+            for (int i = 0; i < weight; i++) {
+                serverList.add(server);
             }
         }
     }
 
     private String getServer() {
         String server;
-        this.lock.lock();
+        lock.lock();
         try {
-            if (this.serverList.size() == 0) {
-                this.serverList.addAll(this.backupsList);
-                this.backupsList.clear();
+            if (serverList.size() == 0) {
+                serverList.addAll(backupsList);
+                backupsList.clear();
             }
-            if (this.pos >= this.serverList.size()) {
-                this.pos = 0;
+            if (pos >= serverList.size()) {
+                pos = 0;
             }
-            server = this.serverList.get(this.pos);
-            ++this.pos;
-        }
-        finally {
-            this.lock.unlock();
+            server = serverList.get(pos);
+            pos++;
+        } finally {
+            lock.unlock();
         }
         return server;
     }
 
     public String connect(String path, String data) {
-        String server = this.getServer();
+        String server = getServer();
         try {
-            return HttpUtil.connect("http://" + server + "/" + path).setData("data", data).setMethod("POST").execute().getBody(new String[0]);
-        }
-        catch (IOException e) {
-            if (System.currentTimeMillis() - this.start > 3000L) {
-                this.logger.error("{} The server is not available.", (Object)server);
-                this.start = System.currentTimeMillis();
+            return HttpUtil.connect("http://" + server + "/" + path)
+                    .setData("data", data)
+                    .setMethod("POST")
+                    .execute()
+                    .getBody();
+        } catch (IOException e) {
+            if (System.currentTimeMillis() - start > 3000) {
+                logger.error("{} The server is not available.", server);
+                start = System.currentTimeMillis();
             }
-            this.serverList.remove(server);
-            this.backupsList.add(server);
-            return null;
+            serverList.remove(server);
+            backupsList.add(server);
         }
+        return null;
     }
 }
-
