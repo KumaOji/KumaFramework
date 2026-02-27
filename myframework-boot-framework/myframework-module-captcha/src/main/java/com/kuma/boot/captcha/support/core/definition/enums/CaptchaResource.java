@@ -1,27 +1,49 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.captcha.support.core.definition.enums;
 
+/**
+ * <p>Description: 验证码资源 </p>
+ *
+ * @author : gengwei.zheng
+ * @since : 2021/12/11 15:27
+ */
 public enum CaptchaResource {
-    JIGSAW_ORIGINAL("Jigsaw original image", "\u6ed1\u52a8\u62fc\u56fe\u5e95\u56fe"),
-    JIGSAW_TEMPLATE("Jigsaw template image", "\u6ed1\u52a8\u62fc\u56fe\u6ed1\u5757\u5e95\u56fe"),
-    WORD_CLICK("Word click image", "\u6587\u5b57\u70b9\u9009\u5e95\u56fe");
+
+    /**
+     * 验证码资源类型
+     */
+    JIGSAW_ORIGINAL("Jigsaw original image", "滑动拼图底图"),
+    JIGSAW_TEMPLATE("Jigsaw template image", "滑动拼图滑块底图"),
+    WORD_CLICK("Word click image", "文字点选底图");
 
     private final String content;
     private final String description;
 
-    private CaptchaResource(String type, String description) {
+    CaptchaResource(String type, String description) {
         this.content = type;
         this.description = description;
     }
 
     public String getContent() {
-        return this.content;
+        return content;
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 }
-

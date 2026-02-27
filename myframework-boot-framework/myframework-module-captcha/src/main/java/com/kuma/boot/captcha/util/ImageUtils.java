@@ -1,21 +1,29 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.utils.common.RandomUtils
- *  com.kuma.boot.common.utils.json.JacksonUtils
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.captcha.util;
 
-import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.captcha.model.CaptchaBaseEnum;
-import com.kuma.boot.common.utils.common.RandomUtils;
 import com.kuma.boot.common.utils.json.JacksonUtils;
+import com.kuma.boot.common.utils.common.RandomUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
+import cn.hutool.core.util.StrUtil;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,109 +35,194 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.imageio.ImageIO;
 
+/**
+ * ImageUtils
+ *
+ * @author shuigedeng
+ * @version 2021.9
+ * @since 2021-09-03 21:05:00
+ */
 public class ImageUtils {
-    private static Map<String, String> originalCacheMap = new ConcurrentHashMap<String, String>();
-    private static Map<String, String> slidingBlockCacheMap = new ConcurrentHashMap<String, String>();
-    private static Map<String, String> picClickCacheMap = new ConcurrentHashMap<String, String>();
-    private static Map<String, String[]> fileNameMap = new ConcurrentHashMap<String, String[]>();
 
+    /** 滑块底图 */
+    private static Map<String, String> originalCacheMap = new ConcurrentHashMap<>();
+    /** 滑块 */
+    private static Map<String, String> slidingBlockCacheMap = new ConcurrentHashMap<>();
+    /** 点选文字 */
+    private static Map<String, String> picClickCacheMap = new ConcurrentHashMap<>();
+    /** fileNameMap */
+    private static Map<String, String[]> fileNameMap = new ConcurrentHashMap<>();
+
+    /**
+     * cacheImage
+     *
+     * @param captchaOriginalPathJigsaw captchaOriginalPathJigsaw
+     * @param captchaOriginalPathClick captchaOriginalPathClick
+     * @since 2021-09-03 21:05:36
+     */
     public static void cacheImage(String captchaOriginalPathJigsaw, String captchaOriginalPathClick) {
-        if (StrUtil.isBlank((CharSequence)captchaOriginalPathJigsaw)) {
-            originalCacheMap.putAll(ImageUtils.getResourcesImagesFile("defaultImages/jigsaw/original"));
-            slidingBlockCacheMap.putAll(ImageUtils.getResourcesImagesFile("defaultImages/jigsaw/slidingBlock"));
+        // 滑动拼图
+        if (StrUtil.isBlank(captchaOriginalPathJigsaw)) {
+            originalCacheMap.putAll(getResourcesImagesFile("defaultImages/jigsaw/original"));
+            slidingBlockCacheMap.putAll(getResourcesImagesFile("defaultImages/jigsaw/slidingBlock"));
         } else {
-            originalCacheMap.putAll(ImageUtils.getImagesFile(captchaOriginalPathJigsaw + File.separator + "original"));
-            slidingBlockCacheMap.putAll(ImageUtils.getImagesFile(captchaOriginalPathJigsaw + File.separator + "slidingBlock"));
+            originalCacheMap.putAll(getImagesFile(captchaOriginalPathJigsaw + File.separator + "original"));
+            slidingBlockCacheMap.putAll(getImagesFile(captchaOriginalPathJigsaw + File.separator + "slidingBlock"));
         }
-        if (StrUtil.isBlank((CharSequence)captchaOriginalPathClick)) {
-            picClickCacheMap.putAll(ImageUtils.getResourcesImagesFile("defaultImages/pic-click"));
+
+        // 点选文字
+        if (StrUtil.isBlank(captchaOriginalPathClick)) {
+            picClickCacheMap.putAll(getResourcesImagesFile("defaultImages/pic-click"));
         } else {
-            picClickCacheMap.putAll(ImageUtils.getImagesFile(captchaOriginalPathClick));
+            picClickCacheMap.putAll(getImagesFile(captchaOriginalPathClick));
         }
-        fileNameMap.put(CaptchaBaseEnum.ORIGINAL.getCodeValue(), originalCacheMap.keySet().toArray(new String[0]));
-        fileNameMap.put(CaptchaBaseEnum.SLIDING_BLOCK.getCodeValue(), slidingBlockCacheMap.keySet().toArray(new String[0]));
-        fileNameMap.put(CaptchaBaseEnum.PIC_CLICK.getCodeValue(), picClickCacheMap.keySet().toArray(new String[0]));
-        LogUtils.info((String)"\u521d\u59cb\u5316\u5e95\u56fe:{}", (Object[])new Object[]{JacksonUtils.toJSONString(fileNameMap)});
+        fileNameMap.put(
+                CaptchaBaseEnum.ORIGINAL.getCodeValue(),
+                originalCacheMap.keySet().toArray(new String[0]));
+        fileNameMap.put(
+                CaptchaBaseEnum.SLIDING_BLOCK.getCodeValue(),
+                slidingBlockCacheMap.keySet().toArray(new String[0]));
+        fileNameMap.put(
+                CaptchaBaseEnum.PIC_CLICK.getCodeValue(),
+                picClickCacheMap.keySet().toArray(new String[0]));
+        LogUtils.info("初始化底图:{}", JacksonUtils.toJSONString(fileNameMap));
     }
 
-    public static void cacheBootImage(Map<String, String> originalMap, Map<String, String> slidingBlockMap, Map<String, String> picClickMap) {
+    /**
+     * cacheBootImage
+     *
+     * @param originalMap originalMap
+     * @param slidingBlockMap slidingBlockMap
+     * @param picClickMap picClickMap
+     * @since 2021-09-03 21:05:40
+     */
+    public static void cacheBootImage(
+            Map<String, String> originalMap, Map<String, String> slidingBlockMap, Map<String, String> picClickMap) {
+
         originalCacheMap.putAll(originalMap);
         slidingBlockCacheMap.putAll(slidingBlockMap);
         picClickCacheMap.putAll(picClickMap);
-        fileNameMap.put(CaptchaBaseEnum.ORIGINAL.getCodeValue(), originalCacheMap.keySet().toArray(new String[0]));
-        fileNameMap.put(CaptchaBaseEnum.SLIDING_BLOCK.getCodeValue(), slidingBlockCacheMap.keySet().toArray(new String[0]));
-        fileNameMap.put(CaptchaBaseEnum.PIC_CLICK.getCodeValue(), picClickCacheMap.keySet().toArray(new String[0]));
-        LogUtils.info((String)"\u81ea\u5b9a\u4e49resource\u5e95\u56fe:{}", (Object[])new Object[]{JacksonUtils.toJSONString(fileNameMap)});
+
+        fileNameMap.put(
+                CaptchaBaseEnum.ORIGINAL.getCodeValue(),
+                originalCacheMap.keySet().toArray(new String[0]));
+        fileNameMap.put(
+                CaptchaBaseEnum.SLIDING_BLOCK.getCodeValue(),
+                slidingBlockCacheMap.keySet().toArray(new String[0]));
+        fileNameMap.put(
+                CaptchaBaseEnum.PIC_CLICK.getCodeValue(),
+                picClickCacheMap.keySet().toArray(new String[0]));
+
+        LogUtils.info("自定义resource底图:{}", JacksonUtils.toJSONString(fileNameMap));
     }
 
+    /**
+     * getOriginal
+     *
+     * @return {@link BufferedImage }
+     * @since 2021-09-03 21:05:44
+     */
     public static BufferedImage getOriginal() {
         String[] strings = fileNameMap.get(CaptchaBaseEnum.ORIGINAL.getCodeValue());
         if (null == strings || strings.length == 0) {
             return null;
         }
-        int randomInt = RandomUtils.randomInt((int)0, (int)strings.length);
+        int randomInt = RandomUtils.randomInt(0, strings.length);
         String s = originalCacheMap.get(strings[randomInt]);
-        return ImageUtils.getBase64StrToImage(s);
+        return getBase64StrToImage(s);
     }
 
+    /**
+     * getslidingBlock
+     *
+     * @return {@link String }
+     * @since 2021-09-03 21:05:48
+     */
     public static String getslidingBlock() {
         String[] strings = fileNameMap.get(CaptchaBaseEnum.SLIDING_BLOCK.getCodeValue());
         if (null == strings || strings.length == 0) {
             return null;
         }
-        int randomInt = RandomUtils.randomInt((int)0, (int)strings.length);
+        int randomInt = RandomUtils.randomInt(0, strings.length);
         return slidingBlockCacheMap.get(strings[randomInt]);
     }
 
+    /**
+     * getPicClick
+     *
+     * @return {@link BufferedImage }
+     * @since 2021-09-03 21:05:50
+     */
     public static BufferedImage getPicClick() {
         String[] strings = fileNameMap.get(CaptchaBaseEnum.PIC_CLICK.getCodeValue());
         if (null == strings || strings.length == 0) {
             return null;
         }
-        int randomInt = RandomUtils.randomInt((int)0, (int)strings.length);
+        int randomInt = RandomUtils.randomInt(0, strings.length);
         String s = picClickCacheMap.get(strings[randomInt]);
-        return ImageUtils.getBase64StrToImage(s);
+        return getBase64StrToImage(s);
     }
 
+    /**
+     * 图片转base64 字符串
+     *
+     * @param templateImage templateImage
+     * @return {@link String }
+     * @since 2021-09-03 21:05:56
+     */
     public static String getImageToBase64Str(BufferedImage templateImage) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            ImageIO.write((RenderedImage)templateImage, "png", baos);
-        }
-        catch (IOException e) {
-            LogUtils.error((Throwable)e);
+            ImageIO.write(templateImage, "png", baos);
+        } catch (IOException e) {
+            LogUtils.error(e);
         }
         byte[] bytes = baos.toByteArray();
+
         Base64.Encoder encoder = Base64.getEncoder();
+
         return encoder.encodeToString(bytes).trim();
     }
 
+    /**
+     * base64 字符串转图片
+     *
+     * @param base64String base64String
+     * @return {@link BufferedImage }
+     * @since 2021-09-03 21:06:03
+     */
     public static BufferedImage getBase64StrToImage(String base64String) {
         try {
             Base64.Decoder decoder = Base64.getDecoder();
             byte[] bytes = decoder.decode(base64String);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
             return ImageIO.read(inputStream);
+        } catch (IOException e) {
+            LogUtils.error(e);
         }
-        catch (IOException e) {
-            LogUtils.error((Throwable)e);
-            return null;
-        }
+        return null;
     }
 
+    /**
+     * getResourcesImagesFile
+     *
+     * @param path path
+     * @return {@link Map }
+     * @since 2021-09-03 21:06:07
+     */
     private static Map<String, String> getResourcesImagesFile(String path) {
-        HashMap<String, String> imgMap = new HashMap<String, String>();
+        // 默认提供六张底图
+        Map<String, String> imgMap = new HashMap<>();
         ClassLoader classLoader = ImageUtils.class.getClassLoader();
-        for (int i = 1; i <= 6; ++i) {
-            InputStream resourceAsStream = classLoader.getResourceAsStream(path.concat("/").concat(String.valueOf(i).concat(".png")));
-            byte[] bytes = new byte[]{};
+        for (int i = 1; i <= 6; i++) {
+            InputStream resourceAsStream = classLoader.getResourceAsStream(
+                    path.concat("/").concat(String.valueOf(i).concat(".png")));
+            byte[] bytes = new byte[0];
             try {
                 bytes = FileCopyUtils.copyToByteArray(resourceAsStream);
-            }
-            catch (IOException e) {
-                LogUtils.error((Throwable)e);
+            } catch (IOException e) {
+                LogUtils.error(e);
             }
             String string = Base64.getEncoder().encodeToString(bytes);
             String filename = String.valueOf(i).concat(".png");
@@ -138,26 +231,31 @@ public class ImageUtils {
         return imgMap;
     }
 
+    /**
+     * getImagesFile
+     *
+     * @param path path
+     * @return {@link Map }
+     * @since 2021-09-03 21:06:10
+     */
     private static Map<String, String> getImagesFile(String path) {
-        HashMap<String, String> imgMap = new HashMap<String, String>();
+        Map<String, String> imgMap = new HashMap<>();
         File file = new File(path);
         if (!file.exists()) {
-            return new HashMap<String, String>();
+            return new HashMap<>();
         }
         File[] files = file.listFiles();
-        assert (files != null);
+        assert files != null;
         Arrays.stream(files).forEach(item -> {
             try {
-                FileInputStream fileInputStream = new FileInputStream((File)item);
+                FileInputStream fileInputStream = new FileInputStream(item);
                 byte[] bytes = FileCopyUtils.copyToByteArray(fileInputStream);
                 String string = Base64.getEncoder().encodeToString(bytes);
                 imgMap.put(item.getName(), string);
-            }
-            catch (IOException e) {
-                LogUtils.error((Throwable)e);
+            } catch (IOException e) {
+                LogUtils.error(e);
             }
         });
         return imgMap;
     }
 }
-

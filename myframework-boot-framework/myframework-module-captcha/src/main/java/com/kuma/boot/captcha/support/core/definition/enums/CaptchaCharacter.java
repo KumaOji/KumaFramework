@@ -1,38 +1,69 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.captcha.support.core.definition.enums;
 
 import com.kuma.boot.captcha.support.core.provider.RandomProvider;
 
+/**
+ * <p>Description: 验证码字符类型 </p>
+ *
+ * @author : gengwei.zheng
+ * @since : 2021/12/21 16:26
+ */
 public enum CaptchaCharacter {
-    NUM_AND_CHAR(0, RandomProvider.CHAR_MAX_INDEX, "\u6570\u5b57\u548c\u5b57\u6bcd\u6df7\u5408"),
-    ONLY_NUM(0, 8, "\u7eaf\u6570\u5b57"),
-    ONLY_CHAR(8, RandomProvider.CHAR_MAX_INDEX, "\u7eaf\u5b57\u6bcd"),
-    ONLY_UPPER_CHAR(8, 31, "\u7eaf\u5927\u5199\u5b57\u6bcd"),
-    ONLY_LOWER_CHAR(31, RandomProvider.LOWER_MAX_INDEX, "\u7eaf\u5c0f\u5199\u5b57\u6bcd"),
-    NUM_AND_UPPER_CHAR(0, 31, "\u6570\u5b57\u548c\u5927\u5199\u5b57\u6bcd");
 
+    /**
+     * 验证码字母显示类别
+     */
+    NUM_AND_CHAR(RandomProvider.NUM_MIN_INDEX, RandomProvider.CHAR_MAX_INDEX, "数字和字母混合"),
+    ONLY_NUM(RandomProvider.NUM_MIN_INDEX, RandomProvider.NUM_MAX_INDEX, "纯数字"),
+    ONLY_CHAR(RandomProvider.CHAR_MIN_INDEX, RandomProvider.CHAR_MAX_INDEX, "纯字母"),
+    ONLY_UPPER_CHAR(RandomProvider.UPPER_MIN_INDEX, RandomProvider.UPPER_MAX_INDEX, "纯大写字母"),
+    ONLY_LOWER_CHAR(RandomProvider.LOWER_MIN_INDEX, RandomProvider.LOWER_MAX_INDEX, "纯小写字母"),
+    NUM_AND_UPPER_CHAR(RandomProvider.NUM_MIN_INDEX, RandomProvider.UPPER_MAX_INDEX, "数字和大写字母");
+
+    /**
+     * 字符枚举值开始位置
+     */
     private final int start;
+    /**
+     * 字符枚举值结束位置
+     */
     private final int end;
+    /**
+     * 类型说明
+     */
     private final String description;
 
-    private CaptchaCharacter(int start, int end, String description) {
+    CaptchaCharacter(int start, int end, String description) {
         this.start = start;
         this.end = end;
         this.description = description;
     }
 
     public int getStart() {
-        return this.start;
+        return start;
     }
 
     public int getEnd() {
-        return this.end;
+        return end;
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 }
-

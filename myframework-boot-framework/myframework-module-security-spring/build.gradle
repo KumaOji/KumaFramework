@@ -8,21 +8,32 @@ dependencies {
     api project(':myframework-boot-framework:myframework-module-security-common')
     api project(':myframework-boot-framework:myframework-module-security-jstauth')
     api project(':myframework-boot-framework:myframework-module-cache-redis')
+    api project(':myframework-boot-framework:myframework-module-totp')
+    api project(':myframework-boot-framework:myframework-module-captcha')
     api projectLibs.swagger.annotations.jakarta
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.data.redis
+    api projectLibs.spring.boot.starter.oauth2.resource.server
+    api projectLibs.spring.boot.starter.oauth2.client
+    api projectLibs.spring.boot.starter.jdbc
+    api projectLibs.spring.boot.starter.actuator
     api projectLibs.hutool.core
     api projectLibs.hutool.extra
     api projectLibs.hutool.crypto
     api projectLibs.hutool.json
     api projectLibs.guava
+    api projectLibs.fastjson2
     api projectLibs.commons.lang3
     api projectLibs.commons.collections4
     api projectLibs.commons.codec
     api projectLibs.commons.io
     api projectLibs.jackson.databind
+    api projectLibs.jjwt.api
     api projectLibs.justauth
+    runtimeOnly projectLibs.jjwt.impl
+    runtimeOnly projectLibs.jjwt.jackson
+    compileOnly projectLibs.jspecify
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

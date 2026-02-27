@@ -116,6 +116,8 @@ skywalking-apm-toolkit = "9.0.0"
 cglib = "3.3.0"
 httpclient5 = "5.4.1"
 dnsjava = "3.6.2"
+zxing = "3.5.3"
+boofcv = "1.1.5"
 
 ## 统一定义依赖
 [libraries]
@@ -222,6 +224,8 @@ mybatis-plus-extension = { module = "com.baomidou:mybatis-plus-extension", versi
 mybatis-plus-jsqlparser = { module = "com.baomidou:mybatis-plus-jsqlparser", version.ref = "mybatis-plus" }
 spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache", version.ref = "springboot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springboot" }
+spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server", version.ref = "springboot" }
+spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client", version.ref = "springboot" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 jetcache-starter-redis = { module = "com.alicp.jetcache:jetcache-starter-redis", version.ref = "jetcache" }
 aviator = { module = "com.googlecode.aviator:aviator", version.ref = "aviator" }
@@ -263,6 +267,14 @@ skywalking-apm-toolkit-trace = { module = "org.apache.skywalking:apm-toolkit-tra
 cglib = { module = "cglib:cglib", version.ref = "cglib" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version.ref = "httpclient5" }
 dnsjava = { module = "dnsjava:dnsjava", version.ref = "dnsjava" }
+hutool-captcha = { module = "cn.hutool:hutool-captcha", version.ref = "hutool" }
+hutool-system = { module = "cn.hutool:hutool-system", version.ref = "hutool" }
+animated-gif-lib = { module = "com.madgag:animated-gif-lib", version = "1.4" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+zxing-javase = { module = "com.google.zxing:javase", version.ref = "zxing" }
+boofcv-recognition = { module = "org.boofcv:boofcv-recognition", version.ref = "boofcv" }
+boofcv-io = { module = "org.boofcv:boofcv-io", version.ref = "boofcv" }
+easy-captcha = { module = "com.github.whvcse:easy-captcha", version = "1.6.2" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

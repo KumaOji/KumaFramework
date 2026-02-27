@@ -559,7 +559,6 @@ public final class JustAuthRequestHolder implements InitializingBean, Applicatio
      * @param alipayProxyPort 支付宝有自己的代理, 默认代理对支付宝不生效, 支付宝代理端口:
      * @return {@link AuthDefaultRequest} 相对应的适配器
      */
-    @NonNull
     private com.kuma.boot.security.spring.authentication.login.social.justauth.JustAuthDefaultRequestAdapter getAuthDefaultRequestAdapter(
             @NonNull AuthConfig config,
             @NonNull AuthSource source,
