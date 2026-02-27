@@ -32,6 +32,7 @@ dependencies {
     api projectLibs.spring.doc.webmvc
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
+    implementation projectLibs.spring.boot.starter.mail
 
     runtimeOnly projectLibs.mysql
     runtimeOnly projectLibs.postgresql

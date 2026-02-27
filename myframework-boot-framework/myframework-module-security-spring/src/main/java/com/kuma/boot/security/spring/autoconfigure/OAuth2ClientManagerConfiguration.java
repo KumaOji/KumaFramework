@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientPropertiesMapper;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,7 @@ import org.springframework.web.client.RestTemplate;
  * @since 2023-07-10 11:43:29
  */
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnBean(OAuth2ClientProperties.class)
 public class OAuth2ClientManagerConfiguration {
 
     /**

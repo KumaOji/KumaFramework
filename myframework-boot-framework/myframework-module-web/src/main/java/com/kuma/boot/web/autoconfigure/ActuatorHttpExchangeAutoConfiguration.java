@@ -11,21 +11,27 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations in the License.
  */
 
 package com.kuma.boot.web.autoconfigure;
 
+import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository;
 import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.service.registry.ImportHttpServices;
 
+/**
+ * Actuator HTTP Exchange 仓库自动配置，与 httpexchange 包的 HttpExchangeAutoConfiguration（HTTP Client）区分
+ */
 @AutoConfiguration
 @ImportHttpServices(basePackages = "com.kuma.boot.api.*.inner")
-public class HttpExchangeAutoConfiguration {
+public class ActuatorHttpExchangeAutoConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean(HttpExchangeRepository.class)
     InMemoryHttpExchangeRepository httpExchangeRepository() {
         InMemoryHttpExchangeRepository repository = new InMemoryHttpExchangeRepository();
         repository.setCapacity(20);

@@ -18,8 +18,10 @@ package com.kuma.boot.cache.redis.autoconfigure.properties;
 
 import com.kuma.boot.cache.redis.enums.CacheType;
 import com.kuma.boot.cache.redis.enums.SerializerType;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.Role;
 
 import java.time.Duration;
 import java.util.Map;
@@ -33,6 +35,7 @@ import java.util.Map;
  */
 @RefreshScope
 @ConfigurationProperties(prefix = CacheManagerProperties.PREFIX)
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class CacheManagerProperties {
 
     public static final String PREFIX = "kuma.boot.cache.redis.cache-manager";

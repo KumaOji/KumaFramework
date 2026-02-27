@@ -17,6 +17,7 @@
 package com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.configuration;
 
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.MpInterceptor;
+import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.scope.DataPermScopeHandler;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.scope.DataScopeInterceptor;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.select.SelectFieldPermInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -30,7 +31,7 @@ public class DatePermConfiguration {
 
     /** 数据范围权限插件 */
     @Bean
-    @ConditionalOnBean(DataScopeInterceptor.class)
+    @ConditionalOnBean(DataPermScopeHandler.class)
     @ConditionalOnProperty(
             prefix = "bootx.starter.data-perm",
             value = "enableDataPerm",

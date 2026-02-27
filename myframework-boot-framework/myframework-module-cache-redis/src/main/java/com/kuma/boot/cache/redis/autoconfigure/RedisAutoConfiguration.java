@@ -34,6 +34,7 @@ import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -80,6 +81,7 @@ public class RedisAutoConfiguration implements InitializingBean {
     // }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public RedisSerializer<Object> redisSerializer(
             CacheManagerProperties properties, ObjectProvider<JsonMapper> objectProvider) {
         SerializerType serializerType = properties.getSerializerType();
@@ -102,19 +104,31 @@ public class RedisAutoConfiguration implements InitializingBean {
         return new GenericJacksonJsonRedisSerializer(JacksonUtils.MAPPER);
     }
 
-//    @Bean
-//	@ConditionalOnSingleCandidate(RedissonConnectionFactory.class)
-//    public RedissonConnectionFactory redissonConnectionFactory(RedissonClient redissonClient) {
-//        return new RedissonConnectionFactory(redissonClient);
-//    }
+    @Bean
+    @ConditionalOnBean(RedissonClient.class)
+    @ConditionalOnMissingBean(RedissonConnectionFactory.class)
+    public RedissonConnectionFactory redissonConnectionFactory(RedissonClient redissonClient) {
+        return new RedissonConnectionFactory(redissonClient);
+    }
 
     /**
      * 创建 RedisTemplate，bean 名称为 redisTemplate。
      * 使用 redisTemplate 名称以满足 redisKeyValueAdapter 等 Spring Data Redis 组件的依赖要求。
+     * 优先使用 RedissonConnectionFactory，不存在时回退到 Spring Boot 默认的 RedisConnectionFactory（Lettuce/Jedis）。
      */
     @Bean("redisTemplate")
     public RedisTemplate<String, Object> redisTemplate(
-            RedissonConnectionFactory factory, RedisSerializer<Object> redisSerializer) {
+            ObjectProvider<RedissonConnectionFactory> redissonConnectionFactoryProvider,
+            ObjectProvider<RedisConnectionFactory> redisConnectionFactoryProvider,
+            RedisSerializer<Object> redisSerializer) {
+        RedisConnectionFactory factory = redissonConnectionFactoryProvider.getIfAvailable();
+        if (factory == null) {
+            factory = redisConnectionFactoryProvider.orderedStream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No RedisConnectionFactory or RedissonConnectionFactory available. " +
+                            "Configure Redisson or spring.data.redis."));
+        }
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 

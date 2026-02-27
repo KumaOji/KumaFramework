@@ -26,14 +26,14 @@ dependencies {
     api projectLibs.spring.boot.starter.validation
     api projectLibs.spring.web
     api projectLibs.transmittable.thread.local
-    compileOnly projectLibs.okhttp3
+    api projectLibs.okhttp3
     compileOnly projectLibs.spring.boot.starter.mail
     compileOnly projectLibs.spring.cloud.commons
     compileOnly projectLibs.spotbugs.annotations
     compileOnly projectLibs.jetbrains.annotations
     compileOnly projectLibs.poi.ooxml
     compileOnly projectLibs.jakarta.xml.bind.api
-    compileOnly projectLibs.micrometer.tracing.api
+    api projectLibs.micrometer.tracing.api
     implementation projectLibs.sentinel.core
     implementation projectLibs.sentinel.parameter.flow.control
     implementation projectLibs.skywalking.apm.toolkit.trace

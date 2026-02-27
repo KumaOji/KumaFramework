@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.ratelimit.ratelimitguava;
+package com.kuma.boot.ratelimit.ratelimitaspect;
 
+import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.ratelimit.ratelimitaspect.LimitProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,16 +37,17 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @EnableConfigurationProperties({LimitProperties.class})
 @ConditionalOnProperty(prefix = LimitProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-public class LimitAutoConfiguration implements InitializingBean {
+public class LimitAspectAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(LimitAutoConfiguration.class, StarterNameConstants.RATELIMIT_STARTER);
+        LogUtils.started(LimitAspectAutoConfiguration.class, StarterNameConstants.RATELIMIT_STARTER);
     }
 
     @Bean
-    @ConditionalOnClass({com.google.common.util.concurrent.RateLimiter.class})
-    public com.kuma.boot.ratelimit.ratelimitguava.GuavaLimitAspect guavaLimitAspect() {
-        return new com.kuma.boot.ratelimit.ratelimitguava.GuavaLimitAspect();
+    @ConditionalOnClass(RedisRepository.class)
+    @ConditionalOnBean({RedisRepository.class})
+    public com.kuma.boot.ratelimit.ratelimitaspect.LimitAspect limitAspect(RedisRepository redisRepository) {
+        return new com.kuma.boot.ratelimit.ratelimitaspect.LimitAspect(redisRepository);
     }
 }

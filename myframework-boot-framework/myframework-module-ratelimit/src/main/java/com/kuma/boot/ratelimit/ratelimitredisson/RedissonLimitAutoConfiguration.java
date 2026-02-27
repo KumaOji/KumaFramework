@@ -20,9 +20,11 @@ import com.kuma.boot.ratelimit.ratelimitredisson.executor.RedissonLimitExecutor;
 import com.kuma.boot.ratelimit.ratelimitredisson.interceptor.LimitInterceptor;
 import org.redisson.api.RedissonClient;
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.context.annotation.Role;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
@@ -31,7 +33,8 @@ import org.springframework.context.annotation.Bean;
  *
  */
 @AutoConfiguration
-public class LimitAutoConfiguration {
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+public class RedissonLimitAutoConfiguration {
 
     /**
      * Limit interceptor limit interceptor.

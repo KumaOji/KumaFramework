@@ -55,9 +55,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @MapperScan(
         basePackages = {
+                "com.kuma.boot.mybatis.mapper",
+                "com.kuma.boot.data.mybatis.delay",
                 "com.kuma.cloud.*.biz.mapper",
                 "com.kuma.cloud.*.infrastructure.persistent.mapper",
-                "com.kuma.cloud.*.infrastructure.persistent.*.mapper"
+                "com.kuma.cloud.*.infrastructure.persistent.*.mapper",
+                "com.kuma.cloud.*.mapper"
         })
 @EnableTransactionManagement
 @AutoConfiguration(after = {com.kuma.boot.data.mybatis.autoconfigure.MybatisPlusInterceptorAutoConfiguration.class})

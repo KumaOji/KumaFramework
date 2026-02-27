@@ -18,11 +18,13 @@ package com.kuma.cloud.project4;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
+import com.kuma.boot.web.annotation.KumaBootApplication;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Project4 启动类
@@ -30,9 +32,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  *
  * @author kuma
  */
-@SpringBootApplication(
-        scanBasePackages = {"com.kuma.boot", "com.kuma.cloud.project4"},
-        exclude = DruidDataSourceAutoConfigure.class)
+@KumaBootApplication
+@ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
+@EnableAutoConfiguration(exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
 @MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.boot.data.mybatis.delay", "com.kuma.cloud.project4.mapper"}, annotationClass = org.apache.ibatis.annotations.Mapper.class)
 public class Project4Application extends SpringBootServletInitializer {

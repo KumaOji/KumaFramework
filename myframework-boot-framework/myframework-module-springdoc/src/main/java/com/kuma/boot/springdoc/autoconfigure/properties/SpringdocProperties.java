@@ -52,7 +52,7 @@ public class SpringdocProperties {
     /**
      * group default applicationName
      */
-    private String group = PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY);
+    private String group = PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "application");
 
     /**
      * pathsToMatch default /**
@@ -78,7 +78,7 @@ public class SpringdocProperties {
     /**
      * version default kmcVersion
      */
-    private String version = PropertyUtils.getProperty("kmcVersion");
+    private String version = PropertyUtils.getProperty("kmcVersion", "1.0.0");
     /**
      * SecuritySchemes
      */
@@ -99,7 +99,7 @@ public class SpringdocProperties {
      * title
      */
     private String title =
-            PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY).toUpperCase() + " API";
+            (PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "application")).toUpperCase() + " API";
     /**
      * description
      */

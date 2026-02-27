@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.ratelimit.autoconfigure;
+package com.kuma.boot.ratelimit.ratelimitguava;
 
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.ratelimit.ratelimitaspect.LimitProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 
 /**
  * LimitConfiguration
@@ -34,10 +36,16 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @AutoConfiguration
 @EnableConfigurationProperties({LimitProperties.class})
 @ConditionalOnProperty(prefix = LimitProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-public class LimitAutoConfiguration implements InitializingBean {
+public class GuavaLimitAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(LimitAutoConfiguration.class, StarterNameConstants.RATELIMIT_STARTER);
+        LogUtils.started(GuavaLimitAutoConfiguration.class, StarterNameConstants.RATELIMIT_STARTER);
+    }
+
+    @Bean
+    @ConditionalOnClass({com.google.common.util.concurrent.RateLimiter.class})
+    public com.kuma.boot.ratelimit.ratelimitguava.GuavaLimitAspect guavaLimitAspect() {
+        return new com.kuma.boot.ratelimit.ratelimitguava.GuavaLimitAspect();
     }
 }

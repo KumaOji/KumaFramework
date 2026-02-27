@@ -347,22 +347,7 @@ public class WebMvcAutoConfiguration implements WebMvcConfigurer, InitializingBe
                 .addResourceLocations("classpath:/static/")
                 .setCacheControl(CacheControl.maxAge(Duration.ofSeconds(3600)).cachePublic());
 
-        /** 配置knife4j 显示文档 */
-        registry.addResourceHandler("doc.html")
-                .addResourceLocations("classpath:/META-INF/resources/")
-                .setCacheControl(CacheControl.maxAge(Duration.ofSeconds(3600)).cachePublic());
-
-        /**
-         * 配置swagger-ui显示文档
-         */
-        // registry
-        //  .addResourceHandler("swagger-ui.html")
-        //	.addResourceLocations("classpath:/META-INF/resources/");
-
-        /** 公共部分内容 */
-        registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/")
-                .setCacheControl(CacheControl.maxAge(Duration.ofSeconds(3600)).cachePublic());
+        // doc.html 与 /webjars/** 由 SpringDocAutoConfiguration / knife4j 模块注册，避免重复映射
     }
 
     // 视图控制器

@@ -24,11 +24,14 @@ import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermissi
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.factory.DataPermissionRuleFactoryImpl;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.rule.DataPermissionRule;
 import java.util.List;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Role;
 
 /** 数据权限的自动配置类 */
 @AutoConfiguration
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class DataPermissionAutoConfiguration {
 
     /**
