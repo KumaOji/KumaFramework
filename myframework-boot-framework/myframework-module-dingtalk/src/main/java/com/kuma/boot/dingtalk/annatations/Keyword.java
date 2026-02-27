@@ -1,0 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package com.kuma.boot.dingtalk.annatations;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Documented
+@Retention(value=RetentionPolicy.RUNTIME)
+@Target(value={ElementType.PARAMETER})
+@Deprecated
+public @interface Keyword {
+    public boolean keyword() default true;
+}
+

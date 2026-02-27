@@ -1,0 +1,122 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package com.kuma.boot.dingtalk.utils;
+
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import javax.crypto.Cipher;
+
+public class ConfigTools {
+    private static final String DEFAULT_PRIVATE_KEY_STRING = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAK3UkOuP3zsAHap4ImPXuhVskiKGm3PXcM/Xo02CbrmBYHMb0bGuByesSpXhep6OPWGdrIW6LvDnS6ivyVrsDeBd82QS6KmfEMRVJoqeqVZy3mphstAOtHK4OGtABFogXw2RfDRunGq5GW9shF4DWFhrWWsBK/UGs7kJrVir6v77AgMBAAECgYEApnOMTbSXmmSTA6BDtf1ll4w+JsdkZbmfsbYYDmleY03KsI6r7grpmQi25uxhQSCNEEMuZ2MP/ehNH3ssQV8WLPU/wobm/2qaRALtD02sQRefhP95SVvOrgry+ElxawWQyUoyLSyH1bpoCI9J2orx/tnrQQi9nYDeR2+aH4S7JpkCQQDZDr/1dvTqX+ZOmlBF3lI6P0xKLklHinSp3anmW4tRyxA/W9gguZ9JlGFVKP9Ml2YxH3dBVktkfPITloj0smltAkEAzQRtpyUPx3HqjnveZ0CIDeI7j6hbLGGANZ5Gm99lWPVzNMPv6bFcJ2TEXzNq3fqE3Dmv6veSxV3eUOrzHOVxBwJBAKTpD+7u8iUft1sA4vwybUbT0KKLiCFSkFB+mRbrdm4uWanJnes/HEZK9ag9/bmzTXEE9xYs+hre0w0O0f8XjgECQCckEUs36CtLtFw/idZsm40LBBQJMF7ovnF+JjzcCZ1SPwxz2/nhwpZCxrrmNiDrEzJ4UP2rBnpn0WnhcUizBUECQFSU/s7cLaMSjlGmacDDf1r+u8cD2rKyWQWmEiXI155L4gSz2s/Pu5u1X8fcKqlGvtJFfSUP68w1e0x7mPGFohc=";
+    public static final String DEFAULT_PUBLIC_KEY_STRING = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCt1JDrj987AB2qeCJj17oVbJIihptz13DP16NNgm65gWBzG9GxrgcnrEqV4Xqejj1hnayFui7w50uor8la7A3gXfNkEuipnxDEVSaKnqlWct5qYbLQDrRyuDhrQARaIF8NkXw0bpxquRlvbIReA1hYa1lrASv1BrO5Ca1Yq+r++wIDAQAB";
+
+    private ConfigTools() {
+    }
+
+    public static String decrypt(String cipherText) throws Exception {
+        return ConfigTools.decrypt((String)null, cipherText);
+    }
+
+    public static String decrypt(String publicKeyText, String cipherText) throws Exception {
+        PublicKey publicKey = ConfigTools.getPublicKey(publicKeyText);
+        return ConfigTools.decrypt(publicKey, cipherText);
+    }
+
+    public static PublicKey getPublicKey(String publicKeyText) {
+        if (publicKeyText == null || publicKeyText.length() == 0) {
+            publicKeyText = DEFAULT_PUBLIC_KEY_STRING;
+        }
+        try {
+            byte[] publicKeyBytes = DingerUtils.base64ToByteArray(publicKeyText);
+            X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "SunRsaSign");
+            return keyFactory.generatePublic(x509KeySpec);
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException("Failed to get public key", e);
+        }
+    }
+
+    public static String decrypt(PublicKey publicKey, String cipherText) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        try {
+            cipher.init(2, publicKey);
+        }
+        catch (InvalidKeyException e) {
+            RSAPublicKey rsaPublicKey = (RSAPublicKey)publicKey;
+            RSAPrivateKeySpec spec = new RSAPrivateKeySpec(rsaPublicKey.getModulus(), rsaPublicKey.getPublicExponent());
+            PrivateKey fakePrivateKey = KeyFactory.getInstance("RSA").generatePrivate(spec);
+            cipher = Cipher.getInstance("RSA");
+            cipher.init(2, fakePrivateKey);
+        }
+        if (cipherText == null || cipherText.length() == 0) {
+            return cipherText;
+        }
+        byte[] cipherBytes = DingerUtils.base64ToByteArray(cipherText);
+        byte[] plainBytes = cipher.doFinal(cipherBytes);
+        return new String(plainBytes);
+    }
+
+    public static String encrypt(String plainText) throws Exception {
+        return ConfigTools.encrypt((String)null, plainText);
+    }
+
+    public static String encrypt(String key, String plainText) throws Exception {
+        if (key == null) {
+            key = DEFAULT_PRIVATE_KEY_STRING;
+        }
+        byte[] keyBytes = DingerUtils.base64ToByteArray(key);
+        return ConfigTools.encrypt(keyBytes, plainText);
+    }
+
+    public static String encrypt(byte[] keyBytes, String plainText) throws Exception {
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory factory = KeyFactory.getInstance("RSA", "SunRsaSign");
+        PrivateKey privateKey = factory.generatePrivate(spec);
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        try {
+            cipher.init(1, privateKey);
+        }
+        catch (InvalidKeyException e) {
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey)privateKey;
+            RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(rsaPrivateKey.getModulus(), rsaPrivateKey.getPrivateExponent());
+            PublicKey fakePublicKey = KeyFactory.getInstance("RSA").generatePublic(publicKeySpec);
+            cipher = Cipher.getInstance("RSA");
+            cipher.init(1, fakePublicKey);
+        }
+        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes("UTF-8"));
+        String encryptedString = DingerUtils.byteArrayToBase64(encryptedBytes);
+        return encryptedString;
+    }
+
+    public static byte[][] genKeyPairBytes(int keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
+        byte[][] keyPairBytes = new byte[2][];
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
+        gen.initialize(keySize, new SecureRandom());
+        KeyPair pair = gen.generateKeyPair();
+        keyPairBytes[0] = pair.getPrivate().getEncoded();
+        keyPairBytes[1] = pair.getPublic().getEncoded();
+        return keyPairBytes;
+    }
+
+    public static String[] genKeyPair(int keySize) throws NoSuchAlgorithmException, NoSuchProviderException {
+        byte[][] keyPairBytes = ConfigTools.genKeyPairBytes(keySize);
+        String[] keyPairs = new String[]{DingerUtils.byteArrayToBase64(keyPairBytes[0]), DingerUtils.byteArrayToBase64(keyPairBytes[1])};
+        return keyPairs;
+    }
+}
+
