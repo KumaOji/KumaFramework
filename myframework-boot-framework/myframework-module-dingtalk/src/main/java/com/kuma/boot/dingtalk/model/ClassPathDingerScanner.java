@@ -58,12 +58,8 @@ extends ClassPathBeanDefinitionScanner {
             acceptAllInterfaces = false;
         }
         if (this.markerInterface != null) {
-            this.addIncludeFilter((TypeFilter)new AssignableTypeFilter(this, this.markerInterface){
-                {
-                    Objects.requireNonNull(this$0);
-                    super(targetType);
-                }
-
+            this.addIncludeFilter(new AssignableTypeFilter(this.markerInterface) {
+                @Override
                 protected boolean matchClassName(String className) {
                     return false;
                 }

@@ -6,5 +6,12 @@ description = 'Myframework dingtalk模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
-
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.web
+    api projectLibs.spring.context
+    api projectLibs.jakarta.xml.bind.api
+    compileOnly projectLibs.spring.cloud.context
+    api projectLibs.slf4j.api
+    api projectLibs.hutool.core
+    runtimeOnly projectLibs.jaxb.runtime
 }

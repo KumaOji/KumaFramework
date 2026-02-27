@@ -34,8 +34,9 @@ extends DingTalkMessage {
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             Object value = entry.getValue();
             if (!(value instanceof List)) continue;
-            List imageTexts = (List)value;
-            for (ImageTextDeo imageText : imageTexts) {
+            List<?> imageTexts = (List<?>) value;
+            for (Object item : imageTexts) {
+                ImageTextDeo imageText = (ImageTextDeo) item;
                 this.feedCard.links.add(new FeedCard.Link(imageText.getTitle(), imageText.getUrl(), imageText.getPicUrl()));
             }
         }

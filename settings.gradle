@@ -23,7 +23,7 @@ for (name in oneLayerProjects) {
 }
 
 def frameworkBootSubModules = ['common', 'core', 'data-datasource',
-                               'data-mybatis', 'office', 'actuate',
+                               'data-mybatis', 'office', 'actuator',
                                'mq-common', 'mq-kafka', 'ip2region',
                                'data-common', 'springdoc', 'web',
                                'cache-jetcache', 'cache-caffeine', 'cache-common',

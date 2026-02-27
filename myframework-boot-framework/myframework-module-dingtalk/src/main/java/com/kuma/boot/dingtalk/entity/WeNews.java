@@ -37,12 +37,10 @@ extends WeTalkMessage {
         Object value;
         Iterator<Map.Entry<String, Object>> iterator = params.entrySet().iterator();
         if (iterator.hasNext() && (value = (entry = iterator.next()).getValue()) instanceof List) {
-            List imageTexts = (List)value;
-            int size = imageTexts.size();
-            size = Math.min(size, 8);
-            for (int i = 0; i < size; ++i) {
-            }
-            for (ImageTextDeo imageText : imageTexts) {
+            List<?> imageTexts = (List<?>) value;
+            int size = Math.min(imageTexts.size(), 8);
+            for (int i = 0; i < size; i++) {
+                ImageTextDeo imageText = (ImageTextDeo) imageTexts.get(i);
                 this.news.articles.add(new News.Article(imageText.getTitle(), imageText.getDescription(), imageText.getUrl(), imageText.getPicUrl()));
             }
         }

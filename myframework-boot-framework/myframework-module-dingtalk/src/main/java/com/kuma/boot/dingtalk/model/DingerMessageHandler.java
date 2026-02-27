@@ -71,8 +71,10 @@ ResultHandler<DingerResponse> {
 
     @Override
     public MsgType transfer(DingerDefinition dingerDefinition, Map<String, Object> params) {
-        Object message = this.copyProperties(dingerDefinition.message());
-        ((MsgType)message).transfer(params);
+        MsgType message = this.copyProperties(dingerDefinition.message());
+        if (message != null) {
+            message.transfer(params);
+        }
         return message;
     }
 
@@ -88,15 +90,14 @@ ResultHandler<DingerResponse> {
         return null;
     }
 
-    private <T extends MsgType> T copyProperties(MsgType src) {
+    private MsgType copyProperties(MsgType src) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(src);
             ByteArrayInputStream byteIn = new ByteArrayInputStream(baos.toByteArray());
             ObjectInputStream in = new ObjectInputStream(byteIn);
-            MsgType dest = (MsgType)in.readObject();
-            return (T)dest;
+            return (MsgType) in.readObject();
         }
         catch (Exception e) {
             LogUtils.debug((String)"copy properties error:", (Object[])new Object[]{e});

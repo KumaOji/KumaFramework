@@ -99,8 +99,8 @@ public class DingerDefinitionHandler {
             Optional<BodyTag> body = Optional.ofNullable(messageTag.getBody());
             Optional<PhonesTag> phonesTag = body.map(e -> e.getPhones());
             Boolean atAll = phonesTag.map(e -> e.getAtAll()).orElse(false);
-            List phoneTags = phonesTag.map(e -> e.getPhones()).orElse(null);
-            List<Object> phones = phoneTags != null ? phoneTags.stream().map(PhoneTag::getValue).toList() : new ArrayList();
+            List<PhoneTag> phoneTags = phonesTag.map(e -> e.getPhones()).orElse(null);
+            List<String> phones = phoneTags != null ? phoneTags.stream().map(PhoneTag::getValue).toList() : new ArrayList<>();
             Optional<ContentTag> contentTag = body.map(e -> e.getContent());
             String content = contentTag.map(e -> e.getContent()).orElse("");
             String title = contentTag.map(e -> e.getTitle()).orElse("Dinger Title");

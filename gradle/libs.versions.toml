@@ -125,6 +125,8 @@ guava-retrying3 = "3.0.2"
 okhttp3 = "4.12.0"
 hibernate-validator = "8.0.2.Final"
 jakarta-xml-bind-api = "4.0.2"
+jaxb-runtime = "4.0.5"
+spotbugs-annotations = "4.8.6"
 
 ## 统一定义依赖
 [libraries]
@@ -293,6 +295,8 @@ hibernate-validator = { module = "org.hibernate.validator:hibernate-validator", 
 spring-boot-starter-mail = { module = "org.springframework.boot:spring-boot-starter-mail", version.ref = "springboot" }
 sentinel-parameter-flow-control = { module = "com.alibaba.csp:sentinel-parameter-flow-control", version.ref = "sentinel" }
 jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind-api" }
+jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "jaxb-runtime" }
+spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

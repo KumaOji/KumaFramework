@@ -47,7 +47,6 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.objenesis.instantiator.util.ClassUtils;
 
 public class MultiDingerScannerRegistrar
 extends DingerListenersProperty
@@ -114,7 +113,7 @@ Ordered {
                 continue;
             }
             String key = dingerClass.getName();
-            DingerConfigHandler handler = (DingerConfigHandler)ClassUtils.newInstance(dingerConfigHandler);
+            DingerConfigHandler handler = (DingerConfigHandler) BeanUtils.instantiateClass(dingerConfigHandler);
             DingerType dinger = value.dinger();
             this.registerHandler(registry, dinger, String.valueOf((Object)dinger) + "." + key, handler);
             LogUtils.debug((String)"regiseter multi dinger for dingerClass={} and dingerConfigHandler={}.", (Object[])new Object[]{dingerClass.getSimpleName(), beanName});
@@ -131,8 +130,8 @@ Ordered {
             throw new DingerException(ExceptionEnum.MULTIDINGER_ANNOTATTION_EXCEPTION, new Object[]{key, dinger});
         }
         Class<? extends AlgorithmHandler> algorithm = dingerConfigHandler.algorithmHandler();
-        ArrayList<DingerConfig> dingerConfigs = dingerConfigHandler.dingerConfigs();
-        ArrayList<DingerConfig> arrayList = dingerConfigs = dingerConfigs == null ? new ArrayList<DingerConfig>() : dingerConfigs;
+        List<DingerConfig> dingerConfigs = dingerConfigHandler.dingerConfigs();
+        dingerConfigs = dingerConfigs == null ? new ArrayList<>() : new ArrayList<>(dingerConfigs);
         if (algorithm == null) {
             throw new DingerException(ExceptionEnum.MULTIDINGER_ALGORITHM_EXCEPTION, dingerConfigHandlerClassName);
         }
@@ -145,7 +144,7 @@ Ordered {
         long injectionCnt = Arrays.stream(algorithm.getDeclaredFields()).filter(e -> e.isAnnotationPresent(Autowired.class)).count();
         AnalysisEnum mode = AnalysisEnum.REFLECT;
         if (injectionCnt == 0L) {
-            AlgorithmHandler algorithmHandler = (AlgorithmHandler)ClassUtils.newInstance(algorithm);
+            AlgorithmHandler algorithmHandler = (AlgorithmHandler) BeanUtils.instantiateClass(algorithm);
             MultiDingerConfigContainer.INSTANCE.put(key, new MultiDingerConfig(algorithmHandler, dingerConfigs));
         } else {
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(algorithm);

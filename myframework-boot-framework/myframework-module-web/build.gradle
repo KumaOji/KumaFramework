@@ -12,6 +12,8 @@ dependencies {
     api project(':myframework-boot-framework:myframework-module-idempotent')
     api project(':myframework-boot-framework:myframework-module-ratelimit')
     api project(':myframework-boot-framework:myframework-module-mq-kafka')
+    api project(':myframework-boot-framework:myframework-module-actuator')
+    api project(':myframework-boot-framework:myframework-module-dingtalk')
     api project(':myframework-boot-framework:myframework-module-cache-redis')
     api projectLibs.hutool.core
     api projectLibs.hutool.http
@@ -26,7 +28,10 @@ dependencies {
     api projectLibs.transmittable.thread.local
     compileOnly projectLibs.okhttp3
     compileOnly projectLibs.spring.boot.starter.mail
+    compileOnly projectLibs.spring.cloud.commons
+    compileOnly projectLibs.spotbugs.annotations
     compileOnly projectLibs.jetbrains.annotations
+    compileOnly projectLibs.poi.ooxml
     compileOnly projectLibs.jakarta.xml.bind.api
     compileOnly projectLibs.micrometer.tracing.api
     implementation projectLibs.sentinel.core

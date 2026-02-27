@@ -73,7 +73,7 @@ public class TraceEnvironmentPostProcessor implements EnvironmentPostProcessor {
     private boolean isPresent() {
         ClassLoader defaultClassLoader = getDefaultClassLoader();
         return ClassUtils
-                .isPresent("org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration",defaultClassLoader)
+                .isPresent("org.springframework.boot.actuator.autoconfigure.tracing.OpenTelemetryAutoConfiguration",defaultClassLoader)
                 && ClassUtils.isPresent("io.micrometer.tracing.Tracer",defaultClassLoader)
                 && ClassUtils.isPresent("io.micrometer.tracing.otel.bridge.OtelTracer",defaultClassLoader);
     }
