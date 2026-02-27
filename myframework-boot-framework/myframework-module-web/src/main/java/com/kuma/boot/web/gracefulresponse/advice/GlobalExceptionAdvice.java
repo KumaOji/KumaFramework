@@ -26,12 +26,15 @@ import com.kuma.boot.web.gracefulresponse.api.ResponseStatusFactory;
 import com.kuma.boot.web.gracefulresponse.data.Response;
 import com.kuma.boot.web.gracefulresponse.data.ResponseStatus;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -55,15 +58,29 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
 
     @Resource private GracefulResponseProperties properties;
 
+    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
+
     /**
      * 异常处理逻辑.
      *
      * @param throwable 业务逻辑抛出的异常
+     * @param request   当前请求，用于判断是否排除路径
      * @return 统一返回包装后的结果
      */
     @ExceptionHandler({Throwable.class})
     @ResponseBody
-    public Response exceptionHandler(Throwable throwable) {
+    public Response exceptionHandler(Throwable throwable, HttpServletRequest request) {
+        // 排除路径（如 /v3/api-docs、/swagger-ui）不包装，直接抛出，避免 Swagger UI 收到 GracefulResponse 错误格式
+        if (request != null && !CollectionUtils.isEmpty(gracefulResponseProperties.getExcludePaths())) {
+            String path = request.getRequestURI();
+            if (gracefulResponseProperties.getExcludePaths().stream()
+                    .anyMatch(pattern -> ANT_PATH_MATCHER.match(pattern, path))) {
+                if (throwable instanceof RuntimeException) {
+                    throw (RuntimeException) throwable;
+                }
+                throw new RuntimeException(throwable);
+            }
+        }
         if (gracefulResponseProperties.isPrintExceptionInGlobalAdvice()) {
             logger.error(
                     "Graceful Response:GlobalExceptionAdvice捕获到异常,message=[{}]",

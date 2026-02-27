@@ -34,6 +34,8 @@ logging:
     com.kuma.boot: INFO
     org.springframework.web: INFO
     org.springframework.security: INFO
+    # 抑制 spring.cache-CacheProperties 等 BeanPostProcessorChecker 告警（Spring Boot 内置 Bean 无法添加 ROLE_INFRASTRUCTURE）
+    "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
 
 mybatis-plus:
   global-config:
@@ -53,13 +55,27 @@ springdoc:
     doc-expansion: none
     try-it-out-enabled: false
 
+# Knife4j 增强文档（doc.html 界面）
+knife4j:
+  enable: true
+
+# 框架 Springdoc 配置（前缀 kuma.boot.springdoc）
 kuma:
-  springdoc:
-    title: API 文档
-    description: RESTful API 接口文档
-    version: 1.0.0
-    license-name: Apache 2.0
-    license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+  boot:
+    springdoc:
+      enabled: true
+      title: API 文档
+      description: RESTful API 接口文档
+      version: 1.0.0
+      openapi: "3.0.0"   # 必须为 3.0.n，否则 Swagger UI 报 "does not specify a valid version field"
+      # project4 无业务 Controller，需扫描框架 Controller 才能出现 API 列表（否则 "No operations defined in spec!"）
+      packages-to-scan:
+        - com.kuma.cloud.project4
+        - com.kuma.boot.web.controller
+        - com.kuma.boot.web.support.enums.mvc.dict
+      license:
+        name: Apache 2.0
+        url: https://www.apache.org/licenses/LICENSE-2.0.html
 
 # 延迟线程池配置
 delay:

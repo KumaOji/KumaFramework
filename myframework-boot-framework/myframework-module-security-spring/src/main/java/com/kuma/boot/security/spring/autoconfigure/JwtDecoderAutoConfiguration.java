@@ -185,9 +185,15 @@ public class JwtDecoderAutoConfiguration implements InitializingBean {
                         .jwsAlgorithm(SignatureAlgorithm.RS256);
 
         if (redisCacheManager != null) {
-            Cache cache = redisCacheManager.getCache("jwt");
-            if (cache != null) {
-                jwkSetUriJwtDecoderBuilder.cache(cache);
+            try {
+                Cache cache = redisCacheManager.getCache("jwt");
+                if (cache != null) {
+                    jwkSetUriJwtDecoderBuilder.cache(cache);
+                }
+            } catch (Exception e) {
+                // JetCache 等 CacheManager 在未正确配置 local cache 时 getCache 会抛错，
+                // 忽略后不使用缓存，JWT 解码仍可正常工作
+                LogUtils.debug("JWT decoder cache unavailable, proceeding without cache: {}", e.getMessage());
             }
         }
 

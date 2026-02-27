@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
@@ -52,7 +53,7 @@ public class SpringdocProperties {
     /**
      * group default applicationName
      */
-    private String group = PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "application");
+    private String group = Objects.requireNonNullElse(PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "application"), "application");
 
     /**
      * pathsToMatch default /**
@@ -78,7 +79,7 @@ public class SpringdocProperties {
     /**
      * version default kmcVersion
      */
-    private String version = PropertyUtils.getProperty("kmcVersion", "1.0.0");
+    private String version = Objects.requireNonNullElse(PropertyUtils.getProperty("kmcVersion", "1.0.0"), "1.0.0");
     /**
      * SecuritySchemes
      */
@@ -99,7 +100,7 @@ public class SpringdocProperties {
      * title
      */
     private String title =
-            (PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "application")).toUpperCase() + " API";
+            Objects.requireNonNullElse(PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "application"), "application").toUpperCase() + " API";
     /**
      * description
      */
@@ -125,9 +126,9 @@ public class SpringdocProperties {
      */
     private String externalUrl = "https://github.com/kuma/kuma-cloud-project/wiki";
     /**
-     * openapi
+     * openapi 版本，须为 3.0.0 以兼容 Swagger UI/Knife4j 的版本校验
      */
-    private String openapi = "3.0.1";
+    private String openapi = "3.0.0";
 
     public Boolean getEnabled() {
         return enabled;

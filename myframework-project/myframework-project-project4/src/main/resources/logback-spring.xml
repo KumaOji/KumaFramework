@@ -81,6 +81,8 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
+    <!-- 抑制 BeanPostProcessorChecker 对 spring.cache-CacheProperties 等内置 Bean 的 WARN 告警 -->
+    <logger name="org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker" level="ERROR"/>
 
     <!-- 组件扫描相关日志 - 减少输出 -->
     <logger name="org.springframework.context.annotation" level="WARN"/>

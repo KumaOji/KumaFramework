@@ -19,7 +19,6 @@ package com.kuma.cloud.project4;
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
 import com.kuma.boot.web.annotation.KumaBootApplication;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -28,7 +27,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Project4 启动类
- * <p>project4 无 Mapper 时，仅扫描 com.kuma.boot 以消除 MyBatis 警告</p>
+ * <p>Mapper 扫描由 MybatisPlusAutoConfiguration 统一处理，避免重复扫描产生警告</p>
  *
  * @author kuma
  */
@@ -36,7 +35,6 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
 @EnableAutoConfiguration(exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
-@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.boot.data.mybatis.delay", "com.kuma.cloud.project4.mapper"}, annotationClass = org.apache.ibatis.annotations.Mapper.class)
 public class Project4Application extends SpringBootServletInitializer {
 
     @Override

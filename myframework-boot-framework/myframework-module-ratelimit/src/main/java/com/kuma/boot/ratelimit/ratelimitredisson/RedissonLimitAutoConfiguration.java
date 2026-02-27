@@ -43,6 +43,7 @@ public class RedissonLimitAutoConfiguration {
      * @return the limit interceptor
      */
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public LimitInterceptor limitInterceptor(ObjectProvider<LimitExecutor> provider) {
         return new LimitInterceptor(provider);
     }

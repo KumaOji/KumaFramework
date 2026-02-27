@@ -62,6 +62,7 @@ public class DataPermissionAutoConfiguration {
 
     /** aop处理 */
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public DataPermissionAnnotationAdvisor dataPermissionAnnotationAdvisor() {
         return new DataPermissionAnnotationAdvisor();
     }

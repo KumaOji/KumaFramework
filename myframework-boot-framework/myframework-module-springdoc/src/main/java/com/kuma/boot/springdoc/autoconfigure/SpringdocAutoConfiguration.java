@@ -46,6 +46,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import cn.hutool.core.collection.CollUtil;
+import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springdoc.core.utils.SpringDocUtils;
@@ -56,6 +57,8 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.util.Comparator;
 import java.util.List;
@@ -147,6 +150,23 @@ public class SpringdocAutoConfiguration implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         LogUtils.started(SpringdocAutoConfiguration.class, StarterNameConstants.SPRINGDOC_STARTER);
+    }
+
+    /**
+     * 确保 OpenAPI 规范始终包含有效的 openapi 版本字段，避免 Swagger UI/Knife4j 报错：
+     * "The provided definition does not specify a valid version field".
+     * 使用最低优先级确保最后执行，覆盖可能被其他流程清空的情况。
+     */
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public GlobalOpenApiCustomizer openApiVersionCustomizer() {
+        return openApi -> {
+            String targetVersion = (properties.getOpenapi() != null && !properties.getOpenapi().isBlank())
+                    ? properties.getOpenapi()
+                    : "3.0.0";
+            // 始终强制设置，确保 /v3/api-docs 等接口返回的 JSON 包含 openapi 字段
+            openApi.setOpenapi(targetVersion);
+        };
     }
 
     @Bean

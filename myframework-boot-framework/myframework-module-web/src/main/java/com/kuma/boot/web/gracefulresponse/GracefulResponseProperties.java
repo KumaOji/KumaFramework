@@ -19,6 +19,7 @@ package com.kuma.boot.web.gracefulresponse;
 import com.kuma.boot.web.gracefulresponse.defaults.DefaultConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -70,9 +71,16 @@ public class GracefulResponseProperties {
     private String defaultValidateErrorCode = DefaultConstants.DEFAULT_ERROR_CODE;
 
     /**
-     * 例外包路径
+     * 例外包路径，这些包下的 Controller 返回值不再被 GracefulResponse 包装。
+     * 默认排除 org.springdoc，保证 /v3/api-docs、/swagger-ui 等返回原始 OpenAPI JSON。
      */
-    private List<String> excludePackages;
+    private List<String> excludePackages = Arrays.asList("org.springdoc*");
+
+    /**
+     * 例外路径，这些路径下的请求发生异常时不包装为 GracefulResponse，直接抛出原始异常。
+     * 默认排除 /v3/api-docs/**、/swagger-ui/**，便于 Swagger/OpenAPI 相关错误直接暴露。
+     */
+    private List<String> excludePaths = Arrays.asList("/v3/api-docs/**", "/swagger-ui/**", "/doc.html");
 
     /**
      * 不使用@ExceptionMapper和@ExceptionAliasFor修饰的原生异常
@@ -151,6 +159,14 @@ public class GracefulResponseProperties {
 
     public void setExcludePackages(List<String> excludePackages) {
         this.excludePackages = excludePackages;
+    }
+
+    public List<String> getExcludePaths() {
+        return excludePaths;
+    }
+
+    public void setExcludePaths(List<String> excludePaths) {
+        this.excludePaths = excludePaths;
     }
 
     public Boolean getOriginExceptionUsingDetailMessage() {
