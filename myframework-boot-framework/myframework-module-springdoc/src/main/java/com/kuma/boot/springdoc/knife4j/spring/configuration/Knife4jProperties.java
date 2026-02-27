@@ -20,7 +20,6 @@ package com.kuma.boot.springdoc.knife4j.spring.configuration;
 import com.github.xiaoymin.knife4j.core.extend.OpenApiExtendSetting;
 import com.github.xiaoymin.knife4j.core.model.MarkdownProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -30,7 +29,6 @@ import java.util.List;
  * @author <a href="mailto:xiaoymin@foxmail.com">xiaoymin@foxmail.com</a>
  * 2019/08/27 15:40
  */
-@Component
 @ConfigurationProperties(prefix = "knife4j")
 public class Knife4jProperties {
 
