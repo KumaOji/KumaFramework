@@ -54,7 +54,7 @@ public final class CacheUtil {
         if (second > 0) {
             scheduledExecutor = new ScheduledThreadPoolExecutor(
                     1,
-                    r -> new Thread(r, "ttc-captcha-cache-clean-executor"),
+                    r -> new Thread(r, "kmc-captcha-cache-clean-executor"),
                     new ThreadPoolExecutor.CallerRunsPolicy());
             scheduledExecutor.scheduleAtFixedRate(CacheUtil::refresh, 10, second, TimeUnit.SECONDS);
         }

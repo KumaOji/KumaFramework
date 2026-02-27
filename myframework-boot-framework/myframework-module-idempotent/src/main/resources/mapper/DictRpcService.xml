@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kuma.boot.idempotent.enhance.db.mapper.BusinessIdempotentMapper">
+
+    <insert id="insert">
+        INSERT INTO business_idempotent(namespace, source, operation_type, business_key, unique_key, idempotent_status,
+                                        object_version_number, response, create_date, last_modified_date)
+        VALUES (#{namespace},
+                #{source},
+                #{operationType},
+                #{businessKey},
+                #{uniqueKey},
+                #{idempotentStatus},
+                #{objectVersionNumber},
+                #{response},
+                #{createDate},
+                #{lastModifiedDate})
+    </insert>
+
+    <update id="changeIdempotentStatusProcessing">
+        UPDATE business_idempotent
+        SET idempotent_status     = #{idempotentStatus},
+            object_version_number = #{objectVersionNumber} + 1,
+            last_modified_date    = #{lastModifiedDate}
+        WHERE unique_key = #{uniqueKey}
+          AND object_version_number = #{objectVersionNumber}
+    </update>
+
+    <update id="changeIdempotentStatusSuccess">
+        UPDATE business_idempotent
+        SET idempotent_status     = #{idempotentStatus},
+            response              = #{response},
+            object_version_number = #{objectVersionNumber} + 1,
+            last_modified_date    = #{lastModifiedDate}
+        WHERE unique_key = #{uniqueKey}
+          AND object_version_number = #{objectVersionNumber}
+    </update>
+
+    <delete id="deleteByUniqueKey">
+        DELETE
+        FROM business_idempotent
+        WHERE unique_key = #{uniqueKey}
+    </delete>
+
+    <select id="queryByUniqueKey" resultType="com.kuma.boot.idempotent.idempotentenhance.core.pojo.IdempotentEntity">
+        SELECT namespace,
+               source,
+               operation_type,
+               business_key,
+               unique_key,
+               idempotent_status,
+               object_version_number,
+               response,
+               create_date,
+               last_modified_date
+        FROM business_idempotent
+        WHERE unique_key = #{uniqueKey}
+    </select>
+
+</mapper>

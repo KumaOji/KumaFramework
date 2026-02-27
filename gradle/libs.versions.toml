@@ -118,6 +118,13 @@ httpclient5 = "5.4.1"
 dnsjava = "3.6.2"
 zxing = "3.5.3"
 boofcv = "1.1.5"
+httpcore5 = "5.3.3"
+jetbrains-annotations = "24.1.0"
+json-path = "2.9.0"
+guava-retrying3 = "3.0.2"
+okhttp3 = "4.12.0"
+hibernate-validator = "8.0.2.Final"
+jakarta-xml-bind-api = "4.0.2"
 
 ## 统一定义依赖
 [libraries]
@@ -275,6 +282,17 @@ zxing-javase = { module = "com.google.zxing:javase", version.ref = "zxing" }
 boofcv-recognition = { module = "org.boofcv:boofcv-recognition", version.ref = "boofcv" }
 boofcv-io = { module = "org.boofcv:boofcv-io", version.ref = "boofcv" }
 easy-captcha = { module = "com.github.whvcse:easy-captcha", version = "1.6.2" }
+httpcore5 = { module = "org.apache.httpcomponents.core5:httpcore5", version.ref = "httpcore5" }
+spring-cloud-commons = { module = "org.springframework.cloud:spring-cloud-commons", version.ref = "spring-cloud-context-ver" }
+hutool-cache = { module = "cn.hutool:hutool-cache", version.ref = "hutool" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+json-path = { module = "com.jayway.jsonpath:json-path", version.ref = "json-path" }
+guava-retrying3 = { module = "io.github.itning:guava-retrying3", version.ref = "guava-retrying3" }
+okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp3" }
+hibernate-validator = { module = "org.hibernate.validator:hibernate-validator", version.ref = "hibernate-validator" }
+spring-boot-starter-mail = { module = "org.springframework.boot:spring-boot-starter-mail", version.ref = "springboot" }
+sentinel-parameter-flow-control = { module = "com.alibaba.csp:sentinel-parameter-flow-control", version.ref = "sentinel" }
+jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind-api" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

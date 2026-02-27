@@ -82,9 +82,9 @@ public class ResourceProvider implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
 
         String systemName = getOsInfo().getName();
-        log.debug("[ttc] |- Before captcha resource loading, check system. Current system is [{}]", systemName);
+        log.debug("[kmc] |- Before captcha resource loading, check system. Current system is [{}]", systemName);
 
-        log.debug("[ttc] |- Captcha resource loading is BEGIN！");
+        log.debug("[kmc] |- Captcha resource loading is BEGIN！");
 
         loadImages(
                 jigsawOriginalImages,
@@ -101,7 +101,7 @@ public class ResourceProvider implements InitializingBean {
 
         loadFonts();
 
-        log.debug("[ttc] |- Jigsaw captcha resource loading is END！");
+        log.debug("[kmc] |- Jigsaw captcha resource loading is END！");
     }
 
     private static String getBase64Image(Resource resource) {
@@ -110,7 +110,7 @@ public class ResourceProvider implements InitializingBean {
             byte[] bytes = FileCopyUtils.copyToByteArray(inputStream);
             return Base64.encode(bytes);
         } catch (IOException e) {
-            log.error("[ttc] |- Captcha get image catch io error!", e);
+            log.error("[kmc] |- Captcha get image catch io error!", e);
         }
         return null;
     }
@@ -130,7 +130,7 @@ public class ResourceProvider implements InitializingBean {
                 }
                 return images;
             } catch (IOException e) {
-                log.error("[ttc] |- Analysis the  location [{}] catch io error!", location, e);
+                log.error("[kmc] |- Analysis the  location [{}] catch io error!", location, e);
             }
         }
 
@@ -143,7 +143,7 @@ public class ResourceProvider implements InitializingBean {
         if (MapUtils.isNotEmpty(resource)) {
             container.putAll(resource);
             log.debug(
-                    "[ttc] |- {} load complete, total number is [{}]",
+                    "[kmc] |- {} load complete, total number is [{}]",
                     captchaResource.getContent(),
                     resource.size());
             imageIndexes.put(captchaResource.name(), resource.keySet().toArray(new String[0]));
@@ -157,14 +157,14 @@ public class ResourceProvider implements InitializingBean {
         } catch (IORuntimeException e) {
             // 虽然 java.awt.Font 抛出的是 IOException, 因为使用 Hutool FontUtil 将错误又包装了一次。所以出错时必须要拦截
             // IORuntimeException，否则会导致错误不被拦截直接抛出，应用启动失败。
-            log.warn("[ttc] |- Can not read font in the resources folder, maybe in docker.");
+            log.warn("[kmc] |- Can not read font in the resources folder, maybe in docker.");
             // TODO: 2022-10-21 尝试在 docker alpine 下解决字体问题的多种方式之一。目前改用 debian，下面代码已经不再需要。暂留，确保确实没有问题后再做处理
             Font fontInfileSystem = getFontUnderDocker(resource.getFilename());
             if (ObjectUtils.isNotEmpty(fontInfileSystem)) {
                 return fontInfileSystem;
             }
         } catch (IOException e) {
-            log.error("[ttc] |- Resource object in resources folder catch io error!", e);
+            log.error("[kmc] |- Resource object in resources folder catch io error!", e);
         }
 
         return null;
@@ -179,12 +179,12 @@ public class ResourceProvider implements InitializingBean {
                 LogUtils.info(file.getAbsolutePath());
                 try {
                     Font font = FontUtil.createFont(file);
-                    log.debug("[ttc] |- Read font [{}] under the DOCKER.", font.getFontName());
+                    log.debug("[kmc] |- Read font [{}] under the DOCKER.", font.getFontName());
                     return font;
                 } catch (IORuntimeException e) {
-                    log.error("[ttc] |- Read font under the DOCKER catch error.");
+                    log.error("[kmc] |- Read font under the DOCKER catch error.");
                 } catch (NullPointerException e) {
-                    log.error("[ttc] |- Read font under the DOCKER catch null error.");
+                    log.error("[kmc] |- Read font under the DOCKER catch null error.");
                 }
             }
         }
@@ -207,7 +207,7 @@ public class ResourceProvider implements InitializingBean {
                 }
                 return fonts;
             } catch (IOException e) {
-                log.error("[ttc] |- Analysis the  location [{}] catch io error!", location, e);
+                log.error("[kmc] |- Analysis the  location [{}] catch io error!", location, e);
             }
         }
 
@@ -217,7 +217,7 @@ public class ResourceProvider implements InitializingBean {
     private void loadFonts() {
         if (MapUtils.isEmpty(fonts)) {
             this.fonts = getFonts(FONT_RESOURCE);
-            log.debug("[ttc] |- Font load complete, total number is [{}]", fonts.size());
+            log.debug("[kmc] |- Font load complete, total number is [{}]", fonts.size());
         }
     }
 

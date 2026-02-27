@@ -141,7 +141,7 @@ implements CaptchaService {
 
     private void loadWaterMarkFont() {
         try {
-            this.waterMarkFont = waterMarkFontStr.toLowerCase().endsWith(".ttf") || waterMarkFontStr.toLowerCase().endsWith(".ttc") || waterMarkFontStr.toLowerCase().endsWith(".otf") ? Font.createFont(0, Objects.requireNonNull(this.getClass().getResourceAsStream("/fonts/" + waterMarkFontStr))).deriveFont(1, HAN_ZI_SIZE / 2) : new Font(waterMarkFontStr, 1, HAN_ZI_SIZE / 2);
+            this.waterMarkFont = waterMarkFontStr.toLowerCase().endsWith(".ttf") || waterMarkFontStr.toLowerCase().endsWith(".kmc") || waterMarkFontStr.toLowerCase().endsWith(".otf") ? Font.createFont(0, Objects.requireNonNull(this.getClass().getResourceAsStream("/fonts/" + waterMarkFontStr))).deriveFont(1, HAN_ZI_SIZE / 2) : new Font(waterMarkFontStr, 1, HAN_ZI_SIZE / 2);
         }
         catch (Exception e) {
             LogUtils.error((Throwable)e, (String)"load font error:{}", (Object[])new Object[]{e.getMessage()});

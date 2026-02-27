@@ -263,6 +263,7 @@ public class WechatOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             private HttpMessageConverters() {}
 
+            @SuppressWarnings("removal")
             static GenericHttpMessageConverter<Object> getJsonMessageConverter() {
                 if (jackson2Present) {
                     return new MappingJackson2HttpMessageConverter();

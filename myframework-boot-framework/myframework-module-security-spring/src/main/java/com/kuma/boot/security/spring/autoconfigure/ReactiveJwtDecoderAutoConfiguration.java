@@ -182,7 +182,7 @@ public class ReactiveJwtDecoderAutoConfiguration implements InitializingBean {
     //		nacosServiceManager
     //			.getNamingService()
     //			.subscribe(
-    //				ServiceName.TAOTAO_CLOUD_AUTH,
+    //				ServiceName.KUMA_CLOUD_AUTH,
     //				this.properties.getGroup(),
     //				List.of(this.properties.getClusterName()),
     //				event -> {

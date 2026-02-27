@@ -37,7 +37,7 @@ public class BehaviorCaptchaConfiguration {
 
     @PostConstruct
     public void postConstruct() {
-        log.debug("[ttc] |- SDK [Captcha Behavior] Auto Configure.");
+        log.debug("[kmc] |- SDK [Captcha Behavior] Auto Configure.");
     }
 
     @Bean(value={"JIGSAW"})
@@ -45,7 +45,7 @@ public class BehaviorCaptchaConfiguration {
     public JigsawCaptchaRenderer jigsawCaptchaRenderer(ResourceProvider resourceProvider) {
         JigsawCaptchaRenderer jigsawCaptchaRenderer = new JigsawCaptchaRenderer(this.redisRepository, "cache:token:captcha:jigsaw:");
         jigsawCaptchaRenderer.setResourceProvider(resourceProvider);
-        log.trace("[ttc] |- Bean [Jigsaw Captcha Renderer] Auto Configure.");
+        log.trace("[kmc] |- Bean [Jigsaw Captcha Renderer] Auto Configure.");
         return jigsawCaptchaRenderer;
     }
 
@@ -54,7 +54,7 @@ public class BehaviorCaptchaConfiguration {
     public WordClickCaptchaRenderer wordClickCaptchaRenderer(ResourceProvider resourceProvider) {
         WordClickCaptchaRenderer wordClickCaptchaRenderer = new WordClickCaptchaRenderer(this.redisRepository, "cache:token:captcha:word_click:");
         wordClickCaptchaRenderer.setResourceProvider(resourceProvider);
-        log.trace("[ttc] |- Bean [Word Click Captcha Renderer] Auto Configure.");
+        log.trace("[kmc] |- Bean [Word Click Captcha Renderer] Auto Configure.");
         return wordClickCaptchaRenderer;
     }
 }

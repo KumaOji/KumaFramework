@@ -22,6 +22,7 @@ dependencies {
     api projectLibs.hutool.extra
     api projectLibs.hutool.crypto
     api projectLibs.hutool.json
+    api projectLibs.hutool.cache
     api projectLibs.guava
     api projectLibs.fastjson2
     api projectLibs.commons.lang3
@@ -30,9 +31,13 @@ dependencies {
     api projectLibs.commons.io
     api projectLibs.jackson.databind
     api projectLibs.jjwt.api
+    api projectLibs.httpcore5
+    api projectLibs.jakarta.validation.api
     api projectLibs.justauth
     runtimeOnly projectLibs.jjwt.impl
     runtimeOnly projectLibs.jjwt.jackson
+    compileOnly projectLibs.spring.cloud.commons
+    compileOnly projectLibs.jetbrains.annotations
     compileOnly projectLibs.jspecify
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok

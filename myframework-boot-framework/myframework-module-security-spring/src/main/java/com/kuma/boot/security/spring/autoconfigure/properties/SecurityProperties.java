@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.security.spring.configuration.properties;
+package com.kuma.boot.security.spring.autoconfigure.properties;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;

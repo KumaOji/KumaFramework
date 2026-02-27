@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.security.spring.configuration.properties;
+package com.kuma.boot.security.spring.autoconfigure.properties;
 
 import static com.kuma.boot.security.spring.authentication.login.extension.email.EmailAuthenticationFilter.KMC_SECURITY_EXTENSIONS_EMAIL_LOGIN_EMAIL_CODE_KEY;
 import static com.kuma.boot.security.spring.authentication.login.extension.email.EmailAuthenticationFilter.KMC_SECURITY_EXTENSIONS_EMAIL_LOGIN_EMAIL_KEY;

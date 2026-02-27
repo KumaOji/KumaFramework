@@ -9,16 +9,29 @@ dependencies {
     api project(':myframework-boot-framework:myframework-module-core')
     api project(':myframework-boot-framework:myframework-module-security-spring')
     api project(':myframework-boot-framework:myframework-module-ip2region')
+    api project(':myframework-boot-framework:myframework-module-idempotent')
+    api project(':myframework-boot-framework:myframework-module-ratelimit')
+    api project(':myframework-boot-framework:myframework-module-mq-kafka')
     api project(':myframework-boot-framework:myframework-module-cache-redis')
     api projectLibs.hutool.core
+    api projectLibs.hutool.http
     api projectLibs.jackson.databind
     api projectLibs.javax.json.api
     api projectLibs.fastjson2
     api projectLibs.swagger.annotations
     api projectLibs.commons.lang3
     api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.validation
     api projectLibs.spring.web
+    api projectLibs.transmittable.thread.local
+    compileOnly projectLibs.okhttp3
+    compileOnly projectLibs.spring.boot.starter.mail
+    compileOnly projectLibs.jetbrains.annotations
+    compileOnly projectLibs.jakarta.xml.bind.api
     compileOnly projectLibs.micrometer.tracing.api
     implementation projectLibs.sentinel.core
+    implementation projectLibs.sentinel.parameter.flow.control
     implementation projectLibs.skywalking.apm.toolkit.trace
+    implementation projectLibs.json.path
+    implementation projectLibs.guava.retrying3
 }

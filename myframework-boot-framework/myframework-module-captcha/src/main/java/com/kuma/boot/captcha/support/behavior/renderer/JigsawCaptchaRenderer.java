@@ -118,8 +118,8 @@ extends AbstractBehaviorRenderer {
         int originalImageHeight = originalImage.getHeight();
         int templateImageWidth = templateImage.getWidth();
         int templateImageHeight = templateImage.getHeight();
-        log.trace("[ttc] |- Jigsaw captcha original image width is [{}], height is [{}].", (Object)originalImageWidth, (Object)originalImageHeight);
-        log.trace("[ttc] |- Jigsaw captcha template image width is [{}], height is [{}].", (Object)templateImageWidth, (Object)templateImageHeight);
+        log.trace("[kmc] |- Jigsaw captcha original image width is [{}], height is [{}].", (Object)originalImageWidth, (Object)originalImageHeight);
+        log.trace("[kmc] |- Jigsaw captcha template image width is [{}], height is [{}].", (Object)templateImageWidth, (Object)templateImageHeight);
         Coordinate coordinate = this.createImageMattingCoordinate(originalImageWidth, originalImageHeight, templateImageWidth, templateImageHeight);
         int x = coordinate.getX();
         int y = coordinate.getY();
@@ -135,7 +135,7 @@ extends AbstractBehaviorRenderer {
         graphics.setStroke(new BasicStroke(5.0f, 0, 2));
         graphics.drawImage((Image)jigsawImage, 0, 0, null);
         graphics.dispose();
-        log.trace("[ttc] |- Jigsaw captcha jigsaw image width is [{}], height is [{}].", (Object)jigsawImage.getWidth(), (Object)jigsawImage.getHeight());
+        log.trace("[kmc] |- Jigsaw captcha jigsaw image width is [{}], height is [{}].", (Object)jigsawImage.getWidth(), (Object)jigsawImage.getHeight());
         Metadata metadata = new Metadata();
         metadata.setOriginalImageBase64(this.toBase64(originalImage));
         metadata.setSliderImageBase64(this.toBase64(jigsawImage));
@@ -154,7 +154,7 @@ extends AbstractBehaviorRenderer {
         if (availableHeight > 0) {
             y = RandomProvider.randomInt(availableHeight) + 5;
         }
-        log.debug("[ttc] |- Jigsaw captcha image matting coordinate is x: [{}], y: [{}].", (Object)x, (Object)y);
+        log.debug("[kmc] |- Jigsaw captcha image matting coordinate is x: [{}], y: [{}].", (Object)x, (Object)y);
         return new Coordinate(x, y);
     }
 

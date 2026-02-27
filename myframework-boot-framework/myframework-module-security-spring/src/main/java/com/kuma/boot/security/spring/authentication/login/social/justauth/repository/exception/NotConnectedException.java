@@ -17,8 +17,6 @@
 package com.kuma.boot.security.spring.authentication.login.social.justauth.repository.exception;
 
 import com.kuma.boot.security.spring.authentication.login.social.justauth.repository.UsersConnectionRepository;
-import org.springframework.security.core.SpringSecurityCoreVersion;
-
 /**
  * Thrown by a {@link UsersConnectionRepository} when attempting to fetch a "primary" connection and
  * the user is not connected to the provider in question.
@@ -28,7 +26,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
  */
 public class NotConnectedException extends com.kuma.boot.security.spring.authentication.login.social.justauth.repository.exception.ConnectionRepositoryException {
 
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     private final String providerId;
 

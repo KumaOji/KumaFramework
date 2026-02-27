@@ -57,3 +57,4 @@ include 'myframework-boot-framework:myframework-module-security-jstauth'
 include 'myframework-boot-framework:myframework-module-totp'
 
 include 'myframework-boot-framework:myframework-module-captcha'
+include 'myframework-boot-framework:myframework-module-dingtalk'

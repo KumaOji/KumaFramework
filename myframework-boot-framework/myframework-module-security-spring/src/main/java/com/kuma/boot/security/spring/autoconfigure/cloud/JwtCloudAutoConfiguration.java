@@ -41,7 +41,7 @@ public class JwtCloudAutoConfiguration {
             @Override
             public String jwkSetUri() {
                 return discoveryClient.getServices().stream()
-                        .filter(s -> s.contains(ServiceNameConstants.TAOTAO_CLOUD_AUTH))
+                        .filter(s -> s.contains(ServiceNameConstants.KUMA_CLOUD_AUTH))
                         .flatMap(s -> discoveryClient.getInstances(s).stream())
                         .map(
                                 instance ->
@@ -78,7 +78,7 @@ public class JwtCloudAutoConfiguration {
     //		nacosServiceManager
     //			.getNamingService()
     //			.subscribe(
-    //				ServiceName.TAOTAO_CLOUD_AUTH,
+    //				ServiceName.KUMA_CLOUD_AUTH,
     //				this.properties.getGroup(),
     //				List.of(this.properties.getClusterName()),
     //				event -> {

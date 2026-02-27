@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.security.spring.configuration.customizer;
+package com.kuma.boot.security.spring.autoconfigure.customizer;
 
 import tools.jackson.databind.json.JsonMapper;
 

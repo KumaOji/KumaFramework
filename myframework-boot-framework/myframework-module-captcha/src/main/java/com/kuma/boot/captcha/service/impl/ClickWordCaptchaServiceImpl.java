@@ -53,7 +53,7 @@ extends AbstractCaptchaService {
         super.init(config);
         clickWordFontStr = config.getProperty("captcha.font.type", "SourceHanSansCN-Normal.otf");
         try {
-            this.clickWordFont = clickWordFontStr.toLowerCase().endsWith(".ttf") || clickWordFontStr.toLowerCase().endsWith(".ttc") || clickWordFontStr.toLowerCase().endsWith(".otf") ? Font.createFont(0, this.getClass().getResourceAsStream("/fonts/" + clickWordFontStr)).deriveFont(1, HAN_ZI_SIZE) : new Font(clickWordFontStr, 1, HAN_ZI_SIZE);
+            this.clickWordFont = clickWordFontStr.toLowerCase().endsWith(".ttf") || clickWordFontStr.toLowerCase().endsWith(".kmc") || clickWordFontStr.toLowerCase().endsWith(".otf") ? Font.createFont(0, this.getClass().getResourceAsStream("/fonts/" + clickWordFontStr)).deriveFont(1, HAN_ZI_SIZE) : new Font(clickWordFontStr, 1, HAN_ZI_SIZE);
         }
         catch (Exception ex) {
             LogUtils.error((String)"load font error:{}", (Object[])new Object[]{ex});

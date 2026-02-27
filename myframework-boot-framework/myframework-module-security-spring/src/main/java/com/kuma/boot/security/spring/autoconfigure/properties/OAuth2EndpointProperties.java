@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.security.spring.configuration.properties;
+package com.kuma.boot.security.spring.autoconfigure.properties;
 
 import com.google.common.base.MoreObjects;
 import com.kuma.boot.security.spring.constants.DefaultConstants;
