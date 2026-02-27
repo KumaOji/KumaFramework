@@ -6,7 +6,9 @@ description = 'Myframework security-spring 模块'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-security-common')
+    api project(':myframework-boot-framework:myframework-module-security-jstauth')
     api project(':myframework-boot-framework:myframework-module-cache-redis')
+    api projectLibs.swagger.annotations.jakarta
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.data.redis

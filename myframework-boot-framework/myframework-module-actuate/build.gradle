@@ -1,20 +1,16 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'com.kuma.cloud'
-version = '1.0.0'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework 核心模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-test {
-    useJUnitPlatform()
+    api project(':myframework-boot-framework:myframework-module-common')
+    api project(':myframework-boot-framework:myframework-module-core')
+    api projectLibs.spring.boot.starter.actuator
+    api projectLibs.spring.cloud.context
+    api projectLibs.hutool.json
+    compileOnly projectLibs.druid.starter
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

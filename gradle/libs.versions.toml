@@ -111,9 +111,11 @@ poi = "5.3.0"
 poi-ooxml = "5.3.0"
 poi-ooxml-full = "5.3.0"
 sentinel = "1.8.8"
-micrometer-tracing = "1.1.4"
+micrometer-tracing = "1.4.0"
 skywalking-apm-toolkit = "9.0.0"
 cglib = "3.3.0"
+httpclient5 = "5.4.1"
+dnsjava = "3.6.2"
 
 ## 统一定义依赖
 [libraries]
@@ -219,6 +221,7 @@ swagger-annotations-jakarta = { module = "io.swagger.core.v3:swagger-annotations
 mybatis-plus-extension = { module = "com.baomidou:mybatis-plus-extension", version.ref = "mybatis-plus" }
 mybatis-plus-jsqlparser = { module = "com.baomidou:mybatis-plus-jsqlparser", version.ref = "mybatis-plus" }
 spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache", version.ref = "springboot" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springboot" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 jetcache-starter-redis = { module = "com.alicp.jetcache:jetcache-starter-redis", version.ref = "jetcache" }
 aviator = { module = "com.googlecode.aviator:aviator", version.ref = "aviator" }
@@ -254,10 +257,12 @@ poi = { module = "org.apache.poi:poi", version.ref = "poi" }
 poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi-ooxml" }
 poi-ooxml-full = { module = "org.apache.poi:poi-ooxml-full", version.ref = "poi-ooxml-full" }
 sentinel-core = { module = "com.alibaba.csp:sentinel-core", version.ref = "sentinel" }
-micrometer-tracing-api = { module = "io.micrometer:micrometer-tracing-api", version.ref = "micrometer-tracing" }
+micrometer-tracing-api = { module = "io.micrometer:micrometer-tracing", version.ref = "micrometer-tracing" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer-tracing" }
 skywalking-apm-toolkit-trace = { module = "org.apache.skywalking:apm-toolkit-trace", version.ref = "skywalking-apm-toolkit" }
 cglib = { module = "cglib:cglib", version.ref = "cglib" }
+httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version.ref = "httpclient5" }
+dnsjava = { module = "dnsjava:dnsjava", version.ref = "dnsjava" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

@@ -18,8 +18,7 @@ dependencies {
     api projectLibs.commons.lang3
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.web
-    implementation projectLibs.micrometer.tracing.api
-    implementation projectLibs.micrometer.tracing.bridge.brave
+    compileOnly projectLibs.micrometer.tracing.api
     implementation projectLibs.sentinel.core
     implementation projectLibs.skywalking.apm.toolkit.trace
 }

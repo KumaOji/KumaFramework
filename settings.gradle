@@ -23,13 +23,13 @@ for (name in oneLayerProjects) {
 }
 
 def frameworkBootSubModules = ['common', 'core', 'data-datasource',
-                               'data-mybatis', 'office','actuate',
-                           'mq-common', 'mq-kafka','ip2region',
-                           'data-common', 'springdoc', 'web',
-                           'cache-jetcache', 'cache-caffeine', 'cache-common',
-                               'cache-redis','security-common','security-spring',
-                            'ratelimit','idempotent',
-                           'infrastruct', "spring", "application"]
+                               'data-mybatis', 'office', 'actuate',
+                               'mq-common', 'mq-kafka', 'ip2region',
+                               'data-common', 'springdoc', 'web',
+                               'cache-jetcache', 'cache-caffeine', 'cache-common',
+                               'cache-redis', 'security-common', 'security-spring',
+                               'ratelimit', 'idempotent',
+                               'infrastruct', "spring", "application"]
 for (name in frameworkBootSubModules) {
     include "myframework-boot-framework:myframework-module-${name}"
 }
@@ -52,5 +52,8 @@ gradle.settingsEvaluated {
 }
 
 
-
 include 'myframework-boot-framework:myframework-module-lock'
+include 'myframework-boot-framework:myframework-module-security-jstauth'
+include 'myframework-boot-framework:myframework-module-totp'
+
+include 'myframework-boot-framework:myframework-module-captcha'

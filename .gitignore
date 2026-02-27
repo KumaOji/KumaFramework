@@ -19,3 +19,10 @@ myframework-cloud-project/myframework-project-blog/
 
 # jar
 *.jar
+
+# claude
+.claude/
+CLAUDE.md
+
+# doc
+doc/

@@ -14,6 +14,12 @@ dependencies {
     api projectLibs.ip2region
     api projectLibs.hutool.json
     api projectLibs.hutool.http
+    implementation projectLibs.guava
+    implementation projectLibs.httpclient5
+    implementation projectLibs.dnsjava
+    compileOnly projectLibs.jspecify
+    compileOnly projectLibs.jackson.annotations
+    compileOnly projectLibs.jakarta.validation.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
     testImplementation platform('org.junit:junit-bom:5.10.0')
