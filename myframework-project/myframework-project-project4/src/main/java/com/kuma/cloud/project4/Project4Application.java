@@ -50,8 +50,4 @@ public class Project4Application extends SpringBootServletInitializer {
                 .setKmcAllowBeanDefinitionOverriding(true)
                 .run(args);
     }
-
-//    public static void main(String[] args) {
-//        run(Project1Application.class, args);
-//    }
 }

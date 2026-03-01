@@ -57,3 +57,10 @@ include 'myframework-boot-framework:myframework-module-totp'
 
 include 'myframework-boot-framework:myframework-module-captcha'
 include 'myframework-boot-framework:myframework-module-dingtalk'
+
+include 'myframework-cloud-framework:myframework-module-seata'
+include 'myframework-cloud-framework:myframework-module-kmc'
+include 'myframework-cloud-framework:myframework-module-sentinel'
+include 'myframework-cloud-framework:myframework-module-stream'
+
+include 'myframework-cloud-framework:myframework-module-alibaba'
