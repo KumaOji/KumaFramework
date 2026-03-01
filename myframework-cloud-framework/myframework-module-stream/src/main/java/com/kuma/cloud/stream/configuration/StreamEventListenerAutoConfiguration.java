@@ -1,13 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.cloud.stream.binder.BindingCreatedEvent
- *  org.springframework.context.ApplicationListener
- *  org.springframework.context.annotation.Configuration
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.stream.configuration;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -18,13 +24,11 @@ import org.springframework.context.annotation.Configuration;
 
 @AutoConfiguration
 public class StreamEventListenerAutoConfiguration {
-
     @Configuration
-    public static class BindingCreatedEventListener
-    implements ApplicationListener<BindingCreatedEvent> {
+    public static class BindingCreatedEventListener implements ApplicationListener<BindingCreatedEvent> {
+        @Override
         public void onApplicationEvent(BindingCreatedEvent event) {
-            LogUtils.info((String)"StreamEventListener ----- BindingCreatedEvent onApplicationEvent {}", (Object[])new Object[]{event});
+            LogUtils.info("StreamEventListener ----- BindingCreatedEvent onApplicationEvent {}", event);
         }
     }
 }
-

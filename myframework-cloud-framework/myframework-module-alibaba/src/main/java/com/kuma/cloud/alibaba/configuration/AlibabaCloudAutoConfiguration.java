@@ -1,22 +1,38 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.alibaba.configuration;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 
+/**
+ * AlibabaCloudAutoConfiguration
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2021/06/17 17:21
+ */
 @AutoConfiguration
-public class AlibabaCloudAutoConfiguration
-implements InitializingBean {
+public class AlibabaCloudAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(AlibabaCloudAutoConfiguration.class, (String)"kuma-cloud-starter-alibaba", (String[])new String[0]);
+        LogUtils.started(AlibabaCloudAutoConfiguration.class, StarterNameConstants.ALIBABA_CLOUD_STARTER);
     }
 }
-

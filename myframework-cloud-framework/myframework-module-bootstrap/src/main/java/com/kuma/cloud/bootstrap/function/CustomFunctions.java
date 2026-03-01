@@ -1,11 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.context.annotation.Bean
- *  org.springframework.stereotype.Component
- *  reactor.core.publisher.Flux
- */
 package com.kuma.cloud.bootstrap.function;
 
 import java.util.function.Function;
@@ -15,6 +7,7 @@ import reactor.core.publisher.Flux;
 
 @Component
 public class CustomFunctions {
+
     @Bean
     public Function<String, String> toUpperCase() {
         return value -> value.toUpperCase();
@@ -35,4 +28,3 @@ public class CustomFunctions {
         return flux -> flux.map(value -> value.toLowerCase());
     }
 }
-

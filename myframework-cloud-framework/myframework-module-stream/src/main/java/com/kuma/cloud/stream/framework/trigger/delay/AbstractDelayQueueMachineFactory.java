@@ -1,31 +1,48 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  com.kuma.boot.common.utils.date.DateUtils
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.stream.framework.trigger.delay;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 
-public abstract class AbstractDelayQueueMachineFactory
-implements DelayQueueMachine {
+/** 延时队列工厂 */
+public abstract class AbstractDelayQueueMachineFactory implements DelayQueueMachine {
+
     private final RedisRepository cache;
 
     protected AbstractDelayQueueMachineFactory(RedisRepository cache) {
         this.cache = cache;
     }
 
+    /**
+     * 插入任务id
+     *
+     * @param jobId 任务id(队列内唯一)
+     * @param triggerTime 执行时间 时间戳（毫秒）
+     * @return 是否插入成功
+     */
     @Override
     public boolean addJob(String jobId, Long triggerTime) {
-        long delaySeconds = triggerTime / 1000L;
-        boolean result = this.cache.zAdd(this.getDelayQueueName(), (Object)jobId, (double)delaySeconds);
-        LogUtils.info((String)"\u589e\u52a0\u5ef6\u65f6\u4efb\u52a1, \u7f13\u5b58key {}, \u6267\u884c\u65f6\u95f4 {},\u4efb\u52a1id {}", (Object[])new Object[]{this.getDelayQueueName(), DateUtils.toString((Long)triggerTime), jobId});
+        // redis 中排序时间
+        long delaySeconds = triggerTime / 1000;
+        // 增加延时任务 参数依次为：队列名称、执行时间、任务id
+        boolean result = cache.zAdd(getDelayQueueName(), jobId, delaySeconds);
+        LogUtils.info("增加延时任务, 缓存key {}, 执行时间 {},任务id {}", getDelayQueueName(), DateUtils.toString(triggerTime), jobId);
         return result;
     }
 }
-

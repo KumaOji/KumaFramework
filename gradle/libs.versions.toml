@@ -127,6 +127,10 @@ hibernate-validator = "8.0.2.Final"
 jakarta-xml-bind-api = "4.0.2"
 jaxb-runtime = "4.0.5"
 spotbugs-annotations = "4.8.6"
+spring-cloud = "2025.1.0"
+spring-cloud-alibaba = "2025.1.0.0"
+rocketmq-spring = "2.3.3"
+seata = "2.5.0"
 
 ## 统一定义依赖
 [libraries]
@@ -297,6 +301,15 @@ sentinel-parameter-flow-control = { module = "com.alibaba.csp:sentinel-parameter
 jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind-api" }
 jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "jaxb-runtime" }
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
+spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
+spring-cloud-alibaba-dependencies = { module = "com.alibaba.cloud:spring-cloud-alibaba-dependencies", version.ref = "spring-cloud-alibaba" }
+spring-cloud-starter-alibaba-nacos-discovery = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery", version.ref = "spring-cloud-alibaba" }
+spring-cloud-starter-alibaba-nacos-config = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config", version.ref = "spring-cloud-alibaba" }
+spring-cloud-starter-alibaba-sentinel = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-sentinel", version.ref = "spring-cloud-alibaba" }
+spring-cloud-starter-alibaba-seata = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-seata", version.ref = "spring-cloud-alibaba" }
+rocketmq-spring-boot-starter = { module = "org.apache.rocketmq:rocketmq-spring-boot-starter", version.ref = "rocketmq-spring" }
+spring-cloud-starter-stream-rocketmq = { module = "com.alibaba.cloud:spring-cloud-starter-stream-rocketmq", version.ref = "spring-cloud-alibaba" }
+seata-spring-boot-starter = { module = "org.apache.seata:seata-spring-boot-starter", version.ref = "seata" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

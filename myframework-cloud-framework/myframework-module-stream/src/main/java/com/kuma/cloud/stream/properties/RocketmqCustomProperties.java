@@ -1,41 +1,74 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.stream.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="kuma.cloud.stream.rocketmq.custom")
+@ConfigurationProperties(prefix = "kuma.cloud.stream.rocketmq.custom")
 public class RocketmqCustomProperties {
+
     private String promotionTopic;
+
     private String promotionGroup;
+
     private String orderTopic;
+
     private String orderGroup;
+
     private String msgExtTopic;
+
     private String msgExtGroup;
+
     private String goodsTopic;
+
     private String goodsGroup;
+
     private String topicUser;
+
     private String memberTopic;
+
     private String memberGroup;
+
     private String otherTopic;
+
     private String otherGroup;
+
     private String noticeTopic;
+
     private String noticeGroup;
+
     private String noticeSendTopic;
+
     private String noticeSendGroup;
+
     private String storeTopic;
+
     private String storeGroup;
+
     private String afterSaleTopic;
+
     private String afterSaleGroup;
+
     private String broadcastTopic;
+
     private String broadcastGroup;
 
     public String getPromotionTopic() {
-        return this.promotionTopic;
+        return promotionTopic;
     }
 
     public void setPromotionTopic(String promotionTopic) {
@@ -43,7 +76,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getPromotionGroup() {
-        return this.promotionGroup;
+        return promotionGroup;
     }
 
     public void setPromotionGroup(String promotionGroup) {
@@ -51,7 +84,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getOrderTopic() {
-        return this.orderTopic;
+        return orderTopic;
     }
 
     public void setOrderTopic(String orderTopic) {
@@ -59,7 +92,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getOrderGroup() {
-        return this.orderGroup;
+        return orderGroup;
     }
 
     public void setOrderGroup(String orderGroup) {
@@ -67,7 +100,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getMsgExtTopic() {
-        return this.msgExtTopic;
+        return msgExtTopic;
     }
 
     public void setMsgExtTopic(String msgExtTopic) {
@@ -75,7 +108,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getMsgExtGroup() {
-        return this.msgExtGroup;
+        return msgExtGroup;
     }
 
     public void setMsgExtGroup(String msgExtGroup) {
@@ -83,7 +116,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getGoodsTopic() {
-        return this.goodsTopic;
+        return goodsTopic;
     }
 
     public void setGoodsTopic(String goodsTopic) {
@@ -91,7 +124,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getGoodsGroup() {
-        return this.goodsGroup;
+        return goodsGroup;
     }
 
     public void setGoodsGroup(String goodsGroup) {
@@ -99,7 +132,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getTopicUser() {
-        return this.topicUser;
+        return topicUser;
     }
 
     public void setTopicUser(String topicUser) {
@@ -107,7 +140,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getMemberTopic() {
-        return this.memberTopic;
+        return memberTopic;
     }
 
     public void setMemberTopic(String memberTopic) {
@@ -115,7 +148,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getMemberGroup() {
-        return this.memberGroup;
+        return memberGroup;
     }
 
     public void setMemberGroup(String memberGroup) {
@@ -123,7 +156,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getOtherTopic() {
-        return this.otherTopic;
+        return otherTopic;
     }
 
     public void setOtherTopic(String otherTopic) {
@@ -131,7 +164,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getOtherGroup() {
-        return this.otherGroup;
+        return otherGroup;
     }
 
     public void setOtherGroup(String otherGroup) {
@@ -139,7 +172,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getNoticeTopic() {
-        return this.noticeTopic;
+        return noticeTopic;
     }
 
     public void setNoticeTopic(String noticeTopic) {
@@ -147,7 +180,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getNoticeGroup() {
-        return this.noticeGroup;
+        return noticeGroup;
     }
 
     public void setNoticeGroup(String noticeGroup) {
@@ -155,7 +188,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getNoticeSendTopic() {
-        return this.noticeSendTopic;
+        return noticeSendTopic;
     }
 
     public void setNoticeSendTopic(String noticeSendTopic) {
@@ -163,7 +196,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getNoticeSendGroup() {
-        return this.noticeSendGroup;
+        return noticeSendGroup;
     }
 
     public void setNoticeSendGroup(String noticeSendGroup) {
@@ -171,7 +204,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getStoreTopic() {
-        return this.storeTopic;
+        return storeTopic;
     }
 
     public void setStoreTopic(String storeTopic) {
@@ -179,7 +212,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getStoreGroup() {
-        return this.storeGroup;
+        return storeGroup;
     }
 
     public void setStoreGroup(String storeGroup) {
@@ -187,7 +220,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getAfterSaleTopic() {
-        return this.afterSaleTopic;
+        return afterSaleTopic;
     }
 
     public void setAfterSaleTopic(String afterSaleTopic) {
@@ -195,7 +228,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getAfterSaleGroup() {
-        return this.afterSaleGroup;
+        return afterSaleGroup;
     }
 
     public void setAfterSaleGroup(String afterSaleGroup) {
@@ -203,7 +236,7 @@ public class RocketmqCustomProperties {
     }
 
     public String getBroadcastTopic() {
-        return this.broadcastTopic;
+        return broadcastTopic;
     }
 
     public void setBroadcastTopic(String broadcastTopic) {
@@ -211,11 +244,10 @@ public class RocketmqCustomProperties {
     }
 
     public String getBroadcastGroup() {
-        return this.broadcastGroup;
+        return broadcastGroup;
     }
 
     public void setBroadcastGroup(String broadcastGroup) {
         this.broadcastGroup = broadcastGroup;
     }
 }
-

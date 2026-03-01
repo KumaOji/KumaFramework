@@ -1,20 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.cloud.client.discovery.event.HeartbeatEvent
- *  org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent
- *  org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent
- *  org.springframework.cloud.context.environment.EnvironmentChangeEvent
- *  org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent
- *  org.springframework.context.ApplicationListener
- *  org.springframework.context.annotation.Configuration
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.bootstrap.listener;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -27,49 +29,64 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 
 @AutoConfiguration
-public class CloudEventListenerAutoConfiguration
-implements InitializingBean {
+public class CloudEventListenerAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(CloudEventListenerAutoConfiguration.class, (String)"kuma-cloud-starter-bootstrap", (String[])new String[0]);
+        LogUtils.started(CloudEventListenerAutoConfiguration.class, StarterNameConstants.BOOTSTRAP_CLOUD_STARTER);
+    }
+
+    @Configuration
+    public static class RefreshScopeRefreshedEventListener implements
+            ApplicationListener<RefreshScopeRefreshedEvent> {
+
+        @Override
+        public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
+            LogUtils.info(
+                    "CloudEventListener ----- RefreshScopeRefreshedEvent onApplicationEvent {}", event);
+        }
+    }
+
+    @Configuration
+    public static class EnvironmentChangeEventListener implements
+            ApplicationListener<EnvironmentChangeEvent> {
+
+        @Override
+        public void onApplicationEvent(EnvironmentChangeEvent event) {
+            LogUtils.info("CloudEventListener ----- EnvironmentChangeEvent onApplicationEvent {}",
+                    event);
+        }
+    }
+
+    @Configuration
+    public static class HeartbeatEventListener implements ApplicationListener<HeartbeatEvent> {
+
+        @Override
+        public void onApplicationEvent(HeartbeatEvent event) {
+            // NacosDiscoveryHeartBeatPublisher
+            // LogUtils.info("CloudEventListener ----- HeartbeatEvent onApplicationEvent {}", event);
+        }
+    }
+
+    @Configuration
+    public static class InstanceRegisteredEventListener implements
+            ApplicationListener<InstanceRegisteredEvent<Object>> {
+
+        @Override
+        public void onApplicationEvent(InstanceRegisteredEvent<Object> event) {
+            LogUtils.info("CloudEventListener ----- InstanceRegisteredEvent onApplicationEvent {}",
+                    event);
+        }
     }
 
     @Configuration
     public static class InstancePreRegisteredEventEventListener
-    implements ApplicationListener<InstancePreRegisteredEvent> {
+            implements ApplicationListener<InstancePreRegisteredEvent> {
+
+        @Override
         public void onApplicationEvent(InstancePreRegisteredEvent event) {
-            LogUtils.info((String)"CloudEventListener ----- InstancePreRegisteredEvent onApplicationEvent {}", (Object[])new Object[]{event});
-        }
-    }
-
-    @Configuration
-    public static class InstanceRegisteredEventListener
-    implements ApplicationListener<InstanceRegisteredEvent<Object>> {
-        public void onApplicationEvent(InstanceRegisteredEvent<Object> event) {
-            LogUtils.info((String)"CloudEventListener ----- InstanceRegisteredEvent onApplicationEvent {}", (Object[])new Object[]{event});
-        }
-    }
-
-    @Configuration
-    public static class HeartbeatEventListener
-    implements ApplicationListener<HeartbeatEvent> {
-        public void onApplicationEvent(HeartbeatEvent event) {
-        }
-    }
-
-    @Configuration
-    public static class EnvironmentChangeEventListener
-    implements ApplicationListener<EnvironmentChangeEvent> {
-        public void onApplicationEvent(EnvironmentChangeEvent event) {
-            LogUtils.info((String)"CloudEventListener ----- EnvironmentChangeEvent onApplicationEvent {}", (Object[])new Object[]{event});
-        }
-    }
-
-    @Configuration
-    public static class RefreshScopeRefreshedEventListener
-    implements ApplicationListener<RefreshScopeRefreshedEvent> {
-        public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
-            LogUtils.info((String)"CloudEventListener ----- RefreshScopeRefreshedEvent onApplicationEvent {}", (Object[])new Object[]{event});
+            LogUtils.info(
+                    "CloudEventListener ----- InstancePreRegisteredEvent onApplicationEvent {}", event);
         }
     }
 }
-

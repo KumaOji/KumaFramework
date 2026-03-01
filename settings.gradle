@@ -64,3 +64,5 @@ include 'myframework-cloud-framework:myframework-module-sentinel'
 include 'myframework-cloud-framework:myframework-module-stream'
 
 include 'myframework-cloud-framework:myframework-module-alibaba'
+include 'myframework-bigdata-framework'
+include 'myframework-other-framework'

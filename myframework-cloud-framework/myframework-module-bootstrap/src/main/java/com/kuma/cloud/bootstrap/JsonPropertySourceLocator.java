@@ -1,15 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.boot.json.JsonParser
- *  org.springframework.boot.json.JsonParserFactory
- *  org.springframework.cloud.bootstrap.config.PropertySourceLocator
- *  org.springframework.core.annotation.Order
- *  org.springframework.core.env.Environment
- *  org.springframework.core.env.MapPropertySource
- *  org.springframework.core.env.PropertySource
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.bootstrap;
 
 import java.io.IOException;
@@ -27,25 +31,33 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 
-@Order(value=0)
-public class JsonPropertySourceLocator
-implements PropertySourceLocator {
+/**
+ * 获取本地json文件存储到 environment中
+ */
+@Order(0)
+public class JsonPropertySourceLocator implements PropertySourceLocator {
+
+    @Override
     public PropertySource<?> locate(Environment environment) {
-        return new KmcMapPropertySource("KmcMapPropertySource", this.mapPropertySource());
+        return new KmcMapPropertySource("KmcMapPropertySource", mapPropertySource());
     }
 
     private Map<String, Object> mapPropertySource() {
-        HashMap<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         JsonParser parser = JsonParserFactory.getJsonParser();
-        Map fileMap = parser.parseMap(this.readFile());
-        this.processNestMap("", result, fileMap);
+        Map<String, Object> fileMap = parser.parseMap(readFile());
+        processNestMap("", result, fileMap);
         return result;
     }
 
+    /**
+     * 读取配置文件 kmc.json
+     */
     private String readFile() {
         List<String> lines;
         try {
-            lines = Files.readAllLines(Paths.get("src/main/resources/kmc.json", new String[0]), StandardCharsets.UTF_8);
+            lines = Files.readAllLines(Paths.get("src/main/resources/kmc.json"),
+                    StandardCharsets.UTF_8);
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -57,24 +69,34 @@ implements PropertySourceLocator {
         return sb.toString();
     }
 
-    private void processNestMap(String prefix, Map<String, Object> result, Map<String, Object> fileMap) {
-        if (!((String)prefix).isEmpty()) {
-            prefix = (String)prefix + ".";
+    @SuppressWarnings("unchecked")
+    private void processNestMap(String prefix, Map<String, Object> result,
+                                Map<String, Object> fileMap) {
+        if (!prefix.isEmpty()) {
+            prefix += ".";
         }
         for (Map.Entry<String, Object> entrySet : fileMap.entrySet()) {
             if (entrySet.getValue() instanceof Map) {
-                this.processNestMap((String)prefix + entrySet.getKey(), result, (Map)entrySet.getValue());
-                continue;
+                processNestMap(prefix + entrySet.getKey(), result,
+                        (Map<String, Object>) entrySet.getValue());
             }
-            result.put((String)prefix + entrySet.getKey(), entrySet.getValue());
+            else {
+                result.put(prefix + entrySet.getKey(), entrySet.getValue());
+            }
         }
     }
 
-    public static class KmcMapPropertySource
-    extends MapPropertySource {
+    public static class KmcMapPropertySource extends MapPropertySource {
+
+        /**
+         * Create a new {@code MapPropertySource} with the given name and {@code Map}.
+         *
+         * @param name   the associated name
+         * @param source the Map source (without {@code null} values in order to get consistent
+         *               {@link #getProperty} and {@link #containsProperty} behavior)
+         */
         public KmcMapPropertySource(String name, Map<String, Object> source) {
             super(name, source);
         }
     }
 }
-

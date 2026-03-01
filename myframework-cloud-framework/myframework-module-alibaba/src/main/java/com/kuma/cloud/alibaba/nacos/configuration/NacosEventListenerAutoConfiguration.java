@@ -1,16 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.alibaba.cloud.nacos.event.NacosDiscoveryInfoChangedEvent
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.ApplicationListener
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.context.annotation.Import
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.alibaba.nacos.configuration;
 
 import com.alibaba.cloud.nacos.event.NacosDiscoveryInfoChangedEvent;
@@ -26,17 +29,31 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
-@ConditionalOnProperty(prefix="kuma.cloud.alibaba.nacos", name={"enabled"}, havingValue="true")
-@Import(value={NacosConfigListener.class, NacosServiceListener.class})
-@EnableConfigurationProperties(value={NacosCloudProperties.class})
+@ConditionalOnProperty(prefix = NacosCloudProperties.PREFIX, name = "enabled", havingValue = "true")
+@Import({NacosConfigListener.class, NacosServiceListener.class})
+@EnableConfigurationProperties({NacosCloudProperties.class})
 public class NacosEventListenerAutoConfiguration {
 
     @Configuration
     public static class NacosDiscoveryInfoChangedEventListener
-    implements ApplicationListener<NacosDiscoveryInfoChangedEvent> {
+            implements ApplicationListener<NacosDiscoveryInfoChangedEvent> {
+        @Override
         public void onApplicationEvent(NacosDiscoveryInfoChangedEvent event) {
-            LogUtils.info((String)"NacosEventListener ----- NacosDiscoveryInfoChangedEvent onApplicationEvent {}", (Object[])new Object[]{event});
+            LogUtils.info("NacosEventListener ----- NacosDiscoveryInfoChangedEvent onApplicationEvent {}", event);
         }
     }
-}
 
+    // @Autowired
+    // private NacosRefresher nacosRefresher;
+    //
+    // @NacosConfigListener(dataId = "config")
+    // private void onMessage(String msg) {
+    // 	nacosRefresher.refresh(msg, ConfigFileTypeEnum.YAML);
+    // 	LogUtils.info("配置变动" + msg);
+    // }
+    //
+    // @Component
+    // public static class NacosRefresher extends AbstractRefresher {
+    // }
+
+}

@@ -2,8 +2,12 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework bootstrap模块'
+description = 'Myframework kmc微服务治理模块（熔断/发现/配置/路由/限流）'
 
 dependencies {
     api project(':myframework-boot-framework:myframework-module-common')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot.autoconfigure
 }

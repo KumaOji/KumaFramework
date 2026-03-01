@@ -1,25 +1,41 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.apache.rocketmq.client.producer.SendCallback
- *  org.apache.rocketmq.client.producer.SendResult
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.cloud.stream.framework.rocketmq;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 
-public class RocketmqSendCallback
-implements SendCallback {
+/**
+ * RocketmqSendCallback
+ *
+ * @author kuma
+ * @version 2021.10
+ * @since 2022-02-25 10:00:39
+ */
+public class RocketmqSendCallback implements SendCallback {
+
+    @Override
     public void onSuccess(SendResult sendResult) {
-        LogUtils.info((String)"async onSuccess SendResult={}", (Object[])new Object[]{sendResult});
+        LogUtils.info("async onSuccess SendResult={}", sendResult);
     }
 
+    @Override
     public void onException(Throwable throwable) {
-        LogUtils.error((String)"async onException Throwable", (Object[])new Object[]{throwable});
+        LogUtils.error("async onException Throwable", throwable);
     }
 }
-
