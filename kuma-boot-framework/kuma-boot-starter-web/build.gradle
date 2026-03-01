@@ -1,0 +1,42 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework web模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-boot-framework:kuma-boot-starter-ip2region')
+    api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
+    api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
+    api project(':kuma-boot-framework:kuma-boot-starter-mq-kafka')
+    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
+    api project(':kuma-boot-framework:kuma-boot-starter-dingtalk')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api projectLibs.hutool.core
+    api projectLibs.hutool.http
+    api projectLibs.jackson.databind
+    api projectLibs.javax.json.api
+    api projectLibs.fastjson2
+    api projectLibs.swagger.annotations
+    api projectLibs.commons.lang3
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.validation
+    api projectLibs.spring.web
+    api projectLibs.transmittable.thread.local
+    api projectLibs.okhttp3
+    compileOnly projectLibs.spring.boot.starter.mail
+    compileOnly projectLibs.spring.cloud.commons
+    compileOnly projectLibs.spotbugs.annotations
+    compileOnly projectLibs.jetbrains.annotations
+    compileOnly projectLibs.poi.ooxml
+    compileOnly projectLibs.jakarta.xml.bind.api
+    api projectLibs.micrometer.tracing.api
+    implementation projectLibs.sentinel.core
+    implementation projectLibs.sentinel.parameter.flow.control
+    implementation projectLibs.skywalking.apm.toolkit.trace
+    implementation projectLibs.json.path
+    implementation projectLibs.guava.retrying3
+}

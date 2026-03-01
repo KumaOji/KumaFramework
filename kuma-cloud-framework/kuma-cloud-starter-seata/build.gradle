@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework seata分布式事务模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    api projectLibs.spring.cloud.starter.alibaba.seata
+    api projectLibs.seata.spring.boot.starter
+    api projectLibs.hutool.core
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot.autoconfigure
+}

@@ -12,7 +12,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation project(':myframework-boot-framework:myframework-module-data-mybatis')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     implementation projectLibs.spring.boot.starter.jdbc
     runtimeOnly projectLibs.mysql
     runtimeOnly projectLibs.postgresql

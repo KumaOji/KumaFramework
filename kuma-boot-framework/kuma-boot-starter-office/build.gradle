@@ -1,0 +1,47 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework office模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    implementation "com.aspose:aspose-words:26.1:jdk17"
+    // Apache POI 基础
+    implementation "org.apache.poi:poi:5.3.0"            // 处理 .doc
+
+    // Word (.doc/.docx) 基础依赖
+    implementation "org.apache.poi:poi-ooxml:5.5.1"         // .docx 支持
+    implementation "org.apache.poi:poi-scratchpad:5.5.1"      // .doc 支持（HWPF）
+
+    // XDocReport 的 POI XWPF 转 HTML 组件
+    implementation "fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.core:1.0.6"
+    implementation "fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.xhtml:1.0.6"
+
+    implementation "cn.afterturn:easypoi-base:4.4.0"
+    implementation "cn.afterturn:easypoi-web:4.4.0"
+    implementation "org.springframework:spring-webflux:7.0.3"
+    implementation "com.itextpdf:itextpdf:5.5.13.3"
+    implementation "com.aspose:aspose-pdf:26.1"
+    api projectLibs.aspose.cells
+    api projectLibs.spire.doc.free
+    api projectLibs.spire.pdf.free
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot
+    api projectLibs.spring.cloud.context
+    api projectLibs.univocity.parsers
+    api projectLibs.jakarta.servlet.api
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.easyexcel
+    api projectLibs.jakarta.validation.api
+    api projectLibs.spring.boot.starter.validation
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.commons.lang3
+    api projectLibs.commons.io
+    api projectLibs.reactor.core
+    api projectLibs.guava
+    api projectLibs.fastexcel
+    api projectLibs.xhtmlrenderer
+}
+

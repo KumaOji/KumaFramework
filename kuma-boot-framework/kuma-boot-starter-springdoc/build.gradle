@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework springdoc模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.cloud.context
+    api projectLibs.hutool.core
+    api projectLibs.spring.doc.common
+    api projectLibs.spring.doc.webmvc
+    api projectLibs.swagger.models
+    api projectLibs.spring.web
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.jakarta.annotation.api
+    api projectLibs.jakarta.servlet.api
+    api projectLibs.slf4j.api
+    api projectLibs.knife4j
+    api projectLibs.knife4j.core
+    api projectLibs.jackson.databind
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework lock模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.context
+    api projectLibs.spring.expression
+    api projectLibs.spring.tx
+    api projectLibs.spring.cloud.context
+    api projectLibs.hutool.core
+    api projectLibs.aspectjweaver
+    api projectLibs.spring.redisson
+    api projectLibs.curator.recipes
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework totp模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.zxing.core
+    api projectLibs.commons.codec
+    api projectLibs.commons.net
+    implementation projectLibs.zxing.javase
+}

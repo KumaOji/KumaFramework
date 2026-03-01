@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework security-common模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.hutool.extra
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.context
+}

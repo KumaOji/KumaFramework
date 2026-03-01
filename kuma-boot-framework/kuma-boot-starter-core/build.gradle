@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework 核心模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.hutool.extra
+    api projectLibs.spring.boot
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.web.server
+    api projectLibs.spring.boot.webclient
+    api projectLibs.jakarta.annotation.api
+    api projectLibs.jakarta.validation.api
+    api projectLibs.spring.aop
+    api projectLibs.aspectjweaver
+    api projectLibs.spring.cloud.context
+    api projectLibs.slf4j.api
+    api projectLibs.logback.classic
+    api projectLibs.taobao.text.ui
+    api projectLibs.jackson.databind
+    api projectLibs.fastjson2
+    api projectLibs.guava
+    api projectLibs.commons.io
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

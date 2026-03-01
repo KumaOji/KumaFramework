@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework stream消息流模块（RocketMQ + 延迟队列）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    api projectLibs.rocketmq.spring.boot.starter
+    api projectLibs.spring.cloud.starter.stream.rocketmq
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.messaging
+    api projectLibs.hutool.core
+    api projectLibs.hutool.json
+}

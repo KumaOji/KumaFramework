@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework bootstrap模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    api 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    api 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    api 'org.springframework.cloud:spring-cloud-commons'
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.webflux
+    api projectLibs.reactor.core
+}

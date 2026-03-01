@@ -18,8 +18,8 @@ dependencyResolutionManagement {
 
 def oneLayerProjects = ['framework']
 for (name in oneLayerProjects) {
-    include "myframework-boot-${name}"
-    include "myframework-cloud-${name}"
+    include "kuma-boot-${name}"
+    include "kuma-cloud-${name}"
 }
 
 def frameworkBootSubModules = ['common', 'core', 'data-datasource',
@@ -28,14 +28,16 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'data-common', 'springdoc', 'web',
                                'cache-jetcache', 'cache-caffeine', 'cache-common',
                                'cache-redis', 'security-common', 'security-spring',
-                               'ratelimit', 'idempotent']
+                               'ratelimit', 'idempotent','lock',
+                                'security-jstauth','totp','captcha',
+                                'dingtalk']
 for (name in frameworkBootSubModules) {
-    include "myframework-boot-framework:myframework-module-${name}"
+    include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
 
 def frameworkSubModules = ['bootstrap']
 for (name in frameworkSubModules) {
-    include "myframework-cloud-framework:myframework-module-${name}"
+    include "kuma-cloud-framework:kuma-cloud-starter-${name}"
 }
 include "myframework-project"
 def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'blog']
@@ -51,18 +53,11 @@ gradle.settingsEvaluated {
 }
 
 
-include 'myframework-boot-framework:myframework-module-lock'
-include 'myframework-boot-framework:myframework-module-security-jstauth'
-include 'myframework-boot-framework:myframework-module-totp'
 
-include 'myframework-boot-framework:myframework-module-captcha'
-include 'myframework-boot-framework:myframework-module-dingtalk'
-
-include 'myframework-cloud-framework:myframework-module-seata'
-include 'myframework-cloud-framework:myframework-module-kmc'
-include 'myframework-cloud-framework:myframework-module-sentinel'
-include 'myframework-cloud-framework:myframework-module-stream'
-
-include 'myframework-cloud-framework:myframework-module-alibaba'
+include 'kuma-cloud-framework:kuma-cloud-starter-seata'
+include 'kuma-cloud-framework:kuma-cloud-starter-kmc'
+include 'kuma-cloud-framework:kuma-cloud-starter-sentinel'
+include 'kuma-cloud-framework:kuma-cloud-starter-stream'
+include 'kuma-cloud-framework:kuma-cloud-starter-alibaba'
 include 'myframework-bigdata-framework'
 include 'myframework-other-framework'

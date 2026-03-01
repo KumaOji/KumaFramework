@@ -1,0 +1,34 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework 限流模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.data.redis
+    api projectLibs.spring.aop
+    api projectLibs.spring.context
+    api projectLibs.spring.expression
+    api projectLibs.spring.cloud.context
+    api projectLibs.guava
+    api projectLibs.hutool.core
+    api projectLibs.fastjson2
+    api projectLibs.commons.lang3
+    api projectLibs.cglib
+    api projectLibs.aspectjweaver
+    api projectLibs.spring.redisson
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

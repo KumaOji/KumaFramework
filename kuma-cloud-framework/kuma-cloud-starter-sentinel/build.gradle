@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework sentinel流量防护模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    api projectLibs.spring.cloud.starter.alibaba.sentinel
+    api projectLibs.sentinel.core
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot.autoconfigure
+}

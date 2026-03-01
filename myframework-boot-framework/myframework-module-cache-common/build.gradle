@@ -1,9 +1,0 @@
-plugins {
-    id 'java-library'
-}
-
-description = 'Myframework cache-common模块'
-
-dependencies {
-    api project(':myframework-boot-framework:myframework-module-common')
-}

@@ -12,20 +12,20 @@ dependencyManagement {
 }
 
 dependencies {
-    api project(':myframework-boot-framework:myframework-module-common')
-    api project(':myframework-boot-framework:myframework-module-springdoc')
-    api project(':myframework-boot-framework:myframework-module-web')
-    api project(':myframework-boot-framework:myframework-module-core')
-    api project(':myframework-boot-framework:myframework-module-office')
-    api project(':myframework-boot-framework:myframework-module-cache-common')
-    api project(':myframework-boot-framework:myframework-module-cache-redis')
-    api project(':myframework-boot-framework:myframework-module-cache-caffeine')
-    api project(':myframework-boot-framework:myframework-module-cache-jetcache')
-    api project(':myframework-boot-framework:myframework-module-mq-common')
-    api project(':myframework-boot-framework:myframework-module-mq-kafka')
-    api project(':myframework-boot-framework:myframework-module-data-common')
-    api project(':myframework-boot-framework:myframework-module-data-datasource')
-    api project(':myframework-boot-framework:myframework-module-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-office')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-caffeine')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-jetcache')
+    api project(':kuma-boot-framework:kuma-boot-starter-mq-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-mq-kafka')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.security

@@ -1,0 +1,45 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework security-spring 模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-security-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-jstauth')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api project(':kuma-boot-framework:kuma-boot-starter-totp')
+    api project(':kuma-boot-framework:kuma-boot-starter-captcha')
+    api projectLibs.swagger.annotations.jakarta
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.data.redis
+    api projectLibs.spring.boot.starter.oauth2.resource.server
+    api projectLibs.spring.boot.starter.oauth2.client
+    api projectLibs.spring.boot.starter.jdbc
+    api projectLibs.spring.boot.starter.actuator
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.hutool.crypto
+    api projectLibs.hutool.json
+    api projectLibs.hutool.cache
+    api projectLibs.guava
+    api projectLibs.fastjson2
+    api projectLibs.commons.lang3
+    api projectLibs.commons.collections4
+    api projectLibs.commons.codec
+    api projectLibs.commons.io
+    api projectLibs.jackson.databind
+    api projectLibs.jjwt.api
+    api projectLibs.httpcore5
+    api projectLibs.jakarta.validation.api
+    api projectLibs.justauth
+    runtimeOnly projectLibs.jjwt.impl
+    runtimeOnly projectLibs.jjwt.jackson
+    compileOnly projectLibs.spring.cloud.commons
+    compileOnly projectLibs.jetbrains.annotations
+    compileOnly projectLibs.jspecify
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
