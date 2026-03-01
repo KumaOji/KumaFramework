@@ -190,20 +190,21 @@ public class SpringdocAutoConfiguration implements InitializingBean {
     public OpenApiCustomizer openApiCustomizer() {
         return openApi -> {
             final Paths paths = openApi.getPaths();
+            if (paths != null && !paths.isEmpty()) {
+                Paths newPaths = new Paths();
+                paths.keySet().forEach(e -> newPaths.put("/api/v" + properties.getVersion() + e, paths.get(e)));
+                openApi.setPaths(newPaths);
 
-            Paths newPaths = new Paths();
-            paths.keySet().forEach(e -> newPaths.put("/api/v" + properties.getVersion() + e, paths.get(e)));
-            openApi.setPaths(newPaths);
+                openApi.getPaths().values().stream()
+                        .flatMap(pathItem -> pathItem.readOperations().stream())
+                        .forEach(operation -> {
+                        });
+            } else if (paths == null) {
+                openApi.setPaths(new Paths());
+            }
 
-            openApi.getPaths().values().stream()
-                    .flatMap(pathItem -> pathItem.readOperations().stream())
-                    .forEach(operation -> {
-                    });
-
-            if (CollUtil.isEmpty(properties.getTags())) {
-                openApi.setTags(properties.getTags());
-
-                openApi.setTags(openApi.getTags().stream()
+            if (!CollUtil.isEmpty(properties.getTags())) {
+                openApi.setTags(properties.getTags().stream()
                         .sorted(Comparator.comparing(tag -> stripAccents(tag.getName())))
                         .collect(Collectors.toList()));
             }

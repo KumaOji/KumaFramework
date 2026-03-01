@@ -12,7 +12,6 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation project(':myframework-boot-framework:myframework-module-application')
     runtimeOnly projectLibs.mysql
     runtimeOnly projectLibs.postgresql
     compileOnly projectLibs.lombok

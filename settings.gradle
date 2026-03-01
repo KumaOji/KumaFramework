@@ -28,8 +28,7 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'data-common', 'springdoc', 'web',
                                'cache-jetcache', 'cache-caffeine', 'cache-common',
                                'cache-redis', 'security-common', 'security-spring',
-                               'ratelimit', 'idempotent',
-                               'infrastruct', "spring", "application"]
+                               'ratelimit', 'idempotent']
 for (name in frameworkBootSubModules) {
     include "myframework-boot-framework:myframework-module-${name}"
 }
