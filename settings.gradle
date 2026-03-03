@@ -61,3 +61,5 @@ include 'kuma-cloud-framework:kuma-cloud-starter-stream'
 include 'kuma-cloud-framework:kuma-cloud-starter-alibaba'
 include 'kuma-bigdata-framework'
 include 'kuma-other-framework'
+
+include 'kuma-project:kuma-project-project5'

@@ -19,6 +19,7 @@ package com.kuma.cloud.project4;
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
 import com.kuma.boot.web.annotation.KumaBootApplication;
+import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @author kuma
  */
 @KumaBootApplication
+@KumaCloudApplication
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
 @EnableAutoConfiguration(exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})

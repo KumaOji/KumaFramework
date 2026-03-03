@@ -131,9 +131,12 @@ spring-cloud = "2025.1.0"
 spring-cloud-alibaba = "2025.1.0.0"
 rocketmq-spring = "2.3.3"
 seata = "2.5.0"
+langchain4j = "1.11.0"
 
 ## 统一定义依赖
 [libraries]
+langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+langchain4jopenai = { module = "dev.langchain4j:langchain4j-open-ai", version.ref = "langchain4j" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot4-starter", version.ref = "mybatis-plus" }
 mybatis-core = { module = "org.mybatis:mybatis", version.ref = "mybatis" }
