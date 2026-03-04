@@ -138,7 +138,7 @@
         <logger name="org.springframework.beans" level="WARN"/>
 
         <!-- 应用包日志保持 DEBUG，便于调试业务代码 -->
-        <logger name="cn.kuma.blog" level="DEBUG"/>
+        <logger name="com.kuma.cloud.project4" level="DEBUG"/>
 
         <!-- 根日志级别：INFO，减少不必要的 DEBUG 日志 -->
         <root level="INFO">

@@ -61,20 +61,141 @@ springdoc:
 knife4j:
   enable: true
 
-# 框架 Springdoc 配置（前缀 kuma.boot.springdoc）
+# 框架配置（前缀 kuma.boot.*）
 kuma:
   boot:
+    # 核心模块配置
+    core:
+      enabled: true
+      collect-hook-enabled: true
+      context-restart-enabled: false
+      context-restart-timespan: 10
+      async:
+        enabled: true
+        virtual-threads: false
+        core-pool-size: 10
+        max-pool-size: 50
+        queue-capacity: 10000
+        keep-alive-seconds: 300
+        allow-core-thread-time-out: false
+        wait-for-tasks-to-complete-on-shutdown: true
+        await-termination-seconds: 5
+        thread-name-prefix: project4-async
+        check-health: true
+    # Web 模块配置
+    web:
+      graceful-response:
+        print-exception-in-global-advice: false
+        response-style: 0
+        default-success-code: "0000"
+        default-success-msg: success
+        default-error-code: "-1"
+        default-error-msg: failed
+        exclude-packages:
+          - org.springdoc*
+        exclude-paths:
+          - /v3/api-docs/**
+          - /swagger-ui/**
+          - /doc.html
+      filter:
+        version: true
+        tenant: true
+        trace: true
+        web-context: true
+        report: true
+        ping: true
+      request:
+        enabled: true
+        types:
+          - LOGGER
+      global-exception:
+        enabled: true
+        types:
+          - LOGGER
+        ignore-child: true
+        time: 300
+        max: 5
+        length: 3000
+    # Security 模块配置
+    security:
+      ignore-url:
+        - /actuator/**
+        - /v3/api-docs/**
+        - /swagger-ui/**
+        - /swagger-ui.html
+        - /doc.html
+        - /webjars/**
+        - /login/**
+        - /error
+      authentication:
+        expire: 7200
+        refresh-expire: 28800
+        allowed-clock-skew-seconds: 60
+    # 缓存模块配置
+    cache:
+      redis:
+        enabled: true
+      caffeine:
+        enabled: true
+      jetcache:
+        enabled: true
+        desensitization: true
+        clear-remote-on-exit: false
+        allow-null-values: true
+        separator: "-"
+    # 数据源模块配置
+    data:
+      datasource:
+        enabled: false
+        health-enabled: false
+      mybatis:
+        mybatis-plus:
+          enabled: false
+    # Office 模块配置
+    office:
+      enabled: false
+    # MQ 模块配置
+    mq:
+      kafka:
+        enabled: false
+    # Springdoc 配置
     springdoc:
       enabled: true
-      title: API 文档
+      type: SERVICE
+      title: Project4 API 文档
       description: RESTful API 接口文档
       version: 1.0.0
       openapi: "3.0.0"
+      paths-to-match:
+        - /**
+      paths-to-exclude:
+        - /actuator/**
       packages-to-scan:
         - com.kuma.cloud.project4
       license:
         name: Apache 2.0
         url: https://www.apache.org/licenses/LICENSE-2.0.html
+    # IP 地理定位配置
+    ip2region:
+      enabled: true
+    # 幂等配置
+    idempotent:
+      enabled: true
+    # 分布式锁配置
+    lock:
+      enabled: true
+      type: LOCAL
+    # 限流配置
+    ratelimit:
+      enabled: false
+
+# 多租户配置
+mybatis:
+  tenant:
+    config:
+      enable: false
+      tenant-id-column: tenant_id
+      db-type: MYSQL
 
 # 延迟线程池配置
 delay:

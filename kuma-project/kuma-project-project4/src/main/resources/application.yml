@@ -1,4 +1,4 @@
-# Project1 - 项目配置（框架配置由 application-framework.yml 提供，未定义项使用框架默认值）
+# Project4 - 项目配置（框架配置由 application-framework.yml 提供，未定义项使用框架默认值）
 spring:
   profiles:
     active: ${active}

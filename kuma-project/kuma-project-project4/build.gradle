@@ -26,6 +26,11 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-data-common')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-boot-framework:kuma-boot-starter-lock')
+    api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
+    api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
+    api project(':kuma-boot-framework:kuma-boot-starter-ip2region')
     api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
@@ -62,5 +67,5 @@ processResources {
 }
 
 bootJar {
-    archiveBaseName = 'project1'
+    archiveBaseName = 'project4'
 }
