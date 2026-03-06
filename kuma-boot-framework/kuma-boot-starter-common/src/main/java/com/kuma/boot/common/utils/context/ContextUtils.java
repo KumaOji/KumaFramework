@@ -86,11 +86,16 @@ public class ContextUtils extends SpringUtil {
 
     /**
      * getApplicationContext
+     *
      * @return {@link ConfigurableApplicationContext }
      * @since 2021-09-02 17:37:32
      */
     public static ConfigurableApplicationContext getApplicationContext() {
-        return applicationContext;
+        if (applicationContext != null) {
+            return applicationContext;
+        }
+        ApplicationContext ctx = SpringUtil.getApplicationContext();
+        return ctx instanceof ConfigurableApplicationContext ? (ConfigurableApplicationContext) ctx : null;
     }
 
     /**
