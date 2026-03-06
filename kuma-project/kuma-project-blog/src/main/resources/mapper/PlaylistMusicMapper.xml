@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kuma.cloud.blog.mapper.PlaylistMusicMapper">
+
+    <delete id="deleteByPlaylistId">
+        DELETE FROM playlist_music WHERE playlist_id = #{playlistId}
+    </delete>
+
+    <select id="selectMusicIdsByPlaylistId" resultType="java.lang.Long">
+        SELECT music_id FROM playlist_music
+        WHERE playlist_id = #{playlistId}
+        ORDER BY sort_order ASC
+    </select>
+
+</mapper>
