@@ -21,11 +21,19 @@ import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermissi
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.dept.service.DeptDataPermissionFrameworkService;
 import java.util.List;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
 /** 系统内置基于部门的数据权限 AutoConfiguration */
 @AutoConfiguration
 public class DeptDataPermissionAutoConfiguration {
+
+    /** 默认实现：应用未提供时使用，返回 null 表示无部门数据权限限制 */
+    @Bean
+    @ConditionalOnMissingBean(DeptDataPermissionFrameworkService.class)
+    public DeptDataPermissionFrameworkService deptDataPermissionFrameworkService() {
+        return new DeptDataPermissionFrameworkService();
+    }
 
     /**
      * 构建部门数据权限规则对象

@@ -16,8 +16,7 @@
 
 package com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.config;
 
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.kuma.boot.data.mybatis.mybatisplus.MpUtils;
+import com.kuma.boot.data.mybatis.mybatisplus.interceptor.MpInterceptor;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.aop.DataPermissionAnnotationAdvisor;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.db.DataPermissionDatabaseInterceptor;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.factory.DataPermissionRuleFactory;
@@ -44,20 +43,15 @@ public class DataPermissionAutoConfiguration {
         return new DataPermissionRuleFactoryImpl(rules);
     }
 
-    /** 配置拦截器 重写sql */
+    /**
+     * 数据权限拦截器。通过 MpInterceptor 注册，由项目的 mybatisPlusInterceptor 收集，
+     * 避免与 defaultMybatisPlusInterceptor 的循环依赖。sortNo=194 确保在分页插件(199)之前执行。
+     */
     @Bean
-    public DataPermissionDatabaseInterceptor dataPermissionDatabaseInterceptor(
-            MybatisPlusInterceptor interceptor, List<DataPermissionRule> rules) {
-        // 数据权限规则工厂接口
+    public MpInterceptor dataPermissionDatabaseInterceptor(List<DataPermissionRule> rules) {
         DataPermissionRuleFactory ruleFactory = dataPermissionRuleFactory(rules);
-
-        // 创建 DataPermissionDatabaseInterceptor 拦截器
-        DataPermissionDatabaseInterceptor inner =
-                new DataPermissionDatabaseInterceptor(ruleFactory);
-
-        // 需要加在分页插件前面
-        MpUtils.addInterceptor(interceptor, inner, 0);
-        return inner;
+        DataPermissionDatabaseInterceptor inner = new DataPermissionDatabaseInterceptor(ruleFactory);
+        return new MpInterceptor(inner, 194);
     }
 
     /** aop处理 */
