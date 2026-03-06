@@ -14,7 +14,7 @@ dependencies {
     api projectLibs.sentinel.transport.common
     api projectLibs.sentinel.datasource.extension
     api projectLibs.sentinel.parameter.flow.control
-    api projectLibs.sentinel.spring.webmvc6x.adapter
+    api projectLibs.sentinel.spring.webmvc.v6x.adapter
     api projectLibs.sentinel.cluster.server.default
 
     // Resilience4j

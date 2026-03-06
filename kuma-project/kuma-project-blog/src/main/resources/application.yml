@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    active: ${active}
+  application:
+    name: blog
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${redis_host}
+      port: ${redis_port}
+      database: ${redis_database}
+      jedis:
+        pool:
+          max-active: ${redis_jedis_pool_max_active}
+          max-idle: ${redis_jedis_pool_max_idle}
+          min-idle: ${redis_jedis_pool_min_idle}

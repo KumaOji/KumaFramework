@@ -1,0 +1,107 @@
+server:
+  port: 9000
+
+spring:
+  main:
+    lazy-initialization: true
+    log-startup-info: false
+  autoconfigure:
+    exclude:
+      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+  datasource:
+    dynamic:
+      datasource:
+        mysql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
+    com.kuma.boot: INFO
+    com.kuma.cloud.blog: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
+
+mybatis-plus:
+  global-config:
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+
+blog:
+  token-expire-seconds: 86400
+  cookie-secure: false
+
+kuma:
+  boot:
+    core:
+      enabled: true
+      async:
+        enabled: true
+        core-pool-size: 5
+        max-pool-size: 20
+        thread-name-prefix: blog-async
+    web:
+      graceful-response:
+        print-exception-in-global-advice: false
+        response-style: 0
+        exclude-packages:
+          - org.springdoc*
+        exclude-paths:
+          - /v3/api-docs/**
+          - /swagger-ui/**
+          - /doc.html
+      filter:
+        version: true
+        trace: true
+      request:
+        enabled: true
+        types:
+          - LOGGER
+      global-exception:
+        enabled: true
+    security:
+      ignore-url:
+        - /actuator/**
+        - /v3/api-docs/**
+        - /swagger-ui/**
+        - /swagger-ui.html
+        - /doc.html
+        - /webjars/**
+        - /auth/**
+        - /error
+      authentication:
+        expire: 86400
+    cache:
+      redis:
+        enabled: true
+    data:
+      datasource:
+        enabled: false
+      mybatis:
+        mybatis-plus:
+          enabled: false
+    springdoc:
+      enabled: true
+      type: SERVICE
+      title: Blog API 文档
+      description: 博客系统 RESTful API 接口文档
+      version: 1.0.0
+      packages-to-scan:
+        - com.kuma.cloud.blog

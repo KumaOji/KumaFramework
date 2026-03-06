@@ -12,10 +12,26 @@ dependencyManagement {
 }
 
 dependencies {
-    runtimeOnly projectLibs.mysql
-    runtimeOnly projectLibs.postgresql
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
+
+    api projectLibs.hutool.core
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.doc.webmvc
+
+    compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
+
+    runtimeOnly projectLibs.mysql
 }
 
 processResources {
@@ -25,9 +41,6 @@ processResources {
                 mysql_url: project.findProperty('mysql.url') ?: '',
                 mysql_username: project.findProperty('mysql.username') ?: '',
                 mysql_password: project.findProperty('mysql.password') ?: '',
-                postgresql_url: project.findProperty('postgresql.url') ?: '',
-                postgresql_username: project.findProperty('postgresql.username') ?: '',
-                postgresql_password: project.findProperty('postgresql.password') ?: '',
                 redis_host: project.findProperty('redis.host') ?: '',
                 redis_port: project.findProperty('redis.port') ?: '',
                 redis_database: project.findProperty('redis.database') ?: '',
@@ -39,5 +52,5 @@ processResources {
 }
 
 bootJar {
-    archiveBaseName = 'project1'
+    archiveBaseName = 'blog'
 }
