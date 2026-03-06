@@ -34,13 +34,13 @@ public class MailExceptionHandler extends com.kuma.boot.web.exception.handler.Ab
     private final MailProperties mailProperties;
 
     public MailExceptionHandler(
-            MailProperties mailProperties,
+            Object mailProperties,
             ExceptionHandleProperties config,
-            JavaMailSender sender,
+            Object sender,
             String applicationName) {
         super(config, applicationName);
-        this.mailSender = sender;
-        this.mailProperties = mailProperties;
+        this.mailSender = (JavaMailSender) sender;
+        this.mailProperties = (MailProperties) mailProperties;
     }
 
     @Override
