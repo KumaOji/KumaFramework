@@ -63,3 +63,4 @@ include 'kuma-bigdata-framework'
 include 'kuma-other-framework'
 
 include 'kuma-project:kuma-project-project5'
+include 'kuma-boot-framework:kuma-boot-starter-sentinel'

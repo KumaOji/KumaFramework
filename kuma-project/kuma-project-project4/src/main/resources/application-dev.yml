@@ -6,7 +6,6 @@ spring:
     type: none
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
       # 排除 knife4j 自带的 Knife4jOpenApiCustomizer（使用 List 调用 getGroupConfigs，与 springdoc 3.0 的 Set 不兼容），项目已通过 @EnableKnife4j 提供兼容实现
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
   datasource:
@@ -204,3 +203,5 @@ delay:
     max: 10
     queue: 100
     keepAlive: 60
+
+

@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework sentinel模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context
+
+    // Sentinel 核心
+    api projectLibs.sentinel.core
+    api projectLibs.sentinel.transport.common
+    api projectLibs.sentinel.datasource.extension
+    api projectLibs.sentinel.parameter.flow.control
+    api projectLibs.sentinel.spring.webmvc6x.adapter
+    api projectLibs.sentinel.cluster.server.default
+
+    // Resilience4j
+    api projectLibs.resilience4j.circuitbreaker
+    api projectLibs.resilience4j.bulkhead
+    api projectLibs.resilience4j.retry
+    api projectLibs.resilience4j.ratelimiter
+    api projectLibs.vavr
+
+    // fastjson2 (FileDataSourceInit 使用)
+    api projectLibs.fastjson2
+
+    // Servlet API
+    compileOnly projectLibs.jakarta.servlet.api
+}
