@@ -5,6 +5,13 @@ spring:
   main:
     lazy-initialization: true
     log-startup-info: false
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      acks: "1"
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
   autoconfigure:
     exclude:
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration

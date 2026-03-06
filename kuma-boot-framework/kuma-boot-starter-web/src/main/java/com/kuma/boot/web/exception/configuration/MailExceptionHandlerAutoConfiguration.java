@@ -28,22 +28,25 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.context.ApplicationContext;
 
 import java.util.Arrays;
 
 /**
  * 当web项目引入此依赖时，自动配置对应的内容 初始化log的事件监听与切面配置
+ * 使用 name 形式的 @ConditionalOnClass 避免在无 spring-boot-starter-mail 时加载 MailProperties 导致 ClassNotFoundException
  *
  * @author kuma
  * @version 2022.03
  * @since 2020/4/30 10:21
  */
 @AutoConfiguration
-@ConditionalOnClass(JavaMailSender.class)
-@ConditionalOnBean({JavaMailSender.class, MailProperties.class})
+@ConditionalOnClass(name = {
+        "org.springframework.boot.mail.autoconfigure.MailProperties",
+        "org.springframework.mail.javamail.JavaMailSender"
+})
+@ConditionalOnBean(name = "javaMailSender")
 @ConditionalOnProperty(
         prefix = ExceptionHandleProperties.PREFIX,
         name = "enabled",
@@ -52,15 +55,16 @@ import java.util.Arrays;
 public class MailExceptionHandlerAutoConfiguration implements InitializingBean {
 
     private final ExceptionHandleProperties exceptionHandleProperties;
-    private final MailProperties mailProperties;
+    private final ApplicationContext applicationContext;
 
     @Value("${spring.application.name: unknown-application}")
     private String applicationName;
 
     public MailExceptionHandlerAutoConfiguration(
-            ExceptionHandleProperties exceptionHandleProperties, MailProperties mailProperties) {
+            ExceptionHandleProperties exceptionHandleProperties,
+            ApplicationContext applicationContext) {
         this.exceptionHandleProperties = exceptionHandleProperties;
-        this.mailProperties = mailProperties;
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -70,11 +74,19 @@ public class MailExceptionHandlerAutoConfiguration implements InitializingBean {
     }
 
     @Bean
-    public ExceptionHandler mailGlobalExceptionHandler(JavaMailSender mailSender) {
+    public ExceptionHandler mailGlobalExceptionHandler() {
         if (Arrays.stream(exceptionHandleProperties.getTypes())
                 .anyMatch(e -> e.name().equals(ExceptionHandleTypeEnum.MAIL.name()))) {
-            return new MailExceptionHandler(
-                    mailProperties, exceptionHandleProperties, mailSender, applicationName);
+            try {
+                Class<?> mailPropsClass = Class.forName("org.springframework.boot.mail.autoconfigure.MailProperties");
+                Class<?> mailSenderClass = Class.forName("org.springframework.mail.javamail.JavaMailSender");
+                Object mailProperties = applicationContext.getBean(mailPropsClass);
+                Object mailSender = applicationContext.getBean(mailSenderClass);
+                return new MailExceptionHandler(
+                        mailProperties, exceptionHandleProperties, mailSender, applicationName);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
         }
         return null;
     }

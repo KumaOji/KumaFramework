@@ -40,8 +40,7 @@ import java.util.List;
 @AutoConfiguration(
         after = {
                 com.kuma.boot.web.exception.configuration.DingTalkExceptionHandlerAutoConfiguration.class,
-                LoggerExceptionHandlerAutoConfiguration.class,
-                MailExceptionHandlerAutoConfiguration.class
+                LoggerExceptionHandlerAutoConfiguration.class
         })
 @ConditionalOnProperty(
         prefix = ExceptionHandleProperties.PREFIX,
