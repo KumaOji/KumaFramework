@@ -1,9 +1,10 @@
 package com.kuma.cloud.blog.service.impl;
 
+import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
 import com.kuma.cloud.blog.service.TokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -14,32 +15,37 @@ public class TokenServiceImpl implements TokenService {
 
     private static final String TOKEN_PREFIX = "blog:token:";
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public void saveToken(String token, LoginResponse loginResponse, long expireSeconds) {
         String tokenKey = TOKEN_PREFIX + token;
-        redisTemplate.opsForValue().set(tokenKey, loginResponse, expireSeconds, TimeUnit.SECONDS);
+        String json = JacksonUtils.toJSONString(loginResponse);
+        stringRedisTemplate.opsForValue().set(tokenKey, json, expireSeconds, TimeUnit.SECONDS);
     }
 
     @Override
     public LoginResponse getLoginResponseByToken(String token) {
         String tokenKey = TOKEN_PREFIX + token;
-        Object value = redisTemplate.opsForValue().get(tokenKey);
-        if (value instanceof LoginResponse lr) return lr;
-        return null;
+        String json = stringRedisTemplate.opsForValue().get(tokenKey);
+        if (json == null || json.isBlank()) return null;
+        try {
+            return JacksonUtils.readValue(json, LoginResponse.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
     public boolean validateToken(String token) {
         String tokenKey = TOKEN_PREFIX + token;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(tokenKey));
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(tokenKey));
     }
 
     @Override
     public void deleteToken(String token) {
         String tokenKey = TOKEN_PREFIX + token;
-        redisTemplate.delete(tokenKey);
+        stringRedisTemplate.delete(tokenKey);
     }
 
     @Override
