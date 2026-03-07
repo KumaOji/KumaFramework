@@ -1,14 +1,11 @@
 package com.kuma.cloud.blog.controller;
 
-import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
-import com.kuma.boot.security.spring.access.expression.Permissions;
-import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.TokenService;
 import com.kuma.cloud.blog.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,8 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "认证管理")
@@ -34,7 +29,7 @@ public class AuthController {
 
     private final UserService userService;
     private final TokenService tokenService;
-    private final RedisRepository redisRepository;
+    private final PermissionService permissionService;
 
     @Value("${blog.token-expire-seconds:86400}")
     private long tokenExpireSeconds;
@@ -60,7 +55,8 @@ public class AuthController {
         loginResponse.setAdmin(user.getIsAdmin() != null && user.getIsAdmin() == 1);
 
         tokenService.saveToken(token, loginResponse, tokenExpireSeconds);
-        saveAuthorizeUserEntity(user.getUsername(), loginResponse.isAdmin(), tokenExpireSeconds);
+        // 从数据库加载权限（角色权限 + 个人直接授权），写入 Redis
+        permissionService.loadAndCachePermissions(user.getId(), user.getUsername(), tokenExpireSeconds);
         setTokenCookie(response, token);
         return Result.success(loginResponse);
     }
@@ -86,8 +82,7 @@ public class AuthController {
         if (StringUtils.hasText(token)) {
             LoginResponse lr = tokenService.getLoginResponseByToken(token);
             if (lr != null && lr.getUsername() != null) {
-                String cacheKey = "user:authorities:" + lr.getUsername();
-                redisRepository.del(cacheKey);
+                permissionService.evictCache(lr.getUsername());
             }
             tokenService.deleteToken(token);
         }
@@ -104,7 +99,10 @@ public class AuthController {
         }
         LoginResponse lr = tokenService.getLoginResponseByToken(token);
         if (lr != null && lr.getUsername() != null) {
-            saveAuthorizeUserEntity(lr.getUsername(), lr.isAdmin(), tokenExpireSeconds);
+            User user = userService.getByUsername(lr.getUsername());
+            if (user != null) {
+                permissionService.loadAndCachePermissions(user.getId(), user.getUsername(), tokenExpireSeconds);
+            }
         }
         tokenService.refreshToken(token, tokenExpireSeconds);
         return Result.success("Token刷新成功");
@@ -136,27 +134,4 @@ public class AuthController {
         response.addCookie(cookie);
     }
 
-    /**
-     * 存储 UserEntity 到 Redis，供 @Authorize 校验使用。
-     * key 为 "user:authorities:" + username，与 AuthorizeCheckService 中 getAuthorities 一致。
-     */
-    private void saveAuthorizeUserEntity(String username, boolean admin, long expireSeconds) {
-        AuthorizeCheckService.UserEntity entity = new AuthorizeCheckService.UserEntity();
-        List<String> authorities = new ArrayList<>();
-        // 所有登录用户拥有基础角色 + 内容读权限
-        authorities.add(RoleConstants.USER);
-        authorities.add(Permissions.ARTICLE_READ);
-        authorities.add(Permissions.MUSIC_READ);
-        if (admin) {
-            // 管理员额外拥有所有模块的操作权限
-            authorities.add(RoleConstants.ADMIN);
-            authorities.add(Permissions.ARTICLE_ALL);
-            authorities.add(Permissions.MUSIC_ALL);
-            authorities.add(Permissions.SYSTEM_ALL);
-        }
-        entity.setAuthorities(authorities);
-        String cacheKey = "user:authorities:" + username;
-        redisRepository.set(cacheKey, entity);
-        redisRepository.expire(cacheKey, expireSeconds);
-    }
 }

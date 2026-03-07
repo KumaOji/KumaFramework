@@ -190,6 +190,99 @@ CREATE TABLE IF NOT EXISTS `source` (
     INDEX `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='资源管理表';
 
+-- ─────────────────────────────────────────────────────────────
+-- RBAC 权限管理（三类用户：管理员 / 普通用户 / 授权用户）
+-- ─────────────────────────────────────────────────────────────
+
+-- 10. sys_permission（权限定义表）
+-- code 即权限码字符串，如 article:create、music:*
+CREATE TABLE IF NOT EXISTS `sys_permission` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `code`        VARCHAR(100) NOT NULL COMMENT '权限码（module:action 格式，支持通配符 module:*）',
+    `name`        VARCHAR(100) NOT NULL COMMENT '权限名称（可读描述）',
+    `module`      VARCHAR(50)  NOT NULL COMMENT '所属模块（article / music / system）',
+    `description` VARCHAR(255)          DEFAULT NULL COMMENT '说明',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`),
+    KEY `idx_module` (`module`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='权限定义表';
+
+-- 11. sys_role（角色表）
+CREATE TABLE IF NOT EXISTS `sys_role` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `code`        VARCHAR(50)  NOT NULL COMMENT '角色码（ROLE_ADMIN / ROLE_USER）',
+    `name`        VARCHAR(100) NOT NULL COMMENT '角色名称',
+    `description` VARCHAR(255)          DEFAULT NULL COMMENT '说明',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色表';
+
+-- 12. sys_role_permission（角色 → 权限关联）
+CREATE TABLE IF NOT EXISTS `sys_role_permission` (
+    `role_id`       BIGINT NOT NULL COMMENT '角色ID',
+    `permission_id` BIGINT NOT NULL COMMENT '权限ID',
+    PRIMARY KEY (`role_id`, `permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色权限关联表';
+
+-- 13. sys_user_role（用户 → 角色关联）
+CREATE TABLE IF NOT EXISTS `sys_user_role` (
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `role_id` BIGINT NOT NULL COMMENT '角色ID',
+    PRIMARY KEY (`user_id`, `role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
+
+-- 14. sys_user_permission（用户 → 权限直接授权，授权用户专用）
+-- 当用户不是管理员，但需要特定权限时，在此表直接授权，无需改角色
+CREATE TABLE IF NOT EXISTS `sys_user_permission` (
+    `user_id`       BIGINT NOT NULL COMMENT '用户ID',
+    `permission_id` BIGINT NOT NULL COMMENT '权限ID',
+    `granted_by`    BIGINT          DEFAULT NULL COMMENT '授权人用户ID',
+    `grant_time`    DATETIME        DEFAULT CURRENT_TIMESTAMP COMMENT '授权时间',
+    PRIMARY KEY (`user_id`, `permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户直接权限授权表（授权用户）';
+
+-- ─────────────────────────────────────────────────────────────
+-- RBAC 初始化数据
+-- ─────────────────────────────────────────────────────────────
+
+-- 权限码初始化
+INSERT INTO `sys_permission` (`id`, `code`, `name`, `module`) VALUES
+(1,  'article:*',      '文章全部权限',     'article'),
+(2,  'article:create', '创建文章',         'article'),
+(3,  'article:update', '编辑文章',         'article'),
+(4,  'article:delete', '删除文章',         'article'),
+(5,  'article:read',   '查看文章',         'article'),
+(6,  'music:*',        '音乐全部权限',     'music'),
+(7,  'music:upload',   '上传音乐',         'music'),
+(8,  'music:delete',   '删除音乐',         'music'),
+(9,  'music:read',     '播放/查看音乐',    'music'),
+(10, 'system:*',       '系统全部权限',     'system'),
+(11, 'system:config',  '系统配置',         'system'),
+(12, 'system:log',     '查看日志',         'system'),
+(13, 'system:user',    '用户管理',         'system')
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `module` = VALUES(`module`);
+
+-- 角色初始化（三类用户）
+INSERT INTO `sys_role` (`id`, `code`, `name`, `description`) VALUES
+(1, 'ROLE_ADMIN', '管理员', '拥有所有权限'),
+(2, 'ROLE_USER',  '普通用户', '仅拥有基础读权限')
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `description` = VALUES(`description`);
+
+-- 角色权限关联
+-- 管理员拥有所有模块通配符
+INSERT INTO `sys_role_permission` (`role_id`, `permission_id`) VALUES
+(1, 1), (1, 6), (1, 10)   -- ROLE_ADMIN → article:* + music:* + system:*
+ON DUPLICATE KEY UPDATE `role_id` = VALUES(`role_id`);
+
+-- 普通用户拥有只读权限
+INSERT INTO `sys_role_permission` (`role_id`, `permission_id`) VALUES
+(2, 5), (2, 9)             -- ROLE_USER → article:read + music:read
+ON DUPLICATE KEY UPDATE `role_id` = VALUES(`role_id`);
+
 -- -------------------------
 -- Initial category data
 -- -------------------------
