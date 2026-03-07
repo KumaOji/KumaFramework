@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.security.spring.access.expression;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -24,39 +19,39 @@ public class AuthorizeCheckSerivce {
         if (methodInvocation == null) {
             return true;
         } else {
-            com.kuma.boot.security.spring.access.expression.Authorize annotation;
-            if (methodInvocation.getMethod().isAnnotationPresent(com.kuma.boot.security.spring.access.expression.Authorize.class)) {
-                annotation = (com.kuma.boot.security.spring.access.expression.Authorize)methodInvocation.getMethod().getAnnotation(com.kuma.boot.security.spring.access.expression.Authorize.class);
+            Authorize annotation;
+            if (methodInvocation.getMethod().isAnnotationPresent(Authorize.class)) {
+                annotation = methodInvocation.getMethod().getAnnotation(Authorize.class);
             } else {
-                if (!methodInvocation.getMethod().getDeclaringClass().isAnnotationPresent(com.kuma.boot.security.spring.access.expression.Authorize.class)) {
+                if (!methodInvocation.getMethod().getDeclaringClass().isAnnotationPresent(Authorize.class)) {
                     return true;
                 }
-
-                annotation = (com.kuma.boot.security.spring.access.expression.Authorize)methodInvocation.getMethod().getDeclaringClass().getAnnotation(com.kuma.boot.security.spring.access.expression.Authorize.class);
+                annotation = methodInvocation.getMethod().getDeclaringClass().getAnnotation(Authorize.class);
             }
 
             String name = root.getAuthentication().getName();
-            UserEntity userEntity = (UserEntity)this.redisRepository.get(name);
+            UserEntity userEntity = (UserEntity) this.redisRepository.get(name);
             if (userEntity == null) {
                 return false;
             } else {
-                List<String> authorities = new ArrayList();
+                List<String> authorities = userEntity.getAuthorities();
+                if (authorities == null) {
+                    authorities = new ArrayList<>();
+                }
                 String[] needAuthorities = annotation.value();
                 if (annotation.anyMatch()) {
-                    for(String needAuthority : needAuthorities) {
+                    for (String needAuthority : needAuthorities) {
                         if (authorities.contains(needAuthority)) {
                             return true;
                         }
                     }
-
                     return false;
                 } else {
-                    for(String needAuthority : needAuthorities) {
+                    for (String needAuthority : needAuthorities) {
                         if (!authorities.contains(needAuthority)) {
                             return false;
                         }
                     }
-
                     return true;
                 }
             }
@@ -64,5 +59,14 @@ public class AuthorizeCheckSerivce {
     }
 
     public static class UserEntity {
+        private List<String> authorities;
+
+        public List<String> getAuthorities() {
+            return authorities;
+        }
+
+        public void setAuthorities(List<String> authorities) {
+            this.authorities = authorities;
+        }
     }
 }

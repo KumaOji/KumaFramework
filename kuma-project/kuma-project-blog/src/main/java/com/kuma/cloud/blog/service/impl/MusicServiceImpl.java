@@ -12,9 +12,15 @@ import com.kuma.cloud.blog.mapper.MusicMapper;
 import com.kuma.cloud.blog.service.MusicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +30,9 @@ import java.util.stream.Collectors;
 public class MusicServiceImpl implements MusicService {
 
     private final MusicMapper musicMapper;
+
+    @Value("${blog.music.base-path:./music}")
+    private String musicBasePath;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -114,6 +123,26 @@ public class MusicServiceImpl implements MusicService {
         QueryWrapper<Music> qw = new QueryWrapper<>();
         qw.eq("status", 1).orderByDesc("play_count").last("LIMIT " + limit);
         return musicMapper.selectList(qw).stream().map(this::toVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public Resource getMusicFile(Long id) {
+        Music music = musicMapper.selectById(id);
+        if (music == null || StringUtils.isBlank(music.getFilePath())) {
+            return null;
+        }
+        String filePath = music.getFilePath();
+        Path path;
+        if (Paths.get(filePath).isAbsolute()) {
+            path = Paths.get(filePath);
+        } else {
+            path = Paths.get(musicBasePath, filePath);
+        }
+        File file = path.toFile();
+        if (!file.exists() || !file.isFile()) {
+            return null;
+        }
+        return new FileSystemResource(file);
     }
 
     private MusicVO toVO(Music music) {

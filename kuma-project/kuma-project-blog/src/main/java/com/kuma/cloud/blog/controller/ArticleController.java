@@ -5,12 +5,12 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.Article;
 import com.kuma.cloud.blog.domain.vo.*;
+import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,14 +25,14 @@ public class ArticleController {
 
     @Operation(summary = "创建文章")
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @Authorize("ROLE_ADMIN")
     public Result<Long> create(@RequestBody Article article) {
         return Result.success(articleService.createArticle(article));
     }
 
     @Operation(summary = "更新文章")
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Authorize("ROLE_ADMIN")
     public Result<Boolean> update(@PathVariable Long id, @RequestBody Article article) {
         article.setId(id);
         return Result.success(articleService.updateArticle(article));
@@ -40,14 +40,14 @@ public class ArticleController {
 
     @Operation(summary = "删除文章（逻辑）")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Authorize("ROLE_ADMIN")
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(articleService.deleteArticle(id));
     }
 
     @Operation(summary = "物理删除文章")
     @DeleteMapping("/{id}/physical")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Authorize("ROLE_ADMIN")
     public Result<Boolean> deletePhysical(@PathVariable Long id) {
         return Result.success(articleService.deleteArticlePhysical(id));
     }
@@ -106,14 +106,14 @@ public class ArticleController {
 
     @Operation(summary = "发布文章")
     @PostMapping("/{id}/publish")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Authorize("ROLE_ADMIN")
     public Result<Boolean> publish(@PathVariable Long id) {
         return Result.success(articleService.publishArticle(id));
     }
 
     @Operation(summary = "取消发布（转为草稿）")
     @PostMapping("/{id}/unpublish")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Authorize("ROLE_ADMIN")
     public Result<Boolean> unpublish(@PathVariable Long id) {
         return Result.success(articleService.unpublishArticle(id));
     }

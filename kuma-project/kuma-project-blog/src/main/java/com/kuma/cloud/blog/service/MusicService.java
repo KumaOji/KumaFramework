@@ -5,6 +5,8 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Music;
 import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
+import org.springframework.core.io.Resource;
+
 import java.util.List;
 
 public interface MusicService {
@@ -17,4 +19,9 @@ public interface MusicService {
     boolean incrementLikeCount(Long id);
     List<MusicVO> getRecommendMusic(int limit);
     List<MusicVO> getHotMusic(int limit);
+
+    /**
+     * 获取音乐文件资源，用于流式播放
+     */
+    Resource getMusicFile(Long id);
 }

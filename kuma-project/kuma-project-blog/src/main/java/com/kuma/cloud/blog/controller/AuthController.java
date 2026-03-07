@@ -1,7 +1,9 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
+import com.kuma.boot.security.spring.access.expression.AuthorizeCheckSerivce;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "认证管理")
@@ -28,6 +32,7 @@ public class AuthController {
 
     private final UserService userService;
     private final TokenService tokenService;
+    private final RedisRepository redisRepository;
 
     @Value("${blog.token-expire-seconds:86400}")
     private long tokenExpireSeconds;
@@ -53,6 +58,7 @@ public class AuthController {
         loginResponse.setAdmin(user.getIsAdmin() != null && user.getIsAdmin() == 1);
 
         tokenService.saveToken(token, loginResponse, tokenExpireSeconds);
+        saveAuthorizeUserEntity(user.getUsername(), loginResponse.isAdmin(), tokenExpireSeconds);
         setTokenCookie(response, token);
         return Result.success(loginResponse);
     }
@@ -76,6 +82,10 @@ public class AuthController {
     public Result<String> logout(HttpServletRequest request, HttpServletResponse response) {
         String token = getTokenFromCookie(request);
         if (StringUtils.hasText(token)) {
+            LoginResponse lr = tokenService.getLoginResponseByToken(token);
+            if (lr != null && lr.getUsername() != null) {
+                redisRepository.del(lr.getUsername());
+            }
             tokenService.deleteToken(token);
         }
         clearTokenCookie(response);
@@ -88,6 +98,10 @@ public class AuthController {
         String token = getTokenFromCookie(request);
         if (!StringUtils.hasText(token) || !tokenService.validateToken(token)) {
             throw new BusinessException("Token无效或已过期");
+        }
+        LoginResponse lr = tokenService.getLoginResponseByToken(token);
+        if (lr != null && lr.getUsername() != null) {
+            saveAuthorizeUserEntity(lr.getUsername(), lr.isAdmin(), tokenExpireSeconds);
         }
         tokenService.refreshToken(token, tokenExpireSeconds);
         return Result.success("Token刷新成功");
@@ -117,5 +131,21 @@ public class AuthController {
         cookie.setMaxAge(0);
         cookie.setSecure(cookieSecure);
         response.addCookie(cookie);
+    }
+
+    /**
+     * 存储 UserEntity 到 Redis，供 @Authorize 校验使用。
+     * key 为 username，与 AuthorizeCheckService 中 get(name) 一致。
+     */
+    private void saveAuthorizeUserEntity(String username, boolean admin, long expireSeconds) {
+        AuthorizeCheckSerivce.UserEntity entity = new AuthorizeCheckSerivce.UserEntity();
+        List<String> authorities = new ArrayList<>();
+        authorities.add("ROLE_USER");
+        if (admin) {
+            authorities.add("ROLE_ADMIN");
+        }
+        entity.setAuthorities(authorities);
+        redisRepository.set(username, entity);
+        redisRepository.expire(username, expireSeconds);
     }
 }
