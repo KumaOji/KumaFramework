@@ -11,6 +11,7 @@ import com.kuma.cloud.blog.domain.vo.MusicVO;
 import com.kuma.cloud.blog.mapper.MusicMapper;
 import com.kuma.cloud.blog.service.MusicService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -19,12 +20,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MusicServiceImpl implements MusicService {
@@ -131,18 +134,33 @@ public class MusicServiceImpl implements MusicService {
         if (music == null || StringUtils.isBlank(music.getFilePath())) {
             return null;
         }
-        String filePath = music.getFilePath();
-        Path path;
-        if (Paths.get(filePath).isAbsolute()) {
-            path = Paths.get(filePath);
-        } else {
-            path = Paths.get(musicBasePath, filePath);
-        }
-        File file = path.toFile();
-        if (!file.exists() || !file.isFile()) {
+
+        try {
+            Path basePath = Paths.get(musicBasePath).toRealPath();
+            Path resolvedPath;
+
+            String filePath = music.getFilePath();
+            if (Paths.get(filePath).isAbsolute()) {
+                resolvedPath = Paths.get(filePath).toRealPath();
+            } else {
+                resolvedPath = Paths.get(musicBasePath, filePath).toRealPath();
+            }
+
+            // 验证路径不在基础路径之外，防止路径遍历攻击
+            if (!resolvedPath.startsWith(basePath)) {
+                log.warn("Security: Path traversal attempt detected. Base: {}, Resolved: {}", basePath, resolvedPath);
+                return null;
+            }
+
+            File file = resolvedPath.toFile();
+            if (!file.exists() || !file.isFile()) {
+                return null;
+            }
+            return new FileSystemResource(file);
+        } catch (IOException e) {
+            log.error("Failed to resolve music file path for music id: {}", id, e);
             return null;
         }
-        return new FileSystemResource(file);
     }
 
     private MusicVO toVO(Music music) {
