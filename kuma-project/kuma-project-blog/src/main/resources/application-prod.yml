@@ -6,22 +6,18 @@ server:
 spring:
   mvc:
     async:
-      request-timeout: 600000  # 音乐流式播放超时 10 分钟（毫秒）
+      request-timeout: 600000
   main:
     lazy-initialization: true
     log-startup-info: false
   sql:
     init:
-      mode: always
-      schema-locations: classpath:sql/blog_schema.sql
-      data-locations: classpath:sql/blog_data.sql
+      mode: never  # 生产环境不自动执行 SQL
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${KAFKA_BROKERS:kafka:9092}
       acks: "1"
       retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
   autoconfigure:
     exclude:
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
@@ -30,19 +26,17 @@ spring:
       datasource:
         mysql:
           hikari:
-            minimum-idle: 1
-            maximum-pool-size: 10
+            minimum-idle: 5
+            maximum-pool-size: 20
             connection-timeout: 10000
 
 logging:
   config: classpath:logback-spring.xml
   level:
-    root: INFO
+    root: WARN
     com.kuma.boot: INFO
-    com.kuma.cloud.blog: DEBUG
-    org.springframework.web: INFO
-    org.springframework.security: INFO
-    "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
+    com.kuma.cloud.blog: INFO
+    org.springframework.security: WARN
 
 mybatis-plus:
   global-config:
@@ -52,25 +46,23 @@ mybatis-plus:
 
 springdoc:
   api-docs:
-    enabled: true
-    path: /v3/api-docs
+    enabled: false  # 生产环境关闭 API 文档
   swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
+    enabled: false
 
 knife4j:
-  enable: true
+  enable: false
 
 blog:
   token-expire-seconds: 86400
-  cookie-secure: false
-  # 启动时重置 admin 密码为 admin123，解决 BCrypt 哈希不匹配问题。生产环境请设为 false
-  reset-admin-password: true
-  # Admin 初始密码（环境变量 ADMIN_INITIAL_PASSWORD 优先级最高）
-  admin-initial-password: admin123
-  # 音乐文件基础路径，建议使用绝对路径
+  cookie-secure: true  # HTTPS 强制
+  # 生产环境不自动重置密码，密码从环境变量读取
+  reset-admin-password: false
+  # Admin 初始密码从环境变量读取，避免硬编码
+  admin-initial-password: ${ADMIN_INITIAL_PASSWORD}
+  # 生产环境使用绝对路径
   music:
-    base-path: ./music
+    base-path: /data/music
 
 kuma:
   boot:
@@ -78,13 +70,12 @@ kuma:
       enabled: true
       async:
         enabled: true
-        core-pool-size: 5
-        max-pool-size: 20
+        core-pool-size: 10
+        max-pool-size: 50
         thread-name-prefix: blog-async
     web:
       graceful-response:
-        print-exception-in-global-advice: true
-        origin-exception-using-detail-message: true
+        print-exception-in-global-advice: false  # 生产环境不打印异常堆栈
         response-style: 0
         exclude-packages:
           - org.springdoc*
@@ -105,15 +96,10 @@ kuma:
     security:
       oauth2:
         endpoint:
-          # 博客使用本地 Token 认证，不依赖 UAA；此处为占位配置，避免框架初始化时报错
-          uaa-service-uri: http://127.0.0.1:33336
+          uaa-service-uri: ${UAA_SERVICE_URI:http://uaa:8080}
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**
-        - /swagger-ui/**
-        - /swagger-ui.html
-        - /doc.html
-        - /webjars/**
         - /auth/**
         - /error
       authentication:
@@ -132,10 +118,4 @@ kuma:
             pagination:
               enabled: true
     springdoc:
-      enabled: true
-      type: SERVICE
-      title: Blog API 文档
-      description: 博客系统 RESTful API 接口文档
-      version: 1.0.0
-      packages-to-scan:
-        - com.kuma.cloud.blog
+      enabled: false
