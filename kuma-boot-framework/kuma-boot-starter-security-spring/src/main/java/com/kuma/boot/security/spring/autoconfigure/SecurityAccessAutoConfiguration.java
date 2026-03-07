@@ -23,7 +23,6 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
 import com.kuma.boot.security.spring.access.expression.AuthorizeExpressionHandler;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.Collection;
 import org.springframework.beans.BeansException;
@@ -32,7 +31,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -61,18 +59,9 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
     public void afterPropertiesSet() throws Exception {
         LogUtils.started(SecurityAccessAutoConfiguration.class, StarterNameConstants.SECURITY_SPRINGSECURITY_STARTER);
 
-        // 程序启动后修改认证信息上下文存储策略，支持子线程中获取认证信息 -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
-        // MODE_THREALOCAL表示用户信息只能由当前线程访问。
-        // MODE_INHERITABLETHREADLOCAL表示用户信息可以由当前线程及其子线程访问.。
-        // MODE_GLOBAL表示用户信息没有线程限制，全局都可以访问，一般用于gui的开发中。
+        // 修改 SecurityContext 传播策略：允许子线程继承父线程的认证信息。
+        // 等效于 JVM 参数 -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
-
-        // 使用DelegatingSecurityContextRunnable创建线程
-        // Runnable runnable = new DelegatingSecurityContextRunnable(() -> {
-        //	// 线程处理逻辑
-        //	// ...
-        // });
-        // new Thread(runnable).start();
     }
 
     private ApplicationContext applicationContext;
@@ -108,37 +97,28 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
     }
 
     /**
-     * 权限验证器
-     *
-     * @author kuma
-     * @version 2022.06
-     * @since 2022-06-08 11:28:55
+     * 权限验证器，供 SpEL 表达式使用：{@code @PreAuthorize("@pms.hasPermission('export')")}
      */
     public static class PermissionVerifier {
 
-        // @PreAuthorize("@pms.hasPermission(#request, authentication, 'export')")
-        public boolean hasPermission(
-                HttpServletRequest req, Authentication authentication, String permission) {
-            return false;
-        }
-
         // @PreAuthorize("@pms.hasPermission('export')")
         public boolean hasPermission(String permission) {
-            // 内部调用直接跳过
-            String header = RequestUtils.getHeader(CommonConstants.KMC_FROM_INNER);
-            if (Boolean.TRUE.equals(Boolean.valueOf(header))) {
+            if (isInnerRequest()) {
                 return true;
             }
 
-            Collection<? extends GrantedAuthority> authorities =
-                    SecurityUtils.getAuthentication().getAuthorities();
+            Authentication authentication = SecurityUtils.getAuthentication();
+            if (authentication == null) {
+                return false;
+            }
+
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             if (CollUtil.isEmpty(authorities)) {
                 return false;
             }
 
             for (GrantedAuthority grantedAuthority : authorities) {
-                String authority = grantedAuthority.getAuthority();
-                if (authority.contains(permission)) {
+                if (grantedAuthority.getAuthority().contains(permission)) {
                     return true;
                 }
             }
@@ -147,11 +127,6 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
     }
 
     public static class StandardPermissionEvaluator implements PermissionEvaluator {
-
-        /**
-         * 用于SpEL表达式解析.
-         */
-        private static final SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
 
         // 普通的targetDomainObject判断 @PreAuthorize("hasPermission(#batchDTO, 'batch')")
         @Override
@@ -164,25 +139,20 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
             return hasPrivilege(auth, targetType, permission.toString().toUpperCase());
         }
 
-        // 用于ACL的访问控制 @PreAuthorize("hasPermission(1, #batchDTO, 'batch')")
+        // 用于ACL的访问控制 @PreAuthorize("hasPermission(1, 'TargetType', 'batch')")
         @Override
         public boolean hasPermission(
                 Authentication auth, Serializable targetId, String targetType, Object permission) {
-
             if ((auth == null) || (targetType == null) || !(permission instanceof String)) {
                 return false;
             }
-            return hasPrivilege(
-                    auth, targetType.toUpperCase(), permission.toString().toUpperCase());
+            return hasPrivilege(auth, targetType.toUpperCase(), permission.toString().toUpperCase());
         }
 
         private boolean hasPrivilege(Authentication auth, String targetType, String permission) {
-            // 内部微服务调用直接返回true
-            String header = RequestUtils.getHeader(CommonConstants.KMC_FROM_INNER);
-            if (Boolean.TRUE.equals(Boolean.valueOf(header))) {
+            if (isInnerRequest()) {
                 return true;
             }
-
             for (GrantedAuthority grantedAuth : auth.getAuthorities()) {
                 if (grantedAuth.getAuthority().contains(permission)) {
                     return true;
@@ -190,11 +160,10 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
             }
             return false;
         }
+    }
 
-        public boolean checkInner() {
-            HttpServletRequest request = RequestUtils.getRequest();
-
-            return true;
-        }
+    private static boolean isInnerRequest() {
+        String header = RequestUtils.getHeader(CommonConstants.KMC_FROM_INNER);
+        return Boolean.parseBoolean(header);
     }
 }
