@@ -21,6 +21,7 @@ import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.security.spring.access.expression.AuthorizeExpressionHandler;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
@@ -33,7 +34,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -95,20 +95,12 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
     @Bean
     public MethodSecurityExpressionHandler methodSecurityExpressionHandler(
             RoleHierarchy roleHierarchy, StandardPermissionEvaluator standardPermissionEvaluator) {
-        DefaultMethodSecurityExpressionHandler expressionHandler =
-                new DefaultMethodSecurityExpressionHandler();
+        AuthorizeExpressionHandler expressionHandler = new AuthorizeExpressionHandler();
+        expressionHandler.setApplicationContext(applicationContext);
         expressionHandler.setRoleHierarchy(roleHierarchy);
         expressionHandler.setPermissionEvaluator(standardPermissionEvaluator);
         return expressionHandler;
     }
-
-    //	@Bean
-    //	public MethodSecurityExpressionHandler methodSecurityExpressionHandler(ApplicationContext
-    // context) {
-    //		AuthorizeExpressionHandler expressionHandler = new AuthorizeExpressionHandler();
-    //		expressionHandler.setApplicationContext(context);
-    //		return expressionHandler;
-    //	}
 
     @Bean(name = "pms")
     public PermissionVerifier permissionVerifier() {
