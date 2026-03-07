@@ -34,8 +34,8 @@ public class AuthorizeCheckSerivce {
 
             List<String> authorities;
             String name = root.getAuthentication().getName();
-            UserEntity userEntity = (UserEntity) this.redisRepository.get(name);
-            if (userEntity != null && userEntity.getAuthorities() != null) {
+            Object cached = this.redisRepository.get(name);
+            if (cached instanceof UserEntity userEntity && userEntity.getAuthorities() != null) {
                 authorities = userEntity.getAuthorities();
             } else {
                 // 兼容 Token 等认证方式：从 Authentication.getAuthorities() 获取
