@@ -3,7 +3,10 @@ package com.kuma.boot.security.spring.access.expression;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 @Service("authorizeCheck")
@@ -29,31 +32,39 @@ public class AuthorizeCheckSerivce {
                 annotation = methodInvocation.getMethod().getDeclaringClass().getAnnotation(Authorize.class);
             }
 
+            List<String> authorities;
             String name = root.getAuthentication().getName();
             UserEntity userEntity = (UserEntity) this.redisRepository.get(name);
-            if (userEntity == null) {
+            if (userEntity != null && userEntity.getAuthorities() != null) {
+                authorities = userEntity.getAuthorities();
+            } else {
+                // 兼容 Token 等认证方式：从 Authentication.getAuthorities() 获取
+                Authentication auth = root.getAuthentication();
+                if (auth == null || auth.getAuthorities() == null) {
+                    return false;
+                }
+                authorities = auth.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList());
+            }
+            if (authorities == null) {
+                authorities = new ArrayList<>();
+            }
+            String[] needAuthorities = annotation.value();
+            if (annotation.anyMatch()) {
+                for (String needAuthority : needAuthorities) {
+                    if (authorities.contains(needAuthority)) {
+                        return true;
+                    }
+                }
                 return false;
             } else {
-                List<String> authorities = userEntity.getAuthorities();
-                if (authorities == null) {
-                    authorities = new ArrayList<>();
-                }
-                String[] needAuthorities = annotation.value();
-                if (annotation.anyMatch()) {
-                    for (String needAuthority : needAuthorities) {
-                        if (authorities.contains(needAuthority)) {
-                            return true;
-                        }
+                for (String needAuthority : needAuthorities) {
+                    if (!authorities.contains(needAuthority)) {
+                        return false;
                     }
-                    return false;
-                } else {
-                    for (String needAuthority : needAuthorities) {
-                        if (!authorities.contains(needAuthority)) {
-                            return false;
-                        }
-                    }
-                    return true;
                 }
+                return true;
             }
         }
     }
