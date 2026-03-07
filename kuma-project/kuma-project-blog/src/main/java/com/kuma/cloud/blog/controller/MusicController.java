@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
-import com.kuma.boot.security.spring.access.expression.Permissions;
+import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.domain.entity.Music;
 import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
@@ -32,14 +32,14 @@ public class MusicController {
 
     @Operation(summary = "创建音乐")
     @PostMapping
-    @Authorize(Permissions.MUSIC_UPLOAD)
+    @Authorize(BlogPermissions.MUSIC_UPLOAD)
     public Result<Long> create(@RequestBody Music music) {
         return Result.success(musicService.createMusic(music));
     }
 
     @Operation(summary = "更新音乐")
     @PutMapping("/{id}")
-    @Authorize(Permissions.MUSIC_UPLOAD)
+    @Authorize(BlogPermissions.MUSIC_UPLOAD)
     public Result<Boolean> update(@PathVariable Long id, @RequestBody Music music) {
         music.setId(id);
         return Result.success(musicService.updateMusic(music));
@@ -47,7 +47,7 @@ public class MusicController {
 
     @Operation(summary = "删除音乐（逻辑）")
     @DeleteMapping("/{id}")
-    @Authorize(Permissions.MUSIC_DELETE)
+    @Authorize(BlogPermissions.MUSIC_DELETE)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(musicService.deleteMusic(id));
     }
