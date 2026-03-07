@@ -91,10 +91,16 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
             }
         }
         if (gracefulResponseProperties.isPrintExceptionInGlobalAdvice()) {
-            logger.error(
-                    "Graceful Response:GlobalExceptionAdvice捕获到异常,message=[{}]",
-                    throwable.getMessage(),
-                    throwable);
+            // 预期内的业务异常（如未登录）使用 DEBUG，避免日志噪音
+            if (isExpectedBusinessException(throwable)) {
+                logger.debug("Graceful Response:GlobalExceptionAdvice捕获到预期业务异常,message=[{}]",
+                        throwable.getMessage());
+            } else {
+                logger.error(
+                        "Graceful Response:GlobalExceptionAdvice捕获到异常,message=[{}]",
+                        throwable.getMessage(),
+                        throwable);
+            }
         }
         ResponseStatus statusLine;
         if (throwable instanceof GracefulResponseException) {
@@ -156,6 +162,18 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
             }
         }
         return defaultError;
+    }
+
+    /**
+     * 是否为预期内的业务异常（如未登录、用户名密码错误），仅记录 DEBUG 避免日志噪音
+     */
+    private boolean isExpectedBusinessException(Throwable throwable) {
+        if (throwable == null) return false;
+        String className = throwable.getClass().getName();
+        if (!className.contains("BusinessException")) return false;
+        String msg = throwable.getMessage();
+        if (msg == null) return false;
+        return msg.contains("未登录") || msg.contains("用户名或密码错误");
     }
 
     @Override
