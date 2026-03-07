@@ -55,7 +55,7 @@ public class PageQuery implements Serializable {
             requiredMode = RequiredMode.REQUIRED,
             defaultValue = "20")
     @NotNull(message = "每页数据显示数量不能为空")
-    @Min(value = 5, message = "每页显示条数最小为5条")
+    @Min(value = 1, message = "每页显示条数最小为1条")
     @Max(value = 100, message = "每页显示条数最大为100条")
     private Integer pageSize;
 
@@ -81,6 +81,11 @@ public class PageQuery implements Serializable {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    /** 兼容 size 参数（与 pageSize 等价） */
+    public void setSize(Integer size) {
+        this.pageSize = size;
     }
 
     public String getSort() {

@@ -6,6 +6,7 @@ import com.kuma.cloud.blog.security.TokenAuthenticationFilter;
 import com.kuma.cloud.blog.service.TokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,7 +28,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(1)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain blogSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)

@@ -1,10 +1,17 @@
 server:
   port: 9000
+  servlet:
+    context-path: /api
 
 spring:
   main:
     lazy-initialization: true
     log-startup-info: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/blog_schema.sql
+      data-locations: classpath:sql/blog_data.sql
   kafka:
     producer:
       bootstrap-servers: localhost:9092
@@ -66,7 +73,8 @@ kuma:
         thread-name-prefix: blog-async
     web:
       graceful-response:
-        print-exception-in-global-advice: false
+        print-exception-in-global-advice: true
+        origin-exception-using-detail-message: true
         response-style: 0
         exclude-packages:
           - org.springdoc*
@@ -100,10 +108,14 @@ kuma:
         enabled: true
     data:
       datasource:
-        enabled: false
+        enabled: true
       mybatis:
         mybatis-plus:
-          enabled: false
+          enabled: true
+          interceptor:
+            enabled: true
+            pagination:
+              enabled: true
     springdoc:
       enabled: true
       type: SERVICE

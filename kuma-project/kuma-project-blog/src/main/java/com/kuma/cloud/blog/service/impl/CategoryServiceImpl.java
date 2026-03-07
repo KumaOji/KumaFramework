@@ -69,8 +69,9 @@ public class CategoryServiceImpl implements CategoryService {
             Long finalParentId = parentId;
             parentId = all.stream()
                     .filter(c -> c.getId().equals(finalParentId))
+                    .findFirst()
                     .map(Category::getParentId)
-                    .findFirst().orElse(null);
+                    .orElse(null);
         }
         return String.join(" / ", parts);
     }
