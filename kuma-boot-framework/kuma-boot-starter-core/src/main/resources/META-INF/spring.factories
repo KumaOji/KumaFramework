@@ -1,3 +1,7 @@
 # Kuma Boot - Spring Application Run Listeners
 org.springframework.boot.SpringApplicationRunListener=\
 com.kuma.boot.core.runtime.initializer.KmcSpringApplicationRunListener
+
+# Kuma Boot - ApplicationContext Initializers
+org.springframework.context.ApplicationContextInitializer=\
+com.kuma.boot.core.runtime.initializer.KmcApplicationContextInitializer
