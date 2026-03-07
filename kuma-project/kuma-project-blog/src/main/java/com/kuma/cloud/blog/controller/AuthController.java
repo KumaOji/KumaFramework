@@ -4,6 +4,7 @@ import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
@@ -141,9 +142,9 @@ public class AuthController {
     private void saveAuthorizeUserEntity(String username, boolean admin, long expireSeconds) {
         AuthorizeCheckService.UserEntity entity = new AuthorizeCheckService.UserEntity();
         List<String> authorities = new ArrayList<>();
-        authorities.add("ROLE_USER");
+        authorities.add(RoleConstants.USER);
         if (admin) {
-            authorities.add("ROLE_ADMIN");
+            authorities.add(RoleConstants.ADMIN);
         }
         entity.setAuthorities(authorities);
         String cacheKey = "user:authorities:" + username;
