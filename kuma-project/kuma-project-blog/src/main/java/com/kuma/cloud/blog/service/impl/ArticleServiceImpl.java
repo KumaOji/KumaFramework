@@ -102,8 +102,9 @@ public class ArticleServiceImpl implements ArticleService {
 
         qw.orderByDesc("is_top").orderByDesc("publish_time").orderByDesc("create_time");
 
-        IPage<Article> page = articleMapper.selectPage(
-                new Page<>(pageQuery.getCurrentPage(), pageQuery.getPageSize()), qw);
+        int current = pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1;
+        int size = pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 7;
+        IPage<Article> page = articleMapper.selectPage(new Page<>(current, size), qw);
 
         return page.convert(article -> {
             ArticleVO vo = new ArticleVO();

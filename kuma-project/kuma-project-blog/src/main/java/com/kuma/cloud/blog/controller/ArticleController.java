@@ -60,7 +60,17 @@ public class ArticleController {
 
     @Operation(summary = "分页查询文章列表")
     @GetMapping("/list")
-    public Result<IPage<ArticleVO>> list(PageQuery pageQuery, ArticleQueryVO queryVO) {
+    public Result<IPage<ArticleVO>> list(
+            @Parameter(description = "当前页") @RequestParam(required = false) Integer currentPage,
+            @Parameter(description = "每页条数，支持 pageSize 或 size") @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Integer size,
+            PageQuery pageQuery,
+            ArticleQueryVO queryVO) {
+        int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
+        int pageSizeVal = pageSize != null ? pageSize : (size != null ? size : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 10));
+        if (pageQuery == null) pageQuery = new PageQuery();
+        pageQuery.setCurrentPage(current);
+        pageQuery.setPageSize(pageSizeVal);
         return Result.success(articleService.getArticleList(pageQuery, queryVO));
     }
 
