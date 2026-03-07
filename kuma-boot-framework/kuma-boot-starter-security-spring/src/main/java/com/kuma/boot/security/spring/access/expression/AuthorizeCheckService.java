@@ -76,11 +76,11 @@ public class AuthorizeCheckService {
         Set<String> userAuthorities = new HashSet<>(authorities);
         Set<String> requiredAuthorities = new HashSet<>(Arrays.asList(needAuthorities));
 
-        if (annotation.anyMatch()) {
-            // Any match mode: grant access if user has ANY of the required authorities
+        if (annotation.logical() == Authorize.Logical.OR) {
+            // OR 模式：用户拥有任意一个所需权限即可
             return userAuthorities.stream().anyMatch(requiredAuthorities::contains);
         } else {
-            // All match mode: grant access only if user has ALL required authorities
+            // AND 模式：用户必须同时拥有所有所需权限
             return requiredAuthorities.stream().allMatch(userAuthorities::contains);
         }
     }
