@@ -6,6 +6,7 @@ import com.kuma.cloud.blog.security.TokenAuthenticationFilter;
 import com.kuma.cloud.blog.service.TokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -25,6 +26,11 @@ public class SecurityConfig {
 
     public SecurityConfig(TokenService tokenService) {
         this.tokenAuthenticationFilter = new TokenAuthenticationFilter(tokenService);
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

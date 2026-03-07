@@ -1,11 +1,10 @@
 package com.kuma.cloud.blog.service.impl;
 
+import com.kuma.boot.security.spring.utils.SecurityUtils;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.mapper.UserMapper;
 import com.kuma.cloud.blog.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,8 +13,6 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
-    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     private final UserMapper userMapper;
 
@@ -26,13 +23,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean checkPassword(String rawPassword, String encodedPassword) {
-        if (encodedPassword == null) return false;
-        return PASSWORD_ENCODER.matches(rawPassword, encodedPassword);
+        if (rawPassword == null || encodedPassword == null) return false;
+        rawPassword = rawPassword.trim();
+        encodedPassword = encodedPassword.trim();
+        return SecurityUtils.validatePass(rawPassword, encodedPassword);
     }
 
     @Override
     public String encodePassword(String rawPassword) {
-        return PASSWORD_ENCODER.encode(rawPassword);
+        return SecurityUtils.getPasswordEncoder().encode(rawPassword);
     }
 
     @Override
