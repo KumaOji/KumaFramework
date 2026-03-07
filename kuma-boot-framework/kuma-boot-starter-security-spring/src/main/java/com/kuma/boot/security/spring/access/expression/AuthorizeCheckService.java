@@ -68,21 +68,45 @@ public class AuthorizeCheckService {
     private boolean checkAuthorization(List<String> authorities, Authorize annotation) {
         String[] needAuthorities = annotation.value();
 
-        // Validate annotation configuration
         if (needAuthorities.length == 0) {
             throw new IllegalArgumentException("@Authorize annotation must specify at least one authority");
         }
 
         Set<String> userAuthorities = new HashSet<>(authorities);
-        Set<String> requiredAuthorities = new HashSet<>(Arrays.asList(needAuthorities));
 
         if (annotation.logical() == Authorize.Logical.OR) {
             // OR 模式：用户拥有任意一个所需权限即可
-            return userAuthorities.stream().anyMatch(requiredAuthorities::contains);
+            return Arrays.stream(needAuthorities).anyMatch(r -> hasAuthority(userAuthorities, r));
         } else {
             // AND 模式：用户必须同时拥有所有所需权限
-            return requiredAuthorities.stream().allMatch(userAuthorities::contains);
+            return Arrays.stream(needAuthorities).allMatch(r -> hasAuthority(userAuthorities, r));
         }
+    }
+
+    /**
+     * 判断用户是否拥有指定权限，支持通配符规则：
+     * <ul>
+     *   <li>精确匹配：用户有 {@code article:create} → 通过 {@code article:create}</li>
+     *   <li>模块通配符：用户有 {@code article:*} → 通过所有 {@code article:xxx}</li>
+     *   <li>超级权限：用户有 {@code *} → 通过所有校验</li>
+     * </ul>
+     */
+    private boolean hasAuthority(Set<String> userAuthorities, String required) {
+        // 精确匹配
+        if (userAuthorities.contains(required)) {
+            return true;
+        }
+        // 超级权限
+        if (userAuthorities.contains(Permissions.ALL)) {
+            return true;
+        }
+        // 模块通配符：required = "article:create"，检查用户是否有 "article:*"
+        int colonIdx = required.indexOf(':');
+        if (colonIdx > 0) {
+            String moduleWildcard = required.substring(0, colonIdx + 1) + "*";
+            return userAuthorities.contains(moduleWildcard);
+        }
+        return false;
     }
 
     public static class UserEntity {
