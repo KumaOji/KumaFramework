@@ -159,9 +159,16 @@ public class MusicController {
         byte[] buffer = new byte[8192];
         try (InputStream in = resource.getInputStream()) {
             int n;
+            int written = 0;
             while ((n = in.read(buffer)) != -1) {
                 try {
                     outputStream.write(buffer, 0, n);
+                    written += n;
+                    // 定期 flush 避免缓冲堆积，降低连接超时风险
+                    if (written >= 65536) {
+                        outputStream.flush();
+                        written = 0;
+                    }
                 } catch (IOException e) {
                     if (!isClientDisconnect(e)) {
                         log.warn("流式写入中断: {}", e.getMessage());
@@ -169,6 +176,7 @@ public class MusicController {
                     return;
                 }
             }
+            outputStream.flush();
         } catch (IOException e) {
             if (!isClientDisconnect(e)) {
                 log.warn("流式读取/写入异常: {}", e.getMessage());
@@ -178,13 +186,9 @@ public class MusicController {
     }
 
     private static boolean isClientDisconnect(IOException e) {
-        if (e == null) return false;
-        String msg = e.getMessage();
-        if (msg != null && isStreamAbortMessage(msg)) return true;
-        Throwable cause = e.getCause();
-        if (cause != null) {
-            String causeMsg = cause.getMessage();
-            if (causeMsg != null && isStreamAbortMessage(causeMsg)) return true;
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            String msg = t.getMessage();
+            if (msg != null && isStreamAbortMessage(msg)) return true;
         }
         return false;
     }
@@ -192,6 +196,7 @@ public class MusicController {
     private static boolean isStreamAbortMessage(String msg) {
         return msg.contains("Connection reset by peer")
                 || msg.contains("Response not usable after response errors")
+                || msg.contains("Response not usable after async request completion")
                 || msg.contains("I/O operation was interrupted")
                 || msg.contains("XNIO000808");
     }
