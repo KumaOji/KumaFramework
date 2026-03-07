@@ -4,6 +4,7 @@ import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
+import com.kuma.boot.security.spring.access.expression.Permissions;
 import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
@@ -142,9 +143,16 @@ public class AuthController {
     private void saveAuthorizeUserEntity(String username, boolean admin, long expireSeconds) {
         AuthorizeCheckService.UserEntity entity = new AuthorizeCheckService.UserEntity();
         List<String> authorities = new ArrayList<>();
+        // 所有登录用户拥有基础角色 + 内容读权限
         authorities.add(RoleConstants.USER);
+        authorities.add(Permissions.ARTICLE_READ);
+        authorities.add(Permissions.MUSIC_READ);
         if (admin) {
+            // 管理员额外拥有所有模块的操作权限
             authorities.add(RoleConstants.ADMIN);
+            authorities.add(Permissions.ARTICLE_ALL);
+            authorities.add(Permissions.MUSIC_ALL);
+            authorities.add(Permissions.SYSTEM_ALL);
         }
         entity.setAuthorities(authorities);
         String cacheKey = "user:authorities:" + username;
