@@ -27,6 +27,7 @@ import com.kuma.boot.web.gracefulresponse.data.Response;
 import com.kuma.boot.web.gracefulresponse.data.ResponseStatus;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -69,7 +70,15 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
      */
     @ExceptionHandler({Throwable.class})
     @ResponseBody
-    public Response exceptionHandler(Throwable throwable, HttpServletRequest request) {
+    public Response exceptionHandler(Throwable throwable, HttpServletRequest request,
+            HttpServletResponse response) {
+        // 响应已提交（如流式输出中客户端断开），无法再写入 JSON，直接返回 null 避免 HttpMessageNotWritableException
+        if (response != null && response.isCommitted()) {
+            if (gracefulResponseProperties.isPrintExceptionInGlobalAdvice()) {
+                logger.debug("响应已提交，跳过异常包装: {}", throwable.getMessage());
+            }
+            return null;
+        }
         // 排除路径（如 /v3/api-docs、/swagger-ui）不包装，直接抛出，避免 Swagger UI 收到 GracefulResponse 错误格式
         if (request != null && !CollectionUtils.isEmpty(gracefulResponseProperties.getExcludePaths())) {
             String path = request.getRequestURI();
