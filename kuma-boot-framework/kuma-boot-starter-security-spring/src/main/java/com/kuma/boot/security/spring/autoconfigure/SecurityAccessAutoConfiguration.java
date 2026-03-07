@@ -22,6 +22,7 @@ import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
 import com.kuma.boot.security.spring.access.expression.AuthorizeExpressionHandler;
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
 import java.io.Serializable;
 import java.util.Collection;
@@ -73,7 +74,9 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
 
     @Bean
     public RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_DBA ROLE_DBA > ROLE_USER");
+        return RoleHierarchyImpl.fromHierarchy(
+                RoleConstants.ADMIN + " > " + RoleConstants.DBA + "\n" +
+                RoleConstants.DBA + " > " + RoleConstants.USER);
     }
 
     @Bean

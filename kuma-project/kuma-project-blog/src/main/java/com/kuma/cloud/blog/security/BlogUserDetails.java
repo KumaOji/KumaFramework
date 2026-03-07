@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.security;
 
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,9 +29,9 @@ public class BlogUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        authorities.add(new SimpleGrantedAuthority(RoleConstants.USER));
         if (loginResponse.isAdmin()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority(RoleConstants.ADMIN));
         }
         return authorities;
     }

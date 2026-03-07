@@ -11,16 +11,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * 方法/类级别的权限校验注解，底层通过 Spring Security {@code @PreAuthorize} 驱动。
  *
- * <p>支持单权限和多权限两种模式：
+ * <p>支持单权限和多权限两种模式，权限字符串推荐使用 {@link RoleConstants} 中的常量：
  * <pre>{@code
  * // 单权限：当前用户必须拥有 ROLE_ADMIN
- * @Authorize("ROLE_ADMIN")
+ * @Authorize(RoleConstants.ADMIN)
  *
  * // 多权限 OR（默认）：拥有其中任意一个即可访问
- * @Authorize({"ROLE_ADMIN", "ROLE_OPS"})
+ * @Authorize({RoleConstants.ADMIN, RoleConstants.USER})
  *
  * // 多权限 AND：必须同时拥有所有权限才能访问
- * @Authorize(value = {"ROLE_ADMIN", "ROLE_AUDITOR"}, logical = Authorize.Logical.AND)
+ * @Authorize(value = {RoleConstants.ADMIN, RoleConstants.DBA}, logical = Authorize.Logical.AND)
  * }</pre>
  *
  * <p>标注在类上时，对该类所有方法生效；方法上的注解优先级高于类上的注解。
@@ -37,7 +37,7 @@ public @interface Authorize {
     /**
      * 所需权限列表，至少指定一个。
      *
-     * <p>单个权限可直接写字符串：{@code @Authorize("ROLE_ADMIN")}
+     * <p>推荐使用 {@link RoleConstants} 常量，避免硬编码：{@code @Authorize(RoleConstants.ADMIN)}
      */
     String[] value();
 

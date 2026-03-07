@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.entity.Music;
 import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
@@ -31,14 +32,14 @@ public class MusicController {
 
     @Operation(summary = "创建音乐")
     @PostMapping
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Long> create(@RequestBody Music music) {
         return Result.success(musicService.createMusic(music));
     }
 
     @Operation(summary = "更新音乐")
     @PutMapping("/{id}")
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Boolean> update(@PathVariable Long id, @RequestBody Music music) {
         music.setId(id);
         return Result.success(musicService.updateMusic(music));
@@ -46,7 +47,7 @@ public class MusicController {
 
     @Operation(summary = "删除音乐（逻辑）")
     @DeleteMapping("/{id}")
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(musicService.deleteMusic(id));
     }

@@ -5,6 +5,7 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.ReadyItem;
 import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.vo.ReadyQueryVO;
 import com.kuma.cloud.blog.domain.vo.ReadyVO;
 import com.kuma.cloud.blog.service.ReadyService;
@@ -23,14 +24,14 @@ public class ReadyController {
 
     @Operation(summary = "创建待办")
     @PostMapping
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Long> create(@RequestBody ReadyItem item) {
         return Result.success(readyService.createReady(item));
     }
 
     @Operation(summary = "更新待办")
     @PutMapping("/{id}")
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Boolean> update(@PathVariable Long id, @RequestBody ReadyItem item) {
         item.setId(id);
         return Result.success(readyService.updateReady(item));
@@ -38,21 +39,21 @@ public class ReadyController {
 
     @Operation(summary = "切换状态")
     @PutMapping("/{id}/toggle")
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Boolean> toggle(@PathVariable Long id) {
         return Result.success(readyService.toggleStatus(id));
     }
 
     @Operation(summary = "删除待办（逻辑）")
     @DeleteMapping("/{id}")
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(readyService.deleteReady(id));
     }
 
     @Operation(summary = "物理删除待办")
     @DeleteMapping("/{id}/physical")
-    @Authorize("ROLE_ADMIN")
+    @Authorize(RoleConstants.ADMIN)
     public Result<Boolean> deletePhysical(@PathVariable Long id) {
         return Result.success(readyService.deleteReadyPhysical(id));
     }
