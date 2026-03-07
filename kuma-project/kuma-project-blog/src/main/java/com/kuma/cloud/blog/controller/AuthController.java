@@ -3,7 +3,7 @@ package com.kuma.cloud.blog.controller;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.security.spring.access.expression.AuthorizeCheckSerivce;
+import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
@@ -84,7 +84,8 @@ public class AuthController {
         if (StringUtils.hasText(token)) {
             LoginResponse lr = tokenService.getLoginResponseByToken(token);
             if (lr != null && lr.getUsername() != null) {
-                redisRepository.del(lr.getUsername());
+                String cacheKey = "user:authorities:" + lr.getUsername();
+                redisRepository.del(cacheKey);
             }
             tokenService.deleteToken(token);
         }
@@ -135,17 +136,18 @@ public class AuthController {
 
     /**
      * 存储 UserEntity 到 Redis，供 @Authorize 校验使用。
-     * key 为 username，与 AuthorizeCheckService 中 get(name) 一致。
+     * key 为 "user:authorities:" + username，与 AuthorizeCheckService 中 getAuthorities 一致。
      */
     private void saveAuthorizeUserEntity(String username, boolean admin, long expireSeconds) {
-        AuthorizeCheckSerivce.UserEntity entity = new AuthorizeCheckSerivce.UserEntity();
+        AuthorizeCheckService.UserEntity entity = new AuthorizeCheckService.UserEntity();
         List<String> authorities = new ArrayList<>();
         authorities.add("ROLE_USER");
         if (admin) {
             authorities.add("ROLE_ADMIN");
         }
         entity.setAuthorities(authorities);
-        redisRepository.set(username, entity);
-        redisRepository.expire(username, expireSeconds);
+        String cacheKey = "user:authorities:" + username;
+        redisRepository.set(cacheKey, entity);
+        redisRepository.expire(cacheKey, expireSeconds);
     }
 }
