@@ -43,6 +43,9 @@
 
     <springProfile name="dev">
         <logger name="com.kuma.cloud.blog" level="DEBUG"/>
+        <!-- 降低 Tomcat 流式/异步相关 INFO 噪音 -->
+        <logger name="org.apache.catalina.connector.CoyoteAdapter" level="WARN"/>
+        <logger name="org.apache.tomcat.util.http.parser.Cookie" level="WARN"/>
     </springProfile>
 
     <springProfile name="prod">
