@@ -25,7 +25,7 @@ import org.springframework.core.env.Environment;
 /**
  * RocketMQ 自动装配过滤
  *
- * @author <a href="mailto:shiyindaxiaojie@gmail.com">gyl</a>
+ * @author kuma
  * @since 2.4.x
  */
 public class RocketMQAutoConfigurationImportFilter implements AutoConfigurationImportFilter, EnvironmentAware {
