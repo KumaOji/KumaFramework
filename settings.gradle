@@ -20,6 +20,8 @@ def oneLayerProjects = ['framework']
 for (name in oneLayerProjects) {
     include "kuma-boot-${name}"
     include "kuma-cloud-${name}"
+    include "kuma-bigdata-${name}"
+    include "kuma-other-${name}"
 }
 
 def frameworkBootSubModules = ['common', 'core', 'data-datasource',
@@ -30,17 +32,18 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'cache-redis', 'security-common', 'security-spring',
                                'ratelimit', 'idempotent','lock',
                                 'security-jstauth','totp','captcha',
-                                'dingtalk']
+                                'dingtalk','sentinel']
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
 
-def frameworkSubModules = ['bootstrap']
+def frameworkSubModules = ['bootstrap','seata','kmc',
+                           'sentinel','stream','alibaba']
 for (name in frameworkSubModules) {
     include "kuma-cloud-framework:kuma-cloud-starter-${name}"
 }
 include "kuma-project"
-def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'blog']
+def projectBootSubModules = ['project1', 'project2', 'project3', 'project4','project5', 'blog']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }
@@ -53,14 +56,3 @@ gradle.settingsEvaluated {
 }
 
 
-
-include 'kuma-cloud-framework:kuma-cloud-starter-seata'
-include 'kuma-cloud-framework:kuma-cloud-starter-kmc'
-include 'kuma-cloud-framework:kuma-cloud-starter-sentinel'
-include 'kuma-cloud-framework:kuma-cloud-starter-stream'
-include 'kuma-cloud-framework:kuma-cloud-starter-alibaba'
-include 'kuma-bigdata-framework'
-include 'kuma-other-framework'
-
-include 'kuma-project:kuma-project-project5'
-include 'kuma-boot-framework:kuma-boot-starter-sentinel'
