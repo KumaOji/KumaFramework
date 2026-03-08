@@ -6,7 +6,7 @@ spring:
     type: none
   autoconfigure:
     exclude:
-      # 排除 knife4j 自带的 Knife4jOpenApiCustomizer（使用 List 调用 getGroupConfigs，与 springdoc 3.0 的 Set 不兼容），项目已通过 @EnableKnife4j 提供兼容实现
+      # knife4j 与 springdoc 3.0 兼容问题，使用 @EnableKnife4j 替代
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
   datasource:
     dynamic:
@@ -28,14 +28,15 @@ spring:
       retries: 3
       batch-size: 16384
       buffer-memory: 33554432
+
 logging:
   config: classpath:logback-spring.xml
   level:
     root: INFO
     com.kuma.boot: INFO
+    com.kuma.cloud.project4: DEBUG
     org.springframework.web: INFO
     org.springframework.security: INFO
-    # 抑制 spring.cache-CacheProperties 等 BeanPostProcessorChecker 告警（Spring Boot 内置 Bean 无法添加 ROLE_INFRASTRUCTURE）
     "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
 
 mybatis-plus:
@@ -56,19 +57,38 @@ springdoc:
     doc-expansion: none
     try-it-out-enabled: false
 
-# Knife4j 增强文档（doc.html 界面）
 knife4j:
   enable: true
+
+# Actuator 端点暴露
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,kmc,kmchealth,kmcstartup,kmcrequestmappings,auditevents"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    kmc:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: project4
+    description: "框架全量功能演示项目"
+    version: "1.0.0"
 
 # 框架配置（前缀 kuma.boot.*）
 kuma:
   boot:
-    # 核心模块配置
     core:
       enabled: true
       collect-hook-enabled: true
       context-restart-enabled: false
-      context-restart-timespan: 10
       async:
         enabled: true
         virtual-threads: false
@@ -81,7 +101,6 @@ kuma:
         await-termination-seconds: 5
         thread-name-prefix: project4-async
         check-health: true
-    # Web 模块配置
     web:
       graceful-response:
         print-exception-in-global-advice: false
@@ -115,7 +134,6 @@ kuma:
         time: 300
         max: 5
         length: 3000
-    # Security 模块配置
     security:
       ignore-url:
         - /actuator/**
@@ -130,7 +148,6 @@ kuma:
         expire: 7200
         refresh-expire: 28800
         allowed-clock-skew-seconds: 60
-    # 缓存模块配置
     cache:
       redis:
         enabled: true
@@ -142,7 +159,6 @@ kuma:
         clear-remote-on-exit: false
         allow-null-values: true
         separator: "-"
-    # 数据源模块配置
     data:
       datasource:
         enabled: false
@@ -150,14 +166,11 @@ kuma:
       mybatis:
         mybatis-plus:
           enabled: false
-    # Office 模块配置
     office:
       enabled: false
-    # MQ 模块配置
     mq:
       kafka:
         enabled: false
-    # Springdoc 配置
     springdoc:
       enabled: true
       type: SERVICE
@@ -174,21 +187,20 @@ kuma:
       license:
         name: Apache 2.0
         url: https://www.apache.org/licenses/LICENSE-2.0.html
-    # IP 地理定位配置
     ip2region:
       enabled: true
-    # 幂等配置
     idempotent:
       enabled: true
-    # 分布式锁配置
     lock:
       enabled: true
       type: LOCAL
-    # 限流配置
     ratelimit:
       enabled: false
+    actuator:
+      managedresource:
+        enabled: true
 
-# 多租户配置
+# MyBatis 多租户
 mybatis:
   tenant:
     config:
@@ -196,12 +208,10 @@ mybatis:
       tenant-id-column: tenant_id
       db-type: MYSQL
 
-# 延迟线程池配置
+# 延迟线程池
 delay:
   thread:
     core: 5
     max: 10
     queue: 100
     keepAlive: 60
-
-
