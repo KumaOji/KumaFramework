@@ -12,30 +12,13 @@ dependencyManagement {
 }
 
 dependencies {
-    runtimeOnly projectLibs.mysql
-    runtimeOnly projectLibs.postgresql
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
+
+    api projectLibs.spring.boot.starter.web
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
-}
-
-processResources {
-    filesMatching('**/application.yml') {
-        expand(
-                active: 'dev',
-                mysql_url: project.findProperty('mysql.url') ?: '',
-                mysql_username: project.findProperty('mysql.username') ?: '',
-                mysql_password: project.findProperty('mysql.password') ?: '',
-                postgresql_url: project.findProperty('postgresql.url') ?: '',
-                postgresql_username: project.findProperty('postgresql.username') ?: '',
-                postgresql_password: project.findProperty('postgresql.password') ?: '',
-                redis_host: project.findProperty('redis.host') ?: '',
-                redis_port: project.findProperty('redis.port') ?: '',
-                redis_database: project.findProperty('redis.database') ?: '',
-                redis_jedis_pool_max_active: project.findProperty('redis.jedis.pool.max-active') ?: '',
-                redis_jedis_pool_max_idle: project.findProperty('redis.jedis.pool.max-idle') ?: '',
-                redis_jedis_pool_min_idle: project.findProperty('redis.jedis.pool.min-idle') ?: ''
-        )
-    }
 }
 
 bootJar {

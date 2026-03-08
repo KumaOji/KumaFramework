@@ -70,7 +70,7 @@ blog:
   admin-initial-password: admin123
   # 音乐文件基础路径，建议使用绝对路径
   music:
-    base-path: ./music
+    base-path: E:\blog-resource\music
 
 kuma:
   boot:

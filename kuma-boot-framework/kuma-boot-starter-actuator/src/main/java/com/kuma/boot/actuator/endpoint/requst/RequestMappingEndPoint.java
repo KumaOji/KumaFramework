@@ -19,11 +19,13 @@ package com.kuma.boot.actuator.endpoint.requst;
 import cn.hutool.json.JSONObject;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * RequestMappingEndPoint
+ * RequestMappingEndPoint - 暴露所有 URL 映射信息
  *
  * @author kuma
  * @version 2021.9
@@ -32,12 +34,20 @@ import java.util.Map;
 @Endpoint(id = "kmcrequestmappings")
 public class RequestMappingEndPoint {
 
-    public static Map<String, Object> requestMappingHandlerMapping;
+    private final RequestMappingHandlerMapping handlerMapping;
+
+    public RequestMappingEndPoint(RequestMappingHandlerMapping handlerMapping) {
+        this.handlerMapping = handlerMapping;
+    }
 
     @ReadOperation
     public JSONObject requestMapping() {
+        Map<String, String> result = new LinkedHashMap<>();
+        handlerMapping.getHandlerMethods().forEach((info, method) ->
+                result.put(info.toString(), method.toString()));
         JSONObject jsonObject = new JSONObject();
-        jsonObject.set("data", requestMappingHandlerMapping);
+        jsonObject.set("total", result.size());
+        jsonObject.set("mappings", result);
         return jsonObject;
     }
 }

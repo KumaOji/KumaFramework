@@ -22,7 +22,9 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * EndPoint配置
@@ -32,6 +34,7 @@ import org.springframework.context.annotation.Bean;
  * @since 2021/04/02 10:25
  */
 @AutoConfiguration
+@ConditionalOnClass(RequestMappingHandlerMapping.class)
 @ConditionalOnAvailableEndpoint(endpoint = RequestMappingEndPoint.class)
 public class RequestMappingEndPointAutoConfiguration implements InitializingBean {
 
@@ -41,8 +44,8 @@ public class RequestMappingEndPointAutoConfiguration implements InitializingBean
     }
 
     @Bean
-    public RequestMappingEndPoint requestMappingEndPoint() {
-        return new RequestMappingEndPoint();
+    public RequestMappingEndPoint requestMappingEndPoint(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new RequestMappingEndPoint(requestMappingHandlerMapping);
     }
 
 }

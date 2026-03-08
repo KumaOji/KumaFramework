@@ -34,36 +34,36 @@ import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 @Endpoint(id = "kmc")
 public class KmcEndPoint {
 
-    private String STATUS = "up";
-    private String DETAIL = "一切正常";
+    private volatile String status = "up";
+    private volatile String detail = "一切正常";
 
     @ReadOperation
-    public JSONObject test() {
+    public JSONObject info() {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.set("status", STATUS);
-        jsonObject.set("detail", DETAIL);
+        jsonObject.set("status", status);
+        jsonObject.set("detail", detail);
         return jsonObject;
     }
 
     @ReadOperation
-    public JSONObject testSelector( @Selector String name ) {
+    public JSONObject infoByKey(@Selector String key) {
         JSONObject jsonObject = new JSONObject();
-        if ("status".equals(name)) {
-            jsonObject.set("status", STATUS);
-        } else if ("detail".equals(name)) {
-            jsonObject.set("detail", DETAIL);
+        if ("status".equals(key)) {
+            jsonObject.set("status", status);
+        } else if ("detail".equals(key)) {
+            jsonObject.set("detail", detail);
         }
         return jsonObject;
     }
 
-    // 动态修改指标
+    /** 动态修改指标，e.g. POST /actuator/kmc/{key}  body: { "value": "..." } */
     @WriteOperation
-    public void test4( @Selector String name, @Nullable String value ) {
+    public void update(@Selector String key, @Nullable String value) {
         if (!StringUtils.isEmpty(value)) {
-            if ("status".equals(name)) {
-                STATUS = value;
-            } else if ("detail".equals(name)) {
-                DETAIL = value;
+            if ("status".equals(key)) {
+                status = value;
+            } else if ("detail".equals(key)) {
+                detail = value;
             }
         }
     }

@@ -39,6 +39,7 @@ public class KmcManagedResource {
         return name;
     }
 
+    @ManagedAttribute(description = "The name attribute")
     public void setName(String name) {
         this.name = name;
     }
@@ -46,6 +47,11 @@ public class KmcManagedResource {
     @ManagedAttribute(description = "Current counter value")
     public int getCounter() {
         return counter;
+    }
+
+    @ManagedOperation(description = "Increment the counter by one")
+    public void incrementCounter() {
+        this.counter++;
     }
 
     @ManagedOperation(description = "Reset the counter to zero")
