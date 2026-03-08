@@ -12,38 +12,60 @@ dependencyManagement {
 }
 
 dependencies {
+    // ── kuma-boot-framework 全量 ──────────────────────────────────────────
     api project(':kuma-boot-framework:kuma-boot-starter-common')
-    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
-    api project(':kuma-boot-framework:kuma-boot-starter-web')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
-    api project(':kuma-boot-framework:kuma-boot-starter-office')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+
+    // 数据层
+    api project(':kuma-boot-framework:kuma-boot-starter-data-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+
+    // 缓存
     api project(':kuma-boot-framework:kuma-boot-starter-cache-common')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-caffeine')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-jetcache')
+
+    // 安全
+    api project(':kuma-boot-framework:kuma-boot-starter-security-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-jstauth')
+
+    // 消息队列
     api project(':kuma-boot-framework:kuma-boot-starter-mq-common')
     api project(':kuma-boot-framework:kuma-boot-starter-mq-kafka')
-    api project(':kuma-boot-framework:kuma-boot-starter-data-common')
-    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
-    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
-    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
-    api project(':kuma-boot-framework:kuma-boot-starter-lock')
-    api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
+
+    // 功能增强
     api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
+    api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
+    api project(':kuma-boot-framework:kuma-boot-starter-lock')
     api project(':kuma-boot-framework:kuma-boot-starter-ip2region')
+    api project(':kuma-boot-framework:kuma-boot-starter-office')
+    api project(':kuma-boot-framework:kuma-boot-starter-captcha')
+    api project(':kuma-boot-framework:kuma-boot-starter-totp')
+    api project(':kuma-boot-framework:kuma-boot-starter-dingtalk')
+    api project(':kuma-boot-framework:kuma-boot-starter-sentinel')
+
+    // ── kuma-cloud-framework ──────────────────────────────────────────────
     api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
+
+    // ── 第三方 ────────────────────────────────────────────────────────────
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.doc.webmvc
+    implementation projectLibs.spring.boot.starter.mail
+
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
-    implementation projectLibs.spring.boot.starter.mail
+    annotationProcessor projectLibs.lombok
 
     runtimeOnly projectLibs.mysql
     runtimeOnly projectLibs.postgresql
-
-    annotationProcessor projectLibs.lombok
 }
 
 processResources {

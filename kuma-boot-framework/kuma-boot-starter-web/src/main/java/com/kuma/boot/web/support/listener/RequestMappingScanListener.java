@@ -184,7 +184,6 @@ public class RequestMappingScanListener implements ApplicationListener<Applicati
                     list.size(),
                     property + UNDER + RedisConstants.API_RESOURCE);
 
-            RequestMappingEndPoint.requestMappingHandlerMapping = res;
         } catch (Exception e) {
             LogUtils.error("error: {}", e.getMessage());
         }
