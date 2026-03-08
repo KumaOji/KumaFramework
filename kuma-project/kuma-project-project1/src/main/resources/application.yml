@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: project1
+
+# Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,kmc,kmchealth,kmcstartup,kmcrequestmappings,auditevents"
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+  # 开启 kmc health indicator
+  health:
+    kmc:
+      enabled: true
+
+# 应用信息（出现在 /actuator/info）
+info:
+  app:
+    name: project1
+    description: "Actuator 功能演示项目"
+    version: "1.0.0"

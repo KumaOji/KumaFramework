@@ -10,6 +10,7 @@ dependencies {
     api projectLibs.spring.boot.starter.actuator
     api projectLibs.spring.cloud.context
     api projectLibs.hutool.json
+    compileOnly projectLibs.spring.boot.starter.web
     compileOnly projectLibs.druid.starter
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

@@ -18,14 +18,16 @@ package com.kuma.boot.actuator.info.autoconfigure;
 
 import com.kuma.boot.actuator.info.KmcInfoContributor;
 import com.kuma.boot.actuator.info.KmcObservation;
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.boot.actuate.autoconfigure.info.ConditionalOnEnabledInfoContributor;
+import org.springframework.boot.actuate.autoconfigure.info.InfoContributorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.info.InfoContributorFallback;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
-import org.springframework.boot.actuate.autoconfigure.info.InfoContributorAutoConfiguration;
+
 /**
- * gradle配置
+ * KmcInfoAutoConfiguration
  *
  * @author kuma
  * @version 2022.03
@@ -43,7 +45,7 @@ public class KmcInfoAutoConfiguration {
 
     @Bean
     @Order(InfoContributorAutoConfiguration.DEFAULT_ORDER)
-    public KmcObservation kmcObservation(){
-        return kmcObservation();
+    public KmcObservation kmcObservation(ObservationRegistry observationRegistry) {
+        return new KmcObservation(observationRegistry);
     }
 }

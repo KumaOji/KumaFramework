@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -136,17 +135,18 @@ public class MusicServiceImpl implements MusicService {
         }
 
         try {
-            Path basePath = Paths.get(musicBasePath).toRealPath();
-            Path resolvedPath;
+            // 用 normalize() 而非 toRealPath()，避免目录不存在时抛异常
+            Path basePath = Paths.get(musicBasePath).toAbsolutePath().normalize();
 
             String filePath = music.getFilePath();
+            Path resolvedPath;
             if (Paths.get(filePath).isAbsolute()) {
-                resolvedPath = Paths.get(filePath).toRealPath();
+                resolvedPath = Paths.get(filePath).normalize();
             } else {
-                resolvedPath = Paths.get(musicBasePath, filePath).toRealPath();
+                resolvedPath = basePath.resolve(filePath).normalize();
             }
 
-            // 验证路径不在基础路径之外，防止路径遍历攻击
+            // 防止路径遍历攻击
             if (!resolvedPath.startsWith(basePath)) {
                 log.warn("Security: Path traversal attempt detected. Base: {}, Resolved: {}", basePath, resolvedPath);
                 return null;
@@ -154,10 +154,11 @@ public class MusicServiceImpl implements MusicService {
 
             File file = resolvedPath.toFile();
             if (!file.exists() || !file.isFile()) {
+                log.warn("Music file not found for id: {}, path: {}", id, resolvedPath);
                 return null;
             }
             return new FileSystemResource(file);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to resolve music file path for music id: {}", id, e);
             return null;
         }
