@@ -35,7 +35,6 @@ import org.springframework.context.annotation.ComponentScan;
 @KumaBootApplication
 @KumaCloudApplication
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
-@EnableAutoConfiguration(exclude = DruidDataSourceAutoConfigure.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
 public class Project4Application extends SpringBootServletInitializer {
 
