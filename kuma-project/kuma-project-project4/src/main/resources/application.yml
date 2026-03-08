@@ -4,6 +4,7 @@ spring:
     active: ${active}
   application:
     name: project4
+
   datasource:
     dynamic:
       primary: mysql

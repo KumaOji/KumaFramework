@@ -8,6 +8,17 @@ spring:
     exclude:
       # knife4j 与 springdoc 3.0 兼容问题，使用 @EnableKnife4j 替代
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+      # Nacos 注册/配置中心（无 Nacos Server 时禁用）
+      - com.alibaba.cloud.nacos.NacosDiscoveryAutoConfiguration
+      - com.alibaba.cloud.nacos.discovery.NacosDiscoveryClientConfiguration
+      - com.alibaba.cloud.nacos.NacosConfigAutoConfiguration
+      - com.alibaba.cloud.nacos.discovery.NacosServiceDiscoveryAutoConfiguration
+      - com.alibaba.cloud.nacos.registry.NacosServiceRegistryAutoConfiguration
+      # Sentinel（无 Sentinel Dashboard 时禁用）
+      - com.alibaba.cloud.sentinel.SentinelWebAutoConfiguration
+      - com.alibaba.cloud.sentinel.custom.SentinelAutoConfiguration
+      # RocketMQ Stream（无 RocketMQ Broker 时禁用，也可通过 rocketmq.enabled=false 控制）
+      - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
   datasource:
     dynamic:
       datasource:
@@ -21,6 +32,21 @@ spring:
             minimum-idle: 1
             maximum-pool-size: 10
             connection-timeout: 10000
+  cloud:
+    stream:
+      banner:
+        enabled: false
+    nacos:
+      discovery:
+        enabled: false
+        register-enabled: false
+        server-addr: 127.0.0.1:8848
+      config:
+        enabled: false
+        server-addr: 127.0.0.1:8848
+    service-registry:
+      auto-registration:
+        enabled: false
   kafka:
     producer:
       bootstrap-servers: localhost:9092
@@ -199,6 +225,14 @@ kuma:
     actuator:
       managedresource:
         enabled: true
+
+# Seata 分布式事务（本地无 Seata Server，禁用）
+seata:
+  enabled: false
+
+# RocketMQ（本地无 Broker，通过 ImportFilter 禁用）
+rocketmq:
+  enabled: false
 
 # MyBatis 多租户
 mybatis:

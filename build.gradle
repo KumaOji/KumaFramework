@@ -22,7 +22,7 @@ allprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
-        options.compilerArgs += '--enable-preview'
+        options.compilerArgs += ['--enable-preview', '-parameters']
     }
     tasks.withType(Test).configureEach { jvmArgs += '--enable-preview' }
     tasks.withType(JavaExec).configureEach { jvmArgs += '--enable-preview' }

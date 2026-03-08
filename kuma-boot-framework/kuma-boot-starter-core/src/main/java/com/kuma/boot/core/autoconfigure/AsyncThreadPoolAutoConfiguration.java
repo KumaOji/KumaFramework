@@ -26,6 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.ThreadPoolExecutor;
@@ -52,6 +53,7 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
         LogUtils.started(AsyncThreadPoolAutoConfiguration.class, StarterNameConstants.CORE_STARTER);
     }
 
+    @Primary
     @Bean("asyncThreadPoolTaskExecutor")
     public ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor() {
         MDCThreadPoolTaskExecutor executor = new MDCThreadPoolTaskExecutor();

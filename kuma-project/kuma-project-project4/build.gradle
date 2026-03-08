@@ -52,6 +52,11 @@ dependencies {
 
     // ── kuma-cloud-framework ──────────────────────────────────────────────
     api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-kmc')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')   // Nacos 注册/配置
+    api project(':kuma-cloud-framework:kuma-cloud-starter-sentinel')  // Sentinel 流控
+    api project(':kuma-cloud-framework:kuma-cloud-starter-seata')     // Seata 分布式事务
+    api project(':kuma-cloud-framework:kuma-cloud-starter-stream')    // RocketMQ Stream
 
     // ── 第三方 ────────────────────────────────────────────────────────────
     api projectLibs.hutool.core
@@ -90,4 +95,9 @@ processResources {
 
 bootJar {
     archiveBaseName = 'project4'
+}
+
+bootRun {
+    // 抑制 Java 25 对 fastjson2 使用 sun.misc.Unsafe 的终止弃用警告
+    jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
 }
