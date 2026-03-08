@@ -6,6 +6,7 @@ description = 'Myframework sentinel流量防护模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-sentinel')
 
     api platform(projectLibs.spring.cloud.dependencies)
     api projectLibs.spring.cloud.starter.alibaba.sentinel

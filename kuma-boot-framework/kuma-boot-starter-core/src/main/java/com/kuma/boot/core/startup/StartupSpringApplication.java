@@ -16,17 +16,19 @@
 
 package com.kuma.boot.core.startup;
 
+import com.kuma.boot.common.support.version.KmcVersion;
 import com.kuma.boot.common.utils.common.PropertyUtils;
-import com.kuma.boot.core.banner.KmcBanner;
+import com.kuma.boot.core.utils.CoreUtils;
+import com.kuma.boot.core.version.SpringCloudAlibabaVersion;
+import com.kuma.boot.core.version.SpringCloudDependenciesVersion;
+import com.kuma.boot.core.version.SpringCloudVersion;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.SpringVersion;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -45,11 +47,9 @@ import static com.kuma.boot.common.constant.CommonConstants.ENV;
  */
 public class StartupSpringApplication extends SpringApplication {
 
-    public static final String DEFAULT_BANNER_LOCATION = "banner/kmc-banner.txt";
+    public static final String DEFAULT_BANNER_LOCATION = "classpath:banner/kmc-banner.txt";
 
     private final List<com.kuma.boot.core.startup.BaseStat> initializerStartupStatList = new ArrayList<>();
-
-    private boolean isKmcBanner = false;
 
     public StartupSpringApplication(Class<?>... primarySources) {
         super(primarySources);
@@ -77,12 +77,13 @@ public class StartupSpringApplication extends SpringApplication {
         return initializerStartupStatList;
     }
 
+    /**
+     * 注册 KMC Banner：将版本和 URL 信息写入 System Properties（Spring Environment 会读取），
+     * 再通过 spring.banner.location 指向 banner 文件，让标准 ResourceBanner 正常解析 ${xxx} 占位符。
+     */
     public StartupSpringApplication setKmcBanner() {
-        final ResourceLoader resourceLoader = new DefaultResourceLoader();
-        Resource resource = resourceLoader.getResource(DEFAULT_BANNER_LOCATION);
-        super.setBanner(new KmcBanner(resource));
-//        System.setProperty("spring.banner.location", DEFAULT_BANNER_LOCATION);
-        isKmcBanner = true;
+        setVersionSystemProperties();
+        System.setProperty("spring.banner.location", DEFAULT_BANNER_LOCATION);
         return this;
     }
 
@@ -109,16 +110,27 @@ public class StartupSpringApplication extends SpringApplication {
     @Override
     protected void configureEnvironment(ConfigurableEnvironment environment, String[] args) {
         super.configureEnvironment(environment, args);
-//		if(isKmcBanner){
-//			environment.getPropertySources().addFirst(
-//				new MapPropertySource("kmcPropertySource",
-//					Collections.singletonMap("spring.banner.location", "xxxxxxx.txt"))
-//			);
-//		}
     }
 
     @Override
     protected void configureProfiles(ConfigurableEnvironment environment, String[] args) {
 
+    }
+
+    // ── private ──────────────────────────────────────────────────────────────
+
+    private static void setVersionSystemProperties() {
+        putIfNotEmpty("spring.version", SpringVersion.getVersion());
+        putIfNotEmpty("kmc-boot.version", KmcVersion.getVersion());
+        putIfNotEmpty("spring-cloud.version", SpringCloudVersion.getVersion());
+        putIfNotEmpty("spring-cloud-dependencies.version", SpringCloudDependenciesVersion.getVersion());
+        putIfNotEmpty("spring-cloud-alibaba.version", SpringCloudAlibabaVersion.getVersion());
+        CoreUtils.getUrlMap().forEach((k, v) -> System.setProperty(k, String.valueOf(v)));
+    }
+
+    private static void putIfNotEmpty(String key, String value) {
+        if (value != null && !value.isEmpty()) {
+            System.setProperty(key, value);
+        }
     }
 }
