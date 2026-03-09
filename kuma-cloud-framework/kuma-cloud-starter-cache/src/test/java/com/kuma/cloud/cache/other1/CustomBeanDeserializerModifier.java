@@ -23,7 +23,7 @@ public class CustomBeanDeserializerModifier extends ValueDeserializerModifier {
         private final DeserializationConfig config;
 
         public CustomBeanDeserializer(ValueDeserializer<?> delegate, DeserializationConfig config) {
-            super(delegate.handledType());
+            super();
             this.delegate = delegate;
             this.config = config;
         }
@@ -35,7 +35,7 @@ public class CustomBeanDeserializerModifier extends ValueDeserializerModifier {
                 try {
                     processAnnotatedFields(bean, ctxt);
                 } catch (IOException e) {
-                    throw new JacksonException(e);
+
                 }
             }
             return bean;

@@ -10,19 +10,19 @@ import tools.jackson.databind.module.SimpleModule;
 public class Main {
     public static void main(String[] args) throws Exception {
         JsonMapper jsonMapper = JsonMapper.builder().build();
-        
+
         // 注册自定义模块
 //        SimpleModule module = new SimpleModule();
 //        module.setDeserializerModifier(new CustomBeanDeserializerModifier());
-        jsonMapper.registerModule(new SimpleModule(){{
-			setDeserializerModifier(new ValueDeserializerModifier() {
-				@Override
-				public ValueDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription.Supplier beanDescRef,
-					ValueDeserializer<?> deserializer) {
-					return super.modifyDeserializer(config, beanDescRef, deserializer);
-				}
-			});
-		}});
+//        jsonMapper.registerModule(new SimpleModule(){{
+//			setDeserializerModifier(new ValueDeserializerModifier() {
+//				@Override
+//				public ValueDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription.Supplier beanDescRef,
+//					ValueDeserializer<?> deserializer) {
+//					return super.modifyDeserializer(config, beanDescRef, deserializer);
+//				}
+//			});
+//		}});
 
         // 测试JSON
         String json = "{" +
@@ -40,7 +40,7 @@ public class Main {
         User user = jsonMapper.readValue(json, User.class);
         System.out.println(user);
         // 正确输出：
-        // User{name='John Doe', email='JOHN.DOE@EXAMPLE.COM', age=30, 
+        // User{name='John Doe', email='JOHN.DOE@EXAMPLE.COM', age=30,
         // address=Address{street='123 Main St', city='NEW YORK', zipCode='10001'}}
     }
 }
