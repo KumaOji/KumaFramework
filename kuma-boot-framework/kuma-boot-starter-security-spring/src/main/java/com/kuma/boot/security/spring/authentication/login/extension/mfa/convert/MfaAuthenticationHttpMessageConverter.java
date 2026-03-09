@@ -69,8 +69,8 @@ public class MfaAuthenticationHttpMessageConverter
             Map<String, Object> mfaResponseParameters =
                     this.converter.convert(mfaAuthenticationResponse);
             this.jsonMessageConverter.write(
-                    (Object) mfaResponseParameters,
-                    (ResolvableType) STRING_OBJECT_MAP.getType(),
+                    mfaResponseParameters,
+                    ResolvableType.forType(STRING_OBJECT_MAP.getType()),
                     MediaType.APPLICATION_JSON,
                     outputMessage,
                     null);
