@@ -3,6 +3,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven { url = 'https://maven.aliyun.com/repository/public' }
+        // IntelliJ Platform Gradle Plugin (idea-plugin)
+        maven { url = 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies' }
+        maven { url = 'https://www.jetbrains.com/intellij-repository/releases' }
     }
 }
 
@@ -42,6 +45,12 @@ def frameworkSubModules = ['bootstrap','seata','kmc',
 for (name in frameworkSubModules) {
     include "kuma-cloud-framework:kuma-cloud-starter-${name}"
 }
+include "kuma-other-framework:kuma-cloud-plugin"
+def cloudPluginSubModules = ['gradle-plugin', 'elasticsearch-plugin', 'idea-plugin', 'maven-plugin']
+for (name in cloudPluginSubModules) {
+    include "kuma-other-framework:kuma-cloud-plugin:kuma-cloud-${name}"
+}
+
 include "kuma-project"
 def projectBootSubModules = ['project1', 'project2', 'project3', 'project4','project5', 'blog']
 for (name in projectBootSubModules) {

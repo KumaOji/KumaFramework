@@ -1,0 +1,149 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+
+        maven {
+            url = "https://repo1.maven.org/maven2"
+        }
+
+        maven {
+            allowInsecureProtocol = true
+            url = 'https://maven.aliyun.com/repository/public'
+        }
+        //阿里云新的仓库
+        maven {
+            credentials {
+                username = findProperty("mavenUsernameNew") ?: System.getenv("KUMA_CLOUD_MAVEN_USERNAME_NEW")
+                password = findProperty("mavenPasswordNew") ?: System.getenv("KUMA_CLOUD_MAVEN_PASSWORD_NEW")
+            }
+            url = 'https://packages.aliyun.com/60516c4824e1e6fbecd22990/maven/2085441-release-8v0qbs'
+        }
+
+        maven {
+            allowInsecureProtocol = true
+            url = "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/"
+        }
+
+        maven {
+            allowInsecureProtocol = true
+            url = "https://mirrors.huaweicloud.com/repository/maven/"
+        }
+
+        maven { url ="https://repo.spring.io/snapshot" }
+        maven { url ="https://repo.spring.io/milestone" }
+        maven { url ='https://repo.spring.io/release' }
+
+        maven { url ="https://maven.aliyun.com/repository/central" }
+        maven { url ="https://maven.aliyun.com/repository/public" }
+        maven { url ="https://maven.aliyun.com/repository/google" }
+        maven { url ="https://maven.aliyun.com/repository/gradle-plugin" }
+        maven { url ="https://maven.aliyun.com/repository/spring" }
+        maven { url ="https://maven.aliyun.com/repository/spring-plugin" }
+        maven { url ="https://maven.aliyun.com/repository/grails-core" }
+        maven { url ="https://maven.aliyun.com/repository/apache-snapshots" }
+
+        maven { url ="https://repository.aspose.com/repo/" }
+        maven { url ="https://repo.e-iceblue.cn/repository/maven-public/" }
+
+        maven { url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+    }
+}
+
+plugins {
+    id "groovy"
+    id "java"
+    id "java-gradle-plugin"
+    id "groovy-gradle-plugin"
+    //https://plugins.gradle.org/docs/publish-plugin
+    //https://plugins.gradle.org/plugin/com.gradle.plugin-publish
+    id "com.gradle.plugin-publish" version "2.0.0"
+}
+
+//发布到 https://plugins.gradle.org
+apply plugin: "com.gradle.plugin-publish"
+apply plugin: "groovy-gradle-plugin"
+apply plugin: "java-gradle-plugin"
+apply plugin: "groovy"
+apply plugin: "java"
+
+dependencies {
+    //添加gradle版本
+    //implementation 'com.android.tools.build:gradle:3.3.2'
+    //implementation 'org.codehaus.groovy:groovy-all:2.5.8'
+    //implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21'
+
+    //添加gradle对应api
+    implementation gradleApi()
+    implementation localGroovy()
+
+    implementation "org.springframework.boot:spring-boot-gradle-plugin:4.0.2"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:6.0.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:6.0.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.2'
+    testImplementation "org.assertj:assertj-core:3.27.6"
+}
+
+group = "com.kuma.cloud.gradle"
+
+gradlePlugin {
+    website = 'https://github.com/kuma/kuma-cloud-project'
+    vcsUrl = 'https://github.com/kuma/kuma-cloud-project.git'
+    description = 'kuma-cloud-gradle-plugin'
+
+    //tags里面不允许有gradle plugin
+    plugins {
+        greetingsPlugin {
+            id = 'io.github.kuma.plugin'
+            implementationClass = 'com.kuma.cloud.gradle.plugin.MyPlugin'
+            displayName = "kuma-cloud-plugin gradle plugin"
+            description = 'kuma-cloud-plugin gradle plugin Please use!'
+            tags = ['kuma', 'cloud']
+        }
+        bomPlugin {
+            id = "io.github.kuma.plugin.bom"
+            implementationClass = "com.kuma.cloud.gradle.springboot.plugin.BomPlugin"
+            displayName = 'springboot bom plugin'
+            description = 'springboot bom plugin'
+            tags = ['kuma', 'cloud', 'bom']
+        }
+        modulePlugin {
+            id = "io.github.kuma.plugin.module"
+            implementationClass = "com.kuma.cloud.gradle.springboot.plugin.ModulePlugin"
+            displayName = 'springboot module plugin'
+            description = 'springboot module plugin'
+            tags = ['kuma', 'cloud', 'module']
+        }
+        commonPlugin {
+            id = "io.github.kuma.plugin.common"
+            implementationClass = "com.kuma.cloud.gradle.springboot.plugin.CommonPlugin"
+            displayName = 'springboot common plugin'
+            description = 'springboot common plugin'
+            tags = ['kuma', 'cloud', 'common']
+        }
+        rootProjectPlugin {
+            id = "io.github.kuma.plugin.root"
+            implementationClass = "com.kuma.cloud.gradle.springboot.plugin.RootPlugin"
+            displayName = 'springboot root plugin'
+            description = 'springboot root plugin'
+            tags = ['kuma', 'cloud', 'root']
+        }
+        servicePlugin {
+            id = "io.github.kuma.plugin.service"
+            implementationClass = "com.kuma.cloud.gradle.springboot.plugin.ServicePlugin"
+            displayName = 'springboot service plugin'
+            description = 'springboot service plugin'
+            tags = ['kuma', 'cloud', 'service']
+        }
+        //deployedPlugin {
+        //    id = "io.github.kuma.plugin.deployed"
+        //    implementationClass = "com.kuma.cloud.gradle.springboot.plugin.DeployedPlugin"
+        //    displayName = 'springboot deployed plugin'
+        //    description = 'springboot deployed plugin'
+        //    tags = ['kuma', 'cloud', 'plugin', 'deployed']
+        //}
+    }
+}
