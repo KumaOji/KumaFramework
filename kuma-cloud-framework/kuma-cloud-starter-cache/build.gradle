@@ -1,0 +1,49 @@
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    implementation(projectLibs.spring.boot.starter.webmvc) {
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    implementation projectLibs.spring.boot.starter.tomcat
+    implementation projectLibs.spring.boot.starter.aspectj
+    implementation projectLibs.netty.all
+    implementation projectLibs.fastjson2
+    implementation projectLibs.cglib
+    implementation projectLibs.hutool.core
+    implementation projectLibs.xk.time
+
+    implementation projectLibs.slf4j.api
+    implementation projectLibs.logback.core
+    implementation projectLibs.logback.access
+    implementation projectLibs.logback.classic
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:6.0.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:6.0.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.2'
+    testImplementation "org.assertj:assertj-core:3.27.6"
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+    testCompileOnly projectLibs.lombok
+    testAnnotationProcessor projectLibs.lombok
+    annotationProcessor projectLibs.lombok.mapstruct.binding
+}
+
+tasks.register("generateMd5ForZip", Exec) {
+    def zipFile = file("${project.layout.buildDirectory.asFile.get()}/libs/kuma-cloud-starter-cache-2026.03.jar")
+    def md5File = file("${project.layout.buildDirectory.asFile.get()}/libs/kuma-cloud-starter-cache-2026.03.jar.md5")
+
+    inputs.file zipFile
+    outputs.file md5File
+
+    if (System.getProperty("os.name").toLowerCase().contains("win")) {
+        // Windows 系统使用 cmd 执行命令并将结果重定向到文件
+        commandLine 'cmd', '/c', "certutil -hashfile ${zipFile.absolutePath} MD5 | findstr /v \"MD5\" | findstr /v \"certutil\" > ${md5File.absolutePath}"
+    } else {
+        // Unix/Linux 系统使用 md5sum 命令
+        commandLine 'bash', '-c', "md5sum ${zipFile.absolutePath} | awk '{print \$1}' > ${md5File.absolutePath}"
+    }
+}
+
+jar.finalizedBy("generateMd5ForZip")

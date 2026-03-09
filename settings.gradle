@@ -41,7 +41,8 @@ for (name in frameworkBootSubModules) {
 }
 
 def frameworkSubModules = ['bootstrap','seata','kmc',
-                           'sentinel','stream','alibaba']
+                           'sentinel','stream','alibaba',
+                            'cache']
 for (name in frameworkSubModules) {
     include "kuma-cloud-framework:kuma-cloud-starter-${name}"
 }
