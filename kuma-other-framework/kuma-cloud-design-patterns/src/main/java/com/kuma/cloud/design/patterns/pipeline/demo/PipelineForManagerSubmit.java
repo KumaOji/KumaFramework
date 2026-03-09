@@ -18,6 +18,7 @@ package com.kuma.cloud.design.patterns.pipeline.demo;
 
 import com.kuma.cloud.design.patterns.pipeline.DemoPipelineNode;
 import com.kuma.cloud.design.patterns.pipeline.DemoPipelineProduct;
+import jakarta.annotation.PostConstruct;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

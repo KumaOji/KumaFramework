@@ -16,6 +16,7 @@
 
 package com.kuma.cloud.design.patterns.pipeline.demo;
 
+import cn.hutool.json.JSONUtil;
 import com.kuma.cloud.design.patterns.pipeline.AbstractDemoJob;
 import com.kuma.cloud.design.patterns.pipeline.DemoPipelineProduct;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class ManagerSubmitJob extends AbstractDemoJob {
      * @throws Exception 异常
      */
     @Override
-    DemoPipelineProduct.DemoSignalEnum execute(
+    protected DemoPipelineProduct.DemoSignalEnum execute(
             String tradeId, DemoPipelineProduct.DemoProductData productData) throws Exception {
         DemoReq userRequestData = productData.getUserRequestData();
         try {

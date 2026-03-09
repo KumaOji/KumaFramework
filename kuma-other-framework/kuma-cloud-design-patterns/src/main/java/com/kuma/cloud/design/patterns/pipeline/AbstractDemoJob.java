@@ -16,6 +16,9 @@
 
 package com.kuma.cloud.design.patterns.pipeline;
 
+import cn.hutool.core.util.ClassUtil;
+import cn.hutool.json.JSONUtil;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,7 +56,7 @@ public abstract class AbstractDemoJob implements PipelineJob<DemoPipelineProduct
      * @return
      * @throws Exception 异常
      */
-    abstract DemoPipelineProduct.DemoSignalEnum execute(
+    protected abstract DemoPipelineProduct.DemoSignalEnum execute(
             String tradeId, DemoPipelineProduct.DemoProductData productData) throws Exception;
 
     /**

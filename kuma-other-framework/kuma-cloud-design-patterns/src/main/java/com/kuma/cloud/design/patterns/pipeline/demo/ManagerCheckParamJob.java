@@ -16,9 +16,11 @@
 
 package com.kuma.cloud.design.patterns.pipeline.demo;
 
+import cn.hutool.json.JSONUtil;
 import com.kuma.cloud.design.patterns.pipeline.AbstractDemoJob;
 import com.kuma.cloud.design.patterns.pipeline.DemoPipelineProduct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * 审核-参数验证-实现类
@@ -38,7 +40,7 @@ public class ManagerCheckParamJob extends AbstractDemoJob {
      * @return
      */
     @Override
-    DemoPipelineProduct.DemoSignalEnum execute(
+    protected DemoPipelineProduct.DemoSignalEnum execute(
             String tradeId, DemoPipelineProduct.DemoProductData productData) {
         /*
          * 入参验证

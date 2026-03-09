@@ -1,9 +1,13 @@
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
 
+    implementation projectLibs.spring.context
+    implementation projectLibs.jakarta.annotation.api
+
     implementation projectLibs.netty.all
     implementation projectLibs.fastjson2
     implementation projectLibs.hutool.core
+    implementation projectLibs.hutool.json
 
     implementation projectLibs.slf4j.api
     implementation projectLibs.logback.classic
