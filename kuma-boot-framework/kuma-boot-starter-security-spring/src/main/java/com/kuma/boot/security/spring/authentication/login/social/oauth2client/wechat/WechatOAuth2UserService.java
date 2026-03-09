@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpOutputMessage;
@@ -223,7 +224,7 @@ public class WechatOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 // Object and then convert values to String
                 return (com.kuma.boot.security.spring.authentication.login.social.oauth2client.wechat.WechatOAuth2User)
                         this.jsonMessageConverter.read(
-                                null, inputMessage, null);
+                                ResolvableType.forType(OAUTH2_USER_OBJECT.getType()), inputMessage, null);
 
             } catch (Exception ex) {
                 throw new HttpMessageNotReadableException(
