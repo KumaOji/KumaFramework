@@ -2,21 +2,21 @@ package com.kuma.cloud.cache.simple;
 
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.DeserializationConfig;
-import tools.jackson.databind.JsonDeserializer;
-import tools.jackson.databind.deser.BeanDeserializerModifier;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.ValueDeserializerModifier;
 import tools.jackson.databind.deser.std.StdScalarDeserializer;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 import java.util.List;
 
-public class CustomBeanDeserializerModifier extends BeanDeserializerModifier {
+public class CustomBeanDeserializerModifier extends ValueDeserializerModifier {
 
     @Override
-    public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, 
-                                                 BeanDescription beanDesc, 
-                                                 JsonDeserializer<?> deserializer) {
+    public ValueDeserializer<?> modifyDeserializer(DeserializationConfig config,
+                                                  BeanDescription.Supplier beanDescRef,
+                                                  ValueDeserializer<?> deserializer) {
         
         // 获取类中所有字段定义
-        List<BeanPropertyDefinition> properties = beanDesc.findProperties();
+        List<BeanPropertyDefinition> properties = beanDescRef.get().findProperties();
         
         for (BeanPropertyDefinition prop : properties) {
             // 检查字段是否带有自定义注解
@@ -32,6 +32,6 @@ public class CustomBeanDeserializerModifier extends BeanDeserializerModifier {
         }
         
         // 非注解字段使用默认反序列化器
-        return super.modifyDeserializer(config, beanDesc, deserializer);
+        return super.modifyDeserializer(config, beanDescRef, deserializer);
     }
 }

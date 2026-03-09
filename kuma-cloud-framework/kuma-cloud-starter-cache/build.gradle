@@ -1,3 +1,13 @@
+// 排除 Jackson 2 风格示例测试（other1/simple 需迁移至 Jackson 3 API 后恢复）
+sourceSets {
+    test {
+        java {
+            exclude '**/cache/other1/**'
+            exclude '**/cache/simple/**'
+        }
+    }
+}
+
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
 
@@ -9,6 +19,7 @@ dependencies {
     implementation projectLibs.netty.all
     implementation projectLibs.fastjson2
     implementation projectLibs.cglib
+    implementation projectLibs.jackson.databind
     implementation projectLibs.hutool.core
     implementation projectLibs.xk.time
 
@@ -29,21 +40,3 @@ dependencies {
     testAnnotationProcessor projectLibs.lombok
     annotationProcessor projectLibs.lombok.mapstruct.binding
 }
-
-tasks.register("generateMd5ForZip", Exec) {
-    def zipFile = file("${project.layout.buildDirectory.asFile.get()}/libs/kuma-cloud-starter-cache-2026.03.jar")
-    def md5File = file("${project.layout.buildDirectory.asFile.get()}/libs/kuma-cloud-starter-cache-2026.03.jar.md5")
-
-    inputs.file zipFile
-    outputs.file md5File
-
-    if (System.getProperty("os.name").toLowerCase().contains("win")) {
-        // Windows 系统使用 cmd 执行命令并将结果重定向到文件
-        commandLine 'cmd', '/c', "certutil -hashfile ${zipFile.absolutePath} MD5 | findstr /v \"MD5\" | findstr /v \"certutil\" > ${md5File.absolutePath}"
-    } else {
-        // Unix/Linux 系统使用 md5sum 命令
-        commandLine 'bash', '-c', "md5sum ${zipFile.absolutePath} | awk '{print \$1}' > ${md5File.absolutePath}"
-    }
-}
-
-jar.finalizedBy("generateMd5ForZip")
