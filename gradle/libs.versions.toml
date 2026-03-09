@@ -61,6 +61,7 @@ uuid-creator = "5.3.4"
 aopalliance = "1.0"
 gson = "2.11.0"
 fastjson2 = "2.0.61"
+netty = "4.1.119.Final"
 groovy = "4.0.21"
 javassist = "3.30.2-GA"
 jakarta-annotation-api = "3.0.0"
@@ -185,6 +186,7 @@ commons-net = { module = "commons-net:commons-net", version.ref = "commons-net" 
 bouncycastle-provider = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 xk-time = { module = "com.github.xkzhangsan:xk-time", version.ref = "xk-time" }
 reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "reactor-core" }
+netty-all = { module = "io.netty:netty-all", version.ref = "netty" }
 reactivestreams = { module = "org.reactivestreams:reactive-streams", version.ref = "reactivestreams" }
 spring-core = { module = "org.springframework:spring-core", version.ref = "spring-core" }
 spring-context = { module = "org.springframework:spring-context", version.ref = "spring-context" }
