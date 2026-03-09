@@ -27,7 +27,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.AntPathMatcher;
@@ -71,7 +71,7 @@ public class NotVoidResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         // method为空、返回值为void、非JSON，直接跳过
         if (Objects.isNull(method)
                 || method.getReturnType().equals(Void.TYPE)
-                || !MappingJackson2HttpMessageConverter.class.isAssignableFrom(clazz)) {
+                || !JacksonJsonHttpMessageConverter.class.isAssignableFrom(clazz)) {
             logger.debug("Graceful Response:method为空、返回值为void、非JSON，跳过");
             return false;
         }

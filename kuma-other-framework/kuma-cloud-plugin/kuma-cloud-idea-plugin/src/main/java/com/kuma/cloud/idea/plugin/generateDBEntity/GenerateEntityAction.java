@@ -11,7 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.webSymbols.utils.NameCaseUtils;
+import cn.hutool.core.util.StrUtil;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -43,7 +43,7 @@ public class GenerateEntityAction extends AnAction {
         try (Connection conn = DatabaseUtil.connectToDatabase(url, settings.getUsername(), settings.getPassword())) {
             String selectedTable = selectTable(conn, settings);
             if (selectedTable != null) {
-                String className = NameCaseUtils.toCamelCase(selectedTable);
+                String className = StrUtil.toCamelCase(selectedTable);
                 className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 
                 StringBuilder classCode = generateEntityClass(conn.getMetaData(), selectedTable, className, settings);
@@ -169,7 +169,7 @@ public class GenerateEntityAction extends AnAction {
         try (ResultSet columns = metaData.getColumns(null, null, tableName, null)) {
             while (columns.next()) {
                 String columnName = columns.getString("COLUMN_NAME");
-                String fieldName = NameCaseUtils.toCamelCase(columnName);
+                String fieldName = StrUtil.toCamelCase(columnName);
 
                 if (settings.getExcludedFields().contains(fieldName)) {
                     continue;

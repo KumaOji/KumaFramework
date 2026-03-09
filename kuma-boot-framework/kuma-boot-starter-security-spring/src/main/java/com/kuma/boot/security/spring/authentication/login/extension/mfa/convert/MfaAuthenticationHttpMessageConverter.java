@@ -22,15 +22,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,8 +43,8 @@ public class MfaAuthenticationHttpMessageConverter
     private static final ParameterizedTypeReference<Map<String, Object>> STRING_OBJECT_MAP =
             new ParameterizedTypeReference<Map<String, Object>>() {};
 
-    private final GenericHttpMessageConverter<Object> jsonMessageConverter =
-            new MappingJackson2HttpMessageConverter();
+    private final SmartHttpMessageConverter<Object> jsonMessageConverter =
+            new JacksonJsonHttpMessageConverter();
     private Converter<MfaAuthenticationResponse, Map<String, Object>> converter =
             new MfaAuthenticationResponseMapConverter();
 
@@ -68,10 +69,11 @@ public class MfaAuthenticationHttpMessageConverter
             Map<String, Object> mfaResponseParameters =
                     this.converter.convert(mfaAuthenticationResponse);
             this.jsonMessageConverter.write(
-                    mfaResponseParameters,
-                    STRING_OBJECT_MAP.getType(),
+                    (Object) mfaResponseParameters,
+                    (ResolvableType) STRING_OBJECT_MAP.getType(),
                     MediaType.APPLICATION_JSON,
-                    outputMessage);
+                    outputMessage,
+                    null);
         } catch (Exception ex) {
             throw new HttpMessageNotWritableException(
                     "An error occurred writing the MFA login response: " + ex.getMessage(), ex);
