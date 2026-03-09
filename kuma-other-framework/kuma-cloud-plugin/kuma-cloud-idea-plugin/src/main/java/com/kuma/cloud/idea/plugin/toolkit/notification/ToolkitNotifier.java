@@ -1,8 +1,6 @@
 package com.kuma.cloud.idea.plugin.toolkit.notification;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationDisplayType;
-import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 
 /**
@@ -10,18 +8,22 @@ import com.intellij.notification.NotificationType;
  */
 public class ToolkitNotifier {
 
-    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup("Toolkit Information", NotificationDisplayType.BALLOON, false);
+    private static final String GROUP_ID = "Toolkit Information";
 
     private ToolkitNotifier() {
     }
 
     public static void success(String message) {
-        final Notification notification = NOTIFICATION_GROUP.createNotification("Toolkit Information", message, NotificationType.INFORMATION, null);
-        notification.notify(null);
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup(GROUP_ID)
+                .createNotification(message, NotificationType.INFORMATION)
+                .notify(null);
     }
 
     public static void error(String message) {
-        final Notification notification = NOTIFICATION_GROUP.createNotification("Toolkit Information", message, NotificationType.ERROR, null);
-        notification.notify(null);
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup(GROUP_ID)
+                .createNotification(message, NotificationType.ERROR)
+                .notify(null);
     }
 }
