@@ -27,11 +27,10 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.http.converter.json.JsonbHttpMessageConverter;
+import org.springframework.http.converter.SmartHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -193,8 +192,8 @@ public class WorkWechatOAuth2UserService
 
         private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-        private final GenericHttpMessageConverter<Object> jsonMessageConverter =
-                HttpMessageConverters.getJsonMessageConverter();
+        private final SmartHttpMessageConverter<Object> jsonMessageConverter =
+                new JacksonJsonHttpMessageConverter();
 
         public WechatOAuth2UserHttpMessageConverter() {
             super(
@@ -218,7 +217,7 @@ public class WorkWechatOAuth2UserService
                 // Object and then convert values to String
                 return (com.kuma.boot.security.spring.authentication.login.social.oauth2client.wechatwork.WorkWechatOAuth2User)
                         this.jsonMessageConverter.read(
-                                OAUTH2_USER_OBJECT.getType(), null, inputMessage);
+                                OAUTH2_USER_OBJECT.getType(), null, inputMessage, null);
 
             } catch (Exception ex) {
                 throw new HttpMessageNotReadableException(
@@ -236,39 +235,5 @@ public class WorkWechatOAuth2UserService
             // noop
         }
 
-        static class HttpMessageConverters {
-
-            private static final boolean jackson2Present;
-
-            private static final boolean gsonPresent;
-
-            private static final boolean jsonbPresent;
-
-            static {
-                ClassLoader classLoader = HttpMessageConverters.class.getClassLoader();
-                jackson2Present =
-                        ClassUtils.isPresent(
-                                "com.fasterxml.jackson.databind.JsonMapper", classLoader)
-                                && ClassUtils.isPresent(
-                                "com.fasterxml.jackson.core.JsonGenerator", classLoader);
-                gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-                jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
-            }
-
-            private HttpMessageConverters() {}
-
-            static GenericHttpMessageConverter<Object> getJsonMessageConverter() {
-//                if (jackson2Present) {
-//                    return new MappingJackson2HttpMessageConverter();
-//                }
-                if (gsonPresent) {
-                    return new GsonHttpMessageConverter();
-                }
-                if (jsonbPresent) {
-                    return new JsonbHttpMessageConverter();
-                }
-                return null;
-            }
-        }
     }
 }
