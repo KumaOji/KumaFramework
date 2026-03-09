@@ -18,7 +18,6 @@ package com.kuma.boot.security.spring.authentication.login.social.justauth.entit
 
 import com.kuma.boot.security.justauth.justauth.ConnectionData;
 import java.io.Serializable;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 
 /**
  * The unique business key for a {@link ConnectionData} instance.
@@ -27,7 +26,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
  * @author Keith Donald
  */
 public final class ConnectionKey implements Serializable {
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     /**
      * 第三方服务商

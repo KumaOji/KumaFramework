@@ -20,7 +20,6 @@ import java.io.Serial;
 import java.util.Collection;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.util.Assert;
 
 /**
@@ -33,7 +32,7 @@ import org.springframework.util.Assert;
 public class CaptchaAuthenticationToken extends AbstractAuthenticationToken {
 
     @Serial
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     private final Object principal;
     private String password;

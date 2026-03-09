@@ -19,7 +19,6 @@ package com.kuma.boot.security.spring.authentication.login.social.justauth.repos
 import com.kuma.boot.security.justauth.justauth.ConnectionData;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.entity.ConnectionKey;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.repository.UsersConnectionRepository;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 
 /**
  * Thrown by a {@link UsersConnectionRepository} when attempting to fetch a {@link ConnectionData}
@@ -30,7 +29,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
  */
 public final class NoSuchConnectionException extends com.kuma.boot.security.spring.authentication.login.social.justauth.repository.exception.ConnectionRepositoryException {
 
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     private final ConnectionKey connectionKey;
 

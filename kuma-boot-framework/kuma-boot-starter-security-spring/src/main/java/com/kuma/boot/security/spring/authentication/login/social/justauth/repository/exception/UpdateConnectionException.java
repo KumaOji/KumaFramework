@@ -18,7 +18,6 @@ package com.kuma.boot.security.spring.authentication.login.social.justauth.repos
 
 import com.kuma.boot.security.spring.authentication.login.social.justauth.repository.UsersConnectionRepository;
 import com.kuma.boot.security.spring.enums.ErrorCodeEnum;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 
 /**
  * Base exception class for {@link UsersConnectionRepository} failures.
@@ -27,7 +26,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
  */
 public class UpdateConnectionException extends RuntimeException {
 
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     private final ErrorCodeEnum errorCodeEnum;
     private final Object data;
