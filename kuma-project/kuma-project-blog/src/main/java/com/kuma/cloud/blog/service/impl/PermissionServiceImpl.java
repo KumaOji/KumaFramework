@@ -78,6 +78,6 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void evictCache(String username) {
         redisRepository.del(CACHE_KEY_PREFIX + username);
-        log.debug("Permission cache evicted for user [{}]", username);
+        log.warn("Permission cache evicted for user [{}]", username);
     }
 }
