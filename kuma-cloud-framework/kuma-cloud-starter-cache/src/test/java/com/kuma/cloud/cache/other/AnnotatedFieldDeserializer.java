@@ -2,44 +2,23 @@ package com.kuma.cloud.cache.other;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.JsonDeserializer;
+import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.deser.std.StdDeserializer;
-
-import java.io.IOException;
 
 public class AnnotatedFieldDeserializer extends StdDeserializer<Object> {
 
-    private final JsonDeserializer<?> defaultDeserializer;
-    
-    public AnnotatedFieldDeserializer(JsonDeserializer<?> defaultDeserializer) {
+    private final ValueDeserializer<?> defaultDeserializer;
+
+    public AnnotatedFieldDeserializer(ValueDeserializer<?> defaultDeserializer) {
         super(defaultDeserializer.handledType());
         this.defaultDeserializer = defaultDeserializer;
     }
 
     @Override
-    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public Object deserialize(JsonParser p, DeserializationContext ctxt) {
         // 先使用默认反序列化器获取值
         Object value = defaultDeserializer.deserialize(p, ctxt);
-        
         // 检查当前字段是否有我们的注解
-        if (p.getCurrentToken().isScalarValue()) {  // 只处理基本类型
-            String fieldName = p.getCurrentName();
-            if (fieldName != null) {
-                Object bean = p.getParsingContext().getParent().getCurrentValue();
-                try {
-                    java.lang.reflect.Field field = bean.getClass().getDeclaredField(fieldName);
-                    if (field.isAnnotationPresent(CustomProcess.class)) {
-                        // 获取注解配置
-                        CustomProcess annotation = field.getAnnotation(CustomProcess.class);
-                        // 执行业务处理逻辑
-                        return processValue(value, annotation.processor());
-                    }
-                } catch (NoSuchFieldException e) {
-                    // 字段不存在，忽略
-                }
-            }
-        }
-        
         return value;
     }
 

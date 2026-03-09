@@ -2,9 +2,9 @@ package com.kuma.cloud.cache.simple;
 
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.DeserializationConfig;
-import tools.jackson.databind.JsonDeserializer;
+import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.deser.BeanDeserializerModifier;
+import tools.jackson.databind.deser.ValueDeserializerModifier;
 import tools.jackson.databind.module.SimpleModule;
 
 public class Main {
@@ -15,12 +15,11 @@ public class Main {
 //        SimpleModule module = new SimpleModule();
 //        module.setDeserializerModifier(new CustomBeanDeserializerModifier());
         jsonMapper.registerModule(new SimpleModule(){{
-			setDeserializerModifier(new BeanDeserializerModifier() {
+			setDeserializerModifier(new ValueDeserializerModifier() {
 				@Override
-				public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription beanDesc,
-					JsonDeserializer<?> deserializer) {
-
-					return super.modifyDeserializer(config, beanDesc, deserializer);
+				public ValueDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription.Supplier beanDescRef,
+					ValueDeserializer<?> deserializer) {
+					return super.modifyDeserializer(config, beanDescRef, deserializer);
 				}
 			});
 		}});
