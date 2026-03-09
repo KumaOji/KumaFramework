@@ -19,6 +19,7 @@ package com.kuma.cloud.design.patterns.pipeline;
 import com.kuma.cloud.design.patterns.pipeline.demo.DemoReq;
 import com.kuma.cloud.design.patterns.pipeline.demo.DemoResp;
 import com.kuma.cloud.design.patterns.pipeline.demo.PipelineForManagerSubmit;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 /**
