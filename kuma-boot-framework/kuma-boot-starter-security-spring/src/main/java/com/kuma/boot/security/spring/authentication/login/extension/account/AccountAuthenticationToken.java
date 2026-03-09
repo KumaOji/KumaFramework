@@ -20,7 +20,6 @@ import java.io.Serial;
 import java.util.Collection;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.util.Assert;
 
 /**
@@ -33,7 +32,7 @@ import org.springframework.util.Assert;
 public class AccountAuthenticationToken extends AbstractAuthenticationToken {
 
     @Serial
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     // principal：能唯一标识用户身份的属性，一个用户可以有多个principal
     // 如登录的唯一标识，用户可以使用用户名或手机或邮箱进行登录，这些principal是让别人知道的

@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     version = findProperty('version') ?: '1.0.0'
-    group = findProperty('group') ?: 'io.github.kuma'
+    group = findProperty('group') ?: 'io.github.kumaoji'
 
     configurations.all {
         resolutionStrategy {

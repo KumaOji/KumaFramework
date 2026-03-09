@@ -17,7 +17,8 @@
 package com.kuma.boot.security.spring.authentication.login.social.justauth.repository.exception;
 
 import com.kuma.boot.security.spring.authentication.login.social.justauth.repository.UsersConnectionRepository;
-import org.springframework.security.core.SpringSecurityCoreVersion;
+
+import java.io.Serial;
 
 /**
  * Base exception class for {@link UsersConnectionRepository} failures.
@@ -27,7 +28,8 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 @SuppressWarnings("AlibabaAbstractClassShouldStartWithAbstractNaming")
 public abstract class ConnectionRepositoryException extends RuntimeException {
 
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public ConnectionRepositoryException(String message) {
         super(message);

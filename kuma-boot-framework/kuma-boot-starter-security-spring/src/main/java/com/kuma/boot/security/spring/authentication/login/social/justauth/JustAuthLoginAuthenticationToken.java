@@ -18,9 +18,12 @@ package com.kuma.boot.security.spring.authentication.login.social.justauth;
 
 import com.kuma.boot.security.justauth.justauth.request.Auth2DefaultRequest;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.Serial;
 import java.util.Collections;
+
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.util.Assert;
 
 /**
@@ -32,9 +35,11 @@ import org.springframework.util.Assert;
  * @see Auth2DefaultRequest
  * @since 2.0.0
  */
+@Getter
 public class JustAuthLoginAuthenticationToken extends AbstractAuthenticationToken {
 
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Auth2DefaultRequest auth2DefaultRequest;
 
@@ -67,11 +72,4 @@ public class JustAuthLoginAuthenticationToken extends AbstractAuthenticationToke
         return null;
     }
 
-    public Auth2DefaultRequest getAuth2DefaultRequest() {
-        return auth2DefaultRequest;
-    }
-
-    public HttpServletRequest getRequest() {
-        return request;
-    }
 }

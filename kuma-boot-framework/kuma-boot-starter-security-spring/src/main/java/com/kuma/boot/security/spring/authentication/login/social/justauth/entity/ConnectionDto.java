@@ -17,7 +17,6 @@
 package com.kuma.boot.security.spring.authentication.login.social.justauth.entity;
 
 import java.io.Serializable;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 
 /**
  * 查询本地账号下的第三方绑定账号 dto
@@ -26,7 +25,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
  * @since 2021.3.3 20:03
  */
 public class ConnectionDto implements Serializable {
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    private static final long serialVersionUID = 1L;
 
     /**
      * 本地主键 id

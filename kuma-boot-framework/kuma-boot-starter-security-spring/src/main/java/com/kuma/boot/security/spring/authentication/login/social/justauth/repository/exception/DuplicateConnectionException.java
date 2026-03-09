@@ -19,7 +19,8 @@ package com.kuma.boot.security.spring.authentication.login.social.justauth.repos
 import com.kuma.boot.security.justauth.justauth.ConnectionData;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.entity.ConnectionKey;
 import com.kuma.boot.security.spring.authentication.login.social.justauth.repository.UsersConnectionRepository;
-import org.springframework.security.core.SpringSecurityCoreVersion;
+
+import java.io.Serial;
 
 /**
  * Thrown by a {@link UsersConnectionRepository} when attempting to add a {@link ConnectionData} and
@@ -30,7 +31,8 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
  */
 public final class DuplicateConnectionException extends com.kuma.boot.security.spring.authentication.login.social.justauth.repository.exception.ConnectionRepositoryException {
 
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final ConnectionKey connectionKey;
 
