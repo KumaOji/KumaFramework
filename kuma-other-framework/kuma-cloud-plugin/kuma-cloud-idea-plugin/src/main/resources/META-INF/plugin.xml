@@ -140,6 +140,7 @@
 
 	<!-- 声明该插件对IDEA core或其他插件的扩展 可以配置侧边的工具栏，例如maven所在的侧边栏 。-->
 	<extensions defaultExtensionNs="com.intellij">
+		<notificationGroup id="Toolkit Information" displayType="BALLOON" isLogByDefault="false"/>
 		<applicationService serviceInterface="com.kuma.cloud.idea.plugin.toolkit.service.CacheService"
 			serviceImplementation="com.kuma.cloud.idea.plugin.toolkit.service.impl.CacheServiceImpl"/>'
 		<applicationService
