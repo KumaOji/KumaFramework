@@ -29,11 +29,20 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
 }
 
+// 库模块不应向 classpath 投放日志配置文件，由消费方应用统一管理
+processResources {
+    exclude 'logback.xml'
+    exclude 'logback-spring.xml'
+    exclude 'log4j.properties'
+    exclude 'log4j2.xml'
+}
+
 tasks.register("generateMd5ForZip", Exec) {
     def zipFile = file("${project.layout.buildDirectory.asFile.get()}/libs/kuma-cloud-jdbcpool-2026.02.jar")
     def md5File = file("${project.layout.buildDirectory.asFile.get()}/libs/kuma-cloud-jdbcpool-2026.02.jar.md5")
 
-    inputs.file zipFile
+    // 不声明 inputs.file：jar 在配置阶段尚未生成，声明会导致 Gradle 配置失败
+    // jar 任务通过 finalizedBy 保证先于本任务执行
     outputs.file md5File
 
     if (System.getProperty("os.name").toLowerCase().contains("win")) {
