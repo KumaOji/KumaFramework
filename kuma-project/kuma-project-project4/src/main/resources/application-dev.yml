@@ -133,6 +133,15 @@ kuma:
     evict: lru
     persist:
       type: none
+  # ── kuma-cloud-starter-netty ───────────────────────────────────────
+  # 激活条件：需向容器注册 ChannelInitializer<SocketChannel> Bean 才会启动服务器
+  netty:
+    port: 8888
+    boss-threads: 1
+    worker-threads: 0
+    backlog: 128
+    reader-idle-seconds: 0
+    logging-enabled: false
   boot:
     core:
       enabled: true

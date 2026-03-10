@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.netty.netty.sixthexample;
+
+import com.kuma.cloud.netty.grpc.code2.MyMessage;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+
+/**
+ * TestServerHandler
+ *
+ * @author kuma
+ * @version 2026.02
+ * @since 2025-12-19 09:30:45
+ */
+public class TestServerHandler extends SimpleChannelInboundHandler<MyMessage> {
+
+    @Override
+    protected void channelRead0( ChannelHandlerContext ctx, MyMessage msg ) throws Exception {
+        MyMessage.DataType dataType = msg.getDataType();
+
+        // if (dataType == MyMessage.DataType.StudentType) {
+        //    Person person = msg.getPerson();
+        //
+        //    System.out.println(person.getName());
+        //    System.out.println(person.getAge());
+        //    System.out.println(person.getAddress());
+        // } else if (dataType == MyMessage.DataType.DogType) {
+        //    Dog dog = msg.getDog();
+        //
+        //    System.out.println(dog.getName());
+        //    System.out.println(dog.getAge());
+        // } else {
+        //    Cat cat = msg.getCat();
+        //
+        //    System.out.println(cat.getName());
+        //    System.out.println(cat.getCity());
+        // }
+    }
+}
