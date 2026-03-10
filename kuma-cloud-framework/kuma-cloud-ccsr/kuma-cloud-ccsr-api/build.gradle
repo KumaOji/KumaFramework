@@ -1,8 +1,18 @@
+// protobuf 插件需要独立的 buildscript 块提供构建类路径
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.aliyun.com/repository/public' }
+    }
+    dependencies {
+        classpath "com.google.protobuf:protobuf-gradle-plugin:0.9.6"
+    }
+}
 
 apply plugin: "com.google.protobuf"
 
 dependencies {
-    api ("io.github.kuma:kuma-boot-starter-common") {
+    api(project(':kuma-boot-framework:kuma-boot-starter-common')) {
         exclude group: "com.caucho", module: "hessian"
     }
     api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-common")
@@ -49,27 +59,16 @@ configurations {
 }
 
 protobuf {
-    //指定protoc编译器位置 在 protoc 模块下，可以指定多个配置，但是会以最后一个配置为准。
     protoc {
-        //https://repo1.maven.org/maven2/com/google/protobuf/protoc/
-        //直接使用Maven Central上已经编译好的protoc编译器，
         artifact = "com.google.protobuf:protoc:3.25.5"
-        //指定本地已经安装的protoc编译器
-        //path = '/usr/local/bin/protoc'
     }
-    //generatedFilesBaseDir = "$projectDir/src/generated"
     clean {
         delete generatedFilesBaseDir
     }
-    //指定protoc运行插件
     plugins {
         grpc {
             artifact = "io.grpc:protoc-gen-grpc-java:1.64.2"
         }
-        //javalite {
-        //    // The codegen for lite comes as a separate artifact
-        //    artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.1'
-        //}
     }
     generateProtoTasks {
         all()*.plugins {

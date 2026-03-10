@@ -5,3 +5,10 @@ dependencies {
     api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-client")
 }
 
+// 库模块不应向 classpath 投放日志配置文件，由消费方应用统一管理
+processResources {
+    exclude 'logback.xml'
+    exclude 'logback-spring.xml'
+    exclude 'log4j.properties'
+    exclude 'log4j2.xml'
+}

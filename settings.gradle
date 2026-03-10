@@ -60,6 +60,51 @@ for (name in projectBootSubModules) {
 }
 
 
+// kuma-cloud-tx — 仅包含客户端（RM）依赖链：rm → common
+include "kuma-cloud-tx"
+project(":kuma-cloud-tx").projectDir = file("kuma-cloud-framework/kuma-cloud-tx")
+def txSubModules = ['common', 'rm']
+for (name in txSubModules) {
+    include "kuma-cloud-tx:kuma-cloud-tx-${name}"
+    project(":kuma-cloud-tx:kuma-cloud-tx-${name}").projectDir = file("kuma-cloud-framework/kuma-cloud-tx/kuma-cloud-tx-${name}")
+}
+
+// kuma-cloud-ccsr — 仅包含客户端依赖链：client-starter → client → api + spi; api → common
+include "kuma-cloud-ccsr"
+project(":kuma-cloud-ccsr").projectDir = file("kuma-cloud-framework/kuma-cloud-ccsr")
+def ccsrSubModules = ['api', 'client', 'client-starter', 'common', 'spi']
+for (name in ccsrSubModules) {
+    include "kuma-cloud-ccsr:kuma-cloud-ccsr-${name}"
+    project(":kuma-cloud-ccsr:kuma-cloud-ccsr-${name}").projectDir = file("kuma-cloud-framework/kuma-cloud-ccsr/kuma-cloud-ccsr-${name}")
+}
+
+// kuma-cloud-job — 仅包含 Worker 依赖链：worker → common
+include "kuma-cloud-job"
+project(":kuma-cloud-job").projectDir = file("kuma-cloud-framework/kuma-cloud-job")
+def jobSubModules = ['common', 'worker']
+for (name in jobSubModules) {
+    include "kuma-cloud-job:kuma-cloud-job-${name}"
+    project(":kuma-cloud-job:kuma-cloud-job-${name}").projectDir = file("kuma-cloud-framework/kuma-cloud-job/kuma-cloud-job-${name}")
+}
+
+// kuma-cloud-mq — 仅包含客户端依赖链（client 依赖全部 mq 子模块）
+include "kuma-cloud-mq"
+project(":kuma-cloud-mq").projectDir = file("kuma-cloud-framework/kuma-cloud-mq")
+def mqSubModules = ['broker', 'client', 'cluster', 'common', 'consistency', 'metrics', 'plugin', 'proxy']
+for (name in mqSubModules) {
+    include "kuma-cloud-mq:kuma-cloud-mq-${name}"
+    project(":kuma-cloud-mq:kuma-cloud-mq-${name}").projectDir = file("kuma-cloud-framework/kuma-cloud-mq/kuma-cloud-mq-${name}")
+}
+
+// kuma-cloud-rpc — 仅包含客户端依赖链：client → core + filter + metrics + plugin + serialization + registry; core → common
+include "kuma-cloud-rpc"
+project(":kuma-cloud-rpc").projectDir = file("kuma-cloud-framework/kuma-cloud-rpc")
+def rpcSubModules = ['client', 'common', 'core', 'filter', 'metrics', 'plugin', 'registry', 'serialization']
+for (name in rpcSubModules) {
+    include "kuma-cloud-rpc:kuma-cloud-rpc-${name}"
+    project(":kuma-cloud-rpc:kuma-cloud-rpc-${name}").projectDir = file("kuma-cloud-framework/kuma-cloud-rpc/kuma-cloud-rpc-${name}")
+}
+
 gradle.settingsEvaluated {
     if (JavaVersion.current() < JavaVersion.VERSION_25) {
         throw new GradleException("This build requires JDK 25. Current: ${JavaVersion.current()}. Use -Dorg.gradle.ignoreBuildJavaVersionCheck to skip.")

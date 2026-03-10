@@ -6,5 +6,18 @@ dependencies {
     api project(":kuma-cloud-mq:kuma-cloud-mq-plugin")
     api project(":kuma-cloud-mq:kuma-cloud-mq-proxy")
     api project(":kuma-cloud-mq:kuma-cloud-mq-broker")
+
+    // Spring Boot 自动配置支持
+    api "org.springframework.boot:spring-boot-autoconfigure:4.0.2"
+
+    compileOnly "org.projectlombok:lombok:1.18.42"
+    annotationProcessor "org.projectlombok:lombok:1.18.42"
 }
 
+// 库模块不应向 classpath 投放日志配置文件，由消费方应用统一管理
+processResources {
+    exclude 'logback.xml'
+    exclude 'logback-spring.xml'
+    exclude 'log4j.properties'
+    exclude 'log4j2.xml'
+}

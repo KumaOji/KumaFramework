@@ -61,6 +61,13 @@ dependencies {
     api project(':kuma-cloud-framework:kuma-cloud-starter-seata')     // Seata 分布式事务
     api project(':kuma-cloud-framework:kuma-cloud-starter-stream')    // RocketMQ Stream
 
+    // ── kuma-cloud 多模块 ─────────────────────────────────────────────
+//    api project(':kuma-cloud-ccsr:kuma-cloud-ccsr-client-starter') // CCSR 配置与服务注册（客户端）
+//    api project(':kuma-cloud-tx:kuma-cloud-tx-rm')                 // 分布式事务 RM 端
+//    api project(':kuma-cloud-job:kuma-cloud-job-worker')           // 分布式任务调度 Worker
+//    api project(':kuma-cloud-mq:kuma-cloud-mq-client')             // 自定义 MQ 客户端
+//    api project(':kuma-cloud-rpc:kuma-cloud-rpc-client')           // 自定义 RPC 客户端
+
     // ── 第三方 ────────────────────────────────────────────────────────────
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
