@@ -1,0 +1,71 @@
+// protobuf 插件需要独立的 buildscript 块提供构建类路径
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.aliyun.com/repository/public' }
+    }
+    dependencies {
+        classpath "com.google.protobuf:protobuf-gradle-plugin:0.9.6"
+    }
+}
+
+apply plugin: "com.google.protobuf"
+
+dependencies {
+    // Spring Boot 自动配置支持
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot
+
+    // Netty 核心
+    api projectLibs.netty.all
+
+    // 日志
+    implementation projectLibs.slf4j.api
+    implementation projectLibs.logback.classic
+    implementation projectLibs.logback.core
+
+    // 示例代码依赖：protobuf / grpc / thrift
+    implementation "com.google.protobuf:protobuf-java:4.33.4"
+    implementation "com.google.protobuf:protobuf-java-util:4.33.4"
+    implementation "org.apache.thrift:libthrift:0.21.0"
+    implementation "io.grpc:grpc-api:1.78.0"
+    implementation "io.grpc:grpc-core:1.78.0"
+    implementation "io.grpc:grpc-stub:1.78.0"
+    implementation "io.grpc:grpc-netty:1.78.0"
+    implementation "io.grpc:grpc-protobuf:1.78.0"
+    implementation "io.grpc:grpc-services:1.78.0"
+    implementation projectLibs.gson
+    implementation projectLibs.guava
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+    testCompileOnly projectLibs.lombok
+    testAnnotationProcessor projectLibs.lombok
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:6.0.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.2'
+    testImplementation("io.grpc:grpc-testing:1.78.0")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.33.4"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.78.0"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {
+                option 'jakarta_omit'
+                option '@generated=omit'
+            }
+        }
+    }
+    clean {
+        delete generatedFilesBaseDir
+    }
+}

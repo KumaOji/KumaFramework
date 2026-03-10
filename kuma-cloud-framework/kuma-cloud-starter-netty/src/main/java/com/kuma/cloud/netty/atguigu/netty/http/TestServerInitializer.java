@@ -1,0 +1,50 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.netty.atguigu.netty.http;
+
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpServerCodec;
+
+/**
+ * TestServerInitializer
+ *
+ * @author kuma
+ * @version 2026.02
+ * @since 2025-12-19 09:30:45
+ */
+public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
+
+    @Override
+    protected void initChannel( SocketChannel ch ) throws Exception {
+
+        // 向管道加入处理器
+
+        // 得到管道
+        ChannelPipeline pipeline = ch.pipeline();
+
+        // 加入一个netty 提供的httpServerCodec codec =>[coder - decoder]
+        // HttpServerCodec 说明
+        // 1. HttpServerCodec 是netty 提供的处理http的 编-解码器
+        pipeline.addLast("MyHttpServerCodec", new HttpServerCodec());
+        // 2. 增加一个自定义的handler
+        pipeline.addLast("MyTestHttpServerHandler", new TestHttpServerHandler());
+
+        System.out.println("ok~~~~");
+    }
+}

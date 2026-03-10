@@ -53,6 +53,7 @@ dependencies {
     // ── kuma-cloud-framework ──────────────────────────────────────────────
     api project(':kuma-cloud-framework:kuma-cloud-starter-jdbcpool')
     api project(':kuma-cloud-framework:kuma-cloud-starter-cache')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-netty')
     api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
     api project(':kuma-cloud-framework:kuma-cloud-starter-kmc')
     api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')   // Nacos 注册/配置

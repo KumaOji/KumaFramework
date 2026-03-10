@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.netty.nio;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+
+/**
+ * NioTest4
+ *
+ * @author kuma
+ * @version 2026.02
+ * @since 2025-12-19 09:30:45
+ */
+public class NioTest4 {
+
+    public static void main( String[] args ) throws Exception {
+        FileInputStream inputStream = new FileInputStream("input.txt");
+        FileOutputStream outputStream = new FileOutputStream("output.txt");
+
+        FileChannel inputChannel = inputStream.getChannel();
+        FileChannel outputChannel = outputStream.getChannel();
+
+        ByteBuffer buffer = ByteBuffer.allocate(512);
+
+        while (true) {
+            //            buffer.clear(); // 如果注释掉该行代码会发生什么情况？
+
+            int read = inputChannel.read(buffer);
+
+            System.out.println("read: " + read);
+
+            if (-1 == read) {
+                break;
+            }
+
+            buffer.flip();
+
+            outputChannel.write(buffer);
+        }
+
+        inputChannel.close();
+        outputChannel.close();
+    }
+}

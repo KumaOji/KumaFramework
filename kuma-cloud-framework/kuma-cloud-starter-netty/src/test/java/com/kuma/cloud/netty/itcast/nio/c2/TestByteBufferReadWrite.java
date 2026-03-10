@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.netty.itcast.nio.c2;
+
+import static com.kuma.cloud.netty.itcast.nio.c2.ByteBufferUtil.debugAll;
+
+import java.nio.ByteBuffer;
+
+/**
+ * TestByteBufferReadWrite
+ *
+ * @author kuma
+ * @version 2026.02
+ * @since 2025-12-19 09:30:45
+ */
+public class TestByteBufferReadWrite {
+
+    public static void main( String[] args ) {
+        ByteBuffer buffer = ByteBuffer.allocate(10);
+        buffer.put((byte) 0x61); // 'a'
+        debugAll(buffer);
+        buffer.put(new byte[]{0x62, 0x63, 0x64}); // b  c  d
+        debugAll(buffer);
+        //        System.out.println(buffer.get());
+        buffer.flip();
+        System.out.println(buffer.get());
+        debugAll(buffer);
+        buffer.compact();
+        debugAll(buffer);
+        buffer.put(new byte[]{0x65, 0x6f});
+        debugAll(buffer);
+    }
+}
