@@ -1,0 +1,30 @@
+apply from: rootProject.file('gradle/springboot.gradle')
+
+dependencies {
+    api "io.github.kuma:kuma-boot-starter-core"
+
+
+    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-client-starter")
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc") {
+        //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    //implementation "org.springframework.boot:spring-boot-starter-undertow"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+        resolutionStrategy.cacheDynamicVersionsFor 0, "seconds"
+
+        resolutionStrategy {
+            force "com.caucho:hessian:4.0.63"
+            force "com.alipay.sofa:hessian:3.5.5"
+        }
+
+        //exclude group: "commons-logging", module: "commons-logging"
+    }
+}
+

@@ -1,0 +1,299 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.mq.client.consumer.core;
+
+import com.kuma.boot.common.utils.common.ArgUtils;
+import com.kuma.cloud.mq.client.consumer.api.MqConsumer;
+import com.kuma.cloud.mq.client.consumer.api.MqConsumerListener;
+import com.kuma.cloud.mq.client.consumer.constant.ConsumerConst;
+import com.kuma.cloud.mq.client.consumer.constant.ConsumerRespCode;
+import com.kuma.cloud.mq.client.consumer.support.broker.ConsumerBrokerConfig;
+import com.kuma.cloud.mq.client.consumer.support.broker.DefaultConsumerBrokerService;
+import com.kuma.cloud.mq.client.consumer.support.broker.ConsumerBrokerService;
+import com.kuma.cloud.mq.client.consumer.support.listener.MqListenerService;
+import com.kuma.cloud.mq.client.consumer.support.listener.DefaultMqListenerService;
+import com.kuma.cloud.mq.common.balance.LoadBalance;
+import com.kuma.cloud.mq.common.balance.impl.LoadBalances;
+import com.kuma.cloud.mq.common.constant.ConsumerTypeConst;
+import com.kuma.cloud.mq.common.resp.MqException;
+import com.kuma.cloud.mq.common.rpc.RpcChannelFuture;
+import com.kuma.cloud.mq.common.support.hook.DefaultShutdownHook;
+import com.kuma.cloud.mq.common.support.hook.ShutdownHooks;
+import com.kuma.cloud.mq.common.support.invoke.InvokeService;
+import com.kuma.cloud.mq.common.support.invoke.impl.DefaultInvokeService;
+import com.kuma.cloud.mq.common.support.status.StatusManager;
+import com.kuma.cloud.mq.common.support.status.DefaultStatusManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * 推送消费策略
+ *
+ * @author kuma
+ * @since 2024.05
+ */
+public class MqConsumerPush extends Thread implements MqConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(MqConsumerPush.class);
+
+    /**
+     * 组名称
+     */
+    protected String groupName = ConsumerConst.DEFAULT_GROUP_NAME;
+
+    /**
+     * 中间人地址
+     */
+    protected String brokerAddress = "127.0.0.1:9999";
+
+    /**
+     * 获取响应超时时间
+     * @since 2024.05
+     */
+    protected long respTimeoutMills = 5000;
+
+    /**
+     * 检测 broker 可用性
+     * @since 2024.05
+     */
+    protected volatile boolean check = true;
+
+    /**
+     * 为剩余的请求等待时间
+     * @since 2024.05
+     */
+    protected long waitMillsForRemainRequest = 60 * 1000;
+
+    /**
+     * 调用管理类
+     *
+     * @since 2024.05
+     */
+    protected final InvokeService invokeService = new DefaultInvokeService();
+
+    /**
+     * 消息监听服务类
+     * @since 2024.05
+     */
+    protected final MqListenerService mqListenerService = new DefaultMqListenerService();
+
+    /**
+     * 状态管理类
+     * @since 2024.05
+     */
+    protected final StatusManager statusManager = new DefaultStatusManager();
+
+    /**
+     * 生产者-中间服务端服务类
+     * @since 2024.05
+     */
+    protected final ConsumerBrokerService consumerBrokerService = new DefaultConsumerBrokerService();
+
+    /**
+     * 负载均衡策略
+     * @since 2024.05
+     */
+    protected LoadBalance<RpcChannelFuture> loadBalance = LoadBalances.weightRoundRobbin();
+
+    /**
+     * 订阅最大尝试次数
+     * @since 2024.05
+     */
+    protected int subscribeMaxAttempt = 3;
+
+    /**
+     * 取消订阅最大尝试次数
+     * @since 2024.05
+     */
+    protected int unSubscribeMaxAttempt = 3;
+
+    /**
+     * 消费状态更新最大尝试次数
+     * @since 2024.05
+     */
+    protected int consumerStatusMaxAttempt = 3;
+
+    /**
+     * 账户标识
+     * @since 2024.05
+     */
+    protected String appKey;
+
+    /**
+     * 账户密码
+     * @since 2024.05
+     */
+    protected String appSecret;
+
+    public String appKey() {
+        return appKey;
+    }
+
+    public MqConsumerPush appKey(String appKey) {
+        this.appKey = appKey;
+        return this;
+    }
+
+    public String appSecret() {
+        return appSecret;
+    }
+
+    public MqConsumerPush appSecret(String appSecret) {
+        this.appSecret = appSecret;
+        return this;
+    }
+
+    public MqConsumerPush consumerStatusMaxAttempt(int consumerStatusMaxAttempt) {
+        this.consumerStatusMaxAttempt = consumerStatusMaxAttempt;
+        return this;
+    }
+
+    public MqConsumerPush subscribeMaxAttempt(int subscribeMaxAttempt) {
+        this.subscribeMaxAttempt = subscribeMaxAttempt;
+        return this;
+    }
+
+    public MqConsumerPush unSubscribeMaxAttempt(int unSubscribeMaxAttempt) {
+        this.unSubscribeMaxAttempt = unSubscribeMaxAttempt;
+        return this;
+    }
+
+    public MqConsumerPush groupName(String groupName) {
+        this.groupName = groupName;
+        return this;
+    }
+
+    public MqConsumerPush brokerAddress(String brokerAddress) {
+        this.brokerAddress = brokerAddress;
+        return this;
+    }
+
+    public MqConsumerPush respTimeoutMills(long respTimeoutMills) {
+        this.respTimeoutMills = respTimeoutMills;
+        return this;
+    }
+
+    public MqConsumerPush check(boolean check) {
+        this.check = check;
+        return this;
+    }
+
+    public MqConsumerPush waitMillsForRemainRequest(long waitMillsForRemainRequest) {
+        this.waitMillsForRemainRequest = waitMillsForRemainRequest;
+        return this;
+    }
+
+    public MqConsumerPush loadBalance( LoadBalance<RpcChannelFuture> loadBalance) {
+        this.loadBalance = loadBalance;
+        return this;
+    }
+
+    /**
+     * 参数校验
+     */
+    private void paramCheck() {
+        ArgUtils.notEmpty(brokerAddress, "brokerAddress");
+        ArgUtils.notEmpty(groupName, "groupName");
+    }
+
+    @Override
+    public void run() {
+        // 启动服务端
+        log.info("MQ 消费者开始启动服务端 groupName: {}, brokerAddress: {}", groupName, brokerAddress);
+
+        // 1. 参数校验
+        this.paramCheck();
+
+        try {
+            // 0. 配置信息
+            ConsumerBrokerConfig config =
+                    ConsumerBrokerConfig.newInstance()
+                            .groupName(groupName)
+                            .brokerAddress(brokerAddress)
+                            .check(check)
+                            .respTimeoutMills(respTimeoutMills)
+                            .invokeService(invokeService)
+                            .statusManager(statusManager)
+                            .mqListenerService(mqListenerService)
+                            .loadBalance(loadBalance)
+                            .subscribeMaxAttempt(subscribeMaxAttempt)
+                            .unSubscribeMaxAttempt(unSubscribeMaxAttempt)
+                            .consumerStatusMaxAttempt(consumerStatusMaxAttempt)
+                            .appKey(appKey)
+                            .appSecret(appSecret);
+
+            // 1. 初始化
+            this.consumerBrokerService.initChannelFutureList(config);
+
+            // 2. 连接到服务端
+            this.consumerBrokerService.registerToBroker();
+
+            // 3. 标识为可用
+            statusManager.status(true);
+
+            // 4. 添加钩子函数
+            final DefaultShutdownHook rpcShutdownHook = new DefaultShutdownHook();
+            rpcShutdownHook.setStatusManager(statusManager);
+            rpcShutdownHook.setInvokeService(invokeService);
+            rpcShutdownHook.setWaitMillsForRemainRequest(waitMillsForRemainRequest);
+            rpcShutdownHook.setDestroyable(this.consumerBrokerService);
+            ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
+
+            // 5. 启动完成以后的事件
+            this.afterInit();
+
+            log.info("MQ 消费者启动完成");
+        } catch (Exception e) {
+            log.error("MQ 消费者启动异常", e);
+
+            statusManager.initFailed(true);
+
+            throw new MqException(ConsumerRespCode.RPC_INIT_FAILED);
+        }
+    }
+
+    /**
+     * 初始化完成以后
+     */
+    protected void afterInit() {}
+
+    @Override
+    public void subscribe(String topicName, String tagRegex) {
+        final String consumerType = getConsumerType();
+        consumerBrokerService.subscribe(topicName, tagRegex, consumerType);
+    }
+
+    @Override
+    public void unSubscribe(String topicName, String tagRegex) {
+        final String consumerType = getConsumerType();
+        consumerBrokerService.unSubscribe(topicName, tagRegex, consumerType);
+    }
+
+    @Override
+    public void registerListener( MqConsumerListener listener) {
+        this.mqListenerService.register(listener);
+    }
+
+    /**
+     * 获取消费策略类型
+     * @return 类型
+     * @since 2024.05
+     */
+    protected String getConsumerType() {
+        return ConsumerTypeConst.PUSH;
+    }
+}

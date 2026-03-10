@@ -1,0 +1,3 @@
+dependencies {
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-common")
+}

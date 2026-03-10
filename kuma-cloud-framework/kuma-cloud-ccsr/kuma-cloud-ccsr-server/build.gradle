@@ -1,0 +1,80 @@
+apply from: rootProject.file('gradle/springboot.gradle')
+
+dependencies {
+    api "io.github.kuma:kuma-boot-starter-core"
+    //api "io.github.kuma:kuma-boot-starter-logger"
+    //api "io.github.kuma:kuma-boot-starter-metrics"
+    //api "io.github.kuma:kuma-boot-starter-tracer"
+
+    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter")
+
+    implementation("org.springframework.boot:spring-boot-starter-webmvc") {
+        //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    //implementation "org.springframework.boot:spring-boot-starter-undertow"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+        resolutionStrategy.cacheDynamicVersionsFor 0, "seconds"
+
+        resolutionStrategy {
+            force "com.caucho:hessian:4.0.63"
+            force "com.alipay.sofa:hessian:3.5.5"
+            force "com.google.protobuf:protobuf-java:3.25.5"
+            force "com.google.protobuf:protobuf-java-util:3.25.5"
+        }
+
+        //exclude group: "commons-logging", module: "commons-logging"
+    }
+}
+
+jar {
+    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter").jar) { into("lib/") }
+    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-core").jar) { into("lib/") }
+    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-api").jar) { into("lib/") }
+    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-spi").jar) { into("lib/") }
+    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-common").jar) { into("lib/") }
+
+    //详细信息参考 https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
+    //基本的文件名
+    //archivesBaseName = 'Example'
+    //文件夹大于65535个，需要开启zip64
+    zip64=true
+
+    manifest {
+        attributes 'Main-Class': "com.kuma.cloud.ccsr.server.CcsrServerApplication"
+        attributes 'Class-Path': configurations.compileClasspath.files.collect { "lib/$it.name" }.join(' ')
+    }
+
+    //gradle 处理重复文件，include 最后一个重复文件“胜出”的默认策略。
+    //duplicatesStrategy = 'include' // <<---- addition
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    into('lib') { // 将第三方jar放入 lib目录中
+        from configurations.runtimeClasspath.findAll { it.name.endsWith('.jar') }
+    }
+
+    //打包依赖包
+    //from {
+    //    (configurations.runtimeClasspath).collect {
+    //        it.isDirectory() ? it : zipTree(it)
+    //    }
+    //}
+
+    //delete "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    //from configurations.runtimeClasspath
+    //into "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    //from configurations.compileClasspath
+    //into "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+
+    //into('lib') { // 将第三方jar放入 lib目录中
+    //    from configurations.compile
+    //}
+}
+
+
+

@@ -1,0 +1,4 @@
+dependencies {
+    api project(":kuma-cloud-mq:kuma-cloud-mq-common")
+
+}

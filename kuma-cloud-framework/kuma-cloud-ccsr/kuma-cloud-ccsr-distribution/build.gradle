@@ -1,0 +1,99 @@
+apply from: rootProject.file('gradle/shadow.gradle')
+
+apply plugin: 'application'
+
+tasks.register('releaseTarZip', Zip) {
+    dependsOn(':kuma-cloud-ccsr:kuma-cloud-ccsr-server:bootJar')
+
+    archiveFileName = "${project.name}-${project.version}.zip"
+
+    from("${project.projectDir}/bin") {
+        include '**'
+
+        into "bin"
+    }
+
+    from("${project.projectDir}/conf") {
+        include '**'
+
+        into "conf"
+    }
+
+    from "${project.projectDir}/LICENSE-BIN" rename { String filename -> filename.replace("-BIN", "") }
+    from "${project.projectDir}/NOTICE-BIN" rename { String filename -> filename.replace("-BIN", "") }
+
+    from("${project.parent.projectDir}/kuma-cloud-ccsr-server/build/libs") {
+        include '*.jar'
+
+        into "target"
+    }
+
+    finalizedBy("generateMd5ForZip")
+}
+
+tasks.register("releaseTarGz", Tar) {
+    dependsOn('releaseTarZip')
+
+    into "${project.name}"
+    compression = Compression.GZIP
+    //archiveVersion = ""
+    archiveExtension = 'tar.gz'
+
+    from("${project.projectDir}/bin") {
+        include '**'
+
+        into "bin"
+    }
+
+    from("${project.projectDir}/conf") {
+        include '**'
+
+        into "conf"
+    }
+
+    from "${project.projectDir}/LICENSE-BIN" rename {String filename -> filename.replace("-BIN", "")}
+    from "${project.projectDir}/NOTICE-BIN" rename {String filename -> filename.replace("-BIN", "")}
+
+    from("${project.parent.projectDir}/kuma-cloud-ccsr-server/build/libs") {
+        include '*.jar'
+
+        into "target"
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    finalizedBy("generateMd5ForTarGz")
+}
+
+
+tasks.register("generateMd5ForZip", Exec) {
+    def zipFile = file("${project.layout.buildDirectory.asFile.get()}/distributions/kuma-cloud-ccsr-distribution-2026.02.zip")
+    def md5File = file("${project.layout.buildDirectory.asFile.get()}/distributions/kuma-cloud-ccsr-distribution-2026.02.zip.md5")
+
+    inputs.file zipFile
+    outputs.file md5File
+
+    if (System.getProperty("os.name").toLowerCase().contains("win")) {
+        // Windows 系统使用 cmd 执行命令并将结果重定向到文件
+        commandLine 'cmd', '/c', "certutil -hashfile ${zipFile.absolutePath} MD5 | findstr /v \"MD5\" | findstr /v \"certutil\" > ${md5File.absolutePath}"
+    } else {
+        // Unix/Linux 系统使用 md5sum 命令
+        commandLine 'bash', '-c', "md5sum ${zipFile.absolutePath} | awk '{print \$1}' > ${md5File.absolutePath}"
+    }
+}
+
+tasks.register("generateMd5ForTarGz", Exec) {
+    def zipFile = file("${project.layout.buildDirectory.asFile.get()}/distributions/kuma-cloud-ccsr-distribution-2026.02.tar.gz")
+    def md5File = file("${project.layout.buildDirectory.asFile.get()}/distributions/kuma-cloud-ccsr-distribution-2026.02.tar.gz.md5")
+
+    inputs.file zipFile
+    outputs.file md5File
+
+    if (System.getProperty("os.name").toLowerCase().contains("win")) {
+        // Windows 系统使用 cmd 执行命令并将结果重定向到文件
+        commandLine 'cmd', '/c', "certutil -hashfile ${zipFile.absolutePath} MD5 | findstr /v \"MD5\" | findstr /v \"certutil\" > ${md5File.absolutePath}"
+    } else {
+        // Unix/Linux 系统使用 md5sum 命令
+        commandLine 'bash', '-c', "md5sum ${zipFile.absolutePath} | awk '{print \$1}' > ${md5File.absolutePath}"
+    }
+}

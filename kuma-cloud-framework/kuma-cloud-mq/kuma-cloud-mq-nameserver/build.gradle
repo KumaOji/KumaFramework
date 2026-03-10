@@ -1,0 +1,30 @@
+apply from: rootProject.file('gradle/springboot.gradle')
+
+dependencies {
+    api project(":kuma-cloud-mq:kuma-cloud-mq-common")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-cluster")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-consistency")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-metrics")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-plugin")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-proxy")
+
+    api "io.github.kuma:kuma-boot-starter-core"
+
+
+    api("org.springframework.boot:spring-boot-starter-webmvc") {
+        //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    //api "org.springframework.boot:spring-boot-starter-undertow"
+    api "org.springframework.boot:spring-boot-starter-tomcat"
+    api 'org.springframework.boot:spring-boot-starter-aspectj'
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+        resolutionStrategy.cacheDynamicVersionsFor 0, "seconds"
+
+        //exclude group: "commons-logging", module: "commons-logging"
+    }
+}

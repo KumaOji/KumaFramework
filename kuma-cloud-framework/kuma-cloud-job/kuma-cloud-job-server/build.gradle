@@ -1,0 +1,21 @@
+apply from: rootProject.file('gradle/springboot.gradle')
+
+dependencies {
+    api project(":kuma-cloud-job:kuma-cloud-job-common")
+    api project(":kuma-cloud-job:kuma-cloud-job-worker")
+    api project(":kuma-cloud-job:kuma-cloud-job-retry")
+    api project(":kuma-cloud-job:kuma-cloud-job-api")
+    api project(":kuma-cloud-job:kuma-cloud-job-dag")
+    api project(":kuma-cloud-job:kuma-cloud-job-consistency")
+
+    api "com.baomidou:mybatis-plus-spring-boot4-starter:3.5.16"
+    api("org.springframework.boot:spring-boot-starter-webmvc") {
+        //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    //api "org.springframework.boot:spring-boot-starter-undertow"
+    api "org.springframework.boot:spring-boot-starter-tomcat"
+    api "com.mysql:mysql-connector-j:9.6.0"
+    api "net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE"
+    api "com.cronutils:cron-utils:9.2.1"
+}

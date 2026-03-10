@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.rpc.common.loadbalancer;
+
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.kuma.cloud.rpc.common.exception.RpcException;
+import com.kuma.cloud.rpc.common.exception.ServiceNotFoundException;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
+/**
+ * 轮询选择
+ */
+public class RoundRobinLoadBalancer implements LoadBalancer {
+
+    private final AtomicLong idx = new AtomicLong();
+
+    @Override
+    public Instance selectService(List<Instance> instances) throws RpcException {
+        if (instances.isEmpty()) {
+            throw new ServiceNotFoundException(
+                    "service instances size is zero, can't provide service! please start server first!");
+        }
+        int num = (int) (idx.getAndIncrement() % (long) instances.size());
+        return instances.get(num < 0 ? -num : num);
+    }
+
+    @Override
+    public String selectNode(String[] nodes) throws RpcException {
+        if (nodes.length == 0) {
+            throw new ServiceNotFoundException(
+                    "service instances size is zero, can't provide service! please start server first!");
+        }
+        int num = (int) (idx.getAndIncrement() % (long) nodes.length);
+        return nodes[num < 0 ? -num : num];
+    }
+}

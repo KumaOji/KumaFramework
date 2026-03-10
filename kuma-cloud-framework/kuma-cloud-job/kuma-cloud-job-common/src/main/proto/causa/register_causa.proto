@@ -1,0 +1,33 @@
+//使用proto3语法
+syntax = "proto3";
+option java_package = "com.kuma.cloud.job.remote.protos";
+
+
+// req
+message ServerRegisterReporter{
+  string serverIpAddress = 1;
+  int64 registerTimestamp = 2;
+}
+message WorkerSubscribeReq{
+  string workerIpAddress = 1;
+  string appName = 2;
+  int64 scheduleTime = 3;
+  string serverIpAddress = 4;
+  int64 subscribeTimestamp = 5;
+}
+message FetchServerAddressListReq{
+
+}
+
+// response
+message WorkerSubscribeResponse{
+
+  repeated string serverAddressIpLists = 1;
+  bool isSplit = 2;
+  string subAppName = 3;
+  bool isChangeServer = 4;
+
+}
+message ServerAddressList{
+  repeated string serverAddressList = 1;
+}
