@@ -40,16 +40,25 @@ for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
 
-def frameworkSubModules = ['bootstrap','seata','kmc',
+def frameworkCloudSubModules = ['bootstrap','seata','kmc',
                            'sentinel','stream','alibaba',
                             'cache','jdbcpool','netty']
-for (name in frameworkSubModules) {
+//def frameworkCloudSubModules2 = ['tx', 'mq',
+//                                'ccsr','job','rpc']
+for (name in frameworkCloudSubModules) {
     include "kuma-cloud-framework:kuma-cloud-starter-${name}"
 }
-include "kuma-other-framework:kuma-cloud-design-patterns"
-include "kuma-other-framework:kuma-cloud-plugin"
-def cloudPluginSubModules = ['gradle-plugin', 'elasticsearch-plugin', 'idea-plugin', 'maven-plugin']
-for (name in cloudPluginSubModules) {
+//for (name in frameworkCloudSubModules2) {
+//    include "kuma-cloud-framework:kuma-cloud-${name}"
+//}
+
+def frameworkOtherSubModules = ['design-patterns','plugin']
+for (name in frameworkOtherSubModules) {
+    include "kuma-other-framework:kuma-cloud-${name}"
+}
+
+def frameworkCloudPluginSubModules = ['gradle-plugin', 'elasticsearch-plugin', 'idea-plugin', 'maven-plugin']
+for (name in frameworkCloudPluginSubModules) {
     include "kuma-other-framework:kuma-cloud-plugin:kuma-cloud-${name}"
 }
 
