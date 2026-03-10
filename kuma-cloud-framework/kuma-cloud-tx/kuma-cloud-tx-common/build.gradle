@@ -1,8 +1,6 @@
 dependencies {
-    api "io.github.kuma:kuma-boot-starter-common"
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-    api 'io.netty:netty-all'
-    api 'com.alibaba.fastjson2:fastjson2'
+    api 'io.netty:netty-all:4.2.9.Final'
+    api 'com.alibaba.fastjson2:fastjson2:2.0.61'
 }
-
-
