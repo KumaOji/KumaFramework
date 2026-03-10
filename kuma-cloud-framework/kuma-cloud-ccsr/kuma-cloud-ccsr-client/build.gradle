@@ -1,0 +1,4 @@
+dependencies {
+    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-api")
+    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-spi")
+}

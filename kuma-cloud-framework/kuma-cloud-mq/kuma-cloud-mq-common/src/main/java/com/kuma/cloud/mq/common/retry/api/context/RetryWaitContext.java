@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.mq.common.retry.api.context;
+
+import com.kuma.cloud.mq.common.retry.api.model.RetryAttempt;
+import com.kuma.cloud.mq.common.retry.api.support.wait.RetryWait;
+
+/**
+ * 重试等待上下文
+ * @author kuma
+ * @since 0.0.3
+ */
+public interface RetryWaitContext<R> extends RetryAttempt<R> {
+
+    /**
+     * 基础值（毫秒）
+     * 1. fixed: 固定间隔
+     * 2. 递增/指数：为初始值
+     * 3. random/noRetry 这个值会被忽略
+     * @return 基础值
+     */
+    long value();
+
+    /**
+     * 最小等待时间（毫秒）
+     * @return 最小等待时间（毫秒）
+     */
+    long min();
+
+    /**
+     * 最大等待时间（毫秒）
+     * @return 最大等待时间（毫秒）
+     */
+    long max();
+
+    /**
+     * 变换因子（递增/毫秒）
+     * 1. 递增：每次增加的时间
+     * 2. 指数：每次乘的因数
+     * @return 变换因子
+     */
+    double factor();
+
+    /**
+     * 对应的 class 信息
+     * @return class 信息
+     */
+    Class<? extends RetryWait> retryWait();
+}

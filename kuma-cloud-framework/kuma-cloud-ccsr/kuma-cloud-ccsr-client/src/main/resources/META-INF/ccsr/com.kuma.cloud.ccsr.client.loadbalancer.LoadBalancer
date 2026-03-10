@@ -1,0 +1,2 @@
+random=com.kuma.cloud.ccsr.client.loadbalancer.RandomLoadBalancer
+round_robin=com.kuma.cloud.ccsr.client.loadbalancer.RoundRobinLoadBalancer

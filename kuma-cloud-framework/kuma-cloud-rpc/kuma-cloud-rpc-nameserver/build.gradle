@@ -1,0 +1,31 @@
+apply from: rootProject.file('gradle/springboot.gradle')
+
+dependencies {
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-core")
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-filter")
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-metrics")
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-plugin")
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-serialization")
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-registry")
+    api project(":kuma-cloud-rpc:kuma-cloud-rpc-consistency")
+
+    api "io.github.kuma:kuma-boot-starter-core"
+
+
+    api("org.springframework.boot:spring-boot-starter-webmvc") {
+        //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    //api "org.springframework.boot:spring-boot-starter-undertow"
+    api "org.springframework.boot:spring-boot-starter-tomcat"
+    api 'org.springframework.boot:spring-boot-starter-aspectj'
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+        resolutionStrategy.cacheDynamicVersionsFor 0, "seconds"
+
+        //exclude group: "commons-logging", module: "commons-logging"
+    }
+}

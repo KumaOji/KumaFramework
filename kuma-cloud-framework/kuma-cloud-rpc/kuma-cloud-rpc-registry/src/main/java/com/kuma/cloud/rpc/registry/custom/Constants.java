@@ -1,0 +1,29 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.rpc.registry.custom;
+
+/**
+ * 静态常量
+ *
+ * @author kuma
+ * @version v1.0.0
+ */
+public class Constants {
+    public static final int ZK_SESSION_TIMOUT = 5000;
+    public static final String ZK_REGISTRY_PATH = "/registry";
+    public static final String ZK_DATA_PATH = ZK_REGISTRY_PATH + "/data";
+}

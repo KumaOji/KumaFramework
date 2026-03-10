@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.mq.common.retry.api.context;
+
+import com.kuma.cloud.mq.common.retry.api.core.Retry;
+import com.kuma.cloud.mq.common.retry.api.support.block.RetryBlock;
+import com.kuma.cloud.mq.common.retry.api.support.condition.RetryCondition;
+import com.kuma.cloud.mq.common.retry.api.support.listen.RetryListen;
+import com.kuma.cloud.mq.common.retry.api.support.recover.Recover;
+import com.kuma.cloud.mq.common.retry.api.support.stop.RetryStop;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+/**
+ * 重试执行上下文
+ * @author kuma
+ * @since 0.0.1
+ */
+public interface RetryContext<R> {
+
+    /**
+     * 重试实现类
+     * @return 重试
+     * @since 0.0.5
+     */
+    Retry<R> retry();
+
+    /**
+     * 生效条件列表
+     * @return 生效条件列表
+     */
+    RetryCondition condition();
+
+    /**
+     * 重试等待上下文
+     * @return 重试等待上下文
+     */
+    List<RetryWaitContext<R>> waitContext();
+
+    /**
+     * 阻塞方式
+     * @return 阻塞方式
+     */
+    RetryBlock block();
+
+    /**
+     * 停止方式
+     * @return 停止方式
+     */
+    RetryStop stop();
+
+    /**
+     * 可执行的方法
+     * @return 方法
+     */
+    Callable<R> callable();
+
+    /**
+     * 监听信息列表
+     * @return 监听信息列表
+     */
+    RetryListen listen();
+
+    /**
+     * 恢复方式
+     * @return 恢复方式
+     */
+    Recover recover();
+
+    /**
+     * 请求参数
+     * @return 请求参数
+     * @since 0.1.0
+     */
+    Object[] params();
+
+    /**
+     * 设置上下文的信息
+     * @param params 参数
+     * @return this
+     * @since 0.1.0
+     */
+    RetryContext<R> params(Object[] params);
+}

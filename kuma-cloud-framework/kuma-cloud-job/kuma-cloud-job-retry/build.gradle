@@ -1,0 +1,4 @@
+dependencies {
+    api project(":kuma-cloud-job:kuma-cloud-job-common")
+    api project(":kuma-cloud-job:kuma-cloud-job-worker")
+}

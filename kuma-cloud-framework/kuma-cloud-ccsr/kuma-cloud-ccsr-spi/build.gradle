@@ -1,0 +1,5 @@
+dependencies {
+    api ("io.github.kuma:kuma-boot-starter-common") {
+        exclude group: "com.caucho", module: "hessian"
+    }
+}

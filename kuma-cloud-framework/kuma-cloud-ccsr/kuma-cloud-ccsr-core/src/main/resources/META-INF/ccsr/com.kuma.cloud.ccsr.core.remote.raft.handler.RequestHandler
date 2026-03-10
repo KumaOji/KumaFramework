@@ -1,0 +1,3 @@
+read=com.kuma.cloud.ccsr.core.remote.raft.handler.ReadRequestHandler
+write=com.kuma.cloud.ccsr.core.remote.raft.handler.WriteRequestHandler
+delete=com.kuma.cloud.ccsr.core.remote.raft.handler.DeleteRequestHandler

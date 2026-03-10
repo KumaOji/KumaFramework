@@ -1,0 +1,185 @@
+apply from: rootProject.file('gradle/springboot.gradle')
+
+dependencies {
+    api project(":kuma-cloud-mq:kuma-cloud-mq-common")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-broker")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-cluster")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-consistency")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-metrics")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-plugin")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-proxy")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-client")
+    api project(":kuma-cloud-mq:kuma-cloud-mq-nameserver")
+
+    api "io.github.kuma:kuma-boot-starter-core"
+
+
+    api("org.springframework.boot:spring-boot-starter-webmvc") {
+        //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
+    }
+    //api "org.springframework.boot:spring-boot-starter-undertow"
+    api "org.springframework.boot:spring-boot-starter-tomcat"
+    api 'org.springframework.boot:spring-boot-starter-aspectj'
+
+    api "com.mysql:mysql-connector-j:9.6.0"
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+        resolutionStrategy.cacheDynamicVersionsFor 0, "seconds"
+
+        //exclude group: "commons-logging", module: "commons-logging"
+    }
+}
+
+
+jar {
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-common").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-cluster").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-consistency").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-metrics").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-broker").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-plugin").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-proxy").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-client").jar) { into("lib/") }
+    from(project(":kuma-cloud-mq:kuma-cloud-mq-nameserver").jar) { into("lib/") }
+
+    //详细信息参考 https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
+    //基本的文件名
+    //archivesBaseName = 'Example'
+    //文件夹大于65535个，需要开启zip64
+    zip64 = true
+
+    manifest {
+        attributes 'Main-Class': "com.kuma.cloud.mq.dashboard.MqDashboardApplication"
+        attributes 'Class-Path': configurations.compileClasspath.files.collect { "lib/$it.name" }.join(' ')
+    }
+
+    //gradle 处理重复文件，include 最后一个重复文件“胜出”的默认策略。
+    //duplicatesStrategy = 'include' // <<---- addition
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    into('lib') { // 将第三方jar放入 lib目录中
+        from configurations.runtimeClasspath.findAll { it.name.endsWith('.jar') }
+    }
+
+    //打包依赖包
+    //from {
+    //    (configurations.runtimeClasspath).collect {
+    //        it.isDirectory() ? it : zipTree(it)
+    //    }
+    //}
+
+    //delete "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    //from configurations.runtimeClasspath
+    //into "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    //from configurations.compileClasspath
+    //into "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+
+    //into('lib') { // 将第三方jar放入 lib目录中
+    //    from configurations.compile
+    //}
+}
+
+tasks.register('releaseTarZip', Zip) {
+    dependsOn jar
+
+    archiveFileName = "${project.name}-${project.version}.zip"
+
+    from("${project.parent.projectDir}/kuma-cloud-mq-distribution/bin") {
+        include '**'
+
+        into "bin"
+    }
+
+    from("${project.parent.projectDir}/kuma-cloud-mq-distribution/conf") {
+        include '**'
+
+        into "conf"
+    }
+
+    from "${project.parent.projectDir}/kuma-cloud-mq-distribution/LICENSE-BIN" rename { String filename -> filename.replace("-BIN", "") }
+    from "${project.parent.projectDir}/kuma-cloud-mq-distribution/NOTICE-BIN" rename { String filename -> filename.replace("-BIN", "") }
+
+    from('build/libs') {
+        include '*.jar'
+
+        into "target"
+    }
+
+}
+
+tasks.register("releaseTarGz", Tar) {
+
+    dependsOn configurations.archives.artifacts
+
+    into "kuma-cloud-mq-dashboard"
+    compression = Compression.GZIP
+    archiveExtension = 'tar.gz'
+
+    from("${project.parent.projectDir}/kuma-cloud-mq-distribution/bin") {
+        include '**'
+
+        into "bin"
+    }
+
+    from("${project.parent.projectDir}/kuma-cloud-mq-distribution/conf") {
+        include '**'
+
+        into "conf"
+    }
+
+    from "${project.parent.projectDir}/kuma-cloud-mq-distribution/LICENSE-BIN" rename { String filename -> filename.replace("-BIN", "") }
+    from "${project.parent.projectDir}/kuma-cloud-mq-distribution/NOTICE-BIN" rename { String filename -> filename.replace("-BIN", "") }
+
+    from('build/libs') {
+        include '*.jar'
+
+        into "target"
+    }
+
+//    from(project.file("$rootDir/bin")) { into "bin/" }
+//    from(project.file("$rootDir/config")) { into "config/" }
+//    from(project.file("$rootDir/licenses")) { into "licenses/" }
+//    from "$rootDir/LICENSE-binary" rename {String filename -> filename.replace("-binary", "")}
+//    from "$rootDir/NOTICE-binary" rename {String filename -> filename.replace("-binary", "")}
+//    from(configurations.runtimeClasspath) { into("libs/") }
+//    from(configurations.archives.artifacts.files) { into("libs/") }
+//    from(project.siteDocsTar) { into("site-docs/") }
+//    from(project(':tools').jar) { into("libs/") }
+//    from(project(':tools').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':trogdor').jar) { into("libs/") }
+//    from(project(':trogdor').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':shell').jar) { into("libs/") }
+//    from(project(':shell').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:api').jar) { into("libs/") }
+//    from(project(':connect:api').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:runtime').jar) { into("libs/") }
+//    from(project(':connect:runtime').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:transforms').jar) { into("libs/") }
+//    from(project(':connect:transforms').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:json').jar) { into("libs/") }
+//    from(project(':connect:json').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:file').jar) { into("libs/") }
+//    from(project(':connect:file').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:basic-auth-extension').jar) { into("libs/") }
+//    from(project(':connect:basic-auth-extension').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:mirror').jar) { into("libs/") }
+//    from(project(':connect:mirror').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:mirror-client').jar) { into("libs/") }
+//    from(project(':connect:mirror-client').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams').jar) { into("libs/") }
+//    from(project(':streams').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:streams-scala').jar) { into("libs/") }
+//    from(project(':streams:streams-scala').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:test-utils').jar) { into("libs/") }
+//    from(project(':streams:test-utils').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:examples').jar) { into("libs/") }
+//    from(project(':streams:examples').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':tools:tools-api').jar) { into("libs/") }
+//    from(project(':tools:tools-api').configurations.runtimeClasspath) { into("libs/") }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+

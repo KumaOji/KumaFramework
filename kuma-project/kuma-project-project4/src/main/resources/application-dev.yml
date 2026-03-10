@@ -110,8 +110,29 @@ info:
     description: "框架全量功能演示项目"
     version: "1.0.0"
 
-# 框架配置（前缀 kuma.boot.*）
+# 框架配置（前缀 kuma.*）
 kuma:
+  # ── kuma-cloud-starter-jdbcpool ────────────────────────────────────
+  # 注意：项目已有 spring.datasource.dynamic，jdbcpool DataSource 不会自动注册（@ConditionalOnMissingBean）
+  # 如需单独使用，可排除 dynamic 数据源，或直接通过 JdbcPoolBs 手动构建
+  jdbcpool:
+    url: ${mysql_url}
+    username: ${mysql_username}
+    password: ${mysql_password}
+    min-size: 5
+    max-size: 50
+    max-wait-mills: 30000
+    valid-query: "select 1"
+    test-on-borrow: false
+    test-on-return: false
+    test-on-idle: true
+    test-on-idle-interval-seconds: 60
+  # ── kuma-cloud-starter-cache ───────────────────────────────────────
+  cache:
+    size: 1024
+    evict: lru
+    persist:
+      type: none
   boot:
     core:
       enabled: true
