@@ -136,8 +136,8 @@ kuma:
   # ── kuma-cloud-tx (分布式事务 RM) ─────────────────────────────────
   # 激活条件：kuma.tx.enabled=true 才启用事务切面和 Netty 通道客户端
   # 默认 false，本地无 TM Server，禁用
-  tx:
-    enabled: false
+#  tx:
+#    enabled: false
   # ── kuma-cloud-ccsr (配置与服务注册客户端) ──────────────────────────
   # 激活条件：@EnableCcsrClient 注解 或 EnableCcsrCondition 满足
   # 默认关闭，无 CCSR Server 时无需配置
@@ -150,19 +150,19 @@ kuma:
   # ── kuma-cloud-mq (自定义 MQ 客户端) ───────────────────────────────
   # 激活条件：kuma.mq.client.enabled=true
   # 默认 false，无 MQ Broker 时禁用
-  mq:
-    client:
-      enabled: false
-      broker-address: "127.0.0.1:9999"
-      group-name: "project4Group"
+#  mq:
+#    client:
+#      enabled: false
+#      broker-address: "127.0.0.1:9999"
+#      group-name: "project4Group"
   # ── kuma-cloud-rpc (自定义 RPC 客户端) ─────────────────────────────
   # 激活条件：kuma.rpc.client.enabled=true
   # 默认 false，无 RPC Server 时禁用
-  rpc:
-    client:
-      enabled: false
-      server-address: "127.0.0.1:9527"
-      timeout: 60000
+#  rpc:
+#    client:
+#      enabled: false
+#      server-address: "127.0.0.1:9527"
+#      timeout: 60000
   # ── kuma-cloud-starter-netty ───────────────────────────────────────
   # 激活条件：需向容器注册 ChannelInitializer<SocketChannel> Bean 才会启动服务器
   netty:
@@ -289,12 +289,12 @@ kuma:
         enabled: true
 
 # KmcJob Worker（本地无 Job Server，禁用）
-kmcjob:
-  worker:
-    enabled: false
-    app-name: project4
-    server-address: "127.0.0.1:7700"
-    name-server-address: "127.0.0.1:5555"
+#kmcjob:
+#  worker:
+#    enabled: false
+#    app-name: project4
+#    server-address: "127.0.0.1:7700"
+#    name-server-address: "127.0.0.1:5555"
 
 # Seata 分布式事务（本地无 Seata Server，禁用）
 seata:
