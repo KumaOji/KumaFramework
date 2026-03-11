@@ -9,15 +9,15 @@ dependencies {
     api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-rm")
     api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-consistency")
 
-    api("org.springframework.boot:spring-boot-starter-webmvc") {
+    implementation("org.springframework.boot:spring-boot-starter-webmvc:4.0.2") {
         //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
         exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
     }
-    //api "org.springframework.boot:spring-boot-starter-undertow"
-    api "org.springframework.boot:spring-boot-starter-tomcat"
-    api 'org.springframework.boot:spring-boot-starter-aspectj'
+    //implementation "org.springframework.boot:spring-boot-starter-undertow:4.0.2"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat:4.0.2"
+    implementation 'org.springframework.boot:spring-boot-starter-aspectj:4.0.2'
 
-    api "com.mysql:mysql-connector-j:9.6.0"
+    implementation "com.mysql:mysql-connector-j:9.6.0"
 }
 
 configurations {
@@ -31,10 +31,10 @@ configurations {
 
 
 jar {
-    from(project(':kuma-cloud-tx:kuma-cloud-tx-common').jar) { into("lib/") }
-    from(project(':kuma-cloud-tx:kuma-cloud-tx-consistency').jar) { into("lib/") }
-    from(project(':kuma-cloud-tx:kuma-cloud-tx-rm').jar) { into("lib/") }
-    from(project(':kuma-cloud-tx:kuma-cloud-tx-tm').jar) { into("lib/") }
+    from(project(':kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-common').jar) { into("lib/") }
+    from(project(':kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-consistency').jar) { into("lib/") }
+    from(project(':kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-rm').jar) { into("lib/") }
+    from(project(':kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-tm').jar) { into("lib/") }
 
     //详细信息参考 https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
     //基本的文件名

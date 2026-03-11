@@ -69,33 +69,36 @@ for (name in frameworkCloudSubModules2) {
     include "kuma-cloud-framework:kuma-cloud-${name}"
 }
 
-// tx：客户端依赖链 rm → common；server/tm/consistency/distribution 尚未适配本地构建，暂不包含
-def txSubModules = ['common', 'rm']
+// tx：rm → common；tm → rm；consistency → common；server(SpringBoot App)；distribution(打包任务)
+def txSubModules = ['common', 'rm', 'tm', 'consistency', 'server', 'distribution']
 for (name in txSubModules) {
     include "kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-${name}"
 }
 
-// ccsr：客户端依赖链 client-starter → client → api + spi; api → common; 含 core/server-starter 库模块
-// dashboard/server/example/distribution 引用未发布的外部 artifact，暂不包含
-def ccsrSubModules = ['api', 'client', 'client-starter', 'common', 'core', 'server-starter', 'spi']
+// ccsr：client-starter → client → api + spi; api → common; server/server-starter 库模块；dashboard/example(SpringBoot App)；distribution(打包任务)
+def ccsrSubModules = ['api', 'client', 'client-starter', 'common', 'core', 'server-starter', 'spi',
+                      'server', 'dashboard', 'example', 'distribution']
 for (name in ccsrSubModules) {
     include "kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-${name}"
 }
 
-// job：Worker 依赖链 worker → common；其他模块暂不包含
-def jobSubModules = ['common', 'worker']
+// job：完整依赖链 common → worker → retry → api → dag/datasource/consistency；server/nameserver/dashboard(SpringBoot App)；distribution(打包任务)
+def jobSubModules = ['common', 'worker', 'retry', 'api', 'dag', 'datasource', 'consistency',
+                     'client', 'server', 'nameserver', 'dashboard', 'example', 'distribution']
 for (name in jobSubModules) {
     include "kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-${name}"
 }
 
-// mq：客户端依赖链；dashboard/nameserver/distribution/example 引用未发布外部 artifact，暂不包含
-def mqSubModules = ['broker', 'client', 'cluster', 'common', 'consistency', 'metrics', 'plugin', 'proxy']
+// mq：完整依赖链 common → plugin → metrics/proxy → cluster/consistency → broker → client；nameserver/dashboard(SpringBoot App)；distribution/example
+def mqSubModules = ['common', 'plugin', 'metrics', 'proxy', 'cluster', 'consistency',
+                    'broker', 'client', 'nameserver', 'dashboard', 'example', 'distribution']
 for (name in mqSubModules) {
     include "kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-${name}"
 }
 
-// rpc：客户端依赖链；dashboard/nameserver/server/cluster/consistency/distribution/example 暂不包含
-def rpcSubModules = ['client', 'common', 'core', 'filter', 'metrics', 'plugin', 'registry', 'serialization']
+// rpc：完整依赖链 common → core → filter/plugin/serialization/registry/metrics/cluster → consistency → server/client；nameserver/dashboard(SpringBoot App)；distribution
+def rpcSubModules = ['common', 'core', 'filter', 'plugin', 'serialization', 'registry', 'metrics',
+                     'cluster', 'consistency', 'client', 'server', 'nameserver', 'dashboard', 'distribution']
 for (name in rpcSubModules) {
     include "kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-${name}"
 }

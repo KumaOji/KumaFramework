@@ -16,13 +16,13 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
 
-    api("org.springframework.boot:spring-boot-starter-webmvc") {
+    implementation("org.springframework.boot:spring-boot-starter-webmvc:4.0.2") {
         //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
         exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
     }
-    //api "org.springframework.boot:spring-boot-starter-undertow"
-    api "org.springframework.boot:spring-boot-starter-tomcat"
-    api 'org.springframework.boot:spring-boot-starter-aspectj'
+    //implementation "org.springframework.boot:spring-boot-starter-undertow:4.0.2"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat:4.0.2"
+    implementation 'org.springframework.boot:spring-boot-starter-aspectj:4.0.2'
 }
 
 configurations {
