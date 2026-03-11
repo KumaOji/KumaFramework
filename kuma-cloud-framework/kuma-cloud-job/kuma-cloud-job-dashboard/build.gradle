@@ -1,17 +1,18 @@
+plugins { id 'org.springframework.boot' }
 apply from: rootProject.file('gradle/springboot.gradle')
 
 dependencies {
-    api project(":kuma-cloud-job:kuma-cloud-job-common")
-    api project(":kuma-cloud-job:kuma-cloud-job-worker")
-    api project(":kuma-cloud-job:kuma-cloud-job-retry")
-    api project(":kuma-cloud-job:kuma-cloud-job-dag")
-    api project(":kuma-cloud-job:kuma-cloud-job-api")
-    api project(":kuma-cloud-job:kuma-cloud-job-server")
-    api project(":kuma-cloud-job:kuma-cloud-job-nameserver")
-    api project(":kuma-cloud-job:kuma-cloud-job-client")
-    api project(":kuma-cloud-job:kuma-cloud-job-consistency")
-    api project(":kuma-cloud-job:kuma-cloud-job-datasource")
-    api project(":kuma-cloud-job:kuma-cloud-job-retry")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-common")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-worker")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-retry")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-dag")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-api")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-server")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-nameserver")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-client")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-consistency")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-datasource")
+    api project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-retry")
 }
 
 configurations {
@@ -25,16 +26,16 @@ configurations {
 
 
 jar {
-    from(project(":kuma-cloud-job:kuma-cloud-job-api").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-common").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-client").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-dag").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-datasource").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-consistency").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-retry").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-nameserver").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-server").jar) { into("lib/") }
-    from(project(":kuma-cloud-job:kuma-cloud-job-worker").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-api").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-common").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-client").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-dag").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-datasource").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-consistency").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-retry").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-nameserver").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-server").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-worker").jar) { into("lib/") }
 
     //详细信息参考 https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
     //基本的文件名

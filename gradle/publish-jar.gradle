@@ -1,0 +1,127 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+javadoc {
+    failOnError = false
+    options {
+        author  = true
+        version = true
+        title   = project.name
+        links   "https://docs.oracle.com/en/java/javase/25/docs/api"
+        addStringOption('Xdoclint:none', '-quiet')
+        addStringOption('encoding', 'UTF-8')
+        addStringOption('charSet', 'UTF-8')
+        addBooleanOption('-enable-preview', true)
+        addStringOption('-release', '25')
+    }
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    from(project.rootDir) {
+        include 'LICENSE.txt'
+        into 'META-INF'
+    }
+}
+
+jar {
+    enabled           = true
+    archiveClassifier = ""
+    manifest {
+        attributes(
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'kuma-cloud',
+            'Automatic-Module-Name' : project.name.replace("-", "."),
+            'Build-Jdk-Spec'        : JavaVersion.VERSION_25.toString(),
+            'Built-Gradle'          : gradle.gradleVersion,
+            'Build-OS'              : System.getProperty("os.name"),
+            'Build-Jdk'             : System.getProperty("java.version"),
+            'Build-Timestamp'       : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        )
+    }
+}
+
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
+    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "AliyunSnapshot"
+            url  = project.version.toString().endsWith("-SNAPSHOT")
+                ? "https://packages.aliyun.com/maven/snapshot"
+                : "https://packages.aliyun.com/maven/release"
+            allowInsecureProtocol = true
+            credentials {
+                username = findProperty("KUMA_CLOUD_MAVEN_USERNAME")?.toString() ?: System.getenv("KUMA_CLOUD_MAVEN_USERNAME")
+                password = findProperty("KUMA_CLOUD_MAVEN_PASSWORD")?.toString() ?: System.getenv("KUMA_CLOUD_MAVEN_PASSWORD")
+            }
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId    = rootProject.group
+            artifactId = project.name
+            version    = rootProject.version
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name        = project.name
+                description = project.name
+                url         = "https://github.com/kuma-cloud/kuma-cloud-framework"
+
+                properties = [
+                    "java.version"                    : JavaVersion.VERSION_25.toString(),
+                    "maven.compiler.source"           : JavaVersion.VERSION_25.toString(),
+                    "maven.compiler.target"           : JavaVersion.VERSION_25.toString(),
+                    "project.build.sourceEncoding"    : "UTF-8",
+                    "project.reporting.outputEncoding": "UTF-8"
+                ]
+
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url  = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id    = "kuma-cloud"
+                        name  = "kuma-cloud"
+                        email = "2569277704@qq.com"
+                    }
+                }
+
+                scm {
+                    connection          = "scm:git:git@github.com:kuma-cloud/kuma-cloud-framework.git"
+                    developerConnection = "scm:git:ssh://git@github.com:kuma-cloud/kuma-cloud-framework.git"
+                    url                 = "https://github.com/kuma-cloud/kuma-cloud-framework"
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}

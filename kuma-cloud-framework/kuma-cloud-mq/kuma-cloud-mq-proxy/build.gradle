@@ -1,4 +1,4 @@
 dependencies {
-    api project(":kuma-cloud-mq:kuma-cloud-mq-common")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-metrics")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-common")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-metrics")
 }

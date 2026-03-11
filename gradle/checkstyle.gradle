@@ -1,0 +1,23 @@
+apply plugin: 'checkstyle'
+
+checkstyle {
+    project.ext.checkstyleVersion = '13.0.0'
+    toolVersion = "13.0.0"
+
+    configFile = rootProject.file('code-analysis/checkstyle/google_checks.xml')
+
+    ignoreFailures = true
+
+    showViolations = true
+
+    reportsDir = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/checkstyleReportsDir")
+}
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required = false
+        html.required = true
+        //https://raw.githubusercontent.com/checkstyle/contribution/master/xsl
+        html.stylesheet = resources.text.fromFile("${rootDir}/code-analysis/checkstyle/reports/checkstyle-noframes.xsl")
+    }
+}

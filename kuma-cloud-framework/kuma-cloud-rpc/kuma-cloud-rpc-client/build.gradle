@@ -1,10 +1,10 @@
 dependencies {
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-core")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-filter")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-metrics")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-plugin")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-serialization")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-registry")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-core")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-filter")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-metrics")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-plugin")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-serialization")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-registry")
 
     // Spring Boot 自动配置支持
     api "org.springframework.boot:spring-boot-autoconfigure:4.0.2"

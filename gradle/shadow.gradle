@@ -1,0 +1,18 @@
+apply plugin: "com.gradleup.shadow"
+apply plugin: "application"
+
+shadowJar {
+    zip64 true
+
+    mergeServiceFiles()
+
+    archiveClassifier = ""
+
+    manifest {
+        attributes(
+                "Main-Class": application.mainClass
+        )
+    }
+
+}
+

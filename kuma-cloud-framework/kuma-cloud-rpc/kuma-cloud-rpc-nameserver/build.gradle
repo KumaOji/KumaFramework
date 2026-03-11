@@ -1,15 +1,16 @@
+plugins { id 'org.springframework.boot' }
 apply from: rootProject.file('gradle/springboot.gradle')
 
 dependencies {
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-core")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-filter")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-metrics")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-plugin")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-serialization")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-registry")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-consistency")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-core")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-filter")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-metrics")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-plugin")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-serialization")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-registry")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-consistency")
 
-    api "io.github.kuma:kuma-boot-starter-core"
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
 
     api("org.springframework.boot:spring-boot-starter-webmvc") {

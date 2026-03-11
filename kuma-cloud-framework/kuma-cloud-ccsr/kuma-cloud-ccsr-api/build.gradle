@@ -15,7 +15,7 @@ dependencies {
     api(project(':kuma-boot-framework:kuma-boot-starter-common')) {
         exclude group: "com.caucho", module: "hessian"
     }
-    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-common")
+    api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-common")
 
     api "com.caucho:hessian:4.0.63"
     api "com.google.api.grpc:proto-google-common-protos:2.17.0"

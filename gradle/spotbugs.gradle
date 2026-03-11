@@ -1,0 +1,27 @@
+apply plugin: "com.github.spotbugs"
+
+dependencies {
+    compileOnly "com.github.spotbugs:spotbugs-annotations:4.9.8"
+    spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0"
+}
+
+spotbugs {
+    ignoreFailures = false
+    showStackTraces = true
+    showProgress = true
+    visitors = [ 'FindSqlInjection', 'SwitchFallthrough' ]
+    omitVisitors = [ 'FindNonShortCircuit' ]
+    includeFilter = file("${project.rootDir}/code-analysis/spotbugs/include-filter.xml")
+    excludeFilter = file("${project.rootDir}/code-analysis/spotbugs/exclude-filter.xml")
+
+}
+
+spotbugsMain {
+    reports {
+        html {
+            required = true
+            outputLocation = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/spotbugsReportDir/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
