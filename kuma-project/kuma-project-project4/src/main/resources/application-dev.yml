@@ -109,7 +109,13 @@ info:
     name: project4
     description: "框架全量功能演示项目"
     version: "1.0.0"
-
+# KmcJob Worker（本地无 Job Server，禁用）
+#kmcjob:
+#  worker:
+#    enabled: false
+#    app-name: project4
+#    server-address: "127.0.0.1:7700"
+#    name-server-address: "127.0.0.1:5555"
 # 框架配置（前缀 kuma.*）
 kuma:
   # ── kuma-cloud-starter-jdbcpool ────────────────────────────────────
@@ -287,14 +293,6 @@ kuma:
     actuator:
       managedresource:
         enabled: true
-
-# KmcJob Worker（本地无 Job Server，禁用）
-#kmcjob:
-#  worker:
-#    enabled: false
-#    app-name: project4
-#    server-address: "127.0.0.1:7700"
-#    name-server-address: "127.0.0.1:5555"
 
 # Seata 分布式事务（本地无 Seata Server，禁用）
 seata:
