@@ -1,0 +1,43 @@
+apply plugin: "com.google.cloud.tools.jib"
+
+
+jib {
+    allowInsecureRegistries = true
+
+    from {
+        image = "registry.cn-sichuan.aliyuncs.com/kuma-cloud-project/kuma-cloud-openjdk25:amd64"
+        auth {
+            username = findProperty("KUMA_CLOUD_REGISTRY_USERNAME")?.toString() ?: System.getenv("KUMA_CLOUD_REGISTRY_USERNAME") ?: ""
+            password = findProperty("KUMA_CLOUD_REGISTRY_PASSWORD")?.toString() ?: System.getenv("KUMA_CLOUD_REGISTRY_PASSWORD") ?: ""
+        }
+    }
+
+    to {
+        image = "registry.cn-sichuan.aliyuncs.com/kuma-cloud-project/${project.name}"
+        tags  = ["${project.version}"]
+        auth {
+            username = findProperty("KUMA_CLOUD_REGISTRY_USERNAME")?.toString() ?: System.getenv("KUMA_CLOUD_REGISTRY_USERNAME") ?: ""
+            password = findProperty("KUMA_CLOUD_REGISTRY_PASSWORD")?.toString() ?: System.getenv("KUMA_CLOUD_REGISTRY_PASSWORD") ?: ""
+        }
+    }
+
+    container {
+        creationTime     = "USE_CURRENT_TIMESTAMP"
+        mainClass        = findProperty("mainClass")?.toString() ?: ""
+        format           = "OCI"
+        user             = "root"
+        workingDirectory = "/root"
+        volumes          = ["/root/logs"]
+        ports            = [findProperty("containerPort")?.toString() ?: "8080"]
+        jvmFlags = [
+            "-Djava.security.egd=file:/dev/./urandom",
+            "-Dspring.profiles.active=dev",
+            "-Dfile.encoding=utf-8",
+            "-Duser.timezone=Asia/Shanghai"
+        ]
+        environment = [
+            "app_name"   : project.name,
+            "app_version": project.version.toString()
+        ]
+    }
+}

@@ -1,0 +1,14 @@
+// 插件由引用方在 plugins {} 块中声明：alias(projectLibs.plugins.mybatisGenerator)
+configurations {
+    mybatisGenerator
+}
+
+mybatisGenerator {
+    verbose    = true
+    configFile = 'src/main/resources/mybatisGenerator/generatorConfiguration.xml'
+    dependencies {
+        mybatisGenerator 'org.mybatis.generator:mybatis-generator-core:1.4.2'
+        mybatisGenerator 'org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.2'
+        mybatisGenerator 'com.mysql:mysql-connector-j:9.6.0'
+    }
+}

@@ -1,5 +1,5 @@
 dependencies {
-    api project(":kuma-cloud-tx:kuma-cloud-tx-common")
+    api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-common")
 
     api 'com.google.guava:guava:33.5.0-jre'
     api 'com.alibaba:fastjson:2.0.60'

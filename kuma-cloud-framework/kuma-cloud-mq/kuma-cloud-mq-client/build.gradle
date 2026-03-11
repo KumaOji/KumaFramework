@@ -1,11 +1,11 @@
 dependencies {
-    api project(":kuma-cloud-mq:kuma-cloud-mq-common")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-cluster")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-consistency")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-metrics")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-plugin")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-proxy")
-    api project(":kuma-cloud-mq:kuma-cloud-mq-broker")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-common")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-cluster")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-consistency")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-metrics")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-plugin")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-proxy")
+    api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-broker")
 
     // Spring Boot 自动配置支持
     api "org.springframework.boot:spring-boot-autoconfigure:4.0.2"

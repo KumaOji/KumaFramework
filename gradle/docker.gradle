@@ -1,0 +1,21 @@
+apply plugin: "com.bmuschko.docker-spring-boot-application"
+
+
+docker {
+    url = 'tcp://192.168.59.103:2375'
+
+    registryCredentials {
+        url = "https://index.docker.io/v1/"
+        username = "kuma"
+        password = "xxxxxxx"
+        email = "2569277704@qq.com"
+    }
+
+    springBootApplication {
+        baseImage = "openjdk:25"
+        maintainer = "kuma (https://github.com/kumaoji)"
+        ports = [8200, 5701]
+        images = ["micyo202/${project.name}:${project.version}"]
+        jvmArgs = ["-Djava.security.egd=file:/dev/./urandom", "-Xmx512m"]
+    }
+}

@@ -1,7 +1,7 @@
 dependencies {
-    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-api")
-    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-spi")
-    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-common")
+    api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-api")
+    api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-spi")
+    api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-common")
 
     api "org.rocksdb:rocksdbjni:9.4.0"
 }

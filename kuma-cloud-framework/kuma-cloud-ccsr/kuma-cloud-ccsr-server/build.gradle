@@ -1,12 +1,13 @@
+plugins { id 'org.springframework.boot' }
 apply from: rootProject.file('gradle/springboot.gradle')
 
 dependencies {
-    api "io.github.kuma:kuma-boot-starter-core"
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     //api "io.github.kuma:kuma-boot-starter-logger"
     //api "io.github.kuma:kuma-boot-starter-metrics"
     //api "io.github.kuma:kuma-boot-starter-tracer"
 
-    api project(":kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter")
+    api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter")
 
     implementation("org.springframework.boot:spring-boot-starter-webmvc") {
         //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
@@ -33,11 +34,11 @@ configurations {
 }
 
 jar {
-    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter").jar) { into("lib/") }
-    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-core").jar) { into("lib/") }
-    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-api").jar) { into("lib/") }
-    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-spi").jar) { into("lib/") }
-    from(project(":kuma-cloud-ccsr:kuma-cloud-ccsr-common").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-core").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-api").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-spi").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-common").jar) { into("lib/") }
 
     //详细信息参考 https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
     //基本的文件名

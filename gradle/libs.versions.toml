@@ -136,6 +136,20 @@ rocketmq-spring = "2.3.3"
 seata = "2.5.0"
 langchain4j = "1.11.0"
 
+## gradle 插件版本
+gradle-git-properties     = "2.4.2"
+smart-doc                 = "3.0.9"
+mybatis-generator-plugin  = "1.4.2"
+shadow                    = "8.3.6"
+jib                       = "3.4.4"
+graalvm-native            = "0.10.4"
+sonarqube                 = "6.1.0.5360"
+spotbugs-plugin           = "6.1.11"
+spotless                  = "7.0.3"
+springdoc-openapi-plugin  = "2.8.6"
+swagger-gradle-plugin     = "2.2.30"
+bmuschko-docker           = "9.4.0"
+
 ## 统一定义依赖
 [libraries]
 langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
@@ -341,7 +355,19 @@ datasource = ["mysql"]
 
 ## 统一定义插件
 [plugins]
-springboot = { id = "org.springframework.boot", version.ref = "springboot" }
-spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+springboot                = { id = "org.springframework.boot",                     version.ref = "springboot" }
+spring-dependency-management = { id = "io.spring.dependency-management",           version.ref = "spring-dependency-management" }
+kotlin-jvm                = { id = "org.jetbrains.kotlin.jvm",                     version.ref = "kotlin" }
+gradle-git-properties     = { id = "com.gorylenko.gradle-git-properties",          version.ref = "gradle-git-properties" }
+smart-doc                 = { id = "com.ly.smart-doc",                             version.ref = "smart-doc" }
+mybatis-generator         = { id = "com.qqviaja.gradle.MybatisGenerator",          version.ref = "mybatis-generator-plugin" }
+shadow                    = { id = "com.gradleup.shadow",                           version.ref = "shadow" }
+jib                       = { id = "com.google.cloud.tools.jib",                   version.ref = "jib" }
+graalvm-native            = { id = "org.graalvm.buildtools.native",                version.ref = "graalvm-native" }
+sonarqube                 = { id = "org.sonarqube",                                version.ref = "sonarqube" }
+spotbugs                  = { id = "com.github.spotbugs",                          version.ref = "spotbugs-plugin" }
+spotless                  = { id = "com.diffplug.spotless",                        version.ref = "spotless" }
+springdoc-openapi         = { id = "org.springdoc.openapi-gradle-plugin",          version.ref = "springdoc-openapi-plugin" }
+swagger                   = { id = "io.swagger.core.v3.swagger-gradle-plugin",     version.ref = "swagger-gradle-plugin" }
+bmuschko-docker           = { id = "com.bmuschko.docker-spring-boot-application",  version.ref = "bmuschko-docker" }
 

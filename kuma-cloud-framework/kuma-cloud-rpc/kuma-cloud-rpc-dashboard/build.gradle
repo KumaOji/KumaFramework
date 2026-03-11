@@ -1,18 +1,19 @@
+plugins { id 'org.springframework.boot' }
 apply from: rootProject.file('gradle/springboot.gradle')
 
 dependencies {
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-client")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-cluster")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-common")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-core")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-filter")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-metrics")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-plugin")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-registry")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-serialization")
-    api project(":kuma-cloud-rpc:kuma-cloud-rpc-server")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-client")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-cluster")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-common")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-core")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-filter")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-metrics")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-plugin")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-registry")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-serialization")
+    api project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-server")
 
-    api "io.github.kuma:kuma-boot-starter-core"
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
 
     api("org.springframework.boot:spring-boot-starter-webmvc") {
@@ -34,17 +35,17 @@ configurations {
 }
 
 jar {
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-client").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-cluster").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-common").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-core").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-filter").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-metrics").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-plugin").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-consistency").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-registry").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-serialization").jar) { into("lib/") }
-    from(project(":kuma-cloud-rpc:kuma-cloud-rpc-server").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-client").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-cluster").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-common").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-core").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-filter").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-metrics").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-plugin").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-consistency").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-registry").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-serialization").jar) { into("lib/") }
+    from(project(":kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-server").jar) { into("lib/") }
 
     //详细信息参考 https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
     //基本的文件名

@@ -1,12 +1,13 @@
+plugins { id 'org.springframework.boot' }
 apply plugin: 'application'
 apply from: rootProject.file('gradle/springboot.gradle')
 
 dependencies {
-    api "io.github.kuma:kuma-boot-starter-core"
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
-    api project(":kuma-cloud-tx:kuma-cloud-tx-tm")
-    api project(":kuma-cloud-tx:kuma-cloud-tx-rm")
-    api project(":kuma-cloud-tx:kuma-cloud-tx-consistency")
+    api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-tm")
+    api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-rm")
+    api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-consistency")
 
     api("org.springframework.boot:spring-boot-starter-webmvc") {
         //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
