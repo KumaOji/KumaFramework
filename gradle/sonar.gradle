@@ -1,93 +1,21 @@
+// 插件由引用方在 plugins {} 块中声明：alias(projectLibs.plugins.sonarqube)
+// 或在 settings.gradle pluginManagement 中声明后 apply plugin: "org.sonarqube"
 apply plugin: "org.sonarqube"
 
-import groovy.json.JsonSlurper
-
-ext {
-    APK_PACKAGE_NAME = 'asdfasdf'
-    sonar = [
-            //sonarqube 服务器地址
-            host       : "http://10.1.120.7:9001",
-            // todo 这里写上sonar后台自己生成的token
-            username   : "",
-            // 密码请保持为空即可，不可删除
-            passwd     : "",
-            projectkey : APK_PACKAGE_NAME + "_${getBranch()}",
-            projectName: APK_PACKAGE_NAME + "_${getBranch()}(${getGitName()})"
-    ]
-}
-
-//启动远程服务器一个sonar任务
-sonarqube {
+// SonarQube/SonarCloud 分析配置
+// 认证：新版本使用 token（sonar.token），旧版本使用 sonar.login
+// 推荐通过环境变量注入，不要将 token 硬编码在脚本中
+sonar {
     properties {
-        property "sonar.host.url", sonar.host
-        property "sonar.verbose", "true"
-        property "sonar.login", sonar.username
-//        property "sonar.password", sonar.passwd
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.projectKey", sonar.projectkey
-        property "sonar.projectName", sonar.projectName
-        property "sonar.exclusions", "**/*Test.java"
+        property "sonar.host.url",        findProperty("sonar.host.url")   ?: System.getenv("SONAR_HOST_URL")   ?: "http://localhost:9000"
+        property "sonar.token",           findProperty("sonar.token")      ?: System.getenv("SONAR_TOKEN")      ?: ""
+        property "sonar.projectKey",      findProperty("sonar.projectKey") ?: System.getenv("SONAR_PROJECT_KEY") ?: rootProject.name
+        property "sonar.projectName",     rootProject.name
+        property "sonar.sourceEncoding",  "UTF-8"
+        property "sonar.verbose",         "false"
+        property "sonar.exclusions",      "**/test/**,**/*Test.java,**/*Tests.java,**/build/**"
         property "sonar.core.codeCoveragePlugin", "jacoco"
-        //覆盖报告绝对路径 需要保证路径下有生成的报告report.html
-        property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/core/build/reports/coverage/debug/report.xml"
+        // JaCoCo 报告路径（需先执行 jacocoTestReport 任务生成报告）
+        //property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/build/code-analysis/jacoco/coverage-reports/jacoco.xml"
     }
-}
-
-
-
-tasks.register('queryStatus') {
-    try {
-
-        String urlPath = sonar.host + "/api/qualitygates/project_status?projectKey=" + sonar.projectkey
-        URL url = new URL(urlPath);
-
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setConnectTimeout(5000);
-        urlConnection.setReadTimeout(5000);
-        //设置本次urlConnection请求方式
-        urlConnection.setRequestMethod("GET");
-        // 认证登陆
-        String base64Credentials = new String(Base64.encoder.encode((sonar.username + ":" + sonar.passwd).getBytes("UTF-8")));
-        urlConnection.setRequestProperty("Authorization", "Basic " + base64Credentials);
-        //调用urlConnection的链接方法，线程等待，等待的是服务器所给我们返回的结果集
-        urlConnection.connect();
-        //获取本次网络请求的状态码
-        int code = urlConnection.getResponseCode();
-        //如果本次返回的状态吗是200（成功）
-        println("http code:" + code)
-        if (code == 200) {
-            //调用urlConnection.getInputStream得到本次请求所返回的结果流
-            InputStream inputStream = urlConnection.getInputStream();
-            //创建一个BufferedReader，去读取结果流
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String readLine;
-            StringBuffer buffer = new StringBuffer();
-            while ((readLine = reader.readLine()) != null) {
-                buffer.append(readLine);
-            }
-            //读取完结果流之后所得到的结果
-            String result = buffer.toString();
-            inputStream.close();
-            def parsedJson = new JsonSlurper().parseText(result)
-            println(sonar.projectkey + " ---> status:" + parsedJson.projectStatus.status)
-        }
-    } catch (MalformedURLException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    }
-}
-
-//需要有git环境
-def static getBranch() {
-    String cmd = "git rev-parse --abbrev-ref HEAD"
-    return cmd.execute().text.trim().toString()
-}
-
-//需要有git环境
-def static getGitName() {
-    String cmd = "git config user.email"
-    return cmd.execute().text.trim().toString()
 }

@@ -1,4 +1,3 @@
-// 插件由引用方在 plugins {} 块中声明：alias(projectLibs.plugins.smartDoc)
 smartdoc {
     configFile = file("src/main/resources/smart-doc.json")
 
