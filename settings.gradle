@@ -1,14 +1,17 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = 'https://maven.aliyun.com/repository/public' }
-        // IntelliJ Platform Gradle Plugin (idea-plugin)
+        maven { url = 'https://maven.aliyun.com/repository/public'        }
+        maven { url = 'https://maven.aliyun.com/repository/gradle-plugin' }
+        maven { url = 'https://repo.spring.io/release'                    }
+        maven { url = 'https://repo.spring.io/milestone'                  }
+        maven { url = 'https://plugins.gradle.org/m2/'                    }
         maven { url = 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies' }
-        maven { url = 'https://www.jetbrains.com/intellij-repository/releases' }
+        maven { url = 'https://www.jetbrains.com/intellij-repository/releases'           }
     }
 
-    // 为 apply from: 脚本中的 apply plugin: 声明版本，使 Gradle 能够解析
     plugins {
         id 'org.springframework.boot'                    version '4.0.2'
         id 'com.gorylenko.gradle-git-properties'         version '2.4.2'
@@ -23,8 +26,10 @@ pluginManagement {
         id 'org.springdoc.openapi-gradle-plugin'         version '2.8.6'
         id 'io.swagger.core.v3.swagger-gradle-plugin'    version '2.2.30'
         id 'com.bmuschko.docker-spring-boot-application' version '9.4.0'
+        id 'org.owasp.dependencycheck'                   version '12.1.3'
     }
 }
+
 
 rootProject.name = 'Myframework'
 
@@ -118,14 +123,6 @@ def projectBootSubModules = ['project1', 'project2', 'project3', 'project4','pro
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }
-
-
-
-
-
-
-
-
 
 gradle.settingsEvaluated {
     if (JavaVersion.current() < JavaVersion.VERSION_25) {

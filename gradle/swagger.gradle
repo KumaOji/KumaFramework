@@ -1,6 +1,5 @@
 apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
 
-
 resolve {
     outputFileName = project.name
     outputFormat = 'JSON'

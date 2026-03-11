@@ -1,29 +1,53 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 buildscript {
+    ext {
+        kmcVersion           = version
+        kmcGroup             = "io.github.kumaoji"
+        springBootVersion    = "4.0.3"
+        aspectjweaverVersion = "1.9.22.1"
+    }
+
     repositories {
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
         maven { url = 'https://maven.aliyun.com/repository/public' }
+        maven { url = 'https://repo.spring.io/release'   }
+        maven { url = 'https://repo.spring.io/milestone' }
     }
     dependencies {
+        // gradle/shadow.gradle 使用 apply plugin: 方式，需要提前将 jar 放入 classpath
         classpath "com.gradleup.shadow:shadow-gradle-plugin:8.3.6"
     }
 }
 
 plugins {
-    id 'java'
     id 'java-library'
     id 'idea'
 }
 
 allprojects {
-    version = findProperty('version') ?: '1.0.0'
-    group = findProperty('group') ?: 'io.github.kumaoji'
+    version = project.kmcVersion ?: '1.0.0'
+    group   = project.kmcGroup   ?: 'io.github.kumaoji'
 
-    configurations.all {
-        resolutionStrategy {
-            force 'org.aspectj:aspectjweaver:1.9.22.1'
-        }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url = 'https://maven.aliyun.com/repository/public'  }
+        maven { url = 'https://maven.aliyun.com/repository/central' }
+        maven { url = 'https://maven.aliyun.com/repository/google'  }
+        maven { url = 'https://repo.spring.io/release'   }
+        maven { url = 'https://repo.spring.io/milestone' }
+        maven { url = 'https://repo.e-iceblue.com/nexus/content/groups/public/' }
+        maven { url = 'https://releases.aspose.com/java/repo/' }
     }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'idea'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_25
@@ -31,28 +55,66 @@ allprojects {
         toolchain { languageVersion = JavaLanguageVersion.of(25) }
     }
 
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8'
-        options.compilerArgs += ['--enable-preview', '-parameters']
+    // aspectjweaver 全局强制版本，避免不同传递依赖带入不一致版本
+    configurations.configureEach {
+        resolutionStrategy {
+            force "org.aspectj:aspectjweaver:${aspectjweaverVersion}"
+        }
     }
-    tasks.withType(Test).configureEach { jvmArgs += '--enable-preview' }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding     = 'UTF-8'
+        options.compilerArgs += [
+            '--enable-preview',
+            '-parameters',
+            '-Xlint:unchecked',
+            '-Xlint:deprecation',
+        ]
+    }
+    tasks.withType(Test).configureEach     { jvmArgs += '--enable-preview' }
     tasks.withType(JavaExec).configureEach { jvmArgs += '--enable-preview' }
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven { url = 'https://maven.aliyun.com/repository/public' }
-        maven { url = 'https://repo.e-iceblue.com/nexus/content/groups/public/' }
-        maven { url = 'https://releases.aspose.com/java/repo/' }
+    javadoc {
+        failOnError = false
+        options {
+            author  = true
+            version = true
+            title   = project.name
+            links   "https://docs.oracle.com/en/java/javase/25/docs/api"
+            addStringOption('Xdoclint:none', '-quiet')
+            addStringOption('encoding', 'UTF-8')
+            addStringOption('charSet',  'UTF-8')
+            addBooleanOption('-enable-preview', true)
+            addStringOption('-release', '25')
+        }
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
+        }
     }
-}
 
-configure(subprojects) { sub ->
-    apply plugin: 'java'
-    apply plugin: 'java-library'
-    apply plugin: 'idea'
+    // 将 LICENSE.txt 打包进每个 jar 的 META-INF 目录
+    tasks.withType(Jar).configureEach {
+        from(project.rootDir) {
+            include 'LICENSE.txt'
+            into 'META-INF'
+        }
+    }
 
-    dependencies {
-
+    jar {
+        enabled           = true
+        archiveClassifier = ""
+        manifest {
+            attributes(
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor' : 'kuma-cloud',
+                'Automatic-Module-Name' : project.name.replace('-', '.'),
+                'Build-Jdk-Spec'        : JavaVersion.VERSION_25.toString(),
+                'Built-Gradle'          : gradle.gradleVersion,
+                'Build-OS'              : System.getProperty('os.name'),
+                'Build-Jdk'             : System.getProperty('java.version'),
+                'Build-Timestamp'       : LocalDateTime.now().format(DateTimeFormatter.ofPattern('yyyy-MM-dd HH:mm:ss'))
+            )
+        }
     }
 }
