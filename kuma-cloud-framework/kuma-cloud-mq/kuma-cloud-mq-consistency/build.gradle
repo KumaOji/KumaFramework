@@ -4,7 +4,6 @@ dependencies {
     api project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-proxy")
 
     api 'org.slf4j:slf4j-api:2.0.17'
-    api 'org.slf4j:slf4j-api:2.0.17'
     api "redis.clients:jedis:7.2.1"
 
     api 'com.google.guava:guava:33.5.0-jre'

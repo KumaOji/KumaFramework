@@ -7,12 +7,12 @@ dependencies {
 
     api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-server")
 
-    implementation("org.springframework.boot:spring-boot-starter-webmvc") {
+    implementation("org.springframework.boot:spring-boot-starter-webmvc:4.0.2") {
         //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
         exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
     }
-    //implementation "org.springframework.boot:spring-boot-starter-undertow"
-    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+    //implementation "org.springframework.boot:spring-boot-starter-undertow:4.0.2"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat:4.0.2"
 }
 
 configurations {
