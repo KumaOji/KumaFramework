@@ -22,6 +22,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getById(Long id) {
+        return userMapper.selectById(id);
+    }
+
+    @Override
     public boolean checkPassword(String rawPassword, String encodedPassword) {
         if (rawPassword == null || encodedPassword == null) return false;
         rawPassword = rawPassword.trim();

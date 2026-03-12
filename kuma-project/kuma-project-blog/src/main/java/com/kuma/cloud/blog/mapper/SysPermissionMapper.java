@@ -42,4 +42,15 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
             WHERE ur.user_id = #{userId}
             """)
     List<String> selectRoleCodesByUserId(Long userId);
+
+    /**
+     * 查询用户直接被授予的权限实体列表（授权用户专用）
+     */
+    @Select("""
+            SELECT p.* FROM sys_permission p
+            INNER JOIN sys_user_permission up ON p.id = up.permission_id
+            WHERE up.user_id = #{userId}
+            ORDER BY p.module, p.code
+            """)
+    List<SysPermission> selectDirectPermissionEntitiesByUserId(Long userId);
 }

@@ -1,5 +1,7 @@
 package com.kuma.cloud.blog.service;
 
+import com.kuma.cloud.blog.domain.entity.SysPermission;
+
 import java.util.List;
 
 /**
@@ -13,6 +15,12 @@ import java.util.List;
  * </ul>
  */
 public interface PermissionService {
+
+    /** 查询所有权限列表 */
+    List<SysPermission> listAll();
+
+    /** 查询用户已直接授予的权限列表 */
+    List<SysPermission> listUserDirectPermissions(Long userId);
 
     /**
      * 加载用户全量权限列表（角色权限 ∪ 直接授权权限），写入 Redis。

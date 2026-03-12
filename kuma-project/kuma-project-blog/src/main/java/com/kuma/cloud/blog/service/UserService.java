@@ -4,6 +4,7 @@ import com.kuma.cloud.blog.domain.entity.User;
 
 public interface UserService {
     User getByUsername(String username);
+    User getById(Long id);
     boolean checkPassword(String rawPassword, String encodedPassword);
     String encodePassword(String rawPassword);
     Long createUser(User user);
