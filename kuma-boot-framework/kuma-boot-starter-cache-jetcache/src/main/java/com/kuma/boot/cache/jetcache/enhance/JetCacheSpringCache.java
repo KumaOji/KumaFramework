@@ -1,21 +1,40 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.kuma.boot.cache.jetcache.enhance;
 
 import com.alicp.jetcache.Cache;
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import java.util.concurrent.Callable;
-import org.apache.commons.lang3.ObjectUtils;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 
+import java.util.concurrent.Callable;
+
+/**
+ * 将 JetCache {@link Cache} 适配为 Spring {@link org.springframework.cache.Cache}。
+ *
+ * @author kuma
+ * @since 2022-07-03
+ */
 public class JetCacheSpringCache extends AbstractValueAdaptingCache {
+
     private static final Logger log = LoggerFactory.getLogger(JetCacheSpringCache.class);
+
     private final String cacheName;
     private final Cache<Object, Object> cache;
 
@@ -25,58 +44,67 @@ public class JetCacheSpringCache extends AbstractValueAdaptingCache {
         this.cache = cache;
     }
 
+    @Override
     public String getName() {
-        return this.cacheName;
+        return cacheName;
     }
 
-    public final Cache<Object, Object> getNativeCache() {
-        return this.cache;
+    @Override
+    public Cache<Object, Object> getNativeCache() {
+        return cache;
     }
 
+    @Override
     protected @Nullable Object lookup(Object key) {
-        Object value = this.cache.get(key);
-        if (ObjectUtils.isNotEmpty(value)) {
-            log.trace("[kmc] |- CACHE - Lookup data in herodotus cache, value is : [{}]", JacksonUtils.toJson(value));
+        Object value = cache.get(key);
+        if (value != null) {
+            log.trace("[kmc] |- CACHE - Lookup in herodotus cache, value: [{}]", JacksonUtils.toJson(value));
             return value;
-        } else {
-            return null;
         }
+        return null;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public <T> @Nullable T get(Object key, Callable<T> valueLoader) {
-        log.trace("[kmc] |- CACHE - Get data in herodotus cache, key: {}", key);
-        return (T)this.fromStoreValue(this.cache.computeIfAbsent(key, (k) -> {
+        log.trace("[kmc] |- CACHE - Get from herodotus cache, key: {}", key);
+        return (T) fromStoreValue(cache.computeIfAbsent(key, k -> {
             try {
-                return this.toStoreValue(valueLoader.call());
+                return toStoreValue(valueLoader.call());
             } catch (Throwable ex) {
-                throw new org.springframework.cache.Cache.ValueRetrievalException(key, valueLoader, ex);
+                throw new ValueRetrievalException(key, valueLoader, ex);
             }
         }));
     }
 
+    @Override
     public void put(Object key, @Nullable Object value) {
-        log.trace("[kmc] |- CACHE - Put data in herodotus cache, key: {}", key);
-        this.cache.put(key, this.toStoreValue(value));
+        log.trace("[kmc] |- CACHE - Put into herodotus cache, key: {}", key);
+        cache.put(key, toStoreValue(value));
     }
 
-    public org.springframework.cache.Cache.@Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
-        log.trace("[kmc] |- CACHE - PutIfPresent data in herodotus cache, key: {}", key);
-        Object existing = this.cache.putIfAbsent(key, this.toStoreValue(value));
-        return this.toValueWrapper(existing);
+    @Override
+    public @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
+        log.trace("[kmc] |- CACHE - PutIfAbsent into herodotus cache, key: {}", key);
+        Object existing = cache.putIfAbsent(key, toStoreValue(value));
+        return toValueWrapper(existing);
     }
 
+    @Override
     public void evict(Object key) {
-        log.trace("[kmc] |- CACHE - Evict data in herodotus cache, key: {}", key);
-        this.cache.remove(key);
+        log.trace("[kmc] |- CACHE - Evict from herodotus cache, key: {}", key);
+        cache.remove(key);
     }
 
+    @Override
     public boolean evictIfPresent(Object key) {
-        log.trace("[kmc] |- CACHE - EvictIfPresent data in herodotus cache, key: {}", key);
-        return this.cache.remove(key);
+        log.trace("[kmc] |- CACHE - EvictIfPresent from herodotus cache, key: {}", key);
+        return cache.remove(key);
     }
 
+    @Override
     public void clear() {
-        log.trace("[kmc] |- CACHE - Clear data in herodotus cache.");
-        this.cache.close();
+        log.trace("[kmc] |- CACHE - Clear herodotus cache.");
+        cache.close();
     }
 }
