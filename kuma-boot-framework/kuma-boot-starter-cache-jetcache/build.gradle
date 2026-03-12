@@ -6,6 +6,7 @@ description = 'Myframework cache-jetcache模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.hutool.core
     api projectLibs.slf4j.api
     api projectLibs.spring.context
     api projectLibs.spring.cloud.context

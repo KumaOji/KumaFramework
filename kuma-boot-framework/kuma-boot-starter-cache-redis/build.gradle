@@ -7,6 +7,7 @@ description = 'Myframework cache-redis模块'
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-lock')
+    api projectLibs.hutool.extra
     api projectLibs.spring.boot.starter.data.redis
     api projectLibs.jedis
     api projectLibs.commons.pool2

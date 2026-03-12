@@ -17,7 +17,6 @@
 package com.kuma.boot.web.support.listener;
 
 import com.google.common.collect.Maps;
-import com.kuma.boot.actuator.endpoint.requst.RequestMappingEndPoint;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.constant.RedisConstants;
