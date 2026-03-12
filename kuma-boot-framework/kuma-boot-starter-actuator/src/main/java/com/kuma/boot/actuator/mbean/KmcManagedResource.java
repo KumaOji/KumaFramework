@@ -20,19 +20,20 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
- * MBeanDemo
+ * JMX MBean + REST 双路访问的业务状态资源。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 21:05:36
+ * @since 2021-09-02
  */
 @ManagedResource(objectName = "com.kuma.boot.actuator.endpoint:name=KmcMBean",
         description = "kmc managed resource")
 public class KmcManagedResource {
 
-    private String name = "default";
-    private int counter = 0;
+    private volatile String name = "default";
+    private final AtomicInteger counter = new AtomicInteger(0);
 
     @ManagedAttribute(description = "The name attribute")
     public String getName() {
@@ -46,16 +47,16 @@ public class KmcManagedResource {
 
     @ManagedAttribute(description = "Current counter value")
     public int getCounter() {
-        return counter;
+        return counter.get();
     }
 
     @ManagedOperation(description = "Increment the counter by one")
     public void incrementCounter() {
-        this.counter++;
+        counter.incrementAndGet();
     }
 
     @ManagedOperation(description = "Reset the counter to zero")
     public void resetCounter() {
-        this.counter = 0;
+        counter.set(0);
     }
 }

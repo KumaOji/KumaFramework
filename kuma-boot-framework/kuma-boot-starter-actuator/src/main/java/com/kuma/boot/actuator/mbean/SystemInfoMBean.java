@@ -17,19 +17,18 @@
 package com.kuma.boot.actuator.mbean;
 
 /**
- * 注册一个 JMX MBean
- *
- * <p>名字必须要用 MBean 结尾
+ * JMX MBean 接口，接口名必须以 MBean 结尾（JMX 规范）。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 20:08:43
+ * @since 2021-09-02
  */
 public interface SystemInfoMBean {
 
     int getCpuCore();
 
     long getTotalMemory();
+
+    long getFreeMemory();
 
     void shutdown();
 }

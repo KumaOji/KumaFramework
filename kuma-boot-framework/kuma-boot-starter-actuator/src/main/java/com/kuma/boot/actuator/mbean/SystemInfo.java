@@ -17,11 +17,10 @@
 package com.kuma.boot.actuator.mbean;
 
 /**
- * SystemInfo
+ * JMX MBean 实现，暴露 JVM 基础系统信息。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 21:06:46
+ * @since 2021-09-02
  */
 public class SystemInfo implements SystemInfoMBean {
 
@@ -36,7 +35,12 @@ public class SystemInfo implements SystemInfoMBean {
     }
 
     @Override
+    public long getFreeMemory() {
+        return Runtime.getRuntime().freeMemory();
+    }
+
+    @Override
     public void shutdown() {
-        //System.exit(0);
+        throw new UnsupportedOperationException("shutdown is disabled");
     }
 }

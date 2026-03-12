@@ -16,32 +16,38 @@
 
 package com.kuma.boot.actuator.info;
 
-import com.kuma.boot.common.utils.log.LogUtils;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
-import org.springframework.stereotype.Component;
 
 /**
- * KmcObservation
+ * Micrometer Observation 使用示例：演示如何对业务方法进行埋点观测。
+ *
+ * <p>通过 {@link ObservationRegistry} 创建带低/高基数标签的观测，
+ * 自动衔接 Micrometer Tracing / Prometheus 等后端。
  *
  * @author kuma
- * @version 2026.01
- * @since 2025-12-19 09:30:45
+ * @since 2025-12-19
  */
 public class KmcObservation {
 
     private final ObservationRegistry observationRegistry;
 
-    public KmcObservation( ObservationRegistry observationRegistry ) {
+    public KmcObservation(ObservationRegistry observationRegistry) {
         this.observationRegistry = observationRegistry;
     }
 
-    public void doSomething() {
-        Observation.createNotStarted("doSomething", this.observationRegistry)
-                .lowCardinalityKeyValue("locale", "en-US")
-                .highCardinalityKeyValue("userId", "42")
-                .observe(() -> {
-                    LogUtils.info("ObservationRegistry doSomething==========================执行");
-                });
+    /**
+     * 使用 Observation 对目标逻辑进行埋点，所有 span / metric 自动上报。
+     *
+     * @param name   观测名称（低基数，用于指标 key）
+     * @param locale 低基数标签：locale
+     * @param userId 高基数标签：userId（不建议用于 metric 聚合）
+     * @param task   被观测的实际逻辑
+     */
+    public void observe(String name, String locale, String userId, Runnable task) {
+        Observation.createNotStarted(name, observationRegistry)
+                .lowCardinalityKeyValue("locale", locale)
+                .highCardinalityKeyValue("userId", userId)
+                .observe(task);
     }
 }

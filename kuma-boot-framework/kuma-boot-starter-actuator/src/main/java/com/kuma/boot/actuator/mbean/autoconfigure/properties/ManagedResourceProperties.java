@@ -16,30 +16,23 @@
 
 package com.kuma.boot.actuator.mbean.autoconfigure.properties;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * HttpClientProperties
+ * ManagedResource 配置属性。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 20:43:08
+ * @since 2021-09-02
  */
+@Data
 @RefreshScope
 @ConfigurationProperties(prefix = ManagedResourceProperties.PREFIX)
 public class ManagedResourceProperties {
 
     public static final String PREFIX = "kuma.boot.actuator.managedresource";
 
-    /** 是否开启endpoint */
+    /** 是否启用 ManagedResource（默认开启） */
     private boolean enabled = true;
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 }

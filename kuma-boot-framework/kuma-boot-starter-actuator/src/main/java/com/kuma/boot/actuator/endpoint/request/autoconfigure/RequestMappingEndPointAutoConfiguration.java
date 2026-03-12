@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.actuator.endpoint.requst.autoconfigure;
+package com.kuma.boot.actuator.endpoint.request.autoconfigure;
 
-import com.kuma.boot.actuator.endpoint.requst.RequestMappingEndPoint;
+import com.kuma.boot.actuator.endpoint.request.RequestMappingEndPoint;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,11 +27,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
- * EndPoint配置
+ * {@link RequestMappingEndPoint} 自动配置。
  *
  * @author kuma
- * @version 2022.03
- * @since 2021/04/02 10:25
+ * @since 2021-04-02
  */
 @AutoConfiguration
 @ConditionalOnClass(RequestMappingHandlerMapping.class)
@@ -39,7 +38,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class RequestMappingEndPointAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RequestMappingEndPointAutoConfiguration.class, StarterNameConstants.ACTUATOR_STARTER);
     }
 
@@ -47,5 +46,4 @@ public class RequestMappingEndPointAutoConfiguration implements InitializingBean
     public RequestMappingEndPoint requestMappingEndPoint(RequestMappingHandlerMapping requestMappingHandlerMapping) {
         return new RequestMappingEndPoint(requestMappingHandlerMapping);
     }
-
 }

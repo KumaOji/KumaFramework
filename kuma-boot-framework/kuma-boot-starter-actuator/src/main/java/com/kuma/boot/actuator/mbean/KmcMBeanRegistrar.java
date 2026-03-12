@@ -16,12 +16,8 @@
 
 package com.kuma.boot.actuator.mbean;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
 
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -29,35 +25,26 @@ import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 
 /**
- * CustomMbeanRegistrar
+ * 将 {@link SystemInfo} 注册到平台 MBeanServer，应用关闭时自动注销。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 20:08:05
+ * @since 2021-09-02
  */
-public class KmcMBeanRegistrar implements ApplicationContextAware, InitializingBean, DisposableBean {
+public class KmcMBeanRegistrar implements InitializingBean, DisposableBean {
 
-    /** applicationContext */
-    private ConfigurableApplicationContext applicationContext;
-    /** objectName */
     private final ObjectName objectName =
             new ObjectName("com.kuma.boot.actuator.endpoint:type=KmcAdmin,name=SystemInfoMBean");
 
     public KmcMBeanRegistrar() throws MalformedObjectNameException {}
 
     @Override
-    public void destroy() throws Exception {
-        ManagementFactory.getPlatformMBeanServer().unregisterMBean(this.objectName);
-    }
-
-    @Override
     public void afterPropertiesSet() throws Exception {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        server.registerMBean(new com.kuma.boot.actuator.mbean.SystemInfo(), this.objectName);
+        server.registerMBean(new SystemInfo(), objectName);
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+    public void destroy() throws Exception {
+        ManagementFactory.getPlatformMBeanServer().unregisterMBean(objectName);
     }
 }
