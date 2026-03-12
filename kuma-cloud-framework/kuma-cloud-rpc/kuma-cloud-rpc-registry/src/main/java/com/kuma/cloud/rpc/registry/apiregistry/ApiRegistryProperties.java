@@ -29,6 +29,7 @@ public class ApiRegistryProperties {
     public static final String Enabled = "kmc.apiRegistry.enabled";
     public static final String ApiClientAspectEnabled = "kmc.apiRegistry.apiClientAspect.enabled";
     public static final String HealthEnabled = "kmc.apiRegistry.health.enabled";
+    public static final String RegistryType = "kmc.apiRegistry.registry.type";
     public static final String FeignClientClassPath =
             "org.springframework.cloud.openfeign.FeignClient";
 }

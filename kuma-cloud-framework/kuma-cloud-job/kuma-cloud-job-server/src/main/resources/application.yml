@@ -80,7 +80,7 @@ spring:
       max-request-size: 200MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/kuma-cloud-kmcjob?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&allowMultiQueries=true&autoReconnect=true
+    url: jdbc:mysql://localhost:3306/kuma-cloud-kmcjob?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&zeroDateTimeBehavior=convertToNull&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&allowMultiQueries=true&autoReconnect=true
     username: root
     password: 123456
 
@@ -330,4 +330,10 @@ grpc:
 kmcjob:
   server:
     worker-port: 9082
+    name-server-address: 127.0.0.1:9089
+  worker:
+    enabled: false
+    app-name: kuma-cloud-job-server
+    server-address: 127.0.0.1
+    server-port: 9081
     name-server-address: 127.0.0.1:9089

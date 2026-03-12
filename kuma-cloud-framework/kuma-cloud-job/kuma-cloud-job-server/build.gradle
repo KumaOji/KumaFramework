@@ -19,4 +19,5 @@ dependencies {
     implementation "com.mysql:mysql-connector-j:9.6.0"
     implementation "net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE"
     implementation "com.cronutils:cron-utils:9.2.1"
+    implementation projectLibs.httpclient5
 }

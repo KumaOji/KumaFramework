@@ -331,7 +331,7 @@ ccsr:
     election-timeout: 1000 # Leader选举超时时间，默认1000
     read-only-option: read_only_lease_based # 读写模式，默认read_only_safe
     port-offset: 1001 # Raft服务端口偏移，默认1001
-    single-node: false # 是否为单节点模式，用于单机测试使用
+    single-node: true # 是否为单节点模式，用于单机测试使用
   cluster-address:
     - 127.0.0.1:9006 # Raft集群实例地址，为了单机测试方便这里通过端口作区分
 #    - 127.0.0.1:9007

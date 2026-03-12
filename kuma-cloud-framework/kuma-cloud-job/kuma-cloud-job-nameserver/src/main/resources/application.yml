@@ -322,6 +322,8 @@ grpc:
     port: 9089
 
 kmcjob:
+  worker:
+    enabled: false
   name-server:
     max-worker-num: 1
     #127.0.0.1:9089,127.0.0.1:9084

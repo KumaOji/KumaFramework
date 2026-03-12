@@ -317,3 +317,11 @@ knife4j:
     enableDebug: true
     enableOpenApi: true
     enableGroup: true
+
+kmc:
+  apiRegistry:
+    enabled: true
+    registry:
+      type: NoneRegistry
+    apiClientAspect:
+      enabled: false

@@ -27,9 +27,7 @@ import com.kuma.cloud.rpc.registry.apiregistry.base.ApiRegistryException;
  */
 public class RegistryFactory {
 
-    public static BaseRegistry create() {
-        //		String type = ApiRegistryProperties.getRegistryType();
-        String type = "";
+    public static BaseRegistry create(String type) {
         if (RedisRegistry.class.getSimpleName().equalsIgnoreCase(type)) {
             return new RedisRegistry();
         }
