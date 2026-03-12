@@ -40,4 +40,18 @@ public final class BlogPermissions {
     public static final String SYSTEM_CONFIG = "system:config";
     public static final String SYSTEM_LOG    = "system:log";
     public static final String SYSTEM_USER   = "system:user";
+
+    // ── 服务管理模块 ─────────────────────────────────────────────
+
+    /** 服务管理所有权限（用于管理员角色关联） */
+    public static final String SERVICE_ALL    = "service:*";
+    /** 管理外部服务进程（LibreTranslate 等）的启停与状态查询 */
+    public static final String SERVICE_MANAGE = "service:manage";
+
+    // ── 工具模块 ──────────────────────────────────────────────────
+
+    /** 工具模块所有权限（用于管理员角色关联） */
+    public static final String TOOL_ALL = "tool:*";
+    /** 使用工具接口（RePKG 文件提取等） */
+    public static final String TOOL_USE = "tool:use";
 }

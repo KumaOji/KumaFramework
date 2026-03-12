@@ -61,7 +61,30 @@ springdoc:
 knife4j:
   enable: true
 
+python:
+  libreTranslate:
+    # 是否在应用启动时自动启动 LibreTranslate 服务
+    enabled: false
+    # libretranslate 可执行文件路径（Windows 示例: E:\\python\\Python39\\Scripts\\libretranslate.exe）
+    path: libretranslate
+    # 服务监听地址
+    host: 0.0.0.0
+    # 服务端口
+    port: 5000
+    # 仅加载指定语言模型，逗号分隔
+    load-only: en,zh
+    # 翻译线程数
+    threads: 2
+    # 是否自动下载/更新语言模型（首次启动建议设为 true）
+    update-models: false
+
 blog:
+  tool:
+    repkg:
+      # RePKG 工具目录（存放 RePKG.exe 及依赖 DLL）
+      tool-dir: E:\blog-resource\tool
+      # RePKG 提取结果输出目录
+      output-dir: E:\blog-resource\tool\output
   token-expire-seconds: 86400
   cookie-secure: false
   # 启动时重置 admin 密码为 admin123，解决 BCrypt 哈希不匹配问题。生产环境请设为 false
