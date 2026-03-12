@@ -55,7 +55,7 @@ import org.springframework.util.ErrorHandler;
 public class RedisStreamAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RedisStreamAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 
@@ -82,7 +82,7 @@ public class RedisStreamAutoConfiguration implements InitializingBean {
             builder.pollTimeout(pollTimeout);
         }
         // errorHandler
-        errorHandlerObjectProvider.ifAvailable((builder::errorHandler));
+        errorHandlerObjectProvider.ifAvailable(builder::errorHandler);
 
         // TODO  executor
         return builder.build();

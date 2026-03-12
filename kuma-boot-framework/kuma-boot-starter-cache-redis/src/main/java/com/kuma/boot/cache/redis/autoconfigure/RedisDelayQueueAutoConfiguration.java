@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Bean;
 public class RedisDelayQueueAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RedisDelayQueueAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 

@@ -34,7 +34,7 @@ public class RedisProperties {
 
     private boolean enabled = true;
 
-    public boolean getEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 

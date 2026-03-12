@@ -71,14 +71,9 @@ import tools.jackson.databind.json.JsonMapper;
 public class RedisAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RedisAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
-
-    // @Bean
-    // public RedisSerializer<String> redisKeySerializer() {
-    //	return RedisSerializer.string();
-    // }
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
@@ -90,16 +85,6 @@ public class RedisAutoConfiguration implements InitializingBean {
             ClassLoader classLoader = this.getClass().getClassLoader();
             return new JdkSerializationRedisSerializer(classLoader);
         }
-
-        //// jackson findAndRegisterModules，use copy
-        // JsonMapper jsonMapper = objectProvider.getIfAvailable(JsonMapper::new).copy();
-        // jsonMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //// findAndRegisterModules
-        // jsonMapper.findAndRegisterModules();
-        //// class type info to json
-        // GenericJackson2JsonRedisSerializer.registerNullValueSerializer(jsonMapper, null);
-        // jsonMapper.activateDefaultTyping(jsonMapper.getPolymorphicTypeValidator(),
-        //	DefaultTyping.NON_FINAL, As.PROPERTY);
 
         return new GenericJacksonJsonRedisSerializer(JacksonUtils.MAPPER);
     }
@@ -133,14 +118,10 @@ public class RedisAutoConfiguration implements InitializingBean {
         template.setConnectionFactory(factory);
 
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        // key采用String的序列化方式
         template.setKeySerializer(stringRedisSerializer);
-        // hash的key也采用String的序列化方式
         template.setHashKeySerializer(stringRedisSerializer);
 
-        // value序列化方式采用jackson
         template.setValueSerializer(redisSerializer);
-        // hash的value序列化方式采用jackson
         template.setHashValueSerializer(redisSerializer);
         template.afterPropertiesSet();
 
@@ -165,11 +146,4 @@ public class RedisAutoConfiguration implements InitializingBean {
         return new RedissonDistributedLock(redissonClient);
     }
 
-//    @Bean("stringRedisTemplate")
-//	@ConditionalOnMissingBean(StringRedisTemplate.class)
-//    public StringRedisTemplate stringRedisTemplate(RedissonConnectionFactory factory) {
-//        StringRedisTemplate template = new StringRedisTemplate();
-//        template.setConnectionFactory(factory);
-//        return template;
-//    }
 }

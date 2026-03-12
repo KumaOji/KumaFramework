@@ -38,7 +38,7 @@ import org.springframework.data.redis.core.mapping.RedisMappingContext;
 public class RedisDocumentAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RedisDocumentAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 

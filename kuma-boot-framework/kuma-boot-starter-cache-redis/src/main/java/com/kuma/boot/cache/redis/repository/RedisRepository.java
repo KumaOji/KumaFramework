@@ -16,8 +16,6 @@
 
 package com.kuma.boot.cache.redis.repository;
 
-import com.google.common.hash.Funnels;
-import com.google.common.hash.Hashing;
 import com.kuma.boot.cache.redis.model.CacheHashKey;
 import com.kuma.boot.cache.redis.model.CacheKey;
 import com.kuma.boot.cache.redis.val.NullVal;
@@ -40,9 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import org.apache.commons.collections4.CollectionUtils;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
@@ -65,6 +60,7 @@ import org.springframework.data.redis.serializer.SerializationUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.DigestUtils;
 
 /**
  * Redis Repository redis 基本操作 可扩展
@@ -79,13 +75,6 @@ public class RedisRepository {
      * 默认编码
      */
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-    /** key序列化 */
-    // private static final StringRedisSerializer STRING_SERIALIZER = new StringRedisSerializer();
-
-    /** value 序列化 */
-    // private static final JdkSerializationRedisSerializer OBJECT_SERIALIZER = new
-    // JdkSerializationRedisSerializer();
 
     /**
      * KEY_LOCKS
@@ -115,8 +104,6 @@ public class RedisRepository {
      */
     public RedisRepository(RedisTemplate<String, Object> redisTemplate, boolean cacheNullVal) {
         this.redisTemplate = redisTemplate;
-        // this.redisTemplate.setKeySerializer(STRING_SERIALIZER);
-        // this.redisTemplate.setValueSerializer(OBJECT_SERIALIZER);
         this.defaultCacheNullVal = cacheNullVal;
     }
 
@@ -1449,7 +1436,7 @@ public class RedisRepository {
         if (isNullVal(val)) {
             return defaultValue.length > 0 ? defaultValue[0] : null;
         }
-        return Convert.toLong(val);
+        return val instanceof Number n ? n.longValue() : Long.parseLong(val.toString());
     }
 
     /**
@@ -1465,7 +1452,7 @@ public class RedisRepository {
         if (isNullVal(val)) {
             return loader.apply(key);
         }
-        return Convert.toLong(val);
+        return val instanceof Number n ? n.longValue() : Long.parseLong(val.toString());
     }
 
     /**
@@ -1861,7 +1848,7 @@ public class RedisRepository {
      */
     private <K, V> Map<K, V> returnMapVal(Map<K, V> map) {
         Map<K, V> newMap = new HashMap<>(map.size());
-        if (CollUtil.isNotEmpty(map)) {
+        if (!map.isEmpty()) {
             map.forEach((k, v) -> {
                 if (!isNullVal(v)) {
                     newMap.put(k, v);
@@ -1886,13 +1873,13 @@ public class RedisRepository {
             @NonNull CacheHashKey key, Function<CacheHashKey, Map<K, V>> loader, boolean... cacheNullValues) {
         boolean cacheNullVal = cacheNullValues.length > 0 ? cacheNullValues[0] : defaultCacheNullVal;
         Map<K, V> map = (Map<K, V>) redisTemplate.opsForHash().entries(key.getKey());
-        if (CollUtil.isNotEmpty(map)) {
+        if (!map.isEmpty()) {
             return returnMapVal(map);
         }
         String lockKey = key.getKey();
         synchronized (KEY_LOCKS.computeIfAbsent(lockKey, v -> new Object())) {
             map = (Map<K, V>) redisTemplate.opsForHash().entries(key.getKey());
-            if (CollUtil.isNotEmpty(map)) {
+            if (!map.isEmpty()) {
                 return returnMapVal(map);
             }
             try {
@@ -2536,7 +2523,7 @@ public class RedisRepository {
             RedisSerializer<String> serializer = getRedisSerializer();
             Map<String, Object> maps = new HashMap<>(16);
             Set<String> keys = redisTemplate.keys(keyPatten + "*");
-            if (CollectionUtils.isNotEmpty(keys)) {
+            if (keys != null && !keys.isEmpty()) {
                 for (String key : keys) {
                     // byte[] bKeys = serializer.serialize(key);
                     // byte[] bValues = connection.get(bKeys);
@@ -3731,9 +3718,10 @@ public class RedisRepository {
      * @since 2023-07-12 16:16:52
      */
     private static long hash(String key) {
-        return Math.abs(Hashing.murmur3_128()
-                .hashObject(key, Funnels.stringFunnel(StandardCharsets.UTF_8))
-                .asInt());
+        byte[] digest = DigestUtils.md5Digest(key.getBytes(StandardCharsets.UTF_8));
+        int h = ((digest[0] & 0xff) << 24) | ((digest[1] & 0xff) << 16)
+                | ((digest[2] & 0xff) << 8) | (digest[3] & 0xff);
+        return Math.abs(h);
     }
 
     /**

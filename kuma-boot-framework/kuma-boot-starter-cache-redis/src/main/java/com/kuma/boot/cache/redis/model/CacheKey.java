@@ -30,16 +30,15 @@ import org.jspecify.annotations.NonNull;
 public class CacheKey {
 
     /** redis key */
-    private String key;
+    private final String key;
 
     /** 超时时间 秒 */
-    private Duration expire;
+    private final Duration expire;
 
     public CacheKey(final @NonNull String key) {
         this.key = key;
+        this.expire = null;
     }
-
-    public CacheKey() {}
 
     public CacheKey(@NonNull String key, Duration expire) {
         this.key = key;
@@ -74,15 +73,7 @@ public class CacheKey {
         return key;
     }
 
-    public void setKey(@NonNull String key) {
-        this.key = key;
-    }
-
     public Duration getExpire() {
         return expire;
-    }
-
-    public void setExpire(Duration expire) {
-        this.expire = expire;
     }
 }
