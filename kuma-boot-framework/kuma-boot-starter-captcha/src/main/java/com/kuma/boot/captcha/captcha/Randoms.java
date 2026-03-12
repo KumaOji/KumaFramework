@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.captcha;
 
 import java.util.Random;
@@ -25,19 +27,19 @@ public class Randoms {
     }
 
     public static char alpha() {
-        return ALPHA[Randoms.num(ALPHA.length)];
+        return ALPHA[num(ALPHA.length)];
     }
 
     public static char alpha(int num) {
-        return ALPHA[Randoms.num(num)];
+        return ALPHA[num(num)];
     }
 
     public static char alpha(int min, int max) {
-        return ALPHA[Randoms.num(min, max)];
+        return ALPHA[num(min, max)];
     }
 
     static {
-        lowerMaxIndex = charMaxIndex = ALPHA.length;
+        charMaxIndex = ALPHA.length;
+        lowerMaxIndex = charMaxIndex;
     }
 }
-

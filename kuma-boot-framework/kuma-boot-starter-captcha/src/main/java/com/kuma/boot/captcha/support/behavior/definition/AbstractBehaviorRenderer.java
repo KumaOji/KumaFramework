@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.behavior.definition;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -14,8 +13,7 @@ import java.awt.Graphics;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-public abstract class AbstractBehaviorRenderer
-extends AbstractRenderer {
+public abstract class AbstractBehaviorRenderer extends AbstractRenderer {
     public AbstractBehaviorRenderer(RedisRepository redisRepository, String cacheName) {
         super(redisRepository, cacheName);
     }
@@ -27,14 +25,16 @@ extends AbstractRenderer {
     protected int getEnOrZhLength(String s) {
         int enCount = 0;
         int zhCount = 0;
-        for (int i = 0; i < s.length(); ++i) {
+
+        for(int i = 0; i < s.length(); ++i) {
             int length = String.valueOf(s.charAt(i)).getBytes(StandardCharsets.UTF_8).length;
             if (length > 1) {
                 ++zhCount;
-                continue;
+            } else {
+                ++enCount;
             }
-            ++enCount;
         }
+
         int zhOffset = this.getHalfWatermarkFontSize() * zhCount + 5;
         int enOffset = enCount * 8;
         return zhOffset + enOffset;
@@ -69,4 +69,3 @@ extends AbstractRenderer {
         return this.isUnderOffset(actualValue, standardValue, threshold) || this.isOverOffset(actualValue, standardValue, threshold);
     }
 }
-

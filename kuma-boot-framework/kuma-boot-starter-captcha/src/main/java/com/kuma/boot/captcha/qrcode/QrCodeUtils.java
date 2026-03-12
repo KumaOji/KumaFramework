@@ -1,32 +1,11 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.google.zxing.BarcodeFormat
- *  com.google.zxing.Binarizer
- *  com.google.zxing.BinaryBitmap
- *  com.google.zxing.ChecksumException
- *  com.google.zxing.DecodeHintType
- *  com.google.zxing.EncodeHintType
- *  com.google.zxing.FormatException
- *  com.google.zxing.LuminanceSource
- *  com.google.zxing.NotFoundException
- *  com.google.zxing.Result
- *  com.google.zxing.WriterException
- *  com.google.zxing.client.j2se.BufferedImageLuminanceSource
- *  com.google.zxing.common.BitMatrix
- *  com.google.zxing.common.HybridBinarizer
- *  com.google.zxing.qrcode.QRCodeReader
- *  com.google.zxing.qrcode.QRCodeWriter
- *  com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
- *  com.kuma.boot.common.utils.exception.ExceptionUtils
- *  com.kuma.boot.common.utils.image.ImageUtils
- *  com.kuma.boot.common.utils.secure.Base64Utils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.qrcode;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.Binarizer;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
@@ -48,10 +27,9 @@ import com.kuma.boot.common.utils.secure.Base64Utils;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
+import java.awt.image.ImageObserver;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -88,7 +66,7 @@ public final class QrCodeUtils {
         this.hints = new Hashtable();
     }
 
-    public static QrCodeUtils form(String content) {
+    public static QrCodeUtils form(final String content) {
         return new QrCodeUtils(content);
     }
 
@@ -101,46 +79,43 @@ public final class QrCodeUtils {
         if (null != encode) {
             this.encode = encode;
         }
+
         return this;
     }
 
     public QrCodeUtils errorCorrectionLevel(ErrorCorrectionLevel errorCorrectionLevel) {
         switch (errorCorrectionLevel) {
-            case L: {
+            case L:
                 this.errorCorrectionLevel = errorCorrectionLevel;
                 this.errorCorrectionLevelValue = 0.07;
                 break;
-            }
-            case M: {
+            case M:
                 this.errorCorrectionLevel = errorCorrectionLevel;
                 this.errorCorrectionLevelValue = 0.15;
                 break;
-            }
-            case Q: {
+            case Q:
                 this.errorCorrectionLevel = errorCorrectionLevel;
-                this.errorCorrectionLevelValue = 0.25;
+                this.errorCorrectionLevelValue = (double)0.25F;
                 break;
-            }
-            case H: {
+            case H:
                 this.errorCorrectionLevel = errorCorrectionLevel;
                 this.errorCorrectionLevelValue = 0.3;
                 break;
-            }
-            default: {
+            default:
                 this.errorCorrectionLevel = ErrorCorrectionLevel.M;
                 this.errorCorrectionLevelValue = 0.15;
-            }
         }
+
         return this;
     }
 
     public QrCodeUtils foreGroundColor(String foreGroundColor) {
         try {
-            this.foreGroundColor = QrCodeUtils.getColor(foreGroundColor);
-        }
-        catch (NumberFormatException e) {
+            this.foreGroundColor = getColor(foreGroundColor);
+        } catch (NumberFormatException var3) {
             this.foreGroundColor = Color.BLACK;
         }
+
         return this;
     }
 
@@ -151,11 +126,11 @@ public final class QrCodeUtils {
 
     public QrCodeUtils backGroundColor(String backGroundColor) {
         try {
-            this.backGroundColor = QrCodeUtils.getColor(backGroundColor);
-        }
-        catch (NumberFormatException e) {
+            this.backGroundColor = getColor(backGroundColor);
+        } catch (NumberFormatException var3) {
             this.backGroundColor = Color.WHITE;
         }
+
         return this;
     }
 
@@ -168,6 +143,7 @@ public final class QrCodeUtils {
         if (imageFormat != null) {
             this.imageFormat = imageFormat.toLowerCase();
         }
+
         return this;
     }
 
@@ -190,24 +166,24 @@ public final class QrCodeUtils {
     }
 
     public QrCodeUtils logo(File logo) {
-        return this.logo(ImageUtils.read((File)logo));
+        return this.logo(ImageUtils.read(logo));
     }
 
     public QrCodeUtils logo(URL url) {
-        return this.logo(ImageUtils.read((URL)url));
+        return this.logo(ImageUtils.read(url));
     }
 
     public QrCodeUtils logo(String iconPath) {
-        return this.logo(ImageUtils.read((String)iconPath));
+        return this.logo(ImageUtils.read(iconPath));
     }
 
     public QrCodeUtils logo(InputStream logoStream) {
-        return this.logo(ImageUtils.read((InputStream)logoStream));
+        return this.logo(ImageUtils.read(logoStream));
     }
 
     public boolean write(OutputStream output) {
         BufferedImage bufferedImage = this.toImage();
-        return ImageUtils.write((RenderedImage)bufferedImage, (String)this.imageFormat, (OutputStream)output);
+        return ImageUtils.write(bufferedImage, this.imageFormat, output);
     }
 
     public File toFile(String f) {
@@ -218,128 +194,135 @@ public final class QrCodeUtils {
         if (!qrCodeFile.exists()) {
             qrCodeFile.getParentFile().mkdirs();
         }
+
         BufferedImage bufferedImage = this.toImage();
-        ImageUtils.write((RenderedImage)bufferedImage, (String)this.imageFormat, (File)qrCodeFile);
+        ImageUtils.write(bufferedImage, this.imageFormat, qrCodeFile);
         return qrCodeFile;
     }
 
     public String toBase64() {
-        return "data:image/png;base64," + Base64Utils.encodeToString((byte[])this.toBytes());
+        return "data:image/png;base64," + Base64Utils.encodeToString(this.toBytes());
     }
 
     public byte[] toBytes() {
         BufferedImage bufferedImage = this.toImage();
-        return ImageUtils.writeAsBytes((RenderedImage)bufferedImage, (String)this.imageFormat);
+        return ImageUtils.writeAsBytes(bufferedImage, this.imageFormat);
     }
 
     public ByteArrayInputStream toStream() {
         BufferedImage bufferedImage = this.toImage();
-        return ImageUtils.writeAsStream((RenderedImage)bufferedImage, (String)this.imageFormat);
+        return ImageUtils.writeAsStream(bufferedImage, this.imageFormat);
     }
 
     public BufferedImage toImage() {
         BitMatrix matrix;
         try {
-            matrix = new QRCodeWriter().encode(this.content, BarcodeFormat.QR_CODE, this.size, this.size, this.getHints());
+            matrix = (new QRCodeWriter()).encode(this.content, BarcodeFormat.QR_CODE, this.size, this.size, this.getHints());
+        } catch (WriterException e) {
+            throw ExceptionUtils.unchecked(e);
         }
-        catch (WriterException e) {
-            throw ExceptionUtils.unchecked((Throwable)e);
-        }
+
         if (this.deleteMargin) {
-            matrix = QrCodeUtils.deleteWhite(matrix);
+            matrix = deleteWhite(matrix);
         }
+
         int width = matrix.getWidth();
         int height = matrix.getHeight();
         int fgColor = this.foreGroundColor.getRGB();
         int bgColor = this.backGroundColor.getRGB();
         BufferedImage image = new BufferedImage(width, height, 5);
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
+
+        for(int x = 0; x < width; ++x) {
+            for(int y = 0; y < height; ++y) {
                 image.setRGB(x, y, matrix.get(x, y) ? fgColor : bgColor);
             }
         }
+
         if (null != this.logo) {
-            QrCodeUtils.addLogo(image, this.logo, this);
+            addLogo(image, this.logo, this);
         }
+
         return image;
     }
 
     public static String read(String qrCodeFile) {
-        return QrCodeUtils.read(ImageUtils.read((String)qrCodeFile));
+        return read(ImageUtils.read(qrCodeFile));
     }
 
     public static String read(File qrCodeFile) {
-        return QrCodeUtils.read(ImageUtils.read((File)qrCodeFile));
+        return read(ImageUtils.read(qrCodeFile));
     }
 
     public static String read(URL qrCodeUrl) {
-        return QrCodeUtils.read(ImageUtils.read((URL)qrCodeUrl));
+        return read(ImageUtils.read(qrCodeUrl));
     }
 
     public static String read(BufferedImage qrCodeImage) {
-        return QrCodeUtils.read(qrCodeImage, (Map)null);
+        return read(qrCodeImage, (Map)null);
     }
 
     public static String read(String qrCodeFile, Charset encode) {
-        return QrCodeUtils.read(ImageUtils.read((String)qrCodeFile), encode);
+        return read(ImageUtils.read(qrCodeFile), encode);
     }
 
     public static String read(File qrCodeFile, Charset encode) {
-        return QrCodeUtils.read(ImageUtils.read((File)qrCodeFile), encode);
+        return read(ImageUtils.read(qrCodeFile), encode);
     }
 
     public static String read(URL qrCodeUrl, Charset encode) {
-        return QrCodeUtils.read(ImageUtils.read((URL)qrCodeUrl), encode);
+        return read(ImageUtils.read(qrCodeUrl), encode);
     }
 
     public static String read(BufferedImage qrCodeImage, Charset encode) {
-        Hashtable<DecodeHintType, Charset> hints = new Hashtable<DecodeHintType, Charset>();
+        Map<DecodeHintType, Object> hints = new Hashtable();
         hints.put(DecodeHintType.CHARACTER_SET, encode);
-        return QrCodeUtils.read(qrCodeImage, hints);
+        return read(qrCodeImage, hints);
     }
 
     public static String read(BufferedImage qrCodeImage, Map<DecodeHintType, ?> hints) {
-        BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(qrCodeImage);
-        BinaryBitmap bitmap = new BinaryBitmap((Binarizer)new HybridBinarizer((LuminanceSource)source));
+        LuminanceSource source = new BufferedImageLuminanceSource(qrCodeImage);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+        String var5;
         try {
-            Result result = new QRCodeReader().decode(bitmap, hints);
-            String string = result.getText();
-            return string;
-        }
-        catch (ChecksumException | FormatException | NotFoundException e) {
-            throw ExceptionUtils.unchecked((Throwable)e);
-        }
-        finally {
+            Result result = (new QRCodeReader()).decode(bitmap, hints);
+            var5 = result.getText();
+        } catch (ChecksumException | FormatException | NotFoundException e) {
+            throw ExceptionUtils.unchecked(e);
+        } finally {
             qrCodeImage.getGraphics().dispose();
         }
+
+        return var5;
     }
 
     public static byte[] readRawBytes(String qrCodeFile) {
-        return QrCodeUtils.readRawBytes(ImageUtils.read((String)qrCodeFile));
+        return readRawBytes(ImageUtils.read(qrCodeFile));
     }
 
     public static byte[] readRawBytes(File qrCodeFile) {
-        return QrCodeUtils.readRawBytes(ImageUtils.read((File)qrCodeFile));
+        return readRawBytes(ImageUtils.read(qrCodeFile));
     }
 
     public static byte[] readRawBytes(URL qrCodeUrl) {
-        return QrCodeUtils.readRawBytes(ImageUtils.read((URL)qrCodeUrl));
+        return readRawBytes(ImageUtils.read(qrCodeUrl));
     }
 
     public static byte[] readRawBytes(BufferedImage qrCodeImage) {
-        BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(qrCodeImage);
-        BinaryBitmap bitmap = new BinaryBitmap((Binarizer)new HybridBinarizer((LuminanceSource)source));
+        LuminanceSource source = new BufferedImageLuminanceSource(qrCodeImage);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+        byte[] var4;
         try {
-            Result result = new QRCodeReader().decode(bitmap);
-            byte[] byArray = result.getRawBytes();
-            return byArray;
-        }
-        catch (ChecksumException | FormatException | NotFoundException e) {
-            throw ExceptionUtils.unchecked((Throwable)e);
-        }
-        finally {
+            Result result = (new QRCodeReader()).decode(bitmap);
+            var4 = result.getRawBytes();
+        } catch (ChecksumException | FormatException | NotFoundException e) {
+            throw ExceptionUtils.unchecked(e);
+        } finally {
             qrCodeImage.getGraphics().dispose();
         }
+
+        return var4;
     }
 
     private static void addLogo(BufferedImage qrCodeImage, BufferedImage logoImage, QrCodeUtils qrCode) {
@@ -357,21 +340,18 @@ public final class QrCodeUtils {
         g2.setColor(Color.LIGHT_GRAY);
         g2.fillRect(2, 2, logoRectWidth - 4, logoRectHeight - 4);
         g2.setComposite(AlphaComposite.SrcAtop);
-        g2.drawImage(logoImage, 4, 4, logoRectWidth - 8, logoRectHeight - 8, null);
+        g2.drawImage(logoImage, 4, 4, logoRectWidth - 8, logoRectHeight - 8, (ImageObserver)null);
         logoImage.getGraphics().dispose();
         g2.dispose();
         Graphics2D gc = (Graphics2D)qrCodeImage.getGraphics();
         gc.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         gc.setColor(qrCode.backGroundColor);
-        gc.drawImage((Image)logoRect, (baseWidth - logoRectWidth) / 2, (baseHeight - logoRectHeight) / 2, null);
+        gc.drawImage(logoRect, (baseWidth - logoRectWidth) / 2, (baseHeight - logoRectHeight) / 2, (ImageObserver)null);
         gc.dispose();
     }
 
     private static Color getColor(String hexString) {
-        if ('#' == hexString.charAt(0)) {
-            return new Color(Long.decode(hexString).intValue());
-        }
-        return new Color(Long.decode("0xFF" + hexString).intValue());
+        return '#' == hexString.charAt(0) ? new Color(Long.decode(hexString).intValue()) : new Color(Long.decode("0xFF" + hexString).intValue());
     }
 
     private static BitMatrix deleteWhite(BitMatrix matrix) {
@@ -380,13 +360,15 @@ public final class QrCodeUtils {
         int resHeight = rec[3] + 1;
         BitMatrix resMatrix = new BitMatrix(resWidth, resHeight);
         resMatrix.clear();
-        for (int i = 0; i < resWidth; ++i) {
-            for (int j = 0; j < resHeight; ++j) {
-                if (!matrix.get(i + rec[0], j + rec[1])) continue;
-                resMatrix.set(i, j);
+
+        for(int i = 0; i < resWidth; ++i) {
+            for(int j = 0; j < resHeight; ++j) {
+                if (matrix.get(i + rec[0], j + rec[1])) {
+                    resMatrix.set(i, j);
+                }
             }
         }
+
         return resMatrix;
     }
 }
-

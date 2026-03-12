@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.graphic.renderer;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -12,8 +11,7 @@ import com.kuma.boot.captcha.support.graphic.definition.AbstractPngGraphicRender
 import java.awt.Font;
 import java.time.Duration;
 
-public class ChineseCaptchaRenderer
-extends AbstractPngGraphicRenderer {
+public class ChineseCaptchaRenderer extends AbstractPngGraphicRenderer {
     public ChineseCaptchaRenderer(RedisRepository redisRepository, String cacheName) {
         super(redisRepository, cacheName);
     }
@@ -22,19 +20,15 @@ extends AbstractPngGraphicRenderer {
         super(redisRepository, cacheName, expire);
     }
 
-    @Override
     public String getCategory() {
         return CaptchaCategory.CHINESE.getConstant();
     }
 
-    @Override
     protected String[] getDrawCharacters() {
         return this.getWordCharacters();
     }
 
-    @Override
     protected Font getFont() {
         return this.getResourceProvider().getChineseFont();
     }
 }
-

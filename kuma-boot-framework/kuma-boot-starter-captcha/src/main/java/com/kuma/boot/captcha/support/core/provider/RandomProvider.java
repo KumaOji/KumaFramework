@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.core.util.RandomUtil
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.provider;
 
 import cn.hutool.core.util.RandomUtil;
@@ -28,26 +27,26 @@ public class RandomProvider {
     private static final String[] DICTIONARY;
     private static final List<String> WORDS;
 
-    public static int randomInt(int startInclusive, int endExclusive) {
-        return RandomUtil.randomInt((int)startInclusive, (int)endExclusive);
+    public static int randomInt(final int startInclusive, final int endExclusive) {
+        return RandomUtil.randomInt(startInclusive, endExclusive);
     }
 
     public static int randomInt(int bound) {
-        return RandomUtil.randomInt((int)bound);
+        return RandomUtil.randomInt(bound);
     }
 
     public static List<String> randomWords(int wordCount) {
-        return RandomUtil.randomEles(WORDS, (int)wordCount);
+        return RandomUtil.randomEles(WORDS, wordCount);
     }
 
     public static Color[] randomColors(int number) {
-        List<Color> colors = IntStream.range(0, number).mapToObj(i -> RandomProvider.randomColor()).toList();
+        List<Color> colors = IntStream.range(0, number).mapToObj((i) -> randomColor()).toList();
         Color[] result = new Color[colors.size()];
-        return colors.toArray(result);
+        return (Color[])colors.toArray(result);
     }
 
     public static Color randomColor() {
-        int[] color = COLOR[RandomProvider.randomInt(COLOR.length)];
+        int[] color = COLOR[randomInt(COLOR.length)];
         return new Color(color[0], color[1], color[2]);
     }
 
@@ -55,37 +54,42 @@ public class RandomProvider {
         if (min > 255) {
             min = 255;
         }
+
         if (max > 255) {
             max = 255;
         }
+
         if (min < 0) {
             min = 0;
         }
+
         if (max < 0) {
             max = 0;
         }
+
         if (min > max) {
             min = 0;
             max = 255;
         }
-        return new Color(RandomProvider.randomInt(min, max), RandomProvider.randomInt(min, max), RandomProvider.randomInt(min, max));
+
+        return new Color(randomInt(min, max), randomInt(min, max), randomInt(min, max));
     }
 
     private static String randomCharacter(CaptchaCharacter captchaCharacter) {
-        return CHARACTERS[RandomProvider.randomInt(captchaCharacter.getStart(), captchaCharacter.getEnd())];
+        return CHARACTERS[randomInt(captchaCharacter.getStart(), captchaCharacter.getEnd())];
     }
 
     public static String[] randomCharacters(int number, CaptchaCharacter captchaCharacter) {
-        List<String> characters = IntStream.range(0, number).mapToObj(i -> RandomProvider.randomCharacter(captchaCharacter)).collect(Collectors.toList());
+        List<String> characters = (List)IntStream.range(0, number).mapToObj((i) -> randomCharacter(captchaCharacter)).collect(Collectors.toList());
         String[] result = new String[characters.size()];
-        return characters.toArray(result);
+        return (String[])characters.toArray(result);
     }
 
     static {
-        LOWER_MAX_INDEX = CHAR_MAX_INDEX = CHARACTERS.length;
+        CHAR_MAX_INDEX = CHARACTERS.length;
+        LOWER_MAX_INDEX = CHAR_MAX_INDEX;
         COLOR = new int[][]{{0, 135, 255}, {51, 153, 51}, {255, 102, 102}, {255, 153, 0}, {153, 102, 0}, {153, 102, 153}, {51, 153, 153}, {102, 102, 255}, {0, 102, 204}, {204, 51, 51}, {0, 153, 204}, {0, 51, 102}};
-        DICTIONARY = new String[]{"\u7684", "\u4e00", "\u4e86", "\u662f", "\u6211", "\u4e0d", "\u5728", "\u4eba", "\u4eec", "\u6709", "\u6765", "\u4ed6", "\u8fd9", "\u4e0a", "\u7740", "\u4e2a", "\u5730", "\u5230", "\u5927", "\u91cc", "\u8bf4", "\u5c31", "\u53bb", "\u5b50", "\u5f97", "\u4e5f", "\u548c", "\u90a3", "\u8981", "\u4e0b", "\u770b", "\u5929", "\u65f6", "\u8fc7", "\u51fa", "\u5c0f", "\u4e48", "\u8d77", "\u4f60", "\u90fd", "\u628a", "\u597d", "\u8fd8", "\u591a", "\u6ca1", "\u4e3a", "\u53c8", "\u53ef", "\u5bb6", "\u5b66", "\u53ea", "\u4ee5", "\u4e3b", "\u4f1a", "\u6837", "\u5e74", "\u60f3", "\u751f", "\u540c", "\u8001", "\u4e2d", "\u5341", "\u4ece", "\u81ea", "\u9762", "\u524d", "\u5934", "\u9053", "\u5b83", "\u540e", "\u7136", "\u8d70", "\u5f88", "\u50cf", "\u89c1", "\u4e24", "\u7528", "\u5979", "\u56fd", "\u52a8", "\u8fdb", "\u6210", "\u56de", "\u4ec0", "\u8fb9", "\u4f5c", "\u5bf9", "\u5f00", "\u800c", "\u5df1", "\u4e9b", "\u73b0", "\u5c71", "\u6c11", "\u5019", "\u7ecf", "\u53d1", "\u5de5", "\u5411", "\u4e8b", "\u547d", "\u7ed9", "\u957f", "\u6c34", "\u51e0", "\u4e49", "\u4e09", "\u58f0", "\u4e8e", "\u9ad8", "\u624b", "\u77e5", "\u7406", "\u773c", "\u5fd7", "\u70b9", "\u5fc3", "\u6218", "\u4e8c", "\u95ee", "\u4f46", "\u8eab", "\u65b9", "\u5b9e", "\u5403", "\u505a", "\u53eb", "\u5f53", "\u4f4f", "\u542c", "\u9769", "\u6253", "\u5462", "\u771f", "\u5168", "\u624d", "\u56db", "\u5df2", "\u6240", "\u654c", "\u4e4b", "\u6700", "\u5149", "\u4ea7", "\u60c5", "\u8def", "\u5206", "\u603b", "\u6761", "\u767d", "\u8bdd", "\u4e1c", "\u5e2d", "\u6b21", "\u4eb2", "\u5982", "\u88ab", "\u82b1", "\u53e3", "\u653e", "\u513f", "\u5e38", "\u6c14", "\u4e94", "\u7b2c", "\u4f7f", "\u5199", "\u519b", "\u5427", "\u6587", "\u8fd0", "\u518d", "\u679c", "\u600e", "\u5b9a", "\u8bb8", "\u5feb", "\u660e", "\u884c", "\u56e0", "\u522b", "\u98de", "\u5916", "\u6811", "\u7269", "\u6d3b", "\u90e8", "\u95e8", "\u65e0", "\u5f80", "\u8239", "\u671b", "\u65b0", "\u5e26", "\u961f", "\u5148", "\u529b", "\u5b8c", "\u5374", "\u7ad9", "\u4ee3", "\u5458", "\u673a", "\u66f4", "\u4e5d", "\u60a8", "\u6bcf", "\u98ce", "\u7ea7", "\u8ddf", "\u7b11", "\u554a", "\u5b69", "\u4e07", "\u5c11", "\u76f4", "\u610f", "\u591c", "\u6bd4", "\u9636", "\u8fde", "\u8f66", "\u91cd", "\u4fbf", "\u6597", "\u9a6c", "\u54ea", "\u5316", "\u592a", "\u6307", "\u53d8", "\u793e", "\u4f3c", "\u58eb", "\u8005", "\u5e72", "\u77f3", "\u6ee1", "\u65e5", "\u51b3", "\u767e", "\u539f", "\u62ff", "\u7fa4", "\u7a76", "\u5404", "\u516d", "\u672c", "\u601d", "\u89e3", "\u7acb", "\u6cb3", "\u6751", "\u516b", "\u96be", "\u65e9", "\u8bba", "\u5417", "\u6839", "\u5171", "\u8ba9", "\u76f8", "\u7814", "\u4eca", "\u5176", "\u4e66", "\u5750", "\u63a5", "\u5e94", "\u5173", "\u4fe1", "\u89c9", "\u6b65", "\u53cd", "\u5904", "\u8bb0", "\u5c06", "\u5343", "\u627e", "\u4e89", "\u9886", "\u6216", "\u5e08", "\u7ed3", "\u5757", "\u8dd1", "\u8c01", "\u8349", "\u8d8a", "\u5b57", "\u52a0", "\u811a", "\u7d27", "\u7231", "\u7b49", "\u4e60", "\u9635", "\u6015", "\u6708", "\u9752", "\u534a", "\u706b", "\u6cd5", "\u9898", "\u5efa", "\u8d76", "\u4f4d", "\u5531", "\u6d77", "\u4e03", "\u5973", "\u4efb", "\u4ef6", "\u611f", "\u51c6", "\u5f20", "\u56e2", "\u5c4b", "\u79bb", "\u8272", "\u8138", "\u7247", "\u79d1", "\u5012", "\u775b", "\u5229", "\u4e16", "\u521a", "\u4e14", "\u7531", "\u9001", "\u5207", "\u661f", "\u5bfc", "\u665a", "\u8868", "\u591f", "\u6574", "\u8ba4", "\u54cd", "\u96ea", "\u6d41", "\u672a", "\u573a", "\u8be5", "\u5e76", "\u5e95", "\u6df1", "\u523b", "\u5e73", "\u4f1f", "\u5fd9", "\u63d0", "\u786e", "\u8fd1", "\u4eae", "\u8f7b", "\u8bb2", "\u519c", "\u53e4", "\u9ed1", "\u544a", "\u754c", "\u62c9", "\u540d", "\u5440", "\u571f", "\u6e05", "\u9633", "\u7167", "\u529e", "\u53f2", "\u6539", "\u5386", "\u8f6c", "\u753b", "\u9020", "\u5634", "\u6b64", "\u6cbb", "\u5317", "\u5fc5", "\u670d", "\u96e8", "\u7a7f", "\u5185", "\u8bc6", "\u9a8c", "\u4f20", "\u4e1a", "\u83dc", "\u722c", "\u7761", "\u5174", "\u5f62", "\u91cf", "\u54b1", "\u89c2", "\u82e6", "\u4f53", "\u4f17", "\u901a", "\u51b2", "\u5408", "\u7834", "\u53cb", "\u5ea6", "\u672f", "\u996d", "\u516c", "\u65c1", "\u623f", "\u6781", "\u5357", "\u67aa", "\u8bfb", "\u6c99", "\u5c81", "\u7ebf", "\u91ce", "\u575a", "\u7a7a", "\u6536", "\u7b97", "\u81f3", "\u653f", "\u57ce", "\u52b3", "\u843d", "\u94b1", "\u7279", "\u56f4", "\u5f1f", "\u80dc", "\u6559", "\u70ed", "\u5c55", "\u5305", "\u6b4c", "\u7c7b", "\u6e10", "\u5f3a", "\u6570", "\u4e61", "\u547c", "\u6027", "\u97f3", "\u7b54", "\u54e5", "\u9645", "\u65e7", "\u795e", "\u5ea7", "\u7ae0", "\u5e2e", "\u5566", "\u53d7", "\u7cfb", "\u4ee4", "\u8df3", "\u975e", "\u4f55", "\u725b", "\u53d6", "\u5165", "\u5cb8", "\u6562", "\u6389", "\u5ffd", "\u79cd", "\u88c5", "\u9876", "\u6025", "\u6797", "\u505c", "\u606f", "\u53e5", "\u533a", "\u8863", "\u822c", "\u62a5", "\u53f6", "\u538b", "\u6162", "\u53d4", "\u80cc", "\u7ec6"};
-        WORDS = Arrays.stream(DICTIONARY).collect(Collectors.toList());
+        DICTIONARY = new String[]{"的", "一", "了", "是", "我", "不", "在", "人", "们", "有", "来", "他", "这", "上", "着", "个", "地", "到", "大", "里", "说", "就", "去", "子", "得", "也", "和", "那", "要", "下", "看", "天", "时", "过", "出", "小", "么", "起", "你", "都", "把", "好", "还", "多", "没", "为", "又", "可", "家", "学", "只", "以", "主", "会", "样", "年", "想", "生", "同", "老", "中", "十", "从", "自", "面", "前", "头", "道", "它", "后", "然", "走", "很", "像", "见", "两", "用", "她", "国", "动", "进", "成", "回", "什", "边", "作", "对", "开", "而", "己", "些", "现", "山", "民", "候", "经", "发", "工", "向", "事", "命", "给", "长", "水", "几", "义", "三", "声", "于", "高", "手", "知", "理", "眼", "志", "点", "心", "战", "二", "问", "但", "身", "方", "实", "吃", "做", "叫", "当", "住", "听", "革", "打", "呢", "真", "全", "才", "四", "已", "所", "敌", "之", "最", "光", "产", "情", "路", "分", "总", "条", "白", "话", "东", "席", "次", "亲", "如", "被", "花", "口", "放", "儿", "常", "气", "五", "第", "使", "写", "军", "吧", "文", "运", "再", "果", "怎", "定", "许", "快", "明", "行", "因", "别", "飞", "外", "树", "物", "活", "部", "门", "无", "往", "船", "望", "新", "带", "队", "先", "力", "完", "却", "站", "代", "员", "机", "更", "九", "您", "每", "风", "级", "跟", "笑", "啊", "孩", "万", "少", "直", "意", "夜", "比", "阶", "连", "车", "重", "便", "斗", "马", "哪", "化", "太", "指", "变", "社", "似", "士", "者", "干", "石", "满", "日", "决", "百", "原", "拿", "群", "究", "各", "六", "本", "思", "解", "立", "河", "村", "八", "难", "早", "论", "吗", "根", "共", "让", "相", "研", "今", "其", "书", "坐", "接", "应", "关", "信", "觉", "步", "反", "处", "记", "将", "千", "找", "争", "领", "或", "师", "结", "块", "跑", "谁", "草", "越", "字", "加", "脚", "紧", "爱", "等", "习", "阵", "怕", "月", "青", "半", "火", "法", "题", "建", "赶", "位", "唱", "海", "七", "女", "任", "件", "感", "准", "张", "团", "屋", "离", "色", "脸", "片", "科", "倒", "睛", "利", "世", "刚", "且", "由", "送", "切", "星", "导", "晚", "表", "够", "整", "认", "响", "雪", "流", "未", "场", "该", "并", "底", "深", "刻", "平", "伟", "忙", "提", "确", "近", "亮", "轻", "讲", "农", "古", "黑", "告", "界", "拉", "名", "呀", "土", "清", "阳", "照", "办", "史", "改", "历", "转", "画", "造", "嘴", "此", "治", "北", "必", "服", "雨", "穿", "内", "识", "验", "传", "业", "菜", "爬", "睡", "兴", "形", "量", "咱", "观", "苦", "体", "众", "通", "冲", "合", "破", "友", "度", "术", "饭", "公", "旁", "房", "极", "南", "枪", "读", "沙", "岁", "线", "野", "坚", "空", "收", "算", "至", "政", "城", "劳", "落", "钱", "特", "围", "弟", "胜", "教", "热", "展", "包", "歌", "类", "渐", "强", "数", "乡", "呼", "性", "音", "答", "哥", "际", "旧", "神", "座", "章", "帮", "啦", "受", "系", "令", "跳", "非", "何", "牛", "取", "入", "岸", "敢", "掉", "忽", "种", "装", "顶", "急", "林", "停", "息", "句", "区", "衣", "般", "报", "叶", "压", "慢", "叔", "背", "细"};
+        WORDS = (List)Arrays.stream(DICTIONARY).collect(Collectors.toList());
     }
 }
-

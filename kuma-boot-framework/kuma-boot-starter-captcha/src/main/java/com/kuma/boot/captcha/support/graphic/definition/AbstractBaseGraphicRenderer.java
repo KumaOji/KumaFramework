@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.graphic.definition;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -22,8 +21,7 @@ import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.util.List;
 
-public abstract class AbstractBaseGraphicRenderer
-extends AbstractGraphicRenderer {
+public abstract class AbstractBaseGraphicRenderer extends AbstractGraphicRenderer {
     public AbstractBaseGraphicRenderer(RedisRepository redisRepository, String cacheName) {
         super(redisRepository, cacheName);
     }
@@ -36,7 +34,7 @@ extends AbstractGraphicRenderer {
         int number = this.getCaptchaProperties().getGraphics().getLength();
         List<String> words = RandomProvider.randomWords(number);
         String[] content = new String[words.size()];
-        return words.toArray(content);
+        return (String[])words.toArray(content);
     }
 
     protected String[] getCharCharacters() {
@@ -60,7 +58,7 @@ extends AbstractGraphicRenderer {
     }
 
     protected BufferedImage createGifBufferedImage(String[] characters, int alpha) {
-        return this.createBufferedImage(characters, "\u738b", false, true, alpha);
+        return this.createBufferedImage(characters, "王", false, true, alpha);
     }
 
     private BufferedImage createBufferedImage(String[] characters, String benchmark, boolean isArithmetic, boolean isGif, int alpha) {
@@ -72,6 +70,7 @@ extends AbstractGraphicRenderer {
         if (!isArithmetic) {
             this.drawInterfereLine(graphics, isGif);
         }
+
         Color[] colors = RandomProvider.randomColors(characters.length);
         this.drawCharacter(graphics, characters, colors, benchmark, isGif, alpha);
         graphics.dispose();
@@ -88,12 +87,12 @@ extends AbstractGraphicRenderer {
     }
 
     private void drawAlphaForLine(Graphics2D graphics) {
-        this.drawAlpha(graphics, 0.7f);
+        this.drawAlpha(graphics, 0.7F);
     }
 
     private float getAlpha(int length, int alpha, int index) {
         int num = alpha + index;
-        float r = 1.0f / (float)length;
+        float r = 1.0F / (float)length;
         float s = (float)(length + 1) * r;
         return num > length ? (float)num * r - s : (float)num * r;
     }
@@ -123,23 +122,26 @@ extends AbstractGraphicRenderer {
             y1 = y2;
             y2 = ty;
         }
+
         if (RandomProvider.randomInt(2) == 0) {
-            QuadCurve2D.Double shape = new QuadCurve2D.Double();
-            ((QuadCurve2D)shape).setCurve(x1, y1, ctrlx1, ctrly1, x2, y2);
+            QuadCurve2D shape = new QuadCurve2D.Double();
+            shape.setCurve((double)x1, (double)y1, (double)ctrlx1, (double)ctrly1, (double)x2, (double)y2);
             graphics.draw(shape);
         } else {
             int ctrlx2 = this.randomCtrlX();
             int ctrly2 = this.randomCtrlY();
-            CubicCurve2D.Double shape = new CubicCurve2D.Double(x1, y1, ctrlx1, ctrly1, ctrlx2, ctrly2, x2, y2);
+            CubicCurve2D shape = new CubicCurve2D.Double((double)x1, (double)y1, (double)ctrlx1, (double)ctrly1, (double)ctrlx2, (double)ctrly2, (double)x2, (double)y2);
             graphics.draw(shape);
         }
+
     }
 
     private void drawInterfereLine(Graphics2D graphics, boolean isGif) {
         if (isGif) {
             this.drawAlphaForLine(graphics);
         }
-        graphics.setStroke(new BasicStroke(1.2f, 0, 2));
+
+        graphics.setStroke(new BasicStroke(1.2F, 0, 2));
         this.drawBezierCurve(graphics);
     }
 
@@ -156,15 +158,17 @@ extends AbstractGraphicRenderer {
         FontMetrics fontMetrics = graphics.getFontMetrics();
         int fW = this.getWidth() / characters.length;
         int fSp = (fW - (int)fontMetrics.getStringBounds(benchmark, graphics).getWidth()) / 2;
-        for (int i = 0; i < characters.length; ++i) {
+
+        for(int i = 0; i < characters.length; ++i) {
             if (isGif) {
                 this.drawAlphaForCharacter(graphics, characters.length, alpha, i);
             }
+
             graphics.setColor(colors[i]);
             this.drawOval(graphics);
             int fY = this.getHeight() - (this.getHeight() - (int)fontMetrics.getStringBounds(String.valueOf(characters[i]), graphics).getHeight() >> 1);
             graphics.drawString(characters[i], i * fW + fSp - 3, fY - 3);
         }
+
     }
 }
-

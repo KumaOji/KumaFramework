@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.captcha;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -14,13 +13,11 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.imageio.ImageIO;
 
-public class ChineseCaptcha
-extends AbstractChineseCaptcha {
+public class ChineseCaptcha extends AbstractChineseCaptcha {
     public ChineseCaptcha() {
     }
 
@@ -40,15 +37,11 @@ extends AbstractChineseCaptcha {
         this.setFont(font);
     }
 
-    @Override
     public boolean out(OutputStream out) {
         this.checkAlpha();
         return this.graphicsImage(this.textChar(), out);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     private boolean graphicsImage(char[] strs, OutputStream out) {
         boolean ok;
         try {
@@ -63,46 +56,50 @@ extends AbstractChineseCaptcha {
             int h = this.height - hp;
             int w = this.width / strs.length;
             int sp = (w - this.font.getSize()) / 2;
-            for (int i = 0; i < len; ++i) {
-                int x = i * w + sp + ChineseCaptcha.num(-5, 5);
-                int y = h + ChineseCaptcha.num(-5, 5);
+
+            for(int i = 0; i < len; ++i) {
+                int x = i * w + sp + num(-5, 5);
+                int y = h + num(-5, 5);
                 if (x < 5) {
                     x = 5;
                 }
+
                 if (x + this.font.getSize() > this.width) {
                     x = this.width - this.font.getSize();
                 }
+
                 if (y > this.height) {
                     y = this.height;
                 }
+
                 if (y - this.font.getSize() < 0) {
                     y = this.font.getSize();
                 }
-                g.setFont(this.font.deriveFont(ChineseCaptcha.num(2) == 0 ? 0 : 2));
+
+                g.setFont(this.font.deriveFont(num(2) == 0 ? 0 : 2));
                 g.drawString(String.valueOf(strs[i]), x, y);
             }
-            g.setStroke(new BasicStroke(1.25f, 0, 2));
-            AlphaComposite ac3 = AlphaComposite.getInstance(3, 0.7f);
+
+            g.setStroke(new BasicStroke(1.25F, 0, 2));
+            AlphaComposite ac3 = AlphaComposite.getInstance(3, 0.7F);
             g.setComposite(ac3);
             this.drawLine(2, g.getColor(), g);
             this.drawOval(5, g.getColor(), g);
-            ImageIO.write((RenderedImage)bi, "png", out);
+            ImageIO.write(bi, "png", out);
             out.flush();
             ok = true;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             ok = false;
-            LogUtils.error((Throwable)e);
-        }
-        finally {
+            LogUtils.error(e);
+        } finally {
             try {
                 out.close();
+            } catch (IOException e) {
+                LogUtils.error(e);
             }
-            catch (IOException e) {
-                LogUtils.error((Throwable)e);
-            }
+
         }
+
         return ok;
     }
 }
-

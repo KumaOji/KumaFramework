@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.apache.commons.lang3.ObjectUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.definition;
 
 import com.kuma.boot.captcha.support.core.definition.domain.Metadata;
@@ -14,51 +13,50 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.ObjectUtils;
 
 public interface Renderer {
-    public Metadata draw();
+    Metadata draw();
 
-    public Captcha getCapcha(String var1);
+    Captcha getCapcha(String key);
 
-    public boolean verify(Verification var1);
+    boolean verify(Verification verification);
 
-    public String getCategory();
+    String getCategory();
 
-    default public Object create(String key) {
+    default Object create(String key) {
         return this.create(key, this.getExpire());
     }
 
-    default public Object create(String key, Duration expire) {
+    default Object create(String key, Duration expire) {
         return this.create(key, expire.toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    default public Object create(String key, long expireAfterWrite, TimeUnit timeUnit) {
+    default Object create(String key, long expireAfterWrite, TimeUnit timeUnit) {
         Object value = this.nextStamp(key);
         this.put(key, value, expireAfterWrite, timeUnit);
         return value;
     }
 
-    public void put(String var1, Object var2, long var3, TimeUnit var5);
+    void put(String key, Object value, long expireAfterWrite, TimeUnit timeUnit);
 
-    public Object nextStamp(String var1);
+    Object nextStamp(String key);
 
-    public Duration getExpire();
+    Duration getExpire();
 
-    public Object get(String var1);
+    Object get(String key);
 
-    public void delete(String var1);
+    void delete(String key);
 
-    default public boolean containKey(String key) {
+    default boolean containKey(String key) {
         Object value = this.get(key);
-        return ObjectUtils.isNotEmpty((Object)value);
+        return ObjectUtils.isNotEmpty(value);
     }
 
-    public boolean check(String var1, Object var2);
+    boolean check(String key, Object value);
 
-    default public void put(String key, Object value, Duration expire) {
+    default void put(String key, Object value, Duration expire) {
         this.put(key, value, expire.toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    default public void put(String key, Object value) {
+    default void put(String key, Object value) {
         this.put(key, value, this.getExpire());
     }
 }
-

@@ -1,12 +1,13 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.behavior.dto;
 
 import com.kuma.boot.captcha.support.core.dto.Captcha;
 
-public class JigsawCaptcha
-extends Captcha {
+public class JigsawCaptcha extends Captcha {
     private String originalImageBase64;
     private String sliderImageBase64;
 
@@ -26,4 +27,3 @@ extends Captcha {
         this.sliderImageBase64 = sliderImageBase64;
     }
 }
-

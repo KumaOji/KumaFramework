@@ -1,39 +1,40 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.qrcode;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
+import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-public class ParserUtils
-extends ZXINGParser {
+public class ParserUtils extends ZXINGParser {
     protected static BufferedImage convertToGrayscale(BufferedImage colorImage) {
         BufferedImage grayscaleImage = new BufferedImage(colorImage.getWidth(), colorImage.getHeight(), 10);
-        grayscaleImage.getGraphics().drawImage(colorImage, 0, 0, null);
+        grayscaleImage.getGraphics().drawImage(colorImage, 0, 0, (ImageObserver)null);
         return grayscaleImage;
     }
 
     protected static BufferedImage swapColors(BufferedImage image) throws IOException {
-        for (int y = 0; y < image.getHeight(); ++y) {
-            for (int x = 0; x < image.getWidth(); ++x) {
-                int colorThreshold;
-                int blue;
-                int green;
+        for(int y = 0; y < image.getHeight(); ++y) {
+            for(int x = 0; x < image.getWidth(); ++x) {
                 int rgb = image.getRGB(x, y);
-                int red = rgb >> 16 & 0xFF;
-                if (ParserUtils.isColorWithinThreshold(red, green = rgb >> 8 & 0xFF, blue = rgb & 0xFF, 255, 255, 255, colorThreshold = 30)) {
+                int red = rgb >> 16 & 255;
+                int green = rgb >> 8 & 255;
+                int blue = rgb & 255;
+                int colorThreshold = 30;
+                if (isColorWithinThreshold(red, green, blue, 255, 255, 255, colorThreshold)) {
                     image.setRGB(x, y, 0);
-                    continue;
+                } else if (isColorWithinThreshold(red, green, blue, 0, 0, 0, colorThreshold)) {
+                    image.setRGB(x, y, 16777215);
                 }
-                if (!ParserUtils.isColorWithinThreshold(red, green, blue, 0, 0, 0, colorThreshold)) continue;
-                image.setRGB(x, y, 0xFFFFFF);
             }
         }
-        ImageIO.write((RenderedImage)image, "jpg", new File("/Users/laoxue/Desktop/convert.jpg"));
+
+        ImageIO.write(image, "jpg", new File("/Users/laoxue/Desktop/convert.jpg"));
         return ImageIO.read(new File("/Users/laoxue/Desktop/convert.jpg"));
     }
 
@@ -44,4 +45,3 @@ extends ZXINGParser {
         return deltaR <= threshold && deltaG <= threshold && deltaB <= threshold;
     }
 }
-

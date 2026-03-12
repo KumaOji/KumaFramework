@@ -1,10 +1,13 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.model;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class Point {
@@ -55,27 +58,26 @@ public class Point {
     }
 
     public Point parse(String jsonStr) {
-        HashMap m = new HashMap();
-        Arrays.stream(jsonStr.replaceFirst(",\\{", "\\{").replaceFirst("\\{", "").replaceFirst("\\}", "").replaceAll("\"", "").split(",")).forEach(item -> m.put(item.split(":")[0], item.split(":")[1]));
-        this.setX(Double.valueOf(String.valueOf(m.get("x"))).intValue());
-        this.setY(Double.valueOf(String.valueOf(m.get("y"))).intValue());
-        this.setSecretKey(String.valueOf(m.getOrDefault("secretKey", "")));
+        Map<String, Object> m = new HashMap();
+        Arrays.stream(jsonStr.replaceFirst(",\\{", "\\{").replaceFirst("\\{", "").replaceFirst("\\}", "").replaceAll("\"", "").split(",")).forEach((item) -> m.put(item.split(":")[0], item.split(":")[1]));
+        this.setX(Double.valueOf("" + String.valueOf(m.get("x"))).intValue());
+        this.setY(Double.valueOf("" + String.valueOf(m.get("y"))).intValue());
+        this.setSecretKey("" + String.valueOf(m.getOrDefault("secretKey", "")));
         return this;
     }
 
     public boolean equals(Object o) {
         if (this == o) {
             return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            Point point = (Point)o;
+            return this.x == point.x && this.y == point.y && Objects.equals(this.secretKey, point.secretKey);
+        } else {
             return false;
         }
-        Point point = (Point)o;
-        return this.x == point.x && this.y == point.y && Objects.equals(this.secretKey, point.secretKey);
     }
 
     public int hashCode() {
-        return Objects.hash(this.secretKey, this.x, this.y);
+        return Objects.hash(new Object[]{this.secretKey, this.x, this.y});
     }
 }
-

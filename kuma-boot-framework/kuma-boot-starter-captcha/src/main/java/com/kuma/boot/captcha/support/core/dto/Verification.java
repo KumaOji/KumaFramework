@@ -1,20 +1,16 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.dto;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.kuma.boot.captcha.support.core.definition.domain.Coordinate;
-
 import java.util.List;
 
-public class Verification
-extends Captcha {
+public class Verification extends Captcha {
     private Coordinate coordinate;
     private List<Coordinate> coordinates;
     private String characters;
@@ -46,20 +42,19 @@ extends Captcha {
     public boolean equals(Object o) {
         if (this == o) {
             return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            Verification that = (Verification)o;
+            return Objects.equal(this.characters, that.characters);
+        } else {
             return false;
         }
-        Verification that = (Verification)o;
-        return Objects.equal((Object)this.characters, (Object)that.characters);
     }
 
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.characters});
+        return Objects.hashCode(new Object[]{this.characters});
     }
 
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("characters", (Object)this.characters).toString();
+        return MoreObjects.toStringHelper(this).add("characters", this.characters).toString();
     }
 }
-

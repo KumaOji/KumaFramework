@@ -1,11 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.captcha.CaptchaUtil
- *  cn.hutool.captcha.GifCaptcha
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.hutool.renderer;
 
 import cn.hutool.captcha.CaptchaUtil;
@@ -16,8 +13,7 @@ import com.kuma.boot.captcha.support.core.definition.domain.Metadata;
 import com.kuma.boot.captcha.support.core.definition.enums.CaptchaCategory;
 import java.time.Duration;
 
-public class GifCaptchaRenderer
-extends AbstractGraphicRenderer {
+public class GifCaptchaRenderer extends AbstractGraphicRenderer {
     public GifCaptchaRenderer(RedisRepository redisRepository, String cacheName) {
         super(redisRepository, cacheName);
     }
@@ -26,9 +22,8 @@ extends AbstractGraphicRenderer {
         super(redisRepository, cacheName, expire);
     }
 
-    @Override
     public Metadata draw() {
-        GifCaptcha gifCaptcha = CaptchaUtil.createGifCaptcha((int)this.getWidth(), (int)this.getHeight(), (int)this.getLength());
+        GifCaptcha gifCaptcha = CaptchaUtil.createGifCaptcha(this.getWidth(), this.getHeight(), this.getLength());
         gifCaptcha.setFont(this.getFont());
         Metadata metadata = new Metadata();
         metadata.setGraphicImageBase64(gifCaptcha.getImageBase64Data());
@@ -36,9 +31,7 @@ extends AbstractGraphicRenderer {
         return metadata;
     }
 
-    @Override
     public String getCategory() {
         return CaptchaCategory.HUTOOL_GIF.getConstant();
     }
 }
-

@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.properties;
 
 import com.kuma.boot.captcha.support.core.definition.enums.CaptchaCharacter;
@@ -11,7 +10,9 @@ import com.kuma.boot.captcha.support.core.definition.enums.CaptchaFont;
 import com.kuma.boot.captcha.support.core.definition.enums.FontStyle;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="kuma.boot.captcha.tmp")
+@ConfigurationProperties(
+        prefix = "kuma.boot.captcha.tmp"
+)
 public class CaptchaProperties {
     private boolean enabled = false;
     private Graphics graphics = new Graphics();
@@ -64,8 +65,13 @@ public class CaptchaProperties {
         private int width = 130;
         private int height = 48;
         private int complexity = 2;
-        private CaptchaCharacter letter = CaptchaCharacter.NUM_AND_CHAR;
-        private CaptchaFont font = CaptchaFont.LEXOGRAPHER;
+        private CaptchaCharacter letter;
+        private CaptchaFont font;
+
+        public Graphics() {
+            this.letter = CaptchaCharacter.NUM_AND_CHAR;
+            this.font = CaptchaFont.LEXOGRAPHER;
+        }
 
         public int getLength() {
             return this.length;
@@ -119,8 +125,13 @@ public class CaptchaProperties {
     public static class Watermark {
         private String content = "Dante Cloud";
         private String fontName = "WenQuanZhengHei.ttf";
-        private FontStyle fontStyle = FontStyle.BOLD;
-        private Integer fontSize = 25;
+        private FontStyle fontStyle;
+        private Integer fontSize;
+
+        public Watermark() {
+            this.fontStyle = FontStyle.BOLD;
+            this.fontSize = 25;
+        }
 
         public String getContent() {
             return this.content;
@@ -198,9 +209,15 @@ public class CaptchaProperties {
         private String imageResource = "classpath*:images/word-click/*.png";
         private Integer wordCount = 5;
         private boolean randomColor = true;
-        private FontStyle fontStyle = FontStyle.BOLD;
-        private String fontName = "WenQuanZhengHei.ttf";
-        private Integer fontSize = 25;
+        private FontStyle fontStyle;
+        private String fontName;
+        private Integer fontSize;
+
+        public WordClick() {
+            this.fontStyle = FontStyle.BOLD;
+            this.fontName = "WenQuanZhengHei.ttf";
+            this.fontSize = 25;
+        }
 
         public String getImageResource() {
             return this.imageResource;
@@ -251,4 +268,3 @@ public class CaptchaProperties {
         }
     }
 }
-

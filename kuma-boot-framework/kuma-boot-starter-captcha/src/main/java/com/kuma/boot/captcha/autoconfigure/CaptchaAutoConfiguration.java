@@ -1,19 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.core.util.StrUtil
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
- *  org.springframework.core.io.Resource
- *  org.springframework.core.io.support.PathMatchingResourcePatternResolver
- *  org.springframework.util.FileCopyUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.autoconfigure;
 
 import cn.hutool.core.util.StrUtil;
@@ -23,7 +12,6 @@ import com.kuma.boot.captcha.service.CaptchaService;
 import com.kuma.boot.captcha.service.impl.CaptchaServiceFactory;
 import com.kuma.boot.captcha.util.ImageUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import java.io.InputStream;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,15 +24,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
 
 @AutoConfiguration
-@EnableConfigurationProperties(value={CaptchaProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.captcha", name={"enabled"}, havingValue="true")
-public class CaptchaAutoConfiguration
-implements InitializingBean {
+@EnableConfigurationProperties({CaptchaProperties.class})
+@ConditionalOnProperty(
+        prefix = "kuma.boot.captcha",
+        name = {"enabled"},
+        havingValue = "true"
+)
+public class CaptchaAutoConfiguration implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(CaptchaAutoConfiguration.class, (String)"kuma-boot-starter-captcha", (String[])new String[0]);
+        LogUtils.started(CaptchaAutoConfiguration.class, "kuma-boot-starter-captcha", new String[0]);
     }
 
     @Bean
@@ -70,10 +62,11 @@ implements InitializingBean {
         config.put("captcha.req.get.minute.limit", "" + prop.getReqGetMinuteLimit());
         config.put("captcha.req.check.minute.limit", "" + prop.getReqCheckMinuteLimit());
         config.put("captcha.req.verify.minute.limit", "" + prop.getReqVerifyMinuteLimit());
-        if (StrUtil.isNotBlank((CharSequence)prop.getJigsaw()) && prop.getJigsaw().startsWith("classpath:") || StrUtil.isNotBlank((CharSequence)prop.getPicClick()) && prop.getPicClick().startsWith("classpath:")) {
+        if (StrUtil.isNotBlank(prop.getJigsaw()) && prop.getJigsaw().startsWith("classpath:") || StrUtil.isNotBlank(prop.getPicClick()) && prop.getPicClick().startsWith("classpath:")) {
             config.put("captcha.init.original", "true");
-            CaptchaAutoConfiguration.initializeBaseMap(prop.getJigsaw(), prop.getPicClick());
+            initializeBaseMap(prop.getJigsaw(), prop.getPicClick());
         }
+
         return CaptchaServiceFactory.getInstance(config);
     }
 
@@ -83,25 +76,26 @@ implements InitializingBean {
     }
 
     public static void initializeBaseMap(String jigsaw, String picClick) {
-        ImageUtils.cacheBootImage(CaptchaAutoConfiguration.getResourcesImagesFile(jigsaw + "/original/*.png"), CaptchaAutoConfiguration.getResourcesImagesFile(jigsaw + "/slidingBlock/*.png"), CaptchaAutoConfiguration.getResourcesImagesFile(picClick + "/*.png"));
+        ImageUtils.cacheBootImage(getResourcesImagesFile(jigsaw + "/original/*.png"), getResourcesImagesFile(jigsaw + "/slidingBlock/*.png"), getResourcesImagesFile(picClick + "/*.png"));
     }
 
     public static Map<String, String> getResourcesImagesFile(String path) {
-        HashMap<String, String> imgMap = new HashMap<String, String>();
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Map<String, String> imgMap = new HashMap();
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
         try {
-            Resource[] resources;
-            for (Resource resource : resources = resolver.getResources(path)) {
-                byte[] bytes = FileCopyUtils.copyToByteArray((InputStream)resource.getInputStream());
+            Resource[] resources = resolver.getResources(path);
+
+            for(Resource resource : resources) {
+                byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
                 String string = Base64.getEncoder().encodeToString(bytes);
                 String filename = resource.getFilename();
                 imgMap.put(filename, string);
             }
+        } catch (Exception e) {
+            LogUtils.error(e);
         }
-        catch (Exception e) {
-            LogUtils.error((Throwable)e);
-        }
+
         return imgMap;
     }
 }
-
