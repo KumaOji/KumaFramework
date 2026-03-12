@@ -1,13 +1,15 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.captcha;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.ImageObserver;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -37,19 +39,21 @@ public class GifEncoder {
     protected int sample = 10;
 
     public void setDelay(int ms) {
-        this.delay = Math.round((float)ms / 10.0f);
+        this.delay = Math.round((float)ms / 10.0F);
     }
 
     public void setDispose(int code) {
         if (code >= 0) {
             this.dispose = code;
         }
+
     }
 
     public void setRepeat(int iter) {
         if (iter >= 0) {
             this.repeat = iter;
         }
+
     }
 
     public void setTransparent(Color c) {
@@ -57,45 +61,50 @@ public class GifEncoder {
     }
 
     public boolean addFrame(BufferedImage im) {
-        if (im == null || !this.started) {
+        if (im != null && this.started) {
+            boolean ok = true;
+
+            try {
+                if (!this.sizeSet) {
+                    this.setSize(im.getWidth(), im.getHeight());
+                }
+
+                this.image = im;
+                this.getImagePixels();
+                this.analyzePixels();
+                if (this.firstFrame) {
+                    this.writeLSD();
+                    this.writePalette();
+                    if (this.repeat >= 0) {
+                        this.writeNetscapeExt();
+                    }
+                }
+
+                this.writeGraphicCtrlExt();
+                this.writeImageDesc();
+                if (!this.firstFrame) {
+                    this.writePalette();
+                }
+
+                this.writePixels();
+                this.firstFrame = false;
+            } catch (IOException var4) {
+                ok = false;
+            }
+
+            return ok;
+        } else {
             return false;
         }
-        boolean ok = true;
-        try {
-            if (!this.sizeSet) {
-                this.setSize(im.getWidth(), im.getHeight());
-            }
-            this.image = im;
-            this.getImagePixels();
-            this.analyzePixels();
-            if (this.firstFrame) {
-                this.writeLSD();
-                this.writePalette();
-                if (this.repeat >= 0) {
-                    this.writeNetscapeExt();
-                }
-            }
-            this.writeGraphicCtrlExt();
-            this.writeImageDesc();
-            if (!this.firstFrame) {
-                this.writePalette();
-            }
-            this.writePixels();
-            this.firstFrame = false;
-        }
-        catch (IOException e) {
-            ok = false;
-        }
-        return ok;
     }
 
     public boolean outFlush() {
         boolean ok = true;
+
         try {
             this.out.flush();
             return ok;
-        }
-        catch (IOException e) {
+        } catch (IOException var3) {
             ok = false;
             return ok;
         }
@@ -108,20 +117,22 @@ public class GifEncoder {
     public boolean finish() {
         if (!this.started) {
             return false;
-        }
-        boolean ok = true;
-        this.started = false;
-        try {
-            this.out.write(59);
-            this.out.flush();
-            if (this.closeStream) {
-                this.out.close();
+        } else {
+            boolean ok = true;
+            this.started = false;
+
+            try {
+                this.out.write(59);
+                this.out.flush();
+                if (this.closeStream) {
+                    this.out.close();
+                }
+            } catch (IOException var3) {
+                ok = false;
             }
+
+            return ok;
         }
-        catch (IOException e) {
-            ok = false;
-        }
-        return ok;
     }
 
     public void reset() {
@@ -136,62 +147,66 @@ public class GifEncoder {
     }
 
     public void setFrameRate(float fps) {
-        if (Float.valueOf(0.0f).equals(Float.valueOf(fps))) {
-            this.delay = Math.round(100.0f / fps);
+        if (Float.valueOf(0.0F).equals(fps)) {
+            this.delay = Math.round(100.0F / fps);
         }
+
     }
 
     public void setQuality(int quality) {
         if (quality < 1) {
             quality = 1;
         }
+
         this.sample = quality;
     }
 
     public void setSize(int w, int h) {
-        if (this.started && !this.firstFrame) {
-            return;
+        if (!this.started || this.firstFrame) {
+            this.width = w;
+            this.height = h;
+            if (this.width < 1) {
+                this.width = 320;
+            }
+
+            if (this.height < 1) {
+                this.height = 240;
+            }
+
+            this.sizeSet = true;
         }
-        this.width = w;
-        this.height = h;
-        if (this.width < 1) {
-            this.width = 320;
-        }
-        if (this.height < 1) {
-            this.height = 240;
-        }
-        this.sizeSet = true;
     }
 
     public boolean start(OutputStream os) {
         if (os == null) {
             return false;
+        } else {
+            boolean ok = true;
+            this.closeStream = false;
+            this.out = os;
+
+            try {
+                this.writeString("GIF89a");
+            } catch (IOException var4) {
+                ok = false;
+            }
+
+            return this.started = ok;
         }
-        boolean ok = true;
-        this.closeStream = false;
-        this.out = os;
-        try {
-            this.writeString("GIF89a");
-        }
-        catch (IOException e) {
-            ok = false;
-        }
-        this.started = ok;
-        return this.started;
     }
 
     public boolean start(String file) {
         boolean ok = true;
+
         try {
             this.out = new BufferedOutputStream(new FileOutputStream(file));
             ok = this.start(this.out);
             this.closeStream = true;
-        }
-        catch (IOException e) {
+        } catch (IOException var4) {
             ok = false;
         }
-        this.started = ok;
-        return this.started;
+
+        return this.started = ok;
     }
 
     protected void analyzePixels() {
@@ -200,47 +215,56 @@ public class GifEncoder {
         this.indexedPixels = new byte[nPix];
         Quant nq = new Quant(this.pixels, len, this.sample);
         this.colorTab = nq.process();
-        for (int i = 0; i < this.colorTab.length; i += 3) {
+
+        for(int i = 0; i < this.colorTab.length; i += 3) {
             byte temp = this.colorTab[i];
             this.colorTab[i] = this.colorTab[i + 2];
             this.colorTab[i + 2] = temp;
             this.usedEntry[i / 3] = false;
         }
+
         int k = 0;
-        for (int i = 0; i < nPix; ++i) {
-            int index = nq.map(this.pixels[k++] & 0xFF, this.pixels[k++] & 0xFF, this.pixels[k++] & 0xFF);
+
+        for(int i = 0; i < nPix; ++i) {
+            int index = nq.map(this.pixels[k++] & 255, this.pixels[k++] & 255, this.pixels[k++] & 255);
             this.usedEntry[index] = true;
             this.indexedPixels[i] = (byte)index;
         }
+
         this.pixels = null;
         this.colorDepth = 8;
         this.palSize = 7;
         if (this.transparent != null) {
             this.transIndex = this.findClosest(this.transparent);
         }
+
     }
 
     protected int findClosest(Color c) {
         if (this.colorTab == null) {
             return -1;
+        } else {
+            int r = c.getRed();
+            int g = c.getGreen();
+            int b = c.getBlue();
+            int minpos = 0;
+            int dmin = 16777216;
+            int len = this.colorTab.length;
+
+            for(int i = 0; i < len; ++i) {
+                int dr = r - (this.colorTab[i++] & 255);
+                int dg = g - (this.colorTab[i++] & 255);
+                int db = b - (this.colorTab[i] & 255);
+                int d = dr * dr + dg * dg + db * db;
+                int index = i / 3;
+                if (this.usedEntry[index] && d < dmin) {
+                    dmin = d;
+                    minpos = index;
+                }
+            }
+
+            return minpos;
         }
-        int r = c.getRed();
-        int g = c.getGreen();
-        int b = c.getBlue();
-        int minpos = 0;
-        int dmin = 0x1000000;
-        int len = this.colorTab.length;
-        for (int i = 0; i < len; ++i) {
-            int dr = r - (this.colorTab[i++] & 0xFF);
-            int dg = g - (this.colorTab[i++] & 0xFF);
-            int db = b - (this.colorTab[i] & 0xFF);
-            int d = dr * dr + dg * dg + db * db;
-            int index = i / 3;
-            if (!this.usedEntry[index] || d >= dmin) continue;
-            dmin = d;
-            minpos = index;
-        }
-        return minpos;
     }
 
     protected void getImagePixels() {
@@ -250,18 +274,19 @@ public class GifEncoder {
         if (w != this.width || h != this.height || type != 5) {
             BufferedImage temp = new BufferedImage(this.width, this.height, 5);
             Graphics2D g = temp.createGraphics();
-            g.drawImage((Image)this.image, 0, 0, null);
+            g.drawImage(this.image, 0, 0, (ImageObserver)null);
             this.image = temp;
         }
+
         this.pixels = ((DataBufferByte)this.image.getRaster().getDataBuffer()).getData();
     }
 
     protected void writeGraphicCtrlExt() throws IOException {
-        int disp;
-        int transp;
         this.out.write(33);
         this.out.write(249);
         this.out.write(4);
+        int transp;
+        int disp;
         if (this.transparent == null) {
             transp = 0;
             disp = 0;
@@ -269,10 +294,13 @@ public class GifEncoder {
             transp = 1;
             disp = 2;
         }
+
         if (this.dispose >= 0) {
             disp = this.dispose & 7;
         }
-        this.out.write(0 | (disp <<= 2) | 0 | transp);
+
+        disp <<= 2;
+        this.out.write(0 | disp | 0 | transp);
         this.writeShort(this.delay);
         this.out.write(this.transIndex);
         this.out.write(0);
@@ -287,14 +315,15 @@ public class GifEncoder {
         if (this.firstFrame) {
             this.out.write(0);
         } else {
-            this.out.write(0x80 | this.palSize);
+            this.out.write(128 | this.palSize);
         }
+
     }
 
     protected void writeLSD() throws IOException {
         this.writeShort(this.width);
         this.writeShort(this.height);
-        this.out.write(0xF0 | this.palSize);
+        this.out.write(240 | this.palSize);
         this.out.write(0);
         this.out.write(0);
     }
@@ -313,9 +342,11 @@ public class GifEncoder {
     protected void writePalette() throws IOException {
         this.out.write(this.colorTab, 0, this.colorTab.length);
         int n = 768 - this.colorTab.length;
-        for (int i = 0; i < n; ++i) {
+
+        for(int i = 0; i < n; ++i) {
             this.out.write(0);
         }
+
     }
 
     protected void writePixels() throws IOException {
@@ -324,14 +355,14 @@ public class GifEncoder {
     }
 
     protected void writeShort(int value) throws IOException {
-        this.out.write(value & 0xFF);
-        this.out.write(value >> 8 & 0xFF);
+        this.out.write(value & 255);
+        this.out.write(value >> 8 & 255);
     }
 
     protected void writeString(String s) throws IOException {
-        for (int i = 0; i < s.length(); ++i) {
+        for(int i = 0; i < s.length(); ++i) {
             this.out.write((byte)s.charAt(i));
         }
+
     }
 }
-

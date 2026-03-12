@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.definition.domain;
 
 import java.util.List;
@@ -79,4 +81,3 @@ public class Metadata {
         this.characters = characters;
     }
 }
-

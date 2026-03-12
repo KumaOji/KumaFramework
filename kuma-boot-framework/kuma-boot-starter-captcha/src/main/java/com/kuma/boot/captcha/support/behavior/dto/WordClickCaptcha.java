@@ -1,16 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.behavior.dto;
 
 import com.google.common.base.MoreObjects;
 import com.kuma.boot.captcha.support.core.dto.Captcha;
 
-public class WordClickCaptcha
-extends Captcha {
+public class WordClickCaptcha extends Captcha {
     private String wordClickImageBase64;
     private String words;
     private Integer wordsCount;
@@ -40,7 +38,6 @@ extends Captcha {
     }
 
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("wordClickImageBase64", (Object)this.wordClickImageBase64).add("words", (Object)this.words).add("wordsCount", (Object)this.wordsCount).toString();
+        return MoreObjects.toStringHelper(this).add("wordClickImageBase64", this.wordClickImageBase64).add("words", this.words).add("wordsCount", this.wordsCount).toString();
     }
 }
-

@@ -1,14 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  jakarta.annotation.PostConstruct
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core;
 
 import com.kuma.boot.captcha.support.behavior.configuration.BehaviorCaptchaConfiguration;
@@ -23,20 +17,25 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-@AutoConfiguration(after={BehaviorCaptchaConfiguration.class, GraphicCaptchaConfiguration.class, HutoolCaptchaConfiguration.class})
-@EnableConfigurationProperties(value={CaptchaProperties.class})
-@ConditionalOnProperty(prefix="kuma.boot.captcha.tmp", name={"enabled"}, havingValue="true")
+@AutoConfiguration(
+        after = {BehaviorCaptchaConfiguration.class, GraphicCaptchaConfiguration.class, HutoolCaptchaConfiguration.class}
+)
+@EnableConfigurationProperties({CaptchaProperties.class})
+@ConditionalOnProperty(
+        prefix = "kuma.boot.captcha.tmp",
+        name = {"enabled"},
+        havingValue = "true"
+)
 public class CaptchaRendererAutoConfiguration {
     @PostConstruct
     public void postConstruct() {
-        LogUtils.info((String)"Starter [Engine Captcha Starter] Auto Configure.", (Object[])new Object[0]);
+        LogUtils.info("Starter [Engine Captcha Starter] Auto Configure.", new Object[0]);
     }
 
     @Bean
     public CaptchaRendererFactory captchaRendererFactory() {
         CaptchaRendererFactory captchaRendererFactory = new CaptchaRendererFactory();
-        LogUtils.info((String)"Bean [Captcha Renderer Factory] Auto Configure.", (Object[])new Object[0]);
+        LogUtils.info("Bean [Captcha Renderer Factory] Auto Configure.", new Object[0]);
         return captchaRendererFactory;
     }
 }
-

@@ -1,11 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.core.util.RandomUtil
- *  com.kuma.boot.common.constant.SymbolConstants
- *  com.kuma.boot.common.utils.lang.StringUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.behavior.renderer;
 
 import cn.hutool.core.util.RandomUtil;
@@ -17,8 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WordClickObfuscator {
-    private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
-    private final List<String> words = new ArrayList<String>();
+    private final List<Coordinate> coordinates = new ArrayList();
+    private final List<String> words = new ArrayList();
     private String wordString;
 
     public WordClickObfuscator(List<String> originalWords, List<Coordinate> originalCoordinates) {
@@ -26,12 +23,12 @@ public class WordClickObfuscator {
     }
 
     private void execute(List<String> originalWords, List<Coordinate> originalCoordinates) {
-        int[] indexes = RandomUtil.randomInts((int)originalWords.size());
-        Arrays.stream(indexes).forEach(value -> {
+        int[] indexes = RandomUtil.randomInts(originalWords.size());
+        Arrays.stream(indexes).forEach((value) -> {
             this.words.add(this.words.size(), (String)originalWords.get(value));
             this.coordinates.add(this.coordinates.size(), (Coordinate)originalCoordinates.get(value));
         });
-        this.wordString = StringUtils.join(this.getWords(), (String)SymbolConstants.COMMA);
+        this.wordString = StringUtils.join(this.getWords(), SymbolConstants.COMMA);
     }
 
     public List<Coordinate> getCoordinates() {
@@ -46,4 +43,3 @@ public class WordClickObfuscator {
         return this.wordString;
     }
 }
-

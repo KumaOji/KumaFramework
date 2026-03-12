@@ -1,17 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  jakarta.annotation.PostConstruct
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.context.annotation.Bean
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.hutool.configuration;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -30,8 +21,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
-@AutoConfiguration(after={ResourceProviderAutoConfiguration.class})
-@ConditionalOnProperty(prefix="kuma.boot.captcha.tmp", name={"enabled"}, havingValue="true")
+@AutoConfiguration(
+        after = {ResourceProviderAutoConfiguration.class}
+)
+@ConditionalOnProperty(
+        prefix = "kuma.boot.captcha.tmp",
+        name = {"enabled"},
+        havingValue = "true"
+)
 public class HutoolCaptchaConfiguration {
     private static final Logger log = LoggerFactory.getLogger(HutoolCaptchaConfiguration.class);
     @Autowired
@@ -42,8 +39,8 @@ public class HutoolCaptchaConfiguration {
         log.debug("SDK [Engine Captcha Hutool] Auto Configure.");
     }
 
-    @Bean(value={"HUTOOL_LINE"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"HUTOOL_LINE"})
+    @ConditionalOnBean({ResourceProvider.class})
     public LineCaptchaRenderer lineCaptchaRenderer(ResourceProvider resourceProvider) {
         LineCaptchaRenderer lineCaptchaRenderer = new LineCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         lineCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -51,8 +48,8 @@ public class HutoolCaptchaConfiguration {
         return lineCaptchaRenderer;
     }
 
-    @Bean(value={"HUTOOL_CIRCLE"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"HUTOOL_CIRCLE"})
+    @ConditionalOnBean({ResourceProvider.class})
     public CircleCaptchaRenderer circleCaptchaRenderer(ResourceProvider resourceProvider) {
         CircleCaptchaRenderer circleCaptchaRenderer = new CircleCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         circleCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -60,8 +57,8 @@ public class HutoolCaptchaConfiguration {
         return circleCaptchaRenderer;
     }
 
-    @Bean(value={"HUTOOL_SHEAR"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"HUTOOL_SHEAR"})
+    @ConditionalOnBean({ResourceProvider.class})
     public ShearCaptchaRenderer shearCaptchaRenderer(ResourceProvider resourceProvider) {
         ShearCaptchaRenderer shearCaptchaRenderer = new ShearCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         shearCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -69,8 +66,8 @@ public class HutoolCaptchaConfiguration {
         return shearCaptchaRenderer;
     }
 
-    @Bean(value={"HUTOOL_GIF"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"HUTOOL_GIF"})
+    @ConditionalOnBean({ResourceProvider.class})
     public GifCaptchaRenderer gifCaptchaRenderer(ResourceProvider resourceProvider) {
         GifCaptchaRenderer gifCaptchaRenderer = new GifCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         gifCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -78,4 +75,3 @@ public class HutoolCaptchaConfiguration {
         return gifCaptchaRenderer;
     }
 }
-

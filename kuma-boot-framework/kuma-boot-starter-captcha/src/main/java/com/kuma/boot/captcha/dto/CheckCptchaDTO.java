@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.dto;
 
 public class CheckCptchaDTO {
@@ -32,4 +34,3 @@ public class CheckCptchaDTO {
         this.token = token;
     }
 }
-

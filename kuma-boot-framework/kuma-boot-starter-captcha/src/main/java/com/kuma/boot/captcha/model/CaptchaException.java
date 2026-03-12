@@ -1,12 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.ResultEnum
- *  com.kuma.boot.common.enums.StatusEnum
- *  com.kuma.boot.common.exception.BootException
- *  com.kuma.boot.common.model.Code
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.model;
 
 import com.kuma.boot.common.enums.ResultEnum;
@@ -14,8 +10,7 @@ import com.kuma.boot.common.enums.StatusEnum;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.model.Code;
 
-public class CaptchaException
-extends BootException {
+public class CaptchaException extends BootException {
     public CaptchaException() {
     }
 
@@ -78,4 +73,3 @@ extends BootException {
     public CaptchaException(CaptchaCodeEnum captchaCodeEnum) {
     }
 }
-

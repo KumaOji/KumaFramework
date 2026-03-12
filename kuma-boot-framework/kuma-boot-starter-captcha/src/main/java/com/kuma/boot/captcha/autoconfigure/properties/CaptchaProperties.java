@@ -1,37 +1,58 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.autoconfigure.properties;
 
 import com.kuma.boot.captcha.model.CaptchaTypeEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(value="kuma.boot.captcha")
+@ConfigurationProperties("kuma.boot.captcha")
 public class CaptchaProperties {
     public static final String PREFIX = "kuma.boot.captcha";
     private boolean enabled = false;
-    private CaptchaTypeEnum type = CaptchaTypeEnum.DEFAULT;
-    private String jigsaw = "";
-    private String picClick = "";
-    private String waterMark = "\u6211\u7684\u6c34\u5370";
-    private String waterFont = "WenQuanZhengHei.ttf";
-    private String fontType = "WenQuanZhengHei.ttf";
-    private String slipOffset = "5";
-    private Boolean aesStatus = true;
-    private String interferenceOptions = "0";
-    private String cacheNumber = "1000";
-    private String timingClear = "180";
-    private StorageType cacheType = StorageType.redis;
-    private boolean historyDataClearEnable = false;
-    private boolean reqFrequencyLimitEnable = true;
-    private int reqGetLockLimit = 5;
-    private int reqGetLockSeconds = 300;
-    private int reqGetMinuteLimit = 100;
-    private int reqCheckMinuteLimit = 100;
-    private int reqVerifyMinuteLimit = 100;
+    private CaptchaTypeEnum type;
+    private String jigsaw;
+    private String picClick;
+    private String waterMark;
+    private String waterFont;
+    private String fontType;
+    private String slipOffset;
+    private Boolean aesStatus;
+    private String interferenceOptions;
+    private String cacheNumber;
+    private String timingClear;
+    private StorageType cacheType;
+    private boolean historyDataClearEnable;
+    private boolean reqFrequencyLimitEnable;
+    private int reqGetLockLimit;
+    private int reqGetLockSeconds;
+    private int reqGetMinuteLimit;
+    private int reqCheckMinuteLimit;
+    private int reqVerifyMinuteLimit;
+
+    public CaptchaProperties() {
+        this.type = CaptchaTypeEnum.DEFAULT;
+        this.jigsaw = "";
+        this.picClick = "";
+        this.waterMark = "我的水印";
+        this.waterFont = "WenQuanZhengHei.ttf";
+        this.fontType = "WenQuanZhengHei.ttf";
+        this.slipOffset = "5";
+        this.aesStatus = true;
+        this.interferenceOptions = "0";
+        this.cacheNumber = "1000";
+        this.timingClear = "180";
+        this.cacheType = CaptchaProperties.StorageType.redis;
+        this.historyDataClearEnable = false;
+        this.reqFrequencyLimitEnable = true;
+        this.reqGetLockLimit = 5;
+        this.reqGetLockSeconds = 300;
+        this.reqGetMinuteLimit = 100;
+        this.reqCheckMinuteLimit = 100;
+        this.reqVerifyMinuteLimit = 100;
+    }
 
     public boolean getHistoryDataClearEnable() {
         return this.historyDataClearEnable;
@@ -102,7 +123,7 @@ public class CaptchaProperties {
     }
 
     public static String getPREFIX() {
-        return PREFIX;
+        return "kuma.boot.captcha";
     }
 
     public CaptchaTypeEnum getType() {
@@ -213,7 +234,5 @@ public class CaptchaProperties {
         local,
         redis,
         other;
-
     }
 }
-

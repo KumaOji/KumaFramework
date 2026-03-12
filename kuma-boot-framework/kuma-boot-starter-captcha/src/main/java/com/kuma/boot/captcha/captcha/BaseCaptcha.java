@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.captcha;
 
 import java.awt.Color;
@@ -8,8 +10,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.io.OutputStream;
 
-public abstract class BaseCaptcha
-extends Randoms {
+public abstract class BaseCaptcha extends Randoms {
     protected Font font = new Font("Arial", 1, 32);
     protected int len = 4;
     protected int width = 130;
@@ -26,33 +27,29 @@ extends Randoms {
 
     protected char[] alphas() {
         char[] cs = new char[this.len];
-        block7: for (int i = 0; i < this.len; ++i) {
+
+        for(int i = 0; i < this.len; ++i) {
             switch (this.charType) {
-                case 2: {
-                    cs[i] = BaseCaptcha.alpha(8);
-                    continue block7;
-                }
-                case 3: {
-                    cs[i] = BaseCaptcha.alpha(8, charMaxIndex);
-                    continue block7;
-                }
-                case 4: {
-                    cs[i] = BaseCaptcha.alpha(8, 31);
-                    continue block7;
-                }
-                case 5: {
-                    cs[i] = BaseCaptcha.alpha(31, lowerMaxIndex);
-                    continue block7;
-                }
-                case 6: {
-                    cs[i] = BaseCaptcha.alpha(31);
-                    continue block7;
-                }
-                default: {
-                    cs[i] = BaseCaptcha.alpha();
-                }
+                case 2:
+                    cs[i] = alpha(8);
+                    break;
+                case 3:
+                    cs[i] = alpha(8, charMaxIndex);
+                    break;
+                case 4:
+                    cs[i] = alpha(8, 31);
+                    break;
+                case 5:
+                    cs[i] = alpha(31, lowerMaxIndex);
+                    break;
+                case 6:
+                    cs[i] = alpha(31);
+                    break;
+                default:
+                    cs[i] = alpha();
             }
         }
+
         this.chars = new String(cs);
         return cs;
     }
@@ -61,21 +58,23 @@ extends Randoms {
         if (fc > 255) {
             fc = 255;
         }
+
         if (bc > 255) {
             bc = 255;
         }
-        int r = fc + BaseCaptcha.num(bc - fc);
-        int g = fc + BaseCaptcha.num(bc - fc);
-        int b = fc + BaseCaptcha.num(bc - fc);
+
+        int r = fc + num(bc - fc);
+        int g = fc + num(bc - fc);
+        int b = fc + num(bc - fc);
         return new Color(r, g, b);
     }
 
     protected Color color() {
-        int[] color = COLOR[BaseCaptcha.num(COLOR.length)];
+        int[] color = COLOR[num(COLOR.length)];
         return new Color(color[0], color[1], color[2]);
     }
 
-    public abstract boolean out(OutputStream var1);
+    public abstract boolean out(OutputStream os);
 
     public String text() {
         this.checkAlpha();
@@ -91,35 +90,39 @@ extends Randoms {
         if (this.chars == null) {
             this.alphas();
         }
+
     }
 
     public void drawLine(int num, Graphics2D g) {
-        this.drawLine(num, null, g);
+        this.drawLine(num, (Color)null, g);
     }
 
     public void drawLine(int num, Color color, Graphics2D g) {
-        for (int i = 0; i < num; ++i) {
+        for(int i = 0; i < num; ++i) {
             g.setColor(color == null ? this.color(150, 250) : color);
-            int x1 = BaseCaptcha.num(-10, this.width - 10);
-            int y1 = BaseCaptcha.num(5, this.height - 5);
-            int x2 = BaseCaptcha.num(10, this.width + 10);
-            int y2 = BaseCaptcha.num(2, this.height - 2);
+            int x1 = num(-10, this.width - 10);
+            int y1 = num(5, this.height - 5);
+            int x2 = num(10, this.width + 10);
+            int y2 = num(2, this.height - 2);
             g.drawLine(x1, y1, x2, y2);
         }
+
     }
 
     public void drawOval(int num, Graphics2D g) {
-        for (int i = 0; i < num; ++i) {
+        for(int i = 0; i < num; ++i) {
             g.setColor(this.color(100, 250));
-            g.drawOval(BaseCaptcha.num(this.width), BaseCaptcha.num(this.height), 10 + BaseCaptcha.num(20), 10 + BaseCaptcha.num(20));
+            g.drawOval(num(this.width), num(this.height), 10 + num(20), 10 + num(20));
         }
+
     }
 
     public void drawOval(int num, Color color, Graphics2D g) {
-        for (int i = 0; i < num; ++i) {
+        for(int i = 0; i < num; ++i) {
             g.setColor(color == null ? this.color(100, 250) : color);
-            g.drawOval(BaseCaptcha.num(this.width), BaseCaptcha.num(this.height), 10 + BaseCaptcha.num(20), 10 + BaseCaptcha.num(20));
+            g.drawOval(num(this.width), num(this.height), 10 + num(20), 10 + num(20));
         }
+
     }
 
     public Font getFont() {
@@ -162,4 +165,3 @@ extends Randoms {
         this.charType = charType;
     }
 }
-

@@ -1,12 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.model;
 
 public enum CaptchaBaseEnum {
-    ORIGINAL("ORIGINAL", "\u6ed1\u52a8\u62fc\u56fe\u5e95\u56fe"),
-    SLIDING_BLOCK("SLIDING_BLOCK", "\u6ed1\u52a8\u62fc\u56fe\u6ed1\u5757\u5e95\u56fe"),
-    PIC_CLICK("PIC_CLICK", "\u6587\u5b57\u70b9\u9009\u5e95\u56fe");
+    ORIGINAL("ORIGINAL", "滑动拼图底图"),
+    SLIDING_BLOCK("SLIDING_BLOCK", "滑动拼图滑块底图"),
+    PIC_CLICK("PIC_CLICK", "文字点选底图");
 
     private final String codeValue;
     private final String codeDesc;
@@ -25,29 +27,32 @@ public enum CaptchaBaseEnum {
     }
 
     public static CaptchaBaseEnum parseFromCodeValue(String codeValue) {
-        for (CaptchaBaseEnum e : CaptchaBaseEnum.values()) {
-            if (!e.codeValue.equals(codeValue)) continue;
-            return e;
+        for(CaptchaBaseEnum e : values()) {
+            if (e.codeValue.equals(codeValue)) {
+                return e;
+            }
         }
+
         return null;
     }
 
     public static String getCodeDescByCodeBalue(String codeValue) {
-        CaptchaBaseEnum enumItem = CaptchaBaseEnum.parseFromCodeValue(codeValue);
+        CaptchaBaseEnum enumItem = parseFromCodeValue(codeValue);
         return enumItem == null ? "" : enumItem.getCodeDesc();
     }
 
     public static boolean validateCodeValue(String codeValue) {
-        return CaptchaBaseEnum.parseFromCodeValue(codeValue) != null;
+        return parseFromCodeValue(codeValue) != null;
     }
 
     public static String getString() {
         StringBuffer buffer = new StringBuffer();
-        for (CaptchaBaseEnum e : CaptchaBaseEnum.values()) {
+
+        for(CaptchaBaseEnum e : values()) {
             buffer.append(e.codeValue).append("--").append(e.getCodeDesc()).append(", ");
         }
+
         buffer.deleteCharAt(buffer.lastIndexOf(","));
         return buffer.toString().trim();
     }
 }
-

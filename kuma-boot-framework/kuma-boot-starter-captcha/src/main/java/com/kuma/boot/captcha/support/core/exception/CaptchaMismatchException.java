@@ -1,10 +1,11 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.exception;
 
-public class CaptchaMismatchException
-extends RuntimeException {
+public class CaptchaMismatchException extends RuntimeException {
     public CaptchaMismatchException() {
     }
 
@@ -24,4 +25,3 @@ extends RuntimeException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
-

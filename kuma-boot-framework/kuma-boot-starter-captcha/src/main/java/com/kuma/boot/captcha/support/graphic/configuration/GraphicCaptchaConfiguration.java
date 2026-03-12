@@ -1,17 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  jakarta.annotation.PostConstruct
- *  org.slf4j.Logger
- *  org.slf4j.LoggerFactory
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.context.annotation.Bean
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.graphic.configuration;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -31,8 +22,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
-@AutoConfiguration(after={ResourceProviderAutoConfiguration.class})
-@ConditionalOnProperty(prefix="kuma.boot.captcha.tmp", name={"enabled"}, havingValue="true")
+@AutoConfiguration(
+        after = {ResourceProviderAutoConfiguration.class}
+)
+@ConditionalOnProperty(
+        prefix = "kuma.boot.captcha.tmp",
+        name = {"enabled"},
+        havingValue = "true"
+)
 public class GraphicCaptchaConfiguration {
     private static final Logger log = LoggerFactory.getLogger(GraphicCaptchaConfiguration.class);
     @Autowired
@@ -43,8 +40,8 @@ public class GraphicCaptchaConfiguration {
         log.debug("SDK [Engine Captcha Graphic] Auto Configure.");
     }
 
-    @Bean(value={"ARITHMETIC"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"ARITHMETIC"})
+    @ConditionalOnBean({ResourceProvider.class})
     public ArithmeticCaptchaRenderer arithmeticCaptchaRenderer(ResourceProvider resourceProvider) {
         ArithmeticCaptchaRenderer arithmeticCaptchaRenderer = new ArithmeticCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         arithmeticCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -52,8 +49,8 @@ public class GraphicCaptchaConfiguration {
         return arithmeticCaptchaRenderer;
     }
 
-    @Bean(value={"CHINESE"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"CHINESE"})
+    @ConditionalOnBean({ResourceProvider.class})
     public ChineseCaptchaRenderer chineseCaptchaRenderer(ResourceProvider resourceProvider) {
         ChineseCaptchaRenderer chineseCaptchaRenderer = new ChineseCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         chineseCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -61,8 +58,8 @@ public class GraphicCaptchaConfiguration {
         return chineseCaptchaRenderer;
     }
 
-    @Bean(value={"CHINESE_GIF"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"CHINESE_GIF"})
+    @ConditionalOnBean({ResourceProvider.class})
     public ChineseGifCaptchaRenderer chineseGifCaptchaRenderer(ResourceProvider resourceProvider) {
         ChineseGifCaptchaRenderer chineseGifCaptchaRenderer = new ChineseGifCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         chineseGifCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -70,8 +67,8 @@ public class GraphicCaptchaConfiguration {
         return chineseGifCaptchaRenderer;
     }
 
-    @Bean(value={"SPEC_GIF"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"SPEC_GIF"})
+    @ConditionalOnBean({ResourceProvider.class})
     public SpecGifCaptchaRenderer specGifCaptchaRenderer(ResourceProvider resourceProvider) {
         SpecGifCaptchaRenderer specGifCaptchaRenderer = new SpecGifCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         specGifCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -79,8 +76,8 @@ public class GraphicCaptchaConfiguration {
         return specGifCaptchaRenderer;
     }
 
-    @Bean(value={"SPEC"})
-    @ConditionalOnBean(value={ResourceProvider.class})
+    @Bean({"SPEC"})
+    @ConditionalOnBean({ResourceProvider.class})
     public SpecCaptchaRenderer specCaptchaRenderer(ResourceProvider resourceProvider) {
         SpecCaptchaRenderer specCaptchaRenderer = new SpecCaptchaRenderer(this.redisRepository, "cache:token:captcha:graphic:");
         specCaptchaRenderer.setResourceProvider(resourceProvider);
@@ -88,4 +85,3 @@ public class GraphicCaptchaConfiguration {
         return specCaptchaRenderer;
     }
 }
-

@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.service.impl;
 
 import com.kuma.boot.captcha.service.CaptchaCacheService;
@@ -11,32 +13,32 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 public class CaptchaServiceFactory {
-    public static volatile Map<String, CaptchaService> instances = new HashMap<String, CaptchaService>();
-    public static volatile Map<String, CaptchaCacheService> cacheService = new HashMap<String, CaptchaCacheService>();
+    public static volatile Map<String, CaptchaService> instances = new HashMap();
+    public static volatile Map<String, CaptchaCacheService> cacheService = new HashMap();
 
     public static CaptchaService getInstance(Properties config) {
         String captchaType = config.getProperty("captcha.type", "default");
-        CaptchaService ret = instances.get(captchaType);
+        CaptchaService ret = (CaptchaService)instances.get(captchaType);
         if (ret == null) {
             throw new RuntimeException("unsupported-[captcha.type]=" + captchaType);
+        } else {
+            ret.init(config);
+            return ret;
         }
-        ret.init(config);
-        return ret;
     }
 
     public static CaptchaCacheService getCache(String cacheType) {
-        return cacheService.get(cacheType);
+        return (CaptchaCacheService)cacheService.get(cacheType);
     }
 
     static {
-        ServiceLoader<CaptchaCacheService> cacheServices = ServiceLoader.load(CaptchaCacheService.class);
-        for (CaptchaCacheService item : cacheServices) {
+        for(CaptchaCacheService item : ServiceLoader.load(CaptchaCacheService.class)) {
             cacheService.put(item.type(), item);
         }
-        ServiceLoader<CaptchaService> services = ServiceLoader.load(CaptchaService.class);
-        for (CaptchaService item : services) {
+
+        for(CaptchaService item : ServiceLoader.load(CaptchaService.class)) {
             instances.put(item.captchaType(), item);
         }
+
     }
 }
-

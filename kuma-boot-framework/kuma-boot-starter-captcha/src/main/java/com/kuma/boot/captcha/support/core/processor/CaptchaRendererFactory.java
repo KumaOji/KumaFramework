@@ -1,11 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.apache.commons.lang3.ObjectUtils
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.stereotype.Component
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.processor;
 
 import com.kuma.boot.captcha.support.core.definition.Renderer;
@@ -23,18 +20,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class CaptchaRendererFactory {
     @Autowired
-    private final Map<String, Renderer> handlers = new ConcurrentHashMap<String, Renderer>(8);
+    private final Map<String, Renderer> handlers = new ConcurrentHashMap(8);
 
     public Renderer getRenderer(String category) {
         CaptchaCategory captchaCategory = CaptchaCategory.getCaptchaCategory(category);
-        if (ObjectUtils.isEmpty((Object)((Object)captchaCategory))) {
+        if (ObjectUtils.isEmpty(captchaCategory)) {
             throw new CaptchaCategoryIsIncorrectException("Captcha category is incorrect.");
+        } else {
+            Renderer renderer = (Renderer)this.handlers.get(captchaCategory.getConstant());
+            if (ObjectUtils.isEmpty(renderer)) {
+                throw new CaptchaHandlerNotExistException();
+            } else {
+                return renderer;
+            }
         }
-        Renderer renderer = this.handlers.get(captchaCategory.getConstant());
-        if (ObjectUtils.isEmpty((Object)renderer)) {
-            throw new CaptchaHandlerNotExistException();
-        }
-        return renderer;
     }
 
     public Captcha getCaptcha(String identity, String category) {
@@ -47,4 +46,3 @@ public class CaptchaRendererFactory {
         return renderer.verify(verification);
     }
 }
-

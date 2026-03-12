@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.captcha.utils;
 
 import com.kuma.boot.captcha.captcha.BaseCaptcha;
@@ -16,45 +18,45 @@ import java.util.Random;
 
 public class CaptchaUtil {
     public static String out(OutputStream outputStream) {
-        return CaptchaUtil.out(5, outputStream);
+        return out(5, outputStream);
     }
 
     public static String out(int len, OutputStream outputStream) {
-        return CaptchaUtil.out(130, 48, len, outputStream);
+        return out(130, 48, len, outputStream);
     }
 
     public static String out(int len, Font font, OutputStream outputStream) {
-        return CaptchaUtil.out(130, 48, len, font, outputStream);
+        return out(130, 48, len, font, outputStream);
     }
 
     public static String out(int width, int height, int len, OutputStream outputStream) {
-        return CaptchaUtil.out(width, height, len, null, outputStream);
+        return out(width, height, len, (Font)null, outputStream);
     }
 
     public static String out(int width, int height, int len, Font font, OutputStream outputStream) {
-        int cType = new Random().nextInt(6);
-        return CaptchaUtil.outCaptcha(width, height, len, font, cType, outputStream);
+        int cType = (new Random()).nextInt(6);
+        return outCaptcha(width, height, len, font, cType, outputStream);
     }
 
     public static String outPng(OutputStream outputStream) {
-        return CaptchaUtil.outPng(5, outputStream);
+        return outPng(5, outputStream);
     }
 
     public static String outPng(int len, OutputStream outputStream) {
-        return CaptchaUtil.outPng(130, 48, len, outputStream);
+        return outPng(130, 48, len, outputStream);
     }
 
     public static String outPng(int len, Font font, OutputStream outputStream) {
-        return CaptchaUtil.outPng(130, 48, len, font, outputStream);
+        return outPng(130, 48, len, font, outputStream);
     }
 
     public static String outPng(int width, int height, int len, OutputStream outputStream) {
-        return CaptchaUtil.outPng(width, height, len, null, outputStream);
+        return outPng(width, height, len, (Font)null, outputStream);
     }
 
     public static String outPng(int width, int height, int len, Font font, OutputStream outputStream) {
-        int cType = new Random().nextInt(6);
-        return CaptchaUtil.outCaptcha(width, height, len, font, cType, outputStream);
+        int cType = (new Random()).nextInt(6);
+        return outCaptcha(width, height, len, font, cType, outputStream);
     }
 
     private static String outCaptcha(int width, int height, int len, Font font, int cType, OutputStream outputStream) {
@@ -72,11 +74,12 @@ public class CaptchaUtil {
         } else if (cType == 5) {
             captcha = new MathGifCaptcha(width, height, 4);
         }
+
         if (font != null) {
             captcha.setFont(font);
         }
+
         captcha.out(outputStream);
         return captcha.text().toLowerCase();
     }
 }
-

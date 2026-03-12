@@ -1,22 +1,23 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.service;
 
 import com.kuma.boot.captcha.model.Captcha;
 import java.util.Properties;
 
 public interface CaptchaService {
-    public void init(Properties var1);
+    void init(Properties config);
 
-    public Captcha get(Captcha var1);
+    Captcha get(Captcha captcha);
 
-    public Captcha check(Captcha var1);
+    Captcha check(Captcha captcha);
 
-    public Captcha verification(Captcha var1);
+    Captcha verification(Captcha captcha);
 
-    public String captchaType();
+    String captchaType();
 
-    public void destroy(Properties var1);
+    void destroy(Properties config);
 }
-

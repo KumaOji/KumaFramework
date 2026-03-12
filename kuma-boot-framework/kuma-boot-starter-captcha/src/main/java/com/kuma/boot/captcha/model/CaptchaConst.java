@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.model;
 
 public class CaptchaConst {
@@ -25,4 +27,3 @@ public class CaptchaConst {
     public static final String REQ_VALIDATE_MINUTE_LIMIT = "captcha.req.verify.minute.limit";
     public static final String REQ_CHECK_MINUTE_LIMIT = "captcha.req.check.minute.limit";
 }
-

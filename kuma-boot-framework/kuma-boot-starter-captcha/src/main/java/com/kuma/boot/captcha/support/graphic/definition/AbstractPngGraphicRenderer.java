@@ -1,11 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  com.kuma.boot.common.constant.SymbolConstants
- *  com.kuma.boot.common.utils.lang.StringUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.graphic.definition;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
@@ -15,8 +12,7 @@ import com.kuma.boot.common.utils.lang.StringUtils;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 
-public abstract class AbstractPngGraphicRenderer
-extends AbstractBaseGraphicRenderer {
+public abstract class AbstractPngGraphicRenderer extends AbstractBaseGraphicRenderer {
     public AbstractPngGraphicRenderer(RedisRepository redisRepository, String cacheName) {
         super(redisRepository, cacheName);
     }
@@ -25,15 +21,13 @@ extends AbstractBaseGraphicRenderer {
         super(redisRepository, cacheName, expire);
     }
 
-    @Override
     public Metadata draw() {
-        Object[] drawCharacters = this.getDrawCharacters();
-        BufferedImage bufferedImage = this.createPngBufferedImage((String[])drawCharacters);
-        String characters = StringUtils.join((Object[])drawCharacters, (String)SymbolConstants.BLANK);
+        String[] drawCharacters = this.getDrawCharacters();
+        BufferedImage bufferedImage = this.createPngBufferedImage(drawCharacters);
+        String characters = StringUtils.join(drawCharacters, SymbolConstants.BLANK);
         Metadata metadata = new Metadata();
         metadata.setGraphicImageBase64(this.toBase64(bufferedImage));
         metadata.setCharacters(characters);
         return metadata;
     }
 }
-

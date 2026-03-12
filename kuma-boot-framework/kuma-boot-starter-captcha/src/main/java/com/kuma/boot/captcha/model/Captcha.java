@@ -1,13 +1,15 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.model;
 
+import java.awt.Point;
 import java.io.Serializable;
 import java.util.List;
 
-public class Captcha
-implements Serializable {
+public class Captcha implements Serializable {
     private String captchaId;
     private String projectCode;
     private String captchaType;
@@ -16,10 +18,10 @@ implements Serializable {
     private Integer captchaFontSize;
     private String secretKey;
     private String originalImageBase64;
-    private Point point;
+    private com.kuma.boot.captcha.model.Point point;
     private String jigsawImageBase64;
     private List<String> wordList;
-    private List<java.awt.Point> pointList;
+    private List<Point> pointList;
     private String pointJson;
     private String token;
     private Boolean result = false;
@@ -89,11 +91,11 @@ implements Serializable {
         this.originalImageBase64 = originalImageBase64;
     }
 
-    public Point getPoint() {
+    public com.kuma.boot.captcha.model.Point getPoint() {
         return this.point;
     }
 
-    public void setPoint(Point point) {
+    public void setPoint(com.kuma.boot.captcha.model.Point point) {
         this.point = point;
     }
 
@@ -113,11 +115,11 @@ implements Serializable {
         this.wordList = wordList;
     }
 
-    public List<java.awt.Point> getPointList() {
+    public List<Point> getPointList() {
         return this.pointList;
     }
 
-    public void setPointList(List<java.awt.Point> pointList) {
+    public void setPointList(List<Point> pointList) {
         this.pointList = pointList;
     }
 
@@ -185,4 +187,3 @@ implements Serializable {
         this.browserInfo = browserInfo;
     }
 }
-

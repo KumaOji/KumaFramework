@@ -1,17 +1,20 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  io.swagger.v3.oas.annotations.media.Schema
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public abstract class Captcha {
-    @Schema(title="\u9a8c\u8bc1\u7801\u8eab\u4efd")
+    @Schema(
+            title = "验证码身份"
+    )
     private String identity;
-    @Schema(title="\u9a8c\u8bc1\u7801\u7c7b\u522b")
+    @Schema(
+            title = "验证码类别"
+    )
     private String category;
 
     public String getIdentity() {
@@ -30,4 +33,3 @@ public abstract class Captcha {
         this.category = category;
     }
 }
-

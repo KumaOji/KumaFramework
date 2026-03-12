@@ -1,12 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.core.util.IdUtil
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  org.apache.commons.lang3.ObjectUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.definition;
 
 import cn.hutool.core.util.IdUtil;
@@ -24,8 +20,7 @@ import java.awt.Font;
 import java.time.Duration;
 import org.apache.commons.lang3.ObjectUtils;
 
-public abstract class AbstractGraphicRenderer
-extends AbstractRenderer {
+public abstract class AbstractGraphicRenderer extends AbstractRenderer {
     private GraphicCaptcha graphicCaptcha;
 
     public AbstractGraphicRenderer(RedisRepository redisRepository, String cacheName) {
@@ -52,34 +47,37 @@ extends AbstractRenderer {
         return this.getCaptchaProperties().getGraphics().getLength();
     }
 
-    @Override
     public Captcha getCapcha(String key) {
         String identity = key;
-        if (StringUtils.isBlank((String)identity)) {
+        if (StringUtils.isBlank(key)) {
             identity = IdUtil.fastUUID();
         }
+
         this.create(identity);
         return this.getGraphicCaptcha();
     }
 
-    @Override
     public boolean verify(Verification verification) {
-        if (ObjectUtils.isEmpty((Object)verification) || StringUtils.isEmpty((String)verification.getIdentity())) {
+        if (!ObjectUtils.isEmpty(verification) && !StringUtils.isEmpty(verification.getIdentity())) {
+            if (StringUtils.isEmpty(verification.getCharacters())) {
+                throw new CaptchaIsEmptyException("Captcha is empty");
+            } else {
+                String store = (String)this.get(verification.getIdentity());
+                if (StringUtils.isEmpty(store)) {
+                    throw new CaptchaHasExpiredException("Stamp is invalid!");
+                } else {
+                    this.delete(verification.getIdentity());
+                    String real = verification.getCharacters();
+                    if (!StringUtils.equalsIgnoreCase(store, real)) {
+                        throw new CaptchaMismatchException();
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        } else {
             throw new CaptchaParameterIllegalException("Parameter value is illegal");
         }
-        if (StringUtils.isEmpty((String)verification.getCharacters())) {
-            throw new CaptchaIsEmptyException("Captcha is empty");
-        }
-        String store = (String)this.get(verification.getIdentity());
-        if (StringUtils.isEmpty((String)store)) {
-            throw new CaptchaHasExpiredException("Stamp is invalid!");
-        }
-        this.delete(verification.getIdentity());
-        String real = verification.getCharacters();
-        if (!StringUtils.equalsIgnoreCase((CharSequence)store, (CharSequence)real)) {
-            throw new CaptchaMismatchException();
-        }
-        return true;
     }
 
     private GraphicCaptcha getGraphicCaptcha() {
@@ -90,7 +88,6 @@ extends AbstractRenderer {
         this.graphicCaptcha = graphicCaptcha;
     }
 
-    @Override
     public String nextStamp(String key) {
         Metadata metadata = this.draw();
         GraphicCaptcha graphicCaptcha = new GraphicCaptcha();
@@ -101,4 +98,3 @@ extends AbstractRenderer {
         return metadata.getCharacters();
     }
 }
-

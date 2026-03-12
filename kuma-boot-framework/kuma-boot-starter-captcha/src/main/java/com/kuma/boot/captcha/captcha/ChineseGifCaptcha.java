@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.captcha;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -17,8 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class ChineseGifCaptcha
-extends AbstractChineseCaptcha {
+public class ChineseGifCaptcha extends AbstractChineseCaptcha {
     public ChineseGifCaptcha() {
     }
 
@@ -37,13 +35,10 @@ extends AbstractChineseCaptcha {
         this.setFont(font);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    @Override
     public boolean out(OutputStream os) {
-        boolean ok;
         this.checkAlpha();
+
+        boolean ok;
         try {
             char[] rands = this.textChar();
             GifEncoder gifEncoder = new GifEncoder();
@@ -52,27 +47,28 @@ extends AbstractChineseCaptcha {
             gifEncoder.setDelay(100);
             gifEncoder.setRepeat(0);
             Color fontcolor = this.color();
-            for (int i = 0; i < this.len; ++i) {
+
+            for(int i = 0; i < this.len; ++i) {
                 BufferedImage frame = this.graphicsImage(fontcolor, rands, i);
                 gifEncoder.addFrame(frame);
                 frame.flush();
             }
+
             gifEncoder.finish();
             ok = true;
-        }
-        finally {
+        } finally {
             try {
                 os.close();
+            } catch (IOException e) {
+                LogUtils.error(e);
             }
-            catch (IOException e) {
-                LogUtils.error((Throwable)e);
-            }
+
         }
+
         return ok;
     }
 
     private BufferedImage graphicsImage(Color fontcolor, char[] strs, int flag) {
-        AlphaComposite ac3;
         BufferedImage image = new BufferedImage(this.width, this.height, 1);
         Graphics2D g2d = (Graphics2D)image.getGraphics();
         g2d.setColor(Color.WHITE);
@@ -83,28 +79,34 @@ extends AbstractChineseCaptcha {
         int h = this.height - hp;
         int w = this.width / strs.length;
         int sp = (w - this.font.getSize()) / 2;
-        for (int i = 0; i < this.len; ++i) {
-            ac3 = AlphaComposite.getInstance(3, this.getAlpha(flag, i));
+
+        for(int i = 0; i < this.len; ++i) {
+            AlphaComposite ac3 = AlphaComposite.getInstance(3, this.getAlpha(flag, i));
             g2d.setComposite(ac3);
-            int x = i * w + sp + ChineseGifCaptcha.num(-3, 3);
-            int y = h + ChineseGifCaptcha.num(-3, 3);
+            int x = i * w + sp + num(-3, 3);
+            int y = h + num(-3, 3);
             if (x < 0) {
                 x = 0;
             }
+
             if (x + this.font.getSize() > this.width) {
                 x = this.width - this.font.getSize();
             }
+
             if (y > this.height) {
                 y = this.height;
             }
+
             if (y - this.font.getSize() < 0) {
                 y = this.font.getSize();
             }
-            g2d.setFont(this.font.deriveFont(ChineseGifCaptcha.num(2) == 0 ? 0 : 2));
+
+            g2d.setFont(this.font.deriveFont(num(2) == 0 ? 0 : 2));
             g2d.drawString(String.valueOf(strs[i]), x, y);
         }
-        g2d.setStroke(new BasicStroke(1.25f, 0, 2));
-        ac3 = AlphaComposite.getInstance(3, 0.45f);
+
+        g2d.setStroke(new BasicStroke(1.25F, 0, 2));
+        AlphaComposite ac3 = AlphaComposite.getInstance(3, 0.45F);
         g2d.setComposite(ac3);
         this.drawLine(1, g2d.getColor(), g2d);
         this.drawOval(3, g2d.getColor(), g2d);
@@ -114,9 +116,8 @@ extends AbstractChineseCaptcha {
 
     private float getAlpha(int i, int j) {
         int num = i + j;
-        float r = 1.0f / (float)(this.len - 1);
+        float r = 1.0F / (float)(this.len - 1);
         float s = (float)this.len * r;
         return num >= this.len ? (float)num * r - s : (float)num * r;
     }
 }
-

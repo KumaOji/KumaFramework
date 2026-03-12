@@ -1,21 +1,22 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.service;
 
 public interface CaptchaCacheService {
-    public void set(String var1, String var2, long var3);
+    void set(String key, String value, long expiresInSeconds);
 
-    public boolean exists(String var1);
+    boolean exists(String key);
 
-    public void delete(String var1);
+    void delete(String key);
 
-    public String get(String var1);
+    String get(String key);
 
-    public String type();
+    String type();
 
-    default public Long increment(String key, long val) {
+    default Long increment(String key, long val) {
         return 0L;
     }
 }
-

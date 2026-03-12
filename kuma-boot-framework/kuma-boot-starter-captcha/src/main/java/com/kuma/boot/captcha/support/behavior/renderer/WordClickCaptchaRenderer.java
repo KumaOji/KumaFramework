@@ -1,13 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  cn.hutool.core.util.IdUtil
- *  com.kuma.boot.cache.redis.repository.RedisRepository
- *  com.kuma.boot.common.utils.lang.StringUtils
- *  org.apache.commons.lang3.ObjectUtils
- *  org.springframework.util.CollectionUtils
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.behavior.renderer;
 
 import cn.hutool.core.util.IdUtil;
@@ -30,16 +25,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.util.CollectionUtils;
 
-public class WordClickCaptchaRenderer
-extends AbstractBehaviorRenderer {
+public class WordClickCaptchaRenderer extends AbstractBehaviorRenderer {
     private WordClickCaptcha wordClickCaptcha;
 
     public WordClickCaptchaRenderer(RedisRepository redisRepository, String cacheName) {
@@ -57,12 +51,10 @@ extends AbstractBehaviorRenderer {
         return this.getResourceProvider().getFont(fontName, fontSize, fontStyle);
     }
 
-    @Override
     public String getCategory() {
         return CaptchaCategory.WORD_CLICK.getConstant();
     }
 
-    @Override
     public List<Coordinate> nextStamp(String key) {
         Metadata metadata = this.draw();
         WordClickObfuscator wordClickObfuscator = new WordClickObfuscator(metadata.getWords(), metadata.getCoordinates());
@@ -75,35 +67,38 @@ extends AbstractBehaviorRenderer {
         return wordClickObfuscator.getCoordinates();
     }
 
-    @Override
     public Captcha getCapcha(String key) {
         String identity = key;
-        if (StringUtils.isBlank((String)identity)) {
+        if (StringUtils.isBlank(key)) {
             identity = IdUtil.fastUUID();
         }
+
         this.create(identity);
         return this.wordClickCaptcha;
     }
 
-    @Override
     public boolean verify(Verification verification) {
-        if (ObjectUtils.isEmpty((Object)verification) || CollectionUtils.isEmpty(verification.getCoordinates())) {
+        if (!ObjectUtils.isEmpty(verification) && !CollectionUtils.isEmpty(verification.getCoordinates())) {
+            List<Coordinate> store = (List)this.get(verification.getIdentity());
+            if (CollectionUtils.isEmpty(store)) {
+                throw new CaptchaHasExpiredException("Stamp is invalid!");
+            } else {
+                this.delete(verification.getIdentity());
+                List<Coordinate> real = verification.getCoordinates();
+
+                for(int i = 0; i < store.size(); ++i) {
+                    if (this.isDeflected(((Coordinate)real.get(i)).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize()) || this.isDeflected(((Coordinate)real.get(i)).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize())) {
+                        throw new CaptchaMismatchException();
+                    }
+                }
+
+                return true;
+            }
+        } else {
             throw new CaptchaParameterIllegalException("Parameter Stamp value is null");
         }
-        List store = (List)this.get(verification.getIdentity());
-        if (CollectionUtils.isEmpty((Collection)store)) {
-            throw new CaptchaHasExpiredException("Stamp is invalid!");
-        }
-        this.delete(verification.getIdentity());
-        List<Coordinate> real = verification.getCoordinates();
-        for (int i = 0; i < store.size(); ++i) {
-            if (!this.isDeflected(real.get(i).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize()) && !this.isDeflected(real.get(i).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize())) continue;
-            throw new CaptchaMismatchException();
-        }
-        return true;
     }
 
-    @Override
     public Metadata draw() {
         BufferedImage backgroundImage = this.getResourceProvider().getRandomWordClickImage();
         int wordCount = this.getCaptchaProperties().getWordClick().getWordCount();
@@ -111,11 +106,11 @@ extends AbstractBehaviorRenderer {
         Graphics backgroundGraphics = backgroundImage.getGraphics();
         int backgroundImageWidth = backgroundImage.getWidth();
         int backgroundImageHeight = backgroundImage.getHeight();
-        List<Coordinate> coordinates = IntStream.range(0, words.size()).mapToObj(index -> this.drawWord(backgroundGraphics, backgroundImageWidth, backgroundImageHeight, index, wordCount, (String)words.get(index))).collect(Collectors.toList());
+        List<Coordinate> coordinates = (List)IntStream.range(0, words.size()).mapToObj((index) -> this.drawWord(backgroundGraphics, backgroundImageWidth, backgroundImageHeight, index, wordCount, (String)words.get(index))).collect(Collectors.toList());
         this.addWatermark(backgroundGraphics, backgroundImageWidth, backgroundImageHeight);
         BufferedImage combinedImage = new BufferedImage(backgroundImageWidth, backgroundImageHeight, 1);
         Graphics combinedGraphics = combinedImage.getGraphics();
-        combinedGraphics.drawImage(backgroundImage, 0, 0, null);
+        combinedGraphics.drawImage(backgroundImage, 0, 0, (ImageObserver)null);
         int excludeWordIndex = RandomProvider.randomInt(1, wordCount) - 1;
         words.remove(excludeWordIndex);
         coordinates.remove(excludeWordIndex);
@@ -133,8 +128,9 @@ extends AbstractBehaviorRenderer {
         } else {
             graphics.setColor(Color.BLACK);
         }
+
         AffineTransform affineTransform = new AffineTransform();
-        affineTransform.rotate(Math.toRadians(RandomProvider.randomInt(-45, 45)), 0.0, 0.0);
+        affineTransform.rotate(Math.toRadians((double)RandomProvider.randomInt(-45, 45)), (double)0.0F, (double)0.0F);
         Font rotatedFont = this.getFont().deriveFont(affineTransform);
         graphics.setFont(rotatedFont);
         graphics.drawString(word, coordinate.getX(), coordinate.getY());
@@ -151,9 +147,17 @@ extends AbstractBehaviorRenderer {
 
     private Coordinate randomWordCoordinate(int backgroundImageWidth, int backgroundImageHeight, int wordIndex, int wordCount) {
         int wordSize = this.getFontSize();
-        int averageWidth = backgroundImageWidth / (wordCount + 1);
         int halfWordSize = this.getHalfFontSize();
-        int x = averageWidth < halfWordSize ? RandomProvider.randomInt(this.getStartInclusive(halfWordSize), backgroundImageWidth) : (wordIndex == 0 ? RandomProvider.randomInt(this.getStartInclusive(halfWordSize), this.getEndExclusive(wordIndex, averageWidth, halfWordSize)) : RandomProvider.randomInt(averageWidth * wordIndex + halfWordSize, this.getEndExclusive(wordIndex, averageWidth, halfWordSize)));
+        int averageWidth = backgroundImageWidth / (wordCount + 1);
+        int x;
+        if (averageWidth < halfWordSize) {
+            x = RandomProvider.randomInt(this.getStartInclusive(halfWordSize), backgroundImageWidth);
+        } else if (wordIndex == 0) {
+            x = RandomProvider.randomInt(this.getStartInclusive(halfWordSize), this.getEndExclusive(wordIndex, averageWidth, halfWordSize));
+        } else {
+            x = RandomProvider.randomInt(averageWidth * wordIndex + halfWordSize, this.getEndExclusive(wordIndex, averageWidth, halfWordSize));
+        }
+
         int y = RandomProvider.randomInt(wordSize, backgroundImageHeight - wordSize);
         return new Coordinate(x, y);
     }
@@ -166,4 +170,3 @@ extends AbstractBehaviorRenderer {
         return averageWidth * (wordIndex + 1) - halfWordSize;
     }
 }
-

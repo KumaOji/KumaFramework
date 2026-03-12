@@ -1,18 +1,15 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.google.common.base.MoreObjects
- *  com.google.common.base.Objects
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.support.core.definition.domain;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import java.io.Serializable;
 
-public class Coordinate
-implements Serializable {
+public class Coordinate implements Serializable {
     private int x;
     private int y;
 
@@ -43,20 +40,19 @@ implements Serializable {
     public boolean equals(Object o) {
         if (this == o) {
             return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
+        } else if (o != null && this.getClass() == o.getClass()) {
+            Coordinate that = (Coordinate)o;
+            return this.x == that.x && this.y == that.y;
+        } else {
             return false;
         }
-        Coordinate that = (Coordinate)o;
-        return this.x == that.x && this.y == that.y;
     }
 
     public int hashCode() {
-        return Objects.hashCode((Object[])new Object[]{this.x, this.y});
+        return Objects.hashCode(new Object[]{this.x, this.y});
     }
 
     public String toString() {
-        return MoreObjects.toStringHelper((Object)this).add("x", this.x).add("y", this.y).toString();
+        return MoreObjects.toStringHelper(this).add("x", this.x).add("y", this.y).toString();
     }
 }
-

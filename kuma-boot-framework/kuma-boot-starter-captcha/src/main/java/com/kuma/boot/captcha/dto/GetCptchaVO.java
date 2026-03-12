@@ -1,6 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.captcha.dto;
 
 public class GetCptchaVO {
@@ -41,4 +43,3 @@ public class GetCptchaVO {
         this.secretKey = secretKey;
     }
 }
-
