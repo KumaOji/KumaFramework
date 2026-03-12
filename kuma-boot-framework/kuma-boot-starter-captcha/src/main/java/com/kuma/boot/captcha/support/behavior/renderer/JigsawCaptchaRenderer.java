@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.captcha.support.behavior.renderer;
 
 import cn.hutool.core.img.ImgUtil;

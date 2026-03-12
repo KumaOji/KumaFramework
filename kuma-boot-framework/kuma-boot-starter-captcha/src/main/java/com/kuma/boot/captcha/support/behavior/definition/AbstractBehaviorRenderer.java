@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.captcha.support.behavior.definition;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
