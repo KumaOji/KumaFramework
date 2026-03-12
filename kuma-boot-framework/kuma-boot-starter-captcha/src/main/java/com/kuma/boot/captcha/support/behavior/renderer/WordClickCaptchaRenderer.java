@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.captcha.support.behavior.renderer;
 
 import cn.hutool.core.util.IdUtil;
@@ -87,7 +82,7 @@ public class WordClickCaptchaRenderer extends AbstractBehaviorRenderer {
                 List<Coordinate> real = verification.getCoordinates();
 
                 for(int i = 0; i < store.size(); ++i) {
-                    if (this.isDeflected(((Coordinate)real.get(i)).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize()) || this.isDeflected(((Coordinate)real.get(i)).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize())) {
+                    if (this.isDeflected(((Coordinate)real.get(i)).getX(), ((Coordinate)store.get(i)).getX(), this.getFontSize()) || this.isDeflected(((Coordinate)real.get(i)).getY(), ((Coordinate)store.get(i)).getY(), this.getFontSize())) {
                         throw new CaptchaMismatchException();
                     }
                 }

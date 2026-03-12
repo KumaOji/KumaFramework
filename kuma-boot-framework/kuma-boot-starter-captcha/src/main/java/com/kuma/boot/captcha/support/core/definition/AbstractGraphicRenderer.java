@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.captcha.support.core.definition;
 
 import cn.hutool.core.util.IdUtil;
