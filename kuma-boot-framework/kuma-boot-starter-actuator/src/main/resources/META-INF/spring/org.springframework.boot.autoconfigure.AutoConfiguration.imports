@@ -1,7 +1,7 @@
 com.kuma.boot.actuator.endpoint.audit.autoconfigure.AuditEndPointAutoConfiguration
 com.kuma.boot.actuator.endpoint.druid.autoconfigure.DruidEndpointAutoConfiguration
 com.kuma.boot.actuator.endpoint.kmc.autoconfigure.KmcEndPointAutoConfiguration
-com.kuma.boot.actuator.endpoint.requst.autoconfigure.RequestMappingEndPointAutoConfiguration
+com.kuma.boot.actuator.endpoint.request.autoconfigure.RequestMappingEndPointAutoConfiguration
 com.kuma.boot.actuator.endpoint.startup.autoconfigure.KmcStartupEndpointAutoConfiguration
 com.kuma.boot.actuator.health.autoconfigure.KmcHealthAutoConfiguration
 com.kuma.boot.actuator.info.autoconfigure.KmcInfoAutoConfiguration

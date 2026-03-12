@@ -20,19 +20,18 @@ import com.kuma.boot.common.support.version.KmcVersion;
 import org.springframework.boot.actuate.info.Info;
 import org.springframework.boot.actuate.info.InfoContributor;
 
-import java.util.Collections;
+import java.util.Map;
 
 /**
- * KmcInfoContributor
+ * 向 {@code /actuator/info} 端点注入 kmc 版本信息。
  *
  * @author kuma
- * @version 2026.01
- * @since 2025-12-19 09:30:45
+ * @since 2025-12-19
  */
 public class KmcInfoContributor implements InfoContributor {
 
     @Override
-    public void contribute( Info.Builder builder ) {
-        builder.withDetail("kmc-version", Collections.singletonMap("version", KmcVersion.getVersion()));
+    public void contribute(Info.Builder builder) {
+        builder.withDetail("kmc-version", Map.of("version", KmcVersion.getVersion()));
     }
 }

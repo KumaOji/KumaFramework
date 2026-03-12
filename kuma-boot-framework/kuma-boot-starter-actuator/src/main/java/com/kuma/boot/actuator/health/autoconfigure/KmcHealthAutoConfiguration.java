@@ -25,18 +25,17 @@ import org.springframework.boot.health.autoconfigure.contributor.ConditionalOnEn
 import org.springframework.context.annotation.Bean;
 
 /**
- * EndPoint配置1111
+ * {@link KmcHealthIndicator} 自动配置。
  *
  * @author kuma
- * @version 2022.03
- * @since 2021/04/02 10:25
+ * @since 2021-04-02
  */
 @AutoConfiguration
 @ConditionalOnEnabledHealthIndicator("kmc")
 public class KmcHealthAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(KmcHealthAutoConfiguration.class, StarterNameConstants.ACTUATOR_STARTER);
     }
 
@@ -44,5 +43,4 @@ public class KmcHealthAutoConfiguration implements InitializingBean {
     public KmcHealthIndicator kmcHealthIndicator() {
         return new KmcHealthIndicator();
     }
-
 }

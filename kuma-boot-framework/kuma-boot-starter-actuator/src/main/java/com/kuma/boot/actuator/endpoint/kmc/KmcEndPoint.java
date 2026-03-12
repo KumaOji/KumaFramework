@@ -16,20 +16,20 @@
 
 package com.kuma.boot.actuator.endpoint.kmc;
 
-import cn.hutool.json.JSONObject;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import jakarta.annotation.Nullable;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
+import org.springframework.util.StringUtils;
+
+import java.util.Map;
 
 /**
- * KmcEndPoint
+ * 自定义状态端点 {@code /actuator/kmc}，支持运行时动态读写 status / detail。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 20:08:52
+ * @since 2021-09-02
  */
 @Endpoint(id = "kmc")
 public class KmcEndPoint {
@@ -38,33 +38,27 @@ public class KmcEndPoint {
     private volatile String detail = "一切正常";
 
     @ReadOperation
-    public JSONObject info() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.set("status", status);
-        jsonObject.set("detail", detail);
-        return jsonObject;
+    public Map<String, String> info() {
+        return Map.of("status", status, "detail", detail);
     }
 
     @ReadOperation
-    public JSONObject infoByKey(@Selector String key) {
-        JSONObject jsonObject = new JSONObject();
-        if ("status".equals(key)) {
-            jsonObject.set("status", status);
-        } else if ("detail".equals(key)) {
-            jsonObject.set("detail", detail);
-        }
-        return jsonObject;
+    public Map<String, String> infoByKey(@Selector String key) {
+        return switch (key) {
+            case "status" -> Map.of("status", status);
+            case "detail" -> Map.of("detail", detail);
+            default       -> Map.of();
+        };
     }
 
     /** 动态修改指标，e.g. POST /actuator/kmc/{key}  body: { "value": "..." } */
     @WriteOperation
     public void update(@Selector String key, @Nullable String value) {
-        if (!StringUtils.isEmpty(value)) {
-            if ("status".equals(key)) {
-                status = value;
-            } else if ("detail".equals(key)) {
-                detail = value;
-            }
+        if (!StringUtils.hasText(value)) return;
+        switch (key) {
+            case "status" -> status = value;
+            case "detail" -> detail = value;
+            default -> {}
         }
     }
 }
