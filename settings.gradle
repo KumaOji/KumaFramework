@@ -113,7 +113,8 @@ for (name in frameworkOtherSubModules) {
     include "kuma-other-framework:kuma-cloud-${name}"
 }
 
-def frameworkCloudPluginSubModules = ['gradle-plugin', 'elasticsearch-plugin', 'idea-plugin', 'maven-plugin']
+// idea-plugin 单独开发，需独立 Gradle 项目（org.jetbrains.intellij.platform 会下载完整 IDE ~1.5GB）
+def frameworkCloudPluginSubModules = ['gradle-plugin', 'elasticsearch-plugin', 'maven-plugin']
 for (name in frameworkCloudPluginSubModules) {
     include "kuma-other-framework:kuma-cloud-plugin:kuma-cloud-${name}"
 }

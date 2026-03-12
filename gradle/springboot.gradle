@@ -1,13 +1,12 @@
 apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 
-// 将运行时依赖复制到 libs/lib/，用于瘦 JAR 外置依赖部署
 tasks.register('copyJar', Copy) {
-    delete "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    delete "${project.layout.buildDirectory.asFile.get()}/libs/lib"
     from configurations.runtimeClasspath
-    into "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    into "${project.layout.buildDirectory.asFile.get()}/libs/lib"
     from configurations.compileClasspath
-    into "${project.layout.buildDirectory.asFile.get()}\\libs\\lib"
+    into "${project.layout.buildDirectory.asFile.get()}/libs/lib"
 }
 
 String removeBizSuffix(String input) {
@@ -23,9 +22,12 @@ bootJar {
 }
 
 bootBuildImage {
+    def appName    = removeBizSuffix(project.name)
+    def appVersion = project.version.toString()
+
     builder   = "registry.cn-sichuan.aliyuncs.com/kuma-cloud-project/kuma-cloud-builder:latest"
     runImage  = "registry.cn-sichuan.aliyuncs.com/kuma-cloud-project/kuma-cloud-run:base-cnb"
-    imageName = "registry.cn-sichuan.aliyuncs.com/kuma-cloud-project/kuma-cloud-monitor:${project.version}"
+    imageName = "registry.cn-sichuan.aliyuncs.com/kuma-cloud-project/${appName}:${appVersion}"
     pullPolicy    = "IF_NOT_PRESENT"
     cleanCache    = false
     verboseLogging = true
@@ -34,11 +36,11 @@ bootBuildImage {
     environment = [
         "BPL_SPRING_CLOUD_BINDINGS_ENABLED": "true",
 
-        "BP_IMAGE_LABELS": "application_name=kuma-cloud-monitor application_version=2026.03",
+        "BP_IMAGE_LABELS": "application_name=${appName} application_version=${appVersion}",
         "BP_OCI_AUTHORS" : "2569277704@qq.com",
 
-        "BPE_APPLICATION_NAME"   : "kuma-cloud-monitor",
-        "BPE_APPLICATION_VERSION": "2026.03",
+        "BPE_APPLICATION_NAME"   : appName,
+        "BPE_APPLICATION_VERSION": appVersion,
         "BPE_LANG"               : "zh_CN.UTF-8",
 
         "BPE_JMX_ENABLED": "true",
@@ -48,11 +50,11 @@ bootBuildImage {
 
         "BPE_DEBUG_ENABLED" : "true",
         "BPE_DEBUG_PORT"    : "8000",
-        "BPE_DEBUG_SUSPEND" : "true",
+        "BPE_DEBUG_SUSPEND" : "false",
         "BP_DEBUG_ENABLED"  : "true",
         "BPL_DEBUG_ENABLED" : "true",
         "BPL_DEBUG_PORT"    : "8000",
-        "BPL_DEBUG_SUSPEND" : "true",
+        "BPL_DEBUG_SUSPEND" : "false",
 
         "BP_JVM_VERSION": "25.*",
         "BP_JVM_TYPE"   : "JRE",
@@ -62,31 +64,28 @@ bootBuildImage {
             "-Xmx2g " +
             "-Xss256k " +
             "-XX:MaxDirectMemorySize=256m " +
-            "-XX:SurvivorRatio=8 " +
-            "-XX:+UseCompressedOops " +
-            "-XX:+UseCompressedClassPointers " +
             "-XX:+SegmentedCodeCache " +
             "-XX:+PrintCommandLineFlags " +
             "-XX:+ExplicitGCInvokesConcurrent " +
             "-XX:+HeapDumpOnOutOfMemoryError " +
             "-XX:MetaspaceSize=256m " +
             "-XX:MaxMetaspaceSize=256m " +
-            "-verbose:gc " +
             "-XX:ParallelGCThreads=4 " +
+            "-Xlog:gc* " +
             "-Djava.security.egd=file:/dev/./urandom " +
             "-Dfile.encoding=utf-8 " +
             "-javaagent:/skywalking/agent/skywalking-agent.jar " +
-            "-Dskywalking.agent.service_name=kuma-cloud-monitor " +
+            "-Dskywalking.agent.service_name=${appName} " +
             "-Dskywalking.agent.authentication=kuma-cloud " +
-            "-Dskywalking.logging.file_name=kuma-cloud-monitor.skywalking.log " +
+            "-Dskywalking.logging.file_name=${appName}.skywalking.log " +
             "-Dskywalking.logging.level=INFO " +
-            "-Dskywalking.logging.dir=/root/logs/kuma-cloud-monitor " +
+            "-Dskywalking.logging.dir=/root/logs/${appName} " +
             "-Dskywalking.collector.backend_service=127.0.0.1:11800 " +
             "-Dspring.profiles.active=dev",
     ]
 
     bindings = [
-        "/tmp/logs/kuma-cloud-monitor:/root/logs",
+        "/tmp/logs/${appName}:/root/logs",
         "/opt/cloud/apache-skywalking-apm-bin/agent/:/skywalking/agent"
     ]
 

@@ -1,4 +1,0 @@
-# Project1 开发环境配置
-logging:
-  level:
-    com.kuma: DEBUG

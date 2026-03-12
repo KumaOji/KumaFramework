@@ -30,7 +30,7 @@ jib {
         ports            = [findProperty("containerPort")?.toString() ?: "8080"]
         jvmFlags = [
             "-Djava.security.egd=file:/dev/./urandom",
-            "-Dspring.profiles.active=dev",
+            "-Dspring.profiles.active=${findProperty('activeProfile') ?: 'prod'}",
             "-Dfile.encoding=utf-8",
             "-Duser.timezone=Asia/Shanghai"
         ]

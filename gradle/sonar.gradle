@@ -1,21 +1,15 @@
-// 插件由引用方在 plugins {} 块中声明：alias(projectLibs.plugins.sonarqube)
-// 或在 settings.gradle pluginManagement 中声明后 apply plugin: "org.sonarqube"
 apply plugin: "org.sonarqube"
 
-// SonarQube/SonarCloud 分析配置
-// 认证：新版本使用 token（sonar.token），旧版本使用 sonar.login
-// 推荐通过环境变量注入，不要将 token 硬编码在脚本中
 sonar {
     properties {
-        property "sonar.host.url",        findProperty("sonar.host.url")   ?: System.getenv("SONAR_HOST_URL")   ?: "http://localhost:9000"
-        property "sonar.token",           findProperty("sonar.token")      ?: System.getenv("SONAR_TOKEN")      ?: ""
-        property "sonar.projectKey",      findProperty("sonar.projectKey") ?: System.getenv("SONAR_PROJECT_KEY") ?: rootProject.name
-        property "sonar.projectName",     rootProject.name
-        property "sonar.sourceEncoding",  "UTF-8"
-        property "sonar.verbose",         "false"
-        property "sonar.exclusions",      "**/test/**,**/*Test.java,**/*Tests.java,**/build/**"
-        property "sonar.core.codeCoveragePlugin", "jacoco"
-        // JaCoCo 报告路径（需先执行 jacocoTestReport 任务生成报告）
-        //property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/build/code-analysis/jacoco/coverage-reports/jacoco.xml"
+        property "sonar.host.url",       findProperty("sonar.host.url")    ?: System.getenv("SONAR_HOST_URL")    ?: "http://localhost:9000"
+        property "sonar.token",          findProperty("sonar.token")       ?: System.getenv("SONAR_TOKEN")       ?: ""
+        property "sonar.projectKey",     findProperty("sonar.projectKey")  ?: System.getenv("SONAR_PROJECT_KEY") ?: rootProject.name
+        property "sonar.projectName",    rootProject.name
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.verbose",        "false"
+        property "sonar.exclusions",     "**/test/**,**/*Test.java,**/*Tests.java,**/build/**"
+        property "sonar.core.codeCoveragePlugin",          "jacoco"
+        property "sonar.coverage.jacoco.xmlReportPaths",   "${project.projectDir}/build/code-analysis/jacoco/coverage-reports/jacoco.xml"
     }
 }

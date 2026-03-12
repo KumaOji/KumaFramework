@@ -1,21 +1,20 @@
 apply plugin: "com.bmuschko.docker-spring-boot-application"
 
-
 docker {
-    url = 'tcp://192.168.59.103:2375'
+    url = findProperty("DOCKER_HOST")?.toString() ?: System.getenv("DOCKER_HOST") ?: "tcp://localhost:2375"
 
     registryCredentials {
-        url = "https://index.docker.io/v1/"
-        username = "kuma"
-        password = "xxxxxxx"
-        email = "2569277704@qq.com"
+        url      = findProperty("DOCKER_REGISTRY_URL")?.toString()      ?: System.getenv("DOCKER_REGISTRY_URL")      ?: "https://index.docker.io/v1/"
+        username = findProperty("DOCKER_REGISTRY_USERNAME")?.toString() ?: System.getenv("DOCKER_REGISTRY_USERNAME") ?: ""
+        password = findProperty("DOCKER_REGISTRY_PASSWORD")?.toString() ?: System.getenv("DOCKER_REGISTRY_PASSWORD") ?: ""
+        email    = findProperty("DOCKER_REGISTRY_EMAIL")?.toString()    ?: System.getenv("DOCKER_REGISTRY_EMAIL")    ?: "2569277704@qq.com"
     }
 
     springBootApplication {
-        baseImage = "openjdk:25"
+        baseImage  = "eclipse-temurin:25-jre"
         maintainer = "kuma (https://github.com/kumaoji)"
-        ports = [8200, 5701]
-        images = ["micyo202/${project.name}:${project.version}"]
-        jvmArgs = ["-Djava.security.egd=file:/dev/./urandom", "-Xmx512m"]
+        ports      = [8080, 5701]
+        images     = ["kuma-cloud/${project.name}:${project.version}"]
+        jvmArgs    = ["-Djava.security.egd=file:/dev/./urandom", "-Xmx512m"]
     }
 }
