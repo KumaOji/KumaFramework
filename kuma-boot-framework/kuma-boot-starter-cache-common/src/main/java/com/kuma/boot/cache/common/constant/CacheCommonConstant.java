@@ -27,5 +27,5 @@ public final class CacheCommonConstant {
 
     private CacheCommonConstant() {}
 
-    public static String SPRING_APP_NAME_KEY = "spring.application.name";
+    public static final String SPRING_APP_NAME_KEY = "spring.application.name";
 }

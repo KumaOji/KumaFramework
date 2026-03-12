@@ -18,28 +18,23 @@ package com.kuma.boot.cache.common.exception;
 
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.enums.StatusEnum;
-import com.kuma.boot.common.exception.BaseException;
-
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.model.Code;
-import java.io.Serial;
-import java.util.function.Supplier;
 
+import java.io.Serial;
 
 /**
- * BusinessException
+ * 缓存模块业务异常。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-02 20:09:13
+ * @since 2021-09-02
  */
 public class CacheCommonException extends BootException {
 
     @Serial
     private static final long serialVersionUID = 6610083281801529147L;
 
-    public CacheCommonException() {
-    }
+    public CacheCommonException() {}
 
     public CacheCommonException(String message) {
         super(message);
@@ -53,8 +48,7 @@ public class CacheCommonException extends BootException {
         super(message, e);
     }
 
-    public CacheCommonException(String message, Throwable cause, boolean enableSuppression,
-                                boolean writableStackTrace) {
+    public CacheCommonException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
@@ -78,8 +72,7 @@ public class CacheCommonException extends BootException {
         super(code, message);
     }
 
-    public CacheCommonException(StatusEnum status, Code code,
-                                String message) {
+    public CacheCommonException(StatusEnum status, Code code, String message) {
         super(status, code, message);
     }
 
@@ -87,8 +80,7 @@ public class CacheCommonException extends BootException {
         super(code, e);
     }
 
-    public CacheCommonException(StatusEnum status, Code code,
-                                Throwable e) {
+    public CacheCommonException(StatusEnum status, Code code, Throwable e) {
         super(status, code, e);
     }
 
@@ -96,8 +88,7 @@ public class CacheCommonException extends BootException {
         super(code, e, message);
     }
 
-    public CacheCommonException(StatusEnum status, Code code,
-                                Throwable e, String message) {
+    public CacheCommonException(StatusEnum status, Code code, Throwable e, String message) {
         super(status, code, e, message);
     }
 }
