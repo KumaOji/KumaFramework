@@ -30,9 +30,9 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 @ConfigurationProperties(CaffeineProperties.PREFIX)
 public class CaffeineProperties {
 
-    public static final String PREFIX = ".boot.cache.caffeine";
+    public static final String PREFIX = "kuma.boot.cache.caffeine";
 
-    /** 开启 */
+    /** 是否启用（默认开启） */
     private boolean enabled = true;
 
     public boolean isEnabled() {

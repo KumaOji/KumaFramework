@@ -6,9 +6,6 @@ description = 'Myframework cache-caffeine模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
-    api projectLibs.commons.lang3
-    api projectLibs.commons.collections4
-    api projectLibs.guava
     api projectLibs.slf4j.api
     api projectLibs.spring.context
     api projectLibs.spring.cloud.context
@@ -16,7 +13,4 @@ dependencies {
     api projectLibs.spring.boot.starter.cache
     api projectLibs.caffeine
     api projectLibs.jspecify
-    api projectLibs.hutool.extra
-    api projectLibs.hutool.crypto
-    api projectLibs.mybatis.core
 }

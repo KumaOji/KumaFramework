@@ -17,43 +17,36 @@
 package com.kuma.boot.cache.caffeine.model;
 
 import com.kuma.boot.common.constant.StrPoolConstants;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ObjUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.kuma.boot.common.constant.StrPoolConstants.COLON;
 
 /**
- * CacheKeyBuilder
+ * 缓存 key 构建器，支持 KV 和 Hash 两种模式，兼容 Caffeine 与 Redis 存储后端。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-07 21:15:53
+ * @since 2021-09-07
  */
 @FunctionalInterface
 public interface CacheKeyBuilder {
 
     /**
-     * 租户编码
-     *
-     * <p>非租户模式设置成空字符串
+     * 租户编码；非租户模式返回空字符串。
      *
      * @return 租户编码
      */
-    // todo  return ContextUtil.getTenant();
     @NonNull
     default String getTenant() {
         return "";
     }
 
     /**
-     * key 前缀
+     * key 前缀（必须实现）。
      *
      * @return key 前缀
      */
@@ -61,7 +54,7 @@ public interface CacheKeyBuilder {
     String getPrefix();
 
     /**
-     * 超时时间
+     * 超时时间；{@code null} 表示不过期。
      *
      * @return 超时时间
      */
@@ -71,60 +64,60 @@ public interface CacheKeyBuilder {
     }
 
     /**
-     * 构建通用KV模式 的 cache key 兼容 redis caffeine
+     * 构建 KV 模式的 {@link CacheKey}，兼容 Caffeine 与 Redis。
      *
-     * @param suffix 参数
+     * @param suffix 动态参数
      * @return cache key
      */
-    default com.kuma.boot.cache.caffeine.model.CacheKey key(Object... suffix) {
-        String field = suffix.length > 0 ? Convert.toStr(suffix[0], StrPoolConstants.EMPTY) : StrPoolConstants.EMPTY;
+    default CacheKey key(Object... suffix) {
+        String field = suffix.length > 0 && suffix[0] != null
+                ? String.valueOf(suffix[0])
+                : StrPoolConstants.EMPTY;
         return hashFieldKey(field, suffix);
     }
 
     /**
-     * 构建 redis 类型的 hash cache key
+     * 构建带 field 的 hash {@link CacheHashKey}。
      *
-     * @param field field
+     * @param field  hash field
+     * @param suffix 动态参数
+     * @return hash cache key
+     */
+    default CacheHashKey hashFieldKey(@NonNull Object field, Object... suffix) {
+        return new CacheHashKey(getKey(suffix), field, getExpire());
+    }
+
+    /**
+     * 构建仅含 key 的 hash {@link CacheKey}（无 field），适用于 HGETALL 等整体操作。
+     *
      * @param suffix 动态参数
      * @return cache key
      */
-    default com.kuma.boot.cache.caffeine.model.CacheHashKey hashFieldKey(@NonNull Object field, Object... suffix) {
-        String key = getKey(suffix);
-
-        return new com.kuma.boot.cache.caffeine.model.CacheHashKey(key, field, getExpire());
+    default CacheKey hashKey(Object... suffix) {
+        return new CacheKey(getKey(suffix), getExpire());
     }
 
     /**
-     * 构建 redis 类型的 hash cache key （无field)
+     * 将租户、前缀和动态参数拼接为完整 key。
      *
      * @param suffix 动态参数
-     * @return
-     */
-    default com.kuma.boot.cache.caffeine.model.CacheHashKey hashKey(Object... suffix) {
-        String key = getKey(suffix);
-
-        return new com.kuma.boot.cache.caffeine.model.CacheHashKey(key, null, getExpire());
-    }
-
-    /**
-     * 根据动态参数 拼接参数
-     *
-     * @param suffix 动态参数
+     * @return 完整 key 字符串
      */
     default String getKey(Object... suffix) {
-        ArrayList<String> regionList = new ArrayList<>();
-        String tenant = this.getTenant();
-        if (StrUtil.isNotEmpty(tenant)) {
-            regionList.add(tenant);
+        List<String> parts = new ArrayList<>();
+        String tenant = getTenant();
+        if (!tenant.isEmpty()) {
+            parts.add(tenant);
         }
-        String prefix = this.getPrefix();
-        regionList.add(prefix);
-
+        parts.add(getPrefix());
         for (Object s : suffix) {
-            if (ObjUtil.isNotEmpty(s)) {
-                regionList.add(String.valueOf(s));
+            if (s != null) {
+                String str = String.valueOf(s);
+                if (!str.isEmpty()) {
+                    parts.add(str);
+                }
             }
         }
-        return CollUtil.join(regionList, COLON);
+        return String.join(COLON, parts);
     }
 }

@@ -16,8 +16,8 @@
 
 package com.kuma.boot.cache.caffeine.model;
 
-import cn.hutool.core.util.StrUtil;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -25,44 +25,37 @@ import java.util.Objects;
 import static com.kuma.boot.common.constant.StrPoolConstants.COLON;
 
 /**
- * CacheHashKey
+ * Hash 缓存 key，包含 key、field 以及可选过期时间。
+ *
+ * <p>通过 {@link #tran()} 将 hash key 扁平化为 {@code key:field} 格式的 {@link CacheKey}，
+ * 以便在 Caffeine 平铺结构中存储 hash 语义数据。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-07 21:15:35
+ * @since 2021-09-07
  */
 public class CacheHashKey extends CacheKey {
 
-    /** redis hash field */
     @NonNull
-    private Object field;
+    private final Object field;
 
-    public CacheHashKey(@NonNull String key, final @NonNull Object field) {
+    public CacheHashKey(@NonNull String key, @NonNull Object field) {
         super(key);
         this.field = field;
     }
 
-    public CacheHashKey(@NonNull String key, final @NonNull Object field, Duration expire) {
+    public CacheHashKey(@NonNull String key, @NonNull Object field, @Nullable Duration expire) {
         super(key, expire);
         this.field = field;
     }
 
+    /** 将 hash key 转换为 {@code key:field} 格式的普通 {@link CacheKey}。 */
     public CacheKey tran() {
-        return new CacheKey(StrUtil.join(COLON, getKey(), getField()), getExpire());
+        return new CacheKey(getKey() + COLON + field, getExpire());
     }
 
     @NonNull
     public Object getField() {
         return field;
-    }
-
-    public void setField(@NonNull Object field) {
-        this.field = field;
-    }
-
-    @Override
-    public String toString() {
-        return "CacheHashKey{" + "field=" + field + "} " + super.toString();
     }
 
     @Override
@@ -83,5 +76,10 @@ public class CacheHashKey extends CacheKey {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), field);
+    }
+
+    @Override
+    public String toString() {
+        return "CacheHashKey{field=" + field + "} " + super.toString();
     }
 }
