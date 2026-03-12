@@ -20,6 +20,8 @@ buildscript {
     dependencies {
         // gradle/shadow.gradle 使用 apply plugin: 方式，需要提前将 jar 放入 classpath
         classpath "com.gradleup.shadow:shadow-gradle-plugin:8.3.6"
+        // gradle/proguard.gradle 中 import proguard.gradle.ProGuardTask 需要此依赖
+        classpath "com.guardsquare:proguard-gradle:7.5.0"
     }
 }
 
