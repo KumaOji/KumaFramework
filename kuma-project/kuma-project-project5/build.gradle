@@ -1,23 +1,19 @@
 plugins {
-    id 'java'
     alias(projectLibs.plugins.springboot)
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
-def springBootVersion = projectLibs.versions.springboot.get()
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
     }
 }
 
 dependencies {
-    // kuma-boot 基础
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
 
-    // kuma-cloud-job Worker（任务执行端）
     api project(':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-worker')
 
     api projectLibs.spring.boot.starter.web

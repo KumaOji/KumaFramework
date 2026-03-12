@@ -1,27 +1,22 @@
 plugins {
-    id 'java'
-    id 'application'
     alias(projectLibs.plugins.springboot)
     alias(projectLibs.plugins.spring.dependency.management)
-    alias(projectLibs.plugins.gradle.git.properties)  // git.gradle
-    alias(projectLibs.plugins.smart.doc)              // smart-doc.gradle
+    alias(projectLibs.plugins.gradle.git.properties)
+    alias(projectLibs.plugins.smart.doc)
 }
 
-// ── 应用 gradle/ 脚本插件 ──────────────────────────────────────────────
-apply from: rootProject.file('gradle/springboot.gradle')        // Spring Boot 打包 / 镜像构建
-apply from: rootProject.file('gradle/git.gradle')               // 嵌入 Git 提交信息到 git.properties
-apply from: rootProject.file('gradle/jacoco.gradle')            // 测试覆盖率报告
-apply from: rootProject.file('gradle/smart-doc.gradle')         // API 文档生成（无需注解）
+apply from: rootProject.file('gradle/springboot.gradle')
+apply from: rootProject.file('gradle/git.gradle')
+apply from: rootProject.file('gradle/jacoco.gradle')
+apply from: rootProject.file('gradle/smart-doc.gradle')
 
-def springBootVersion = projectLibs.versions.springboot.get()
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
     }
 }
 
 dependencies {
-    // ── kuma-boot-framework ───────────────────────────────────────────
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
@@ -38,11 +33,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
     api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
 
-    // ── 第三方 ────────────────────────────────────────────────────────
     api projectLibs.spring.boot.starter.web
     api projectLibs.hutool.core
 
-    compileOnly     projectLibs.lombok
+    compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 
     runtimeOnly projectLibs.mysql
@@ -53,13 +47,13 @@ dependencies {
 processResources {
     filesMatching('**/application.yml') {
         expand(
-            active           : 'dev',
-            mysql_url        : project.findProperty('mysql.url') ?: '',
-            mysql_username   : project.findProperty('mysql.username') ?: '',
-            mysql_password   : project.findProperty('mysql.password') ?: '',
-            redis_host       : project.findProperty('redis.host') ?: '',
-            redis_port       : project.findProperty('redis.port') ?: '',
-            redis_database   : project.findProperty('redis.database') ?: ''
+            active         : 'dev',
+            mysql_url      : project.findProperty('mysql.url')      ?: '',
+            mysql_username : project.findProperty('mysql.username') ?: '',
+            mysql_password : project.findProperty('mysql.password') ?: '',
+            redis_host     : project.findProperty('redis.host')     ?: '',
+            redis_port     : project.findProperty('redis.port')     ?: '',
+            redis_database : project.findProperty('redis.database') ?: ''
         )
     }
 }
@@ -74,5 +68,5 @@ bootRun {
 
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport   // 测试完成后自动生成覆盖率报告
+    finalizedBy jacocoTestReport
 }
