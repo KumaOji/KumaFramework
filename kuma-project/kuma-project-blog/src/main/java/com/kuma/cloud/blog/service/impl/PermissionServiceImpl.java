@@ -1,8 +1,9 @@
 package com.kuma.cloud.blog.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
+import com.kuma.cloud.blog.domain.entity.SysPermission;
 import com.kuma.cloud.blog.mapper.SysPermissionMapper;
 import com.kuma.cloud.blog.service.PermissionService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,17 @@ public class PermissionServiceImpl implements PermissionService {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String CACHE_KEY_PREFIX = "user:authorities:";
+
+    @Override
+    public List<SysPermission> listAll() {
+        return permissionMapper.selectList(
+                new LambdaQueryWrapper<SysPermission>().orderByAsc(SysPermission::getModule, SysPermission::getCode));
+    }
+
+    @Override
+    public List<SysPermission> listUserDirectPermissions(Long userId) {
+        return permissionMapper.selectDirectPermissionEntitiesByUserId(userId);
+    }
 
     @Override
     public List<String> loadAndCachePermissions(Long userId, String username, long expireSeconds) {
