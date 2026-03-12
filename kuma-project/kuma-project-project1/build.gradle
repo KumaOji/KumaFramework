@@ -1,26 +1,3 @@
-plugins {
-    id 'java'
-    alias(projectLibs.plugins.springboot)
-    alias(projectLibs.plugins.spring.dependency.management)
-}
-
-def springBootVersion = projectLibs.versions.springboot.get()
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
-    }
-}
-
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
-    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
 
-    api projectLibs.spring.boot.starter.web
-
-    compileOnly projectLibs.lombok
-    annotationProcessor projectLibs.lombok
-}
-
-bootJar {
-    archiveBaseName = 'project1'
 }

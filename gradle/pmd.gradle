@@ -1,19 +1,12 @@
 apply plugin: 'pmd'
 
 pmd {
-
-    consoleOutput = true
-
-    threads = 4
-
-    ignoreFailures = true
-
+    consoleOutput       = true
+    threads             = 4
+    ignoreFailures      = true
     incrementalAnalysis = true
-
-    reportsDir = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/pmdReportsDir")
-
-    toolVersion = "7.20.0"
-
-    ruleSetFiles = files(rootProject.file('code-analysis/pmd/pmd.xml'))
+    reportsDir          = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/pmdReportsDir")
+    toolVersion         = "7.20.0"
+    ruleSetFiles        = files(rootProject.file('code-analysis/pmd/pmd.xml'))
     rulesMinimumPriority = 5
 }

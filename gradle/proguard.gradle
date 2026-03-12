@@ -5,49 +5,40 @@ tasks.register('proguard', ProGuardTask) {
     configuration rootProject.file('gradle/proguard.pro')
     libraryjars configurations.runtimeClasspath.collect()
 
-    if (System.getProperty('java.version').startsWith('1.')) {
-        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
-    } else {
-        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-        libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    }
+    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod",    jarfilter: '!**.jar', filter: '!module-info.class'
+    libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
 
-
-    injars sourceSets.main.output
-
+    injars  sourceSets.main.output
     outjars "${project.layout.buildDirectory.asFile.get()}/classes-pro"
 }
 
-
-
 tasks.register('makeJar', Jar) {
-    archiveBaseName = 'xx'
+    archiveBaseName = project.name
     from sourceSets.main.output
-
     manifest {
-        attributes "Manifest-Version": 1.0,
-                'Main-Class': 'xx.xx.xx',
-                'Class-Path': configurations.compileClasspath.files.collect { "lib/$it.name" }.join(' ')
+        attributes(
+            "Manifest-Version": 1.0,
+            'Main-Class' : findProperty("mainClassName") ?: "",
+            'Class-Path' : configurations.compileClasspath.files.collect { "lib/$it.name" }.join(' ')
+        )
     }
 }
 
 tasks.register('makeProJar', Jar) {
-    dependsOn makeJar
-    dependsOn proguard
+    dependsOn proguard, makeJar, copyJar
 
-    archiveBaseName = 'xx-pro'
+    archiveBaseName = "${project.name}-pro"
     from("${project.layout.buildDirectory.asFile.get()}/classes-pro")
 
-    dependsOn copyJar
-
     manifest {
-        attributes "Manifest-Version": 1.0,
-                'Main-Class': 'xx.xx.xx',
-                'Class-Path': configurations.compileClasspath.files.collect { "lib/$it.name" }.join(' ')
+        attributes(
+            "Manifest-Version": 1.0,
+            'Main-Class' : findProperty("mainClassName") ?: "",
+            'Class-Path' : configurations.compileClasspath.files.collect { "lib/$it.name" }.join(' ')
+        )
     }
 
     doLast {
-        delete 'build/libs/lib/com'
+        delete "${project.layout.buildDirectory.asFile.get()}/libs/lib/com"
     }
-
 }
