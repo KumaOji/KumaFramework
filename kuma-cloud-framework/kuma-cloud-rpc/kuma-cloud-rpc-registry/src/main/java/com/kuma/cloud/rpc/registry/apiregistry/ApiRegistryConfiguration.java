@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 
 /**
  * @version : 2022-12-7 14:30
@@ -81,8 +82,9 @@ public class ApiRegistryConfiguration {
     }
 
     @Bean
-    public BaseRegistry getBaseRegistry() {
-        return RegistryFactory.create();
+    public BaseRegistry getBaseRegistry(Environment environment) {
+        String type = environment.getProperty(ApiRegistryProperties.RegistryType, "");
+        return RegistryFactory.create(type);
     }
 
     //	@Bean
