@@ -17,44 +17,47 @@
 package com.kuma.boot.cache.caffeine.model;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Objects;
 
 /**
- * CacheKey
+ * 缓存 key，包含 key 字符串和可选的过期时间。
  *
  * @author kuma
- * @version 2021.9
- * @since 2021-09-07 21:15:45
+ * @since 2021-09-07
  */
 public class CacheKey {
 
-    /** redis key */
-    private String key;
+    @NonNull
+    private final String key;
 
-    /** 超时时间 秒 */
-    private Duration expire;
+    @Nullable
+    private final Duration expire;
 
-    public CacheKey(final @NonNull String key) {
+    public CacheKey(@NonNull String key) {
         this.key = key;
+        this.expire = null;
     }
 
-    public CacheKey() {}
-
-    public CacheKey(@NonNull String key, Duration expire) {
+    public CacheKey(@NonNull String key, @Nullable Duration expire) {
         this.key = key;
         this.expire = expire;
     }
 
-    @Override
-    public String toString() {
-        return "CacheKey{" + "key='" + key + '\'' + ", expire=" + expire + '}';
+    @NonNull
+    public String getKey() {
+        return key;
+    }
+
+    @Nullable
+    public Duration getExpire() {
+        return expire;
     }
 
     @Override
     public boolean equals(Object o) {
-
         if (this == o) {
             return true;
         }
@@ -70,20 +73,8 @@ public class CacheKey {
         return Objects.hash(key, expire);
     }
 
-    @NonNull
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(@NonNull String key) {
-        this.key = key;
-    }
-
-    public Duration getExpire() {
-        return expire;
-    }
-
-    public void setExpire(Duration expire) {
-        this.expire = expire;
+    @Override
+    public String toString() {
+        return "CacheKey{key='" + key + "', expire=" + expire + '}';
     }
 }

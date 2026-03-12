@@ -56,11 +56,11 @@ import java.util.List;
 @ConditionalOnClass({Caffeine.class, CaffeineCacheManager.class})
 @AutoConfiguration(before = CacheAutoConfiguration.class)
 @EnableConfigurationProperties({CaffeineProperties.class, CacheProperties.class})
-@ConditionalOnProperty(prefix = CaffeineProperties.PREFIX, name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = CaffeineProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CaffeineCacheAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(CaffeineCacheAutoConfiguration.class, StarterNameConstants.CACHE_CAFFEINE_STARTER);
     }
 
@@ -91,32 +91,6 @@ public class CaffeineCacheAutoConfiguration implements InitializingBean {
         }
         return customizers.customize(cacheManager);
     }
-
-    // @Bean("caffeineCacheManager")
-    // @ConditionalOnProperty(prefix = CacheProperties.PREFIX, name = "type", havingValue =
-    // "CAFFEINE")
-    // public CacheManager caffeineCacheManager() {
-    //	LogUtil.started(CaffeineCacheManager.class, StarterNameConstant.REDIS_STARTER);
-    //
-    //	CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-    //
-    //	Caffeine caffeine = Caffeine
-    //		.newBuilder()
-    //		.recordStats()
-    //		.initialCapacity(500)
-    //		.expireAfterWrite(cacheProperties.getDef().getTimeToLive())
-    //		.maximumSize(cacheProperties.getDef().getMaxSize());
-    //
-    //	cacheManager.setAllowNullValues(cacheProperties.getDef().isCacheNullValues());
-    //	cacheManager.setCaffeine(caffeine);
-    //
-    //	//配置了这里，就必须事先在配置文件中指定key 缓存才生效
-    //    Map<String, CacheProperties.Cache> configs = cacheProperties.getConfigs();
-    //    Optional.ofNullable(configs).ifPresent((config)->{
-    //        cacheManager.setCacheNames(config.keySet());
-    //    });
-    //	return cacheManager;
-    // }
 
     private static CaffeineAutoCacheManager createCacheManager(
             CacheProperties cacheProperties,

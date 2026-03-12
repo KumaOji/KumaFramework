@@ -47,7 +47,7 @@ public class CaffeineAutoCacheManager extends CaffeineCacheManager {
     }
 
     @Nullable
-    private CaffeineSpec caffeineSpec = null;
+    private CaffeineSpec caffeineSpec;
 
     public CaffeineAutoCacheManager() {
         super();
@@ -63,10 +63,15 @@ public class CaffeineAutoCacheManager extends CaffeineCacheManager {
         return (CacheLoader<Object, Object>) ReflectionUtils.getField(CACHE_LOADER_FIELD, this);
     }
 
+    /**
+     * 不支持直接注入 {@link Caffeine} bean，请改用 {@link CaffeineSpec} bean 以保留 per-key TTL 支持。
+     *
+     * @throws IllegalArgumentException always
+     */
     @Override
     public void setCaffeine(Caffeine<Object, Object> caffeine) {
         throw new IllegalArgumentException(
-                "mica-caffeine not support customization Caffeine bean，you can customize" + " CaffeineSpec bean.");
+                "CaffeineAutoCacheManager does not support a custom Caffeine bean; use a CaffeineSpec bean instead.");
     }
 
     @Override
