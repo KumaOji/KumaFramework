@@ -1,0 +1,21 @@
+server:
+  port: 8085
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    root: INFO
+    com.kuma.cloud.project5: DEBUG
+
+# kuma-cloud-job Worker 配置
+# 依赖：job-nameserver(9089) + job-server(gRPC:9081) 已启动
+kmcjob:
+  worker:
+    enabled: true
+    app-name: project5          # 须与 job-server 中注册的 appName 一致
+    server-address: 127.0.0.1   # job-server 纯 IP（不含端口）
+    server-port: 9081            # job-server gRPC 端口
+    name-server-address: 127.0.0.1:9089  # job-nameserver 地址
