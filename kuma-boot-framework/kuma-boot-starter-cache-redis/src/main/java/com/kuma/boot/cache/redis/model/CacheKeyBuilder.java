@@ -18,13 +18,9 @@ package com.kuma.boot.cache.redis.model;
 
 import static com.kuma.boot.common.constant.StrPoolConstants.COLON;
 
-import cn.hutool.core.convert.Convert;
 import com.kuma.boot.common.constant.StrPoolConstants;
 import java.time.Duration;
 import java.util.ArrayList;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ObjUtil;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -76,7 +72,7 @@ public interface CacheKeyBuilder {
      * @return cache key
      */
     default CacheKey key(Object... suffix) {
-        String field = suffix.length > 0 ? Convert.toStr(suffix[0], StrPoolConstants.EMPTY) : StrPoolConstants.EMPTY;
+        String field = suffix.length > 0 ? String.valueOf(suffix[0]) : StrPoolConstants.EMPTY;
         return hashFieldKey(field, suffix);
     }
 
@@ -89,7 +85,6 @@ public interface CacheKeyBuilder {
      */
     default CacheHashKey hashFieldKey(@NonNull Object field, Object... suffix) {
         String key = getKey(suffix);
-
         return new CacheHashKey(key, field, getExpire());
     }
 
@@ -97,12 +92,11 @@ public interface CacheKeyBuilder {
      * 构建 redis 类型的 hash cache key （无field)
      *
      * @param suffix 动态参数
-     * @return
+     * @return cache key
      */
-    default CacheHashKey hashKey(Object... suffix) {
+    default CacheKey hashKey(Object... suffix) {
         String key = getKey(suffix);
-
-        return new CacheHashKey(key, null, getExpire());
+        return new CacheKey(key, getExpire());
     }
 
     /**
@@ -113,17 +107,15 @@ public interface CacheKeyBuilder {
     default String getKey(Object... suffix) {
         ArrayList<String> regionList = new ArrayList<>();
         String tenant = this.getTenant();
-        if (StrUtil.isNotEmpty(tenant)) {
+        if (!tenant.isEmpty()) {
             regionList.add(tenant);
         }
-        String prefix = this.getPrefix();
-        regionList.add(prefix);
-
+        regionList.add(this.getPrefix());
         for (Object s : suffix) {
-            if (ObjUtil.isNotEmpty(s)) {
+            if (s != null && !String.valueOf(s).isEmpty()) {
                 regionList.add(String.valueOf(s));
             }
         }
-        return CollUtil.join(regionList, COLON);
+        return String.join(COLON, regionList);
     }
 }

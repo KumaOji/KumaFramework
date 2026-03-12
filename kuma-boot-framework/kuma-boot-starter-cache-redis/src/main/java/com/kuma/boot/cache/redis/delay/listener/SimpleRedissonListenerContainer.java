@@ -21,7 +21,6 @@ import com.kuma.boot.cache.redis.delay.message.FastJsonCodec;
 import com.kuma.boot.cache.redis.delay.message.RedissonMessage;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import cn.hutool.core.util.StrUtil;
 import org.redisson.Redisson;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RFuture;
@@ -102,7 +101,7 @@ public class SimpleRedissonListenerContainer extends AbstractRedissonListenerCon
                             blockingQueue.getName(), blockingQueue.getCodec(), LPOP_VALUE, blockingQueue.getName());
                     String message = commandExecutor.get(asyncResult);
 
-                    if (StrUtil.isBlank(message)) {
+                    if (message == null || message.isBlank()) {
                         Thread.sleep(Math.min(++emptyFetchTimes * 5, maxWaitMillis));
                     } else {
                         // reset counting

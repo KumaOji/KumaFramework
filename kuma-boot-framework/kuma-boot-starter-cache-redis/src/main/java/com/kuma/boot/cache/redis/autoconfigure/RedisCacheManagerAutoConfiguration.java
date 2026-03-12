@@ -27,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import jodd.util.StringPool;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
@@ -77,7 +76,7 @@ import org.jspecify.annotations.Nullable;
 public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RedisCacheManagerAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 
@@ -181,28 +180,6 @@ public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, In
         cacheManager.setTransactionAware(enableTransactions);
 
         return cacheManagerCustomizers.customize(cacheManager);
-
-        // RedisCacheConfiguration defConfig = getDefConf();
-        // defConfig.entryTtl(cacheProperties.getDef().getTimeToLive());
-        //
-        // Map<String, CacheProperties.Cache> configs = cacheProperties.getConfigs();
-        // Map<String, RedisCacheConfiguration> map = Maps.newHashMap();
-        //
-        //// 自定义的缓存过期时间配置
-        // Optional
-        //	.ofNullable(configs)
-        //	.ifPresent(config ->
-        //		config.forEach((key, cache) -> {
-        //			RedisCacheConfiguration cfg = handleRedisCacheConfiguration(cache, defConfig);
-        //			map.put(key, cfg);
-        //		})
-        //	);
-        //
-        // return RedisCacheManager
-        //	.builder(redisConnectionFactory)
-        //	.cacheDefaults(defConfig)
-        //	.withInitialCacheConfigurations(map)
-        //	.build();
     }
 
     private RedisCacheConfiguration determineConfiguration() {
@@ -249,10 +226,10 @@ public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, In
 
         @Override
         protected RedisCache createRedisCache(String name, @Nullable RedisCacheConfiguration cacheConfig) {
-            if (StringUtils.isBlank(name) || !name.contains(StringPool.HASH)) {
+            if (StringUtils.isBlank(name) || !name.contains(StrPoolConstants.HASH)) {
                 return super.createRedisCache(name, cacheConfig);
             }
-            String[] cacheArray = name.split(StringPool.HASH);
+            String[] cacheArray = name.split(StrPoolConstants.HASH);
             if (cacheArray.length < 2) {
                 return super.createRedisCache(name, cacheConfig);
             }
@@ -266,80 +243,4 @@ public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, In
         }
     }
 
-    //	@Configuration
-    //	@EnableMethodCache(basePackages = "com.kuma.cloud")
-    //	@EnableCreateCacheAnnotation
-    //	@PropertySource(factory = YamlPropertySourceFactory.class, value = "classpath:jetcache.yml")
-    //	public class JetCacheAutoConfiguration {
-    //
-    //		@Bean
-    //		@ConditionalOnProperty(prefix = CustomCacheProperties.PREFIX, name = "type", havingValue =
-    // "JETCACHE")
-    //		public SpringConfigProvider springConfigProvider() {
-    //			return new SpringConfigProvider();
-    //		}
-    //
-    //		@Bean
-    //		@ConditionalOnProperty(prefix = CustomCacheProperties.PREFIX, name = "type", havingValue =
-    // "JETCACHE")
-    //		public GlobalCacheConfig config() {
-    //			Map localBuilders = new HashMap();
-    //			EmbeddedCacheBuilder localBuilder = LinkedHashMapCacheBuilder
-    //				.createLinkedHashMapCacheBuilder()
-    //				.keyConvertor(FastjsonKeyConvertor.INSTANCE);
-    //			localBuilders.put(CacheConsts.DEFAULT_AREA, localBuilder);
-    //
-    //			Map remoteBuilders = new HashMap(6);
-    //			RedisSpringDataCacheBuilder<?> redisSpringDataCacheBuilder =
-    // RedisSpringDataCacheBuilder.createBuilder()
-    //				.keyConvertor(FastjsonKeyConvertor.INSTANCE)
-    //				.valueEncoder(JavaValueEncoder.INSTANCE)
-    //				.valueDecoder(JavaValueDecoder.INSTANCE);
-    //			remoteBuilders.put(CacheConsts.DEFAULT_AREA, redisSpringDataCacheBuilder);
-    //
-    //			GlobalCacheConfig globalCacheConfig = new GlobalCacheConfig();
-    //			// globalCacheConfig.setConfigProvider(configProvider);//for jetcache <=2.5
-    //			globalCacheConfig.setLocalCacheBuilders(localBuilders);
-    //			globalCacheConfig.setRemoteCacheBuilders(remoteBuilders);
-    //			globalCacheConfig.setStatIntervalMinutes(15);
-    //			globalCacheConfig.setAreaInCacheName(false);
-    //
-    //			return globalCacheConfig;
-    //		}
-    //	}
-
-    // private RedisCacheConfiguration getDefConf() {
-    //	RedisCacheConfiguration def = RedisCacheConfiguration
-    //		.defaultCacheConfig()
-    //		.disableCachingNullValues()
-    //		.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(
-    //			new StringRedisSerializer()))
-    //		.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
-    //			new RedisObjectSerializer()));
-    //	return handleRedisCacheConfiguration(cacheProperties.getDef(), def);
-    // }
-    //
-    // private RedisCacheConfiguration handleRedisCacheConfiguration(
-    //	CacheProperties.Cache redisProperties, RedisCacheConfiguration config) {
-    //	if (Objects.isNull(redisProperties)) {
-    //		return config;
-    //	}
-    //	if (redisProperties.getTimeToLive() != null) {
-    //		config = config.entryTtl(redisProperties.getTimeToLive());
-    //	}
-    //	if (redisProperties.getKeyPrefix() != null) {
-    //		config = config.computePrefixWith(cacheName -> redisProperties.getKeyPrefix().concat(
-    //			StrPool.COLON).concat(cacheName).concat(StrPool.COLON));
-    //	} else {
-    //		config = config.computePrefixWith(cacheName -> cacheName.concat(StrPool.COLON));
-    //	}
-    //	if (!redisProperties.isCacheNullValues()) {
-    //		config = config.disableCachingNullValues();
-    //	}
-    //	if (!redisProperties.isUseKeyPrefix()) {
-    //		config = config.disableKeyPrefix();
-    //	}
-    //
-    //	return config;
-    // }
 }

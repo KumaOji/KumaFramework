@@ -16,10 +16,9 @@
 
 package com.kuma.boot.cache.redis.autoconfigure;
 
-import com.kuma.boot.common.utils.log.LogUtils;
-import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -27,9 +26,6 @@ import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import redis.clients.jedis.ConnectionPoolConfig;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.RedisClient;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
  * jedis自动配置
@@ -44,11 +40,12 @@ public class JedisAutoConfiguration {
 
     private final DataRedisProperties redisProperties;
 
-    public JedisAutoConfiguration( DataRedisProperties redisProperties ) {
+    public JedisAutoConfiguration(DataRedisProperties redisProperties) {
         this.redisProperties = redisProperties;
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public JedisConnectionFactory redisConnectionFactory() {
         ConnectionPoolConfig jedisPoolConfig = new ConnectionPoolConfig();
         jedisPoolConfig.setMaxTotal(200);
@@ -61,47 +58,9 @@ public class JedisAutoConfiguration {
         redisStandaloneConfiguration.setPassword(redisProperties.getPassword());
         redisStandaloneConfiguration.setDatabase(redisProperties.getDatabase());
 
-        JedisClientConfiguration.JedisClientConfigurationBuilder configurationBuilder =
-                JedisClientConfiguration.builder();
         JedisClientConfiguration jedisClientConfiguration =
-                configurationBuilder.usePooling().poolConfig(jedisPoolConfig).build();
+                JedisClientConfiguration.builder().usePooling().poolConfig(jedisPoolConfig).build();
 
         return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
-    }
-
-    //通过这种方式，我们就可以实现对Redis命令来进行实时的监控操作，
-    // 当Redis执行命令的时候，就会在控制台中看到对应的命令输出。
-    //@Component
-
-    /**
-     * JedisMonitor
-     *
-     * @author kuma
-     * @version 2026.01
-     * @since 2025-12-19 09:30:45
-     */
-    public static class JedisMonitor {
-
-        private final RedisClient jedisPool;
-
-        public JedisMonitor( RedisClient jedisPool ) {
-            this.jedisPool = jedisPool;
-        }
-
-        @PostConstruct
-        public void startMonitoring() {
-//			new Thread(() -> {
-//				try (Jedis jedis = jedisPool.getResource()) {
-//					jedis.monitor(new redis.clients.jedis.JedisMonitor() {
-//						@Override
-//						public void onCommand( String response ) {
-//							System.out.println("Received command: " + response);
-//						}
-//					});
-//				} catch (JedisConnectionException e) {
-//					LogUtils.error(e);
-//				}
-//			}).start();
-        }
     }
 }

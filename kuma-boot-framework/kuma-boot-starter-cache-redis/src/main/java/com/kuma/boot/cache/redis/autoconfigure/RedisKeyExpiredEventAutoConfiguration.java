@@ -41,11 +41,11 @@ import org.springframework.scheduling.annotation.Async;
  */
 @AutoConfiguration
 @ConditionalOnBean(RedissonClient.class)
-@ConditionalOnProperty(prefix = "kuma.boot.cache.redis.key-expired-event.enable", value = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "kuma.boot.cache.redis.key-expired-event", name = "enable", matchIfMissing = true)
 public class RedisKeyExpiredEventAutoConfiguration implements InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         LogUtils.started(RedisKeyExpiredEventAutoConfiguration.class, StarterNameConstants.CACHE_REDIS_STARTER);
     }
 

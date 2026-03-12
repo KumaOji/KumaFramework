@@ -16,7 +16,6 @@
 
 package com.kuma.boot.cache.redis.model;
 
-import cn.hutool.core.util.StrUtil;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
@@ -35,7 +34,7 @@ public class CacheHashKey extends CacheKey {
 
     /** redis hash field */
     @NonNull
-    private Object field;
+    private final Object field;
 
     public CacheHashKey(@NonNull String key, final @NonNull Object field) {
         super(key);
@@ -48,16 +47,12 @@ public class CacheHashKey extends CacheKey {
     }
 
     public CacheKey tran() {
-        return new CacheKey(StrUtil.join(COLON, getKey(), getField()), getExpire());
+        return new CacheKey(getKey() + COLON + getField(), getExpire());
     }
 
     @NonNull
     public Object getField() {
         return field;
-    }
-
-    public void setField(@NonNull Object field) {
-        this.field = field;
     }
 
     @Override

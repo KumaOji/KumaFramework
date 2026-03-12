@@ -16,14 +16,16 @@
 
 package com.kuma.boot.cache.redis.redisson;
 
-import cn.hutool.core.thread.ExecutorBuilder;
-import cn.hutool.core.thread.ThreadFactoryBuilder;
-import cn.hutool.core.thread.ThreadUtil;
 import com.kuma.boot.cache.redis.redisson.handle.RedisDelayQueueHandle;
 import com.kuma.boot.common.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.boot.CommandLineRunner;
 
 /**
@@ -46,23 +48,15 @@ public class RedisDelayQueueRunner implements CommandLineRunner {
             executor.shutdownNow();
         }
 
-        // 此处在docker容器中 可能会造成启动失败 现目前注释 setCorePoolSize setMaxPoolSize写死
-
         // 最佳的线程数 = CPU可用核心数 / (1 - 阻塞系数)
-        // int blockingCoefficient = 0;
-        // int poolSize = Runtime.getRuntime().availableProcessors() / (1 - blockingCoefficient);
-
-        executor = ExecutorBuilder.create()
-                .setCorePoolSize(5)
-                .setMaxPoolSize(10)
-                .setKeepAliveTime(0L)
-                .setThreadFactory(r -> ThreadFactoryBuilder.create()
-                        .setNamePrefix("kmc-redis-delay-queue-thread")
-                        .setDaemon(false)
-                        .build()
-                        .newThread(r))
-                .useSynchronousQueue()
-                .build();
+        AtomicInteger counter = new AtomicInteger(0);
+        ThreadFactory threadFactory = r -> {
+            Thread t = new Thread(r, "kmc-redis-delay-queue-thread-" + counter.getAndIncrement());
+            t.setDaemon(false);
+            return t;
+        };
+        executor = new ThreadPoolExecutor(5, 10, 0L, TimeUnit.MILLISECONDS,
+                new SynchronousQueue<>(), threadFactory);
     }
 
     private final RedisDelayQueue redisDelayQueue;
@@ -73,8 +67,8 @@ public class RedisDelayQueueRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        com.kuma.boot.cache.redis.redisson.RedisDelayQueueEnum[] queueEnums = com.kuma.boot.cache.redis.redisson.RedisDelayQueueEnum.values();
-        for (com.kuma.boot.cache.redis.redisson.RedisDelayQueueEnum queueEnum : queueEnums) {
+        RedisDelayQueueEnum[] queueEnums = RedisDelayQueueEnum.values();
+        for (RedisDelayQueueEnum queueEnum : queueEnums) {
             executor.submit(() -> {
                 try {
                     while (true) {
@@ -92,8 +86,7 @@ public class RedisDelayQueueRunner implements CommandLineRunner {
                                 ContextUtils.getBean(RedisDelayQueueHandle.class, queueEnum.getBeanId(), true);
 
                         if (Objects.nonNull(redisDelayQueueHandle)) {
-                            ThreadUtil.execute(() -> redisDelayQueueHandle.execute(value));
-                            // redisDelayQueueHandle.execute(value);
+                            executor.submit(() -> redisDelayQueueHandle.execute(value));
                             LogUtils.info("RedisDelayQueueRunner run success");
                         }
                     }

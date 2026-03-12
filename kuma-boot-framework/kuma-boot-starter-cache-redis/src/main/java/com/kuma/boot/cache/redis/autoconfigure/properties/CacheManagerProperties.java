@@ -260,11 +260,11 @@ public class CacheManagerProperties {
         this.configs = configs;
     }
 
-    public boolean getEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled( boolean enabled ) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
