@@ -11,6 +11,7 @@ dependencies {
     api projectLibs.hutool.core
     api projectLibs.hutool.captcha
     api projectLibs.hutool.system
+    api projectLibs.hutool.extra
     api projectLibs.animated.gif.lib
     api projectLibs.commons.lang3
     api projectLibs.slf4j.api

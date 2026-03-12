@@ -45,7 +45,7 @@ public enum CaptchaCategory {
     public static final String HUTOOL_SHEAR_CAPTCHA = "HUTOOL_SHEAR";
     public static final String HUTOOL_GIF_CAPTCHA = "HUTOOL_GIF";
     private static final Map<String, CaptchaCategory> INDEX_MAP = new HashMap();
-    private static final List<Map<String, Object>> JSON_STRUCT = new ArrayList();
+    private static final List<ImmutableMap<Object, Object>> JSON_STRUCT = new ArrayList();
     @Schema(
             title = "常量值"
     )
@@ -72,7 +72,7 @@ public enum CaptchaCategory {
         return (CaptchaCategory)INDEX_MAP.get(name);
     }
 
-    public static List<Map<String, Object>> getJsonStruct() {
+    public static List<ImmutableMap<Object, Object>> getJsonStruct() {
         return JSON_STRUCT;
     }
 
