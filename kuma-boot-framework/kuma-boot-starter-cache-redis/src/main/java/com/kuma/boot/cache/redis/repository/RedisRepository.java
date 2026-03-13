@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.springframework.dao.DataAccessException;
@@ -77,9 +77,20 @@ public class RedisRepository {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     /**
-     * KEY_LOCKS
+     * 分段锁，防止缓存击穿，替代 ConcurrentHashMap 锁对象，避免内存泄漏
      */
-    private static final Map<String, Object> KEY_LOCKS = new ConcurrentHashMap<>();
+    private static final int LOCK_STRIPES = 256;
+    private static final ReentrantLock[] LOCK_STRIPE = new ReentrantLock[LOCK_STRIPES];
+
+    static {
+        for (int i = 0; i < LOCK_STRIPES; i++) {
+            LOCK_STRIPE[i] = new ReentrantLock();
+        }
+    }
+
+    private static ReentrantLock getLock(String key) {
+        return LOCK_STRIPE[(key.hashCode() & Integer.MAX_VALUE) % LOCK_STRIPES];
+    }
 
     /**
      * Spring Redis Template
@@ -91,8 +102,10 @@ public class RedisRepository {
      */
     private final boolean defaultCacheNullVal;
 
-    public boolean isClosed(){
-        return this.redisTemplate.getConnectionFactory().getConnection().isClosed();
+    public boolean isClosed() {
+        try (RedisConnection connection = this.redisTemplate.getConnectionFactory().getConnection()) {
+            return connection.isClosed();
+        }
     }
 
     /**
@@ -542,12 +555,6 @@ public class RedisRepository {
      */
     public void setExpire(final String key, final Object value, final long time) {
         redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
-        // return redisTemplate.execute((RedisCallback<Boolean>) connection -> {
-        //	RedisSerializer<String> serializer = getRedisSerializer();
-        //	byte[] keys = serializer.serialize(key);
-        //	byte[] values = OBJECT_SERIALIZER.serialize(value);
-        //	return connection.setEx(keys, time, values);
-        // });
     }
 
     /**
@@ -1562,18 +1569,17 @@ public class RedisRepository {
         }
 
         String lockKey = key + "@" + field;
-        synchronized (KEY_LOCKS.computeIfAbsent(lockKey, v -> new Object())) {
+        ReentrantLock lock1 = getLock(lockKey);
+        lock1.lock();
+        try {
             value = (T) redisTemplate.opsForHash().get(key, field);
             if (value != null) {
                 return returnVal(value);
             }
-
-            try {
-                value = loader.apply(key, field);
-                this.hSet(key, field, value, cacheNullVal);
-            } finally {
-                KEY_LOCKS.remove(lockKey);
-            }
+            value = loader.apply(key, field);
+            this.hSet(key, field, value, cacheNullVal);
+        } finally {
+            lock1.unlock();
         }
         return returnVal(value);
     }
@@ -1617,17 +1623,17 @@ public class RedisRepository {
             return returnVal(value);
         }
         String lockKey = key.getKey() + "@" + key.getField();
-        synchronized (KEY_LOCKS.computeIfAbsent(lockKey, v -> new Object())) {
+        ReentrantLock lock2 = getLock(lockKey);
+        lock2.lock();
+        try {
             value = (T) redisTemplate.opsForHash().get(key.getKey(), key.getField());
             if (value != null) {
                 return returnVal(value);
             }
-            try {
-                value = loader.apply(key);
-                this.hSet(key, value, cacheNullVal);
-            } finally {
-                KEY_LOCKS.remove(key.getKey());
-            }
+            value = loader.apply(key);
+            this.hSet(key, value, cacheNullVal);
+        } finally {
+            lock2.unlock();
         }
         return returnVal(value);
     }
@@ -1877,17 +1883,17 @@ public class RedisRepository {
             return returnMapVal(map);
         }
         String lockKey = key.getKey();
-        synchronized (KEY_LOCKS.computeIfAbsent(lockKey, v -> new Object())) {
+        ReentrantLock lock3 = getLock(lockKey);
+        lock3.lock();
+        try {
             map = (Map<K, V>) redisTemplate.opsForHash().entries(key.getKey());
             if (!map.isEmpty()) {
                 return returnMapVal(map);
             }
-            try {
-                map = loader.apply(key);
-                this.hmSet(key.getKey(), map, cacheNullVal);
-            } finally {
-                KEY_LOCKS.remove(key.getKey());
-            }
+            map = loader.apply(key);
+            this.hmSet(key.getKey(), map, cacheNullVal);
+        } finally {
+            lock3.unlock();
         }
         return returnMapVal(map);
     }
@@ -2064,18 +2070,17 @@ public class RedisRepository {
         }
 
         // 加锁解决缓存击穿
-        synchronized (KEY_LOCKS.computeIfAbsent(key, v -> new Object())) {
+        ReentrantLock lock4 = getLock(key);
+        lock4.lock();
+        try {
             value = (T) redisTemplate.opsForValue().get(key);
             if (value != null) {
                 return returnVal(value);
             }
-
-            try {
-                value = loader.apply(key);
-                this.set(key, value, cacheNullVal);
-            } finally {
-                KEY_LOCKS.remove(key);
-            }
+            value = loader.apply(key);
+            this.set(key, value, cacheNullVal);
+        } finally {
+            lock4.unlock();
         }
         // NullVal 值
         return returnVal(value);
@@ -2140,18 +2145,17 @@ public class RedisRepository {
         if (value != null) {
             return returnVal(value);
         }
-        synchronized (KEY_LOCKS.computeIfAbsent(key.getKey(), v -> new Object())) {
+        ReentrantLock lock5 = getLock(key.getKey());
+        lock5.lock();
+        try {
             value = (T) redisTemplate.opsForValue().get(key.getKey());
             if (value != null) {
                 return returnVal(value);
             }
-
-            try {
-                value = loader.apply(key);
-                this.set(key, value, cacheNullVal);
-            } finally {
-                KEY_LOCKS.remove(key.getKey());
-            }
+            value = loader.apply(key);
+            this.set(key, value, cacheNullVal);
+        } finally {
+            lock5.unlock();
         }
         return returnVal(value);
     }
