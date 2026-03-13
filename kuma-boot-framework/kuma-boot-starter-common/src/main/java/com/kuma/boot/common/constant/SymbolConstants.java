@@ -23,171 +23,173 @@ package com.kuma.boot.common.constant;
  * @version 2022.07
  * @since 2022-07-12 10:47:29
  */
-public class SymbolConstants {
+public final class SymbolConstants {
 
-    public static String AMPERSAND = "&";
+    private SymbolConstants() {}
 
-    public static String AMPERSAND_ENCODED = "&amp;";
+    public static final String AMPERSAND = "&";
 
-    public static String APOSTROPHE = "'";
+    public static final String AMPERSAND_ENCODED = "&amp;";
 
-    public static String APOSTROPHE_AND_COMMA = "',";
+    public static final String APOSTROPHE = "'";
 
-    public static String APOSTROPHE_AND_COMMA_AND_APOSTROPHE = "','";
+    public static final String APOSTROPHE_AND_COMMA = "',";
 
-    public static String AT = "@";
+    public static final String APOSTROPHE_AND_COMMA_AND_APOSTROPHE = "','";
 
-    public static String BACK_SLASH = "\\";
+    public static final String AT = "@";
 
-    public static String BETWEEN = "BETWEEN";
+    public static final String BACK_SLASH = "\\";
 
-    public static String BLANK = "";
+    public static final String BETWEEN = "BETWEEN";
 
-    public static String CDATA_OPEN = "<![CDATA[";
+    public static final String BLANK = "";
 
-    public static String CDATA_CLOSE = "]]>";
+    public static final String CDATA_OPEN = "<![CDATA[";
 
-    public static String CLOSE_BRACKET = "]";
+    public static final String CDATA_CLOSE = "]]>";
 
-    public static String CLOSE_CURLY_BRACE = "}";
+    public static final String CLOSE_BRACKET = "]";
 
-    public static String CLOSE_PARENTHESIS = ")";
+    public static final String CLOSE_CURLY_BRACE = "}";
 
-    public static String COLON = ":";
+    public static final String CLOSE_PARENTHESIS = ")";
 
-    public static String COMMA = ",";
+    public static final String COLON = ":";
 
-    public static String COMMA_AND_APOSTROPHE = ",'";
+    public static final String COMMA = ",";
 
-    public static String COMMA_AND_SPACE = ", ";
+    public static final String COMMA_AND_APOSTROPHE = ",'";
 
-    public static String DASH = "-";
+    public static final String COMMA_AND_SPACE = ", ";
 
-    public static String DOUBLE_APOSTROPHE = "''";
+    public static final String DASH = "-";
 
-    public static String DOUBLE_CLOSE_BRACKET = "]]";
+    public static final String DOUBLE_APOSTROPHE = "''";
 
-    public static String DOUBLE_OPEN_BRACKET = "[[";
+    public static final String DOUBLE_CLOSE_BRACKET = "]]";
 
-    public static String DOUBLE_SLASH = "//";
+    public static final String DOUBLE_OPEN_BRACKET = "[[";
 
-    public static String EQUAL = "=";
+    public static final String DOUBLE_SLASH = "//";
 
-    public static String GREATER_THAN = ">";
+    public static final String EQUAL = "=";
 
-    public static String GREATER_THAN_OR_EQUAL = ">=";
+    public static final String GREATER_THAN = ">";
 
-    public static String FORWARD_SLASH = "/";
+    public static final String GREATER_THAN_OR_EQUAL = ">=";
 
-    public static String FOUR_SPACES = "    ";
+    public static final String FORWARD_SLASH = "/";
 
-    public static String FINISH_LEFT_ANGLE = "</";
+    public static final String FOUR_SPACES = "    ";
 
-    public static String FINISH_RIGHT_ANGLE = "/>";
+    public static final String FINISH_LEFT_ANGLE = "</";
 
-    public static String GBK = "GBK";
+    public static final String FINISH_RIGHT_ANGLE = "/>";
 
-    public static String IS_NOT_NULL = "IS NOT NULL";
+    public static final String GBK = "GBK";
 
-    public static String IS_NULL = "IS NULL";
+    public static final String IS_NOT_NULL = "IS NOT NULL";
 
-    public static String IN = "IN";
+    public static final String IS_NULL = "IS NULL";
 
-    public static String LEFT_ANGLE = "<";
+    public static final String IN = "IN";
 
-    public static String LESS_THAN = "<";
+    public static final String LEFT_ANGLE = "<";
 
-    public static String LESS_THAN_OR_EQUAL = "<=";
+    public static final String LESS_THAN = "<";
 
-    public static String LIKE = "LIKE";
+    public static final String LESS_THAN_OR_EQUAL = "<=";
 
-    public static String MINUS = "-";
+    public static final String LIKE = "LIKE";
 
-    public static String NBSP = "&nbsp;";
+    public static final String MINUS = "-";
 
-    public static String NEW_LINE = "\n";
+    public static final String NBSP = "&nbsp;";
 
-    public static String NOT_EQUAL = "!=";
+    public static final String NEW_LINE = "\n";
 
-    public static String DB_NOT_EQUAL = "<>";
+    public static final String NOT_EQUAL = "!=";
 
-    public static String NOT_LIKE = "NOT LIKE";
+    public static final String DB_NOT_EQUAL = "<>";
 
-    public static String NULL = "null";
+    public static final String NOT_LIKE = "NOT LIKE";
 
-    public static String OPEN_BRACKET = "[";
+    public static final String NULL = "null";
 
-    public static String OPEN_CURLY_BRACE = "{";
+    public static final String OPEN_BRACKET = "[";
 
-    public static String OPEN_PARENTHESIS = "(";
+    public static final String OPEN_CURLY_BRACE = "{";
 
-    public static String PERCENT = "%";
+    public static final String OPEN_PARENTHESIS = "(";
 
-    public static String PERIOD = ".";
+    public static final String PERCENT = "%";
 
-    public static String PIPE = "|";
+    public static final String PERIOD = ".";
 
-    public static String PLUS = "+";
+    public static final String PIPE = "|";
 
-    public static String POUND = "#";
+    public static final String PLUS = "+";
 
-    public static String QUESTION = "?";
+    public static final String POUND = "#";
 
-    public static String QUOTE = "\"";
+    public static final String QUESTION = "?";
 
-    public static String RETURN = "\r";
+    public static final String QUOTE = "\"";
 
-    public static String RETURN_NEW_LINE = "\r\n";
+    public static final String RETURN = "\r";
 
-    public static String RIGHT_ANGLE = ">";
+    public static final String RETURN_NEW_LINE = "\r\n";
 
-    public static String SEMICOLON = ";";
+    public static final String RIGHT_ANGLE = ">";
 
-    public static String SLASH = FORWARD_SLASH;
+    public static final String SEMICOLON = ";";
 
-    public static String SPACE = " ";
+    public static final String SLASH = FORWARD_SLASH;
 
-    public static String STAR = "*";
+    public static final String SPACE = " ";
 
-    public static String TAB = "\t";
+    public static final String STAR = "*";
 
-    public static String TILDE = "~";
+    public static final String TAB = "\t";
 
-    public static String UNDERLINE = "_";
+    public static final String TILDE = "~";
 
-    public static String SUFFIX_EXCEL_2003 = ".xls";
+    public static final String UNDERLINE = "_";
 
-    public static String SUFFIX_EXCEL_2007 = ".xlsx";
+    public static final String SUFFIX_EXCEL_2003 = ".xls";
 
-    public static String SUFFIX_JPEG = ".jpg";
+    public static final String SUFFIX_EXCEL_2007 = ".xlsx";
 
-    public static String SUFFIX_XML = ".xml";
+    public static final String SUFFIX_JPEG = ".jpg";
 
-    public static String SUFFIX_PDF = ".pdf";
+    public static final String SUFFIX_XML = ".xml";
 
-    public static String SUFFIX_ZIP = ".zip";
+    public static final String SUFFIX_PDF = ".pdf";
 
-    public static String SUFFIX_DOC = ".doc";
+    public static final String SUFFIX_ZIP = ".zip";
 
-    public static String SUFFIX_DOCX = ".docx";
+    public static final String SUFFIX_DOC = ".doc";
 
-    public static String SUFFIX_PPT = ".ppt";
+    public static final String SUFFIX_DOCX = ".docx";
 
-    public static String SUFFIX_PPTX = ".pptx";
+    public static final String SUFFIX_PPT = ".ppt";
 
-    public static String SUFFIX_EXCEL = ".xls";
+    public static final String SUFFIX_PPTX = ".pptx";
 
-    public static String SUFFIX_EXCELX = ".xlsx";
+    public static final String SUFFIX_EXCEL = ".xls";
 
-    public static String SUFFIX_SWF = ".swf";
+    public static final String SUFFIX_EXCELX = ".xlsx";
 
-    public static String SUFFIX_PROPERTIES = ".properties";
+    public static final String SUFFIX_SWF = ".swf";
 
-    public static String SUFFIX_YML = ".yml";
+    public static final String SUFFIX_PROPERTIES = ".properties";
 
-    public static String SUFFIX_YAML = ".yaml";
+    public static final String SUFFIX_YML = ".yml";
 
-    public static String SUFFIX_JSON = ".json";
+    public static final String SUFFIX_YAML = ".yaml";
 
-    public static String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    public static final String SUFFIX_JSON = ".json";
+
+    public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 }

@@ -31,35 +31,35 @@ public final class CommonConstants {
 
     private CommonConstants() {}
 
-    public static String REQUEST_ERROR = "请求错误";
+    public static final String REQUEST_ERROR = "请求错误";
 
-    public static String REQUEST_SUCCESS = "请求成功";
+    public static final String REQUEST_SUCCESS = "请求成功";
 
-    public static String REQUEST_FAILED = "请求失败";
+    public static final String REQUEST_FAILED = "请求失败";
 
-    public static String SPRING_APP_NAME_KEY = "spring.application.name";
+    public static final String SPRING_APP_NAME_KEY = "spring.application.name";
 
-    public static String ACTIVE_PROFILES_PROPERTY = "spring.profiles.active";
+    public static final String ACTIVE_PROFILES_PROPERTY = "spring.profiles.active";
 
-    public static String ACTIVE_PROFILES_ACTIVE = "ACTIVE_PROFILES_ACTIVE";
+    public static final String ACTIVE_PROFILES_ACTIVE = "ACTIVE_PROFILES_ACTIVE";
 
-    public static String ENV = "env";
+    public static final String ENV = "env";
 
-    public static String DEFAULT_KMC_VERSION = KmcVersion.getVersion();
-    public static String DEFAULT_SYSTEM_CODE = "000000";
-    public static String DEFAULT_CATEGORY_CODE = "000";
+    public static final String DEFAULT_KMC_VERSION = KmcVersion.getVersion();
+    public static final String DEFAULT_SYSTEM_CODE = "000000";
+    public static final String DEFAULT_CATEGORY_CODE = "000";
 
-    public static String KMC_ENV = "kmc_env";
+    public static final String KMC_ENV = "kmc_env";
 
-    public static String KMC_MAIN = "kmc_main";
+    public static final String KMC_MAIN = "kmc_main";
 
-    public static String KMC_ENV_VERSION = "kmcVersion";
+    public static final String KMC_ENV_VERSION = "kmcVersion";
 
-    public static String ACTIVE_ON_PROFILE_PROPERTY = "spring.config.activate.on-profile";
+    public static final String ACTIVE_ON_PROFILE_PROPERTY = "spring.config.activate.on-profile";
 
-    public static String LOGGING_FILE_TOTAL_SIZE = "logging.file.total-size";
+    public static final String LOGGING_FILE_TOTAL_SIZE = "logging.file.total-size";
 
-    public static String CONTEXT_RESTART_TEXT = "kuma.boot.core.context.restart.text";
+    public static final String CONTEXT_RESTART_TEXT = "kuma.boot.core.context.restart.text";
 
     /**
      * utf-8

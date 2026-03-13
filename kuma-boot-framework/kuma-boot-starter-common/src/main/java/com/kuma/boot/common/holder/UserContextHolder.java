@@ -55,11 +55,13 @@ public class UserContextHolder {
     }
 
     public static Long getUserId() {
-        return LOGIN_USER_CONTEXT.get().getUserId();
+        BaseSecurityUser user = LOGIN_USER_CONTEXT.get();
+        return user != null ? user.getUserId() : null;
     }
 
     public static String getUserName() {
-        return LOGIN_USER_CONTEXT.get().getUsername();
+        BaseSecurityUser user = LOGIN_USER_CONTEXT.get();
+        return user != null ? user.getUsername() : null;
     }
 
     /**
