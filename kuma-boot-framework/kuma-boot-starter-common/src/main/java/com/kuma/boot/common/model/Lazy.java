@@ -61,19 +61,14 @@ public class Lazy<T> implements Supplier<T>, Serializable {
     private synchronized T computeValue() {
         T result = value;
         if (null == result) {
-            synchronized (this) {
-                result = value;
-                if (null == result) {
-                    final Supplier<? extends T> s = supplier;
-                    if (s == null) {
-                        throw new RuntimeException("supplier is null");
-                    }
-                    value = s.get();
-                    supplier = null;
-                }
+            final Supplier<? extends T> s = supplier;
+            if (s == null) {
+                throw new RuntimeException("supplier is null");
             }
+            value = s.get();
+            result = value;
+            supplier = null;
         }
-
-        return value;
+        return result;
     }
 }
