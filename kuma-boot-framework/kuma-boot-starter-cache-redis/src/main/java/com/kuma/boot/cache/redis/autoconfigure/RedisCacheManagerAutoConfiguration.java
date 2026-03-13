@@ -173,11 +173,9 @@ public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, In
             initialCaches.putAll(cacheConfigMap);
         }
 
-        boolean allowInFlightCacheCreation = true;
-        boolean enableTransactions = false;
         RedisAutoCacheManager cacheManager = new RedisAutoCacheManager(
-                redisCacheWriter, cacheConfiguration, allowInFlightCacheCreation, initialCaches);
-        cacheManager.setTransactionAware(enableTransactions);
+                redisCacheWriter, cacheConfiguration, true, initialCaches);
+        cacheManager.setTransactionAware(false);
 
         return cacheManagerCustomizers.customize(cacheManager);
     }

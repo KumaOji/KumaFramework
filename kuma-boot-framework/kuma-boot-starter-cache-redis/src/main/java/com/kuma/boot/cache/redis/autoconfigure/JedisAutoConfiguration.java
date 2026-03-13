@@ -16,6 +16,7 @@
 
 package com.kuma.boot.cache.redis.autoconfigure;
 
+import java.util.Objects;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -47,10 +48,7 @@ public class JedisAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public JedisConnectionFactory redisConnectionFactory() {
-        ConnectionPoolConfig jedisPoolConfig = new ConnectionPoolConfig();
-        jedisPoolConfig.setMaxTotal(200);
-        jedisPoolConfig.setMaxIdle(150);
-        jedisPoolConfig.setMinIdle(50);
+        ConnectionPoolConfig jedisPoolConfig = buildPoolConfig();
 
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(redisProperties.getHost());
@@ -62,5 +60,24 @@ public class JedisAutoConfiguration {
                 JedisClientConfiguration.builder().usePooling().poolConfig(jedisPoolConfig).build();
 
         return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
+    }
+
+    private ConnectionPoolConfig buildPoolConfig() {
+        ConnectionPoolConfig config = new ConnectionPoolConfig();
+        DataRedisProperties.Jedis jedis = redisProperties.getJedis();
+        DataRedisProperties.Pool pool = (jedis != null) ? jedis.getPool() : null;
+        if (pool != null) {
+            config.setMaxTotal(Objects.requireNonNullElse(pool.getMaxActive(), 200));
+            config.setMaxIdle(Objects.requireNonNullElse(pool.getMaxIdle(), 150));
+            config.setMinIdle(Objects.requireNonNullElse(pool.getMinIdle(), 50));
+            if (pool.getMaxWait() != null && !pool.getMaxWait().isNegative()) {
+                config.setMaxWait(pool.getMaxWait());
+            }
+        } else {
+            config.setMaxTotal(200);
+            config.setMaxIdle(150);
+            config.setMinIdle(50);
+        }
+        return config;
     }
 }

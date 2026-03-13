@@ -129,8 +129,9 @@ public class RedisAutoConfiguration implements InitializingBean {
     }
 
     @Bean
-    public RedisRepository redisRepository(RedisTemplate<String, Object> redisTemplate) {
-        return new RedisRepository(redisTemplate, false);
+    public RedisRepository redisRepository(
+            RedisTemplate<String, Object> redisTemplate, CacheManagerProperties properties) {
+        return new RedisRepository(redisTemplate, Boolean.TRUE.equals(properties.getCacheNullVal()));
     }
 
     @Bean
