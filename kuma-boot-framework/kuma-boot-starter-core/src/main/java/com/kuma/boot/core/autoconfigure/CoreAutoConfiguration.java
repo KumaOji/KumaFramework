@@ -20,7 +20,6 @@ import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.model.PropertyCache;
 import com.kuma.boot.common.model.Pubsub;
 import com.kuma.boot.common.utils.log.LogUtils;
-//import com.kuma.boot.core.runtime.listener.StartedEventListener;
 import com.kuma.boot.core.autoconfigure.properties.CoreProperties;
 import com.kuma.boot.core.runtime.listener.StartedEventListener;
 import com.kuma.boot.core.runtime.runner.KmcApplicationRunner;

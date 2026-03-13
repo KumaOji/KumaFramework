@@ -39,7 +39,7 @@ public final class PropertyUtils {
     /**
      * NULL
      */
-    public static String NULL = "<?NULL?>";
+    public static final String NULL = "<?NULL?>";
 
     /**
      * eachProperty

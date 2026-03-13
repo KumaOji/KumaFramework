@@ -91,12 +91,20 @@ public class StartupSpringApplication extends SpringApplication {
         if (StrUtil.isBlank(System.getProperty(ACTIVE_PROFILES_PROPERTY)) && StrUtil.isBlank(
                 System.getProperty(ENV)) && !System.getenv().containsKey(ACTIVE_PROFILES_ACTIVE)) {
             System.setProperty(ACTIVE_PROFILES_PROPERTY, profile);
+            // 仅在没有激活 profile 时才补充 additional profile，避免与外部传入的 profile 叠加
+            super.setAdditionalProfiles(profile);
         }
-        super.setAdditionalProfiles(profile);
         return this;
     }
 
     public StartupSpringApplication setKmcApplicationProperty(String applicationName) {
+        // 将 spring.application.name 写入 System 属性（优先级高于 application.yml），
+        // 保证 event.getApplicationContext().getEnvironment().getProperty("spring.application.name") 可用。
+        // 注意：ApplicationContext.getApplicationName() 在 Spring Boot 中始终返回 ""，
+        //       请勿使用该 API 获取应用名，应使用 BootContextUtils.getApplicationName(context) 代替。
+        if (StrUtil.isNotBlank(applicationName) && System.getProperty("spring.application.name") == null) {
+            System.setProperty("spring.application.name", applicationName);
+        }
         PropertyUtils.setDefaultProperty(applicationName);
         return this;
     }

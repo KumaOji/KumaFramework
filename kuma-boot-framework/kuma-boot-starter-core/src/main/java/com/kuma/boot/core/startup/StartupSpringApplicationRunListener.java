@@ -177,8 +177,6 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
 
     @Override
     public void failed(ConfigurableApplicationContext context, Throwable exception) {
-        exception.printStackTrace();
-
         LogUtils.error(exception, "启动失败");
     }
 }

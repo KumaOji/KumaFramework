@@ -1,6 +1,7 @@
 package com.kuma.boot.core.holder;
 
 import com.kuma.boot.common.constant.SystemConstants;
+import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.system.SystemUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
@@ -67,8 +68,11 @@ public class RuntimeContextHolder {
     private void judgmentSpringCloud( SpringApplication springApplication ) {
         Set<Object> allSources = springApplication.getAllSources();
         for (Object source : allSources) {
-            String name = ( (Class<?>) source ).getName();
-            if (SPRING_CLOUD_CLASS_NAME.equals(name)) {
+            // sources 可能是 Class、URL 或 String，只处理 Class 类型
+            if (!(source instanceof Class<?> clazz)) {
+                continue;
+            }
+            if (SPRING_CLOUD_CLASS_NAME.equals(clazz.getName())) {
                 isSpringCloud = true;
                 return;
             }
@@ -97,7 +101,7 @@ public class RuntimeContextHolder {
                 }
             }
         } catch (IOException e) {
-
+            LogUtils.debug("无法读取 /proc/1/cgroup 检测 Docker/K8s 环境: {}", e.getMessage());
         }
 
     }
