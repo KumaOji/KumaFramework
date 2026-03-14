@@ -48,6 +48,7 @@ public class CoreUtils {
      */
     public static Map<String, Object> getUrlMap() {
         Map<String, Object> map = new HashMap<>();
+        map.put("kmc.author", "Kuma");
         map.put("kmc.author.github", "https://github.com/KumaOji");
         map.put("kmc.author.gitee", "https://gitee.com/kuma047");
         map.put("kmc.author.csdn", "https://blog.csdn.net/Kuma_Test");
