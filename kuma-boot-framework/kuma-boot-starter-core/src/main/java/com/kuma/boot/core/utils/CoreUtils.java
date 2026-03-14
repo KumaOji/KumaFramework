@@ -30,20 +30,29 @@ public class CoreUtils {
         return new MapPropertySource("kmc_website_info", getUrlMap());
     }
 
+    /**
+     * 作者/网站链接，会写入 System Properties 供 banner/kmc-banner.txt 的 ${...} 占位符展开。
+     *
+     * <p><b>扩展约定（banner.txt 对齐规则）：</b>
+     * <pre>
+     *   格式：  &lt;label padded to 28 chars&gt;::  ${property.key}
+     *   示例：  Spring              ::  ${spring.version}     (标签 6 字符 + 22 空格 = 28)
+     *           SC Dependencies     ::  ${...}               (标签 15 字符 + 13 空格 = 28)
+     *
+     *   新增步骤：
+     *     1. 在此 map 中添加  map.put("kmc.xxx.yyy", "value");
+     *     2. 在 kmc-banner.txt 中添加一行：
+     *        ${AnsiColor.XXX}  YourLabel           ::  ${kmc.xxx.yyy}
+     *        （保证 "YourLabel + 填充空格" 恰好 28 字符，:: 落在第 22 列）
+     * </pre>
+     */
     public static Map<String, Object> getUrlMap() {
-        Map<String, Object> versions = new HashMap<>();
-        versions.put("kmc.website.url", "NULL");
-        versions.put("kmc.website.initializr.url", "NULL");
-        versions.put("kmc.website.blog.url", "NULL");
-        versions.put("kmc.website.m.url", "NULL");
-        versions.put("kmc.website.datav.url", "NULL");
-        versions.put("kmc.website.manager.url", "NULL");
-        versions.put("kmc.website.merchant.url", "NULL");
-        versions.put("kmc.website.open.url", "NULL");
-        versions.put("kmc.website.backend.url", "NULL");
-        versions.put("kmc.website.gitee.url", "NULL");
-        versions.put("kmc.website.github.url", "NULL");
-        return versions;
+        Map<String, Object> map = new HashMap<>();
+        map.put("kmc.author.github", "https://github.com/KumaOji");
+        map.put("kmc.author.gitee", "https://gitee.com/kuma047");
+        map.put("kmc.author.csdn", "https://blog.csdn.net/Kuma_Test");
+        map.put("kmc.author.juejin", "https://juejin.cn/user/3423240582337945");
+        return map;
     }
 
     public static String getApplicationVersion( Environment environment ) {

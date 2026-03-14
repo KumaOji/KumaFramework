@@ -5,31 +5,17 @@ ${AnsiColor.BRIGHT_CYAN}
  | . \| |_| | |  | |/ ___ \     | |___| |__| |_| | |_| | |_| |
  |_|\_\\___/|_|  |_/_/   \_\     \____|_____\___/ \___/|____/
 
-${AnsiColor.GREEN}SPRING_VERSION:                    ${spring.version}
-${AnsiColor.RED}KMC_BOOT_VERSION:                  ${kmc-boot.version}
-${AnsiColor.YELLOW}SPRING_BOOT_VERSION:               ${spring-boot.version}
-${AnsiColor.BLUE}SPRING_CLOUD_VERSION:              ${spring-cloud.version}
-${AnsiColor.MAGENTA}SPRING_CLOUD_DEPENDENCIES_VERSION: ${spring-cloud-dependencies.version}
-${AnsiColor.CYAN}SPRING_CLOUD_ALIBABA_VERSION:      ${spring-cloud-alibaba.version}
-${AnsiColor.BRIGHT_RED}
-............ KUMA BOOT INFO ............
-${AnsiColor.CYAN}KMC_AUTHOR:						             KUMA
-${AnsiColor.MAGENTA}KMC_GITHUB: 					             NULL
-${AnsiColor.BLUE}KMC_GITEE: 						             NULL
-${AnsiColor.YELLOW}KMC_CSDN: 						             NULL
-${AnsiColor.GREEN}KMC_JUEJIN: 					             NULL
-${AnsiColor.RED}KMC_WEBSITE: 					             NULL
-${AnsiColor.BRIGHT_GREEN}
-............ KUMA BOOT WEBSITE INFO ............
-${AnsiColor.RED}KMC:                               ${kmc.website.url}
-${AnsiColor.BLUE}KMC_INITIALIZR:                    ${kmc.website.initializr.url}
-${AnsiColor.CYAN}KMC_BLOG:                          ${kmc.website.blog.url}
-${AnsiColor.BLUE}KMC_M:                             ${kmc.website.m.url}
-${AnsiColor.GREEN}KMC_DATAV:                         ${kmc.website.datav.url}
-${AnsiColor.CYAN}KMC_MANAGER:                       ${kmc.website.manager.url}
-${AnsiColor.RED}KMC_MERCHANT:                      ${kmc.website.merchant.url}
-${AnsiColor.BLUE}KMC_OPEN:                          ${kmc.website.open.url}
-${AnsiColor.WHITE}KMC_BACKEND:                       ${kmc.website.backend.url}
-
-${AnsiColor.BRIGHT_CYAN}............ KUMA BOOT ${spring.application.name} STARING ............
+${AnsiColor.GREEN}  Spring                      ::  ${spring.version}
+${AnsiColor.RED}  KMC Boot                    ::  ${kmc-boot.version}
+${AnsiColor.YELLOW}  Spring Boot                 ::  ${spring-boot.version}
+${AnsiColor.BLUE}  Spring Cloud                ::  ${spring-cloud.version}
+${AnsiColor.MAGENTA}  SC Dependencies             ::  ${spring-cloud-dependencies.version}
+${AnsiColor.CYAN}  SC Alibaba                  ::  ${spring-cloud-alibaba.version}
+${AnsiColor.WHITE}  ───────────────────────────────────────────────────────
+${AnsiColor.CYAN}  GitHub                      ::  ${kmc.author.github}
+${AnsiColor.MAGENTA}  Gitee                       ::  ${kmc.author.gitee}
+${AnsiColor.BLUE}  CSDN                        ::  ${kmc.author.csdn}
+${AnsiColor.YELLOW}  Juejin                      ::  ${kmc.author.juejin}
+${AnsiColor.WHITE}  ───────────────────────────────────────────────────────
+${AnsiColor.BRIGHT_CYAN}  ${spring.application.name} Starting ...
 ${AnsiColor.DEFAULT}
