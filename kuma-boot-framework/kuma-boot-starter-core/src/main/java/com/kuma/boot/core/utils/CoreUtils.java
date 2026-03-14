@@ -35,15 +35,15 @@ public class CoreUtils {
      *
      * <p><b>扩展约定（banner.txt 对齐规则）：</b>
      * <pre>
-     *   格式：  &lt;label padded to 28 chars&gt;::  ${property.key}
-     *   示例：  Spring              ::  ${spring.version}     (标签 6 字符 + 22 空格 = 28)
-     *           SC Dependencies     ::  ${...}               (标签 15 字符 + 13 空格 = 28)
+     *   格式：  &lt;label padded to 43 chars&gt;::  ${property.key}
+     *   示例：  Spring              ::  ${spring.version}     (标签 6 字符 + 27 空格 = 43)
+     *           SC Dependencies     ::  ${...}               (标签 15 字符 + 18 空格 = 43)
      *
      *   新增步骤：
      *     1. 在此 map 中添加  map.put("kmc.xxx.yyy", "value");
      *     2. 在 kmc-banner.txt 中添加一行：
      *        ${AnsiColor.XXX}  YourLabel           ::  ${kmc.xxx.yyy}
-     *        （保证 "YourLabel + 填充空格" 恰好 28 字符，:: 落在第 22 列）
+     *        （保证 "YourLabel + 填充空格" 恰好 43 字符，:: 落在第 22 列）
      * </pre>
      */
     public static Map<String, Object> getUrlMap() {
