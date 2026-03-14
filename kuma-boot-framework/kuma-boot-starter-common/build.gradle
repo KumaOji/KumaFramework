@@ -4,6 +4,13 @@ plugins {
 
 description = 'Myframework 公共模块'
 
+// 将 project.version 写入 kmc-version.properties，供 KmcVersion 在 IDE 模式下读取
+processResources {
+    filesMatching('kmc-version.properties') {
+        expand(project: project)
+    }
+}
+
 
 dependencies {
     implementation projectLibs.hutool.core
