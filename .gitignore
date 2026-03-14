@@ -28,7 +28,7 @@ CLAUDE.md
 doc/
 
 # temp
-**/kuma*/
+#**/kuma*/
 
 # intellijPlatform
 .intellijPlatform/
