@@ -25,7 +25,16 @@ configurations {
 }
 
 
+// Gradle 9: job-server and job-nameserver are Spring Boot apps whose artifact is bootJar
+tasks.named('bootJar').configure {
+    dependsOn ':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-server:bootJar'
+    dependsOn ':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-nameserver:bootJar'
+}
+
 jar {
+    dependsOn ':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-server:bootJar'
+    dependsOn ':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-nameserver:bootJar'
+
     from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-api").jar) { into("lib/") }
     from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-common").jar) { into("lib/") }
     from(project(":kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-client").jar) { into("lib/") }
@@ -53,7 +62,8 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     into('lib') { // 将第三方jar放入 lib目录中
-        from configurations.runtimeClasspath.findAll { it.name.endsWith('.jar') }
+        // .filter{} 返回懒惰 FileCollection，Gradle 9 可自动追踪传递任务依赖
+        from configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }
     }
 
     //打包依赖包

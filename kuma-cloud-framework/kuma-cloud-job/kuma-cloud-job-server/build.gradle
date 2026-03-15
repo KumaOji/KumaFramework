@@ -21,3 +21,5 @@ dependencies {
     implementation "com.cronutils:cron-utils:9.2.1"
     implementation projectLibs.httpclient5
 }
+
+tasks.named('startScripts') { dependsOn bootJar }

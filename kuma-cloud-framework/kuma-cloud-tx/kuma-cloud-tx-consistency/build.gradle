@@ -1,6 +1,12 @@
 dependencies {
     api project(":kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-common")
 
+    implementation projectLibs.aspectjweaver
+    implementation projectLibs.spring.core
+    implementation projectLibs.spring.context
+    implementation projectLibs.spring.web
+    implementation "org.springframework:spring-webmvc:7.0.3"
+
     api 'com.google.guava:guava:33.5.0-jre'
     api 'com.alibaba:fastjson:2.0.60'
     api 'org.rocksdb:rocksdbjni:9.4.0'

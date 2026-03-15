@@ -13,6 +13,10 @@ String removeBizSuffix(String input) {
     return input ? input.replaceAll(/-biz$/, '') : ''
 }
 
+// Gradle 9: application plugin 生成的 startScripts/bootStartScripts 需要显式依赖
+tasks.named('startScripts') { dependsOn bootJar }
+tasks.named('bootStartScripts') { dependsOn jar }
+
 bootJar {
     archiveBaseName = removeBizSuffix(project.name)
     manifest {

@@ -1,7 +1,3 @@
-apply from: rootProject.file('gradle/shadow.gradle')
-
-apply plugin: 'application'
-
 tasks.register('releaseTarZip', Zip) {
     dependsOn(':kuma-cloud-ccsr:kuma-cloud-ccsr-server:bootJar')
 

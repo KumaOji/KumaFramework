@@ -1,5 +1,3 @@
-apply from: rootProject.file('gradle/shadow.gradle')
-
 tasks.register('releaseTarZip', Zip) {
     dependsOn(':kuma-cloud-mq:kuma-cloud-mq-dashboard:bootJar')
 

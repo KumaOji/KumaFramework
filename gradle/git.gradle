@@ -1,6 +1,6 @@
 gitProperties {
     dateFormat         = "yyyy-MM-dd HH:mm:ss"
     dateFormatTimeZone = "GMT+8"
-    customProperty 'project_version', { project.version }
+    customProperty 'project_version', project.version
     failOnNoGitDirectory = false
 }

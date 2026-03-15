@@ -3,6 +3,11 @@ dependencies {
         exclude group: "com.caucho", module: "hessian"
     }
 
+    implementation projectLibs.gson
+    implementation projectLibs.commons.lang3
+    implementation projectLibs.commons.collections4
+    implementation projectLibs.hutool.core
+
     api 'com.google.guava:guava:33.5.0-jre'
     api 'com.alibaba:fastjson:2.0.60'
     api 'org.rocksdb:rocksdbjni:9.4.0'

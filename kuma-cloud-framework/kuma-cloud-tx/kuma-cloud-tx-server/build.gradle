@@ -52,7 +52,8 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     into('lib') { // 将第三方jar放入 lib目录中
-        from configurations.runtimeClasspath.findAll { it.name.endsWith('.jar') }
+        // .filter{} 返回懒惰 FileCollection，Gradle 9 可自动追踪传递任务依赖
+        from configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }
     }
 
     //打包依赖包

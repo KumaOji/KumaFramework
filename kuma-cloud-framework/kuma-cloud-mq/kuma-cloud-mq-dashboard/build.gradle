@@ -26,6 +26,11 @@ dependencies {
     implementation "com.mysql:mysql-connector-j:9.6.0"
 }
 
+// mq-nameserver 是 Spring Boot 应用，其 artifact 是 bootJar，需要显式声明依赖
+tasks.named('bootJar').configure {
+    dependsOn ':kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-nameserver:bootJar'
+}
+
 configurations {
     configureEach {
         resolutionStrategy.cacheChangingModulesFor 0, "seconds"
@@ -37,6 +42,8 @@ configurations {
 
 
 jar {
+    dependsOn ':kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-nameserver:bootJar'
+
     from(project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-common").jar) { into("lib/") }
     from(project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-cluster").jar) { into("lib/") }
     from(project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-consistency").jar) { into("lib/") }
@@ -63,7 +70,7 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     into('lib') { // 将第三方jar放入 lib目录中
-        from configurations.runtimeClasspath.findAll { it.name.endsWith('.jar') }
+        from configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }
     }
 
     //打包依赖包

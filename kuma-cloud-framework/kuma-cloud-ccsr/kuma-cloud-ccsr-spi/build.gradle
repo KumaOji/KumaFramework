@@ -2,4 +2,6 @@ dependencies {
     api(project(':kuma-boot-framework:kuma-boot-starter-common')) {
         exclude group: "com.caucho", module: "hessian"
     }
+
+    implementation projectLibs.hutool.core
 }
