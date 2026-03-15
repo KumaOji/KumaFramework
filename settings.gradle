@@ -47,6 +47,12 @@ for (name in oneLayerProjects) {
     include "kuma-cloud-${name}"
     include "kuma-bigdata-${name}"
     include "kuma-other-${name}"
+    include "kuma-ai-${name}"
+}
+
+def frameworkAiSubModules = ['python']
+for (name in frameworkAiSubModules) {
+    include "kuma-ai-framework:kuma-ai-${name}"
 }
 
 def frameworkBootSubModules = ['common', 'core', 'data-datasource',
@@ -130,5 +136,3 @@ gradle.settingsEvaluated {
         throw new GradleException("This build requires JDK 25. Current: ${JavaVersion.current()}. Use -Dorg.gradle.ignoreBuildJavaVersionCheck to skip.")
     }
 }
-
-
