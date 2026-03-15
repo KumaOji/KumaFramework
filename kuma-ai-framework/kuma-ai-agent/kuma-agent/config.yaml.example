@@ -1,0 +1,30 @@
+# KumaAgent Configuration Example
+# Copy this file to config.yaml and fill in your API keys.
+# Config values starting with $ are resolved from environment variables.
+
+models:
+  - name: gpt-4o-mini
+    use: langchain_openai:ChatOpenAI
+    model: gpt-4o-mini
+    api_key: $OPENAI_API_KEY
+    temperature: 0.7
+
+  - name: claude-3-haiku
+    use: langchain_anthropic:ChatAnthropic
+    model: claude-3-haiku-20240307
+    api_key: $ANTHROPIC_API_KEY
+    temperature: 0.7
+
+agent:
+  name: KumaAgent
+  description: A helpful AI assistant built on LangGraph
+  default_model: gpt-4o-mini
+
+tools:
+  calculator: true
+  current_time: true
+  web_search: false   # Set true if TAVILY_API_KEY is configured
+
+middlewares:
+  log: true
+  title: true

@@ -1,0 +1,66 @@
+(kuma-agent) PS E:\IdeaProjects\Myframework\kuma-ai-framework\kuma-ai-agent\kuma-agent> uv run python app/demo.py
+00:36:31 [INFO] kuma_agent.config.config: Loading config from: config.yaml
+==================================================
+KumaAgent — Demo
+==================================================
+
+Agent : KumaAgent
+Model : qwen-turbo
+Tools : get_current_time, calculate
+
+──────────────────────────────────────────────────
+Demo 1 — Basic Conversation
+──────────────────────────────────────────────────
+User : Hello! What can you help me with today?
+00:36:31 [INFO] kuma_agent.agents.agent: Creating agent 'KumaAgent' with model 'qwen-turbo' (langchain_openai:ChatOpenAI)
+00:36:32 [INFO] kuma_agent.models.factory: Creating chat model: qwen-turbo via langchain_openai:ChatOpenAI
+00:36:33 [INFO] kuma_agent.agents.agent: Agent 'KumaAgent' ready — 2 tool(s): ['get_current_time', 'calculate']
+00:36:33 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] BEFORE | thread=demo-basic | messages=1
+00:36:34 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] AFTER  | thread=demo-basic | messages=2 | title=(none)
+00:36:34 [INFO] kuma_agent.middlewares.title_middleware: [TitleMiddleware] Generated title: 'Hello! What can you help me with today?'
+Agent: Hello! I'm here to help you with any questions or tasks you might have. Whether it's answering questions, performing calculations, or providing information, feel free to ask me anything. How can I assist you today?
+
+──────────────────────────────────────────────────
+Demo 2 — Tool Use: Current Time
+──────────────────────────────────────────────────
+User : What is the current date and time?
+00:36:34 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] BEFORE | thread=demo-time | messages=1
+00:36:35 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] AFTER  | thread=demo-time | messages=4 | title=(none)
+00:36:35 [INFO] kuma_agent.middlewares.title_middleware: [TitleMiddleware] Generated title: 'What is the current date and time?'
+Agent: The current date and time is 2026-03-16 00:36:34 (Monday).
+
+──────────────────────────────────────────────────
+Demo 3 — Tool Use: Calculator
+──────────────────────────────────────────────────
+User : What is (42 * 7) + (100 / 4)?
+00:36:35 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] BEFORE | thread=demo-calc | messages=1
+00:36:36 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] AFTER  | thread=demo-calc | messages=4 | title=(none)
+00:36:36 [INFO] kuma_agent.middlewares.title_middleware: [TitleMiddleware] Generated title: 'What is (42 * 7) + (100 / 4)?'
+Agent: The result of $(42 \times 7) + (100 \div 4)$ is **319**.
+
+──────────────────────────────────────────────────
+Demo 4 — Multi-Turn Conversation (Memory)
+──────────────────────────────────────────────────
+User : My name is Alice and I work as a data scientist.
+00:36:36 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] BEFORE | thread=demo-memory | messages=1
+00:36:36 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] AFTER  | thread=demo-memory | messages=2 | title=(none)
+00:36:36 [INFO] kuma_agent.middlewares.title_middleware: [TitleMiddleware] Generated title: 'My name is Alice and I work as a data scientist.'
+Agent: Nice to meet you, Alice! As a data scientist, you likely work with data analysis, modeling, and insights. How can I assist
+you today?
+
+User : What do I do for work?
+00:36:36 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] BEFORE | thread=demo-memory | messages=1
+00:36:37 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] AFTER  | thread=demo-memory | messages=4 | title=(none)
+00:36:37 [INFO] kuma_agent.middlewares.title_middleware: [TitleMiddleware] Generated title: 'My name is Alice and I work as a data scientist.'
+Agent: As a data scientist, you work with data analysis, modeling, and insights. You likely collect, process, and perform statistical analyses on large datasets to help organizations make informed decisions.
+
+User : Can you calculate the square of 13 for me?
+00:36:37 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] BEFORE | thread=demo-memory | messages=1
+00:36:38 [INFO] kuma_agent.middlewares.log_middleware: [LogMiddleware] AFTER  | thread=demo-memory | messages=8 | title=(none)
+00:36:38 [INFO] kuma_agent.middlewares.title_middleware: [TitleMiddleware] Generated title: 'My name is Alice and I work as a data scientist.'
+Agent: The square of 13 is 169.
+
+
+==================================================
+Demo complete.
+==================================================

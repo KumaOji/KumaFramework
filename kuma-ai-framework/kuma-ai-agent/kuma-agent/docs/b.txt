@@ -1,0 +1,85 @@
+# 使用 uv 管理 kuma-agent 项目
+
+uv 是一个极快的 Python 包管理器（Rust 编写），deer-flow 也使用 uv。
+
+## 安装 uv
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+## 项目初始化
+
+cd kuma-ai-framework/kuma-ai-agent/kuma-agent
+
+# 创建虚拟环境 + 安装依赖（自动读取 pyproject.toml）
+uv sync
+
+# 安装 OpenAI 支持（可选依赖组）
+uv sync --extra openai
+
+# 安装 Anthropic 支持
+uv sync --extra anthropic
+
+# 同时安装两者
+uv sync --extra all
+
+## 添加 / 移除依赖
+
+# 添加依赖（自动写入 pyproject.toml）
+uv add langchain-openai
+uv add langchain-anthropic
+
+# 添加可选依赖到指定 extra 组
+uv add --optional openai langchain-openai
+
+# 移除依赖
+uv remove langchain-openai
+
+## 运行脚本
+
+# 运行 demo（自动使用项目虚拟环境）
+uv run python app/demo.py
+
+# 交互模式
+uv run python app/demo.py --interactive
+
+# 指定 config 文件
+uv run python app/demo.py --config /path/to/config.yaml
+
+## 配置
+
+cp config.yaml.example config.yaml
+
+# 在 config.yaml 中填写 API key，或直接设置环境变量：
+export OPENAI_API_KEY=sk-...
+export ANTHROPIC_API_KEY=sk-ant-...
+
+uv run python app/demo.py
+
+## 本地可编辑安装（用于开发）
+
+# uv sync 默认已以可编辑模式安装本项目
+# 等价于旧的：pip install -e "packages/.[openai]"
+uv sync --extra openai
+
+## 锁文件
+
+# uv sync 会自动生成 uv.lock（精确锁定所有传递依赖版本）
+# 提交 uv.lock 到版本控制，确保团队环境一致
+
+git add uv.lock
+git commit -m "chore: lock dependencies"
+
+## 常用命令速查
+
+uv sync                    # 安装/同步所有依赖
+uv sync --extra openai     # 带可选依赖同步
+uv add <pkg>               # 添加依赖
+uv remove <pkg>            # 移除依赖
+uv run python <script>     # 在虚拟环境中运行脚本
+uv pip list                # 查看已安装包
+uv python list             # 查看可用 Python 版本
+uv python install 3.12     # 安装指定 Python 版本
