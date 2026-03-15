@@ -1,1 +1,8 @@
-description = 'Myframework 总体架构'
+description = '''Myframework project参考 —— 一组渐进式 Demo 应用，演示框架各能力的用法：
+  project1 : 最简骨架，无任何依赖，仅验证项目能否正常启动
+  project2 : 极简 Web，仅引入 spring-boot-starter-web，演示最基础的 REST 接口
+  project3 : 中等复杂度 Demo，集成 Web / Actuator / SpringDoc / MyBatis / Redis / 限流 / 幂等，bootJar 已禁用（仅编译验证）
+  project4 : 全量 Demo，涵盖 kuma-boot-framework 全部 starter（安全 / 双数据源 MySQL+PostgreSQL / Redis+Caffeine+JetCache / Kafka / 分布式锁 / IP归属 / Office导出 / 验证码 / TOTP / 钉钉 / Sentinel）及 kuma-cloud-framework 各 starter
+  project5 : 分布式任务调度 Demo，接入 kuma-cloud-job-worker，演示任务注册与执行
+  blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
+'''
