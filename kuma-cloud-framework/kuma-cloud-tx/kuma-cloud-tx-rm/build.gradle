@@ -4,6 +4,10 @@ dependencies {
     // Spring Boot 自动配置支持
     api "org.springframework.boot:spring-boot-autoconfigure:4.0.2"
 
+    implementation projectLibs.aspectjweaver
+    implementation projectLibs.spring.web
+    implementation "org.springframework:spring-webmvc:7.0.3"
+
     compileOnly "org.projectlombok:lombok:1.18.42"
     annotationProcessor "org.projectlombok:lombok:1.18.42"
 }

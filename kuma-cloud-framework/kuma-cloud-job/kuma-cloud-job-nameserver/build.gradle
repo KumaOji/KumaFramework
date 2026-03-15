@@ -20,6 +20,8 @@ dependencies {
     implementation projectLibs.httpclient5
 }
 
+tasks.named('startScripts') { dependsOn bootJar }
+
 configurations {
     configureEach {
         resolutionStrategy.cacheChangingModulesFor 0, "seconds"

@@ -37,7 +37,7 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     into('lib') { // 将第三方jar放入 lib目录中
-        from configurations.runtimeClasspath.findAll { it.name.endsWith('.jar') }
+        from configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }
     }
 
     //打包依赖包

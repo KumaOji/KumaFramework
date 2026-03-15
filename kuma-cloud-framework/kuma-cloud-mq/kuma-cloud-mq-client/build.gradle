@@ -10,6 +10,9 @@ dependencies {
     // Spring Boot 自动配置支持
     api "org.springframework.boot:spring-boot-autoconfigure:4.0.2"
 
+    implementation projectLibs.xk.time
+    implementation projectLibs.hutool.core
+
     compileOnly "org.projectlombok:lombok:1.18.42"
     annotationProcessor "org.projectlombok:lombok:1.18.42"
 }

@@ -4,4 +4,8 @@ dependencies {
     api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-common")
 
     api "org.rocksdb:rocksdbjni:9.4.0"
+
+    implementation projectLibs.commons.collections4
+    implementation projectLibs.commons.lang3
+    implementation projectLibs.hutool.core
 }

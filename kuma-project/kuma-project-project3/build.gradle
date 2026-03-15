@@ -67,11 +67,16 @@ processResources {
 
 bootJar {
     archiveBaseName = 'project3'
+    // project3 暂无源码，跳过 bootJar
+    enabled = false
 }
 
 bootRun {
     jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
 }
+
+// gradle-git-properties 2.4.2 在 JDK 25 + Gradle 9 下 Groovy 方法分派存在 bug，跳过该任务
+tasks.named('generateGitProperties') { enabled = false }
 
 test {
     useJUnitPlatform()

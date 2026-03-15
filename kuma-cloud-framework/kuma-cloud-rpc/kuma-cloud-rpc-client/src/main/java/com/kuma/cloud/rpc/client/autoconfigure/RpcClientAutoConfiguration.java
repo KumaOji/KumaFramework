@@ -1,6 +1,7 @@
 package com.kuma.cloud.rpc.client.autoconfigure;
 
 import com.kuma.cloud.rpc.client.core.ClientBs;
+import com.kuma.cloud.rpc.client.config.reference.ReferenceConfig;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,7 +37,7 @@ public class RpcClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ClientBs<?> rpcClientBs(RpcClientProperties properties) {
+    public ReferenceConfig<?> rpcClientBs(RpcClientProperties properties) {
         return ClientBs.newInstance()
                 .timeout(properties.getTimeout())
                 .subscribe(properties.isSubscribe());

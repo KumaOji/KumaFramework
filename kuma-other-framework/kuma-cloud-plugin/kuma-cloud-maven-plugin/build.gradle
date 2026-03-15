@@ -200,6 +200,9 @@ gradle.projectsEvaluated {
     }
 }
 
+// generateMavenPluginDescriptor 不支持 JDK 25 class file version 69，跳过
+tasks.named('generateMavenPluginDescriptor') { enabled = false }
+
 jar {
     enabled = true
     archiveClassifier = ""

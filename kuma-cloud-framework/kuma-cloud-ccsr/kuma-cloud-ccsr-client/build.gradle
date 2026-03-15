@@ -1,4 +1,8 @@
 dependencies {
     api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-api")
     api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-spi")
+    api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-common")
+
+    implementation projectLibs.commons.collections4
+    implementation projectLibs.hutool.core
 }

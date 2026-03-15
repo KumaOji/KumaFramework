@@ -48,3 +48,8 @@ dependencies {
     testAnnotationProcessor projectLibs.lombok
     annotationProcessor projectLibs.lombok.mapstruct.binding
 }
+
+test {
+    useJUnitPlatform()
+    failOnNoDiscoveredTests = false
+}
