@@ -3,6 +3,8 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
+description = '全量 Demo —— 引入 kuma-boot-framework 全部 starter（安全 / MySQL+PostgreSQL 双数据源 / Redis+Caffeine+JetCache 多级缓存 / Kafka / 分布式锁 / IP归属 / Office导出 / 验证码 / TOTP / 钉钉 / Sentinel）及 kuma-cloud-framework 各 starter，覆盖企业级应用绝大多数场景'
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"

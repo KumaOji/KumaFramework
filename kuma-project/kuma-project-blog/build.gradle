@@ -4,6 +4,8 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
+description = '博客系统 Demo —— 完整业务场景，含 Spring Security（OAuth2）/ MySQL / Redis / MyBatis-Plus / SpringDoc，展示框架在真实项目中的集成方式'
+
 def springBootVersion = projectLibs.versions.springboot.get()
 dependencyManagement {
     imports {

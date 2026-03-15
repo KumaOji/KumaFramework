@@ -3,6 +3,8 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
+description = '分布式任务调度 Demo —— 接入 kuma-cloud-job-worker，演示任务注册、执行与调度中心交互'
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
