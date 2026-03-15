@@ -11,6 +11,10 @@ dependencies {
 }
 
 jar {
+    // mq-nameserver 和 mq-dashboard 是 Spring Boot 应用，其 artifact 是 bootJar
+    dependsOn ':kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-nameserver:bootJar'
+    dependsOn ':kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-dashboard:bootJar'
+
     from(project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-broker").jar) { into("lib/") }
     from(project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-client").jar) { into("lib/") }
     from(project(":kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-cluster").jar) { into("lib/") }
