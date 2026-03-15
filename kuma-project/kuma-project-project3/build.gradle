@@ -44,16 +44,23 @@ dependencies {
     testImplementation projectLibs.spring.boot.starter.test
 }
 
+def p3MysqlUrl      = project.findProperty('mysql.url')      ?: ''
+def p3MysqlUsername = project.findProperty('mysql.username') ?: ''
+def p3MysqlPassword = project.findProperty('mysql.password') ?: ''
+def p3RedisHost     = project.findProperty('redis.host')     ?: ''
+def p3RedisPort     = project.findProperty('redis.port')     ?: ''
+def p3RedisDatabase = project.findProperty('redis.database') ?: ''
+
 processResources {
     filesMatching('**/application.yml') {
         expand(
             active         : 'dev',
-            mysql_url      : project.findProperty('mysql.url')      ?: '',
-            mysql_username : project.findProperty('mysql.username') ?: '',
-            mysql_password : project.findProperty('mysql.password') ?: '',
-            redis_host     : project.findProperty('redis.host')     ?: '',
-            redis_port     : project.findProperty('redis.port')     ?: '',
-            redis_database : project.findProperty('redis.database') ?: ''
+            mysql_url      : p3MysqlUrl,
+            mysql_username : p3MysqlUsername,
+            mysql_password : p3MysqlPassword,
+            redis_host     : p3RedisHost,
+            redis_port     : p3RedisPort,
+            redis_database : p3RedisDatabase
         )
     }
 }

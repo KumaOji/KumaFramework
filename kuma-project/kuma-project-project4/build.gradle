@@ -74,22 +74,35 @@ dependencies {
     runtimeOnly projectLibs.postgresql
 }
 
+def p4MysqlUrl                   = project.findProperty('mysql.url')                   ?: ''
+def p4MysqlUsername              = project.findProperty('mysql.username')              ?: ''
+def p4MysqlPassword              = project.findProperty('mysql.password')              ?: ''
+def p4PostgresqlUrl              = project.findProperty('postgresql.url')              ?: ''
+def p4PostgresqlUsername         = project.findProperty('postgresql.username')         ?: ''
+def p4PostgresqlPassword         = project.findProperty('postgresql.password')         ?: ''
+def p4RedisHost                  = project.findProperty('redis.host')                  ?: ''
+def p4RedisPort                  = project.findProperty('redis.port')                  ?: ''
+def p4RedisDatabase              = project.findProperty('redis.database')              ?: ''
+def p4RedisJedisPoolMaxActive    = project.findProperty('redis.jedis.pool.max-active') ?: ''
+def p4RedisJedisPoolMaxIdle      = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
+def p4RedisJedisPoolMinIdle      = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
+
 processResources {
     filesMatching('**/application.yml') {
         expand(
             active                     : 'dev',
-            mysql_url                  : project.findProperty('mysql.url')                   ?: '',
-            mysql_username             : project.findProperty('mysql.username')              ?: '',
-            mysql_password             : project.findProperty('mysql.password')              ?: '',
-            postgresql_url             : project.findProperty('postgresql.url')              ?: '',
-            postgresql_username        : project.findProperty('postgresql.username')         ?: '',
-            postgresql_password        : project.findProperty('postgresql.password')         ?: '',
-            redis_host                 : project.findProperty('redis.host')                  ?: '',
-            redis_port                 : project.findProperty('redis.port')                  ?: '',
-            redis_database             : project.findProperty('redis.database')              ?: '',
-            redis_jedis_pool_max_active: project.findProperty('redis.jedis.pool.max-active') ?: '',
-            redis_jedis_pool_max_idle  : project.findProperty('redis.jedis.pool.max-idle')   ?: '',
-            redis_jedis_pool_min_idle  : project.findProperty('redis.jedis.pool.min-idle')   ?: ''
+            mysql_url                  : p4MysqlUrl,
+            mysql_username             : p4MysqlUsername,
+            mysql_password             : p4MysqlPassword,
+            postgresql_url             : p4PostgresqlUrl,
+            postgresql_username        : p4PostgresqlUsername,
+            postgresql_password        : p4PostgresqlPassword,
+            redis_host                 : p4RedisHost,
+            redis_port                 : p4RedisPort,
+            redis_database             : p4RedisDatabase,
+            redis_jedis_pool_max_active: p4RedisJedisPoolMaxActive,
+            redis_jedis_pool_max_idle  : p4RedisJedisPoolMaxIdle,
+            redis_jedis_pool_min_idle  : p4RedisJedisPoolMinIdle
         )
     }
 }

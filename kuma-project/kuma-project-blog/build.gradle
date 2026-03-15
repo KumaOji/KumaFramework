@@ -34,19 +34,29 @@ dependencies {
     runtimeOnly projectLibs.mysql
 }
 
+def blogMysqlUrl                = project.findProperty('mysql.url')                   ?: ''
+def blogMysqlUsername           = project.findProperty('mysql.username')              ?: ''
+def blogMysqlPassword           = project.findProperty('mysql.password')              ?: ''
+def blogRedisHost               = project.findProperty('redis.host')                  ?: ''
+def blogRedisPort               = project.findProperty('redis.port')                  ?: ''
+def blogRedisDatabase           = project.findProperty('redis.database')              ?: ''
+def blogRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
+def blogRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
+def blogRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
+
 processResources {
     filesMatching('**/application.yml') {
         expand(
-                active: 'dev',
-                mysql_url: project.findProperty('mysql.url') ?: '',
-                mysql_username: project.findProperty('mysql.username') ?: '',
-                mysql_password: project.findProperty('mysql.password') ?: '',
-                redis_host: project.findProperty('redis.host') ?: '',
-                redis_port: project.findProperty('redis.port') ?: '',
-                redis_database: project.findProperty('redis.database') ?: '',
-                redis_jedis_pool_max_active: project.findProperty('redis.jedis.pool.max-active') ?: '',
-                redis_jedis_pool_max_idle: project.findProperty('redis.jedis.pool.max-idle') ?: '',
-                redis_jedis_pool_min_idle: project.findProperty('redis.jedis.pool.min-idle') ?: ''
+                active                     : 'dev',
+                mysql_url                  : blogMysqlUrl,
+                mysql_username             : blogMysqlUsername,
+                mysql_password             : blogMysqlPassword,
+                redis_host                 : blogRedisHost,
+                redis_port                 : blogRedisPort,
+                redis_database             : blogRedisDatabase,
+                redis_jedis_pool_max_active: blogRedisJedisPoolMaxActive,
+                redis_jedis_pool_max_idle  : blogRedisJedisPoolMaxIdle,
+                redis_jedis_pool_min_idle  : blogRedisJedisPoolMinIdle
         )
     }
 }
