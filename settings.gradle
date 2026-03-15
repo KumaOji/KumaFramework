@@ -50,7 +50,7 @@ for (name in oneLayerProjects) {
     include "kuma-ai-${name}"
 }
 
-def frameworkAiSubModules = ['python']
+def frameworkAiSubModules = ['python','agent']
 for (name in frameworkAiSubModules) {
     include "kuma-ai-framework:kuma-ai-${name}"
 }

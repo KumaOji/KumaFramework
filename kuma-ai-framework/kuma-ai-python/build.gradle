@@ -1,20 +1,67 @@
 plugins {
-    id 'java'
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
 }
 
-group = 'io.github.kumaoji'
-version = '2026.03'
+description = 'Python系统'
 
-repositories {
-    mavenCentral()
+def springBootVersion = projectLibs.versions.springboot.get()
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
+
+    api projectLibs.hutool.core
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.doc.webmvc
+
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    runtimeOnly projectLibs.mysql
 }
 
-test {
-    useJUnitPlatform()
+def pythonMysqlUrl                = project.findProperty('mysql.url')                   ?: ''
+def pythonMysqlUsername           = project.findProperty('mysql.username')              ?: ''
+def pythonMysqlPassword           = project.findProperty('mysql.password')              ?: ''
+def pythonRedisHost               = project.findProperty('redis.host')                  ?: ''
+def pythonRedisPort               = project.findProperty('redis.port')                  ?: ''
+def pythonRedisDatabase           = project.findProperty('redis.database')              ?: ''
+def pythonRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
+def pythonRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
+def pythonRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(
+                active                     : 'dev',
+                mysql_url                  : pythonMysqlUrl,
+                mysql_username             : pythonMysqlUsername,
+                mysql_password             : pythonMysqlPassword,
+                redis_host                 : pythonRedisHost,
+                redis_port                 : pythonRedisPort,
+                redis_database             : pythonRedisDatabase,
+                redis_jedis_pool_max_active: pythonRedisJedisPoolMaxActive,
+                redis_jedis_pool_max_idle  : pythonRedisJedisPoolMaxIdle,
+                redis_jedis_pool_min_idle  : pythonRedisJedisPoolMinIdle
+        )
+    }
+}
+
+bootJar {
+    archiveBaseName = 'python'
 }

@@ -18,6 +18,7 @@ package com.kuma.boot.core.runtime.listener;
 
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.core.utils.BootContextUtils;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -39,7 +40,7 @@ public class ApplicationStartedListener implements ApplicationListener<Applicati
         Duration timeTaken = event.getTimeTaken();
 
         LogUtils.info("Application [{}] Started StartupDate: {} TimeTaken: {} s, ApplicationType:{}",
-                event.getApplicationContext().getApplicationName(),
+                BootContextUtils.getApplicationName(event.getApplicationContext()),
                 DateUtils.formatTimestamp(event.getApplicationContext().getStartupDate()),
                 timeTaken == null? 0: timeTaken.toSeconds(),
                 event.getSpringApplication().getWebApplicationType());

@@ -1,5 +1,4 @@
 plugins {
-    id 'java'
     alias(projectLibs.plugins.springboot)
     alias(projectLibs.plugins.spring.dependency.management)
 }

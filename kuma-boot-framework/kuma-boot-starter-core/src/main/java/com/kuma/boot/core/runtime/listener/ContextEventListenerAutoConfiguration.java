@@ -19,6 +19,8 @@ package com.kuma.boot.core.runtime.listener;
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.time.LocalDateTime;
+
+import com.kuma.boot.core.utils.BootContextUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -51,7 +53,7 @@ public class ContextEventListenerAutoConfiguration {
         //LogUtils.info("ApplicationContextEventListener ----- ContextRefreshedEvent onApplicationEvent {}", event);
 
         LogUtils.info("Application [{}] Refreshed StartupDate: {} ",
-                event.getApplicationContext().getApplicationName(),
+                BootContextUtils.getApplicationName(event.getApplicationContext()),
                 DateUtils.formatTimestamp(event.getApplicationContext().getStartupDate()));
 
     }
