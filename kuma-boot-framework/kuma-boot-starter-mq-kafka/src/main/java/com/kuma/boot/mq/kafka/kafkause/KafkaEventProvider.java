@@ -2,10 +2,12 @@ package com.kuma.boot.mq.kafka.kafkause;
 
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "spring.kafka.producer", name = "bootstrap-servers")
 public class KafkaEventProvider {
 
     @Resource

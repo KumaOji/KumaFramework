@@ -2,6 +2,7 @@ package com.kuma.boot.mq.kafka.kafkause;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
+@ConditionalOnProperty(prefix = "spring.kafka.consumer", name = "bootstrap-servers")
 public class KafkaEventListener {
 
     @KafkaListener(

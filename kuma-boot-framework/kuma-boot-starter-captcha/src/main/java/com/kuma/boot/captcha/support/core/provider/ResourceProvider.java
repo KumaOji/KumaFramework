@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 
@@ -32,7 +31,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 public class ResourceProvider implements InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceProvider.class);

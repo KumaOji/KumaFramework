@@ -192,6 +192,8 @@ kuma:
         max: 5
         length: 3000
     security:
+      justauth:
+        enabled: true
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**
@@ -253,6 +255,15 @@ kuma:
       type: LOCAL
     ratelimit:
       enabled: false
+    dingtalk:
+      enabled: true
+      project-id: project4-demo
+      dingers:
+        DINGTALK:
+          token-id: https://oapi.dingtalk.com/robot/send?access_token=demo_token_placeholder
+          secret: demo_secret_placeholder
+    captcha:
+      enabled: true
     actuator:
       managedresource:
         enabled: true

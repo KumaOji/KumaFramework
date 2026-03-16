@@ -22,12 +22,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 @AutoConfiguration
+@ConditionalOnProperty(prefix = "kuma.boot.dingtalk", value = {"enabled"}, havingValue = "true")
 public class DingtalkHttpClientAutoConfiguration
 implements InitializingBean {
     public void afterPropertiesSet() throws Exception {

@@ -43,12 +43,8 @@ public class WebClientAutoConfiguration implements InitializingBean {
     }
 
     @Bean
-    public WebClientCustomizer restClientCustomizer(){
-        return new WebClientCustomizer() {
-            @Override
-            public void customize( WebClient.Builder webClientBuilder ) {
-            }
-        };
+    public WebClientCustomizer webClientCustomizer(){
+        return webClientBuilder -> {};
     }
 
 

@@ -8,11 +8,9 @@ import com.kuma.boot.captcha.support.core.exception.CaptchaCategoryIsIncorrectEx
 import com.kuma.boot.captcha.support.core.exception.CaptchaHandlerNotExistException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Component
 public class CaptchaRendererFactory {
 
     private Map<String, Renderer> handlers;
