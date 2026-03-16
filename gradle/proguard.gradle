@@ -1,3 +1,16 @@
+// buildscript 块让 IntelliJ IDEA 能解析 ProGuardTask 符号。
+// Gradle 运行时 ProGuardTask 已由根 build.gradle 的 buildscript classpath 提供；
+// 此处声明仅供 IDE 索引使用，不会造成版本冲突。
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = 'https://maven.aliyun.com/repository/public' }
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.5.0'
+    }
+}
+
 import proguard.gradle.ProGuardTask
 
 tasks.register('proguard', ProGuardTask) {
