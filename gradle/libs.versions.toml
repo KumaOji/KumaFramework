@@ -351,7 +351,7 @@ seata-spring-boot-starter = { module = "org.apache.seata:seata-spring-boot-start
 [bundles]
 hutool = ["hutool-core", "hutool-extra", "hutool-crypto"]
 spring-doc = ["spring-doc-common", "spring-doc-webmvc"]
-datasource = ["mysql"]
+datasource = ["mysql", "postgresql"]
 
 ## 统一定义插件
 [plugins]

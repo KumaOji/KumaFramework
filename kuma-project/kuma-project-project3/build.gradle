@@ -8,6 +8,7 @@ plugins {
 description = '中等复杂度 Demo —— 集成 Web / Actuator / SpringDoc / MyBatis-Plus / Redis / 限流 / 幂等，含 Jacoco 覆盖率与 smart-doc 文档生成；bootJar 已禁用，仅作编译验证'
 
 apply from: rootProject.file('gradle/springboot.gradle')
+apply from: rootProject.file('gradle/test.gradle')
 apply from: rootProject.file('gradle/git.gradle')
 apply from: rootProject.file('gradle/jacoco.gradle')
 apply from: rootProject.file('gradle/smart-doc.gradle')
