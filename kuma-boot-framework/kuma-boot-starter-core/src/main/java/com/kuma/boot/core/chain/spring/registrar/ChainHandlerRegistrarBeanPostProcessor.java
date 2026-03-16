@@ -52,6 +52,7 @@ public class ChainHandlerRegistrarBeanPostProcessor implements BeanPostProcessor
     /**
      * 在Spring容器刷新完成后，按order排序并注册所有处理器
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @EventListener(ContextRefreshedEvent.class)
     public void registerHandlersAfterContextRefresh() {
         if (handlerInfos.isEmpty()) {

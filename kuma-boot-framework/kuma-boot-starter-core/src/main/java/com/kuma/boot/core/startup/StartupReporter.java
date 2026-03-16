@@ -231,6 +231,7 @@ public class StartupReporter {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private com.kuma.boot.core.startup.BeanStat eventToBeanStat(StartupTimeline.TimelineEvent timelineEvent ) {
         com.kuma.boot.core.startup.BeanStat beanStat = new com.kuma.boot.core.startup.BeanStat();
         beanStat.setStartTime(timelineEvent.getStartTime().toEpochMilli());

@@ -126,6 +126,7 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void started(ConfigurableApplicationContext context, Duration timeTaken) {
         // refresh applicationRefreshStage
         com.kuma.boot.core.startup.ChildrenStat<com.kuma.boot.core.startup.ModuleStat> applicationRefreshStage = (com.kuma.boot.core.startup.ChildrenStat<com.kuma.boot.core.startup.ModuleStat>)
