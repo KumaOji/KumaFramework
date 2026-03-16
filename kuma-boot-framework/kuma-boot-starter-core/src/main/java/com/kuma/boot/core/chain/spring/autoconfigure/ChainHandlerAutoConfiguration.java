@@ -68,7 +68,7 @@ public class ChainHandlerAutoConfiguration {
                 new LinkedBlockingQueue<>(properties.getQueueCapacity()),
                 r -> {
                     Thread t = new Thread(r);
-                    t.setName("chain-handler-" + t.getId());
+                    t.setName("chain-handler-" + t.threadId());
                     t.setDaemon(false);
                     return t;
                 },
