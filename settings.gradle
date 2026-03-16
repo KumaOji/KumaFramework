@@ -126,7 +126,7 @@ for (name in frameworkCloudPluginSubModules) {
 }
 
 include "kuma-project"
-def projectBootSubModules = ['project1', 'project2', 'project3', 'project4','project5', 'blog']
+def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'blog']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }

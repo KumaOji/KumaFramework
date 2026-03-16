@@ -1,0 +1,41 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = 'RPC Demo —— 演示 kuma-cloud-rpc 的服务注册与远程调用（ServiceBs 发布服务 / ClientBs 获取代理）'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+
+    // RPC 服务端：ServiceBs 注册并暴露服务
+    api project(':kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-server')
+    // RPC 客户端：ClientBs 获取服务代理
+    api project(':kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-client')
+
+    api projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(active: 'dev')
+    }
+}
+
+bootJar {
+    archiveBaseName = 'project6'
+}
+
+bootRun {
+    jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
+}
