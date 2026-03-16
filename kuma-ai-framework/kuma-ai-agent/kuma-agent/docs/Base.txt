@@ -49,6 +49,55 @@ uv run python app/demo.py --interactive
 # 指定 config 文件
 uv run python app/demo.py --config /path/to/config.yaml
 
+## 启动 HTTP 对话服务器（持久运行，不会自动退出）
+
+# 默认启动（127.0.0.1:8000）
+uv run python app/server.py
+
+# 指定端口
+uv run python app/server.py --port 8080
+
+# 对外开放（局域网可访问）
+uv run python app/server.py --host 0.0.0.0 --port 8000
+
+# 指定 config 文件 + 开启 debug 日志
+uv run python app/server.py --config /path/to/config.yaml --log-level debug
+
+# 开发模式（文件变更自动重载）
+uv run python app/server.py --reload
+
+## 服务器 API 说明
+
+# 启动后访问交互式 Swagger 文档：
+# http://127.0.0.1:8000/docs
+
+# 发起对话（阻塞模式，等待完整回复）
+curl -X POST http://127.0.0.1:8000/api/chat \
+     -H "Content-Type: application/json" \
+     -d '{"message": "你好，请介绍一下自己"}'
+
+# 继续同一会话（传入 thread_id）
+curl -X POST http://127.0.0.1:8000/api/chat \
+     -H "Content-Type: application/json" \
+     -d '{"message": "我刚才问了什么？", "thread_id": "上一步返回的 thread_id"}'
+
+# SSE 流式对话（逐 token 输出）
+curl -N -X POST http://127.0.0.1:8000/api/chat/stream \
+     -H "Content-Type: application/json" \
+     -d '{"message": "讲一个笑话"}'
+
+# 列出所有会话线程
+curl http://127.0.0.1:8000/api/threads
+
+# 删除某个线程（仅清除元数据，不影响内存中历史）
+curl -X DELETE http://127.0.0.1:8000/api/threads/{thread_id}
+
+# 查看 Agent 配置
+curl http://127.0.0.1:8000/api/config
+
+# 健康检查
+curl http://127.0.0.1:8000/health
+
 ## 配置
 
 cp config.yaml.example config.yaml
