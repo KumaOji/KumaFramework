@@ -1,5 +1,1 @@
-description = '极简 Web Demo —— 仅引入 spring-boot-starter-web，演示最基础的 REST 接口写法'
-
-dependencies {
-    implementation projectLibs.spring.boot.starter.web
-}
+description = '最简骨架 Demo —— 无任何业务依赖，仅验证框架项目结构与启动流程是否正常'

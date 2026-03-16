@@ -1,17 +1,52 @@
+// ============================================================
+//  project3 —— Gradle 插件调用示例
+//
+//  本文件演示 gradle/ 目录下所有可复用脚本的接入方式。
+//  每个 apply from 对应一个独立功能，按需取用即可。
+//
+//  使用规则：
+//    ✅ 直接取消注释即可启用
+//    ⚠️  标注的脚本有前置条件或与其他脚本互斥，见注释说明
+// ============================================================
+
 plugins {
-    alias(projectLibs.plugins.springboot)
-    alias(projectLibs.plugins.spring.dependency.management)
-    alias(projectLibs.plugins.gradle.git.properties)
-    alias(projectLibs.plugins.smart.doc)
+    // ── Spring Boot 核心插件（使用 apply false 仅声明，由 springboot.gradle 负责 apply）
+    alias(projectLibs.plugins.springboot)                  // org.springframework.boot
+    alias(projectLibs.plugins.spring.dependency.management) // io.spring.dependency-management
+
+    // ── 代码质量类插件（需在 plugins{} 中声明，才能在 apply from 脚本中 apply）
+    alias(projectLibs.plugins.spotbugs)    // com.github.spotbugs
+    alias(projectLibs.plugins.spotless)    // com.diffplug.spotless
+    alias(projectLibs.plugins.sonarqube)   // org.sonarqube
+
+    // ── 文档类
+    alias(projectLibs.plugins.smart.doc)           // com.ly.smart-doc
+    // ⚠️ springdoc-openapi 需要应用正常启动才能生成文档；project3 的 bootJar 已禁用，故注释
+    // alias(projectLibs.plugins.springdoc.openapi)   // org.springdoc.openapi-gradle-plugin
+    // ⚠️ swagger 同理，需要运行中的应用；启用前确保 bootJar enabled = true
+    // alias(projectLibs.plugins.swagger)             // io.swagger.core.v3.swagger-gradle-plugin
+
+    // ── 打包 / 部署类
+    alias(projectLibs.plugins.gradle.git.properties) // com.gorylenko.gradle-git-properties
+    alias(projectLibs.plugins.jib)                   // com.google.cloud.tools.jib
+
+    // ── 代码生成
+    // ⚠️ MybatisGenerator 插件不在 Gradle Plugin Portal / Maven Central，需额外配置私有仓库后再启用
+    // alias(projectLibs.plugins.mybatis.generator) // com.qqviaja.gradle.MybatisGenerator
+
+    // ⚠️ shadow 与 springboot.gradle 均会 apply 'application'，二选一使用：
+    //    - spring boot 应用 → 用 springboot.gradle（已在下方启用）
+    //    - 普通 fat-jar    → 注释掉 springboot.gradle，改用 shadow.gradle
+    // alias(projectLibs.plugins.shadow)
+
+    // ⚠️ graalvm-native 需要 GraalVM JDK，普通 JDK 25 环境不可用
+    // alias(projectLibs.plugins.graalvm.native)
+
+    // ⚠️ bmuschko-docker 需要本地 Docker 守护进程
+    // alias(projectLibs.plugins.bmuschko.docker)
 }
 
-description = '中等复杂度 Demo —— 集成 Web / Actuator / SpringDoc / MyBatis-Plus / Redis / 限流 / 幂等，含 Jacoco 覆盖率与 smart-doc 文档生成；bootJar 已禁用，仅作编译验证'
-
-apply from: rootProject.file('gradle/springboot.gradle')
-apply from: rootProject.file('gradle/test.gradle')
-apply from: rootProject.file('gradle/git.gradle')
-apply from: rootProject.file('gradle/jacoco.gradle')
-apply from: rootProject.file('gradle/smart-doc.gradle')
+description = 'Gradle 插件调用示例 —— 演示 gradle/ 目录下所有可复用脚本的接入方式'
 
 dependencyManagement {
     imports {
@@ -19,66 +54,172 @@ dependencyManagement {
     }
 }
 
+// ============================================================
+//  ① Spring Boot 基础：打包 / 启动脚本 / bootBuildImage 配置
+// ============================================================
+apply from: rootProject.file('gradle/springboot.gradle')
+
+// ============================================================
+//  ② 测试：JUnit Platform + JVM 参数
+// ============================================================
+apply from: rootProject.file('gradle/test.gradle')
+
+// ============================================================
+//  ③ Git 属性注入：将 git commit/branch 写入 application.properties
+//     生成 git.properties 后可通过 /actuator/info 暴露
+// ============================================================
+apply from: rootProject.file('gradle/git.gradle')
+
+// ============================================================
+//  ④ 覆盖率：Jacoco —— 执行 test 后生成 HTML 报告
+//     任务：jacocoTestReport / jacocoTestCoverageVerification
+// ============================================================
+apply from: rootProject.file('gradle/jacoco.gradle')
+
+// ============================================================
+//  ⑤ 代码风格：Spotless —— 统一格式化（Java / Groovy / XML）
+//     任务：spotlessApply（修复）/ spotlessCheck（校验）
+// ============================================================
+apply from: rootProject.file('gradle/spotless.gradle')
+
+// ============================================================
+//  ⑥ 静态分析：SpotBugs —— Bug 模式检测
+//     任务：spotbugsMain / spotbugsTest
+// ============================================================
+apply from: rootProject.file('gradle/spotbugs.gradle')
+
+// ============================================================
+//  ⑦ 静态分析：Checkstyle —— 编码规范检查（Google Style）
+//     任务：checkstyleMain / checkstyleTest
+// ============================================================
+apply from: rootProject.file('gradle/checkstyle.gradle')
+
+// ============================================================
+//  ⑧ 静态分析：PMD —— 代码规则检查
+//     任务：pmdMain / pmdTest
+// ============================================================
+apply from: rootProject.file('gradle/pmd.gradle')
+
+// ============================================================
+//  ⑨ 质量门禁：SonarQube —— 将分析结果推送到 Sonar 服务器
+//     前置：需启动 SonarQube（默认 http://localhost:9000）
+//     任务：sonar
+// ============================================================
+apply from: rootProject.file('gradle/sonar.gradle')
+
+// ============================================================
+//  ⑩ API 文档：smart-doc —— 零注解，从源码注释生成文档
+//     任务：smartdoc / smartdocHtml / smartdocMarkdown
+//     配置：src/main/resources/smart-doc.json
+// ============================================================
+apply from: rootProject.file('gradle/smart-doc.gradle')
+
+// ============================================================
+//  ⑪ API 文档：SpringDoc OpenAPI —— 生成 openapi.json
+//     ⚠️ 需要项目能正常启动才可使用（需 bootJar enabled = true，且 DB / Redis 可用）
+//     ⚠️ project3 的 bootJar 已禁用，故注释；在可运行的项目中取消注释即可
+//     任务：generateOpenApiDocs
+// ============================================================
+// apply from: rootProject.file('gradle/springdoc-openapi.gradle')
+
+// ============================================================
+//  ⑫ API 文档：Swagger —— 生成 swagger.json（与 ⑪ 二选一）
+//     任务：resolve
+// ============================================================
+// apply from: rootProject.file('gradle/swagger.gradle')
+
+// ============================================================
+//  ⑬ 项目报告：依赖关系 HTML 报告
+//     任务：htmlDependencyReport
+// ============================================================
+apply from: rootProject.file('gradle/project-report.gradle')
+
+// ============================================================
+//  ⑭ MyBatis 代码生成：根据数据库表生成 Entity/Mapper/XML
+//     配置：src/main/resources/generatorConfig.xml
+//     任务：MybatisGeneratorPlugin（或 mbGenerate）
+// ============================================================
+// apply from: rootProject.file('gradle/mybatis-generator.gradle')
+
+// ============================================================
+//  ⑮ 容器镜像：JIB —— 无需本地 Docker，直接推送镜像到仓库
+//     任务：jib（推送）/ jibDockerBuild（本地）
+// ============================================================
+apply from: rootProject.file('gradle/google-tools-jib.gradle')
+
+// ============================================================
+//  ⑯ 容器镜像：Docker Spring Boot Application（需本地 Docker）
+//     ⚠️ 与 JIB 二选一；需本地 Docker 守护进程
+//     任务：dockerBuildImage / dockerPushImage
+// ============================================================
+// apply from: rootProject.file('gradle/docker.gradle')
+
+// ============================================================
+//  ⑰ Fat Jar（Shadow）：将所有依赖打进单个 jar
+//     ⚠️ 与 springboot.gradle 互斥；去掉 springboot.gradle 再启用
+//     任务：shadowJar
+// ============================================================
+// apply from: rootProject.file('gradle/shadow.gradle')
+
+// ============================================================
+//  ⑱ 代码混淆：ProGuard
+//     ⚠️ 需要 proguard.pro 配置；混淆后 jar 在 build/classes-pro
+//     任务：proguard / makeJar / makeProJar
+//     前置：classpath 'com.guardsquare:proguard-gradle:7.5.0'
+//           已在根 build.gradle buildscript 中声明
+// ============================================================
+// apply from: rootProject.file('gradle/proguard.gradle')
+
+// ============================================================
+//  ⑲ GraalVM Native Image：编译为原生可执行文件
+//     ⚠️ 需要 GraalVM JDK（普通 JDK 25 不可用）
+//     任务：nativeCompile / nativeRun / nativeTest
+// ============================================================
+// apply from: rootProject.file('gradle/graalvm.gradle')
+
+// ============================================================
+//  ⑳ Maven 发布：将 jar 发布到 Maven Central / 私有仓库
+//     配置：gradle.properties 中填写 signing.* 和仓库凭据
+//     任务：publishToMavenLocal / publish
+// ============================================================
+// apply from: rootProject.file('gradle/publish-jar.gradle')
+
+// ============================================================
+//  ㉑ BOM 发布：发布 Bill of Materials（版本约束 pom）
+//     任务：generatePomFileForBomPublication / publish
+// ============================================================
+// apply from: rootProject.file('gradle/publish-bom.gradle')
+
+// ============================================================
+//  依赖声明（最小化：仅用于编译验证）
+// ============================================================
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
-    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
 
-    api project(':kuma-boot-framework:kuma-boot-starter-data-common')
-    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
-    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
-
-    api project(':kuma-boot-framework:kuma-boot-starter-cache-common')
-    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
-
-    api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
-    api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
-
     api projectLibs.spring.boot.starter.web
-    api projectLibs.hutool.core
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 
-    runtimeOnly projectLibs.mysql
-
     testImplementation projectLibs.spring.boot.starter.test
 }
 
-def p3MysqlUrl      = project.findProperty('mysql.url')      ?: ''
-def p3MysqlUsername = project.findProperty('mysql.username') ?: ''
-def p3MysqlPassword = project.findProperty('mysql.password') ?: ''
-def p3RedisHost     = project.findProperty('redis.host')     ?: ''
-def p3RedisPort     = project.findProperty('redis.port')     ?: ''
-def p3RedisDatabase = project.findProperty('redis.database') ?: ''
-
-processResources {
-    filesMatching('**/application.yml') {
-        expand(
-            active         : 'dev',
-            mysql_url      : p3MysqlUrl,
-            mysql_username : p3MysqlUsername,
-            mysql_password : p3MysqlPassword,
-            redis_host     : p3RedisHost,
-            redis_port     : p3RedisPort,
-            redis_database : p3RedisDatabase
-        )
-    }
-}
-
+// ============================================================
+//  bootJar 配置
+// ============================================================
 bootJar {
     archiveBaseName = 'project3'
-    // project3 暂无源码，跳过 bootJar
-    enabled = false
+    enabled = false  // 纯插件示例，跳过打包
 }
 
 bootRun {
     jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
 }
 
-// gradle-git-properties 2.4.2 在 JDK 25 + Gradle 9 下 Groovy 方法分派存在 bug，跳过该任务
+// gradle-git-properties 在 JDK 25 + Gradle 9 下有 bug，跳过
 tasks.named('generateGitProperties') { enabled = false }
 
 test {

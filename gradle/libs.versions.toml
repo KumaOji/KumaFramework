@@ -146,7 +146,7 @@ graalvm-native            = "0.10.4"
 sonarqube                 = "6.1.0.5360"
 spotbugs-plugin           = "6.1.11"
 spotless                  = "7.0.3"
-springdoc-openapi-plugin  = "2.8.6"
+springdoc-openapi-plugin  = "3.0.1"
 swagger-gradle-plugin     = "2.2.30"
 bmuschko-docker           = "9.4.0"
 
