@@ -27,6 +27,7 @@ import com.kuma.boot.security.spring.authentication.stamp.SignInFailureLimitedSt
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,11 +37,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 /**
  * <p>OAuth2 应用安全合规配置 </p>
  *
+ * <p>仅在容器中存在 {@link UserDetailsService} bean 时才激活，
+ * 避免在无 UserDetailsService（如纯 RPC 项目）场景下启动失败。</p>
+ *
  * @author kuma
  * @version 2023.07
  * @since 2023-07-04 11:41:27
  */
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnBean(UserDetailsService.class)
 public class OAuth2ComplianceConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2ComplianceConfiguration.class);
