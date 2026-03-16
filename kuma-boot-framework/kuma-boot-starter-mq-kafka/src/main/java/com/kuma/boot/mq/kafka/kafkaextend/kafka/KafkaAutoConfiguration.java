@@ -18,12 +18,14 @@ package com.kuma.boot.mq.kafka.kafkaextend.kafka;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 
 @AutoConfiguration
 @EnableConfigurationProperties({KafkaProperties.class})
+@ConditionalOnProperty(prefix = "kuma.boot.mq.kafka.extend", name = "bootstrap-servers")
 public class KafkaAutoConfiguration {
 
     @Bean

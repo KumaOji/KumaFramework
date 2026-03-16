@@ -10,7 +10,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -18,14 +17,13 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * Redis 多规则限流
+ * Redis 多规则限流（未完成，暂不注册为 Spring Bean）
  *
  * @author YiFei
  * @since 2024/5/10 20:43
  */
 @Aspect
 @Order(20)
-@Component
 public class RateLimitersAspect {
 
     private final RedisRepository redisUtil;

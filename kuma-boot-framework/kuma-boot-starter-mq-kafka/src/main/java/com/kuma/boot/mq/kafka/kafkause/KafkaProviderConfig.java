@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -18,6 +19,7 @@ import java.util.Map;
  * Kafka生产者配置
  */
 @Configuration
+@ConditionalOnProperty(prefix = "spring.kafka.producer", name = "bootstrap-servers")
 public class KafkaProviderConfig {
 
     @Value("${spring.kafka.producer.bootstrap-servers}")
