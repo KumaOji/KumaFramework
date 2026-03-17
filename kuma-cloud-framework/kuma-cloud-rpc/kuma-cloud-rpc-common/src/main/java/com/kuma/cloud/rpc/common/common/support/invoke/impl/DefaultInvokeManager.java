@@ -62,38 +62,27 @@ public class DefaultInvokeManager implements InvokeManager {
 
     @Override
     public InvokeManager addRequest(String seqId, long timeoutMills) {
-        //        LOG.info("[Invoke] start add request for seqId: {}, timeoutMills: {}", seqId,
-        //                timeoutMills);
-
-        //        final long expireTime = Times.systemTime()+timeoutMills;
-        //        requestMap.putIfAbsent(seqId, expireTime);
-
+        final long expireTime = System.currentTimeMillis() + timeoutMills;
+        requestMap.putIfAbsent(seqId, expireTime);
         return this;
     }
 
     @Override
     public InvokeManager addResponse(String seqId, RpcResponse rpcResponse) {
-        // 1. 判断是否有效
+        // 1. 判断是否有效，为空说明已超时被清除，直接忽略
         Long expireTime = this.requestMap.get(seqId);
-        // 如果为空，可能是这个结果已经超时了，被定时 job 移除之后，响应结果才过来。直接忽略
-        //        if(ObjectUtil.isNull(expireTime)) {
-        //            LOG.warn("[Invoke] seqId: {} has been removed, maybe timeout!", seqId);
-        //            return this;
-        //        }
+        if (expireTime == null) {
+            LOG.warn("[Invoke] seqId: {} has been removed, maybe timeout!", seqId);
+            return this;
+        }
 
         // 2. 判断是否超时
-        //        if(Times.systemTime() > expireTime) {
-        //            LOG.info("[Invoke] seqId:{} 信息已超时，直接返回超时结果。", seqId);
-        //            rpcResponse = RpcResponseFactory.timeout();
-        //        }
-        //
-        //        // 这里放入之前，可以添加判断。
-        //        // 如果 seqId 必须处理请求集合中，才允许放入。或者直接忽略丢弃。
-        //        // 通知所有等待方
-        //        responseMap.putIfAbsent(seqId, rpcResponse);
-        //        LOG.info("[Invoke] 获取结果信息，seqId: {}, rpcResponse: {}", seqId, rpcResponse);
-        //        LOG.info("[Invoke] seqId:{} 信息已经放入，通知所有等待方", seqId);
+        if (System.currentTimeMillis() > expireTime) {
+            rpcResponse = RpcResponseFactory.timeout();
+        }
 
+        // 3. 存入响应结果，通知所有等待方
+        responseMap.putIfAbsent(seqId, rpcResponse);
         synchronized (this) {
             this.notifyAll();
         }
@@ -105,28 +94,24 @@ public class DefaultInvokeManager implements InvokeManager {
     public RpcResponse getResponse(String seqId) {
         try {
             RpcResponse rpcResponse = this.responseMap.get(seqId);
-            //            if(ObjectUtil.isNotNull(rpcResponse)) {
-            //                LOG.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
-            //            } else {
-            //                // 进入等待
-            //                while (rpcResponse == null) {
-            //                    LOG.info("[Invoke] seq {} 对应结果为空，进入等待", seqId);
-            //                    // 同步等待锁
-            //                    synchronized (this) {
-            //                        this.wait();
-            //                    }
-            //
-            //                    rpcResponse = this.responseMap.get(seqId);
-            //                    LOG.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
-            //                }
-            //            }
-
+            if (rpcResponse == null) {
+                // 进入等待，直到 addResponse 通知
+                synchronized (this) {
+                    while (this.responseMap.get(seqId) == null) {
+                        this.wait();
+                    }
+                }
+                rpcResponse = this.responseMap.get(seqId);
+            }
             // 移除 request
             this.requestMap.remove(seqId);
             return rpcResponse;
-            //        } catch (InterruptedException e) {
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             LOG.error("[Invoke] get response meet InterruptedException ex", e);
+            return RpcResponseFactory.interrupted();
+        } catch (Exception e) {
+            LOG.error("[Invoke] get response meet ex", e);
             return RpcResponseFactory.interrupted();
         }
     }

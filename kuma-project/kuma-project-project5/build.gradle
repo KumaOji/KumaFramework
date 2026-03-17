@@ -17,6 +17,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-web')
 
     api project(':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-worker')
+    api project(':kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-client')
 
     api projectLibs.spring.boot.starter.web
     compileOnly projectLibs.lombok

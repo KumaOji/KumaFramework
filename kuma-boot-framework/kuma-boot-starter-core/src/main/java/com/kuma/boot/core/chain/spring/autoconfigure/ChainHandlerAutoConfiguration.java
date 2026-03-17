@@ -3,6 +3,7 @@ package com.kuma.boot.core.chain.spring.autoconfigure;
 import com.kuma.boot.core.chain.core.executor.ChainExecutor;
 import com.kuma.boot.core.chain.core.registry.ChainRegistry;
 import com.kuma.boot.core.chain.spring.properties.ChainHandlerProperties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,7 @@ public class ChainHandlerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public <P, R> ChainExecutor<P, R> chainExecutor(ChainRegistry<P, R> chainRegistry,
-                                                    ExecutorService executorService) {
+                                                    @Qualifier("handlerExecutorService") ExecutorService executorService) {
         return new ChainExecutor<>(chainRegistry, executorService);
     }
 

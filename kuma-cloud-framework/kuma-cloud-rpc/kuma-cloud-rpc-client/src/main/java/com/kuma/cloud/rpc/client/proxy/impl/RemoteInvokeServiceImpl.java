@@ -19,6 +19,7 @@ package com.kuma.cloud.rpc.client.proxy.impl;
 import com.kuma.cloud.rpc.client.proxy.RemoteInvokeContext;
 import com.kuma.cloud.rpc.client.proxy.RemoteInvokeService;
 import com.kuma.cloud.rpc.client.proxy.ServiceContext;
+import java.util.UUID;
 import com.kuma.cloud.rpc.client.support.calltype.CallTypeStrategy;
 import com.kuma.cloud.rpc.client.support.calltype.impl.CallTypeStrategyFactory;
 import com.kuma.cloud.rpc.client.support.fail.FailStrategy;
@@ -29,7 +30,6 @@ import com.kuma.cloud.rpc.common.common.rpc.domain.RpcChannelFuture;
 import com.kuma.cloud.rpc.common.common.rpc.domain.RpcRequest;
 import com.kuma.cloud.rpc.common.common.rpc.domain.RpcResponse;
 import com.kuma.cloud.rpc.common.common.support.invoke.InvokeManager;
-import com.kuma.cloud.rpc.common.tmp.LoadBalance;
 import io.netty.channel.Channel;
 import java.util.List;
 import org.slf4j.Logger;
@@ -52,8 +52,8 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
         final RpcFilter rpcFilter = proxyContext.rpcFilter();
 
         // 设置唯一标识
-        //        final String seqId = Ids.uuid32();
-        //        rpcRequest.seqId(seqId);
+        final String seqId = UUID.randomUUID().toString();
+        rpcRequest.seqId(seqId);
 
         // 构建 filter 相关信息,结合 pipeline 进行整合
         rpcFilter.filter(context);
@@ -61,15 +61,14 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
         // 负载均衡
         // 这里使用 load-balance 进行选择 channel 写入。
         final Channel channel = getLoadBalanceChannel(proxyContext);
-        //        LOG.info("[Client] start call channel id: {}", channel.id().asLongText());
+
+        final InvokeManager invokeManager = proxyContext.invokeManager();
+        invokeManager.addRequest(seqId, proxyContext.timeout());
 
         // 对于信息的写入，实际上有着严格的要求。
         // writeAndFlush 实际是一个异步的操作，直接使用 sync() 可以看到异常信息。
         // 支持的必须是 ByteBuf
         channel.writeAndFlush(rpcRequest).syncUninterruptibly();
-        //        LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        final InvokeManager invokeManager = proxyContext.invokeManager();
-        invokeManager.addRequest("seqId", proxyContext.timeout());
 
         // 获取结果
         CallTypeStrategy callTypeStrategy =
@@ -97,21 +96,9 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
         List<RpcChannelFuture> channelFutures =
                 clientRegisterManager.queryServerChannelFutures(serviceId);
 
-        final LoadBalance loadBalance = serviceContext.loadBalance();
-        //        List<IServer> servers = CollectionUtil.toList(channelFutures, new
-        // IHandler<RpcChannelFuture, IServer>() {
-        //            @Override
-        //            public IServer handle(RpcChannelFuture rpcChannelFuture) {
-        //                return rpcChannelFuture;
-        //            }
-        //        });
-        //        LoadBalanceContext context = LoadBalanceContext.newInstance()
-        //                .servers(servers);
-
-        //        IServer server = loadBalance.select(context);
-        //        LOG.info("负载均衡获取地址信息：{}", server.url());
-        //        RpcChannelFuture future = (RpcChannelFuture) server;
-        //        return future.channelFuture().channel();
-        return null;
+        if (channelFutures == null || channelFutures.isEmpty()) {
+            throw new RuntimeException("No available server for serviceId: " + serviceId);
+        }
+        return channelFutures.get(0).channelFuture().channel();
     }
 }

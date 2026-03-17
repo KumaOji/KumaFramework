@@ -25,6 +25,9 @@ import com.kuma.cloud.rpc.common.common.support.inteceptor.impl.DefaultRpcInterc
 import com.kuma.cloud.rpc.common.common.support.status.enums.StatusEnum;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +94,10 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         rpcRequest.serviceId(proxyContext.serviceId());
         //        rpcRequest.createTime(createTime);
         rpcRequest.paramValues(args);
-        //        rpcRequest.paramTypeNames(ReflectMethodUtil.getParamTypeNames(method));
+        List<String> paramTypeNames = Arrays.stream(method.getParameterTypes())
+                .map(Class::getName)
+                .collect(Collectors.toList());
+        rpcRequest.paramTypeNames(paramTypeNames);
         rpcRequest.methodName(method.getName());
         rpcRequest.returnType(method.getReturnType());
         rpcRequest.timeout(proxyContext.timeout());
