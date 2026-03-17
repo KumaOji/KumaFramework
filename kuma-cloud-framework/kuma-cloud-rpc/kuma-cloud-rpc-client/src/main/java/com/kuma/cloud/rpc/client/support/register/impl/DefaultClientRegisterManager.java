@@ -583,10 +583,10 @@ public class DefaultClientRegisterManager implements ClientRegisterManager {
         final List<RpcAddress> registerCenterList = config.registerCenterList();
         final String serviceId = config.serviceId();
 
-        // 0. 快速返回
-        //		if (CollectionUtil.isNotEmpty(rpcAddresses)) {
-        //			return rpcAddresses;
-        //		}
+        // 0. 快速返回：有直连地址时直接使用，不走注册中心
+        if (rpcAddresses != null && !rpcAddresses.isEmpty()) {
+            return rpcAddresses;
+        }
 
         // 1. 信息检查
         registerCenterParamCheck(config);

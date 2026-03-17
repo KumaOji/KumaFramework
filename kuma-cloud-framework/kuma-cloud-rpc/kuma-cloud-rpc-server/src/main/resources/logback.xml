@@ -27,6 +27,12 @@
         </encoder>
     </appender>
 
+    <!-- 抑制 BeanPostProcessorChecker 对内置 Bean 的 WARN 告警 -->
+    <logger name="org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker" level="ERROR"/>
+
+    <!-- 幂等模块找不到自定义 executor 时使用默认值，属于正常降级，抑制 WARN -->
+    <logger name="com.kuma.boot.idempotent.idempotentenhance.core.handler.DefaultIdempotentExceptionEventHandler" level="ERROR"/>
+
     <!-- 日志级别设置 -->
     <root level="info">
         <appender-ref ref="CONSOLE"/>

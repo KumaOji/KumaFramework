@@ -87,7 +87,7 @@ public class DefaultNettyClient extends AbstractNettyClient<ChannelFuture> {
                             .syncUninterruptibly();
             //            LOG.info("[Netty Client] 启动客户端完成，监听地址 {}:{}", ip, port);
         } catch (Exception e) {
-            LOG.error("[Netty Client] 端启动遇到异常", e);
+            LOG.warn("[Netty Client] 端启动遇到异常", e);
             throw new RpcRuntimeException(e);
         }
         // 不要关闭线程池！！！

@@ -138,7 +138,7 @@ public class ServiceBs implements ServiceRegistry {
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
         this.rpcPort = 9527;
-        //        this.registerCenterList = Guavas.newArrayList();
+        this.registerCenterList = new ArrayList<>();
 
         // manager 初始化
         this.statusManager = new DefaultStatusManager();
@@ -270,7 +270,14 @@ public class ServiceBs implements ServiceRegistry {
             DefaultNettyClient nettyClient =
                     DefaultNettyClient.newInstance(
                             rpcAddress.address(), rpcAddress.port(), registerHandler);
-            ChannelFuture channelFuture = nettyClient.call();
+            ChannelFuture channelFuture;
+            try {
+                channelFuture = nettyClient.call();
+            } catch (Exception e) {
+                LOG.warn("[Rpc Server] nameserver {}:{} unavailable, skip register. Cause: {}",
+                        rpcAddress.address(), rpcAddress.port(), e.getMessage());
+                continue;
+            }
             resourceManager.addDestroy(nettyClient);
 
             // 添加到服务端管理中
