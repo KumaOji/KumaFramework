@@ -35,7 +35,7 @@ public class RpcBootstrap implements ApplicationRunner {
     @Value("${rpc.server.port:9527}")
     private int serverPort;
 
-    @Value("${rpc.nameserver.address:127.0.0.1:7103}")
+    @Value("${rpc.nameserver.address:}")
     private String nameserverAddress;
 
     @Value("${rpc.client.server-address:127.0.0.1:9527}")
@@ -63,11 +63,13 @@ public class RpcBootstrap implements ApplicationRunner {
      */
     private void startRpcServer() {
         log.info("[RPC] Starting server on port {} ...", serverPort);
-        ServiceBs.getInstance()
+        ServiceBs serviceBs = (ServiceBs) ServiceBs.getInstance()
                 .port(serverPort)
-                .register(SERVICE_ID, new HelloServiceImpl())
-                .registerCenter(nameserverAddress)   // 名称服务器地址（可选）
-                .expose();
+                .register(SERVICE_ID, new HelloServiceImpl());
+        if (nameserverAddress != null && !nameserverAddress.isBlank()) {
+            serviceBs.registerCenter(nameserverAddress);
+        }
+        serviceBs.expose();
         log.info("[RPC] Server exposed on port {}.", serverPort);
     }
 
