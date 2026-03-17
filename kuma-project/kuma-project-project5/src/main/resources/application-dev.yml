@@ -10,6 +10,13 @@ spring:
       - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
       - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 
+kuma:
+  boot:
+    security:
+      oauth2:
+        endpoint:
+          uaa-service-uri: http://localhost:8080
+
 logging:
   level:
     root: INFO

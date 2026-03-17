@@ -5,9 +5,11 @@ import com.kuma.boot.core.chain.core.handler.BaseHandler;
 import com.kuma.boot.core.chain.core.registry.ChainRegistry;
 import com.kuma.boot.core.chain.spring.annotation.ChainHandler;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Role;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
  * 责任链处理者注册器，负责扫描并注册带有@ChainHandler注解的处理者
  */
 @Component
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class ChainHandlerRegistrarBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
     private ApplicationContext applicationContext;
     private final List<HandlerInfo> handlerInfos = new ArrayList<>();
