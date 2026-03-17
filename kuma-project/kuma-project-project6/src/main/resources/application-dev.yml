@@ -19,8 +19,6 @@ kuma:
 rpc:
   server:
     port: 9527                         # Netty 监听端口，客户端直连用
-  nameserver:
-    address: 127.0.0.1:7103           # 名称服务器地址（可选）；不启动时服务注册会失败，但直连 RPC 调用仍可用
   client:
     server-address: 127.0.0.1:9527   # 客户端直连服务端地址
     timeout: 5000
