@@ -329,6 +329,7 @@ grpc:
 
 kmcjob:
   server:
+    address: 127.0.0.1
     worker-port: 9082
     name-server-address: 127.0.0.1:9089
   worker:

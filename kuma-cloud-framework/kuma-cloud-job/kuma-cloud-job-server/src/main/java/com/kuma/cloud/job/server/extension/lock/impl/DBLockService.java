@@ -22,6 +22,7 @@ import com.kuma.cloud.job.server.extension.lock.LockService;
 import com.kuma.cloud.job.server.persistence.domain.DistributedLock;
 import com.kuma.cloud.job.server.persistence.mapper.DistributedLockMapper;
 import jakarta.annotation.PostConstruct;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -79,7 +80,13 @@ public class DBLockService extends ServiceImpl<DistributedLockMapper, Distribute
         lock.setExpirationTime(expirationTime);
 
         // 插入或更新锁信息
-        saveOrUpdate(lock);
+        // 并发场景下两个线程可能同时 SELECT 到 null，再同时 INSERT，后者触发唯一键冲突
+        // 视为抢锁失败，返回 false
+        try {
+            saveOrUpdate(lock);
+        } catch (DuplicateKeyException e) {
+            return false;
+        }
         return true;
     }
 
