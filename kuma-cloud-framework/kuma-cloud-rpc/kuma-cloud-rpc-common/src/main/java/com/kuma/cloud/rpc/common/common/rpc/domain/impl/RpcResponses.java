@@ -16,6 +16,7 @@
 
 package com.kuma.cloud.rpc.common.common.rpc.domain.impl;
 
+import com.kuma.cloud.rpc.common.common.exception.RpcRuntimeException;
 import com.kuma.cloud.rpc.common.common.rpc.domain.RpcResponse;
 
 /**
@@ -55,24 +56,17 @@ public final class RpcResponses {
      * @since 0.1.1
      */
     public static Object getResult(final RpcResponse rpcResponse, final Class returnType) {
-        //        if(ObjectUtil.isNull(rpcResponse)) {
-        //            // 根据返回类型处理
-        //            return PrimitiveUtil.getDefaultValue(returnType);
-        //        }
-        //
-        //        // 处理异常信息
-        //        Throwable throwable = rpcResponse.error();
-        //        if(ObjectUtil.isNotNull(throwable)) {
-        //            throw new RpcRuntimeException(throwable);
-        //        }
-        //
-        //        // 处理结果信息
-        //        Object result = rpcResponse.result();
-        //        if(ObjectUtil.isNotNull(result)) {
-        //            return result;
-        //        }
-        //        return PrimitiveUtil.getDefaultValue(returnType);
-        return null;
+        if (rpcResponse == null) {
+            return null;
+        }
+
+        // 处理异常信息
+        Throwable throwable = rpcResponse.error();
+        if (throwable != null) {
+            throw new RpcRuntimeException(throwable);
+        }
+
+        return rpcResponse.result();
     }
 
     /**

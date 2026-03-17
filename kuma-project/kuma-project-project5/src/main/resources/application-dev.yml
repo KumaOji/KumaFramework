@@ -4,6 +4,11 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
+      - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 
 logging:
   level:

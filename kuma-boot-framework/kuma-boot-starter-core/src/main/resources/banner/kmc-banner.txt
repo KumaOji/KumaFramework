@@ -18,4 +18,4 @@ ${AnsiColor.MAGENTA}  ::  Gitee                             ::  ${kmc.author.git
 ${AnsiColor.BLUE}  ::  CSDN                              ::  ${kmc.author.csdn}
 ${AnsiColor.YELLOW}  ::  Juejin                            ::  ${kmc.author.juejin}
 ${AnsiColor.BRIGHT_CYAN}  ───────────────────── Application ─────────────────────
-${AnsiColor.RED}  ::  ${spring.application.name} Starting ...
+${AnsiColor.RED}  ::  ${spring.application.name} Starting ...${AnsiColor.DEFAULT}

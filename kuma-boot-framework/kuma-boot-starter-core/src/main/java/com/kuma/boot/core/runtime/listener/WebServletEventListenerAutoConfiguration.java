@@ -18,6 +18,7 @@ package com.kuma.boot.core.runtime.listener;
 
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.core.utils.BootContextUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.web.server.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
@@ -42,7 +43,7 @@ public class WebServletEventListenerAutoConfiguration {
         public void onApplicationEvent( ServletWebServerInitializedEvent event ) {
 
             LogUtils.info("Application [{}] WebServerInitialized StartupDate: {}  port: {}",
-                    event.getApplicationContext().getApplicationName(),
+                    BootContextUtils.getApplicationName(event.getApplicationContext()),
                     DateUtils.formatTimestamp(event.getApplicationContext().getStartupDate()),
                     event.getWebServer().getPort());
 

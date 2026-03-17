@@ -21,9 +21,11 @@ import com.kuma.cloud.rpc.server.config.service.ServiceConfig;
 import com.kuma.cloud.rpc.server.service.ServiceFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 默认服务仓库实现
@@ -83,15 +85,11 @@ public class DefaultServiceFactory implements ServiceFactory {
             Method[] methods = reference.getClass().getMethods();
             for (Method method : methods) {
                 String methodName = method.getName();
-                //                if(ReflectMethodUtil.isIgnoreMethod(methodName)) {
-                //                    continue;
-                //                }
-
-                //                List<String> paramTypeNames =
-                // ReflectMethodUtil.getParamTypeNames(method);
-                //                String key = buildMethodKey(serviceId, methodName,
-                // paramTypeNames);
-                //                methodMap.put(key, method);
+                List<String> paramTypeNames = Arrays.stream(method.getParameterTypes())
+                        .map(Class::getName)
+                        .collect(Collectors.toList());
+                String key = buildMethodKey(serviceId, methodName, paramTypeNames);
+                methodMap.put(key, method);
             }
         }
 
@@ -133,9 +131,7 @@ public class DefaultServiceFactory implements ServiceFactory {
      */
     private String buildMethodKey(
             String serviceId, String methodName, List<String> paramTypeNames) {
-        //        String param = CollectionUtil.join(paramTypeNames, PunctuationConst.AT);
-        //        return serviceId+PunctuationConst.COLON+methodName+PunctuationConst.COLON
-        //                +param;
-        return "";
+        String param = paramTypeNames != null ? String.join("@", paramTypeNames) : "";
+        return serviceId + ":" + methodName + ":" + param;
     }
 }
