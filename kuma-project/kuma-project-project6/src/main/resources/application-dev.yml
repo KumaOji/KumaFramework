@@ -1,6 +1,20 @@
 server:
   port: 8086
 
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
+      - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
+
+kuma:
+  boot:
+    security:
+      oauth2:
+        endpoint:
+          uaa-service-uri: http://localhost:8080
+
 # RPC 配置
 rpc:
   server:

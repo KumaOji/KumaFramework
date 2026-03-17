@@ -93,26 +93,28 @@ public final class ChannelHandlers {
      */
     public static List<RpcChannelFuture> channelFutureList(
             final List<RpcAddress> rpcAddressList, final ChannelHandlerFactory handlerFactory) {
-        //        List<RpcChannelFuture> resultList = Guavas.newArrayList();
-        //
-        //        if(CollectionUtil.isNotEmpty(rpcAddressList)) {
-        //            for(RpcAddress rpcAddress : rpcAddressList) {
-        //                final ChannelHandler channelHandler = handlerFactory.handler();
-        //
-        //                // 循环中每次都需要一个新的 handler
-        //                DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
-        //                DefaultNettyClient nettyClient =
-        // DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler);
-        //                ChannelFuture channelFuture = nettyClient.call();
-        //
-        //                future.channelFuture(channelFuture).address(rpcAddress)
-        //                        .weight(rpcAddress.weight()).destroyable(nettyClient);
-        //                resultList.add(future);
-        //            }
-        //        }
+        List<RpcChannelFuture> resultList = new java.util.ArrayList<>();
 
-        //        return resultList;
-        return null;
+        if (rpcAddressList != null && !rpcAddressList.isEmpty()) {
+            for (RpcAddress rpcAddress : rpcAddressList) {
+                final ChannelHandler channelHandler = handlerFactory.handler();
+
+                // 循环中每次都需要一个新的 handler
+                DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
+                DefaultNettyClient nettyClient =
+                        DefaultNettyClient.newInstance(
+                                rpcAddress.address(), rpcAddress.port(), channelHandler);
+                ChannelFuture channelFuture = nettyClient.call();
+
+                future.channelFuture(channelFuture)
+                        .address(rpcAddress)
+                        .weight(rpcAddress.weight())
+                        .destroyable(nettyClient);
+                resultList.add(future);
+            }
+        }
+
+        return resultList;
     }
 
     /**
