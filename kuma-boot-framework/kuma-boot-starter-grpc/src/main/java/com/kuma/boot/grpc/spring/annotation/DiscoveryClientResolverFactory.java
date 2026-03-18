@@ -21,7 +21,7 @@ public class DiscoveryClientResolverFactory extends NameResolverProvider {
    public static final String DISCOVERY_SCHEME = "discovery";
    public static final Attributes.Key<String> DISCOVERY_SERVICE_NAME_KEY = Key.create("serviceName");
    public static final Attributes.Key<String> DISCOVERY_INSTANCE_ID_KEY = Key.create("instanceId");
-   private final Set discoveryClientNameResolvers = ConcurrentHashMap.newKeySet();
+   private final Set<DiscoveryClientNameResolver> discoveryClientNameResolvers = ConcurrentHashMap.newKeySet();
    private final HeartbeatMonitor monitor = new HeartbeatMonitor();
    private final DiscoveryClient client;
 
@@ -48,7 +48,7 @@ public class DiscoveryClientResolverFactory extends NameResolverProvider {
    protected DiscoveryClientNameResolver newNameResolver(final String serviceName, final NameResolver.Args args) {
       DiscoveryClient var10003 = this.client;
       SharedResourceHolder.Resource var10005 = GrpcUtil.SHARED_CHANNEL_EXECUTOR;
-      Set var10006 = this.discoveryClientNameResolvers;
+      Set<DiscoveryClientNameResolver> var10006 = this.discoveryClientNameResolvers;
       Objects.requireNonNull(var10006);
       return new DiscoveryClientNameResolver(serviceName, var10003, args, var10005, var10006::remove);
    }

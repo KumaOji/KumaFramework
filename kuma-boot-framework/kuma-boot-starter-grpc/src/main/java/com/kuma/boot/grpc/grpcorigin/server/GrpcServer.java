@@ -24,14 +24,14 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 public class GrpcServer implements ContextComponent {
    private final Server server;
-   private final Map serviceNameMap;
-   private final Map fullMethodNameMap;
+   private final Map<String, Class<?>> serviceNameMap;
+   private final Map<String, Method> fullMethodNameMap;
 
-   public GrpcServer(GrpcServerProperties properties, List interceptors, List services) {
+   public GrpcServer(GrpcServerProperties properties, List<ServerInterceptor> interceptors, List<BindableService> services) {
       this(ServerBuilder.forPort(properties.getPort()), properties, interceptors, services);
    }
 
-   public GrpcServer(ServerBuilder builder, GrpcServerProperties properties, List interceptors, List services) {
+   public GrpcServer(ServerBuilder<?> builder, GrpcServerProperties properties, List<ServerInterceptor> interceptors, List<BindableService> services) {
       builder.maxInboundMessageSize((int)properties.getMessageSize().toBytes()).keepAliveTime(properties.getKeepAliveTime(), TimeUnit.MILLISECONDS).keepAliveTimeout(properties.getKeepAliveTimeout(), TimeUnit.MILLISECONDS);
       interceptors.sort(AnnotationAwareOrderComparator.INSTANCE);
       ListIterator<ServerInterceptor> iterator = interceptors.listIterator(interceptors.size());
@@ -40,8 +40,8 @@ public class GrpcServer implements ContextComponent {
          builder.intercept((ServerInterceptor)iterator.previous());
       }
 
-      this.serviceNameMap = new HashMap();
-      this.fullMethodNameMap = new HashMap();
+      this.serviceNameMap = new HashMap<>();
+      this.fullMethodNameMap = new HashMap<>();
 
       for(BindableService service : services) {
          builder.addService(service);
