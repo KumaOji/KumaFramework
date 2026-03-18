@@ -14,12 +14,12 @@ import org.springframework.context.event.EventListener;
 public final class DiscoveryNameResolverProvider extends NameResolverProvider {
    private final DiscoveryClient discoveryClient;
    private final ExecutorService executorService;
-   private final Set discoveryNameResolvers;
+   private final Set<DiscoveryNameResolver> discoveryNameResolvers;
 
    public DiscoveryNameResolverProvider(DiscoveryClient discoveryClient, ExecutorService executorService) {
       this.discoveryClient = discoveryClient;
       this.executorService = executorService;
-      this.discoveryNameResolvers = new HashSet();
+      this.discoveryNameResolvers = new HashSet<>();
    }
 
    protected boolean isAvailable() {

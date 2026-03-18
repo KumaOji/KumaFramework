@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 
 @Order(Integer.MIN_VALUE)
 public class GrpcServerTraceIdInterceptor implements ServerInterceptor {
-   private final Metadata.Key traceIdKey;
+   private final Metadata.Key<String> traceIdKey;
 
    public GrpcServerTraceIdInterceptor(GrpcServerProperties properties) {
       this.traceIdKey = Key.of(properties.getTraceIdKey(), Metadata.ASCII_STRING_MARSHALLER);
@@ -22,13 +22,13 @@ public class GrpcServerTraceIdInterceptor implements ServerInterceptor {
    protected String traceId(Metadata headers) {
       String traceId = null;
       if (headers.containsKey(this.traceIdKey)) {
-         traceId = (String)headers.get(this.traceIdKey);
+         traceId = headers.get(this.traceIdKey);
       }
 
-      return StringUtils.hasText(traceId) ? traceId : TraceUtils.getTtcTraceId();
+      return StringUtils.hasText(traceId) ? traceId : TraceUtils.getTraceId();
    }
 
-   public ServerCall.Listener interceptCall(ServerCall call, Metadata headers, ServerCallHandler next) {
+   public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
       String traceId = this.traceId(headers);
       MDC.put("TRACE_ID", traceId);
 

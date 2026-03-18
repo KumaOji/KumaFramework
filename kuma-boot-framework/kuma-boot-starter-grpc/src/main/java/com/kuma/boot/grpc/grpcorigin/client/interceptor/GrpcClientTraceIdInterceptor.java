@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 
 @Order(Integer.MIN_VALUE)
 public class GrpcClientTraceIdInterceptor implements ClientInterceptor {
-   private final Metadata.Key traceIdKey;
+   private final Metadata.Key<String> traceIdKey;
 
    public GrpcClientTraceIdInterceptor(GrpcClientProperties properties) {
       this.traceIdKey = Key.of(properties.getTraceIdKey(), Metadata.ASCII_STRING_MARSHALLER);
@@ -26,19 +26,14 @@ public class GrpcClientTraceIdInterceptor implements ClientInterceptor {
       return MDC.get("TRACE_ID");
    }
 
-   public ClientCall interceptCall(MethodDescriptor method, CallOptions callOptions, Channel next) {
+   public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
       final String traceId = this.traceId();
-      ClientCall<S, R> call = next.newCall(method, callOptions);
-      return new SimpleForwardingClientCall(call) {
-         {
-            Objects.requireNonNull(GrpcClientTraceIdInterceptor.this);
-         }
-
-         public void onStartBefore(ClientCall.Listener responseListener, Metadata headers) {
+      ClientCall<ReqT, RespT> call = next.newCall(method, callOptions);
+      return new SimpleForwardingClientCall<ReqT, RespT>(call) {
+         public void onStartBefore(ClientCall.Listener<RespT> responseListener, Metadata headers) {
             if (StringUtils.hasText(traceId)) {
                headers.put(GrpcClientTraceIdInterceptor.this.traceIdKey, traceId);
             }
-
          }
       };
    }
