@@ -1,4 +1,0 @@
-com.kuma.boot.grpc.spring.GrpcClientExtendsAutoConfiguration
-com.kuma.boot.grpc.spring.GrpcServerExtendsAutoConfiguration
-com.kuma.boot.grpc.spring.config.GrpcClientAutoConfiguration
-com.kuma.boot.grpc.spring.annotation.GrpcDiscoveryClientAutoConfiguration
