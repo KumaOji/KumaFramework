@@ -5,5 +5,6 @@ description = '''Myframework project参考 —— 一组渐进式 Demo 应用，
   project4 : 全量 Demo，涵盖 kuma-boot-framework 全部 starter（安全 / 双数据源 MySQL+PostgreSQL / Redis+Caffeine+JetCache / Kafka / 分布式锁 / IP归属 / Office导出 / 验证码 / TOTP / 钉钉 / Sentinel）及 kuma-cloud-framework 各 starter
   project5 : 任务 Demo，接入 kuma-cloud-job-worker，演示任务注册与执行
   project6 : RPC Demo，演示 kuma-cloud-rpc 的服务注册（ServiceBs）与远程调用（ClientBs 直连）
+  project20: gRPC 客户端 Demo，通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）
   blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
 '''
