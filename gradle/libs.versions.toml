@@ -135,6 +135,8 @@ spring-cloud-alibaba = "2025.1.0.0"
 rocketmq-spring = "2.3.3"
 seata = "2.5.0"
 langchain4j = "1.11.0"
+grpc = "1.76.0"
+spring-grpc = "1.0.0-RC1"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -274,6 +276,13 @@ kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafk
 kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka-streams" }
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring-context" }
 spring-cloud-context = { module = "org.springframework.cloud:spring-cloud-context", version.ref = "spring-cloud-context-ver" }
+spring-cloud-commons = { module = "org.springframework.cloud:spring-cloud-commons", version.ref = "spring-cloud-context-ver" }
+grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
+grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
+grpc-core = { module = "io.grpc:grpc-core", version.ref = "grpc" }
+spring-grpc-core = { module = "org.springframework.grpc:spring-grpc-core", version.ref = "spring-grpc" }
+spring-grpc-client-starter = { module = "org.springframework.grpc:spring-grpc-client-spring-boot-starter", version.ref = "spring-grpc" }
+spring-grpc-server-starter = { module = "org.springframework.grpc:spring-grpc-server-spring-boot-starter", version.ref = "spring-grpc" }
 taobao-text-ui = { module = "com.taobao.text:text-ui", version.ref = "taobao-text" }
 justauth = { module = "me.zhyd.oauth:JustAuth", version.ref = "justauth" }
 druid-starter = { module = "com.alibaba:druid-spring-boot-3-starter", version.ref = "druid" }
@@ -320,7 +329,6 @@ boofcv-recognition = { module = "org.boofcv:boofcv-recognition", version.ref = "
 boofcv-io = { module = "org.boofcv:boofcv-io", version.ref = "boofcv" }
 easy-captcha = { module = "com.github.whvcse:easy-captcha", version = "1.6.2" }
 httpcore5 = { module = "org.apache.httpcomponents.core5:httpcore5", version.ref = "httpcore5" }
-spring-cloud-commons = { module = "org.springframework.cloud:spring-cloud-commons", version.ref = "spring-cloud-context-ver" }
 hutool-cache = { module = "cn.hutool:hutool-cache", version.ref = "hutool" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 json-path = { module = "com.jayway.jsonpath:json-path", version.ref = "json-path" }

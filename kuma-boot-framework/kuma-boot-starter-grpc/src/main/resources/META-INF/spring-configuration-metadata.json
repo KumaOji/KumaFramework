@@ -1,0 +1,113 @@
+{
+  "groups": [
+    {
+      "name": "kuma.boot.grpc",
+      "type": "com.kuma.boot.grpc.properties.GrpcProperties",
+      "sourceType": "com.kuma.boot.grpc.properties.GrpcProperties"
+    },
+    {
+      "name": "kuma.boot.grpc.client",
+      "type": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties"
+    },
+    {
+      "name": "kuma.boot.grpc.server",
+      "type": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "kuma.boot.grpc.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kuma.boot.grpc.properties.GrpcProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "kuma.boot.grpc.client.host",
+      "type": "java.lang.String",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties"
+    },
+    {
+      "name": "kuma.boot.grpc.client.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": 80
+    },
+    {
+      "name": "kuma.boot.grpc.client.trace-id-key",
+      "type": "java.lang.String",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties"
+    },
+    {
+      "name": "kuma.boot.grpc.client.use-plaintext",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "kuma.boot.grpc.client.disable-ssl",
+      "type": "java.lang.Boolean",
+      "description": "仅在支持此操作时生效",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "kuma.boot.grpc.client.enable-retry",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "kuma.boot.grpc.client.enable-keep-alive",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "kuma.boot.grpc.client.keep-alive-time",
+      "type": "java.lang.Long",
+      "description": "单位: 毫秒",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": 30
+    },
+    {
+      "name": "kuma.boot.grpc.client.keep-alive-timeout",
+      "type": "java.lang.Long",
+      "description": "单位: 毫秒",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties",
+      "defaultValue": 2
+    },
+    {
+      "name": "kuma.boot.grpc.server.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties"
+    },
+    {
+      "name": "kuma.boot.grpc.server.trace-id-key",
+      "type": "java.lang.String",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties"
+    },
+    {
+      "name": "kuma.boot.grpc.server.message-size",
+      "type": "org.springframework.util.unit.DataSize",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties",
+      "defaultValue": "512MB"
+    },
+    {
+      "name": "kuma.boot.grpc.server.keep-alive-time",
+      "type": "java.lang.Long",
+      "description": "单位: 毫秒",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties",
+      "defaultValue": 2
+    },
+    {
+      "name": "kuma.boot.grpc.server.keep-alive-timeout",
+      "type": "java.lang.Long",
+      "description": "单位: 毫秒",
+      "sourceType": "com.kuma.boot.grpc.grpcorigin.server.properties.GrpcServerProperties",
+      "defaultValue": 20
+    }
+  ],
+  "hints": []
+}
