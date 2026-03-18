@@ -1,12 +1,13 @@
 package com.kuma.cloud.project20.config;
 
 import com.kuma.ai.agent.grpc.KumaAgentServiceGrpc;
+import com.kuma.boot.grpc.grpcorigin.client.GrpcClientProvide;
+import com.kuma.boot.grpc.grpcorigin.client.properties.GrpcClientProperties;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,10 +16,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * AgentGrpcClientConfig —— 创建 gRPC ManagedChannel 及服务存根 Bean
  *
- * <p>配置项（application-dev.yml 中可覆盖）：
+ * <p>连接配置通过 {@code kuma.boot.grpc.client.*} 统一管理：
  * <ul>
- *   <li>{@code kuma.agent.grpc.host} — Agent gRPC 服务地址（默认 127.0.0.1）</li>
- *   <li>{@code kuma.agent.grpc.port} — Agent gRPC 端口（默认 50051）</li>
+ *   <li>{@code kuma.boot.grpc.client.host} — Agent gRPC 服务地址</li>
+ *   <li>{@code kuma.boot.grpc.client.port} — Agent gRPC 端口</li>
+ *   <li>{@code kuma.boot.grpc.client.use-plaintext} — 是否明文（无 TLS）</li>
  * </ul>
  */
 @Configuration
@@ -26,25 +28,21 @@ public class AgentGrpcClientConfig {
 
     private static final Logger log = LoggerFactory.getLogger(AgentGrpcClientConfig.class);
 
-    @Value("${kuma.agent.grpc.host:127.0.0.1}")
-    private String host;
-
-    @Value("${kuma.agent.grpc.port:50051}")
-    private int port;
-
     private ManagedChannel channel;
 
     /**
-     * gRPC 托管通道（明文，无 TLS）。
+     * gRPC 托管通道，通过 {@link GrpcClientProvide} 统一构建。
      * 消息大小限制 50 MB，与 Python 服务端保持一致。
      */
     @Bean
-    public ManagedChannel agentManagedChannel() {
-        channel = ManagedChannelBuilder.forAddress(host, port)
-                .usePlaintext()
-                .maxInboundMessageSize(50 * 1024 * 1024)
-                .build();
-        log.info("[Agent gRPC] Channel created → {}:{}", host, port);
+    public ManagedChannel agentManagedChannel(GrpcClientProvide grpcClientProvide,
+                                              GrpcClientProperties grpcClientProperties) {
+        channel = grpcClientProvide.channel(
+                grpcClientProperties.getHost(),
+                grpcClientProperties.getPort(),
+                builder -> ((ManagedChannelBuilder<?>) builder).maxInboundMessageSize(50 * 1024 * 1024)
+        );
+        log.info("[Agent gRPC] Channel created → {}:{}", grpcClientProperties.getHost(), grpcClientProperties.getPort());
         return channel;
     }
 

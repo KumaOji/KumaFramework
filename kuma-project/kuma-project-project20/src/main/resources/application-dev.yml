@@ -15,7 +15,8 @@ kuma:
       oauth2:
         endpoint:
           uaa-service-uri: http://localhost:8080
-  agent:
     grpc:
-      host: 127.0.0.1   # Agent gRPC 服务地址
-      port: 50051         # Agent gRPC 服务端口（默认值）
+      client:
+        host: 127.0.0.1   # Agent gRPC 服务地址
+        port: 50051         # Agent gRPC 服务端口
+        use-plaintext: true # 明文连接（无 TLS）

@@ -6,7 +6,7 @@ plugins {
 
 description = 'AI Agent gRPC 客户端示例 —— 通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）'
 
-def grpcVersion     = '1.68.0'
+def grpcVersion     = '1.76.0'
 def protobufVersion = '3.25.5'
 
 dependencyManagement {
@@ -16,17 +16,11 @@ dependencyManagement {
 }
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-grpc')
 
-    api projectLibs.spring.boot.starter.web
-
-    // ── gRPC 客户端 ───────────────────────────────────────────────────────────
-    implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    // Protobuf 编译依赖（protoc-gen-grpc-java 生成代码依赖 grpc-protobuf）
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation "io.grpc:grpc-stub:${grpcVersion}"
-
     // Protobuf JSON 序列化（JsonFormat.printer 用于返回 JSON 响应）
     implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
 
