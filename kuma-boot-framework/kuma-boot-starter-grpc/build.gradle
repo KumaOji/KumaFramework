@@ -1,0 +1,30 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework grpc模块'
+
+// grpc 版本需与 spring-grpc-core 所引用的版本保持一致
+def grpcVersion = '1.76.0'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // Spring gRPC 1.0.0-RC1（spring-grpc-core 的 grpc-netty/grpc-stub 为 optional，需显式声明）
+    api projectLibs.spring.grpc.core
+    api "io.grpc:grpc-netty:${grpcVersion}"
+    api "io.grpc:grpc-stub:${grpcVersion}"
+
+    // Spring Cloud DiscoveryClient
+    api projectLibs.spring.cloud.commons
+
+    // Spring Security（可选，GrpcServerExtendsAutoConfiguration 用于 gRPC 安全配置）
+    compileOnly projectLibs.spring.boot.starter.security
+
+    // 工具类
+    api projectLibs.hutool.core
+    api projectLibs.guava
+    api projectLibs.gson
+    api projectLibs.jspecify
+}

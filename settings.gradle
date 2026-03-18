@@ -127,6 +127,7 @@ for (name in frameworkCloudPluginSubModules) {
 }
 
 include "kuma-project"
+include "kuma-project:engine"
 def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project20', 'blog']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
@@ -137,3 +138,5 @@ gradle.settingsEvaluated {
         throw new GradleException("This build requires JDK 25. Current: ${JavaVersion.current()}. Use -Dorg.gradle.ignoreBuildJavaVersionCheck to skip.")
     }
 }
+
+include 'kuma-boot-framework:kuma-boot-starter-grpc'
