@@ -1,10 +1,12 @@
 package com.kuma.cloud.project9.service;
 
+import com.kuma.cloud.mq.client.consumer.api.MqConsumerListener;
+import com.kuma.cloud.mq.client.consumer.api.MqConsumerListenerContext;
 import com.kuma.cloud.mq.client.consumer.core.MqConsumerPush;
-import com.kuma.cloud.mq.client.consumer.listener.MqConsumerListener;
-import com.kuma.cloud.mq.client.consumer.listener.MqConsumerListenerContext;
-import com.kuma.cloud.mq.common.constant.ConsumerStatus;
+
+
 import com.kuma.cloud.mq.common.dto.req.MqMessage;
+import com.kuma.cloud.mq.common.resp.ConsumerStatus;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
