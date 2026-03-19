@@ -1,0 +1,19 @@
+server:
+  port: 8089
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
+      - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
+
+# 启用消息队列 client
+kuma:
+  mq:
+    client:
+      enabled: true
+      broker-address: "127.0.0.1:9999"
+      group-name: "project9Group"
+      resp-timeout-mills: 5000
+      check: false   # Broker 未启动时不阻塞应用启动
