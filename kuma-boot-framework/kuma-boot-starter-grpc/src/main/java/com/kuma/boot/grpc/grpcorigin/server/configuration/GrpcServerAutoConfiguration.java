@@ -8,10 +8,12 @@ import io.grpc.ServerInterceptor;
 import java.util.List;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
+@ConditionalOnProperty(prefix = "kuma.boot.grpc.server", name = "port")
 @EnableConfigurationProperties({GrpcServerProperties.class})
 public class GrpcServerAutoConfiguration {
    private final GrpcServerProperties properties;

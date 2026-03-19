@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-@AutoConfiguration
+@AutoConfiguration("grpcOriginClientAutoConfiguration")
 @EnableConfigurationProperties({GrpcClientProperties.class})
 public class GrpcClientAutoConfiguration {
    private final GrpcClientProperties properties;

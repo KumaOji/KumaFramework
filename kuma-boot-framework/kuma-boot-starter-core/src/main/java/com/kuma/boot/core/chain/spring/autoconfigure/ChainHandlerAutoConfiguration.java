@@ -59,7 +59,7 @@ public class ChainHandlerAutoConfiguration {
      * @return 线程池
      */
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "handlerExecutorService")
     public ExecutorService handlerExecutorService(ChainHandlerProperties properties) {
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 properties.getCorePoolSize(),
