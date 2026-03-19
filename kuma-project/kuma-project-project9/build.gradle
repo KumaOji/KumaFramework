@@ -1,0 +1,35 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = '消息队列 Demo —— 演示 kuma-cloud-mq-client 的接入，通过 MqProducer / MqConsumerPush 完成消息收发'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+
+    // 消息队列 client
+    api project(':kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-client')
+
+    api projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(active: 'dev')
+    }
+}
+
+bootJar {
+    archiveBaseName = 'project9'
+}
