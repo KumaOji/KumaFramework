@@ -144,6 +144,11 @@ public abstract class AbstractClient<OPTION extends RequestOption> implements Le
             throw new IllegalArgumentException("Option is empty.");
         }
 
+        // payload 未指定 namespace 时，回退到 client 级别的 namespace
+        if (request.getNamespace() == null && this.namespace != null) {
+            request.setNamespace(this.namespace);
+        }
+
         Log.info("[Client-Execute-Begin] Execute sync request.");
 
         Response response = this.filterChain.preFilter(new CcsrContext(), option, request);

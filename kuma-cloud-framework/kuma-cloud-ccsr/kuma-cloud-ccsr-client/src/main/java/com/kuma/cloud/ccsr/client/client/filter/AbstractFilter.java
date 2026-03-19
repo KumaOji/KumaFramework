@@ -49,6 +49,10 @@ public abstract class AbstractFilter<OPTION extends RequestOption> implements Fi
         return (OPTION) client.getOption();
     }
 
+    protected AbstractClient<OPTION> getClient() {
+        return this.client;
+    }
+
     @Override
     public void init() throws Exception {
 

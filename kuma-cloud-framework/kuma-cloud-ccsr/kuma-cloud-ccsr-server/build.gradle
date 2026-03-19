@@ -9,6 +9,8 @@ dependencies {
 
     api project(":kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-server-starter")
 
+    implementation "org.springframework.boot:spring-boot-starter-validation:4.0.2"
+
     implementation("org.springframework.boot:spring-boot-starter-webmvc:4.0.2") {
         //exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
         exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"
@@ -27,10 +29,23 @@ configurations {
             force "com.alipay.sofa:hessian:3.5.5"
             force "com.google.protobuf:protobuf-java:3.25.5"
             force "com.google.protobuf:protobuf-java-util:3.25.5"
+            // jraft-core 传递引入旧版 httpclient5（<5.3），Spring Boot 4.x 需要 5.3+ 的 TlsSocketStrategy
+            force "org.apache.httpcomponents.client5:httpclient5:5.4.1"
         }
 
         //exclude group: "commons-logging", module: "commons-logging"
     }
+}
+
+bootRun {
+    // jraft-core 在 Java 9+ 需要开放 java.util 包的反射访问（ArrayList.elementData）
+    jvmArgs += [
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+        '--sun-misc-Unsafe-memory-access=allow',
+        '--enable-native-access=ALL-UNNAMED'
+    ]
 }
 
 jar {
