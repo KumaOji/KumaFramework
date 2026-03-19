@@ -5,11 +5,8 @@ import com.kuma.boot.core.chain.core.handler.BaseHandler;
 import com.kuma.boot.core.chain.core.registry.ChainRegistry;
 import com.kuma.boot.core.chain.spring.annotation.ChainHandler;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Role;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -25,31 +22,12 @@ import java.util.stream.Collectors;
  * 责任链处理者注册器，负责扫描并注册带有@ChainHandler注解的处理者
  */
 @Component
-@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-public class ChainHandlerRegistrarBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
+public class ChainHandlerRegistrarBeanPostProcessor implements ApplicationContextAware {
     private ApplicationContext applicationContext;
-    private final List<HandlerInfo> handlerInfos = new ArrayList<>();
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        // 检查bean是否有@ChainHandler注解
-        ChainHandler chainHandler = AnnotationUtils.findAnnotation(bean.getClass(), ChainHandler.class);
-        if (chainHandler != null && bean instanceof BaseHandler) {
-            // 收集处理器信息，稍后统一排序注册
-            handlerInfos.add(new HandlerInfo(
-                    chainHandler.value(),
-                    chainHandler.order(),
-                    (BaseHandler) bean
-            ));
-            LogUtils.debug("Collected handler {} for chain {} with order {}",
-                    bean.getClass().getSimpleName(), chainHandler.value(), chainHandler.order());
-        }
-        return bean;
     }
 
     /**
@@ -58,10 +36,6 @@ public class ChainHandlerRegistrarBeanPostProcessor implements BeanPostProcessor
     @SuppressWarnings({"unchecked", "rawtypes"})
     @EventListener(ContextRefreshedEvent.class)
     public void registerHandlersAfterContextRefresh() {
-        if (handlerInfos.isEmpty()) {
-            return;
-        }
-
         // 获取链注册器
         Map<String, ChainRegistry> registryBeans = applicationContext.getBeansOfType(ChainRegistry.class);
         if (registryBeans.isEmpty()) {
@@ -70,6 +44,25 @@ public class ChainHandlerRegistrarBeanPostProcessor implements BeanPostProcessor
         }
 
         ChainRegistry registry = registryBeans.values().iterator().next();
+
+        // 获取所有带@ChainHandler注解的bean
+        Map<String, Object> handlerBeans = applicationContext.getBeansWithAnnotation(ChainHandler.class);
+
+        List<HandlerInfo> handlerInfos = new ArrayList<>();
+        for (Object bean : handlerBeans.values()) {
+            if (bean instanceof BaseHandler) {
+                ChainHandler chainHandler = AnnotationUtils.findAnnotation(bean.getClass(), ChainHandler.class);
+                if (chainHandler != null) {
+                    handlerInfos.add(new HandlerInfo(chainHandler.value(), chainHandler.order(), (BaseHandler) bean));
+                    LogUtils.debug("Collected handler {} for chain {} with order {}",
+                            bean.getClass().getSimpleName(), chainHandler.value(), chainHandler.order());
+                }
+            }
+        }
+
+        if (handlerInfos.isEmpty()) {
+            return;
+        }
 
         // 按链ID分组，然后按order排序
         Map<String, List<HandlerInfo>> chainGroups = handlerInfos.stream()
@@ -91,9 +84,6 @@ public class ChainHandlerRegistrarBeanPostProcessor implements BeanPostProcessor
                         handlerInfo.getOrder());
             }
         }
-
-        // 清空临时存储
-        handlerInfos.clear();
     }
 
     /**

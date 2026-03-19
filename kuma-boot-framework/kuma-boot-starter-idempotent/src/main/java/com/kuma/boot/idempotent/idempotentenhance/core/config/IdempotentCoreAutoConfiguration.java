@@ -28,6 +28,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 /** 幂等核心自动配置 */
 @Configuration
 // @ConditionalOnProperties(prefix = "enhance.idempotent", properties = {"enable"}, values =
@@ -51,6 +56,21 @@ public class IdempotentCoreAutoConfiguration {
     @ConditionalOnMissingBean
     public IdempotentExceptionEventHandler defaultIdempotentExceptionEventHandler() {
         return new DefaultIdempotentExceptionEventHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "idempotentExceptionEventExecutor")
+    public ExecutorService idempotentExceptionEventExecutor() {
+        return new ThreadPoolExecutor(
+                2, 5, 60L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(1024),
+                r -> {
+                    Thread t = new Thread(r);
+                    t.setName("idempotentExceptionEvent-" + t.threadId());
+                    return t;
+                },
+                new ThreadPoolExecutor.AbortPolicy()
+        );
     }
 
     // 等待后续实现了动态选择幂等组件时再注册
