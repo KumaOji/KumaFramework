@@ -1,5 +1,6 @@
 package com.kuma.cloud.project8;
 
+import com.kuma.boot.core.startup.StartupSpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
