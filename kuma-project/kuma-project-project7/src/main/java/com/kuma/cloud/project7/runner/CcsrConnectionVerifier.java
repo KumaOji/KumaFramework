@@ -5,6 +5,7 @@ import com.kuma.cloud.ccsr.api.event.EventType;
 import com.kuma.cloud.ccsr.api.grpc.auto.Response;
 import com.kuma.cloud.ccsr.client.request.Payload;
 import com.kuma.cloud.ccsr.client.starter.CcsrService;
+import com.kuma.cloud.ccsr.common.enums.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -32,7 +33,10 @@ public class CcsrConnectionVerifier implements ApplicationRunner {
                     .build();
             Response response = ccsrService.request(payload, EventType.GET);
 
-            if (response.getSuccess()) {
+            // 连通性验证：成功 或 数据不存在(4042) 均视为连接正常
+            boolean connected = response.getSuccess()
+                    || response.getCode() == ResponseCode.DATA_NOT_EXIST.getCode();
+            if (connected) {
                 LogUtils.info("[CCSR] 连接验证成功 ✓  code={}, msg={}", response.getCode(), response.getMsg());
             } else {
                 LogUtils.warn("[CCSR] 连接验证失败 ✗  code={}, msg={}", response.getCode(), response.getMsg());

@@ -135,7 +135,14 @@ public class MetadataConfigServiceImpl extends MetadataServiceGrpc.MetadataServi
                             request.getDataId());
             Metadata data = storage.get(key);
 
-            Response response = ResponseHelper.success(Any.pack(data));
+            Response response;
+            if (data == null) {
+                response = ResponseHelper.error(
+                        ResponseCode.DATA_NOT_EXIST.getCode(),
+                        ResponseCode.DATA_NOT_EXIST.getMsg());
+            } else {
+                response = ResponseHelper.success(Any.pack(data));
+            }
             // Respond to the client immediately
             responseObserver.onNext(response);
             responseObserver.onCompleted();
