@@ -1,0 +1,18 @@
+server:
+  port: 8087
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
+      - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
+
+# CCSR 客户端配置
+ccsr:
+  rpc-type: grpc         # 通信协议
+  namespace: default     # 命名空间
+  cluster-address:
+    - 127.0.0.1:8005     # CCSR 服务端集群地址
+    - 127.0.0.1:8006
+    - 127.0.0.1:8007

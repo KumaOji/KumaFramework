@@ -46,7 +46,11 @@ public class ConvertFilter<OPTION extends RequestOption> extends AbstractFilter<
             String configDataString = GsonUtils.getInstance().toJson(request.getConfigData());
             String md5 = MD5Utils.calculateMD5(configDataString);
             context.setConfigDataString(configDataString);
-            context.setNamespace(request.getNamespace());
+            // payload 未指定 namespace 时，回退到 client 级别的 namespace
+            String namespace = request.getNamespace() != null
+                    ? request.getNamespace()
+                    : getClient().getNamespace();
+            context.setNamespace(namespace);
             context.setMd5(md5);
         } catch (Exception e) {
             return ResponseHelper.error(ResponseCode.CLIENT_ERROR.getCode(), e.getMessage());

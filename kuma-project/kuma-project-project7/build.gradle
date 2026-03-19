@@ -1,0 +1,48 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = 'CCSR Demo —— 演示 kuma-cloud-ccsr-client-starter 的接入，通过 CcsrService 向 CCSR 集群进行配置读写'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+
+    // CCSR 客户端 starter
+    api project(':kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-client-starter')
+
+    api projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
+
+configurations {
+    configureEach {
+        resolutionStrategy {
+            force "com.caucho:hessian:4.0.63"
+            force "com.alipay.sofa:hessian:3.5.5"
+        }
+    }
+}
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(active: 'dev')
+    }
+}
+
+bootJar {
+    archiveBaseName = 'project7'
+}
+
+bootRun {
+    jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
+}

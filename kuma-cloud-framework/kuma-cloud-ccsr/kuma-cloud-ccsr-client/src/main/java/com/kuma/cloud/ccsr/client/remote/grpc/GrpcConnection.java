@@ -36,6 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author kuma
@@ -58,6 +59,11 @@ public abstract class GrpcConnection implements Closeable {
     private ScheduledExecutorService healthCheckScheduler;
 
     private final ServiceDiscovery discovery = new ServiceDiscovery();
+
+    /** 重连尝试次数，用于指数退避计算 */
+    private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
+
+    private static final int MAX_BACKOFF_SECONDS = 60;
 
     private void startHealthCheckScheduler() {
         if (healthCheckScheduler == null || healthCheckScheduler.isShutdown()) {
@@ -91,7 +97,7 @@ public abstract class GrpcConnection implements Closeable {
         discovery.update(serverAddresses);
         ServerAddress server = discovery.selector();
 
-        Log.print("尝试连接... host:%s, port:%s", server.getHost(), server.getPort());
+        Log.info("尝试连接... host:{}, port:{}", server.getHost(), server.getPort());
 
         this.channel =
                 ManagedChannelBuilder.forAddress(server.getHost(), server.getPort())
@@ -143,10 +149,14 @@ public abstract class GrpcConnection implements Closeable {
     }
 
     private void reconnect() {
-        Log.print("尝试重新连接...");
-        this.channel.shutdown();
-        this.rebuildChannel();
-        this.listening();
+        int attempts = reconnectAttempts.incrementAndGet();
+        long delaySeconds = Math.min((1L << Math.min(attempts - 1, 6)), MAX_BACKOFF_SECONDS);
+        Log.warn("配置订阅连接断开，将在 {}s 后进行第 {} 次重连...", delaySeconds, attempts);
+        healthCheckScheduler.schedule(() -> {
+            this.channel.shutdown();
+            this.rebuildChannel();
+            this.listening();
+        }, delaySeconds, TimeUnit.SECONDS);
     }
 
     public void listening() {
@@ -161,7 +171,8 @@ public abstract class GrpcConnection implements Closeable {
                 new StreamObserver<>() {
                     @Override
                     public void onNext(MetadataSubscribeResponse response) {
-                        Log.print(
+                        reconnectAttempts.set(0); // 收到消息说明连接正常，重置退避计数
+                        Log.info(
                                 "配置订阅监听: namespace=%s, eventType=%s, metadata=%s",
                                 response.getNamespace(),
                                 response.getOpType(),
@@ -173,13 +184,13 @@ public abstract class GrpcConnection implements Closeable {
 
                     @Override
                     public void onError(Throwable t) {
-                        Log.print("配置订阅监听出错: " + t.getMessage());
+                        Log.warn("配置订阅监听出错: " + t.getMessage());
                         reconnect();
                     }
 
                     @Override
                     public void onCompleted() {
-                        Log.print("服务端链接关闭...");
+                        Log.info("服务端链接关闭...");
                         // TODO 标记为不健康服务
                     }
                 });

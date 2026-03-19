@@ -225,6 +225,9 @@ logging:
     org.apache.kafka.clients.consumer: error
     org.apache.kafka.clients.Metadata: error
     org.apache.kafka.common.utils.AppInfoParser: error
+    # jraft 在 Windows 上无法 fsync 目录（系统限制），以及首次启动无快照数据，均为正常现象
+    com.alipay.sofa.jraft.storage.snapshot.local.LocalSnapshotStorage: error
+    com.alipay.sofa.jraft.util.Utils: error
     # hibernate log org.apache.kafka.clients.consumer
     #org.hibernate.SQL: debug
     #org.hibernate.type: info
