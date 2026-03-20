@@ -132,7 +132,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private void sendResult( JSONObject result ) {
         System.out.println("事务最终处理结果：" + result.toJSONString());
         for (Channel channel : channelGroup) {
-            channel.writeAndFlush(result.toJSONString());
+            channel.writeAndFlush(result.toJSONString() + "\n");
         }
     }
 }
