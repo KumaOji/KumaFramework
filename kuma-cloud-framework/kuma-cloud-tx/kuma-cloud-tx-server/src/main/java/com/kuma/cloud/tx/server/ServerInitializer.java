@@ -19,6 +19,7 @@ package com.kuma.cloud.tx.server;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
@@ -36,6 +37,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel( SocketChannel socketChannel ) throws Exception {
         // 设置编码器、解码器、处理器
         ChannelPipeline pipeline = socketChannel.pipeline();
+        pipeline.addLast("framer", new LineBasedFrameDecoder(1024 * 1024));
         pipeline.addLast("decoder", new StringDecoder());
         pipeline.addLast("encoder", new StringEncoder());
         pipeline.addLast("handler", new NettyServerHandler());

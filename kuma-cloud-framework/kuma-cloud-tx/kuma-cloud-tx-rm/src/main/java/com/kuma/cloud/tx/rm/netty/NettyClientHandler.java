@@ -70,6 +70,6 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 
     public void sendData( JSONObject result ) {
         System.out.println("向事务管理者发送数据：" + result.toJSONString());
-        channelHandlerContext.writeAndFlush(result.toJSONString());
+        channelHandlerContext.writeAndFlush(result.toJSONString() + "\n");
     }
 }
