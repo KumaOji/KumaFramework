@@ -16,8 +16,6 @@
 
 package com.kuma.cloud.mq.common.util;
 
-import com.kuma.boot.common.utils.collection.CollectionUtils;
-import com.kuma.boot.common.utils.lang.StringUtils;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -182,7 +180,7 @@ public final class RegexUtil {
      * @since 0.1.125
      */
     public static boolean isIp(final String ip) {
-        if (StringUtils.isEmptyTrim(ip)) {
+        if (ip == null || ip.trim().isEmpty()) {
             return false;
         }
 
@@ -195,7 +193,7 @@ public final class RegexUtil {
      * @return 结果
      */
     public static String escapeWord(String keyword) {
-        if (StringUtils.isNotBlank(keyword)) {
+        if (keyword != null && !keyword.isBlank()) {
             for (String key : SPECIAL_CHARS) {
                 if (keyword.contains(key)) {
                     keyword = keyword.replace(key, "\\" + key);
@@ -339,7 +337,7 @@ public final class RegexUtil {
      * @since 0.1.161
      */
     public static boolean hasMatch(List<String> textList, String regex) {
-        if (CollectionUtils.isEmpty(textList)) {
+        if (textList == null || textList.isEmpty()) {
             return false;
         }
 
