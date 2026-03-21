@@ -114,7 +114,7 @@ public class DefaultInvokeService implements InvokeService {
         try {
             while (true) {
                 synchronized (this) {
-                    RpcMessageDto rpcResponse = this.responseMap.get(seqId);
+                    RpcMessageDto rpcResponse = this.responseMap.remove(seqId);
                     if (ObjectUtils.isNotNull(rpcResponse)) {
                         logger.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
                         return rpcResponse;
