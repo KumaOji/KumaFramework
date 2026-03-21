@@ -17,7 +17,6 @@
 package com.kuma.cloud.mq.broker.handler;
 
 import com.alibaba.fastjson2.JSON;
-import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.cloud.mq.broker.api.BrokerConsumerService;
 import com.kuma.cloud.mq.broker.api.BrokerProducerService;
@@ -423,7 +422,7 @@ public class MqBrokerHandler extends SimpleChannelInboundHandler {
         final MqMessage mqMessage = put.getMqMessage();
         List<ChannelGroupNameDto> channelList =
                 registerConsumerService.getPushSubscribeList(mqMessage);
-        if (CollectionUtils.isEmpty(channelList)) {
+        if (channelList == null || channelList.isEmpty()) {
             log.info("监听列表为空，忽略处理");
             return;
         }
