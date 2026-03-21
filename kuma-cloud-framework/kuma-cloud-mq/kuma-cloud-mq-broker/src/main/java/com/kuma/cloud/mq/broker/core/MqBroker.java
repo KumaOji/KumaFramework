@@ -202,7 +202,7 @@ public class MqBroker extends Thread implements com.kuma.cloud.mq.broker.api.MqB
             final ByteBuf delimiterBuf = DelimiterUtil.getByteBuf(DelimiterUtil.DELIMITER);
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap
-                    .group(workerGroup, bossGroup)
+                    .group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(
                             new ChannelInitializer<Channel>() {

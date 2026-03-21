@@ -44,22 +44,33 @@ public class TimeoutCheckThread implements Runnable {
     private final ConcurrentHashMap<String, RpcMessageDto> responseMap;
 
     /**
+     * 锁对象，用于唤醒 getResponse() 中的等待线程
+     *
+     * @since 2024.05
+     */
+    private final Object lock;
+
+    /**
      * 新建
      *
      * @param requestMap  请求 Map
      * @param responseMap 结果 map
+     * @param lock        与 DefaultInvokeService 共享的锁对象
      * @since 2024.05
      */
     public TimeoutCheckThread(
             ConcurrentHashMap<String, Long> requestMap,
-            ConcurrentHashMap<String, RpcMessageDto> responseMap) {
+            ConcurrentHashMap<String, RpcMessageDto> responseMap,
+            Object lock) {
         ArgUtils.notNull(requestMap, "requestMap");
         this.requestMap = requestMap;
         this.responseMap = responseMap;
+        this.lock = lock;
     }
 
     @Override
     public void run() {
+        boolean hasTimeout = false;
         for (Map.Entry<String, Long> entry : requestMap.entrySet()) {
             long expireTime = entry.getValue();
             long currentTime = System.currentTimeMillis();
@@ -69,6 +80,13 @@ public class TimeoutCheckThread implements Runnable {
                 // 结果设置为超时，从请求 map 中移除
                 responseMap.putIfAbsent(key, RpcMessageDto.timeout());
                 requestMap.remove(key);
+                hasTimeout = true;
+            }
+        }
+        // 有超时请求时唤醒所有等待 getResponse() 的线程
+        if (hasTimeout) {
+            synchronized (lock) {
+                lock.notifyAll();
             }
         }
     }

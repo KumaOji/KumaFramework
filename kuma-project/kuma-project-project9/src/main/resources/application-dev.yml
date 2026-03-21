@@ -8,7 +8,7 @@ spring:
       - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
       - org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 
-# 启用消息队列 client
+# MQ client + 安全白名单
 kuma:
   mq:
     client:
@@ -17,3 +17,7 @@ kuma:
       group-name: "project9Group"
       resp-timeout-mills: 5000
       check: false   # Broker 未启动时不阻塞应用启动
+  boot:
+    security:
+      ignore-url:
+        - /mq/**

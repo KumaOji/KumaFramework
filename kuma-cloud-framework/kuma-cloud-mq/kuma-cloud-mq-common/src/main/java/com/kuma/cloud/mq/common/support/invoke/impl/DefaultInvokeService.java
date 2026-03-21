@@ -49,8 +49,6 @@ public class DefaultInvokeService implements InvokeService {
      */
     private final ConcurrentHashMap<String, Long> requestMap;
 
-    private boolean condition = false;
-
     /**
      * 响应结果
      *
@@ -62,7 +60,7 @@ public class DefaultInvokeService implements InvokeService {
         requestMap = new ConcurrentHashMap<>();
         responseMap = new ConcurrentHashMap<>();
 
-        final Runnable timeoutThread = new TimeoutCheckThread(requestMap, responseMap);
+        final Runnable timeoutThread = new TimeoutCheckThread(requestMap, responseMap, this);
         Executors.newScheduledThreadPool(1)
                 .scheduleAtFixedRate(timeoutThread, 60, 60, TimeUnit.SECONDS);
     }
@@ -95,7 +93,6 @@ public class DefaultInvokeService implements InvokeService {
 
         // 这里放入之前，可以添加判断。
         // 如果 seqId 必须处理请求集合中，才允许放入。或者直接忽略丢弃。
-        // 通知所有等待方
         responseMap.putIfAbsent(seqId, rpcResponse);
         logger.info("[Invoke] 获取结果信息，seqId: {}, rpcResponse: {}", seqId, JSON.toJSON(rpcResponse));
         logger.info("[Invoke] seqId:{} 信息已经放入，通知所有等待方", seqId);
@@ -104,16 +101,9 @@ public class DefaultInvokeService implements InvokeService {
         requestMap.remove(seqId);
         logger.info("[Invoke] seqId:{} remove from request map", seqId);
 
-        logger.info("notifyAll" + this.toString());
-        // 同步锁
-        // synchronized (this) {
-        //	this.notifyAll();
-        //	logger.info("[Invoke] {} notifyAll()", seqId);
-        // }
+        // 唤醒所有等待方
         synchronized (this) {
-            condition = true; // 满足条件
-            // logger.info("[Invoke] {} notifyAll()", seqId);
-            this.notifyAll(); // 唤醒等待队列中的线程
+            this.notifyAll();
         }
 
         return this;
@@ -122,35 +112,33 @@ public class DefaultInvokeService implements InvokeService {
     @Override
     public RpcMessageDto getResponse(String seqId) {
         try {
-            RpcMessageDto rpcResponse = this.responseMap.get(seqId);
-            if (ObjectUtils.isNotNull(rpcResponse)) {
-                logger.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
-                return rpcResponse;
-            }
-
-            // 进入等待
-            while (rpcResponse == null) {
-                logger.info("[Invoke] seq {} 对应结果为空，进入等待", seqId);
-
-                logger.info("wait" + this.toString());
-                // 同步等待锁
-                // synchronized (this) {
-                //	this.wait();
-                // }
+            while (true) {
                 synchronized (this) {
-                    while (!condition) {
-                        logger.info("条件不满足，释放锁并等待...");
-                        this.wait(); // 释放锁，进入等待
+                    RpcMessageDto rpcResponse = this.responseMap.get(seqId);
+                    if (ObjectUtils.isNotNull(rpcResponse)) {
+                        logger.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
+                        return rpcResponse;
                     }
+                    // 计算剩余超时时间，避免无限等待
+                    Long expireTime = this.requestMap.get(seqId);
+                    if (expireTime == null) {
+                        // requestMap 已被 TimeoutCheckThread 清除，但 responseMap 尚未写入，短暂自旋
+                        logger.info("[Invoke] seq {} requestMap 已移除，等待 responseMap 写入", seqId);
+                        this.wait(50);
+                        continue;
+                    }
+                    long remainingMs = expireTime - System.currentTimeMillis();
+                    if (remainingMs <= 0) {
+                        logger.info("[Invoke] seq {} 已超时，返回超时结果", seqId);
+                        this.responseMap.putIfAbsent(seqId, RpcMessageDto.timeout());
+                        this.requestMap.remove(seqId);
+                        return RpcMessageDto.timeout();
+                    }
+                    logger.info("[Invoke] seq {} 对应结果为空，进入等待 {}ms", seqId, remainingMs);
+                    this.wait(remainingMs);
+                    logger.info("[Invoke] {} wait has notified!", seqId);
                 }
-
-                logger.info("[Invoke] {} wait has notified!", seqId);
-
-                rpcResponse = this.responseMap.get(seqId);
-                logger.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
             }
-
-            return rpcResponse;
         } catch (InterruptedException e) {
             logger.error("获取响应异常", e);
             throw new MqException(MqCommonRespCode.RPC_GET_RESP_FAILED);
