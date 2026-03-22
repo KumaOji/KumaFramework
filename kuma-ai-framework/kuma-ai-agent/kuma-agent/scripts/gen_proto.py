@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 PROTO_DIR = ROOT / "proto"
-OUT_DIR = ROOT / "packages" / "kuma_agent" / "grpc" / "generated"
+OUT_DIR = ROOT / "kuma_agent" / "grpc" / "generated"
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
