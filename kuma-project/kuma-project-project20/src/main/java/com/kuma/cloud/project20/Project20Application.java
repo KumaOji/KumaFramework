@@ -1,6 +1,7 @@
 package com.kuma.cloud.project20;
 
 import com.kuma.boot.core.startup.StartupSpringApplication;
+import com.kuma.boot.web.annotation.KumaBootApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -27,7 +28,7 @@ import org.springframework.context.annotation.ComponentScan;
  *   ./gradlew :kuma-project:kuma-project-project20:bootRun
  * </pre>
  */
-@SpringBootApplication
+@KumaBootApplication
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project20"})
 public class Project20Application {
 
