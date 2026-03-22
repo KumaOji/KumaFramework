@@ -1,7 +1,8 @@
 package com.kuma.cloud.project20.controller;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.google.protobuf.util.JsonFormat;
+import tools.jackson.databind.JsonNode;
 import com.kuma.ai.agent.grpc.*;
 import io.grpc.StatusRuntimeException;
 import lombok.RequiredArgsConstructor;
@@ -59,16 +60,16 @@ public class AgentController {
      * @param threadId 会话 ID（空字符串时由服务端自动生成）
      */
     @PostMapping(value = "/chat", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String chat(
+    public JsonNode chat(
             @RequestParam String message,
             @RequestParam(required = false, defaultValue = "") String threadId)
-            throws InvalidProtocolBufferException {
+            throws Exception {
         ChatRequest request = ChatRequest.newBuilder()
                 .setMessage(message)
                 .setThreadId(threadId)
                 .build();
         ChatResponse response = blockingStub.chat(request);
-        return JSON_PRINTER.print(response);
+        return JacksonUtils.parse(JSON_PRINTER.print(response));
     }
 
     /**
@@ -123,10 +124,10 @@ public class AgentController {
      * <p>示例：{@code GET /agent/threads}
      */
     @GetMapping(value = "/threads", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String listThreads() throws InvalidProtocolBufferException {
+    public JsonNode listThreads() throws Exception {
         ListThreadsResponse response = blockingStub.listThreads(
                 ListThreadsRequest.newBuilder().build());
-        return JSON_PRINTER.print(response);
+        return JacksonUtils.parse(JSON_PRINTER.print(response));
     }
 
     /**
@@ -137,11 +138,10 @@ public class AgentController {
      * @param threadId 要删除的线程 ID
      */
     @DeleteMapping(value = "/threads/{threadId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteThread(@PathVariable String threadId)
-            throws InvalidProtocolBufferException {
+    public JsonNode deleteThread(@PathVariable String threadId) throws Exception {
         DeleteThreadResponse response = blockingStub.deleteThread(
                 DeleteThreadRequest.newBuilder().setThreadId(threadId).build());
-        return JSON_PRINTER.print(response);
+        return JacksonUtils.parse(JSON_PRINTER.print(response));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -154,10 +154,10 @@ public class AgentController {
      * <p>示例：{@code GET /agent/config}
      */
     @GetMapping(value = "/config", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String getConfig() throws InvalidProtocolBufferException {
+    public JsonNode getConfig() throws Exception {
         GetConfigResponse response = blockingStub.getConfig(
                 GetConfigRequest.newBuilder().build());
-        return JSON_PRINTER.print(response);
+        return JacksonUtils.parse(JSON_PRINTER.print(response));
     }
 
     /**
@@ -166,10 +166,10 @@ public class AgentController {
      * <p>示例：{@code GET /agent/health}
      */
     @GetMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String healthCheck() throws InvalidProtocolBufferException {
+    public JsonNode healthCheck() throws Exception {
         HealthCheckResponse response = blockingStub.healthCheck(
                 HealthCheckRequest.newBuilder().build());
-        return JSON_PRINTER.print(response);
+        return JacksonUtils.parse(JSON_PRINTER.print(response));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
