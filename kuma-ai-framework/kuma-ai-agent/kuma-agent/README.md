@@ -54,7 +54,6 @@ KumaAgent is a LangGraph-based AI agent backend with sandbox execution, persiste
 ```
 kuma-agent/
 ├── app/
-│   ├── demo.py                    # Interactive demo / test client
 │   ├── gateway/                   # HTTP Gateway (FastAPI)
 │   │   ├── server.py              # Entry point — uv run python app/gateway/server.py
 │   │   ├── app.py                 # FastAPI app factory + lifespan
@@ -250,12 +249,8 @@ export TAVILY_API_KEY="your-key"      # optional, for web search
 # Gateway (HTTP REST API)
 uv run python app/gateway/server.py
 
-# gRPC server (for Java/Go clients)
+# gRPC server (for Java/Go clients) — independent, start separately as needed
 uv run python app/channels/grpc_server.py
-
-# Interactive demo
-uv run python app/demo.py --interactive
-uv run python app/demo.py --config config.yaml
 ```
 
 ---
