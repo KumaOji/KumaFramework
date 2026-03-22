@@ -1,7 +1,7 @@
 """
 KumaAgentClient — Embedded Python client for KumaAgent.
 
-Inspired by deer-flow's DeerFlowClient (packages/harness/deerflow/client.py):
+Inspired by kuma_agent.client:
   - Direct in-process agent access, no HTTP server required
   - Lazy agent initialization (created on first use)
   - Middleware chain wrapping each invocation

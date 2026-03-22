@@ -10,10 +10,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.gateway.path_utils import resolve_thread_virtual_path
-from deerflow.config.extensions_config import ExtensionsConfig, SkillStateConfig, get_extensions_config, reload_extensions_config
-from deerflow.skills import Skill, load_skills
-from deerflow.skills.loader import get_skills_root_path
-from deerflow.skills.validation import _validate_skill_frontmatter
+from kuma_agent.config.extensions_config import ExtensionsConfig, SkillStateConfig, get_extensions_config, reload_extensions_config
+from kuma_agent.skills import Skill, load_skills
+from kuma_agent.skills.loader import get_skills_root_path
+from kuma_agent.skills.validation import _validate_skill_frontmatter
 
 logger = logging.getLogger(__name__)
 

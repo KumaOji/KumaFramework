@@ -16,7 +16,7 @@ from app.gateway.routers import (
     suggestions,
     uploads,
 )
-from deerflow.config.app_config import get_app_config
+from kuma_agent.config.app_config import get_app_config
 
 # Configure logging
 logging.basicConfig(
