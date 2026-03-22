@@ -30,7 +30,6 @@ import grpc
 # Project root → resolves kuma_agent package
 _ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_ROOT))
-sys.path.insert(0, str(_ROOT / "packages" / "harness"))
 
 from kuma_agent.client import KumaAgentClient
 from kuma_agent.grpc.generated import kuma_agent_pb2_grpc

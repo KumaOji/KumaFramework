@@ -17,7 +17,6 @@ from pathlib import Path
 # Project root → resolves kuma_agent package
 _ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_ROOT))
-sys.path.insert(0, str(_ROOT / "packages" / "harness"))
 
 import uvicorn
 
