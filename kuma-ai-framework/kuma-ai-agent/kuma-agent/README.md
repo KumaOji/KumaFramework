@@ -1,6 +1,8 @@
-# DeerFlow Backend
+# KumaAgent
 
-DeerFlow is a LangGraph-based AI super agent with sandbox execution, persistent memory, and extensible tool integration. The backend enables AI agents to execute code, browse the web, manage files, delegate tasks to subagents, and retain context across conversations - all in isolated, per-thread environments.
+KumaAgent is a LangGraph-based AI agent backend with sandbox execution, persistent memory, multi-channel IM integration, and gRPC support. Agents can execute code, browse the web, manage files, delegate tasks to subagents, and retain context across conversations — all in isolated, per-thread environments.
+
+> Chinese documentation: [README_ZH.md](README_ZH.md)
 
 ---
 
@@ -9,35 +11,103 @@ DeerFlow is a LangGraph-based AI super agent with sandbox execution, persistent 
 ```
                         ┌──────────────────────────────────────┐
                         │          Nginx (Port 2026)           │
-                        │      Unified reverse proxy           │
+                        │        Unified reverse proxy         │
                         └───────┬──────────────────┬───────────┘
                                 │                  │
               /api/langgraph/*  │                  │  /api/* (other)
                                 ▼                  ▼
                ┌────────────────────┐  ┌────────────────────────┐
-               │ LangGraph Server   │  │   Gateway API (8001)   │
-               │    (Port 2024)     │  │   FastAPI REST         │
+               │  LangGraph Server  │  │  Gateway API (8001)    │
+               │    (Port 2024)     │  │  app/gateway/server.py │
                │                    │  │                        │
-               │ ┌────────────────┐ │  │ Models, MCP, Skills,   │
-               │ │  Lead Agent    │ │  │ Memory, Uploads,       │
-               │ │  ┌──────────┐  │ │  │ Artifacts              │
-               │ │  │Middleware│  │ │  └────────────────────────┘
-               │ │  │  Chain   │  │ │
-               │ │  └──────────┘  │ │
-               │ │  ┌──────────┐  │ │
-               │ │  │  Tools   │  │ │
-               │ │  └──────────┘  │ │
-               │ │  ┌──────────┐  │ │
-               │ │  │Subagents │  │ │
-               │ │  └──────────┘  │ │
-               │ └────────────────┘ │
+               │  ┌──────────────┐  │  │  Models, MCP, Skills,  │
+               │  │  Lead Agent  │  │  │  Memory, Uploads,      │
+               │  │  Middleware  │  │  │  Artifacts, Agents,    │
+               │  │  Tools       │  │  │  Suggestions, Channels │
+               │  │  Subagents   │  │  └────────────────────────┘
+               │  └──────────────┘  │
                └────────────────────┘
+                                          ┌────────────────────────┐
+                                          │  gRPC Server (50051)   │
+                                          │  app/channels/         │
+                                          │  grpc_server.py        │
+                                          │  Java / Go clients     │
+                                          └────────────────────────┘
+                                          ┌────────────────────────┐
+                                          │  IM Channels           │
+                                          │  app/channels/         │
+                                          │  Feishu / Slack /      │
+                                          │  Telegram              │
+                                          └────────────────────────┘
 ```
 
-**Request Routing** (via Nginx):
-- `/api/langgraph/*` → LangGraph Server - agent interactions, threads, streaming
-- `/api/*` (other) → Gateway API - models, MCP, skills, memory, artifacts, uploads
-- `/` (non-API) → Frontend - Next.js web interface
+**Request Routing:**
+- `/api/langgraph/*` → LangGraph Server — agent interactions, threads, streaming
+- `/api/*` → Gateway API — models, MCP, skills, memory, artifacts, uploads
+- gRPC — Java/Go clients via `app/channels/grpc_server.py`
+- IM — Feishu/Slack/Telegram via `app/channels/`
+
+---
+
+## Project Structure
+
+```
+kuma-agent/
+├── app/
+│   ├── demo.py                    # Interactive demo / test client
+│   ├── gateway/                   # HTTP Gateway (FastAPI)
+│   │   ├── server.py              # Entry point — uv run python app/gateway/server.py
+│   │   ├── app.py                 # FastAPI app factory + lifespan
+│   │   ├── config.py              # GatewayConfig (host, port, CORS)
+│   │   ├── path_utils.py          # Virtual path resolution helper
+│   │   └── routers/               # Route modules
+│   │       ├── agents.py          # /api/agents
+│   │       ├── artifacts.py       # /api/threads/{id}/artifacts
+│   │       ├── channels.py        # /api/channels
+│   │       ├── memory.py          # /api/memory
+│   │       ├── mcp.py             # /api/mcp
+│   │       ├── models.py          # /api/models
+│   │       ├── skills.py          # /api/skills
+│   │       ├── suggestions.py     # /api/threads/{id}/suggestions
+│   │       └── uploads.py         # /api/threads/{id}/uploads
+│   └── channels/                  # Communication channels
+│       ├── grpc_server.py         # Entry point — uv run python app/channels/grpc_server.py
+│       ├── base.py                # Abstract Channel base class
+│       ├── manager.py             # ChannelManager — dispatches to LangGraph Server
+│       ├── message_bus.py         # Async inbound/outbound message bus
+│       ├── service.py             # ChannelService lifecycle manager
+│       ├── store.py               # chat_id → thread_id mapping store
+│       ├── feishu.py              # Feishu/Lark channel (streaming)
+│       ├── slack.py               # Slack channel
+│       └── telegram.py            # Telegram channel
+├── kuma_agent/                    # Core package
+│   ├── agents/
+│   │   ├── lead_agent/            # Main LangGraph agent
+│   │   ├── middlewares/           # 9 middleware components
+│   │   ├── memory/                # Memory extraction & storage
+│   │   ├── checkpointer/          # LangGraph checkpointer providers
+│   │   └── thread_state.py        # ThreadState schema
+│   ├── client.py                  # KumaAgentClient (embedded usage)
+│   ├── config/                    # Configuration system
+│   ├── community/                 # Community tool providers
+│   ├── grpc/                      # gRPC servicer & generated stubs
+│   ├── mcp/                       # Model Context Protocol integration
+│   ├── middlewares/               # KumaAgent-specific middlewares
+│   ├── models/                    # LLM model factory
+│   ├── reflection/                # Dynamic module loading
+│   ├── sandbox/                   # Sandboxed execution environment
+│   ├── skills/                    # Skill discovery & loading
+│   ├── subagents/                 # Subagent delegation engine
+│   ├── tools/                     # Built-in and community tools
+│   └── utils/                     # Utilities
+├── proto/                         # Protobuf definitions
+├── scripts/
+│   └── gen_proto.py               # Regenerate gRPC stubs
+├── docs/                          # Documentation
+├── config.yaml                    # Main configuration
+├── pyproject.toml                 # Python dependencies
+└── ruff.toml                      # Linter / formatter config
+```
 
 ---
 
@@ -55,30 +125,27 @@ The single LangGraph agent (`lead_agent`) is the runtime entry point, created vi
 
 ### Middleware Chain
 
-Middlewares execute in strict order, each handling a specific concern:
+Middlewares execute in strict order:
 
 | # | Middleware | Purpose |
 |---|-----------|---------|
 | 1 | **ThreadDataMiddleware** | Creates per-thread isolated directories (workspace, uploads, outputs) |
 | 2 | **UploadsMiddleware** | Injects newly uploaded files into conversation context |
 | 3 | **SandboxMiddleware** | Acquires sandbox environment for code execution |
-| 4 | **SummarizationMiddleware** | Reduces context when approaching token limits (optional) |
-| 5 | **TodoListMiddleware** | Tracks multi-step tasks in plan mode (optional) |
+| 4 | **SummarizationMiddleware** | Reduces context when approaching token limits |
+| 5 | **TodoListMiddleware** | Tracks multi-step tasks in plan mode |
 | 6 | **TitleMiddleware** | Auto-generates conversation titles after first exchange |
 | 7 | **MemoryMiddleware** | Queues conversations for async memory extraction |
-| 8 | **ViewImageMiddleware** | Injects image data for vision-capable models (conditional) |
-| 9 | **ClarificationMiddleware** | Intercepts clarification requests and interrupts execution (must be last) |
+| 8 | **ViewImageMiddleware** | Injects image data for vision-capable models |
+| 9 | **ClarificationMiddleware** | Intercepts clarification requests (must be last) |
 
 ### Sandbox System
 
 Per-thread isolated execution with virtual path translation:
 
 - **Abstract interface**: `execute_command`, `read_file`, `write_file`, `list_dir`
-- **Providers**: `LocalSandboxProvider` (filesystem) and `AioSandboxProvider` (Docker, in community/)
+- **Providers**: `LocalSandboxProvider` (filesystem) and `AioSandboxProvider` (Docker, in `community/`)
 - **Virtual paths**: `/mnt/user-data/{workspace,uploads,outputs}` → thread-specific physical directories
-- **Skills path**: `/mnt/skills` → `deer-flow/skills/` directory
-- **Skills loading**: Recursively discovers nested `SKILL.md` files under `skills/{public,custom}` and preserves nested container paths
-- **Tools**: `bash`, `ls`, `read_file`, `write_file`, `str_replace`
 
 ### Subagent System
 
@@ -86,18 +153,15 @@ Async task delegation with concurrent execution:
 
 - **Built-in agents**: `general-purpose` (full toolset) and `bash` (command specialist)
 - **Concurrency**: Max 3 subagents per turn, 15-minute timeout
-- **Execution**: Background thread pools with status tracking and SSE events
-- **Flow**: Agent calls `task()` tool → executor runs subagent in background → polls for completion → returns result
+- **Flow**: Agent calls `task()` tool → executor runs subagent in background → returns result
 
 ### Memory System
 
-LLM-powered persistent context retention across conversations:
+LLM-powered persistent context across conversations:
 
 - **Automatic extraction**: Analyzes conversations for user context, facts, and preferences
-- **Structured storage**: User context (work, personal, top-of-mind), history, and confidence-scored facts
-- **Debounced updates**: Batches updates to minimize LLM calls (configurable wait time)
+- **Debounced updates**: Batches LLM calls with configurable wait time
 - **System prompt injection**: Top facts + context injected into agent prompts
-- **Storage**: JSON file with mtime-based cache invalidation
 
 ### Tool Ecosystem
 
@@ -105,33 +169,34 @@ LLM-powered persistent context retention across conversations:
 |----------|-------|
 | **Sandbox** | `bash`, `ls`, `read_file`, `write_file`, `str_replace` |
 | **Built-in** | `present_files`, `ask_clarification`, `view_image`, `task` (subagent) |
-| **Community** | Tavily (web search), Jina AI (web fetch), Firecrawl (scraping), DuckDuckGo (image search) |
-| **MCP** | Any Model Context Protocol server (stdio, SSE, HTTP transports) |
+| **Community** | Tavily (search), Jina AI (fetch), Firecrawl (scraping), DuckDuckGo (images) |
+| **MCP** | Any Model Context Protocol server (stdio, SSE, HTTP) |
 | **Skills** | Domain-specific workflows injected via system prompt |
 
 ### Gateway API
-
-FastAPI application providing REST endpoints for frontend integration:
 
 | Route | Purpose |
 |-------|---------|
 | `GET /api/models` | List available LLM models |
 | `GET/PUT /api/mcp/config` | Manage MCP server configurations |
 | `GET/PUT /api/skills` | List and manage skills |
-| `POST /api/skills/install` | Install skill from `.skill` archive |
-| `GET /api/memory` | Retrieve memory data |
-| `POST /api/memory/reload` | Force memory reload |
-| `GET /api/memory/config` | Memory configuration |
-| `GET /api/memory/status` | Combined config + data |
-| `POST /api/threads/{id}/uploads` | Upload files (auto-converts PDF/PPT/Excel/Word to Markdown, rejects directory paths) |
-| `GET /api/threads/{id}/uploads/list` | List uploaded files |
+| `POST /api/threads/{id}/uploads` | Upload files (auto-converts PDF/PPT/Excel/Word) |
 | `GET /api/threads/{id}/artifacts/{path}` | Serve generated artifacts |
+| `GET /api/memory` | Retrieve memory data |
+| `GET /api/agents` | List custom agents |
+| `GET /api/channels` | IM channel status |
 
 ### IM Channels
 
-The IM bridge supports Feishu, Slack, and Telegram. Slack and Telegram still use the final `runs.wait()` response path, while Feishu now streams through `runs.stream(["messages-tuple", "values"])` and updates a single in-thread card in place.
+Feishu, Slack, and Telegram are supported. Feishu uses streaming (`runs.stream`) and updates a live card in-thread. Slack and Telegram use `runs.wait` for final responses.
 
-For Feishu card updates, DeerFlow stores the running card's `message_id` per inbound message and patches that same card until the run finishes, preserving the existing `OK` / `DONE` reaction flow.
+### gRPC Server
+
+Java/Go clients connect via gRPC at port 50051. Proto definition: `proto/kuma_agent.proto`. Regenerate stubs after editing:
+
+```bash
+uv run python scripts/gen_proto.py
+```
 
 ---
 
@@ -141,24 +206,24 @@ For Feishu card updates, DeerFlow stores the running card's `message_id` per inb
 
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) package manager
-- API keys for your chosen LLM provider
+- API key for your chosen LLM provider
 
 ### Installation
 
 ```bash
-cd deer-flow
+git clone <repo>
+cd kuma-agent
 
-# Copy configuration files
-cp config.example.yaml config.yaml
+# Copy and edit configuration
+cp config.yaml.example config.yaml
 
-# Install backend dependencies
-cd backend
-make install
+# Install dependencies
+uv sync
 ```
 
 ### Configuration
 
-Edit `config.yaml` in the project root:
+Edit `config.yaml`:
 
 ```yaml
 models:
@@ -171,196 +236,88 @@ models:
     supports_vision: true
 ```
 
-Set your API keys:
+Set API keys:
 
 ```bash
-export OPENAI_API_KEY="your-api-key-here"
+export OPENAI_API_KEY="your-key"
+export ANTHROPIC_API_KEY="your-key"   # optional
+export TAVILY_API_KEY="your-key"      # optional, for web search
 ```
 
 ### Running
 
-**Full Application** (from project root):
-
 ```bash
-make dev  # Starts LangGraph + Gateway + Frontend + Nginx
-```
+# Gateway (HTTP REST API)
+uv run python app/gateway/server.py
 
-Access at: http://localhost:2026
+# gRPC server (for Java/Go clients)
+uv run python app/channels/grpc_server.py
 
-**Backend Only** (from backend directory):
-
-```bash
-# Terminal 1: LangGraph server
-make dev
-
-# Terminal 2: Gateway API
-make gateway
-```
-
-Direct access: LangGraph at http://localhost:2024, Gateway at http://localhost:8001
-
----
-
-## Project Structure
-
-```
-backend/
-├── src/
-│   ├── agents/                  # Agent system
-│   │   ├── lead_agent/         # Main agent (factory, prompts)
-│   │   ├── middlewares/        # 9 middleware components
-│   │   ├── memory/             # Memory extraction & storage
-│   │   └── thread_state.py    # ThreadState schema
-│   ├── gateway/                # FastAPI Gateway API
-│   │   ├── app.py             # Application setup
-│   │   └── routers/           # 6 route modules
-│   ├── sandbox/                # Sandbox execution
-│   │   ├── local/             # Local filesystem provider
-│   │   ├── sandbox.py         # Abstract interface
-│   │   ├── tools.py           # bash, ls, read/write/str_replace
-│   │   └── middleware.py      # Sandbox lifecycle
-│   ├── subagents/              # Subagent delegation
-│   │   ├── builtins/          # general-purpose, bash agents
-│   │   ├── executor.py        # Background execution engine
-│   │   └── registry.py        # Agent registry
-│   ├── tools/builtins/         # Built-in tools
-│   ├── mcp/                    # MCP protocol integration
-│   ├── models/                 # Model factory
-│   ├── skills/                 # Skill discovery & loading
-│   ├── config/                 # Configuration system
-│   ├── community/              # Community tools & providers
-│   ├── reflection/             # Dynamic module loading
-│   └── utils/                  # Utilities
-├── docs/                       # Documentation
-├── tests/                      # Test suite
-├── langgraph.json              # LangGraph server configuration
-├── pyproject.toml              # Python dependencies
-├── Makefile                    # Development commands
-└── Dockerfile                  # Container build
+# Interactive demo
+uv run python app/demo.py --interactive
+uv run python app/demo.py --config config.yaml
 ```
 
 ---
 
-## Configuration
+## Configuration Reference
 
-### Main Configuration (`config.yaml`)
+### `config.yaml`
 
-Place in project root. Config values starting with `$` resolve as environment variables.
-
-Key sections:
-- `models` - LLM configurations with class paths, API keys, thinking/vision flags
-- `tools` - Tool definitions with module paths and groups
-- `tool_groups` - Logical tool groupings
-- `sandbox` - Execution environment provider
-- `skills` - Skills directory paths
-- `title` - Auto-title generation settings
-- `summarization` - Context summarization settings
-- `subagents` - Subagent system (enabled/disabled)
-- `memory` - Memory system settings (enabled, storage, debounce, facts limits)
-
-Provider note:
-- `models[*].use` references provider classes by module path (for example `langchain_openai:ChatOpenAI`).
-- If a provider module is missing, DeerFlow now returns an actionable error with install guidance (for example `uv add langchain-google-genai`).
-
-### Extensions Configuration (`extensions_config.json`)
-
-MCP servers and skill states in a single file:
-
-```json
-{
-  "mcpServers": {
-    "github": {
-      "enabled": true,
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {"GITHUB_TOKEN": "$GITHUB_TOKEN"}
-    },
-    "secure-http": {
-      "enabled": true,
-      "type": "http",
-      "url": "https://api.example.com/mcp",
-      "oauth": {
-        "enabled": true,
-        "token_url": "https://auth.example.com/oauth/token",
-        "grant_type": "client_credentials",
-        "client_id": "$MCP_OAUTH_CLIENT_ID",
-        "client_secret": "$MCP_OAUTH_CLIENT_SECRET"
-      }
-    }
-  },
-  "skills": {
-    "pdf-processing": {"enabled": true}
-  }
-}
-```
+| Section | Description |
+|---------|-------------|
+| `models` | LLM configurations — class path, API key, thinking/vision flags |
+| `tools` | Tool definitions with module paths and groups |
+| `sandbox` | Execution environment provider class path |
+| `skills` | Skills directory paths |
+| `memory` | Memory system settings (enabled, storage, debounce, facts limit) |
+| `summarization` | Context summarization settings |
+| `subagents` | Subagent system toggle |
+| `channels` | IM channel configs (feishu, slack, telegram) |
 
 ### Environment Variables
 
-- `DEER_FLOW_CONFIG_PATH` - Override config.yaml location
-- `DEER_FLOW_EXTENSIONS_CONFIG_PATH` - Override extensions_config.json location
-- Model API keys: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`, etc.
-- Tool API keys: `TAVILY_API_KEY`, `GITHUB_TOKEN`, etc.
+| Variable | Purpose |
+|----------|---------|
+| `KUMA_AGENT_CONFIG_PATH` | Override config.yaml location |
+| `GATEWAY_HOST` / `GATEWAY_PORT` | Gateway bind address (default: `0.0.0.0:8001`) |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `DEEPSEEK_API_KEY` | DeepSeek API key |
+| `TAVILY_API_KEY` | Tavily search API key |
 
 ---
 
 ## Development
 
-### Commands
+### Code Style
 
 ```bash
-make install    # Install dependencies
-make dev        # Run LangGraph server (port 2024)
-make gateway    # Run Gateway API (port 8001)
-make lint       # Run linter (ruff)
-make format     # Format code (ruff)
+uv run ruff check .      # lint
+uv run ruff format .     # format
+uv run pytest            # tests
 ```
-
-### Code Style
 
 - **Linter/Formatter**: `ruff`
 - **Line length**: 240 characters
 - **Python**: 3.12+ with type hints
 - **Quotes**: Double quotes
-- **Indentation**: 4 spaces
-
-### Testing
-
-```bash
-uv run pytest
-```
 
 ---
 
 ## Technology Stack
 
-- **LangGraph** (1.0.6+) - Agent framework and multi-agent orchestration
-- **LangChain** (1.2.3+) - LLM abstractions and tool system
-- **FastAPI** (0.115.0+) - Gateway REST API
-- **langchain-mcp-adapters** - Model Context Protocol support
-- **agent-sandbox** - Sandboxed code execution
-- **markitdown** - Multi-format document conversion
-- **tavily-python** / **firecrawl-py** - Web search and scraping
-
----
-
-## Documentation
-
-- [Configuration Guide](docs/CONFIGURATION.md)
-- [Architecture Details](docs/ARCHITECTURE.md)
-- [API Reference](docs/API.md)
-- [File Upload](docs/FILE_UPLOAD.md)
-- [Path Examples](docs/PATH_EXAMPLES.md)
-- [Context Summarization](docs/summarization.md)
-- [Plan Mode](docs/plan_mode_usage.md)
-- [Setup Guide](docs/SETUP.md)
+- **LangGraph** 1.0.6+ — Agent framework and multi-agent orchestration
+- **LangChain** 1.2.3+ — LLM abstractions and tool system
+- **FastAPI** 0.115.0+ — Gateway REST API
+- **gRPC / protobuf** — Java/Go client integration
+- **langchain-mcp-adapters** — Model Context Protocol support
+- **agent-sandbox** — Sandboxed code execution
+- **markitdown** — Multi-format document conversion (PDF, PPT, Excel, Word)
+- **tavily-python / firecrawl-py** — Web search and scraping
 
 ---
 
 ## License
 
-See the [LICENSE](../LICENSE) file in the project root.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+See [LICENSE](LICENSE).
