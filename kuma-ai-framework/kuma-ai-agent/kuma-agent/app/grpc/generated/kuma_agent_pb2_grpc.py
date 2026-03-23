@@ -27,7 +27,7 @@ if _version_not_supported:
 
 class KumaAgentServiceStub(object):
     """─────────────────────────────────────────────
-    Service definition
+    Service definition  (mirrors app/gateway routers)
     ─────────────────────────────────────────────
     """
 
@@ -37,31 +37,6 @@ class KumaAgentServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Chat = channel.unary_unary(
-                '/kumaagent.v1.KumaAgentService/Chat',
-                request_serializer=kuma__agent__pb2.ChatRequest.SerializeToString,
-                response_deserializer=kuma__agent__pb2.ChatResponse.FromString,
-                _registered_method=True)
-        self.ChatStream = channel.unary_stream(
-                '/kumaagent.v1.KumaAgentService/ChatStream',
-                request_serializer=kuma__agent__pb2.ChatRequest.SerializeToString,
-                response_deserializer=kuma__agent__pb2.StreamToken.FromString,
-                _registered_method=True)
-        self.ListThreads = channel.unary_unary(
-                '/kumaagent.v1.KumaAgentService/ListThreads',
-                request_serializer=kuma__agent__pb2.ListThreadsRequest.SerializeToString,
-                response_deserializer=kuma__agent__pb2.ListThreadsResponse.FromString,
-                _registered_method=True)
-        self.DeleteThread = channel.unary_unary(
-                '/kumaagent.v1.KumaAgentService/DeleteThread',
-                request_serializer=kuma__agent__pb2.DeleteThreadRequest.SerializeToString,
-                response_deserializer=kuma__agent__pb2.DeleteThreadResponse.FromString,
-                _registered_method=True)
-        self.GetConfig = channel.unary_unary(
-                '/kumaagent.v1.KumaAgentService/GetConfig',
-                request_serializer=kuma__agent__pb2.GetConfigRequest.SerializeToString,
-                response_deserializer=kuma__agent__pb2.GetConfigResponse.FromString,
-                _registered_method=True)
         self.HealthCheck = channel.unary_unary(
                 '/kumaagent.v1.KumaAgentService/HealthCheck',
                 request_serializer=kuma__agent__pb2.HealthCheckRequest.SerializeToString,
@@ -72,59 +47,249 @@ class KumaAgentServiceStub(object):
                 request_serializer=kuma__agent__pb2.ListModelsRequest.SerializeToString,
                 response_deserializer=kuma__agent__pb2.ListModelsResponse.FromString,
                 _registered_method=True)
+        self.GetModel = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetModel',
+                request_serializer=kuma__agent__pb2.GetModelRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.ModelInfo.FromString,
+                _registered_method=True)
+        self.ListAgents = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/ListAgents',
+                request_serializer=kuma__agent__pb2.ListAgentsRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.ListAgentsResponse.FromString,
+                _registered_method=True)
+        self.CheckAgentName = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/CheckAgentName',
+                request_serializer=kuma__agent__pb2.CheckAgentNameRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.CheckAgentNameResponse.FromString,
+                _registered_method=True)
+        self.GetAgent = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetAgent',
+                request_serializer=kuma__agent__pb2.GetAgentRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.AgentInfo.FromString,
+                _registered_method=True)
+        self.CreateAgent = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/CreateAgent',
+                request_serializer=kuma__agent__pb2.CreateAgentRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.AgentInfo.FromString,
+                _registered_method=True)
+        self.UpdateAgent = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/UpdateAgent',
+                request_serializer=kuma__agent__pb2.UpdateAgentRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.AgentInfo.FromString,
+                _registered_method=True)
+        self.DeleteAgent = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/DeleteAgent',
+                request_serializer=kuma__agent__pb2.DeleteAgentRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.DeleteAgentResponse.FromString,
+                _registered_method=True)
+        self.GetUserProfile = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetUserProfile',
+                request_serializer=kuma__agent__pb2.GetUserProfileRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.UserProfileResponse.FromString,
+                _registered_method=True)
+        self.UpdateUserProfile = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/UpdateUserProfile',
+                request_serializer=kuma__agent__pb2.UpdateUserProfileRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.UserProfileResponse.FromString,
+                _registered_method=True)
+        self.GetMemory = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetMemory',
+                request_serializer=kuma__agent__pb2.GetMemoryRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.MemoryResponse.FromString,
+                _registered_method=True)
+        self.ReloadMemory = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/ReloadMemory',
+                request_serializer=kuma__agent__pb2.ReloadMemoryRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.MemoryResponse.FromString,
+                _registered_method=True)
+        self.GetMemoryConfig = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetMemoryConfig',
+                request_serializer=kuma__agent__pb2.GetMemoryConfigRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.MemoryConfigResponse.FromString,
+                _registered_method=True)
+        self.GetMemoryStatus = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetMemoryStatus',
+                request_serializer=kuma__agent__pb2.GetMemoryStatusRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.MemoryStatusResponse.FromString,
+                _registered_method=True)
+        self.ListSkills = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/ListSkills',
+                request_serializer=kuma__agent__pb2.ListSkillsRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.ListSkillsResponse.FromString,
+                _registered_method=True)
+        self.GetSkill = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetSkill',
+                request_serializer=kuma__agent__pb2.GetSkillRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.SkillInfo.FromString,
+                _registered_method=True)
+        self.UpdateSkill = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/UpdateSkill',
+                request_serializer=kuma__agent__pb2.UpdateSkillRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.SkillInfo.FromString,
+                _registered_method=True)
+        self.GetMcpConfig = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetMcpConfig',
+                request_serializer=kuma__agent__pb2.GetMcpConfigRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.McpConfigResponse.FromString,
+                _registered_method=True)
+        self.UpdateMcpConfig = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/UpdateMcpConfig',
+                request_serializer=kuma__agent__pb2.UpdateMcpConfigRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.McpConfigResponse.FromString,
+                _registered_method=True)
+        self.GetChannelsStatus = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/GetChannelsStatus',
+                request_serializer=kuma__agent__pb2.GetChannelsStatusRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.ChannelsStatusResponse.FromString,
+                _registered_method=True)
+        self.RestartChannel = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/RestartChannel',
+                request_serializer=kuma__agent__pb2.RestartChannelRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.RestartChannelResponse.FromString,
+                _registered_method=True)
 
 
 class KumaAgentServiceServicer(object):
     """─────────────────────────────────────────────
-    Service definition
+    Service definition  (mirrors app/gateway routers)
     ─────────────────────────────────────────────
     """
 
-    def Chat(self, request, context):
-        """阻塞式对话：发送消息，等待完整回复
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ChatStream(self, request, context):
-        """流式对话：服务端流，逐 token 推送
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ListThreads(self, request, context):
-        """列出所有会话线程
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def DeleteThread(self, request, context):
-        """删除线程元数据
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetConfig(self, request, context):
-        """查询 Agent 配置
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def HealthCheck(self, request, context):
-        """健康检查
+        """── Health ──────────────────────────────────
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListModels(self, request, context):
-        """列出所有可用模型
+        """── Models ──────────────────────────────────
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetModel(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListAgents(self, request, context):
+        """── Agents ──────────────────────────────────
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CheckAgentName(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetAgent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateAgent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateAgent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteAgent(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetUserProfile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateUserProfile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMemory(self, request, context):
+        """── Memory ──────────────────────────────────
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ReloadMemory(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMemoryConfig(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMemoryStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListSkills(self, request, context):
+        """── Skills ──────────────────────────────────
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSkill(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateSkill(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMcpConfig(self, request, context):
+        """── MCP ─────────────────────────────────────
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateMcpConfig(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetChannelsStatus(self, request, context):
+        """── Channels ────────────────────────────────
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RestartChannel(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -132,31 +297,6 @@ class KumaAgentServiceServicer(object):
 
 def add_KumaAgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Chat': grpc.unary_unary_rpc_method_handler(
-                    servicer.Chat,
-                    request_deserializer=kuma__agent__pb2.ChatRequest.FromString,
-                    response_serializer=kuma__agent__pb2.ChatResponse.SerializeToString,
-            ),
-            'ChatStream': grpc.unary_stream_rpc_method_handler(
-                    servicer.ChatStream,
-                    request_deserializer=kuma__agent__pb2.ChatRequest.FromString,
-                    response_serializer=kuma__agent__pb2.StreamToken.SerializeToString,
-            ),
-            'ListThreads': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListThreads,
-                    request_deserializer=kuma__agent__pb2.ListThreadsRequest.FromString,
-                    response_serializer=kuma__agent__pb2.ListThreadsResponse.SerializeToString,
-            ),
-            'DeleteThread': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteThread,
-                    request_deserializer=kuma__agent__pb2.DeleteThreadRequest.FromString,
-                    response_serializer=kuma__agent__pb2.DeleteThreadResponse.SerializeToString,
-            ),
-            'GetConfig': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetConfig,
-                    request_deserializer=kuma__agent__pb2.GetConfigRequest.FromString,
-                    response_serializer=kuma__agent__pb2.GetConfigResponse.SerializeToString,
-            ),
             'HealthCheck': grpc.unary_unary_rpc_method_handler(
                     servicer.HealthCheck,
                     request_deserializer=kuma__agent__pb2.HealthCheckRequest.FromString,
@@ -166,6 +306,106 @@ def add_KumaAgentServiceServicer_to_server(servicer, server):
                     servicer.ListModels,
                     request_deserializer=kuma__agent__pb2.ListModelsRequest.FromString,
                     response_serializer=kuma__agent__pb2.ListModelsResponse.SerializeToString,
+            ),
+            'GetModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetModel,
+                    request_deserializer=kuma__agent__pb2.GetModelRequest.FromString,
+                    response_serializer=kuma__agent__pb2.ModelInfo.SerializeToString,
+            ),
+            'ListAgents': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListAgents,
+                    request_deserializer=kuma__agent__pb2.ListAgentsRequest.FromString,
+                    response_serializer=kuma__agent__pb2.ListAgentsResponse.SerializeToString,
+            ),
+            'CheckAgentName': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckAgentName,
+                    request_deserializer=kuma__agent__pb2.CheckAgentNameRequest.FromString,
+                    response_serializer=kuma__agent__pb2.CheckAgentNameResponse.SerializeToString,
+            ),
+            'GetAgent': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAgent,
+                    request_deserializer=kuma__agent__pb2.GetAgentRequest.FromString,
+                    response_serializer=kuma__agent__pb2.AgentInfo.SerializeToString,
+            ),
+            'CreateAgent': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateAgent,
+                    request_deserializer=kuma__agent__pb2.CreateAgentRequest.FromString,
+                    response_serializer=kuma__agent__pb2.AgentInfo.SerializeToString,
+            ),
+            'UpdateAgent': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateAgent,
+                    request_deserializer=kuma__agent__pb2.UpdateAgentRequest.FromString,
+                    response_serializer=kuma__agent__pb2.AgentInfo.SerializeToString,
+            ),
+            'DeleteAgent': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteAgent,
+                    request_deserializer=kuma__agent__pb2.DeleteAgentRequest.FromString,
+                    response_serializer=kuma__agent__pb2.DeleteAgentResponse.SerializeToString,
+            ),
+            'GetUserProfile': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUserProfile,
+                    request_deserializer=kuma__agent__pb2.GetUserProfileRequest.FromString,
+                    response_serializer=kuma__agent__pb2.UserProfileResponse.SerializeToString,
+            ),
+            'UpdateUserProfile': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateUserProfile,
+                    request_deserializer=kuma__agent__pb2.UpdateUserProfileRequest.FromString,
+                    response_serializer=kuma__agent__pb2.UserProfileResponse.SerializeToString,
+            ),
+            'GetMemory': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMemory,
+                    request_deserializer=kuma__agent__pb2.GetMemoryRequest.FromString,
+                    response_serializer=kuma__agent__pb2.MemoryResponse.SerializeToString,
+            ),
+            'ReloadMemory': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReloadMemory,
+                    request_deserializer=kuma__agent__pb2.ReloadMemoryRequest.FromString,
+                    response_serializer=kuma__agent__pb2.MemoryResponse.SerializeToString,
+            ),
+            'GetMemoryConfig': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMemoryConfig,
+                    request_deserializer=kuma__agent__pb2.GetMemoryConfigRequest.FromString,
+                    response_serializer=kuma__agent__pb2.MemoryConfigResponse.SerializeToString,
+            ),
+            'GetMemoryStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMemoryStatus,
+                    request_deserializer=kuma__agent__pb2.GetMemoryStatusRequest.FromString,
+                    response_serializer=kuma__agent__pb2.MemoryStatusResponse.SerializeToString,
+            ),
+            'ListSkills': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListSkills,
+                    request_deserializer=kuma__agent__pb2.ListSkillsRequest.FromString,
+                    response_serializer=kuma__agent__pb2.ListSkillsResponse.SerializeToString,
+            ),
+            'GetSkill': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSkill,
+                    request_deserializer=kuma__agent__pb2.GetSkillRequest.FromString,
+                    response_serializer=kuma__agent__pb2.SkillInfo.SerializeToString,
+            ),
+            'UpdateSkill': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateSkill,
+                    request_deserializer=kuma__agent__pb2.UpdateSkillRequest.FromString,
+                    response_serializer=kuma__agent__pb2.SkillInfo.SerializeToString,
+            ),
+            'GetMcpConfig': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMcpConfig,
+                    request_deserializer=kuma__agent__pb2.GetMcpConfigRequest.FromString,
+                    response_serializer=kuma__agent__pb2.McpConfigResponse.SerializeToString,
+            ),
+            'UpdateMcpConfig': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateMcpConfig,
+                    request_deserializer=kuma__agent__pb2.UpdateMcpConfigRequest.FromString,
+                    response_serializer=kuma__agent__pb2.McpConfigResponse.SerializeToString,
+            ),
+            'GetChannelsStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetChannelsStatus,
+                    request_deserializer=kuma__agent__pb2.GetChannelsStatusRequest.FromString,
+                    response_serializer=kuma__agent__pb2.ChannelsStatusResponse.SerializeToString,
+            ),
+            'RestartChannel': grpc.unary_unary_rpc_method_handler(
+                    servicer.RestartChannel,
+                    request_deserializer=kuma__agent__pb2.RestartChannelRequest.FromString,
+                    response_serializer=kuma__agent__pb2.RestartChannelResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,144 +417,9 @@ def add_KumaAgentServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class KumaAgentService(object):
     """─────────────────────────────────────────────
-    Service definition
+    Service definition  (mirrors app/gateway routers)
     ─────────────────────────────────────────────
     """
-
-    @staticmethod
-    def Chat(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/kumaagent.v1.KumaAgentService/Chat',
-            kuma__agent__pb2.ChatRequest.SerializeToString,
-            kuma__agent__pb2.ChatResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def ChatStream(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            '/kumaagent.v1.KumaAgentService/ChatStream',
-            kuma__agent__pb2.ChatRequest.SerializeToString,
-            kuma__agent__pb2.StreamToken.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def ListThreads(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/kumaagent.v1.KumaAgentService/ListThreads',
-            kuma__agent__pb2.ListThreadsRequest.SerializeToString,
-            kuma__agent__pb2.ListThreadsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def DeleteThread(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/kumaagent.v1.KumaAgentService/DeleteThread',
-            kuma__agent__pb2.DeleteThreadRequest.SerializeToString,
-            kuma__agent__pb2.DeleteThreadResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetConfig(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/kumaagent.v1.KumaAgentService/GetConfig',
-            kuma__agent__pb2.GetConfigRequest.SerializeToString,
-            kuma__agent__pb2.GetConfigResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
 
     @staticmethod
     def HealthCheck(request,
@@ -360,6 +465,546 @@ class KumaAgentService(object):
             '/kumaagent.v1.KumaAgentService/ListModels',
             kuma__agent__pb2.ListModelsRequest.SerializeToString,
             kuma__agent__pb2.ListModelsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetModel',
+            kuma__agent__pb2.GetModelRequest.SerializeToString,
+            kuma__agent__pb2.ModelInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListAgents(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/ListAgents',
+            kuma__agent__pb2.ListAgentsRequest.SerializeToString,
+            kuma__agent__pb2.ListAgentsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CheckAgentName(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/CheckAgentName',
+            kuma__agent__pb2.CheckAgentNameRequest.SerializeToString,
+            kuma__agent__pb2.CheckAgentNameResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetAgent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetAgent',
+            kuma__agent__pb2.GetAgentRequest.SerializeToString,
+            kuma__agent__pb2.AgentInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateAgent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/CreateAgent',
+            kuma__agent__pb2.CreateAgentRequest.SerializeToString,
+            kuma__agent__pb2.AgentInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateAgent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/UpdateAgent',
+            kuma__agent__pb2.UpdateAgentRequest.SerializeToString,
+            kuma__agent__pb2.AgentInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteAgent(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/DeleteAgent',
+            kuma__agent__pb2.DeleteAgentRequest.SerializeToString,
+            kuma__agent__pb2.DeleteAgentResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetUserProfile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetUserProfile',
+            kuma__agent__pb2.GetUserProfileRequest.SerializeToString,
+            kuma__agent__pb2.UserProfileResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateUserProfile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/UpdateUserProfile',
+            kuma__agent__pb2.UpdateUserProfileRequest.SerializeToString,
+            kuma__agent__pb2.UserProfileResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMemory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetMemory',
+            kuma__agent__pb2.GetMemoryRequest.SerializeToString,
+            kuma__agent__pb2.MemoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReloadMemory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/ReloadMemory',
+            kuma__agent__pb2.ReloadMemoryRequest.SerializeToString,
+            kuma__agent__pb2.MemoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMemoryConfig(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetMemoryConfig',
+            kuma__agent__pb2.GetMemoryConfigRequest.SerializeToString,
+            kuma__agent__pb2.MemoryConfigResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMemoryStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetMemoryStatus',
+            kuma__agent__pb2.GetMemoryStatusRequest.SerializeToString,
+            kuma__agent__pb2.MemoryStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListSkills(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/ListSkills',
+            kuma__agent__pb2.ListSkillsRequest.SerializeToString,
+            kuma__agent__pb2.ListSkillsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSkill(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetSkill',
+            kuma__agent__pb2.GetSkillRequest.SerializeToString,
+            kuma__agent__pb2.SkillInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateSkill(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/UpdateSkill',
+            kuma__agent__pb2.UpdateSkillRequest.SerializeToString,
+            kuma__agent__pb2.SkillInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMcpConfig(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetMcpConfig',
+            kuma__agent__pb2.GetMcpConfigRequest.SerializeToString,
+            kuma__agent__pb2.McpConfigResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateMcpConfig(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/UpdateMcpConfig',
+            kuma__agent__pb2.UpdateMcpConfigRequest.SerializeToString,
+            kuma__agent__pb2.McpConfigResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetChannelsStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/GetChannelsStatus',
+            kuma__agent__pb2.GetChannelsStatusRequest.SerializeToString,
+            kuma__agent__pb2.ChannelsStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RestartChannel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/RestartChannel',
+            kuma__agent__pb2.RestartChannelRequest.SerializeToString,
+            kuma__agent__pb2.RestartChannelResponse.FromString,
             options,
             channel_credentials,
             insecure,
