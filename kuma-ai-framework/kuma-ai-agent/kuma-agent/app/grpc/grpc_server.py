@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-KumaAgent gRPC Server — channels entry point.
+KumaAgent gRPC Server — entry point.
 
 gRPC is treated as another communication channel alongside Slack / Telegram / Feishu.
 Java / Go clients connect here; the server delegates to KumaAgentClient.
 
 Run:
-    uv run python app/channels/grpc_server.py
-    uv run python app/channels/grpc_server.py --port 50051
-    uv run python app/channels/grpc_server.py --config /path/to/config.yaml
+    uv run python app/grpc/grpc_server.py
+    uv run python app/grpc/grpc_server.py --port 50051
+    uv run python app/grpc/grpc_server.py --config /path/to/config.yaml
 
 Java 客户端接入：
     1. 将 proto/kuma_agent.proto 复制到 Java 项目
@@ -32,8 +32,8 @@ _ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_ROOT))
 
 from kuma_agent.client import KumaAgentClient
-from kuma_agent.grpc.generated import kuma_agent_pb2_grpc
-from kuma_agent.grpc.servicer import KumaAgentServicer
+from app.grpc.generated import kuma_agent_pb2_grpc
+from app.grpc.servicer import KumaAgentServicer
 
 logging.basicConfig(
     level=logging.INFO,
