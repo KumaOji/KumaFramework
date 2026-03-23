@@ -1,7 +1,8 @@
-"""Agents RPCs: ListAgents, GetAgent, CreateAgent, UpdateAgent, DeleteAgent,
+"""Agents RPCs: ListAgents, CheckAgentName, GetAgent, CreateAgent, UpdateAgent, DeleteAgent,
 GetUserProfile, UpdateUserProfile."""
 
 import logging
+import re
 import shutil
 
 import grpc
@@ -10,6 +11,8 @@ import yaml
 from app.grpc.generated import kuma_agent_pb2
 from kuma_agent.config.agents_config import AgentConfig, list_custom_agents, load_agent_config, load_agent_soul
 from kuma_agent.config.paths import get_paths
+
+_AGENT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9-]+$")
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +29,21 @@ def _agent_to_pb(agent_cfg: AgentConfig, soul: str = "") -> kuma_agent_pb2.Agent
 
 class AgentsRouter:
     """Mixin: agents CRUD + user profile."""
+
+    def CheckAgentName(self, request, context):
+        try:
+            if not _AGENT_NAME_PATTERN.match(request.name):
+                context.abort(
+                    grpc.StatusCode.INVALID_ARGUMENT,
+                    f"Invalid agent name '{request.name}'. Must match ^[A-Za-z0-9-]+$",
+                )
+                return
+            normalized = request.name.lower()
+            available = not get_paths().agent_dir(normalized).exists()
+            return kuma_agent_pb2.CheckAgentNameResponse(available=available, name=normalized)
+        except Exception as exc:
+            logger.exception("CheckAgentName failed for '%s'", request.name)
+            context.abort(grpc.StatusCode.INTERNAL, str(exc))
 
     def ListAgents(self, request, context):
         try:

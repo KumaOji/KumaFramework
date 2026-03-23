@@ -1,4 +1,4 @@
-"""System RPCs: HealthCheck, GetConfig."""
+"""System RPCs: HealthCheck."""
 
 import logging
 
@@ -8,16 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class SystemRouter:
-    """Mixin: HealthCheck, GetConfig."""
+    """Mixin: HealthCheck."""
 
     def HealthCheck(self, request, context):
         return kuma_agent_pb2.HealthCheckResponse(status="ok")
-
-    def GetConfig(self, request, context):
-        cfg = self._client.get_config()
-        return kuma_agent_pb2.GetConfigResponse(
-            agent_name=cfg["agent_name"],
-            description=cfg["description"],
-            model=cfg["model"] or "",
-            tools=cfg["tools"],
-        )
