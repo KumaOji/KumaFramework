@@ -16,7 +16,6 @@
 
 package com.kuma.boot.office.convert.config;
 
-import com.aspose.words.License;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -33,21 +32,56 @@ import java.io.InputStream;
 public class StartAppRunner implements CommandLineRunner {
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         LogUtils.info("《服务初始化执行处理》 start...");
-        try {
-            LogUtils.info("实现`aspose-words`授权 -> 去掉头部水印");
-            /*
-             实现匹配文件授权 -> 去掉头部水印 `Evaluation Only. Created with Aspose.Words. Copyright 2003-2018 Aspose Pty Ltd.` |
-                                         `Evaluation Only. Created with Aspose.Cells for Java. Copyright 2003 - 2020 Aspose Pty Ltd.`
-            */
-            LogUtils.info("暂时不考虑去除水印");
-//            InputStream is = new ClassPathResource("license.xml").getInputStream();
-//            License license = new License();
-//            license.setLicense(is);
-        } catch (Exception e) {
-            LogUtils.error("《`aspose-words`授权》 失败： {}", e.getMessage());
-        }
+        applyWordsLicense();
+        applyCellsLicense();
+        applyPdfLicense();
+        applySlidesLicense();
         LogUtils.info("《服务初始化执行处理》 end...");
+    }
+
+    private void applyWordsLicense() {
+        try {
+            InputStream is = new ClassPathResource("license.xml").getInputStream();
+            com.aspose.words.License license = new com.aspose.words.License();
+            license.setLicense(is);
+            LogUtils.info("aspose-words 授权成功");
+        } catch (Exception e) {
+            LogUtils.warn("aspose-words 授权失败（评估版水印保留）: {}", e.getMessage());
+        }
+    }
+
+    private void applyCellsLicense() {
+        try {
+            InputStream is = new ClassPathResource("license.xml").getInputStream();
+            com.aspose.cells.License license = new com.aspose.cells.License();
+            license.setLicense(is);
+            LogUtils.info("aspose-cells 授权成功");
+        } catch (Exception e) {
+            LogUtils.warn("aspose-cells 授权失败（评估版水印保留）: {}", e.getMessage());
+        }
+    }
+
+    private void applyPdfLicense() {
+        try {
+            InputStream is = new ClassPathResource("license.xml").getInputStream();
+            com.aspose.pdf.License license = new com.aspose.pdf.License();
+            license.setLicense(is);
+            LogUtils.info("aspose-pdf 授权成功");
+        } catch (Exception e) {
+            LogUtils.warn("aspose-pdf 授权失败（评估版水印保留）: {}", e.getMessage());
+        }
+    }
+
+    private void applySlidesLicense() {
+        try {
+            InputStream is = new ClassPathResource("license.xml").getInputStream();
+            com.aspose.slides.License license = new com.aspose.slides.License();
+            license.setLicense(is);
+            LogUtils.info("aspose-slides 授权成功");
+        } catch (Exception e) {
+            LogUtils.warn("aspose-slides 授权失败（评估版水印保留）: {}", e.getMessage());
+        }
     }
 }
