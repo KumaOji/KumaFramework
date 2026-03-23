@@ -17,11 +17,11 @@ def get_available_tools(
     Returns:
         List of LangChain tool objects.
     """
-    from kuma_agent.config.app_config import get_app_config
+    from kuma_agent.config.config import AppConfig as LegacyAppConfig
     from kuma_agent.tools.builtins import task_tool
 
-    app_config = get_app_config()
-    tools = get_tools(app_config.tools)
+    legacy_config = LegacyAppConfig.from_file()
+    tools = get_tools(legacy_config.tools)
 
     if subagent_enabled:
         tools = [*tools, task_tool]

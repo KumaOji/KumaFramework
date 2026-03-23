@@ -52,7 +52,7 @@ class AppConfig(BaseModel):
 
         Priority:
         1. If provided `config_path` argument, use it.
-        2. If provided `DEER_FLOW_CONFIG_PATH` environment variable, use it.
+        2. If provided `KUMA_AGENT_CONFIG_PATH` environment variable, use it.
         3. Otherwise, first check the `config.yaml` in the current directory, then fallback to `config.yaml` in the parent directory.
         """
         if config_path:
@@ -60,10 +60,10 @@ class AppConfig(BaseModel):
             if not Path.exists(path):
                 raise FileNotFoundError(f"Config file specified by param `config_path` not found at {path}")
             return path
-        elif os.getenv("DEER_FLOW_CONFIG_PATH"):
-            path = Path(os.getenv("DEER_FLOW_CONFIG_PATH"))
+        elif os.getenv("KUMA_AGENT_CONFIG_PATH"):
+            path = Path(os.getenv("KUMA_AGENT_CONFIG_PATH"))
             if not Path.exists(path):
-                raise FileNotFoundError(f"Config file specified by environment variable `DEER_FLOW_CONFIG_PATH` not found at {path}")
+                raise FileNotFoundError(f"Config file specified by environment variable `KUMA_AGENT_CONFIG_PATH` not found at {path}")
             return path
         else:
             # Check if the config.yaml is in the current directory
@@ -274,7 +274,9 @@ def get_app_config() -> AppConfig:
     if _app_config is not None and _app_config_is_custom:
         return _app_config
 
-    resolved_path = AppConfig.resolve_config_path()
+    # Reuse the cached path when available to avoid calling os.getcwd()
+    # in an async context (which blockbuster flags as a blocking call).
+    resolved_path = _app_config_path if _app_config_path is not None else AppConfig.resolve_config_path()
     current_mtime = _get_config_mtime(resolved_path)
 
     should_reload = (

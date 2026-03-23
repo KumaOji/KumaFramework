@@ -36,7 +36,18 @@ class Paths:
     """
 
     def __init__(self, base_dir: str | Path | None = None) -> None:
-        self._base_dir = Path(base_dir).resolve() if base_dir is not None else None
+        # Resolve everything at construction time (sync context) so that
+        # subsequent property accesses never call os.getcwd() in an async context.
+        if base_dir is not None:
+            self._base_dir: Path = Path(base_dir).resolve()
+        elif env_home := os.getenv("KUMA_AGENT_HOME"):
+            self._base_dir = Path(env_home).resolve()
+        else:
+            cwd = Path.cwd()
+            if cwd.name == "backend" or (cwd / "pyproject.toml").exists():
+                self._base_dir = cwd / ".kuma_agent"
+            else:
+                self._base_dir = Path.home() / ".kuma_agent"
 
     @property
     def host_base_dir(self) -> Path:
@@ -56,17 +67,7 @@ class Paths:
     @property
     def base_dir(self) -> Path:
         """Root directory for all application data."""
-        if self._base_dir is not None:
-            return self._base_dir
-
-        if env_home := os.getenv("KUMA_AGENT_HOME"):
-            return Path(env_home).resolve()
-
-        cwd = Path.cwd()
-        if cwd.name == "backend" or (cwd / "pyproject.toml").exists():
-            return cwd / ".kuma_agent"
-
-        return Path.home() / ".kuma_agent"
+        return self._base_dir
 
     @property
     def memory_file(self) -> Path:
@@ -192,15 +193,14 @@ class Paths:
 
 
 # ── Singleton ────────────────────────────────────────────────────────────
+# Initialized at import time (sync context) so Path.cwd() is never called
+# inside an async event loop (which blockbuster flags as a blocking call).
 
-_paths: Paths | None = None
+_paths: Paths = Paths()
 
 
 def get_paths() -> Paths:
-    """Return the global Paths singleton (lazy-initialized)."""
-    global _paths
-    if _paths is None:
-        _paths = Paths()
+    """Return the global Paths singleton."""
     return _paths
 
 
