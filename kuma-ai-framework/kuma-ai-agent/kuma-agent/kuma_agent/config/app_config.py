@@ -5,7 +5,7 @@ from typing import Any, Self
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from kuma_agent.config.checkpointer_config import CheckpointerConfig, load_checkpointer_config_from_dict
 from kuma_agent.config.extensions_config import ExtensionsConfig
@@ -28,7 +28,7 @@ class AppConfig(BaseModel):
     """Config for the DeerFlow application"""
 
     models: list[ModelConfig] = Field(default_factory=list, description="Available models")
-    sandbox: SandboxConfig = Field(description="Sandbox configuration")
+    sandbox: SandboxConfig | None = Field(default=None, description="Sandbox configuration")
     tools: list[ToolConfig] = Field(default_factory=list, description="Available tools")
     tool_groups: list[ToolGroupConfig] = Field(default_factory=list, description="Available tool groups")
     skills: SkillsConfig = Field(default_factory=SkillsConfig, description="Skills configuration")
@@ -36,6 +36,15 @@ class AppConfig(BaseModel):
     tool_search: ToolSearchConfig = Field(default_factory=ToolSearchConfig, description="Tool search / deferred loading configuration")
     model_config = ConfigDict(extra="allow", frozen=False)
     checkpointer: CheckpointerConfig | None = Field(default=None, description="Checkpointer configuration")
+
+    @field_validator("tools", mode="before")
+    @classmethod
+    def _coerce_tools(cls, v: Any) -> Any:
+        # config.yaml may use the old dict format {calculator: true, ...}
+        # AppConfig expects a list of ToolConfig objects; treat the old dict as empty
+        if isinstance(v, dict):
+            return []
+        return v
 
     @classmethod
     def resolve_config_path(cls, config_path: str | None = None) -> Path:
@@ -63,7 +72,10 @@ class AppConfig(BaseModel):
                 # Check if the config.yaml is in the parent directory of CWD
                 path = Path(os.getcwd()).parent / "config.yaml"
                 if not path.exists():
-                    raise FileNotFoundError("`config.yaml` file not found at the current directory nor its parent directory")
+                    # Fallback: resolve relative to this file (kuma_agent/config/app_config.py → project root)
+                    path = Path(__file__).parent.parent.parent / "config.yaml"
+                    if not path.exists():
+                        raise FileNotFoundError("`config.yaml` file not found at the current directory nor its parent directory")
             return path
 
     @classmethod

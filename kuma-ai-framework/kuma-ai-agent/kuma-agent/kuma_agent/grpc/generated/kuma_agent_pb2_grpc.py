@@ -67,6 +67,11 @@ class KumaAgentServiceStub(object):
                 request_serializer=kuma__agent__pb2.HealthCheckRequest.SerializeToString,
                 response_deserializer=kuma__agent__pb2.HealthCheckResponse.FromString,
                 _registered_method=True)
+        self.ListModels = channel.unary_unary(
+                '/kumaagent.v1.KumaAgentService/ListModels',
+                request_serializer=kuma__agent__pb2.ListModelsRequest.SerializeToString,
+                response_deserializer=kuma__agent__pb2.ListModelsResponse.FromString,
+                _registered_method=True)
 
 
 class KumaAgentServiceServicer(object):
@@ -117,6 +122,13 @@ class KumaAgentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListModels(self, request, context):
+        """列出所有可用模型
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_KumaAgentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -149,6 +161,11 @@ def add_KumaAgentServiceServicer_to_server(servicer, server):
                     servicer.HealthCheck,
                     request_deserializer=kuma__agent__pb2.HealthCheckRequest.FromString,
                     response_serializer=kuma__agent__pb2.HealthCheckResponse.SerializeToString,
+            ),
+            'ListModels': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListModels,
+                    request_deserializer=kuma__agent__pb2.ListModelsRequest.FromString,
+                    response_serializer=kuma__agent__pb2.ListModelsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -316,6 +333,33 @@ class KumaAgentService(object):
             '/kumaagent.v1.KumaAgentService/HealthCheck',
             kuma__agent__pb2.HealthCheckRequest.SerializeToString,
             kuma__agent__pb2.HealthCheckResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListModels(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/kumaagent.v1.KumaAgentService/ListModels',
+            kuma__agent__pb2.ListModelsRequest.SerializeToString,
+            kuma__agent__pb2.ListModelsResponse.FromString,
             options,
             channel_credentials,
             insecure,
