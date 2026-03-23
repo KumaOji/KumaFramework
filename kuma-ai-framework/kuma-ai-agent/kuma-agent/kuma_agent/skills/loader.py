@@ -4,19 +4,18 @@ from pathlib import Path
 from .parser import parse_skill_file
 from .types import Skill
 
+# Compute once at import time (avoids os.getcwd blocking call in async context).
+# loader.py lives at kuma_agent/skills/loader.py
+#   .parent → kuma_agent/skills/
+#   .parent → kuma_agent/
+#   .parent → <project root>/
+_PROJECT_ROOT: Path = Path(__file__).parent.parent.parent
+_DEFAULT_SKILLS_DIR: Path = _PROJECT_ROOT / "skills"
+
 
 def get_skills_root_path() -> Path:
-    """
-    Get the root path of the skills directory.
-
-    Returns:
-        Path to the skills directory (kuma_agent/skills)
-    """
-    # loader.py lives at kuma_agent/skills/loader.py — 3 parents up reaches project root/
-    backend_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
-    # skills directory is sibling to backend directory
-    skills_dir = backend_dir.parent / "skills"
-    return skills_dir
+    """Return the default skills directory (project_root/skills)."""
+    return _DEFAULT_SKILLS_DIR
 
 
 def load_skills(skills_path: Path | None = None, use_config: bool = True, enabled_only: bool = False) -> list[Skill]:
