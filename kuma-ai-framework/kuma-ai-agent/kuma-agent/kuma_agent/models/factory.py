@@ -1,7 +1,7 @@
 """
 Model factory for KumaAgent.
 
-Pattern from deer-flow's models/factory.py:
+Pattern from kuma_agent's models/factory.py:
   - Reflection-based instantiation via 'module:ClassName' strings
   - Provider-agnostic: supports OpenAI, Anthropic, etc.
   - Actionable error messages when providers are not installed
@@ -19,7 +19,7 @@ def create_chat_model(model_config: ModelConfig):
     """Create a LangChain chat model from config using reflection.
 
     The 'use' field in ModelConfig follows the 'module:ClassName' convention
-    from deer-flow, enabling pluggable model providers without hardcoded imports.
+    from kuma_agent, enabling pluggable model providers without hardcoded imports.
 
     Args:
         model_config: ModelConfig with provider class path and parameters.

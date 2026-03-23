@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class AppConfig(BaseModel):
-    """Config for the DeerFlow application"""
+    """Config for the KumaAgent application"""
 
     models: list[ModelConfig] = Field(default_factory=list, description="Available models")
     sandbox: SandboxConfig | None = Field(default=None, description="Sandbox configuration")
@@ -262,7 +262,7 @@ def _load_and_cache_app_config(config_path: str | None = None) -> AppConfig:
 
 
 def get_app_config() -> AppConfig:
-    """Get the DeerFlow config instance.
+    """Get the KumaAgent config instance.
 
     Returns a cached singleton instance and automatically reloads it when the
     underlying config file path or modification time changes. Use

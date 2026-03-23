@@ -1,12 +1,12 @@
 """
 Title middleware for KumaAgent.
 
-Simplified version of deer-flow's TitleMiddleware:
+Simplified version of kuma_agent's TitleMiddleware:
   - Runs after the first complete exchange (human + AI)
   - Extracts a title from the first human message (no extra LLM call)
   - Sets state['title'] exactly once; never overwrites an existing title
 
-In deer-flow, TitleMiddleware calls the LLM to generate a semantic title.
+In kuma_agent, TitleMiddleware calls the LLM to generate a semantic title.
 This simplified version avoids the extra API call while demonstrating
 the same middleware lifecycle pattern.
 """

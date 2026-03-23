@@ -1,12 +1,12 @@
 """
 Base middleware class for KumaAgent.
 
-Pattern from deer-flow's middleware system:
+Pattern from kuma_agent's middleware system:
   - before_agent() runs before each agent invocation, can inject state updates
   - after_agent() runs after each agent invocation, can inject state updates
   - Middlewares are ordered and applied sequentially by KumaAgentClient
 
-Unlike deer-flow (which integrates middlewares into the LangGraph graph itself
+Unlike kuma_agent (which integrates middlewares into the LangGraph graph itself
 via langchain.agents.create_agent), this simplified implementation wraps
 the agent invocation in the client, keeping it framework-independent.
 """
