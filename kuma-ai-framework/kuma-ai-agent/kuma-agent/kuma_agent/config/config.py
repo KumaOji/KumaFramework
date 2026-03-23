@@ -1,7 +1,7 @@
 """
 Configuration system for KumaAgent.
 
-Pattern from deer-flow's config/app_config.py:
+Pattern from kuma_agent's config/app_config.py:
   - YAML-based configuration
   - Environment variable resolution (values starting with $)
   - Fallback search across multiple config file locations
@@ -23,7 +23,7 @@ class ModelConfig:
     """Configuration for a single LLM model.
 
     The 'use' field is a reflection path 'module:ClassName',
-    following deer-flow's convention for pluggable model providers.
+    following kuma_agent's convention for pluggable model providers.
     """
     name: str
     use: str          # e.g. "langchain_openai:ChatOpenAI"
@@ -73,7 +73,7 @@ class AppConfig:
     def from_file(cls, config_path: str | Path | None = None) -> "AppConfig":
         """Load config from YAML file.
 
-        Priority (same as deer-flow):
+        Priority (same as kuma_agent):
           1. Explicit config_path argument
           2. KUMA_AGENT_CONFIG_PATH environment variable
           3. config.yaml in current directory

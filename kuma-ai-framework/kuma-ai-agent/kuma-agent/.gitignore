@@ -1,2 +1,3 @@
-/packages/harness/deerflow
-/deerflow
+.env
+/.claude/
+.langgraph_api/

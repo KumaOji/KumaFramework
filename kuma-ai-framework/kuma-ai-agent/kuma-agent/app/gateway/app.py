@@ -77,11 +77,11 @@ def create_app() -> FastAPI:
     """
 
     app = FastAPI(
-        title="DeerFlow API Gateway",
+        title="KumaAgent API Gateway",
         description="""
-## DeerFlow API Gateway
+## KumaAgent API Gateway
 
-API Gateway for DeerFlow - A LangGraph-based AI agent backend with sandbox execution capabilities.
+API Gateway for KumaAgent - A LangGraph-based AI agent backend with sandbox execution capabilities.
 
 ### Features
 

@@ -1,7 +1,7 @@
 """
 Agent factory for KumaAgent.
 
-Pattern from deer-flow's agents/lead_agent/agent.py — make_lead_agent():
+Pattern from kuma_agent's agents/lead_agent/agent.py — make_lead_agent():
   1. Resolve model config
   2. Create chat model via reflection (models/factory.py)
   3. Assemble tool list (tools/tools.py)

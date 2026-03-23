@@ -1,7 +1,7 @@
 """
 Built-in tools for KumaAgent.
 
-Pattern from deer-flow's tools/builtins/:
+Pattern from kuma_agent's tools/builtins/:
   - Each tool is a @tool decorated function
   - get_tools() assembles the list based on ToolsConfig
   - Tools are stateless and have clear docstrings (used as tool descriptions by LLM)
@@ -100,7 +100,7 @@ def search_web(query: str) -> str:
 def get_tools(config: ToolsConfig) -> list:
     """Assemble tool list based on configuration.
 
-    Pattern from deer-flow's get_available_tools(): builds the tool list
+    Pattern from kuma_agent's get_available_tools(): builds the tool list
     dynamically based on config flags instead of hardcoding.
     """
     tools = []

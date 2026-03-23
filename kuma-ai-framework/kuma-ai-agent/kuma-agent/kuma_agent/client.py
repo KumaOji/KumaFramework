@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class KumaAgentClient:
     """Embedded client for interacting with KumaAgent.
 
-    Mirrors the high-level interface of deer-flow's DeerFlowClient:
+    Mirrors the high-level interface of kuma_agent's KumaAgentClient:
       - chat()         — blocking single response
       - stream()       — streaming state events
       - get_title()    — retrieve auto-generated thread title
@@ -57,7 +57,7 @@ class KumaAgentClient:
     def _build_middlewares(self) -> list[AgentMiddleware]:
         """Build the ordered middleware chain from config.
 
-        Pattern from deer-flow's _build_middlewares(): each middleware is
+        Pattern from kuma_agent's _build_middlewares(): each middleware is
         instantiated based on config flags and added in a defined order.
         Ordering matters — later middlewares run after earlier ones.
         """

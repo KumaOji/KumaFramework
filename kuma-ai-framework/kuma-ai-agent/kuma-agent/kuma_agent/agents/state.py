@@ -1,7 +1,7 @@
 """
 Agent state schema for KumaAgent.
 
-Pattern from deer-flow's agents/thread_state.py:
+Pattern from kuma_agent's agents/thread_state.py:
   - Extends MessagesState (provides 'messages' with add_messages reducer)
   - Custom reducers for immutable field merging
   - Each field is independently updateable via state update dicts
@@ -16,7 +16,7 @@ from langgraph.managed import RemainingSteps
 def _merge_unique(existing: list[str] | None, new: list[str] | None) -> list[str]:
     """Merge two string lists, deduplicating while preserving insertion order.
 
-    Follows deer-flow's merge_artifacts reducer pattern:
+    Follows kuma_agent's merge_artifacts reducer pattern:
       - Never mutates the existing list
       - Deduplicates using dict.fromkeys (preserves order, O(n))
       - Handles None inputs gracefully

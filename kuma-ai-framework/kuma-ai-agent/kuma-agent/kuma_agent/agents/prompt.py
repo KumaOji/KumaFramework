@@ -1,7 +1,7 @@
 """
 System prompt template for KumaAgent.
 
-Pattern from deer-flow's agents/lead_agent/prompt.py:
+Pattern from kuma_agent's agents/lead_agent/prompt.py:
   - Template-based system prompt
   - Injected with agent name, description, and current date
   - Extensible: add memory facts, skills, tool guidance, etc.
@@ -32,7 +32,7 @@ Current date: {current_date}
 def build_system_prompt(agent_name: str, description: str) -> str:
     """Build the system prompt string for the agent.
 
-    Pattern from deer-flow's apply_prompt_template(): assembles a system
+    Pattern from kuma_agent's apply_prompt_template(): assembles a system
     prompt from structured sections, injecting runtime context.
     """
     return _SYSTEM_PROMPT_TEMPLATE.format(

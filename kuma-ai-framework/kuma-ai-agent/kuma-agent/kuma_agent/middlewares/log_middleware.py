@@ -2,7 +2,7 @@
 Logging middleware for KumaAgent.
 
 Logs the conversation state before and after each agent invocation.
-Inspired by deer-flow's middleware pattern for cross-cutting concerns.
+Inspired by kuma_agent's middleware pattern for cross-cutting concerns.
 """
 
 import logging
