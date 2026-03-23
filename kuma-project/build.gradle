@@ -9,5 +9,6 @@ description = '''Myframework project参考 —— 一组渐进式 Demo 应用，
   project8 : 分布式事务 Demo，演示 kuma-cloud-tx-rm 的接入，通过 @DistributedTransactional 完成多步分布式事务协调
   project9 : 消息队列 Demo，演示 kuma-cloud-mq-client 的接入，通过 MqProducer / MqConsumerPush 完成消息收发
   project20: gRPC 客户端 Demo，通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）
+  project21: Office Doc 生成 Demo，使用 kuma-boot-starter-office（Aspose.Words）将 HTML 转换为 Word 文档并下载
   blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
 '''
