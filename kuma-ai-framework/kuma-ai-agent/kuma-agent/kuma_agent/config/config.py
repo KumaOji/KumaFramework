@@ -139,7 +139,7 @@ def _resolve_config_path(config_path: str | Path | None) -> Path | None:
         return Path(env)
     candidates = [
         Path("config.yaml"),
-        Path(__file__).parent.parent.parent.parent / "config.yaml",
+        Path(__file__).parent.parent.parent / "config.yaml",
     ]
     for p in candidates:
         if p.exists():
