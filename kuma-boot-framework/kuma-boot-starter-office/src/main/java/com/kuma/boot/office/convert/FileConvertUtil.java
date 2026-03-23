@@ -16,7 +16,6 @@
 
 package com.kuma.boot.office.convert;
 
-import com.kuma.boot.office.convert.config.MatchLicense;
 import com.kuma.boot.office.convert.doc2docx.Doc2DocxUtil;
 import com.kuma.boot.office.convert.excel2pdf.Excel2PdfUtil;
 import com.kuma.boot.office.convert.html2img.Html2ImgUtil;
@@ -51,7 +50,7 @@ public class FileConvertUtil {
      * @since 2020/11/23 16:21
      */
     public static byte[] wordBytes2HtmlBytes(byte[] wordBytes) throws Exception {
-        MatchLicense.init();
+
         return Word2HtmlUtil.wordBytes2HtmlBytes(wordBytes);
     }
 
@@ -63,7 +62,7 @@ public class FileConvertUtil {
      * @since 2020/11/23 16:21
      */
     public static String wordBytes2HtmlStr(byte[] wordBytes) throws Exception {
-        MatchLicense.init();
+
         byte[] htmlBytes = Word2HtmlUtil.wordBytes2HtmlBytes(wordBytes);
         return new String(htmlBytes);
     }
@@ -77,7 +76,7 @@ public class FileConvertUtil {
      * @since 2020/11/23 16:21
      */
     public static File wordBytes2HtmlFile(byte[] wordBytes, String htmlFilePath) throws Exception {
-        MatchLicense.init();
+
         return Word2HtmlUtil.wordBytes2HtmlFile(wordBytes, htmlFilePath);
     }
 
@@ -89,7 +88,7 @@ public class FileConvertUtil {
      * @since 2020/11/26 13:39
      */
     public static byte[] wordBytes2PdfBytes(byte[] wordBytes) throws Exception {
-        MatchLicense.init();
+
         return Word2PdfUtil.wordBytes2PdfBytes(wordBytes);
     }
 
@@ -102,7 +101,7 @@ public class FileConvertUtil {
      * @since 2020/11/26 13:39
      */
     public static File wordBytes2PdfFile(byte[] wordBytes, String pdfFilePath) throws Exception {
-        MatchLicense.init();
+
         return Word2PdfUtil.wordBytes2PdfFile(wordBytes, pdfFilePath);
     }
 
@@ -114,7 +113,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:26
      */
     public static byte[] docBytes2DocxBytes(byte[] docBytes) throws Exception {
-        MatchLicense.init();
+
         return Doc2DocxUtil.docBytes2DocxBytes(docBytes);
     }
 
@@ -127,7 +126,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:26
      */
     public static File docBytes2DocxFile(byte[] docBytes, String docxFilePath) throws Exception {
-        MatchLicense.init();
+
         return Doc2DocxUtil.docBytes2DocxFile(docBytes, docxFilePath);
     }
 
@@ -139,7 +138,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:52
      */
     public static byte[] htmlBytes2WordBytes(byte[] htmlBytes) throws Exception {
-        MatchLicense.init();
+
         return Htm2WordUtil.htmlBytes2WordBytes(htmlBytes);
     }
 
@@ -151,7 +150,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:52
      */
     public static byte[] html2WordBytes(String html) throws Exception {
-        MatchLicense.init();
+
         return Htm2WordUtil.htmlBytes2WordBytes(html.getBytes());
     }
 
@@ -164,7 +163,7 @@ public class FileConvertUtil {
      * @since 2020/11/23 16:04
      */
     public static File htmlBytes2WordFile(byte[] htmlBytes, String wordFilePath) throws Exception {
-        MatchLicense.init();
+
         return Htm2WordUtil.htmlBytes2WordFile(htmlBytes, wordFilePath);
     }
 
@@ -176,7 +175,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:26
      */
     public static byte[] htmlBytes2PdfBytes(byte[] htmlBytes) throws Exception {
-        MatchLicense.init();
+
         return Html2PdfUtil.htmlBytes2PdfBytes(htmlBytes);
     }
 
@@ -189,7 +188,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:26
      */
     public static File htmlBytes2PdfFile(byte[] htmlBytes, String pdfFilePath) throws Exception {
-        MatchLicense.init();
+
         return Html2PdfUtil.htmlBytes2PdfFile(htmlBytes, pdfFilePath);
     }
 
@@ -201,7 +200,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:26
      */
     public static byte[] excelBytes2PdfBytes(byte[] excelBytes) throws Exception {
-        MatchLicense.init();
+
         return Excel2PdfUtil.excelBytes2PdfBytes(excelBytes);
     }
 
@@ -214,7 +213,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:26
      */
     public static File excelBytes2PdfFile(byte[] excelBytes, String pdfFilePath) throws Exception {
-        MatchLicense.init();
+
         return Excel2PdfUtil.excelBytes2PdfFile(excelBytes, pdfFilePath);
     }
 
@@ -226,7 +225,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:52
      */
     public static List<byte[]> wordBytes2JpegBytes(byte[] wordBytes) throws Exception {
-        MatchLicense.init();
+
         return Word2JpegUtil.wordBytes2JpegBytes(wordBytes);
     }
 
@@ -239,7 +238,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:52
      */
     public static List<File> wordBytes2JpegFileList(byte[] wordBytes, String imgRootPath) throws Exception {
-        MatchLicense.init();
+
         return Word2JpegUtil.wordBytes2JpegFileList(wordBytes, imgRootPath);
     }
 
@@ -251,7 +250,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:52
      */
     public static List<byte[]> wordBytes2PngBytes(byte[] wordBytes) throws Exception {
-        MatchLicense.init();
+
         return Word2PngUtil.wordBytes2PngBytes(wordBytes);
     }
 
@@ -264,7 +263,7 @@ public class FileConvertUtil {
      * @since 2020/11/24 11:52
      */
     public static List<File> wordBytes2PngFileList(byte[] wordBytes, String imgRootPath) throws Exception {
-        MatchLicense.init();
+
         return Word2PngUtil.wordBytes2PngFileList(wordBytes, imgRootPath);
     }
 
@@ -276,7 +275,7 @@ public class FileConvertUtil {
      * @since 2020/11/25 17:17
      */
     public static List<byte[]> htmlBytes2PngBytes(byte[] htmlBytes) throws Exception {
-        MatchLicense.init();
+
         return Html2PngUtil.htmlBytes2PngBytes(htmlBytes);
     }
 
@@ -289,7 +288,7 @@ public class FileConvertUtil {
      * @since 2020/11/25 17:17
      */
     public static List<File> htmlBytes2PngFileList(byte[] htmlBytes, String imgRootPath) throws Exception {
-        MatchLicense.init();
+
         return Html2PngUtil.htmlBytes2PngFileList(htmlBytes, imgRootPath);
     }
 
