@@ -29,6 +29,9 @@ service KumaAgentService {
 
   // 健康检查
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+
+  // 列出所有可用模型
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
 }
 
 // ─────────────────────────────────────────────
@@ -103,4 +106,22 @@ message HealthCheckRequest {}
 
 message HealthCheckResponse {
   string status = 1;  // "ok"
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+message ListModelsRequest {}
+
+message ModelInfo {
+  string name                     = 1;
+  string model                    = 2;
+  string display_name             = 3;
+  string description              = 4;
+  bool   supports_thinking        = 5;
+  bool   supports_reasoning_effort = 6;
+}
+
+message ListModelsResponse {
+  repeated ModelInfo models = 1;
 }

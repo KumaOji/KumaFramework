@@ -12,6 +12,7 @@ import uuid
 import grpc
 
 from kuma_agent.client import KumaAgentClient
+from kuma_agent.config import get_app_config
 from kuma_agent.grpc.generated import kuma_agent_pb2, kuma_agent_pb2_grpc
 
 logger = logging.getLogger(__name__)
@@ -149,3 +150,18 @@ class KumaAgentServicer(kuma_agent_pb2_grpc.KumaAgentServiceServicer):
         del self._threads[tid]
         logger.info("Deleted thread %s", tid)
         return kuma_agent_pb2.DeleteThreadResponse(deleted=tid)
+
+    def ListModels(self, request, context):
+        config = get_app_config()
+        models = [
+            kuma_agent_pb2.ModelInfo(
+                name=m.name,
+                model=m.model,
+                display_name=m.display_name or "",
+                description=m.description or "",
+                supports_thinking=m.supports_thinking,
+                supports_reasoning_effort=m.supports_reasoning_effort,
+            )
+            for m in config.models
+        ]
+        return kuma_agent_pb2.ListModelsResponse(models=models)

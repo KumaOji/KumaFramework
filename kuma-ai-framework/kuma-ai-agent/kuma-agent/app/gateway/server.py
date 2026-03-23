@@ -42,9 +42,10 @@ if __name__ == "__main__":
     host = args.host or config.host
     port = args.port or config.port
 
+    addr_display = "localhost" if host == "0.0.0.0" else host
     print(f"\n{'=' * 55}")
-    print(f"  KumaAgent Gateway  —  http://{host}:{port}")
-    print(f"  API Docs           —  http://{host}:{port}/docs")
+    print(f"  KumaAgent Gateway  —  http://{addr_display}:{port}")
+    print(f"  API Docs           —  http://{addr_display}:{port}/docs")
     print(f"  Press Ctrl+C to stop")
     print(f"{'=' * 55}\n")
 
