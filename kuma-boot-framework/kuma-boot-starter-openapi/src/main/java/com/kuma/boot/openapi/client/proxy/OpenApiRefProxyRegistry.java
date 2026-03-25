@@ -82,8 +82,9 @@ public class OpenApiRefProxyRegistry implements BeanDefinitionRegistryPostProces
       }
    }
 
+   @SuppressWarnings("unchecked")
    private void registerOpenApiRefProxies(BeanDefinitionRegistry registry, Set interClazzSet) {
-      for(Class interClazz : interClazzSet) {
+      for(Class<?> interClazz : (Set<Class<?>>) interClazzSet) {
          BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(interClazz);
          GenericBeanDefinition definition = (GenericBeanDefinition)beanDefinitionBuilder.getRawBeanDefinition();
          definition.getConstructorArgumentValues().addGenericArgumentValue(interClazz);

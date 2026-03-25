@@ -34,7 +34,7 @@ public class CommonUtil {
 
    public static Object cloneInstance(Object obj) {
       try {
-         T tmp = (T)obj.getClass().getDeclaredConstructor().newInstance();
+         Object tmp = obj.getClass().getDeclaredConstructor().newInstance();
          BeanUtil.copyProperties(obj, tmp, new String[0]);
          return tmp;
       } catch (Exception ex) {
