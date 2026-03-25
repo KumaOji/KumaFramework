@@ -352,10 +352,11 @@ public class FileUtil {
 
    }
 
+   @SuppressWarnings("unchecked")
    private static void compress(List sourceFileList, ZipOutputStream zos, boolean keepDirStructure) throws Exception {
       byte[] buf = new byte[2048];
 
-      for(File sourceFile : sourceFileList) {
+      for(File sourceFile : (List<File>) sourceFileList) {
          String name = sourceFile.getName();
          if (sourceFile.isFile()) {
             zos.putNextEntry(new ZipEntry(name));

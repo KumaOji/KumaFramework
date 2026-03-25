@@ -22,10 +22,11 @@ public class BinaryUtil {
       return StrObjectConvert.objToStr(tmp, tmp.getClass());
    }
 
+   @SuppressWarnings("unchecked")
    public static String getBinariesString(List binaries) {
       List<Binary> temps = new ArrayList();
 
-      for(Binary binary : binaries) {
+      for(Binary binary : (List<Binary>) binaries) {
          Binary tmp = (Binary)CommonUtil.cloneInstance(binary);
          long length = binary.getLength();
          tmp.setData((byte[])null);
@@ -50,7 +51,8 @@ public class BinaryUtil {
       List<byte[]> binaryLengthBytesList = new ArrayList();
       List<byte[]> binaryDataBytesList = new ArrayList();
 
-      for(Binary binary : binaries) {
+      for(Object obj : binaries) {
+         Binary binary = (Binary) obj;
          byte[] binaryLengthBytes = JSONB.toBytes(binary.getLength());
          byte[] binaryDataBytes = binary.getData();
          binaryLengthBytesList.add(binaryLengthBytes);
