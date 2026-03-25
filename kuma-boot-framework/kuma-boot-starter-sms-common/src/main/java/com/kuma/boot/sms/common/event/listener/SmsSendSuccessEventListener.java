@@ -1,0 +1,6 @@
+package com.kuma.boot.sms.common.event.listener;
+
+import org.springframework.context.ApplicationListener;
+
+public interface SmsSendSuccessEventListener extends ApplicationListener {
+}

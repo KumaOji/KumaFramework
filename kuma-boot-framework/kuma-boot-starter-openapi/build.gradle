@@ -1,0 +1,33 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework openapi模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.crypto
+    api projectLibs.hutool.json
+
+    // serialization
+    api projectLibs.fastjson2
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+    api "org.springframework.boot:spring-boot-persistence:${springBootVersion}"
+
+    // spring web
+    api projectLibs.spring.boot.starter.web
+
+    // spring cloud (optional, for @RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+
+    // crypto
+    api projectLibs.bouncycastle.provider
+
+    // jakarta
+    compileOnly projectLibs.jakarta.servlet.api
+}
