@@ -1,5 +1,0 @@
-spring:
-  profiles:
-    active: ${active}
-  application:
-    name: project21
