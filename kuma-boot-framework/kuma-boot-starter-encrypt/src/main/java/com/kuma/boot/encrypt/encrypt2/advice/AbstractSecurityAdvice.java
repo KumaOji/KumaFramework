@@ -25,6 +25,7 @@ import org.springframework.core.Ordered;
 
 public abstract class AbstractSecurityAdvice implements BeanFactoryAware, InitializingBean {
    public int DEFAULT_CLEAN_DEPTH;
+   @SuppressWarnings("rawtypes")
    public List STANDARD_CLASS = new ArrayList();
    protected ConfigurableListableBeanFactory beanFactory;
    protected SecurityHandler securityHandler;
@@ -45,7 +46,7 @@ public abstract class AbstractSecurityAdvice implements BeanFactoryAware, Initia
             return this.handleSecurity((String)result, annotations);
          } else {
             if (resultClass.isArray()) {
-               this.wrapperNewObjArray(result, nextDepth, annotations);
+               this.wrapperNewObjArray((Object[]) result, nextDepth, annotations);
             } else {
                if (List.class.isAssignableFrom(resultClass)) {
                   this.wrapperNewObjList((List)result, nextDepth, annotations);
@@ -74,7 +75,7 @@ public abstract class AbstractSecurityAdvice implements BeanFactoryAware, Initia
                         if (String.class.isAssignableFrom(clazz)) {
                            field.set(result, this.handleSecurity((String)value, annotations));
                         } else if (clazz.isArray()) {
-                           this.wrapperNewObjArray(value, nextDepth, annotations);
+                           this.wrapperNewObjArray((Object[]) value, nextDepth, annotations);
                         } else if (List.class.isAssignableFrom(clazz)) {
                            this.wrapperNewObjList((List)value, nextDepth, annotations);
                         } else if (Set.class.isAssignableFrom(clazz)) {
@@ -159,14 +160,16 @@ public abstract class AbstractSecurityAdvice implements BeanFactoryAware, Initia
       objectSet.addAll(objectList);
    }
 
+   @SuppressWarnings("unchecked")
    boolean isStandardClass(Object result) {
-      if (result instanceof Class clazz) {
-         ;
+      Class<?> clazz;
+      if (result instanceof Class<?> c) {
+         clazz = c;
       } else {
          clazz = result.getClass();
       }
 
-      for(String standardClass : this.STANDARD_CLASS) {
+      for(String standardClass : (List<String>) this.STANDARD_CLASS) {
          if (clazz.getName().startsWith(standardClass) || clazz.getName().matches(standardClass)) {
             return true;
          }
@@ -203,11 +206,12 @@ public abstract class AbstractSecurityAdvice implements BeanFactoryAware, Initia
       this.sensitiveHandler = (SensitiveHandler)sensitiveHandlers.get(0);
    }
 
-   private List getBeanByType(Class tClass) {
-      List<T> list = new ArrayList();
+   @SuppressWarnings("unchecked")
+   private <T> List<T> getBeanByType(Class<T> tClass) {
+      List<T> list = new ArrayList<>();
       String[] beanNames = this.beanFactory.getBeanNamesForType(tClass, true, false);
-      List<String> orderedNames = new ArrayList();
-      List<String> nonOrderedNames = new ArrayList();
+      List<String> orderedNames = new ArrayList<>();
+      List<String> nonOrderedNames = new ArrayList<>();
 
       for(String beanName : beanNames) {
          if (this.beanFactory.isTypeMatch(beanName, Ordered.class)) {
@@ -217,18 +221,18 @@ public abstract class AbstractSecurityAdvice implements BeanFactoryAware, Initia
          }
       }
 
-      List<T> orderedBeans = new ArrayList(orderedNames.size());
+      List<T> orderedBeans = new ArrayList<>(orderedNames.size());
 
       for(String oName : orderedNames) {
-         T t = (T)this.beanFactory.getBean(oName, tClass);
+         T t = this.beanFactory.getBean(oName, tClass);
          orderedBeans.add(t);
       }
 
       sortProcessors(orderedBeans, this.beanFactory);
-      List<T> nonOrderedBeans = new ArrayList(nonOrderedNames.size());
+      List<T> nonOrderedBeans = new ArrayList<>(nonOrderedNames.size());
 
       for(String nName : nonOrderedNames) {
-         T t = (T)this.beanFactory.getBean(nName, tClass);
+         T t = this.beanFactory.getBean(nName, tClass);
          nonOrderedBeans.add(t);
       }
 

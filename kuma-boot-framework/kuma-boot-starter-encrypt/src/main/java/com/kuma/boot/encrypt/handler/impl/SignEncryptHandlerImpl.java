@@ -38,9 +38,10 @@ public class SignEncryptHandlerImpl implements SignEncryptHandler {
       }
    }
 
+   @SuppressWarnings("unchecked")
    private String getDigest(Map map, String sortSignSecret, Charset charset) {
       StringBuilder sb = new StringBuilder();
-      map.entrySet().stream().filter((entry) -> entry != null && !"sign".equals(entry.getKey())).sorted(Comparator.comparing((entry) -> entry.getKey().toString())).forEach((entry) -> sb.append(entry.getKey().toString()).append("=").append(entry.getValue().toString()).append("&"));
+      ((Map<Object, Object>) map).entrySet().stream().filter((entry) -> entry != null && !"sign".equals(entry.getKey())).sorted(Comparator.comparing((entry) -> entry.getKey().toString())).forEach((entry) -> sb.append(entry.getKey().toString()).append("=").append(entry.getValue().toString()).append("&"));
       sb.append("secret").append("=").append(sortSignSecret);
       return MD5.create().digestHex16(sb.toString(), charset);
    }

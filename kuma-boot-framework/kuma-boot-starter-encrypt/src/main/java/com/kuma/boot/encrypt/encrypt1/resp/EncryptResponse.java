@@ -17,7 +17,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 @EnableConfigurationProperties({EncryptProperties.class})
 @ControllerAdvice
-public class EncryptResponse implements ResponseBodyAdvice {
+public class EncryptResponse implements ResponseBodyAdvice<Object> {
    private final JsonMapper jsonMapper = JsonMapper.builder().build();
    private final EncryptProperties encryptProperties;
 
@@ -25,11 +25,16 @@ public class EncryptResponse implements ResponseBodyAdvice {
       this.encryptProperties = encryptProperties;
    }
 
-   public boolean supports(MethodParameter returnType, Class converterType) {
+   @Override
+   public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
       return returnType.hasMethodAnnotation(Encrypt.class);
    }
 
-   public RespBean beforeBodyWrite(RespBean body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+   @Override
+   public Object beforeBodyWrite(Object bodyObj, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+      if (!(bodyObj instanceof RespBean body)) {
+         return bodyObj;
+      }
       byte[] keyBytes = this.encryptProperties.getKey().getBytes();
 
       try {

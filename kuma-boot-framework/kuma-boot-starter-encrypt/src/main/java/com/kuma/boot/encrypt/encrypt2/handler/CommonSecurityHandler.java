@@ -39,7 +39,9 @@ public class CommonSecurityHandler implements SecurityHandler {
       return null;
    }
 
-   public String handleEncrypt(String source, Security annotation) {
+   @Override
+   public String handleEncrypt(String source, Annotation ann) {
+      Security annotation = (Security) ann;
       if (annotation.encrypt()) {
          try {
             byte[] encrypt = this.securityProcessor.encrypt(source.getBytes(this.charset));
@@ -59,7 +61,9 @@ public class CommonSecurityHandler implements SecurityHandler {
       return source;
    }
 
-   public String handleDecrypt(String source, Security annotation) {
+   @Override
+   public String handleDecrypt(String source, Annotation ann) {
+      Security annotation = (Security) ann;
       if (annotation.decrypt()) {
          try {
             byte[] decrypt = this.securityProcessor.decrypt(source);

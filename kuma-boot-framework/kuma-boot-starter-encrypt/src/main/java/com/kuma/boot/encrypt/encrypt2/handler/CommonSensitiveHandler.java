@@ -29,7 +29,9 @@ public class CommonSensitiveHandler implements SensitiveHandler {
       return null;
    }
 
-   public String format(String source, Sensitive annotation) {
+   @Override
+   public String format(String source, Annotation ann) {
+      Sensitive annotation = (Sensitive) ann;
       if (annotation.required()) {
          try {
             return this.sensitiveProcessor.format(source, annotation.type());
