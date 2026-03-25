@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework sms-common模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring web
+    api projectLibs.spring.boot.starter.web
+
+    // spring cloud (optional, for @RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+
+    // annotations
+    compileOnly projectLibs.jspecify
+}

@@ -140,3 +140,7 @@ gradle.settingsEvaluated {
 }
 
 include 'kuma-boot-framework:kuma-boot-starter-grpc'
+include 'kuma-boot-framework:kuma-boot-starter-encrypt'
+include 'kuma-boot-framework:kuma-boot-starter-openapi'
+include 'kuma-boot-framework:kuma-boot-starter-oss-common'
+include 'kuma-boot-framework:kuma-boot-starter-sms-common'

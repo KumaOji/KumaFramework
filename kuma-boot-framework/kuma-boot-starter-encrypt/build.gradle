@@ -1,0 +1,47 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework encrypt模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+
+    // hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.crypto
+
+    // serialization
+    api projectLibs.fastjson2
+    api projectLibs.jackson.databind
+
+    // crypto
+    api projectLibs.bouncycastle.provider
+
+    // commons
+    api projectLibs.commons.codec
+    api projectLibs.commons.lang3
+
+    // guava
+    api projectLibs.guava
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring web
+    api projectLibs.spring.boot.starter.web
+
+    // spring aop
+    api projectLibs.aspectjweaver
+    api projectLibs.aopalliance
+
+    // spring cloud (optional, for @RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+
+    // jakarta
+    compileOnly projectLibs.jakarta.servlet.api
+
+    // annotations
+    compileOnly projectLibs.jspecify
+}
