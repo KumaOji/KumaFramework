@@ -128,8 +128,9 @@ public class InitHandler {
       return typeUrl;
    }
 
+   @SuppressWarnings("unchecked")
    private static void restMethodHandler(List methods, String[] finalTypeUrl, Set cacheUrl) {
-      methods.forEach((m) -> {
+      ((List<Method>) methods).forEach((m) -> {
          if (AnnotationUtils.findAnnotation(m, PostMapping.class) != null || AnnotationUtils.findAnnotation(m, RequestMapping.class) != null && Arrays.stream(((RequestMapping)AnnotationUtils.findAnnotation(m, RequestMapping.class)).method()).allMatch((r) -> !r.equals(RequestMethod.GET))) {
             urlHandler(m, finalTypeUrl, cacheUrl);
          }
@@ -137,8 +138,9 @@ public class InitHandler {
       });
    }
 
+   @SuppressWarnings("unchecked")
    private static void methodHandler(List methods, String[] finalTypeUrl, Set cacheUrl) {
-      methods.forEach((m) -> {
+      ((List<Method>) methods).forEach((m) -> {
          if (AnnotationUtils.findAnnotation(m, PostMapping.class) != null && AnnotationUtils.findAnnotation(m, ResponseBody.class) != null || AnnotationUtils.findAnnotation(m, RequestMapping.class) != null && Arrays.stream(((RequestMapping)AnnotationUtils.findAnnotation(m, RequestMapping.class)).method()).allMatch((r) -> !r.equals(RequestMethod.GET)) && AnnotationUtils.findAnnotation(m, ResponseBody.class) != null) {
             urlHandler(m, finalTypeUrl, cacheUrl);
          }
@@ -155,17 +157,13 @@ public class InitHandler {
       }
 
       Arrays.stream(urls).forEach((u) -> {
-         if (!u.startsWith("/")) {
-            u = "/".concat(u);
-         }
+         String effectiveU = u.startsWith("/") ? u : "/".concat(u);
 
          if (finalTypeUrl != null && finalTypeUrl.length > 0) {
             Arrays.stream(finalTypeUrl).forEach((f) -> {
-               if (!f.startsWith("/")) {
-                  f = "/".concat(f);
-               }
+               String effectiveF = f.startsWith("/") ? f : "/".concat(f);
 
-               String uri = f.concat(u).replaceAll("//+", "/");
+               String uri = effectiveF.concat(effectiveU).replaceAll("//+", "/");
                if (uri.endsWith("/")) {
                   uri = uri.substring(0, uri.length() - 1);
                }
@@ -173,7 +171,7 @@ public class InitHandler {
                cacheUrl.add(uri);
             });
          } else {
-            String uri = u.replaceAll("//+", "/");
+            String uri = effectiveU.replaceAll("//+", "/");
             if (uri.endsWith("/")) {
                uri = uri.substring(0, uri.length() - 1);
             }
