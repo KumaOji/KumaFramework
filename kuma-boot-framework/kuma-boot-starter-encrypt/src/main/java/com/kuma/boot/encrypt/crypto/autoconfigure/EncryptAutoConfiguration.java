@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@AutoConfiguration
+@AutoConfiguration("cryptoEncryptAutoConfiguration")
 @EnableConfigurationProperties({EncryptProperties.class})
 @ConditionalOnProperty(
    prefix = "kuma.boot.crypto",

@@ -49,6 +49,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-totp')
     api project(':kuma-boot-framework:kuma-boot-starter-dingtalk')
     api project(':kuma-boot-framework:kuma-boot-starter-sentinel')
+    api project(':kuma-boot-framework:kuma-boot-starter-encrypt')
+    api project(':kuma-boot-framework:kuma-boot-starter-openapi')
+    api project(':kuma-boot-framework:kuma-boot-starter-sms-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
 
     // ── kuma-cloud-framework ──────────────────────────────────────────────
     api project(':kuma-cloud-framework:kuma-cloud-starter-jdbcpool')
