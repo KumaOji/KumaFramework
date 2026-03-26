@@ -5,11 +5,13 @@ import com.kuma.boot.sms.common.model.NoticeData;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
 
-public class RandomSmsLoadBalancer extends RandomLoadBalancer implements SmsSenderLoadBalancer {
+public class RandomSmsLoadBalancer extends RandomLoadBalancer<SendHandler> implements SmsSenderLoadBalancer {
    public static final String TYPE_NAME = "Random";
 
-   protected @Nullable SendHandler choose0(List activeTargetList, NoticeData chooseReferenceObject) {
-      List<TargetWrapper<SendHandler>> newActiveTargetList = activeTargetList.stream().filter((wrapper) -> this.chooseFilter(wrapper, chooseReferenceObject)).toList();
-      return newActiveTargetList.isEmpty() ? null : (SendHandler)super.choose0(activeTargetList, chooseReferenceObject);
+   @Override
+   protected @Nullable SendHandler choose0(List<TargetWrapper<SendHandler>> activeTargetList, Object chooseReferenceObject) {
+      NoticeData noticeData = (NoticeData) chooseReferenceObject;
+      List<TargetWrapper<SendHandler>> newActiveTargetList = activeTargetList.stream().filter((wrapper) -> this.chooseFilter(wrapper, noticeData)).toList();
+      return newActiveTargetList.isEmpty() ? null : super.choose0(newActiveTargetList, chooseReferenceObject);
    }
 }

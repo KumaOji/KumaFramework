@@ -2,18 +2,18 @@ package com.kuma.boot.sms.common.loadbalancer;
 
 import java.util.Objects;
 
-public class TargetWrapper {
+public class TargetWrapper<T> {
    private boolean active;
-   private Object target;
+   private T target;
 
    private TargetWrapper() {
    }
 
-   public static TargetWrapper of(Object target) {
+   public static <T> TargetWrapper<T> of(T target) {
       if (target == null) {
          throw new NullPointerException("entity is null");
       } else {
-         TargetWrapper<T> wrapper = new TargetWrapper();
+         TargetWrapper<T> wrapper = new TargetWrapper<>();
          wrapper.target = target;
          return wrapper;
       }
@@ -27,19 +27,21 @@ public class TargetWrapper {
       this.active = active;
    }
 
-   public Object getTarget() {
+   public T getTarget() {
       return this.target;
    }
 
+   @Override
    public boolean equals(Object o) {
       if (o != null && this.getClass() == o.getClass()) {
-         TargetWrapper<?> that = (TargetWrapper)o;
+         TargetWrapper<?> that = (TargetWrapper<?>) o;
          return Objects.equals(this.target, that.target);
       } else {
          return false;
       }
    }
 
+   @Override
    public int hashCode() {
       return this.target.hashCode();
    }

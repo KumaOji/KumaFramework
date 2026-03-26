@@ -7,39 +7,39 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class WeightRoundRobinLoadBalancer extends AbstractLoadBalancer {
-   private final Map weightMap = new ConcurrentHashMap();
+public class WeightRoundRobinLoadBalancer<T> extends AbstractLoadBalancer<T> {
+   private final Map<T, Integer> weightMap = new ConcurrentHashMap<>();
    private final Lock lock = new ReentrantLock();
    private int position = 0;
 
    public WeightRoundRobinLoadBalancer() {
    }
 
-   public WeightRoundRobinLoadBalancer(List targetList) {
+   public WeightRoundRobinLoadBalancer(List<TargetWrapper<T>> targetList) {
       super(targetList);
    }
 
-   protected void afterAdd(TargetWrapper wrapper) {
+   protected void afterAdd(TargetWrapper<T> wrapper) {
       this.weightMap.put(wrapper.getTarget(), 1);
    }
 
-   protected void afterRemove(TargetWrapper wrapper) {
+   protected void afterRemove(TargetWrapper<T> wrapper) {
       this.weightMap.remove(wrapper.getTarget());
    }
 
-   public void setWeight(Object target, int weight) {
+   public void setWeight(T target, int weight) {
       if (target != null) {
          this.weightMap.put(target, Math.max(weight, 1));
       }
    }
 
-   protected Object choose0(List activeTargetList, Object chooseReferenceObject) {
-      List<TargetWrapper<T>> targetList = new ArrayList();
+   protected T choose0(List<TargetWrapper<T>> activeTargetList, Object chooseReferenceObject) {
+      List<TargetWrapper<T>> targetList = new ArrayList<>();
 
-      for(TargetWrapper wrapper : activeTargetList) {
-         int weight = (Integer)this.weightMap.getOrDefault(wrapper.getTarget(), 1);
+      for (TargetWrapper<T> wrapper : activeTargetList) {
+         int weight = this.weightMap.getOrDefault(wrapper.getTarget(), 1);
 
-         for(int i = 0; i < weight; ++i) {
+         for (int i = 0; i < weight; ++i) {
             targetList.add(wrapper);
          }
       }
@@ -47,19 +47,16 @@ public class WeightRoundRobinLoadBalancer extends AbstractLoadBalancer {
       int size = targetList.size();
       this.lock.lock();
 
-      Object var13;
       try {
          if (this.position >= size) {
             this.position = 0;
          }
 
-         TargetWrapper<T> wrapper = (TargetWrapper)targetList.get(this.position);
+         TargetWrapper<T> wrapper = targetList.get(this.position);
          ++this.position;
-         var13 = wrapper == null ? null : wrapper.getTarget();
+         return wrapper == null ? null : wrapper.getTarget();
       } finally {
          this.lock.unlock();
       }
-
-      return var13;
    }
 }

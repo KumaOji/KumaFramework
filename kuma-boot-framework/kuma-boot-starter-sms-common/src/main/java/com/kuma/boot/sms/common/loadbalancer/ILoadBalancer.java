@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public interface ILoadBalancer {
+public interface ILoadBalancer<T> {
    int MIN_WEIGHT = 1;
 
-   void addTargetWrapper(TargetWrapper wrapper);
+   void addTargetWrapper(TargetWrapper<T> wrapper);
 
-   default void addTarget(Object target, Boolean initActive) {
+   default void addTarget(T target, Boolean initActive) {
       if (target != null) {
          TargetWrapper<T> wrapper = TargetWrapper.of(target);
          if (initActive != null) {
@@ -22,21 +22,21 @@ public interface ILoadBalancer {
       }
    }
 
-   default void addTarget(Object target) {
-      this.addTarget(target, (Boolean)null);
+   default void addTarget(T target) {
+      this.addTarget(target, (Boolean) null);
    }
 
-   default void addTargetWrappers(Collection wrappers) {
+   default void addTargetWrappers(Collection<TargetWrapper<T>> wrappers) {
       if (wrappers != null && !wrappers.isEmpty()) {
          wrappers.forEach(this::addTargetWrapper);
       }
    }
 
-   default void addTargets(Collection targets, Boolean initActive) {
+   default void addTargets(Collection<T> targets, Boolean initActive) {
       if (targets != null && !targets.isEmpty()) {
-         Collection<TargetWrapper<T>> wrappers = new ArrayList(targets.size());
+         Collection<TargetWrapper<T>> wrappers = new ArrayList<>(targets.size());
 
-         for(Object target : targets) {
+         for (T target : targets) {
             if (target != null) {
                TargetWrapper<T> wrapper = TargetWrapper.of(target);
                if (initActive != null) {
@@ -51,25 +51,25 @@ public interface ILoadBalancer {
       }
    }
 
-   default void addTargets(Collection targets) {
-      this.addTargets(targets, (Boolean)null);
+   default void addTargets(Collection<T> targets) {
+      this.addTargets(targets, (Boolean) null);
    }
 
-   void removeTargetWrapper(TargetWrapper wrapper);
+   void removeTargetWrapper(TargetWrapper<T> wrapper);
 
-   default void removeTarget(Object target) {
+   default void removeTarget(T target) {
       if (target != null) {
          this.removeTargetWrapper(TargetWrapper.of(target));
       }
    }
 
-   default void removeTargetWrappers(Collection wrappers) {
+   default void removeTargetWrappers(Collection<TargetWrapper<T>> wrappers) {
       if (wrappers != null && !wrappers.isEmpty()) {
          wrappers.forEach(this::removeTargetWrapper);
       }
    }
 
-   default void removeTargets(Collection targets) {
+   default void removeTargets(Collection<T> targets) {
       if (targets != null && !targets.isEmpty()) {
          Collection<TargetWrapper<T>> wrappers = targets.stream().filter(Objects::nonNull).map(TargetWrapper::of).toList();
          this.removeTargetWrappers(wrappers);
@@ -78,35 +78,35 @@ public interface ILoadBalancer {
 
    void clear();
 
-   void setWeight(Object target, int weight);
+   void setWeight(T target, int weight);
 
-   Object choose(Predicate predicate, Object chooseReferenceObject);
+   T choose(Predicate<T> predicate, Object chooseReferenceObject);
 
-   default Object choose(Object chooseReferenceObject) {
-      return this.choose((Predicate)null, chooseReferenceObject);
+   default T choose(Object chooseReferenceObject) {
+      return this.choose((Predicate<T>) null, chooseReferenceObject);
    }
 
-   default Object choose() {
-      return this.choose((Predicate)null, (Object)null);
+   default T choose() {
+      return this.choose((Predicate<T>) null, (Object) null);
    }
 
-   void markReachable(TargetWrapper wrapper);
+   void markReachable(TargetWrapper<T> wrapper);
 
-   default void markReachable(Object target) {
+   default void markReachable(T target) {
       if (target != null) {
          this.markReachable(TargetWrapper.of(target));
       }
    }
 
-   void markDown(TargetWrapper wrapper);
+   void markDown(TargetWrapper<T> wrapper);
 
-   default void markDown(Object target) {
+   default void markDown(T target) {
       if (target != null) {
          this.markDown(TargetWrapper.of(target));
       }
    }
 
-   List getTargetWrappers(Boolean active);
+   List<TargetWrapper<T>> getTargetWrappers(Boolean active);
 
-   List getTargets(Boolean active);
+   List<T> getTargets(Boolean active);
 }

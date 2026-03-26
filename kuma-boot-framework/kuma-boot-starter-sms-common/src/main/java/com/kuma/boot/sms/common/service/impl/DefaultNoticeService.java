@@ -18,10 +18,10 @@ import org.jspecify.annotations.Nullable;
 public class DefaultNoticeService implements NoticeService {
    private final SmsProperties config;
    private final SmsAsyncProperties asyncConfig;
-   private final ILoadBalancer smsSenderLoadbalancer;
+   private final ILoadBalancer<SendHandler> smsSenderLoadbalancer;
    private final SendAsyncThreadPoolExecutor executor;
 
-   public DefaultNoticeService(SmsProperties config, SmsAsyncProperties asyncConfig, ILoadBalancer smsSenderLoadbalancer, @Nullable SendAsyncThreadPoolExecutor executor) {
+   public DefaultNoticeService(SmsProperties config, SmsAsyncProperties asyncConfig, ILoadBalancer<SendHandler> smsSenderLoadbalancer, @Nullable SendAsyncThreadPoolExecutor executor) {
       this.config = config;
       this.asyncConfig = asyncConfig;
       this.smsSenderLoadbalancer = smsSenderLoadbalancer;
@@ -55,17 +55,18 @@ public class DefaultNoticeService implements NoticeService {
          LogUtils.debug("phones is empty", new Object[0]);
          return result;
       } else {
-         List<String> phoneList = phones.stream().filter(this::phoneRegValidation).toList();
+         @SuppressWarnings("unchecked")
+         List<String> phoneList = ((Collection<String>) phones).stream().filter(this::phoneRegValidation).toList();
          if (phoneList.isEmpty()) {
             LogUtils.debug("after filter phones is empty", new Object[0]);
             return result;
          } else {
-            SendHandler sendHandler = (SendHandler)this.smsSenderLoadbalancer.choose(noticeData);
+            SendHandler sendHandler = this.smsSenderLoadbalancer.choose(noticeData);
             if (sendHandler == null) {
                result.exception = new NotFindSendHandlerException();
             } else {
                try {
-                  result.result = sendHandler.send(noticeData, phones);
+                  result.result = sendHandler.send(noticeData, phoneList);
                } catch (RuntimeException e) {
                   result.exception = e;
                } catch (Exception e) {
