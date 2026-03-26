@@ -4,34 +4,31 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
+public class RoundRobinLoadBalancer<T> extends AbstractLoadBalancer<T> {
    private final Lock lock = new ReentrantLock();
    private int position = 0;
 
    public RoundRobinLoadBalancer() {
    }
 
-   public RoundRobinLoadBalancer(List targetList) {
+   public RoundRobinLoadBalancer(List<TargetWrapper<T>> targetList) {
       super(targetList);
    }
 
-   protected Object choose0(List activeTargetList, Object chooseReferenceObject) {
+   protected T choose0(List<TargetWrapper<T>> activeTargetList, Object chooseReferenceObject) {
       int size = activeTargetList.size();
       this.lock.lock();
 
-      Object var5;
       try {
          if (this.position >= size) {
             this.position = 0;
          }
 
-         TargetWrapper<T> wrapper = (TargetWrapper)activeTargetList.get(this.position);
+         TargetWrapper<T> wrapper = activeTargetList.get(this.position);
          ++this.position;
-         var5 = wrapper == null ? null : wrapper.getTarget();
+         return wrapper == null ? null : wrapper.getTarget();
       } finally {
          this.lock.unlock();
       }
-
-      return var5;
    }
 }
