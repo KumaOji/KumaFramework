@@ -21,9 +21,11 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
+import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.StringNode;
 
+@Component("cryptoDecryptRequestBodyAdvice")
 @RestControllerAdvice
 public class DecryptRequestBodyAdvice implements RequestBodyAdvice {
    private static final Logger log = LoggerFactory.getLogger(DecryptRequestBodyAdvice.class);
