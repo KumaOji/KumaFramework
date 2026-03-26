@@ -43,7 +43,7 @@ spring:
       max-request-size: 215MB
   mvc:
     servlet:
-      load-on-startup: 1
+      load-on-startup: -1
     format:
       date-time: yyyy-MM-dd HH:mm:ss
       date: yyyy-MM-dd
@@ -67,6 +67,7 @@ spring:
       - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
   datasource:
     dynamic:
+      lazy: true                 # 数据源懒初始化，首次 DB 操作时才建连接池（省 ~900ms）
       datasource:
         mysql:
           hikari:
@@ -78,6 +79,11 @@ spring:
             minimum-idle: 1
             maximum-pool-size: 10
             connection-timeout: 10000
+  integration:
+    management:
+      default-logging-enabled: false   # 关闭 SI 默认 logging，减少 integrationEvaluationContext 初始化开销
+    endpoint:
+      enabled: false
   cloud:
     stream:
       banner:
@@ -94,6 +100,9 @@ spring:
       rabbit:
         binder:
           admin-addresses:
+    inetutils:
+      timeout-value: 1000        # hostname 解析超时 1s（默认可能等待 5~10s）
+      prefer-ip-address: true    # 直接使用 IP，跳过 hostname 反解
     nacos:
       discovery:
         enabled: false

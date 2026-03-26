@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 服务初始化之后，执行方法
@@ -37,10 +39,13 @@ public class StartAppRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         LogUtils.info("《服务初始化执行处理》 start...");
-        applyWordsLicense();
-        applyCellsLicense();
-        applyPdfLicense();
-        applySlidesLicense();
+        List<CompletableFuture<Void>> futures = List.of(
+            CompletableFuture.runAsync(this::applyWordsLicense),
+            CompletableFuture.runAsync(this::applyCellsLicense),
+            CompletableFuture.runAsync(this::applyPdfLicense),
+            CompletableFuture.runAsync(this::applySlidesLicense)
+        );
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         LogUtils.info("《服务初始化执行处理》 end...");
     }
 
