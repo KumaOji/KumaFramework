@@ -15,7 +15,6 @@
  */
 
 package com.kuma.boot.actuator.endpoint.audit.autoconfigure;
-
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.beans.factory.InitializingBean;

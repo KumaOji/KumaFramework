@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/auth/login", "/auth/logout", "/auth/current").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()  // 供负载均衡健康检查
+                        .requestMatchers("/actuator/**").authenticated()  // 其余 actuator 需认证
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/doc.html", "/webjars/**").permitAll()
                         .requestMatchers("/article/list", "/article/category/**").permitAll()
                         .requestMatchers("/article/*/view", "/article/*/like", "/article/*/comment").permitAll()

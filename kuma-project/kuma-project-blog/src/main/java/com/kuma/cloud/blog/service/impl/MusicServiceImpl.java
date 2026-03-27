@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Music;
 import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
@@ -24,12 +25,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MusicServiceImpl implements MusicService {
+
+    private static final Set<String> ALLOWED_ORDER_COLUMNS =
+            Set.of("create_time", "play_count", "like_count", "name", "artist", "album");
 
     private final MusicMapper musicMapper;
 
@@ -87,6 +92,9 @@ public class MusicServiceImpl implements MusicService {
             if (queryVO.getStatus() != null) qw.eq("status", queryVO.getStatus());
             if (queryVO.getIsRecommend() != null) qw.eq("is_recommend", queryVO.getIsRecommend());
             if (StringUtils.isNotEmpty(queryVO.getOrderBy())) {
+                if (!ALLOWED_ORDER_COLUMNS.contains(queryVO.getOrderBy())) {
+                    throw new BusinessException("非法排序字段: " + queryVO.getOrderBy());
+                }
                 boolean asc = "asc".equalsIgnoreCase(queryVO.getOrderDirection());
                 qw.orderBy(true, asc, queryVO.getOrderBy());
             } else {
