@@ -3,7 +3,20 @@ server:
   servlet:
     context-path: /api
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health  # 只暴露 health，不暴露 env/heapdump/loggers 等危险端点
+  endpoint:
+    health:
+      show-details: never  # 不向外泄露数据库/redis 连接状态详情
+
 spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
   mvc:
     async:
       request-timeout: 600000
@@ -98,7 +111,6 @@ kuma:
         endpoint:
           uaa-service-uri: ${UAA_SERVICE_URI:http://uaa:8080}
       ignore-url:
-        - /actuator/**
         - /v3/api-docs/**
         - /auth/**
         - /error

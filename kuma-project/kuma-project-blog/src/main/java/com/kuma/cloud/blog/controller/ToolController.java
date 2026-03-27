@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,7 +37,7 @@ public class ToolController {
     @Authorize(BlogPermissions.TOOL_USE)
     public ResponseEntity<Resource> repkg(
             @Parameter(description = "上传的 .pkg 或 .mpkg 文件") @RequestPart("file") MultipartFile pkgFile,
-            @ModelAttribute RepkgRequest request) {
+            @Valid @ModelAttribute RepkgRequest request) {
         Resource resource = toolService.processRepkgFile(pkgFile, request);
         String encodedFilename = URLEncoder.encode(resource.getFilename(), StandardCharsets.UTF_8)
                 .replace("+", "%20");

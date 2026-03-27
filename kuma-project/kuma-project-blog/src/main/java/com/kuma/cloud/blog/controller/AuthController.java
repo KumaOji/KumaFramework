@@ -5,6 +5,7 @@ import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.security.LoginRateLimiter;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.TokenService;
 import com.kuma.cloud.blog.service.UserService;
@@ -30,6 +31,7 @@ public class AuthController {
     private final UserService userService;
     private final TokenService tokenService;
     private final PermissionService permissionService;
+    private final LoginRateLimiter loginRateLimiter;
 
     @Value("${blog.token-expire-seconds:86400}")
     private long tokenExpireSeconds;
@@ -39,16 +41,20 @@ public class AuthController {
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request,
+                                       HttpServletRequest httpRequest, HttpServletResponse response) {
+        String ip = LoginRateLimiter.resolveIp(httpRequest);
+        loginRateLimiter.check(ip);
+
         User user = userService.getByUsername(request.getUsername());
         if (user == null || !userService.checkPassword(request.getPassword(), user.getPassword())) {
             throw new BusinessException("用户名或密码错误");
         }
+        loginRateLimiter.reset(ip);
         userService.updateLastLoginTime(user.getId());
 
         String token = UUID.randomUUID().toString().replace("-", "");
         LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setToken(token);
         loginResponse.setUserId(user.getId());
         loginResponse.setUsername(user.getUsername());
         loginResponse.setNickname(user.getNickname());
@@ -117,21 +123,17 @@ public class AuthController {
     }
 
     private void setTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("blog_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60);
-        cookie.setSecure(cookieSecure);
-        response.addCookie(cookie);
+        String secureFlag = cookieSecure ? "; Secure" : "";
+        response.addHeader("Set-Cookie", String.format(
+                "blog_token=%s; Path=/; Max-Age=%d; HttpOnly%s; SameSite=Strict",
+                token, 7 * 24 * 60 * 60, secureFlag));
     }
 
     private void clearTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("blog_token", null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setSecure(cookieSecure);
-        response.addCookie(cookie);
+        String secureFlag = cookieSecure ? "; Secure" : "";
+        response.addHeader("Set-Cookie", String.format(
+                "blog_token=; Path=/; Max-Age=0; HttpOnly%s; SameSite=Strict",
+                secureFlag));
     }
 
 }

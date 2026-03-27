@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.service.impl;
 
+import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.cloud.blog.domain.vo.CommandRequest;
 import com.kuma.cloud.blog.domain.vo.CommandResponse;
 import com.kuma.cloud.blog.domain.vo.FileUploadResponse;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -40,6 +42,8 @@ public class ToolServiceImpl implements ToolService {
     private static final Logger logger = LoggerFactory.getLogger(ToolServiceImpl.class);
 
     private static final String REPKG_TOOL_CLASSPATH = "RePKG";
+    private static final long MAX_PKG_FILE_SIZE = 500L * 1024 * 1024; // 500 MB
+    private static final Set<String> ALLOWED_PKG_EXTENSIONS = Set.of(".pkg", ".mpkg");
 
     private final Executor asyncExecutor;
 
@@ -59,6 +63,7 @@ public class ToolServiceImpl implements ToolService {
         String outputDir = null;
         String zipFilePath = null;
         try {
+            validatePkgFile(pkgFile);
             FileUploadResponse uploadResponse = saveUploadedFile(repkgOutputDir, pkgFile);
             tempPkgPath = uploadResponse.getFilePath();
 
@@ -67,7 +72,8 @@ public class ToolServiceImpl implements ToolService {
                 tempPkgPath = tempPkgFile.getAbsolutePath();
             }
             if (!tempPkgFile.exists()) {
-                throw new RuntimeException("上传的文件不存在: " + tempPkgPath);
+                logger.error("上传的临时文件不存在: {}", tempPkgPath);
+                throw new RuntimeException("文件保存失败，请重试");
             }
 
             String outputDirName = UUID.randomUUID().toString();
@@ -97,17 +103,20 @@ public class ToolServiceImpl implements ToolService {
                 String safeBaseDir = new File(repkgToolDir).getCanonicalPath();
                 String repkgCanonical = repkgExeFile.getCanonicalPath();
                 if (!repkgCanonical.startsWith(safeBaseDir)) {
-                    throw new RuntimeException("RePKG 路径必须在工具目录内: " + repkgToolDir);
+                    logger.error("安全校验失败：RePKG 路径越界 canonical={} base={}", repkgCanonical, safeBaseDir);
+                    throw new RuntimeException("工具路径配置错误，请联系管理员");
                 }
                 if (!repkgExeFile.getName().toLowerCase().endsWith(".exe")) {
-                    throw new RuntimeException("仅允许执行 .exe 文件");
+                    throw new RuntimeException("工具路径配置错误，请联系管理员");
                 }
             } catch (IOException e) {
-                throw new RuntimeException("路径校验失败", e);
+                logger.error("路径校验 IO 异常", e);
+                throw new RuntimeException("工具路径配置错误，请联系管理员");
             }
 
             if (!repkgExeFile.exists()) {
-                throw new RuntimeException("RePKG.exe 不存在: " + repkgPath);
+                logger.error("RePKG.exe 不存在: {}", repkgPath);
+                throw new RuntimeException("工具尚未配置，请联系管理员");
             }
             commandRequest.setCommand(repkgPath);
 
@@ -144,10 +153,6 @@ public class ToolServiceImpl implements ToolService {
             commandRequest.setArgs(args);
             commandRequest.setTimeout(request.getTimeout() != null ? request.getTimeout() : 300);
 
-            if (request.getWorkingDirectory() != null && !request.getWorkingDirectory().trim().isEmpty()) {
-                commandRequest.setWorkingDirectory(request.getWorkingDirectory());
-            }
-
             logger.info("执行 RePKG 命令: {} {}", repkgPath, String.join(" ", args));
 
             CommandResponse commandResponse = executeCommand(commandRequest);
@@ -156,13 +161,11 @@ public class ToolServiceImpl implements ToolService {
                     commandResponse.getOutput(), commandResponse.getError());
 
             if (!commandResponse.getSuccess()) {
-                String errorMsg = String.format("RePKG 执行失败 (退出码: %d): %s",
+                logger.error("RePKG 执行失败 - 退出码: {}, 错误: {}, 输出: {}",
                         commandResponse.getExitCode(),
-                        commandResponse.getError() != null && !commandResponse.getError().isEmpty()
-                                ? commandResponse.getError()
-                                : commandResponse.getOutput());
-                logger.error("RePKG 执行失败: {}", errorMsg);
-                throw new RuntimeException(errorMsg);
+                        commandResponse.getError(),
+                        commandResponse.getOutput());
+                throw new RuntimeException("文件提取失败（退出码: " + commandResponse.getExitCode() + "）");
             }
 
             zipFilePath = Paths.get(repkgOutputDir, outputDirName + ".zip").toString();
@@ -175,14 +178,34 @@ public class ToolServiceImpl implements ToolService {
             cleanupTempFiles(tempPkgPath, outputDir);
             return createAutoCleanupResource(zipFile);
 
+        } catch (BusinessException e) {
+            cleanupTempFiles(tempPkgPath, outputDir, zipFilePath);
+            throw e; // 验证类异常消息安全，直接透传
         } catch (Exception e) {
             logger.error("处理 RePKG 文件时发生异常: {}", e.getMessage(), e);
             cleanupTempFiles(tempPkgPath, outputDir, zipFilePath);
-            throw new RuntimeException("处理 RePKG 文件失败: " + e.getMessage(), e);
+            throw new RuntimeException("文件处理失败，请稍后再试");
         }
     }
 
     // ── 私有工具方法 ──────────────────────────────────────────────────────────
+
+    private void validatePkgFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BusinessException("上传文件不能为空");
+        }
+        if (file.getSize() > MAX_PKG_FILE_SIZE) {
+            throw new BusinessException("文件大小超过限制（最大 500MB）");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new BusinessException("文件名无效，缺少扩展名");
+        }
+        String ext = originalFilename.substring(originalFilename.lastIndexOf('.')).toLowerCase();
+        if (!ALLOWED_PKG_EXTENSIONS.contains(ext)) {
+            throw new BusinessException("仅支持 .pkg 或 .mpkg 文件");
+        }
+    }
 
     /**
      * 执行外部命令，同步等待结果
