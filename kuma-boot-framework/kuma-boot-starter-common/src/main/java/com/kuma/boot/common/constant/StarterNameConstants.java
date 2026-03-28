@@ -87,6 +87,8 @@ public final class StarterNameConstants {
 
     public static final String FLOWENGINE_STARTER = "kuma-boot-starter-flowengine";
 
+    public static final String FRP_STARTER = "kuma-boot-starter-frp";
+
     public static final String GRPC_STARTER = "kuma-boot-starter-grpc";
 
     public static final String IDEMPOTENT_STARTER = "kuma-boot-starter-idempotent";
