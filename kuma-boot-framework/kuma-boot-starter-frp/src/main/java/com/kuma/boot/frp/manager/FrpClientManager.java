@@ -50,6 +50,7 @@ public class FrpClientManager implements SmartLifecycle {
 
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private ScheduledExecutorService watchdog;
+    private int restartCount = 0;
 
     public FrpClientManager(FrpProperties properties) {
         this.properties = properties;
@@ -166,7 +167,8 @@ public class FrpClientManager implements SmartLifecycle {
     }
 
     /**
-     * 根据 FrpProperties 动态生成 frpc TOML 配置文件
+     * 根据 FrpProperties 动态生成 frpc TOML 配置文件。
+     * 格式严格对齐 frpc 实际支持的字段，避免 "unknown field" 错误。
      */
     private Path generateTomlConfig() throws IOException {
         Path toolDir = resolveToolDir();
@@ -179,21 +181,10 @@ public class FrpClientManager implements SmartLifecycle {
         sb.append("serverAddr = \"").append(properties.getServerAddr()).append("\"\n");
         sb.append("serverPort = ").append(properties.getServerPort()).append("\n\n");
 
-        // 认证
-        FrpProperties.Auth auth = properties.getAuth();
-        sb.append("[auth]\n");
-        sb.append("method = \"").append(auth.getMethod()).append("\"\n");
-        if (StringUtils.hasText(auth.getToken())) {
-            sb.append("token = \"").append(auth.getToken()).append("\"\n");
+        // 认证（内联写法，与 frpc 实际格式一致）
+        if (StringUtils.hasText(properties.getToken())) {
+            sb.append("auth.token = \"").append(properties.getToken()).append("\"\n\n");
         }
-        sb.append("\n");
-
-        // 日志
-        FrpProperties.Log logCfg = properties.getLog();
-        sb.append("[log]\n");
-        sb.append("level = \"").append(logCfg.getLevel()).append("\"\n");
-        sb.append("maxDays = ").append(logCfg.getMaxDays()).append("\n");
-        sb.append("disableColor = ").append(logCfg.isDisableColor()).append("\n\n");
 
         // 代理
         for (FrpProperties.Proxy proxy : properties.getProxies()) {
@@ -209,13 +200,11 @@ public class FrpClientManager implements SmartLifecycle {
             }
             if (StringUtils.hasText(proxy.getCustomDomains())) {
                 sb.append("customDomains = [");
-                String[] domains = proxy.getCustomDomains().split(",");
                 List<String> quoted = new ArrayList<>();
-                for (String d : domains) {
+                for (String d : proxy.getCustomDomains().split(",")) {
                     quoted.add("\"" + d.trim() + "\"");
                 }
-                sb.append(String.join(", ", quoted));
-                sb.append("]\n");
+                sb.append(String.join(", ", quoted)).append("]\n");
             }
             if (StringUtils.hasText(proxy.getSubdomain())) {
                 sb.append("subdomain = \"").append(proxy.getSubdomain()).append("\"\n");
@@ -223,8 +212,6 @@ public class FrpClientManager implements SmartLifecycle {
             if (StringUtils.hasText(proxy.getLocations())) {
                 sb.append("locations = [\"").append(proxy.getLocations()).append("\"]\n");
             }
-            sb.append("transport.useEncryption = ").append(proxy.isUseEncryption()).append("\n");
-            sb.append("transport.useCompression = ").append(proxy.isUseCompression()).append("\n");
             sb.append("\n");
         }
 
@@ -251,16 +238,21 @@ public class FrpClientManager implements SmartLifecycle {
         pipeStream(frpcProcess.getErrorStream(), true);
     }
 
+    /** 匹配所有 ANSI 转义序列，避免污染宿主日志控制台颜色 */
+    private static final java.util.regex.Pattern ANSI_PATTERN =
+            java.util.regex.Pattern.compile("\u001B\\[[0-9;]*[A-Za-z]");
+
     private void pipeStream(InputStream stream, boolean isError) {
         CompletableFuture.runAsync(() -> {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(stream, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    String clean = ANSI_PATTERN.matcher(line).replaceAll("");
                     if (isError) {
-                        log.warn("[FRP] {}", line);
+                        log.warn("[FRP] {}", clean);
                     } else {
-                        log.info("[FRP] {}", line);
+                        log.info("[FRP] {}", clean);
                     }
                 }
             } catch (IOException e) {
@@ -285,20 +277,30 @@ public class FrpClientManager implements SmartLifecycle {
     private void checkAndRestart() {
         if (stopped.get()) return;
         Process p = frpcProcess;
-        if (p != null && !p.isAlive()) {
-            log.warn("[FRP] frpc 进程已退出（exit={}），{}ms 后重启...",
-                    p.exitValue(), properties.getRestartDelayMs());
-            try {
-                Thread.sleep(properties.getRestartDelayMs());
-                if (!stopped.get()) {
-                    startProcess();
-                    log.info("[FRP] frpc 已重启");
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (IOException e) {
-                log.error("[FRP] frpc 重启失败: {}", e.getMessage(), e);
+        if (p == null || p.isAlive()) return;
+
+        int max = properties.getMaxRestartAttempts();
+        if (max > 0 && restartCount >= max) {
+            log.error("[FRP] frpc 已连续失败 {} 次，超过最大重试次数 {}，停止重启。请检查配置或服务端状态。",
+                    restartCount, max);
+            shutdownWatchdog();
+            running = false;
+            return;
+        }
+
+        restartCount++;
+        log.warn("[FRP] frpc 进程已退出（exit={}），第 {}/{} 次重启，{}ms 后执行...",
+                p.exitValue(), restartCount, max > 0 ? max : "∞", properties.getRestartDelayMs());
+        try {
+            Thread.sleep(properties.getRestartDelayMs());
+            if (!stopped.get()) {
+                startProcess();
+                log.info("[FRP] frpc 已重启（第 {} 次）", restartCount);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (IOException e) {
+            log.error("[FRP] frpc 重启失败: {}", e.getMessage(), e);
         }
     }
 

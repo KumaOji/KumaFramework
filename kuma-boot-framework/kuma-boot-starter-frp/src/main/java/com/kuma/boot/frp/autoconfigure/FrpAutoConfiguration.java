@@ -4,7 +4,7 @@ import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.frp.autoconfigure.properties.FrpProperties;
 import com.kuma.boot.frp.manager.FrpClientManager;
-import org.springframework.aot.hint.annotation.ImportRuntimeHints;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
