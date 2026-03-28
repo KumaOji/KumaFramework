@@ -41,6 +41,7 @@ dependencies {
 
     // 功能增强
     api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
+    api project(':kuma-boot-framework:kuma-boot-starter-frp')
     api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
     api project(':kuma-boot-framework:kuma-boot-starter-lock')
     api project(':kuma-boot-framework:kuma-boot-starter-ip2region')

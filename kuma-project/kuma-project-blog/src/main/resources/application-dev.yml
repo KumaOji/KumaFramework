@@ -97,6 +97,24 @@ blog:
 
 kuma:
   boot:
+    frp:
+      enabled: false           # 本地开发一般不需要穿透，改为 true 即可开启
+      server-addr: your-frps.example.com
+      server-port: 7000
+      auth:
+        token: your-token
+      auto-restart: true
+      restart-delay-ms: 3000
+      log:
+        level: info
+        max-days: 3
+      proxies:
+        - name: blog-web
+          type: tcp
+          local-ip: 127.0.0.1
+          local-port: 9000       # 与 server.port 一致
+          remote-port: 9001
+
     core:
       enabled: true
       async:
