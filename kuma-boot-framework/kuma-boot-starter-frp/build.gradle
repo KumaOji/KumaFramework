@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework FRP 客户端快速启动模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.core          // StringUtils、RuntimeHints、@ImportRuntimeHints
+    api projectLibs.spring.context       // SmartLifecycle、@Bean
+    api projectLibs.spring.beans         // InitializingBean
+    api projectLibs.slf4j.api            // Logger / LoggerFactory（FrpClientManager 直接使用）
+    compileOnly projectLibs.jspecify
+    compileOnly projectLibs.jakarta.validation.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

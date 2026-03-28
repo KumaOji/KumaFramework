@@ -64,7 +64,7 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'cache-redis', 'security-common', 'security-spring',
                                'ratelimit', 'idempotent','lock',
                                 'security-jstauth','totp','captcha',
-                                'dingtalk','sentinel']
+                                'dingtalk','sentinel','frp']
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
