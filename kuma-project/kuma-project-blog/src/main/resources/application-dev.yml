@@ -98,16 +98,13 @@ blog:
 kuma:
   boot:
     frp:
-      enabled: false           # 本地开发一般不需要穿透，改为 true 即可开启
-      server-addr: your-frps.example.com
+      enabled: true           # 本地开发一般不需要穿透，改为 true 即可开启
+      server-addr: 8.134.147.122
       server-port: 7000
-      auth:
-        token: your-token
+      token: 159841
       auto-restart: true
       restart-delay-ms: 3000
-      log:
-        level: info
-        max-days: 3
+      max-restart-attempts: 5
       proxies:
         - name: blog-web
           type: tcp
