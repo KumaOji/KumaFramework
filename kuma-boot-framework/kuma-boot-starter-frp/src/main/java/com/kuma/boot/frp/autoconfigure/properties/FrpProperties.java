@@ -62,36 +62,19 @@ public class FrpProperties {
     /** 自动重启前等待时间（毫秒） */
     private long restartDelayMs = 3000;
 
-    /** 认证配置 */
-    @NestedConfigurationProperty
-    private Auth auth = new Auth();
+    /**
+     * 最大重启次数，0 表示不限制。
+     * 超过后停止重启，需手动干预。
+     */
+    private int maxRestartAttempts = 5;
 
-    /** 日志配置 */
-    @NestedConfigurationProperty
-    private Log log = new Log();
+    /** token 认证密钥 */
+    private String token = "";
 
     /** 代理列表 */
     private List<Proxy> proxies = new ArrayList<>();
 
     // ── 嵌套配置类 ─────────────────────────────────────────────────────────
-
-    @Data
-    public static class Auth {
-        /** 认证方式：token 或 oidc，默认 token */
-        private String method = "token";
-        /** token 认证密钥 */
-        private String token = "";
-    }
-
-    @Data
-    public static class Log {
-        /** 日志级别：trace / debug / info / warn / error */
-        private String level = "info";
-        /** 日志保留天数 */
-        private int maxDays = 3;
-        /** 是否禁用日志颜色 */
-        private boolean disableColor = false;
-    }
 
     @Data
     public static class Proxy {
@@ -111,9 +94,5 @@ public class FrpProperties {
         private String subdomain;
         /** HTTP 类型：路径前缀 */
         private String locations;
-        /** 是否开启加密传输 */
-        private boolean useEncryption = false;
-        /** 是否开启压缩 */
-        private boolean useCompression = false;
     }
 }
