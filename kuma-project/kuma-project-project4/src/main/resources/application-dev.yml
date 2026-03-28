@@ -208,10 +208,10 @@ kuma:
   # ── kuma-cloud-starter-frp ────────────────────────────────────
   frp:
     enabled: false           # 本地开发一般不需要穿透，改为 true 即可开启
-    server-addr: frps.com
+    server-addr: your-frps.example.com
     server-port: 7000
     auth:
-      token: token
+      token: your-token
     auto-restart: true
     restart-delay-ms: 3000
     log:
@@ -219,10 +219,10 @@ kuma:
       max-days: 3
     proxies:
       - name: blog-web
-        type: http
+        type: tcp
         local-ip: 127.0.0.1
-        local-port: 9000
-        custom-domains: blog.example.com
+        local-port: 9000       # 与 server.port 一致
+        remote-port: 9001
   # ── kuma-cloud-starter-jdbcpool ────────────────────────────────────
   # 注意：项目已有 spring.datasource.dynamic，jdbcpool DataSource 不会自动注册（@ConditionalOnMissingBean）
   # 如需单独使用，可排除 dynamic 数据源，或直接通过 JdbcPoolBs 手动构建
