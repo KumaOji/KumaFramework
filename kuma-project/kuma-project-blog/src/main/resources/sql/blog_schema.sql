@@ -210,7 +210,11 @@ INSERT INTO `sys_permission` (`id`, `code`, `name`, `module`) VALUES
 (10, 'system:*',       '系统全部权限',     'system'),
 (11, 'system:config',  '系统配置',         'system'),
 (12, 'system:log',     '查看日志',         'system'),
-(13, 'system:user',    '用户管理',         'system')
+(13, 'system:user',    '用户管理',         'system'),
+(14, 'service:*',      '服务管理全部权限', 'service'),
+(15, 'service:manage', '管理外部服务进程', 'service'),
+(16, 'tool:*',         '工具全部权限',     'tool'),
+(17, 'tool:use',       '使用工具',         'tool')
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `module` = VALUES(`module`);
 
 -- 角色初始化（三类用户）
@@ -222,7 +226,7 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `description` = VALUES(`descrip
 -- 角色权限关联
 -- 管理员拥有所有模块通配符
 INSERT INTO `sys_role_permission` (`role_id`, `permission_id`) VALUES
-(1, 1), (1, 6), (1, 10)   -- ROLE_ADMIN → article:* + music:* + system:*
+(1, 1), (1, 6), (1, 10), (1, 14), (1, 16)   -- ROLE_ADMIN → article:* + music:* + system:* + service:* + tool:*
 ON DUPLICATE KEY UPDATE `role_id` = VALUES(`role_id`);
 
 -- 普通用户拥有只读权限

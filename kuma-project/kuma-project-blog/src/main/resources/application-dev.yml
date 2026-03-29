@@ -64,9 +64,9 @@ knife4j:
 python:
   libreTranslate:
     # 是否在应用启动时自动启动 LibreTranslate 服务
-    enabled: false
+    enabled: true
     # libretranslate 可执行文件路径（Windows 示例: E:\\python\\Python39\\Scripts\\libretranslate.exe）
-    path: libretranslate
+    path: E:\python\Python39\Scripts\libretranslate.exe
     # 服务监听地址
     host: 0.0.0.0
     # 服务端口

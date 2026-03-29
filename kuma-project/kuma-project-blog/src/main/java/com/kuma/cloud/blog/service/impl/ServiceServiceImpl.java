@@ -95,14 +95,18 @@ public class ServiceServiceImpl implements ServiceService, ApplicationListener<A
             try {
                 logger.info("正在异步启动 LibreTranslate 服务...");
 
-                File libreTranslateExe = new File(libreTranslatePath);
-                if (!libreTranslateExe.exists() || !libreTranslateExe.canExecute()) {
-                    logger.error("LibreTranslate 可执行文件不存在或不可执行: {}", libreTranslatePath);
-                    return;
+                // 如果路径包含路径分隔符，则视为文件路径并校验；否则视为 PATH 中的命令名，直接使用
+                boolean isFilePath = libreTranslatePath.contains(File.separator) || libreTranslatePath.contains("/");
+                if (isFilePath) {
+                    File libreTranslateExe = new File(libreTranslatePath);
+                    if (!libreTranslateExe.exists() || !libreTranslateExe.canExecute()) {
+                        logger.error("LibreTranslate 可执行文件不存在或不可执行: {}", libreTranslatePath);
+                        return;
+                    }
                 }
 
                 List<String> command = new ArrayList<>();
-                command.add(libreTranslateExe.getAbsolutePath());
+                command.add(libreTranslatePath);
                 command.add("--host");
                 command.add(libreTranslateHost);
                 command.add("--port");
