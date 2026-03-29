@@ -4,14 +4,18 @@ import com.kuma.boot.cache.redis.repository.RedisRepository;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.aopalliance.intercept.MethodInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 @Service("authorizeCheck")
 public class AuthorizeCheckService {
+    private static final Logger log = LoggerFactory.getLogger(AuthorizeCheckService.class);
     private final RedisRepository redisRepository;
 
     public AuthorizeCheckService(RedisRepository redisRepository) {
@@ -36,6 +40,7 @@ public class AuthorizeCheckService {
 
         String name = auth.getName();
         List<String> authorities = getAuthorities(name, auth);
+        log.info("[Authorize] user={}, authorities={}, required={}", name, authorities, Arrays.toString(annotation.value()));
         return checkAuthorization(authorities, annotation);
     }
 
@@ -53,6 +58,13 @@ public class AuthorizeCheckService {
         Object cached = redisRepository.get(cacheKey);
         if (cached instanceof UserEntity userEntity && userEntity.getAuthorities() != null) {
             return userEntity.getAuthorities();
+        }
+        // Jackson 未配置类型信息时反序列化为 LinkedHashMap，兼容处理
+        if (cached instanceof Map<?, ?> map) {
+            Object authList = map.get("authorities");
+            if (authList instanceof List<?> list) {
+                return list.stream().map(Object::toString).toList();
+            }
         }
 
         // Fall back to extracting from Authentication (supports Token-based auth)
