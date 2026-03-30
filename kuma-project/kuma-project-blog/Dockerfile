@@ -29,8 +29,8 @@ RUN mkdir -p /app /data/music /data/blog/logs \
 
 WORKDIR /app
 
-# ---- copy fat jar ----
-COPY build/libs/blog.jar app.jar
+# ---- copy fat jar (place blog.jar next to Dockerfile before building) ----
+COPY blog-2026.03.jar app.jar
 RUN chown blog:blog app.jar
 
 # ---- runtime user (non-root) ----
@@ -41,18 +41,24 @@ ENV SPRING_PROFILES_ACTIVE=prod
 
 # ---- required env vars (must be supplied at docker run / compose) ----
 # ADMIN_INITIAL_PASSWORD
-# mysql_url  mysql_username  mysql_password
-# redis_host  redis_port  redis_database
-# redis_jedis_pool_max_active  redis_jedis_pool_max_idle  redis_jedis_pool_min_idle
+# MYSQL_URL  MYSQL_USERNAME  MYSQL_PASSWORD
+# REDIS_HOST  REDIS_PORT  REDIS_DATABASE
+# (REDIS_JEDIS_POOL_MAX_ACTIVE / MAX_IDLE / MIN_IDLE — optional, defaults to 8/8/0)
 
 EXPOSE 9000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget -qO- http://localhost:9000/api/actuator/health || exit 1
 
-ENTRYPOINT ["java", \
-    "--enable-preview", \
-    "-XX:+UseG1GC", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-jar", "app.jar"]
+# shell form — allows $VAR substitution so env vars override baked-in yml values
+ENTRYPOINT java --enable-preview \
+    -XX:+UseG1GC \
+    -XX:MaxRAMPercentage=75.0 \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dspring.datasource.dynamic.datasource.mysql.url="$MYSQL_URL" \
+    -Dspring.datasource.dynamic.datasource.mysql.username="$MYSQL_USERNAME" \
+    -Dspring.datasource.dynamic.datasource.mysql.password="$MYSQL_PASSWORD" \
+    -Dspring.data.redis.host="$REDIS_HOST" \
+    -Dspring.data.redis.port="$REDIS_PORT" \
+    -Dspring.data.redis.database="$REDIS_DATABASE" \
+    -jar app.jar

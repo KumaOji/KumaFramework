@@ -13,6 +13,27 @@ management:
       show-details: never  # 不向外泄露数据库/redis 连接状态详情
 
 spring:
+  datasource:
+    dynamic:
+      datasource:
+        mysql:
+          url: ${MYSQL_URL}
+          username: ${MYSQL_USERNAME}
+          password: ${MYSQL_PASSWORD}
+          hikari:
+            minimum-idle: 5
+            maximum-pool-size: 20
+            connection-timeout: 10000
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      jedis:
+        pool:
+          max-active: ${REDIS_JEDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_JEDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_JEDIS_POOL_MIN_IDLE:0}
   servlet:
     multipart:
       max-file-size: 500MB
@@ -34,14 +55,7 @@ spring:
   autoconfigure:
     exclude:
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
-  datasource:
-    dynamic:
-      datasource:
-        mysql:
-          hikari:
-            minimum-idle: 5
-            maximum-pool-size: 20
-            connection-timeout: 10000
+
 
 logging:
   config: classpath:logback-spring.xml
