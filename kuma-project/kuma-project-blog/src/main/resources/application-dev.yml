@@ -64,7 +64,7 @@ knife4j:
 python:
   libreTranslate:
     # 是否在应用启动时自动启动 LibreTranslate 服务
-    enabled: true
+    enabled: false
     # libretranslate 可执行文件路径（Windows 示例: E:\\python\\Python39\\Scripts\\libretranslate.exe）
     path: E:\python\Python39\Scripts\libretranslate.exe
     # 服务监听地址
@@ -98,7 +98,7 @@ blog:
 kuma:
   boot:
     frp:
-      enabled: true           # 本地开发一般不需要穿透，改为 true 即可开启
+      enabled: false           # 本地开发一般不需要穿透，改为 true 即可开启
       server-addr: 8.134.147.122
       server-port: 7000
       token: 159841
