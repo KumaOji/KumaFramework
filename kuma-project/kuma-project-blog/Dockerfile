@@ -1,25 +1,9 @@
 # ============================================================
 # Blog Spring Boot — Production Image
-# Base: ubuntu:22.04 (already pulled on server)
-# JDK: Temurin 25 (required by the project — uses --enable-preview)
+# Base: temurin:25 (本地自建 JDK 镜像，服务器执行一次构建后永久缓存)
 # Port: 9000
 # ============================================================
-FROM ubuntu:22.04
-
-# ---- install Temurin 25 JDK ----
-RUN apt-get update -qq \
-    && apt-get install -y --no-install-recommends \
-        wget gnupg ca-certificates \
-    && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public \
-       | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] \
-       https://packages.adoptium.net/artifactory/deb jammy main" \
-       > /etc/apt/sources.list.d/adoptium.list \
-    && apt-get update -qq \
-    && apt-get install -y --no-install-recommends temurin-25-jdk \
-    && apt-get purge -y wget gnupg \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+FROM temurin:25
 
 # ---- runtime directories ----
 RUN mkdir -p /app /data/music /data/blog/logs \
