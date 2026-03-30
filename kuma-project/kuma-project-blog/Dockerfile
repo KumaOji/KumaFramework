@@ -39,6 +39,7 @@ ENTRYPOINT java --enable-preview \
     -XX:+UseG1GC \
     -XX:MaxRAMPercentage=75.0 \
     -Djava.security.egd=file:/dev/./urandom \
+    -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE \
     -Dspring.datasource.dynamic.datasource.mysql.url="$MYSQL_URL" \
     -Dspring.datasource.dynamic.datasource.mysql.username="$MYSQL_USERNAME" \
     -Dspring.datasource.dynamic.datasource.mysql.password="$MYSQL_PASSWORD" \
