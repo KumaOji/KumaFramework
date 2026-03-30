@@ -3,41 +3,7 @@ server:
   servlet:
     context-path: /api
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health  # 只暴露 health，不暴露 env/heapdump/loggers 等危险端点
-  endpoint:
-    health:
-      show-details: never  # 不向外泄露数据库/redis 连接状态详情
-
 spring:
-  datasource:
-    dynamic:
-      datasource:
-        mysql:
-          url: ${MYSQL_URL}
-          username: ${MYSQL_USERNAME}
-          password: ${MYSQL_PASSWORD}
-          hikari:
-            minimum-idle: 5
-            maximum-pool-size: 20
-            connection-timeout: 10000
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      database: ${REDIS_DATABASE:0}
-      jedis:
-        pool:
-          max-active: ${REDIS_JEDIS_POOL_MAX_ACTIVE:8}
-          max-idle: ${REDIS_JEDIS_POOL_MAX_IDLE:8}
-          min-idle: ${REDIS_JEDIS_POOL_MIN_IDLE:0}
-  servlet:
-    multipart:
-      max-file-size: 500MB
-      max-request-size: 500MB
   mvc:
     async:
       request-timeout: 600000
@@ -46,24 +12,37 @@ spring:
     log-startup-info: false
   sql:
     init:
-      mode: never  # 生产环境不自动执行 SQL
+      mode: always
+      schema-locations: classpath:sql/blog_schema.sql
+      data-locations: classpath:sql/blog_data.sql
   kafka:
     producer:
-      bootstrap-servers: ${KAFKA_BROKERS:kafka:9092}
+      bootstrap-servers: localhost:9092
       acks: "1"
       retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
   autoconfigure:
     exclude:
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
-
+  datasource:
+    dynamic:
+      datasource:
+        mysql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
 
 logging:
   config: classpath:logback-spring.xml
   level:
-    root: WARN
+    root: INFO
     com.kuma.boot: INFO
-    com.kuma.cloud.blog: INFO
-    org.springframework.security: WARN
+    com.kuma.cloud.blog: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
 
 mybatis-plus:
   global-config:
@@ -73,52 +52,65 @@ mybatis-plus:
 
 springdoc:
   api-docs:
-    enabled: false  # 生产环境关闭 API 文档
+    enabled: false
+    path: /v3/api-docs
   swagger-ui:
     enabled: false
+    path: /swagger-ui.html
 
 knife4j:
-  enable: false
+  enable: true
 
-
+python:
+  libreTranslate:
+    enabled: false
+    path: E:\python\Python39\Scripts\libretranslate.exe
+    host: 0.0.0.0
+    port: 5000
+    load-only: en,zh
+    threads: 2
+    update-models: false
 
 blog:
-  token-expire-seconds: 86400
-  cookie-secure: true  # HTTPS 强制
-  # 生产环境不自动重置密码，密码从环境变量读取
-  reset-admin-password: false
-  # Admin 初始密码从环境变量读取，避免硬编码
-  admin-initial-password: ${ADMIN_INITIAL_PASSWORD}
-  # 生产环境使用绝对路径
+  tool:
+    repkg:
+      tool-dir: E:\blog-resource\tool
+      output-dir: E:\blog-resource\tool\output
+  token-expire-seconds: 604800
+  cookie-secure: false
+  reset-admin-password: true
+  admin-initial-password: admin123
   music:
-    base-path: /data/music
+    base-path: /data/blog/blog_background/music
 
 kuma:
   boot:
     frp:
-      enabled: ${FRP_ENABLED:false}
-      server-addr: ${FRP_SERVER_ADDR:}
-      server-port: ${FRP_SERVER_PORT:7000}
-      token: ${FRP_TOKEN:}
+      enabled: false
+      server-addr: 8.134.147.122
+      server-port: 7000
+      token: 159841
       auto-restart: true
-      restart-delay-ms: 5000
+      restart-delay-ms: 3000
       max-restart-attempts: 5
       proxies:
         - name: blog-web
           type: tcp
           local-ip: 127.0.0.1
-          local-port: 9000
-          remote-port: ${FRP_REMOTE_PORT:9001}
+          local-port: 9000       # 与 server.port 一致
+          remote-port: 9000
+
     core:
       enabled: true
       async:
         enabled: true
-        core-pool-size: 10
-        max-pool-size: 50
+        core-pool-size: 5
+        max-pool-size: 20
         thread-name-prefix: blog-async
     web:
       graceful-response:
-        print-exception-in-global-advice: false  # 生产环境不打印异常堆栈
+        print-exception-in-global-advice: true
+        origin-exception-using-detail-message: true
         response-style: 0
         exclude-packages:
           - org.springdoc*
@@ -139,9 +131,15 @@ kuma:
     security:
       oauth2:
         endpoint:
-          uaa-service-uri: ${UAA_SERVICE_URI:http://uaa:8080}
+          # 博客使用本地 Token 认证，不依赖 UAA；此处为占位配置，避免框架初始化时报错
+          uaa-service-uri: http://127.0.0.1:33336
       ignore-url:
+        - /actuator/**
         - /v3/api-docs/**
+        - /swagger-ui/**
+        - /swagger-ui.html
+        - /doc.html
+        - /webjars/**
         - /auth/**
         - /error
       authentication:
@@ -161,3 +159,9 @@ kuma:
               enabled: true
     springdoc:
       enabled: false
+      type: SERVICE
+      title: Blog API 文档
+      description: 博客系统 RESTful API 接口文档
+      version: 1.0.0
+      packages-to-scan:
+        - com.kuma.cloud.blog
