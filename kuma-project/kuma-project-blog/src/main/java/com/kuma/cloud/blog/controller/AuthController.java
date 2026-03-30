@@ -125,8 +125,8 @@ public class AuthController {
     private void setTokenCookie(HttpServletResponse response, String token) {
         String secureFlag = cookieSecure ? "; Secure" : "";
         response.addHeader("Set-Cookie", String.format(
-                "blog_token=%s; Path=/; Max-Age=%d; HttpOnly%s; SameSite=Strict",
-                token, 7 * 24 * 60 * 60, secureFlag));
+                "blog_token=%s; HttpOnly%s; SameSite=Strict; Path=/; Max-Age=%d",
+                token, secureFlag, tokenExpireSeconds));
     }
 
     private void clearTokenCookie(HttpServletResponse response) {
