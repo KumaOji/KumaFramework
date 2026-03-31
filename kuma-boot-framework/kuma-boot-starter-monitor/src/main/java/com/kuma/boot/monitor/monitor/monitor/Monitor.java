@@ -30,11 +30,11 @@ public class Monitor {
          Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 
          while(interfaces.hasMoreElements()) {
-            NetworkInterface networkInterface = (NetworkInterface)interfaces.nextElement();
+            NetworkInterface networkInterface = interfaces.nextElement();
             if (!networkInterface.isLoopback() && !networkInterface.isVirtual() && networkInterface.isUp()) {
                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
                if (addresses.hasMoreElements()) {
-                  return (InetAddress)addresses.nextElement();
+                  return addresses.nextElement();
                }
             }
          }
@@ -51,7 +51,7 @@ public class Monitor {
    }
 
    public static TimeContext timer(String key) {
-      return timer(key, (String)null);
+      return timer(key, null);
    }
 
    public static TimeContext timer(String key, String tag) {
@@ -63,7 +63,7 @@ public class Monitor {
    }
 
    public static CountContext counter(String key) {
-      return counter(key, (String)null);
+      return counter(key, null);
    }
 
    public static CountContext counter(String key, String tag) {

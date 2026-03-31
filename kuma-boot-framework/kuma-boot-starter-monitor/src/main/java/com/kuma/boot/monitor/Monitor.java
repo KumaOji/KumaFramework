@@ -1,7 +1,23 @@
+/*
+ * Copyright (c) 2020-2030, kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.monitor;
 
-import cn.hutool.core.collection.CollUtil;
 import com.kuma.boot.common.exception.BaseException;
+import com.kuma.boot.common.model.Callable.Action1;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.thread.ThreadUtils;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;
@@ -9,6 +25,9 @@ import com.kuma.boot.core.support.Collector;
 import com.kuma.boot.core.support.Ref;
 import com.kuma.boot.core.support.ShutdownHooks;
 import com.kuma.boot.monitor.autoconfigure.properties.MonitorThreadPoolProperties;
+import cn.hutool.core.collection.CollUtil;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -23,59 +42,105 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+/**
+ * 自定义线程池及关键方法包装实现 装饰
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-02 20:46:36
+ */
 public class Monitor {
-   public static final String TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY = "kmc.async.executor";
-   public static final String TTC_COLLECTOR_ASYNC_EXECUTOR_HOOK = "kmc.async.executor.hook";
-   public static final String TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY = "kmc.monitor.executor";
-   public static final String TTC_COLLECTOR_MONITOR_EXECUTOR_HOOK = "kmc.monitor.executor.hook";
+
+   public static final String TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY = "ttc.async.executor";
+   public static final String TTC_COLLECTOR_ASYNC_EXECUTOR_HOOK = "ttc.async.executor.hook";
+
+   public static final String TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY = "ttc.monitor.executor";
+   public static final String TTC_COLLECTOR_MONITOR_EXECUTOR_HOOK = "ttc.monitor.executor.hook";
+
    private ThreadPoolExecutor monitorThreadPoolExecutor;
    private ThreadPoolTaskExecutor asyncThreadPoolExecutor;
+
    private MonitorThreadPoolProperties monitorThreadPoolProperties;
    private AsyncProperties asyncProperties;
+
    private Collector collector;
 
-   public Monitor(Collector collector, AsyncProperties asyncProperties, MonitorThreadPoolProperties monitorThreadPoolProperties, ThreadPoolTaskExecutor asyncThreadPoolExecutor, ThreadPoolExecutor monitorThreadPoolExecutor) {
+   public Monitor(
+           Collector collector,
+           AsyncProperties asyncProperties,
+           MonitorThreadPoolProperties monitorThreadPoolProperties,
+           ThreadPoolTaskExecutor asyncThreadPoolExecutor,
+           ThreadPoolExecutor monitorThreadPoolExecutor) {
+
       this.collector = collector;
+
+      // 核心线程池
       this.asyncThreadPoolExecutor = asyncThreadPoolExecutor;
       this.asyncProperties = asyncProperties;
+      // 监控线程池
       this.monitorThreadPoolExecutor = monitorThreadPoolExecutor;
       this.monitorThreadPoolProperties = monitorThreadPoolProperties;
+
       if (Objects.nonNull(this.monitorThreadPoolExecutor)) {
-         this.call("kmc.monitor.executor.active.count").set(this.monitorThreadPoolExecutor::getActiveCount);
-         this.call("kmc.monitor.executor.core.pool.size").set(this.monitorThreadPoolExecutor::getCorePoolSize);
-         this.call("kmc.monitor.executor.pool.size.largest").set(this.monitorThreadPoolExecutor::getLargestPoolSize);
-         this.call("kmc.monitor.executor.pool.size.max").set(this.monitorThreadPoolExecutor::getMaximumPoolSize);
-         this.call("kmc.monitor.executor.pool.size.count").set(this.monitorThreadPoolExecutor::getPoolSize);
-         this.call("kmc.monitor.executor.queue.size").set(() -> this.monitorThreadPoolExecutor.getQueue().size());
-         this.call("kmc.monitor.executor.task.count").set(this.monitorThreadPoolExecutor::getTaskCount);
-         this.call("kmc.monitor.executor.task.completed").set(this.monitorThreadPoolExecutor::getCompletedTaskCount);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".active.count")
+                 .set(this.monitorThreadPoolExecutor::getActiveCount);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".core.pool.size")
+                 .set(this.monitorThreadPoolExecutor::getCorePoolSize);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.largest")
+                 .set(this.monitorThreadPoolExecutor::getLargestPoolSize);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.max")
+                 .set(this.monitorThreadPoolExecutor::getMaximumPoolSize);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.count")
+                 .set(this.monitorThreadPoolExecutor::getPoolSize);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".queue.size")
+                 .set(() -> this.monitorThreadPoolExecutor.getQueue().size());
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".task.count")
+                 .set(this.monitorThreadPoolExecutor::getTaskCount);
+         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".task.completed")
+                 .set(this.monitorThreadPoolExecutor::getCompletedTaskCount);
       }
 
       if (Objects.nonNull(this.asyncThreadPoolExecutor)) {
-         this.call("kmc.async.executor.active.count").set(this.asyncThreadPoolExecutor::getActiveCount);
-         this.call("kmc.async.executor.core.pool.size").set(this.asyncThreadPoolExecutor::getCorePoolSize);
-         this.call("kmc.async.executor.pool.size.largest").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getLargestPoolSize());
-         this.call("kmc.async.executor.pool.size.max").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getMaximumPoolSize());
-         this.call("kmc.async.executor.pool.size.count").set(this.asyncThreadPoolExecutor::getPoolSize);
-         this.call("kmc.async.executor.queue.size").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getQueue().size());
-         this.call("kmc.async.executor.task.count").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getTaskCount());
-         this.call("kmc.async.executor.task.completed").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".active.count")
+                 .set(this.asyncThreadPoolExecutor::getActiveCount);
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".core.pool.size")
+                 .set(this.asyncThreadPoolExecutor::getCorePoolSize);
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.largest")
+                 .set(() ->
+                         this.asyncThreadPoolExecutor.getThreadPoolExecutor().getLargestPoolSize());
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.max")
+                 .set(() ->
+                         this.asyncThreadPoolExecutor.getThreadPoolExecutor().getMaximumPoolSize());
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.count")
+                 .set(this.asyncThreadPoolExecutor::getPoolSize);
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".queue.size").set(
+                 () -> this.asyncThreadPoolExecutor
+                         .getThreadPoolExecutor()
+                         .getQueue()
+                         .size());
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".task.count")
+                 .set(() ->
+                         this.asyncThreadPoolExecutor.getThreadPoolExecutor().getTaskCount());
+         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".task.completed")
+                 .set(() ->
+                         this.asyncThreadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
       }
-
       ShutdownHooks.register(new ShutdownHooks.ShutdownHookHandler() {
+
+         @Override
          public int getOrder() {
             return 1;
          }
 
+         @Override
          public void runHook() throws Exception {
-            super.runHook();
-            Monitor.this.monitorShutdown();
-            Monitor.this.asyncShutdown();
+            ShutdownHooks.ShutdownHookHandler.super.runHook();
+            monitorShutdown();
+            asyncShutdown();
          }
 
+         @Override
          public String description() {
             return "关闭监控现场池、关闭核心异步现场池";
          }
@@ -83,244 +148,322 @@ public class Monitor {
    }
 
    public Collector.Call call(String key) {
-      return this.collector.call(key);
+      return collector.call(key);
    }
 
    public Collector.Hook monitorHook() {
-      return this.collector.hook("kmc.monitor.executor.hook");
+      return collector.hook(TTC_COLLECTOR_MONITOR_EXECUTOR_HOOK);
    }
 
    public Collector.Hook asyncHook() {
-      return this.collector.hook("kmc.async.executor.hook");
+      return collector.hook(TTC_COLLECTOR_ASYNC_EXECUTOR_HOOK);
    }
 
    private void monitorThreadPoolCheckHealth() {
-      if (this.monitorThreadPoolProperties.isCheckHealth() && this.monitorThreadPoolExecutor.getMaximumPoolSize() <= this.monitorThreadPoolExecutor.getPoolSize() && !this.monitorThreadPoolExecutor.getQueue().isEmpty()) {
-         LogUtils.warn("\u76d1\u63a7\u7ebf\u7a0b\u6c60\u5df2\u6ee1 \u4efb\u52a1\u5f00\u59cb\u51fa\u73b0\u6392\u961f \u8bf7\u4fee\u6539\u914d\u7f6e [kuma.cloud.core.threadpool.monitor.maximumPoolSize] \u5f53\u524d\u6d3b\u52a8\u7ebf\u7a0b\u6570: {}", this.monitorThreadPoolExecutor.getActiveCount());
+      if (monitorThreadPoolProperties.isCheckHealth()
+              && monitorThreadPoolExecutor.getMaximumPoolSize()
+              <= monitorThreadPoolExecutor.getPoolSize()
+              && !monitorThreadPoolExecutor.getQueue().isEmpty()) {
+         LogUtils.warn(
+                 "监控线程池已满 任务开始出现排队 请修改配置 [kuma.cloud.core.threadpool.monitor.maximumPoolSize]"
+                         + " 当前活动线程数: {}",
+                 monitorThreadPoolExecutor.getActiveCount());
       }
-
    }
 
    private void coreThreadPoolCheckHealth() {
-      if (this.asyncProperties.isCheckHealth() && this.asyncThreadPoolExecutor.getMaxPoolSize() <= this.asyncThreadPoolExecutor.getPoolSize() && !this.asyncThreadPoolExecutor.getThreadPoolExecutor().getQueue().isEmpty()) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5df2\u6ee1 \u4efb\u52a1\u5f00\u59cb\u51fa\u73b0\u6392\u961f \u8bf7\u4fee\u6539\u914d\u7f6e [kuma.cloud.core.threadpool.async.threadPoolMaxSiz] \u5f53\u524d\u6d3b\u52a8\u7ebf\u7a0b\u6570: {}", this.asyncThreadPoolExecutor.getActiveCount());
+      if (asyncProperties.isCheckHealth()
+              && asyncThreadPoolExecutor.getMaxPoolSize() <= asyncThreadPoolExecutor.getPoolSize()
+              && !asyncThreadPoolExecutor.getThreadPoolExecutor().getQueue().isEmpty()) {
+         LogUtils.warn(
+                 "核心线程池已满 任务开始出现排队 请修改配置 [kuma.cloud.core.threadpool.async.threadPoolMaxSiz]"
+                         + " 当前活动线程数: {}",
+                 asyncThreadPoolExecutor.getActiveCount());
       }
-
    }
 
    public <T> Future<T> monitorSubmit(String taskName, Callable<T> task) {
-      this.monitorThreadPoolCheckHealth();
-      return (Future)this.monitorHook().run(taskName, () -> this.monitorThreadPoolExecutor.submit(task));
+      monitorThreadPoolCheckHealth();
+
+      return monitorHook().run(taskName, () -> monitorThreadPoolExecutor.submit(task));
    }
 
    public <T> Future<T> asyncSubmit(String taskName, Callable<T> task) {
-      if (Objects.isNull(this.asyncThreadPoolExecutor)) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", );
+      if (Objects.isNull(asyncThreadPoolExecutor)) {
+         LogUtils.warn("核心线程池未初始化");
          return null;
-      } else {
-         this.coreThreadPoolCheckHealth();
-         return (Future)this.asyncHook().run(taskName, () -> this.asyncThreadPoolExecutor.submit(task));
       }
+
+      coreThreadPoolCheckHealth();
+      return asyncHook().run(taskName, () -> asyncThreadPoolExecutor.submit(task));
    }
 
    public void monitorSubmit(String taskName, Runnable task) {
-      this.monitorThreadPoolCheckHealth();
-      this.monitorHook().run(taskName, () -> this.monitorThreadPoolExecutor.submit(task));
+      monitorThreadPoolCheckHealth();
+      monitorHook().run(taskName, () -> monitorThreadPoolExecutor.submit(task));
    }
 
    public Future<?> asyncSubmit(String taskName, Runnable task) {
-      if (Objects.isNull(this.asyncThreadPoolExecutor)) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", );
+      if (Objects.isNull(asyncThreadPoolExecutor)) {
+         LogUtils.warn("核心线程池未初始化");
          return null;
-      } else {
-         this.coreThreadPoolCheckHealth();
-         return (Future)this.asyncHook().run(taskName, () -> this.asyncThreadPoolExecutor.submit(task));
       }
+
+      coreThreadPoolCheckHealth();
+      return asyncHook().run(taskName, () -> asyncThreadPoolExecutor.submit(task));
    }
 
    public boolean monitorIsShutdown() {
-      return this.monitorThreadPoolExecutor.isShutdown();
+      return monitorThreadPoolExecutor.isShutdown();
    }
 
    public boolean coreIsShutdown() {
-      if (Objects.isNull(this.asyncThreadPoolExecutor)) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", );
+      if (Objects.isNull(asyncThreadPoolExecutor)) {
+         LogUtils.warn("核心线程池未初始化");
          return true;
-      } else {
-         return this.asyncThreadPoolExecutor.getThreadPoolExecutor().isShutdown();
       }
+
+      return asyncThreadPoolExecutor.getThreadPoolExecutor().isShutdown();
    }
 
    public void monitorShutdown() {
-      ThreadUtils.shutdownThreadPool(this.monitorThreadPoolExecutor);
+      ThreadUtils.shutdownThreadPool(monitorThreadPoolExecutor);
    }
+
 
    public void asyncShutdown() {
-      if (Objects.nonNull(this.asyncThreadPoolExecutor)) {
-         this.asyncThreadPoolExecutor.destroy();
+      if (Objects.nonNull(asyncThreadPoolExecutor)) {
+         asyncThreadPoolExecutor.destroy();
       }
-
    }
 
-   public <T> void monitorParallelFor(String taskName, int parallelCount, List<T> array, final com.kuma.boot.common.model.Callable.Action1<T> action) {
-      this.monitorThreadPoolCheckHealth();
-      this.monitorHook().run(taskName, () -> {
+   /**
+    * 任务拆分多个小任务分批并行处理，并行处理完一批再并行处理下一批。 在抛出错误的时候有问题，未修复，仅试验，不要用这个方法。
+    *
+    * @param taskName      taskName
+    * @param parallelCount parallelCount
+    * @param array         array
+    * @param action        action
+    * @since 2021-09-02 20:48:09
+    */
+   public <T> void monitorParallelFor(String taskName, int parallelCount, List<T> array,
+                                      final Action1<T> action) {
+      monitorThreadPoolCheckHealth();
+
+      monitorHook().run(taskName, () -> {
          int parallelCount2 = parallelCount;
-         if (parallelCount > array.size()) {
+         if (parallelCount2 > array.size()) {
             parallelCount2 = array.size();
          }
 
+         // 任务队列
          Queue<T> queueTasks = new LinkedList<>(array);
 
-         while(!queueTasks.isEmpty()) {
-            List<T> runningTasks = new ArrayList<>(parallelCount2);
+         while (!queueTasks.isEmpty()) {
+            // 运行任务列表
+            final List<T> runningTasks = new ArrayList<>(parallelCount2);
 
             T task;
-            for(int i = 0; i < parallelCount2 && (task = (T)queueTasks.poll()) != null; ++i) {
-               runningTasks.add(task);
+
+            for (int i = 0; i < parallelCount2; i++) {
+               if ((task = queueTasks.poll()) != null) {
+                  runningTasks.add(task);
+               }
+               else {
+                  break;
+               }
             }
 
-            CountDownLatch latch = new CountDownLatch(runningTasks.size());
+            final CountDownLatch latch = new CountDownLatch(runningTasks.size());
             List<Future<?>> result = new ArrayList<>(parallelCount2);
 
-            for(T obj : runningTasks) {
-               Future<?> future = this.monitorThreadPoolExecutor.submit(() -> {
+            for (T obj : runningTasks) {
+               Future<?> future = monitorThreadPoolExecutor.submit(() -> {
                   try {
                      action.invoke(obj);
-                  } finally {
+                  }
+                  finally {
                      latch.countDown();
                   }
-
                });
                result.add(future);
             }
 
             try {
                latch.await();
-            } catch (InterruptedException exp) {
-               LogUtils.error(exp, "parallelFor \u4efb\u52a1\u8ba1\u6570\u5f02\u5e38", );
+            }
+            catch (InterruptedException exp) {
+               LogUtils.error(exp, "parallelFor 任务计数异常");
             }
 
-            for(Future<?> f : result) {
+            for (Future<?> f : result) {
                try {
                   f.get();
-               } catch (Exception exp) {
-                  throw new BaseException("parallelFor\u5e76\u884c\u6267\u884c\u51fa\u9519", exp);
+               }
+               catch (Exception exp) {
+                  throw new BaseException("parallelFor并行执行出错", exp);
                }
             }
          }
-
          return 1;
       });
    }
 
-   public <T> void monitorParallelFor2(String taskName, int parallelCount, Collection<T> array, final com.kuma.boot.common.model.Callable.Action1<T> action) {
-      this.monitorThreadPoolCheckHealth();
-      this.monitorHook().run(taskName, () -> {
+   /**
+    * 任务使用固定并行大小处理任务,直到所有任务处理完毕。
+    *
+    * @param taskName      taskName
+    * @param parallelCount parallelCount
+    * @param array         array
+    * @param action        action
+    * @since 2021-09-02 20:48:25
+    */
+   public <T> void monitorParallelFor2(
+           String taskName, int parallelCount, Collection<T> array, final Action1<T> action) {
+      monitorThreadPoolCheckHealth();
+      monitorHook().run(taskName, () -> {
          int parallelCount2 = parallelCount;
-         if (parallelCount > array.size()) {
+         if (parallelCount2 > array.size()) {
             parallelCount2 = array.size();
          }
-
+         // 任务队列
          Queue<T> queueTasks = new LinkedList<>(array);
+
          if (!queueTasks.isEmpty()) {
-            CountDownLatch latch = new CountDownLatch(parallelCount2);
+            final CountDownLatch latch = new CountDownLatch(parallelCount2);
             Object lock = new Object();
             Ref<Exception> exceptionRef = new Ref<>(null);
-
-            for(int i = 0; i < parallelCount2; ++i) {
-               this.monitorThreadPoolExecutor.submit(() -> {
-                  while(true) {
+            for (int i = 0; i < parallelCount2; i++) {
+               monitorThreadPoolExecutor.submit(() -> {
+                  while (true) {
                      T task;
-                     synchronized(lock) {
-                        task = (T)queueTasks.poll();
+                     synchronized (lock) {
+                        task = queueTasks.poll();
                      }
 
                      if (task != null && exceptionRef.isNull()) {
                         try {
                            action.invoke(task);
-                           continue;
-                        } catch (Exception exp) {
+                        }
+                        catch (Exception exp) {
                            latch.countDown();
                            exceptionRef.setData(exp);
+                           break;
                         }
-                     } else {
-                        latch.countDown();
                      }
-
-                     return;
+                     else {
+                        latch.countDown();
+                        break;
+                     }
                   }
                });
             }
 
             try {
                latch.await();
-            } catch (InterruptedException exp) {
-               LogUtils.error(exp, "parallelFor \u4efb\u52a1\u8ba1\u6570\u5f02\u5e38", );
             }
-
+            catch (InterruptedException exp) {
+               LogUtils.error(exp, "parallelFor 任务计数异常");
+            }
             if (!exceptionRef.isNull()) {
-               throw new BaseException("parallelFor \u5e76\u884c\u6267\u884c\u51fa\u9519", (Throwable)exceptionRef.getData());
+               throw new BaseException("parallelFor 并行执行出错", exceptionRef.getData());
             }
          }
-
          return 1;
       });
    }
 
-   public <T> void parallelFor(String taskName, int parallelCount, Collection<T> taskList, final com.kuma.boot.common.model.Callable.Action1<T> action) {
+
+   /**
+    * 使用系统线程池并行for循环
+    *
+    * @param taskName      任务名称
+    * @param parallelCount 并行数量
+    * @param taskList      任务列表
+    * @param action        action
+    * @since 2021-09-02 20:57:35
+    */
+   public <T> void parallelFor(
+           String taskName, int parallelCount, Collection<T> taskList,
+           final Action1<T> action) {
       if (parallelCount < 2) {
-         for(T t : taskList) {
+         for (T t : taskList) {
             action.invoke(t);
          }
-      } else {
-         this.monitorParallelFor2(taskName, parallelCount, taskList, action);
       }
-
+      else {
+         monitorParallelFor2(taskName, parallelCount, taskList, action);
+      }
    }
 
-   public <R, M, D> List<R> batchExecute(int batchExecuteSize, long timeout, List<D> dataList, Function<List<D>, M> middleFunc, Function<M, R> resultFunc) {
+
+   /**
+    * 线程池分批执行某个方法（batchExecute(temList,storeCode1)），所有数据都执行完成后返回数据
+    *
+    * @param batchExecuteSize 批次执行的数量
+    * @param timeout          超时(分组)
+    * @param dataList         数据列表
+    * @param middleFunc       中间函数
+    * @param resultFunc       结果函数
+    * @return {@link List }<{@link R }>
+    * @since 2022-09-19 16:35:32
+    */
+   public <R, M, D> List<R> batchExecute(
+           int batchExecuteSize,
+           long timeout,
+           List<D> dataList,
+           java.util.function.Function<List<D>, M> middleFunc,
+           java.util.function.Function<M, R> resultFunc) {
       int totalSize = dataList.size();
       int totalPage = totalSize / batchExecuteSize;
-      ExecutorService pool = new ThreadPoolExecutor(totalPage + 1, totalPage + 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-      List<Future<M>> futureList = new ArrayList<>();
 
-      for(int pageNum = 1; pageNum <= totalPage + 1; ++pageNum) {
+      ExecutorService pool = new ThreadPoolExecutor(
+              totalPage + 1, totalPage + 1, 0L, TimeUnit.MILLISECONDS,
+              new LinkedBlockingQueue<Runnable>());
+
+      List<Future<M>> futureList = new ArrayList<>();
+      for (int pageNum = 1; pageNum <= totalPage + 1; pageNum++) {
          int starNum = (pageNum - 1) * batchExecuteSize;
          int endNum = Math.min(pageNum * batchExecuteSize, totalSize);
          List<D> temList = dataList.subList(starNum, endNum);
+
          if (CollUtil.isNotEmpty(temList)) {
             Callable<M> callable = () -> middleFunc.apply(temList);
             Future<M> future = pool.submit(callable);
             futureList.add(future);
          }
       }
+      pool.shutdown(); // 不允许再想线程池中增加线程
 
-      pool.shutdown();
       List<R> result = new ArrayList<>();
-
       try {
+         // 判断是否所有线程已经执行完毕
          boolean isFinish = pool.awaitTermination(timeout, TimeUnit.MINUTES);
+         // 如果没有执行完
          if (!isFinish) {
+            // 线程池执行结束 不在等待线程执行完毕，直接执行下面的代码
             pool.shutdownNow();
          }
 
-         result = futureList.stream().map(future -> {
-            try {
-               return resultFunc.apply(future.get());
-            } catch (ExecutionException | InterruptedException ex) {
-               throw new RuntimeException(ex);
-            }
-         }).toList();
-      } catch (Exception e) {
+         result = futureList.stream()
+                 .map(e -> {
+                    try {
+                       return resultFunc.apply(e.get());
+                    }
+                    catch (InterruptedException | ExecutionException ex) {
+                       throw new RuntimeException(ex);
+                    }
+                 })
+                 .toList();
+      }
+      catch (Exception e) {
          LogUtils.error(e);
       }
-
       return result;
    }
 
    public ThreadPoolExecutor getMonitorThreadPoolExecutor() {
-      return this.monitorThreadPoolExecutor;
+      return monitorThreadPoolExecutor;
    }
 
    public void setMonitorThreadPoolExecutor(ThreadPoolExecutor monitorThreadPoolExecutor) {
@@ -328,7 +471,7 @@ public class Monitor {
    }
 
    public ThreadPoolTaskExecutor getAsyncThreadPoolExecutor() {
-      return this.asyncThreadPoolExecutor;
+      return asyncThreadPoolExecutor;
    }
 
    public void setAsyncThreadPoolExecutor(ThreadPoolTaskExecutor asyncThreadPoolExecutor) {
@@ -336,15 +479,16 @@ public class Monitor {
    }
 
    public MonitorThreadPoolProperties getMonitorThreadPoolProperties() {
-      return this.monitorThreadPoolProperties;
+      return monitorThreadPoolProperties;
    }
 
-   public void setMonitorThreadPoolProperties(MonitorThreadPoolProperties monitorThreadPoolProperties) {
+   public void setMonitorThreadPoolProperties(
+           MonitorThreadPoolProperties monitorThreadPoolProperties) {
       this.monitorThreadPoolProperties = monitorThreadPoolProperties;
    }
 
    public AsyncProperties getAsyncThreadPoolProperties() {
-      return this.asyncProperties;
+      return asyncProperties;
    }
 
    public void setAsyncThreadPoolProperties(AsyncProperties asyncProperties) {
@@ -352,7 +496,7 @@ public class Monitor {
    }
 
    public Collector getCollector() {
-      return this.collector;
+      return collector;
    }
 
    public void setCollector(Collector collector) {

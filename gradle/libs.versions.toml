@@ -142,6 +142,7 @@ logstash-logback-encoder = "8.0"
 commons-email = "1.6.0"
 dubbo = "3.3.2"
 xxl-job = "2.4.2"
+hdrhistogram = "2.2.2"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -364,6 +365,7 @@ logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-enc
 commons-email = { module = "org.apache.commons:commons-email", version.ref = "commons-email" }
 dubbo-spring-boot-starter = { module = "org.apache.dubbo:dubbo-spring-boot-starter", version.ref = "dubbo" }
 xxl-job-core = { module = "com.xuxueli:xxl-job-core", version.ref = "xxl-job" }
+hdrhistogram = { module = "org.hdrhistogram:HdrHistogram", version.ref = "hdrhistogram" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]
