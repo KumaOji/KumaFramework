@@ -24,6 +24,12 @@ dependencies {
 
     testImplementation projectLibs.spring.boot.starter.test
     testImplementation 'org.openjdk.jol:jol-core:0.17'
+    // Gradle 9+ 要求显式声明，否则报 "Failed to load JUnit Platform"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // MyBatis 两级缓存演示
+    testImplementation projectLibs.mybatis.core
+    testRuntimeOnly 'com.h2database:h2'
 }
 
 test {
