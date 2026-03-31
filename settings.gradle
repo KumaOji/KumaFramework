@@ -65,7 +65,7 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'ratelimit', 'idempotent', 'lock',
                                'security-jstauth', 'totp', 'captcha',
                                'dingtalk', 'sentinel', 'frp',
-                                'prometheus']
+                               'prometheus']
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
@@ -145,3 +145,5 @@ include 'kuma-boot-framework:kuma-boot-starter-encrypt'
 include 'kuma-boot-framework:kuma-boot-starter-openapi'
 include 'kuma-boot-framework:kuma-boot-starter-oss-common'
 include 'kuma-boot-framework:kuma-boot-starter-sms-common'
+
+include 'kuma-boot-framework:kuma-boot-starter-monitor'
