@@ -20,6 +20,10 @@ RUN chown blog:blog app.jar
 # ---- runtime user (non-root) ----
 USER blog
 
+# ---- locale / charset ----
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 # ---- Spring Boot profile ----
 ENV SPRING_PROFILES_ACTIVE=prod
 
@@ -39,6 +43,7 @@ ENTRYPOINT java --enable-preview \
     -XX:+UseG1GC \
     -XX:MaxRAMPercentage=75.0 \
     -Djava.security.egd=file:/dev/./urandom \
+    -Dfile.encoding=UTF-8 \
     -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE \
     -Dspring.datasource.dynamic.datasource.mysql.url="$MYSQL_URL" \
     -Dspring.datasource.dynamic.datasource.mysql.username="$MYSQL_USERNAME" \
