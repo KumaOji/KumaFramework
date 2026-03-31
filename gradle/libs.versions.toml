@@ -138,6 +138,10 @@ seata = "2.5.0"
 langchain4j = "1.11.0"
 grpc = "1.76.0"
 spring-grpc = "1.0.0-RC1"
+logstash-logback-encoder = "8.0"
+commons-email = "1.6.0"
+dubbo = "3.3.2"
+xxl-job = "2.4.2"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -356,6 +360,10 @@ spring-cloud-starter-alibaba-seata = { module = "com.alibaba.cloud:spring-cloud-
 rocketmq-spring-boot-starter = { module = "org.apache.rocketmq:rocketmq-spring-boot-starter", version.ref = "rocketmq-spring" }
 spring-cloud-starter-stream-rocketmq = { module = "com.alibaba.cloud:spring-cloud-starter-stream-rocketmq", version.ref = "spring-cloud-alibaba" }
 seata-spring-boot-starter = { module = "org.apache.seata:seata-spring-boot-starter", version.ref = "seata" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
+commons-email = { module = "org.apache.commons:commons-email", version.ref = "commons-email" }
+dubbo-spring-boot-starter = { module = "org.apache.dubbo:dubbo-spring-boot-starter", version.ref = "dubbo" }
+xxl-job-core = { module = "com.xuxueli:xxl-job-core", version.ref = "xxl-job" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

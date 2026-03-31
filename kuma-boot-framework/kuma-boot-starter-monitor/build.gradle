@@ -1,0 +1,59 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework 健康监控模块 —— 指标采集、告警通知（钉钉/飞书/邮件）、ELK 导出'
+
+dependencies {
+
+    // ---------------------------------------------------------------- //
+    //  核心基础                                                           //
+    // ---------------------------------------------------------------- //
+    // spring-boot-starter-actuator + micrometer-core + ObservationRegistry
+    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
+    // hutool / guava / fastjson2 / commons / logback / slf4j 等公共工具
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // @AutoConfiguration / @ConditionalOn* 自动配置注解
+    compileOnly projectLibs.spring.boot.autoconfigure
+    // @RefreshScope
+    compileOnly projectLibs.spring.cloud.context
+
+    // ---------------------------------------------------------------- //
+    //  告警通知（HTTP 推送 / 邮件，核心功能，运行时必须）                     //
+    // ---------------------------------------------------------------- //
+    // 钉钉 / 飞书告警 HTTP 推送
+    api projectLibs.okhttp3
+    // 邮件告警（EmailExecute / EmailWrapper）
+    api projectLibs.commons.email
+
+    // ---------------------------------------------------------------- //
+    //  ELK 日志导出（ElkExport / ElkCollectTask）                         //
+    // ---------------------------------------------------------------- //
+    api projectLibs.logstash.logback.encoder
+
+    // ---------------------------------------------------------------- //
+    //  可选集成 — 仅在用户引入对应框架时生效（compileOnly + @ConditionalOnBean）//
+    // ---------------------------------------------------------------- //
+    // Web 容器 — FilterRegistrationBean、TomcatWebServer 采集
+    compileOnly projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.spring.boot.starter.tomcat
+
+    // Redis 指标采集（JedisCollectTask / RedisTemplateMetricsBeanPostProcessor）
+    compileOnly projectLibs.spring.boot.starter.data.redis
+
+    // MyBatis 指标采集（MybatisCollectTask / MybatisMapperMetricsBeanPostProcessor）
+    compileOnly projectLibs.mybatis.spring
+
+    // Nacos 服务信息采集（NacosCollectTask）
+    compileOnly projectLibs.spring.cloud.starter.alibaba.nacos.discovery
+
+    // Dubbo 指标采集（DubboCollectTask / DubboMonitor）
+    compileOnly projectLibs.dubbo.spring.boot.starter
+
+    // XxlJob 任务采集（XxlJobCollectTask）
+    compileOnly projectLibs.xxl.job.core
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
