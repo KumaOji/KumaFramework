@@ -19,7 +19,7 @@ public class SourceData {
          try {
             this.histogram.recordValue(time);
          } catch (Exception e) {
-            LogUtils.error("SourceStatistician.record error,time:{}", new Object[]{time, e});
+            LogUtils.error(e, "SourceStatistician.record error, time:{}", time);
          }
       }
 
@@ -30,15 +30,15 @@ public class SourceData {
    }
 
    public long getTP99() {
-      return this.histogram.getValueAtPercentile((double)99.0F);
+      return this.histogram.getValueAtPercentile(99.0);
    }
 
    public long getTP90() {
-      return this.histogram.getValueAtPercentile((double)90.0F);
+      return this.histogram.getValueAtPercentile(90.0);
    }
 
    public long getTP50() {
-      return this.histogram.getValueAtPercentile((double)50.0F);
+      return this.histogram.getValueAtPercentile(50.0);
    }
 
    public long getMax() {

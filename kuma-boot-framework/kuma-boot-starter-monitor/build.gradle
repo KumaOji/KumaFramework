@@ -27,6 +27,8 @@ dependencies {
     compileOnly projectLibs.jakarta.servlet.api
     // LogUtils 类型链依赖 slf4j（common 里是 implementation，不向外传递）
     compileOnly projectLibs.slf4j.api
+    // FileAlterationObserver 等（commons-io 在 common 里是 implementation，不向外传递）
+    compileOnly projectLibs.commons.io
 
     // ---------------------------------------------------------------- //
     //  告警通知（HTTP 推送 / 邮件，核心功能，运行时必须）                     //

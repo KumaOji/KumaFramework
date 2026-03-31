@@ -44,62 +44,28 @@ public class Monitor {
       this.monitorThreadPoolExecutor = monitorThreadPoolExecutor;
       this.monitorThreadPoolProperties = monitorThreadPoolProperties;
       if (Objects.nonNull(this.monitorThreadPoolExecutor)) {
-         Collector.Call var10000 = this.call("kmc.monitor.executor.active.count");
-         ThreadPoolExecutor var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getActiveCount);
-         var10000 = this.call("kmc.monitor.executor.core.pool.size");
-         var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getCorePoolSize);
-         var10000 = this.call("kmc.monitor.executor.pool.size.largest");
-         var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getLargestPoolSize);
-         var10000 = this.call("kmc.monitor.executor.pool.size.max");
-         var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getMaximumPoolSize);
-         var10000 = this.call("kmc.monitor.executor.pool.size.count");
-         var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getPoolSize);
+         this.call("kmc.monitor.executor.active.count").set(this.monitorThreadPoolExecutor::getActiveCount);
+         this.call("kmc.monitor.executor.core.pool.size").set(this.monitorThreadPoolExecutor::getCorePoolSize);
+         this.call("kmc.monitor.executor.pool.size.largest").set(this.monitorThreadPoolExecutor::getLargestPoolSize);
+         this.call("kmc.monitor.executor.pool.size.max").set(this.monitorThreadPoolExecutor::getMaximumPoolSize);
+         this.call("kmc.monitor.executor.pool.size.count").set(this.monitorThreadPoolExecutor::getPoolSize);
          this.call("kmc.monitor.executor.queue.size").set(() -> this.monitorThreadPoolExecutor.getQueue().size());
-         var10000 = this.call("kmc.monitor.executor.task.count");
-         var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getTaskCount);
-         var10000 = this.call("kmc.monitor.executor.task.completed");
-         var10001 = this.monitorThreadPoolExecutor;
-         Objects.requireNonNull(var10001);
-         var10000.set(var10001::getCompletedTaskCount);
+         this.call("kmc.monitor.executor.task.count").set(this.monitorThreadPoolExecutor::getTaskCount);
+         this.call("kmc.monitor.executor.task.completed").set(this.monitorThreadPoolExecutor::getCompletedTaskCount);
       }
 
       if (Objects.nonNull(this.asyncThreadPoolExecutor)) {
-         Collector.Call var12 = this.call("kmc.async.executor.active.count");
-         ThreadPoolTaskExecutor var21 = this.asyncThreadPoolExecutor;
-         Objects.requireNonNull(var21);
-         var12.set(var21::getActiveCount);
-         var12 = this.call("kmc.async.executor.core.pool.size");
-         var21 = this.asyncThreadPoolExecutor;
-         Objects.requireNonNull(var21);
-         var12.set(var21::getCorePoolSize);
+         this.call("kmc.async.executor.active.count").set(this.asyncThreadPoolExecutor::getActiveCount);
+         this.call("kmc.async.executor.core.pool.size").set(this.asyncThreadPoolExecutor::getCorePoolSize);
          this.call("kmc.async.executor.pool.size.largest").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getLargestPoolSize());
          this.call("kmc.async.executor.pool.size.max").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getMaximumPoolSize());
-         var12 = this.call("kmc.async.executor.pool.size.count");
-         var21 = this.asyncThreadPoolExecutor;
-         Objects.requireNonNull(var21);
-         var12.set(var21::getPoolSize);
+         this.call("kmc.async.executor.pool.size.count").set(this.asyncThreadPoolExecutor::getPoolSize);
          this.call("kmc.async.executor.queue.size").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getQueue().size());
          this.call("kmc.async.executor.task.count").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getTaskCount());
          this.call("kmc.async.executor.task.completed").set(() -> this.asyncThreadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
       }
 
       ShutdownHooks.register(new ShutdownHooks.ShutdownHookHandler() {
-         {
-            Objects.requireNonNull(Monitor.this);
-         }
-
          public int getOrder() {
             return 1;
          }
@@ -111,7 +77,7 @@ public class Monitor {
          }
 
          public String description() {
-            return "\u5173\u95ed\u76d1\u63a7\u73b0\u573a\u6c60\u3001\u5173\u95ed\u6838\u5fc3\u5f02\u6b65\u73b0\u573a\u6c60";
+            return "关闭监控现场池、关闭核心异步现场池";
          }
       });
    }
@@ -130,14 +96,14 @@ public class Monitor {
 
    private void monitorThreadPoolCheckHealth() {
       if (this.monitorThreadPoolProperties.isCheckHealth() && this.monitorThreadPoolExecutor.getMaximumPoolSize() <= this.monitorThreadPoolExecutor.getPoolSize() && !this.monitorThreadPoolExecutor.getQueue().isEmpty()) {
-         LogUtils.warn("\u76d1\u63a7\u7ebf\u7a0b\u6c60\u5df2\u6ee1 \u4efb\u52a1\u5f00\u59cb\u51fa\u73b0\u6392\u961f \u8bf7\u4fee\u6539\u914d\u7f6e [kuma.cloud.core.threadpool.monitor.maximumPoolSize] \u5f53\u524d\u6d3b\u52a8\u7ebf\u7a0b\u6570: {}", new Object[]{this.monitorThreadPoolExecutor.getActiveCount()});
+         LogUtils.warn("\u76d1\u63a7\u7ebf\u7a0b\u6c60\u5df2\u6ee1 \u4efb\u52a1\u5f00\u59cb\u51fa\u73b0\u6392\u961f \u8bf7\u4fee\u6539\u914d\u7f6e [kuma.cloud.core.threadpool.monitor.maximumPoolSize] \u5f53\u524d\u6d3b\u52a8\u7ebf\u7a0b\u6570: {}", this.monitorThreadPoolExecutor.getActiveCount());
       }
 
    }
 
    private void coreThreadPoolCheckHealth() {
       if (this.asyncProperties.isCheckHealth() && this.asyncThreadPoolExecutor.getMaxPoolSize() <= this.asyncThreadPoolExecutor.getPoolSize() && !this.asyncThreadPoolExecutor.getThreadPoolExecutor().getQueue().isEmpty()) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5df2\u6ee1 \u4efb\u52a1\u5f00\u59cb\u51fa\u73b0\u6392\u961f \u8bf7\u4fee\u6539\u914d\u7f6e [kuma.cloud.core.threadpool.async.threadPoolMaxSiz] \u5f53\u524d\u6d3b\u52a8\u7ebf\u7a0b\u6570: {}", new Object[]{this.asyncThreadPoolExecutor.getActiveCount()});
+         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5df2\u6ee1 \u4efb\u52a1\u5f00\u59cb\u51fa\u73b0\u6392\u961f \u8bf7\u4fee\u6539\u914d\u7f6e [kuma.cloud.core.threadpool.async.threadPoolMaxSiz] \u5f53\u524d\u6d3b\u52a8\u7ebf\u7a0b\u6570: {}", this.asyncThreadPoolExecutor.getActiveCount());
       }
 
    }
@@ -149,7 +115,7 @@ public class Monitor {
 
    public <T> Future<T> asyncSubmit(String taskName, Callable<T> task) {
       if (Objects.isNull(this.asyncThreadPoolExecutor)) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", new Object[0]);
+         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", );
          return null;
       } else {
          this.coreThreadPoolCheckHealth();
@@ -164,7 +130,7 @@ public class Monitor {
 
    public Future<?> asyncSubmit(String taskName, Runnable task) {
       if (Objects.isNull(this.asyncThreadPoolExecutor)) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", new Object[0]);
+         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", );
          return null;
       } else {
          this.coreThreadPoolCheckHealth();
@@ -178,7 +144,7 @@ public class Monitor {
 
    public boolean coreIsShutdown() {
       if (Objects.isNull(this.asyncThreadPoolExecutor)) {
-         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", new Object[0]);
+         LogUtils.warn("\u6838\u5fc3\u7ebf\u7a0b\u6c60\u672a\u521d\u59cb\u5316", );
          return true;
       } else {
          return this.asyncThreadPoolExecutor.getThreadPoolExecutor().isShutdown();
@@ -204,10 +170,10 @@ public class Monitor {
             parallelCount2 = array.size();
          }
 
-         Queue<T> queueTasks = new LinkedList(array);
+         Queue<T> queueTasks = new LinkedList<>(array);
 
          while(!queueTasks.isEmpty()) {
-            List<T> runningTasks = new ArrayList(parallelCount2);
+            List<T> runningTasks = new ArrayList<>(parallelCount2);
 
             T task;
             for(int i = 0; i < parallelCount2 && (task = (T)queueTasks.poll()) != null; ++i) {
@@ -215,7 +181,7 @@ public class Monitor {
             }
 
             CountDownLatch latch = new CountDownLatch(runningTasks.size());
-            List<Future<?>> result = new ArrayList(parallelCount2);
+            List<Future<?>> result = new ArrayList<>(parallelCount2);
 
             for(T obj : runningTasks) {
                Future<?> future = this.monitorThreadPoolExecutor.submit(() -> {
@@ -232,7 +198,7 @@ public class Monitor {
             try {
                latch.await();
             } catch (InterruptedException exp) {
-               LogUtils.error(exp, "parallelFor \u4efb\u52a1\u8ba1\u6570\u5f02\u5e38", new Object[0]);
+               LogUtils.error(exp, "parallelFor \u4efb\u52a1\u8ba1\u6570\u5f02\u5e38", );
             }
 
             for(Future<?> f : result) {
@@ -256,11 +222,11 @@ public class Monitor {
             parallelCount2 = array.size();
          }
 
-         Queue<T> queueTasks = new LinkedList(array);
+         Queue<T> queueTasks = new LinkedList<>(array);
          if (!queueTasks.isEmpty()) {
             CountDownLatch latch = new CountDownLatch(parallelCount2);
             Object lock = new Object();
-            Ref<Exception> exceptionRef = new Ref((Object)null);
+            Ref<Exception> exceptionRef = new Ref<>(null);
 
             for(int i = 0; i < parallelCount2; ++i) {
                this.monitorThreadPoolExecutor.submit(() -> {
@@ -290,7 +256,7 @@ public class Monitor {
             try {
                latch.await();
             } catch (InterruptedException exp) {
-               LogUtils.error(exp, "parallelFor \u4efb\u52a1\u8ba1\u6570\u5f02\u5e38", new Object[0]);
+               LogUtils.error(exp, "parallelFor \u4efb\u52a1\u8ba1\u6570\u5f02\u5e38", );
             }
 
             if (!exceptionRef.isNull()) {
@@ -316,8 +282,8 @@ public class Monitor {
    public <R, M, D> List<R> batchExecute(int batchExecuteSize, long timeout, List<D> dataList, Function<List<D>, M> middleFunc, Function<M, R> resultFunc) {
       int totalSize = dataList.size();
       int totalPage = totalSize / batchExecuteSize;
-      ExecutorService pool = new ThreadPoolExecutor(totalPage + 1, totalPage + 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue());
-      List<Future<M>> futureList = new ArrayList();
+      ExecutorService pool = new ThreadPoolExecutor(totalPage + 1, totalPage + 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+      List<Future<M>> futureList = new ArrayList<>();
 
       for(int pageNum = 1; pageNum <= totalPage + 1; ++pageNum) {
          int starNum = (pageNum - 1) * batchExecuteSize;
@@ -331,7 +297,7 @@ public class Monitor {
       }
 
       pool.shutdown();
-      List<R> result = new ArrayList();
+      List<R> result = new ArrayList<>();
 
       try {
          boolean isFinish = pool.awaitTermination(timeout, TimeUnit.MINUTES);
@@ -339,9 +305,9 @@ public class Monitor {
             pool.shutdownNow();
          }
 
-         result = futureList.stream().map((ex) -> {
+         result = futureList.stream().map(future -> {
             try {
-               return resultFunc.apply(ex.get());
+               return resultFunc.apply(future.get());
             } catch (ExecutionException | InterruptedException ex) {
                throw new RuntimeException(ex);
             }

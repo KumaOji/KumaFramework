@@ -8,7 +8,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,18 +36,18 @@ public class SourceStatistician {
    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor((new ThreadFactoryBuilder()).setDaemon(true).setNameFormat("monitor-thread").build());
 
    public SourceStatistician() {
-      this.secondDataLinkedList = new AtomicReferenceArray((int)Math.pow((double)2.0F, (double)this.size));
+      this.secondDataLinkedList = new AtomicReferenceArray<>((int) Math.pow(2.0, this.size));
    }
 
    @PostConstruct
    public void init() {
-      this.secondDataLinkedList = new AtomicReferenceArray((int)Math.pow((double)2.0F, (double)this.size));
-      this.n = (int)Math.pow((double)2.0F, (double)this.size) - 1;
+      this.secondDataLinkedList = new AtomicReferenceArray<>((int) Math.pow(2.0, this.size));
+      this.n = (int) Math.pow(2.0, this.size) - 1;
       executorService.scheduleWithFixedDelay(() -> {
          Monitor.TimeContext context = Monitor.timer("seconds_monitor_send");
 
          try {
-            if (this.monitorUrl != null && !this.monitorUrl.equals("")) {
+            if (this.monitorUrl != null && !this.monitorUrl.isEmpty()) {
                for(String s : this.createInfluxData()) {
                   this.sendHttp(s);
                }
@@ -54,13 +55,13 @@ public class SourceStatistician {
                return;
             }
          } catch (Exception e) {
-            LogUtils.error("createInfluxData error:", new Object[]{e});
+            LogUtils.error(e, "createInfluxData error");
             return;
          } finally {
             context.end();
          }
 
-      }, (long)this.sendSeconds, (long)this.sendSeconds, TimeUnit.SECONDS);
+      }, this.sendSeconds, this.sendSeconds, TimeUnit.SECONDS);
    }
 
    public void record(String key, String tag, double count, long totalTime) {
@@ -73,7 +74,7 @@ public class SourceStatistician {
 
          sourceData.record(count, totalTime);
       } catch (Exception e) {
-         LogUtils.error("record error.request:", new Object[]{e});
+         LogUtils.error(e, "record error");
       }
 
    }
@@ -83,7 +84,9 @@ public class SourceStatistician {
       int index = (int)(nowTime & (long)this.n);
 
       SecondData currentSecondData;
-      for(currentSecondData = (SecondData)this.secondDataLinkedList.get(index); currentSecondData == null || currentSecondData.getTime() != nowTime; currentSecondData = (SecondData)this.secondDataLinkedList.get(index)) {
+      for (currentSecondData = this.secondDataLinkedList.get(index);
+           currentSecondData == null || currentSecondData.getTime() != nowTime;
+           currentSecondData = this.secondDataLinkedList.get(index)) {
          SecondData tmp = new SecondData(nowTime);
          this.secondDataLinkedList.compareAndSet(index, currentSecondData, tmp);
       }
@@ -97,81 +100,42 @@ public class SourceStatistician {
 
    public void sendHttp(String data) {
       try {
-         URL url = new URL(this.monitorUrl);
-         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+         HttpURLConnection conn = (HttpURLConnection) URI.create(this.monitorUrl).toURL().openConnection();
          conn.setRequestMethod("POST");
          conn.setRequestProperty("Content-Type", "text/plain; charset=UTF-8");
          conn.setDoOutput(true);
-         OutputStream os = conn.getOutputStream();
-
-         try {
-            os.write(data.getBytes("UTF-8"));
-            os.flush();
-         } catch (Throwable var10) {
-            if (os != null) {
-               try {
-                  os.close();
-               } catch (Throwable var9) {
-                  var10.addSuppressed(var9);
-               }
-            }
-
-            throw var10;
+         try (OutputStream os = conn.getOutputStream()) {
+            os.write(data.getBytes(StandardCharsets.UTF_8));
          }
-
-         if (os != null) {
-            os.close();
-         }
-
-         int responseCode = conn.getResponseCode();
-         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-         try {
+         conn.getResponseCode();
+         try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
             StringBuilder response = new StringBuilder();
-
             String inputLine;
-            while((inputLine = in.readLine()) != null) {
+            while ((inputLine = in.readLine()) != null) {
                response.append(inputLine);
             }
-         } catch (Throwable var11) {
-            try {
-               in.close();
-            } catch (Throwable var8) {
-               var11.addSuppressed(var8);
-            }
-
-            throw var11;
          }
-
-         in.close();
          conn.disconnect();
       } catch (Exception e) {
-         LogUtils.error("record error data:{}", new Object[]{data, e});
+         LogUtils.error(e, "sendHttp error, data:{}", data);
       }
-
    }
 
    public List<String> createInfluxData() {
-      Long secondTime = System.currentTimeMillis() / 1000L;
-      List<String> list = new ArrayList(this.secondDataLinkedList.length());
+      long secondTime = System.currentTimeMillis() / 1000L;
+      List<String> list = new ArrayList<>(this.secondDataLinkedList.length());
       StringBuilder sb = new StringBuilder();
 
       for(int i = 0; i < this.secondDataLinkedList.length(); ++i) {
-         SecondData secondData = (SecondData)this.secondDataLinkedList.get(i);
+         SecondData secondData = this.secondDataLinkedList.get(i);
          if (secondData != null && secondTime != secondData.getTime()) {
-            for(Map.Entry<String, SourceData> entry : secondData.getData().entrySet()) {
-               String key = (String)entry.getKey();
-               SourceData sourceData = (SourceData)entry.getValue();
-               this.append(sb, key, (String)null, secondData, sourceData);
+            for (Map.Entry<String, SourceData> entry : secondData.getData().entrySet()) {
+               this.append(sb, entry.getKey(), null, secondData, entry.getValue());
             }
 
-            for(Map.Entry<String, ConcurrentHashMap<String, SourceData>> entry : secondData.getTagData().entrySet()) {
-               String key = (String)entry.getKey();
-
-               for(Map.Entry<String, SourceData> entry1 : ((ConcurrentHashMap)entry.getValue()).entrySet()) {
-                  String tag = (String)entry1.getKey();
-                  SourceData sourceData = (SourceData)entry1.getValue();
-                  this.append(sb, key, tag, secondData, sourceData);
+            for (Map.Entry<String, ConcurrentHashMap<String, SourceData>> entry : secondData.getTagData().entrySet()) {
+               for (Map.Entry<String, SourceData> entry1 : entry.getValue().entrySet()) {
+                  this.append(sb, entry.getKey(), entry1.getKey(), secondData, entry1.getValue());
                }
             }
 

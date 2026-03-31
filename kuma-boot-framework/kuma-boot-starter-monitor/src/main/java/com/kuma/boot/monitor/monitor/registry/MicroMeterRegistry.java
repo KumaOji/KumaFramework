@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 public class MicroMeterRegistry implements Registry {
    @Resource
    private MeterRegistry registry;
-   private static final double[] percentiles = new double[]{(double)0.5F, 0.9, 0.99};
-   private final Map<String, Map<String, Timer>> timerTagMap = new CacheMap<String, Map<String, Timer>>((k) -> new CacheMap((t) -> this.createTimer(k, t)));
-   private final Map<String, Map<String, Counter>> counterTagMap = new CacheMap<String, Map<String, Counter>>((k) -> new CacheMap((t) -> this.createCounter(k, t)));
+   private static final double[] percentiles = new double[]{0.5, 0.9, 0.99};
+   private final Map<String, Map<String, Timer>> timerTagMap = new CacheMap<>(k -> new CacheMap<String, Timer>(t -> this.createTimer(k, t)));
+   private final Map<String, Map<String, Counter>> counterTagMap = new CacheMap<>(k -> new CacheMap<String, Counter>(t -> this.createCounter(k, t)));
 
    public MicroMeterRegistry() {
    }
@@ -26,11 +26,13 @@ public class MicroMeterRegistry implements Registry {
          tag = "";
       }
 
-      return (Timer)((Map)this.timerTagMap.get(key)).get(tag);
+      return this.timerTagMap.get(key).get(tag);
    }
 
    private Timer createTimer(String key, String tag) {
-      return Objects.equals(tag, "") ? Timer.builder(key).publishPercentiles(percentiles).register(this.registry) : Timer.builder(key).tags(new String[]{"tag", tag}).publishPercentiles(percentiles).register(this.registry);
+      return Objects.equals(tag, "")
+            ? Timer.builder(key).publishPercentiles(percentiles).register(this.registry)
+            : Timer.builder(key).tags("tag", tag).publishPercentiles(percentiles).register(this.registry);
    }
 
    public void record(String key, String tag, long time) {
@@ -39,7 +41,7 @@ public class MicroMeterRegistry implements Registry {
    }
 
    public void count(String key, String tag, double count) {
-      Counter counter = (Counter)((Map)this.counterTagMap.get(key)).get(tag);
+      Counter counter = this.counterTagMap.get(key).get(tag);
       counter.increment(count);
    }
 

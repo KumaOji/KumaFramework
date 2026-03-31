@@ -10,12 +10,12 @@ public class CacheMap<K, V> extends ConcurrentHashMap<K, V> {
       this.mappingFunction = mappingFunction;
    }
 
+   @SuppressWarnings("unchecked")
    public V get(Object key) {
-      V v = (V)super.get(key);
+      V v = (V) super.get(key);
       if (v == null) {
-         v = (V)this.computeIfAbsent(key, this.mappingFunction);
+         v = this.computeIfAbsent((K) key, this.mappingFunction);
       }
-
       return v;
    }
 }
