@@ -11,4 +11,5 @@ description = '''Myframework project参考 —— 一组渐进式 Demo 应用，
   project20: gRPC 客户端 Demo，通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）
   project21: Office Doc 生成 Demo，使用 kuma-boot-starter-office（Aspose.Words）将 HTML 转换为 Word 文档并下载
   blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
+  base     : 基础练习 Demo，用于 Java / Spring Boot 基础知识练习，涵盖常用数据结构、算法、设计模式及 Spring 核心特性
 '''

@@ -1,0 +1,43 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = '基础练习 Demo —— 用于 Java / Spring Boot 基础知识练习，涵盖常用数据结构、算法、设计模式及 Spring 核心特性示例'
+
+def springBootVersion = projectLibs.versions.springboot.get()
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+
+    api projectLibs.spring.boot.starter.web
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testImplementation 'org.openjdk.jol:jol-core:0.17'
+}
+
+test {
+    // JOL 需要访问 java.lang 内部结构
+    jvmArgs(
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.nio=ALL-UNNAMED',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+        '-XX:+UnlockDiagnosticVMOptions'
+    )
+    useJUnitPlatform()
+}
+
+bootJar {
+    archiveBaseName = 'base'
+}
