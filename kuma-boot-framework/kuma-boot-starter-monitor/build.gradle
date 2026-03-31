@@ -14,10 +14,19 @@ dependencies {
     // hutool / guava / fastjson2 / commons / logback / slf4j 等公共工具
     api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-    // @AutoConfiguration / @ConditionalOn* 自动配置注解
+    // @ConditionalOnProperty / @ConditionalOnBean 等条件注解
+    // Spring Boot 4.x 已将这些注解迁移至 spring-boot 核心包
+    compileOnly projectLibs.spring.boot
+    // @AutoConfiguration
     compileOnly projectLibs.spring.boot.autoconfigure
     // @RefreshScope
     compileOnly projectLibs.spring.cloud.context
+    // @Resource / @PostConstruct
+    compileOnly projectLibs.jakarta.annotation.api
+    // HttpServletResponse（jakarta.servlet-api 在 common 里是 compileOnly，不向外传递）
+    compileOnly projectLibs.jakarta.servlet.api
+    // LogUtils 类型链依赖 slf4j（common 里是 implementation，不向外传递）
+    compileOnly projectLibs.slf4j.api
 
     // ---------------------------------------------------------------- //
     //  告警通知（HTTP 推送 / 邮件，核心功能，运行时必须）                     //

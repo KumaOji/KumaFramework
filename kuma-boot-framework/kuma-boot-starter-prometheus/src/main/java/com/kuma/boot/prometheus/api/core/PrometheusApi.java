@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 @Endpoint(
-   id = "kmcprometheusoperation"
+   id = "ttcprometheusoperation"
 )
 public class PrometheusApi {
    private final String activeProfile;
@@ -34,7 +34,7 @@ public class PrometheusApi {
    }
 
    @ReadOperation
-   public List getList() {
+   public List<TargetGroup> getList() {
       List<String> serviceIdList = this.discoveryClient.getServices();
       if (serviceIdList != null && !serviceIdList.isEmpty()) {
          List<TargetGroup> targetGroupList = new ArrayList();
@@ -63,7 +63,7 @@ public class PrometheusApi {
    }
 
    @WriteOperation
-   public ResponseEntity postAlerts(AlertMessage message) {
+   public ResponseEntity<Object> postAlerts(AlertMessage message) {
       this.eventPublisher.publishEvent(message);
       return ResponseEntity.ok().build();
    }

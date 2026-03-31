@@ -1,15 +1,16 @@
 pluginManagement {
     repositories {
         mavenLocal()
-        mavenCentral()
-        gradlePluginPortal()
         maven { url = 'https://maven.aliyun.com/repository/public' }
+        maven { url = 'https://maven.aliyun.com/repository/central' }
         maven { url = 'https://maven.aliyun.com/repository/gradle-plugin' }
         maven { url = 'https://repo.spring.io/release' }
         maven { url = 'https://repo.spring.io/milestone' }
-        maven { url = 'https://plugins.gradle.org/m2/' }
         maven { url = 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies' }
         maven { url = 'https://www.jetbrains.com/intellij-repository/releases' }
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = 'https://plugins.gradle.org/m2/' }
     }
 
     plugins {

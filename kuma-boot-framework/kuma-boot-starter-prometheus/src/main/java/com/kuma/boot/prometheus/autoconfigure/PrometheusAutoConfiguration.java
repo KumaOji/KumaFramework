@@ -4,6 +4,7 @@ import com.kuma.boot.common.utils.common.PropertyUtils;
 import com.kuma.boot.prometheus.autoconfigure.properties.PrometheusProperties;
 import com.kuma.boot.prometheus.collector.PrometheusCollector;
 import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Meter.Type;
 import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig;
@@ -34,6 +35,9 @@ public class PrometheusAutoConfiguration {
    @Value("${spring.application.name}")
    private String applicationName;
 
+   public PrometheusAutoConfiguration() {
+   }
+
    @Bean
    @ConditionalOnBean({PrometheusMeterRegistry.class})
    public PrometheusCollector prometheusCollector(PrometheusMeterRegistry prometheusMeterRegistry) {
@@ -44,14 +48,14 @@ public class PrometheusAutoConfiguration {
    public ThreadPoolTaskScheduler prometheusThreadPoolTaskScheduler() {
       ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
       executor.setPoolSize(5);
-      executor.setThreadGroupName("kmc-prometheus-task-scheduler");
+      executor.setThreadGroupName("ttc-prometheus-task-scheduler");
       executor.setAwaitTerminationSeconds(60);
       executor.setWaitForTasksToCompleteOnShutdown(true);
       return executor;
    }
 
    @Bean
-   MeterRegistryCustomizer appMetricsCommonTags() {
+   MeterRegistryCustomizer<MeterRegistry> appMetricsCommonTags() {
       if (this.applicationName == null) {
          this.applicationName = PropertyUtils.getProperty("spring.application.name");
       }

@@ -11,11 +11,12 @@ buildscript {
 
     repositories {
         mavenLocal()
-        mavenCentral()
-        gradlePluginPortal()
         maven { url = 'https://maven.aliyun.com/repository/public' }
+        maven { url = 'https://maven.aliyun.com/repository/central' }
         maven { url = 'https://repo.spring.io/release'   }
         maven { url = 'https://repo.spring.io/milestone' }
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         // gradle/shadow.gradle 使用 apply plugin: 方式，需要提前将 jar 放入 classpath
@@ -36,7 +37,6 @@ allprojects {
 
     repositories {
         mavenLocal()
-        mavenCentral()
         maven { url = 'https://maven.aliyun.com/repository/public'  }
         maven { url = 'https://maven.aliyun.com/repository/central' }
         maven { url = 'https://maven.aliyun.com/repository/google'  }
@@ -44,6 +44,7 @@ allprojects {
         maven { url = 'https://repo.spring.io/milestone' }
         maven { url = 'https://repo.e-iceblue.com/nexus/content/groups/public/' }
         maven { url = 'https://releases.aspose.com/java/repo/' }
+        mavenCentral()
     }
 }
 

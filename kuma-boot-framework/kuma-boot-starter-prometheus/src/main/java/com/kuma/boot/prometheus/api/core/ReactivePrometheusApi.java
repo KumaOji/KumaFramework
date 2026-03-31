@@ -20,7 +20,7 @@ import reactor.core.publisher.Flux;
 
 @Component
 @Endpoint(
-   id = "kmcreactiveprometheusoperation"
+   id = "ttcreactiveprometheusoperation"
 )
 public class ReactivePrometheusApi {
    private final String activeProfile;
@@ -34,7 +34,7 @@ public class ReactivePrometheusApi {
    }
 
    @ReadOperation
-   public Flux getList() {
+   public Flux<TargetGroup> getList() {
       Flux var10000 = this.discoveryClient.getServices();
       ReactiveDiscoveryClient var10001 = this.discoveryClient;
       Objects.requireNonNull(var10001);
@@ -51,7 +51,7 @@ public class ReactivePrometheusApi {
    }
 
    @WriteOperation
-   public ResponseEntity postAlerts(AlertMessage message) {
+   public ResponseEntity<Object> postAlerts(AlertMessage message) {
       this.eventPublisher.publishEvent(message);
       return ResponseEntity.ok().build();
    }

@@ -6,12 +6,15 @@ import java.util.Map;
 
 public class AlertInfo implements Serializable {
    private String status;
-   private Map labels;
-   private Map annotations;
+   private Map<String, String> labels;
+   private Map<String, String> annotations;
    private OffsetDateTime startsAt;
    private OffsetDateTime endsAt;
    private String generatorURL;
    private String fingerprint;
+
+   public AlertInfo() {
+   }
 
    public String getStatus() {
       return this.status;
@@ -21,19 +24,19 @@ public class AlertInfo implements Serializable {
       this.status = status;
    }
 
-   public Map getLabels() {
+   public Map<String, String> getLabels() {
       return this.labels;
    }
 
-   public void setLabels(Map labels) {
+   public void setLabels(Map<String, String> labels) {
       this.labels = labels;
    }
 
-   public Map getAnnotations() {
+   public Map<String, String> getAnnotations() {
       return this.annotations;
    }
 
-   public void setAnnotations(Map annotations) {
+   public void setAnnotations(Map<String, String> annotations) {
       this.annotations = annotations;
    }
 

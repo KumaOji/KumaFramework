@@ -13,12 +13,17 @@ import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
 public class PrometheusConfiguration {
+   public PrometheusConfiguration() {
+   }
+
    @AutoConfiguration
    @ConditionalOnBean({DiscoveryClient.class})
    @ConditionalOnDiscoveryEnabled
    @ConditionalOnProperty({"spring.cloud.discovery.blocking.enabled"})
    @Import({PrometheusApi.class})
    public static class PrometheusApiConfiguration {
+      public PrometheusApiConfiguration() {
+      }
    }
 
    @AutoConfiguration
@@ -27,5 +32,7 @@ public class PrometheusConfiguration {
    @ConditionalOnReactiveDiscoveryEnabled
    @Import({ReactivePrometheusApi.class})
    public static class ReactivePrometheusApiConfiguration {
+      public ReactivePrometheusApiConfiguration() {
+      }
    }
 }

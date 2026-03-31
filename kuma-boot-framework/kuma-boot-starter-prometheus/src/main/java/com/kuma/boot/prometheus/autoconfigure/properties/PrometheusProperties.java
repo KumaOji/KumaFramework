@@ -11,6 +11,9 @@ public class PrometheusProperties {
    public static final String PREFIX = "kuma.boot.prometheus";
    private boolean enabled = true;
 
+   public PrometheusProperties() {
+   }
+
    public boolean getEnabled() {
       return this.enabled;
    }
