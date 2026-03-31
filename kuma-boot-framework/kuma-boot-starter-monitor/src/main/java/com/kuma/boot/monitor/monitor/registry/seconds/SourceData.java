@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.LongAdder;
 import org.HdrHistogram.Histogram;
 
 public class SourceData {
-   private LongAdder counter = new LongAdder();
-   private Histogram histogram;
+   private final LongAdder counter = new LongAdder();
+   private final Histogram histogram;
 
    public SourceData() {
       this.histogram = new Histogram(1L, TimeUnit.MINUTES.toMillis(1L), 2);

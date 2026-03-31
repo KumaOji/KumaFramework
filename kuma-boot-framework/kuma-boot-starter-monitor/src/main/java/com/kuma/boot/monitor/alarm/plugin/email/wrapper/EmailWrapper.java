@@ -7,7 +7,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 
 public class EmailWrapper {
-   public EmailWrapper() {
+   private EmailWrapper() {
    }
 
    public static HtmlEmail genEmailClient() throws EmailException {
