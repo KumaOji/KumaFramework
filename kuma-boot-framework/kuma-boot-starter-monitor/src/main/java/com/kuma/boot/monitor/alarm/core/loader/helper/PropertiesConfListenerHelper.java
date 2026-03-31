@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
@@ -22,13 +21,19 @@ public class PropertiesConfListenerHelper {
       try {
          long interval = TimeUnit.SECONDS.toMillis(5L);
          File dir = file.getParentFile();
-         FileAlterationObserver observer = FileAlterationObserver.builder().setRootEntry(new FileEntry(dir)).setFileFilter(FileFilterUtils.and(new IOFileFilter[]{FileFilterUtils.fileFileFilter(), FileFilterUtils.nameFileFilter(file.getName())})).setIOCase((IOCase)null).get();
+         FileAlterationObserver observer = FileAlterationObserver.builder()
+               .setRootEntry(new FileEntry(dir))
+               .setFileFilter(FileFilterUtils.and(
+                     FileFilterUtils.fileFileFilter(),
+                     FileFilterUtils.nameFileFilter(file.getName())))
+               .setIOCase(null)
+               .get();
          observer.addListener(new MyFileListener(func));
-         FileAlterationMonitor monitor = new FileAlterationMonitor(interval, new FileAlterationObserver[]{observer});
+         FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
          monitor.start();
          return true;
       } catch (Exception e) {
-         LogUtils.error("register properties change listener error! e:{}", new Object[]{e});
+         LogUtils.error(e, "register properties change listener error!");
          return false;
       }
    }
@@ -41,9 +46,9 @@ public class PropertiesConfListenerHelper {
       }
 
       public void onFileChange(File file) {
-         LogUtils.info("change >>> " + System.currentTimeMillis(), new Object[0]);
-         Map<String, AlarmConfig> ans = (Map)this.func.apply(file);
-         LogUtils.warn("PropertiesConfig changed! reload ans: {}", new Object[]{ans});
+         LogUtils.info("change >>> {}", System.currentTimeMillis());
+         Map<String, AlarmConfig> ans = this.func.apply(file);
+         LogUtils.warn("PropertiesConfig changed! reload ans: {}", ans);
       }
    }
 }
