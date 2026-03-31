@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 @Endpoint(
-   id = "ttcprometheusoperation"
+   id = "kmcprometheusoperation"
 )
 public class PrometheusApi {
    private final String activeProfile;

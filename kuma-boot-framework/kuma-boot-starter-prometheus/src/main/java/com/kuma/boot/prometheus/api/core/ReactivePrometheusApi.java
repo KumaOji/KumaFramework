@@ -19,7 +19,7 @@ import reactor.core.publisher.Flux;
 
 @Component
 @Endpoint(
-   id = "ttcreactiveprometheusoperation"
+   id = "kmcreactiveprometheusoperation"
 )
 public class ReactivePrometheusApi {
    private final String activeProfile;
