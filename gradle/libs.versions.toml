@@ -115,6 +115,7 @@ sentinel = "1.8.8"
 resilience4j = "2.2.0"
 vavr = "0.10.4"
 micrometer-tracing = "1.4.0"
+micrometer = "1.14.5"
 skywalking-apm-toolkit = "9.0.0"
 cglib = "3.3.0"
 httpclient5 = "5.4.1"
@@ -316,6 +317,7 @@ sentinel-spring-webmvc-v6x-adapter = { module = "com.alibaba.csp:sentinel-spring
 sentinel-cluster-server-default = { module = "com.alibaba.csp:sentinel-cluster-server-default", version.ref = "sentinel" }
 micrometer-tracing-api = { module = "io.micrometer:micrometer-tracing", version.ref = "micrometer-tracing" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer-tracing" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 skywalking-apm-toolkit-trace = { module = "org.apache.skywalking:apm-toolkit-trace", version.ref = "skywalking-apm-toolkit" }
 cglib = { module = "cglib:cglib", version.ref = "cglib" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version.ref = "httpclient5" }
