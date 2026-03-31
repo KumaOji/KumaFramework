@@ -10,11 +10,14 @@ public class AlertMessage implements Serializable {
    private String groupKey;
    private String status;
    private String receiver;
-   private Map groupLabels;
-   private Map commonLabels;
-   private Map commonAnnotations;
+   private Map<String, String> groupLabels;
+   private Map<String, String> commonLabels;
+   private Map<String, String> commonAnnotations;
    private String externalURL;
-   private List alerts;
+   private List<AlertInfo> alerts;
+
+   public AlertMessage() {
+   }
 
    public String getVersion() {
       return this.version;
@@ -56,27 +59,27 @@ public class AlertMessage implements Serializable {
       this.receiver = receiver;
    }
 
-   public Map getGroupLabels() {
+   public Map<String, String> getGroupLabels() {
       return this.groupLabels;
    }
 
-   public void setGroupLabels(Map groupLabels) {
+   public void setGroupLabels(Map<String, String> groupLabels) {
       this.groupLabels = groupLabels;
    }
 
-   public Map getCommonLabels() {
+   public Map<String, String> getCommonLabels() {
       return this.commonLabels;
    }
 
-   public void setCommonLabels(Map commonLabels) {
+   public void setCommonLabels(Map<String, String> commonLabels) {
       this.commonLabels = commonLabels;
    }
 
-   public Map getCommonAnnotations() {
+   public Map<String, String> getCommonAnnotations() {
       return this.commonAnnotations;
    }
 
-   public void setCommonAnnotations(Map commonAnnotations) {
+   public void setCommonAnnotations(Map<String, String> commonAnnotations) {
       this.commonAnnotations = commonAnnotations;
    }
 
@@ -88,11 +91,11 @@ public class AlertMessage implements Serializable {
       this.externalURL = externalURL;
    }
 
-   public List getAlerts() {
+   public List<AlertInfo> getAlerts() {
       return this.alerts;
    }
 
-   public void setAlerts(List alerts) {
+   public void setAlerts(List<AlertInfo> alerts) {
       this.alerts = alerts;
    }
 }

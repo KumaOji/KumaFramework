@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.Map;
 
 public class TargetGroup {
-   private final List targets;
-   private final Map labels;
+   private final List<String> targets;
+   private final Map<String, String> labels;
 
-   public TargetGroup(List targets, Map labels) {
+   public TargetGroup(List<String> targets, Map<String, String> labels) {
       this.targets = targets;
       this.labels = labels;
    }
 
-   public List getTargets() {
+   public List<String> getTargets() {
       return this.targets;
    }
 
-   public Map getLabels() {
+   public Map<String, String> getLabels() {
       return this.labels;
    }
 }
