@@ -26,7 +26,7 @@ public class ExceptionUtils {
          AtomicReference<String> title = new AtomicReference(message.getTitle());
          Monitor monitorThreadPool = (Monitor)ContextUtils.getBean(Monitor.class, false);
          if (Objects.nonNull(monitorThreadPool)) {
-            monitorThreadPool.monitorSubmit("\u7cfb\u7edf\u4efb\u52a1: reportException \u5f02\u5e38\u4e0a\u62a5", (Runnable)(() -> {
+            monitorThreadPool.monitorSubmit("系统任务: reportException 异常上报", (Runnable)(() -> {
                Map<String, Object> param = new HashMap();
                param.put("exceptionTitle", title.get());
                param.put("exceptionType", message.getExceptionType().getCode());
