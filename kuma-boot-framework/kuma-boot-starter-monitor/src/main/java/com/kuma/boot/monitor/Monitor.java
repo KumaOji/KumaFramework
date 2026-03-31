@@ -52,11 +52,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class Monitor {
 
-   public static final String TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY = "ttc.async.executor";
-   public static final String TTC_COLLECTOR_ASYNC_EXECUTOR_HOOK = "ttc.async.executor.hook";
+   public static final String KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY = "kmc.async.executor";
+   public static final String KMC_COLLECTOR_ASYNC_EXECUTOR_HOOK = "kmc.async.executor.hook";
 
-   public static final String TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY = "ttc.monitor.executor";
-   public static final String TTC_COLLECTOR_MONITOR_EXECUTOR_HOOK = "ttc.monitor.executor.hook";
+   public static final String KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY = "kmc.monitor.executor";
+   public static final String KMC_COLLECTOR_MONITOR_EXECUTOR_HOOK = "kmc.monitor.executor.hook";
 
    private ThreadPoolExecutor monitorThreadPoolExecutor;
    private ThreadPoolTaskExecutor asyncThreadPoolExecutor;
@@ -83,46 +83,46 @@ public class Monitor {
       this.monitorThreadPoolProperties = monitorThreadPoolProperties;
 
       if (Objects.nonNull(this.monitorThreadPoolExecutor)) {
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".active.count")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".active.count")
                  .set(this.monitorThreadPoolExecutor::getActiveCount);
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".core.pool.size")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".core.pool.size")
                  .set(this.monitorThreadPoolExecutor::getCorePoolSize);
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.largest")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.largest")
                  .set(this.monitorThreadPoolExecutor::getLargestPoolSize);
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.max")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.max")
                  .set(this.monitorThreadPoolExecutor::getMaximumPoolSize);
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.count")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".pool.size.count")
                  .set(this.monitorThreadPoolExecutor::getPoolSize);
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".queue.size")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".queue.size")
                  .set(() -> this.monitorThreadPoolExecutor.getQueue().size());
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".task.count")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".task.count")
                  .set(this.monitorThreadPoolExecutor::getTaskCount);
-         call(TTC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".task.completed")
+         call(KMC_COLLECTOR_MONITOR_EXECUTOR_CALL_KEY + ".task.completed")
                  .set(this.monitorThreadPoolExecutor::getCompletedTaskCount);
       }
 
       if (Objects.nonNull(this.asyncThreadPoolExecutor)) {
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".active.count")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".active.count")
                  .set(this.asyncThreadPoolExecutor::getActiveCount);
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".core.pool.size")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".core.pool.size")
                  .set(this.asyncThreadPoolExecutor::getCorePoolSize);
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.largest")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.largest")
                  .set(() ->
                          this.asyncThreadPoolExecutor.getThreadPoolExecutor().getLargestPoolSize());
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.max")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.max")
                  .set(() ->
                          this.asyncThreadPoolExecutor.getThreadPoolExecutor().getMaximumPoolSize());
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.count")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".pool.size.count")
                  .set(this.asyncThreadPoolExecutor::getPoolSize);
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".queue.size").set(
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".queue.size").set(
                  () -> this.asyncThreadPoolExecutor
                          .getThreadPoolExecutor()
                          .getQueue()
                          .size());
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".task.count")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".task.count")
                  .set(() ->
                          this.asyncThreadPoolExecutor.getThreadPoolExecutor().getTaskCount());
-         call(TTC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".task.completed")
+         call(KMC_COLLECTOR_ASYNC_EXECUTOR_CALL_KEY + ".task.completed")
                  .set(() ->
                          this.asyncThreadPoolExecutor.getThreadPoolExecutor().getCompletedTaskCount());
       }
@@ -152,11 +152,11 @@ public class Monitor {
    }
 
    public Collector.Hook monitorHook() {
-      return collector.hook(TTC_COLLECTOR_MONITOR_EXECUTOR_HOOK);
+      return collector.hook(KMC_COLLECTOR_MONITOR_EXECUTOR_HOOK);
    }
 
    public Collector.Hook asyncHook() {
-      return collector.hook(TTC_COLLECTOR_ASYNC_EXECUTOR_HOOK);
+      return collector.hook(KMC_COLLECTOR_ASYNC_EXECUTOR_HOOK);
    }
 
    private void monitorThreadPoolCheckHealth() {

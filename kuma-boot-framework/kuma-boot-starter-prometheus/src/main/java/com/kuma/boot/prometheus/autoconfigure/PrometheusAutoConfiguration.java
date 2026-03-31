@@ -48,7 +48,7 @@ public class PrometheusAutoConfiguration {
    public ThreadPoolTaskScheduler prometheusThreadPoolTaskScheduler() {
       ThreadPoolTaskScheduler executor = new ThreadPoolTaskScheduler();
       executor.setPoolSize(5);
-      executor.setThreadGroupName("ttc-prometheus-task-scheduler");
+      executor.setThreadGroupName("kmc-prometheus-task-scheduler");
       executor.setAwaitTerminationSeconds(60);
       executor.setWaitForTasksToCompleteOnShutdown(true);
       return executor;
