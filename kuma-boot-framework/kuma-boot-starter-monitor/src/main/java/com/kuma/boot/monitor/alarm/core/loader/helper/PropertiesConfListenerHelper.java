@@ -7,27 +7,23 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.apache.commons.io.monitor.FileEntry;
 
 public class PropertiesConfListenerHelper {
-   public PropertiesConfListenerHelper() {
+   private PropertiesConfListenerHelper() {
    }
 
    public static boolean registerConfChangeListener(File file, Function<File, Map<String, AlarmConfig>> func) {
       try {
          long interval = TimeUnit.SECONDS.toMillis(5L);
          File dir = file.getParentFile();
-         FileAlterationObserver observer = FileAlterationObserver.builder()
-               .setRootEntry(new FileEntry(dir))
-               .setFileFilter(FileFilterUtils.and(
+         FileAlterationObserver observer = new FileAlterationObserver(
+               dir,
+               FileFilterUtils.and(
                      FileFilterUtils.fileFileFilter(),
-                     FileFilterUtils.nameFileFilter(file.getName())))
-               .setIOCase(null)
-               .get();
+                     FileFilterUtils.nameFileFilter(file.getName())));
          observer.addListener(new MyFileListener(func));
          FileAlterationMonitor monitor = new FileAlterationMonitor(interval, observer);
          monitor.start();

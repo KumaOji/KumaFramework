@@ -39,7 +39,7 @@ public class Monitor {
             }
          }
       } catch (SocketException e) {
-         LogUtils.debug("Error when getting host ip address: <{}>.", new Object[]{e.getMessage()});
+         LogUtils.debug("Error when getting host ip address: <{}>.", e.getMessage());
       }
 
       return null;
@@ -47,7 +47,7 @@ public class Monitor {
 
    @Bean
    MeterRegistryCustomizer<MeterRegistry> configurer() {
-      return (registry) -> registry.config().commonTags(new String[]{"host", IP});
+      return registry -> registry.config().commonTags("host", IP);
    }
 
    public static TimeContext timer(String key) {
@@ -97,7 +97,7 @@ public class Monitor {
          }
 
          IP = tempIp;
-         LogUtils.info("Monitor Ip:{}", new Object[]{IP});
+         LogUtils.info("Monitor Ip:{}", IP);
       } catch (UnknownHostException e) {
          throw new RuntimeException(e);
       }
@@ -111,12 +111,12 @@ public class Monitor {
       }
 
       public void end() {
-         this.end((double)1.0F);
+         this.end(1.0);
       }
 
       public void end(double num) {
          if (Monitor.registryInstanceManager == null) {
-            LogUtils.warn("registryInstanceManager is null,key:{}", new Object[]{this.key});
+            LogUtils.warn("registryInstanceManager is null,key:{}", this.key);
          } else {
             Monitor.registryInstanceManager.count(this.key, this.tag, num);
          }
@@ -139,7 +139,7 @@ public class Monitor {
 
       public long end(long totalTime) {
          if (Monitor.registryInstanceManager == null) {
-            LogUtils.warn("registryInstanceManager is null,key:{}", new Object[]{this.key});
+            LogUtils.warn("registryInstanceManager is null,key:{}", this.key);
             return totalTime;
          } else {
             Monitor.registryInstanceManager.record(this.key, this.tag, totalTime);
@@ -149,10 +149,10 @@ public class Monitor {
 
       public void error() {
          if (Monitor.registryInstanceManager == null) {
-            LogUtils.warn("counterInstanceManager is null,key:{}", new Object[]{this.key});
+            LogUtils.warn("counterInstanceManager is null,key:{}", this.key);
          } else {
             String reaTag = this.tag == null ? this.key : this.key + "_" + this.tag;
-            Monitor.registryInstanceManager.count("monitor_key_error", reaTag, (double)1.0F);
+            Monitor.registryInstanceManager.count("monitor_key_error", reaTag, 1.0);
          }
       }
    }
