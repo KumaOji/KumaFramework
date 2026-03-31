@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuma.cloud.base.mybatis.mapper.UserMapper">
+
+    <!--
+        ═══════════════════════════════════════════════════════════════
+        二级缓存声明（Namespace 级别）
+        ═══════════════════════════════════════════════════════════════
+        eviction      缓存淘汰策略
+                        LRU  (默认) - 最近最少使用
+                        FIFO         - 先进先出
+                        SOFT         - 软引用，GC 压力大时优先回收
+                        WEAK         - 弱引用，GC 时立即回收
+        flushInterval 自动刷新间隔（毫秒），不配置则只在写操作时刷新
+        size          最大缓存对象数（默认 1024）
+        readOnly      true  = 直接返回缓存对象引用（性能高，但调用方可能修改共享对象）
+                      false = 序列化后返回拷贝（线程安全，需实体实现 Serializable）
+    -->
+    <cache eviction="LRU"
+           flushInterval="60000"
+           size="512"
+           readOnly="false"/>
+
+    <select id="selectById" resultType="com.kuma.cloud.base.mybatis.entity.User">
+        SELECT id, name, age FROM t_user WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="com.kuma.cloud.base.mybatis.entity.User">
+        SELECT id, name, age FROM t_user ORDER BY id
+    </select>
+
+    <!--
+        useCache="false"  可单独关闭某条语句的二级缓存
+        flushCache="true" 执行后立即清空本 namespace 的一级和二级缓存（写操作默认为 true）
+    -->
+    <update id="updateAge">
+        UPDATE t_user SET age = #{age} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_user WHERE id = #{id}
+    </delete>
+
+</mapper>

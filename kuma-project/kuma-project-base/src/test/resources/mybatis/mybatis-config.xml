@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!--
+            cacheEnabled：全局二级缓存开关（默认已为 true，此处显式声明令意图更清晰）。
+            单独开启此项还不够，还需要在 Mapper XML 中添加 <cache/> 标签才能生效。
+        -->
+        <setting name="cacheEnabled" value="true"/>
+
+        <!--
+            localCacheScope：一级缓存作用域
+              SESSION（默认）：同一 SqlSession 内所有查询共享缓存
+              STATEMENT       ：每次查询完立即清空，相当于关闭一级缓存
+        -->
+        <setting name="localCacheScope" value="SESSION"/>
+
+        <!-- 将 SQL 日志打印到控制台，方便观察是否真正命中了数据库 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <environments default="test">
+        <environment id="test">
+            <transactionManager type="JDBC"/>
+            <!-- H2 内存数据库，进程结束自动销毁 -->
+            <dataSource type="POOLED">
+                <property name="driver"   value="org.h2.Driver"/>
+                <property name="url"      value="jdbc:h2:mem:mybatis_cache_test;DB_CLOSE_DELAY=-1;MODE=MySQL"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper resource="mybatis/mapper/UserMapper.xml"/>
+    </mappers>
+
+</configuration>
