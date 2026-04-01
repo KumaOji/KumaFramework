@@ -8,7 +8,7 @@ spring:
     async:
       request-timeout: 600000  # 音乐流式播放超时 10 分钟（毫秒）
   main:
-    lazy-initialization: false
+    lazy-initialization: true
     log-startup-info: false
   sql:
     init:

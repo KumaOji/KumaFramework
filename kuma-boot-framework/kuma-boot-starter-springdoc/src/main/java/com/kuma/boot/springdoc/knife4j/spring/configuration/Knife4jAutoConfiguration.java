@@ -27,6 +27,7 @@ import com.kuma.boot.springdoc.knife4j.spring.filter.JakartaProductionSecurityFi
 import com.kuma.boot.springdoc.knife4j.spring.util.EnvironmentUtils;
 import jakarta.servlet.DispatcherType;
 import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -64,6 +65,7 @@ public class Knife4jAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(SpringDocConfigProperties.class)
     public Knife4jOpenApiCustomizer knife4jOpenApiCustomizer(SpringDocConfigProperties docProperties) {
         LogUtils.debug("Register Knife4jOpenApiCustomizer");
         return new Knife4jOpenApiCustomizer(this.properties, docProperties);
