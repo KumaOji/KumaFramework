@@ -1,0 +1,34 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = 'Prometheus 系统监控演示 —— 通过 OSHI 采集 CPU / 内存 / 硬盘 / 网络指标并注册到 Micrometer'
+
+def springBootVersion = projectLibs.versions.springboot.get()
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+dependencies {
+    implementation project(':kuma-boot-framework:kuma-boot-starter-web')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-prometheus')
+
+    implementation projectLibs.spring.boot.starter.web
+    implementation projectLibs.spring.boot.starter.actuator
+
+    // OSHI：跨平台 OS/硬件信息库，提供 CPU / 内存 / 磁盘 / 网络原始数据
+    implementation projectLibs.oshi.core
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+bootJar {
+    archiveBaseName = 'project30'
+}
