@@ -43,8 +43,11 @@ public class CustomizeDataSourceInitializer implements InitializingBean {
     @Bean
     public DataSourceInitializer dataSourceInitializer( final DataSource dataSource ) {
         final DataSourceInitializer initializer = new DataSourceInitializer();
-        // 设置数据源
         initializer.setDataSource(dataSource);
+        if (!dataScript.exists()) {
+            initializer.setEnabled(false);
+            return initializer;
+        }
         initializer.setDatabasePopulator(databasePopulator());
         return initializer;
     }

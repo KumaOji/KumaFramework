@@ -47,7 +47,7 @@ public class IdempotentAdapterRedisAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IdempotentHelper idempotentHelper(@NonNull IdempotentRepository idempotentRepository, @NonNull IdempotentExceptionEventHandler exceptionEventHandler, @NonNull IdempotentCoreProperties idempotentCoreProperties) {
+    public IdempotentHelper idempotentHelper(@Qualifier("redisIdempotentRepository") @NonNull IdempotentRepository idempotentRepository, @NonNull IdempotentExceptionEventHandler exceptionEventHandler, @NonNull IdempotentCoreProperties idempotentCoreProperties) {
         return new IdempotentHelper(exceptionEventHandler, idempotentRepository, idempotentCoreProperties);
     }
 }

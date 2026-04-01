@@ -80,6 +80,9 @@ implements InitializingBean {
     }
 
     public void afterPropertiesSet() throws Exception {
+        if (!this.enabled) {
+            return;
+        }
         if (this.dingers.isEmpty()) {
             throw new InvalidPropertiesFormatException("spring.dinger.dingers is empty.");
         }
