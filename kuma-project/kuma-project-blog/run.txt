@@ -1,7 +1,6 @@
 docker run -d \
   --name blog-background \
   --network blog-net \
-  -p 9000:9000 \
   -v /data/blog/blog_background/music:/data/music \
   -v /data/blog/blog_background/logs:/data/blog/logs \
   -e ADMIN_INITIAL_PASSWORD=admin123 \

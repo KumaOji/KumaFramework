@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 创建超时消息处理服务实现类
  */
+@Primary
 @Service
 public class AppDelayMessageServiceImpl extends ServiceImpl<AppDelayMessageMapper, AppDelayMessage>
         implements AppDelayMessageService, ApplicationEventPublisherAware {
