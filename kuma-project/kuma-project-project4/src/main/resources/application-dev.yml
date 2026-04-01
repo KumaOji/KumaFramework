@@ -304,6 +304,9 @@ kuma:
         max: 5
         length: 3000
     security:
+      oauth2:
+        endpoint:
+          uaa-service-uri: http://127.0.0.1:33336
       justauth:
         enabled: true
       ignore-url:
