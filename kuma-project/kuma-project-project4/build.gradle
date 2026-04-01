@@ -17,6 +17,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
     api project(':kuma-boot-framework:kuma-boot-starter-actuator')
+    api project(':kuma-boot-framework:kuma-boot-starter-prometheus')
+
+    // OSHI：跨平台 OS/硬件信息库，提供 CPU / 内存 / 磁盘 / 网络原始数据
+    implementation projectLibs.oshi.core
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
 
     // 数据层

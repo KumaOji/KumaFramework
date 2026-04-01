@@ -186,16 +186,25 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,kmc,kmchealth,kmcstartup,kmcrequestmappings,auditevents"
+        include: "health,info,kmc,kmchealth,kmcstartup,kmcrequestmappings,auditevents,prometheus,metrics"
   endpoint:
     health:
       show-details: always
+    prometheus:
+      enabled: true
   health:
     kmc:
       enabled: true
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    enable:
+      jvm: true
+      process: true
+      system: true
 
 info:
   app:
@@ -383,6 +392,8 @@ kuma:
     actuator:
       managedresource:
         enabled: true
+    prometheus:
+      enabled: true
 
 # Seata 分布式事务（本地无 Seata Server，禁用）
 seata:
