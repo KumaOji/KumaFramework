@@ -18,6 +18,7 @@ package com.kuma.boot.data.datasource.multiple.ck;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Repository;
  * @since 2025-12-19 09:30:45
  */
 @Repository
+@ConditionalOnProperty(name = "kuma.boot.data.datasource.multiple.clickhouse.enabled", havingValue = "true")
 public class ClickHouseJdbcBaseDaoImpl {
 
     private JdbcTemplate jdbcTemplate;

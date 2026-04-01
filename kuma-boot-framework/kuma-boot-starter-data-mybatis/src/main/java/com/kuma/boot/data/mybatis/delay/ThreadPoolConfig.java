@@ -35,25 +35,25 @@ public class ThreadPoolConfig {
     /**
      * 核心线程数量
      */
-    @Value("${delay.thread.core}")
+    @Value("${delay.thread.core:2}")
     private Integer core;
 
     /**
      * 最大线程数
      */
-    @Value("${delay.thread.max}")
+    @Value("${delay.thread.max:10}")
     private Integer max;
 
     /**
      * 排队线程数
      */
-    @Value("${delay.thread.queue}")
+    @Value("${delay.thread.queue:100}")
     private Integer queue;
 
     /**
      * 线程回收时间
      */
-    @Value("${delay.thread.keepAlive}")
+    @Value("${delay.thread.keepAlive:60}")
     private Integer keepAlive;
 
     /**

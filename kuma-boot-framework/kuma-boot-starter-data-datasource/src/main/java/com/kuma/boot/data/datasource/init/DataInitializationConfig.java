@@ -36,13 +36,12 @@ public class DataInitializationConfig {
 
     @PostConstruct
     public void init() {
-        // 项目启动初始化基本数据
-        // LogUtils.info("数据初始化开始: " + DateUtil.dateToString(new Date(),"yyyy-MM-dd HH:mm:ss"));
-        // 通过直接读取sql文件执行
-        Resource resources = new ClassPathResource("sql/client_api_auth.sql");
+        Resource resource = new ClassPathResource("sql/client_api_auth.sql");
+        if (!resource.exists()) {
+            return;
+        }
         ResourceDatabasePopulator resourceDatabasePopulator = new ResourceDatabasePopulator();
-        resourceDatabasePopulator.addScripts(resources);
+        resourceDatabasePopulator.addScripts(resource);
         resourceDatabasePopulator.execute(dataSource);
-        // LogUtils.info("数据初始化结束: " + DateUtil.dateToString(new Date(),"yyyy-MM-dd HH:mm:ss"));
     }
 }
