@@ -8,7 +8,7 @@ spring:
     async:
       request-timeout: 600000
   main:
-    lazy-initialization: false
+    lazy-initialization: true
     log-startup-info: false
   sql:
     init:

@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.config;
 
+import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.dataPermission.annotation.DataPermission;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.mapper.UserMapper;
@@ -32,6 +33,7 @@ public class AdminPasswordInitRunner implements ApplicationRunner {
     private final UserMapper userMapper;
 
     @Override
+    @DataPermission(enable = false)
     public void run(ApplicationArguments args) {
         User admin = userMapper.selectByUsername(ADMIN_USERNAME);
         if (admin == null) {

@@ -36,6 +36,7 @@ import org.springdoc.core.service.OpenAPIService;
 import org.springdoc.core.service.SecurityService;
 import org.springdoc.core.utils.PropertyResolverUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -55,6 +56,7 @@ import java.util.Optional;
 @EnableWebMvc
 @AutoConfiguration(before = SpringDocConfiguration.class)
 @EnableConfigurationProperties(SpringDocExtensionProperties.class)
+@ConditionalOnProperty(prefix = "kuma.boot.springdoc", name = "enabled", havingValue = "true", matchIfMissing = true)
 //@PropertySource(value = "classpath:default-api-doc.yml", factory = GeneralPropertySourceFactory.class)
 public class SpringDocAutoConfiguration implements WebMvcConfigurer {
     private static final Logger log = LoggerFactory.getLogger(SpringDocAutoConfiguration.class);
