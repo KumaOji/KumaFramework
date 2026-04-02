@@ -81,7 +81,7 @@ blog:
   reset-admin-password: true
   admin-initial-password: admin123
   music:
-    base-path: /data/blog/blog_background/music
+    base-path: /data/music
 
 kuma:
   boot:
