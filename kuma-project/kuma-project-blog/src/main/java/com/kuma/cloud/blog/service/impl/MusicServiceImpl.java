@@ -147,6 +147,12 @@ public class MusicServiceImpl implements MusicService {
             Path basePath = Paths.get(musicBasePath).toAbsolutePath().normalize();
 
             String filePath = music.getFilePath();
+            // 兼容数据库中存储的 Windows 绝对路径（如 E:\blog-resource\music\xxx.flac）
+            // 在 Linux 环境下 isAbsolute() 为 false，会错误拼接成 /data/music/E:\...
+            // 处理方式：提取文件名，在 basePath 下查找
+            if (filePath.matches("^[A-Za-z]:[/\\\\].*")) {
+                filePath = Paths.get(filePath.replace('\\', '/')).getFileName().toString();
+            }
             Path resolvedPath;
             if (Paths.get(filePath).isAbsolute()) {
                 resolvedPath = Paths.get(filePath).normalize();
