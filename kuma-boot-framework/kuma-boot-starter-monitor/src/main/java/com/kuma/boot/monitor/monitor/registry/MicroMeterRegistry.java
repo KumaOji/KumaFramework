@@ -8,10 +8,12 @@ import jakarta.annotation.Resource;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MicroMeterRegistry implements Registry {
+   @Lazy
    @Resource
    private MeterRegistry registry;
    private static final double[] percentiles = new double[]{0.5, 0.9, 0.99};

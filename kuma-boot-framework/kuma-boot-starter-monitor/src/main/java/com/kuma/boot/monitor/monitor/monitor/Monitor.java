@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 public class Monitor {
    private static RegistryInstanceManager registryInstanceManager;
    public static final String IP;
+   @Lazy
    @Resource
    private MeterRegistry registry;
 

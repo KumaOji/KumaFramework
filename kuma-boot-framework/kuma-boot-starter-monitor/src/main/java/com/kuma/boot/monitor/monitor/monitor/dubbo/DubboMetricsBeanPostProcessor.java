@@ -11,19 +11,9 @@ import org.apache.dubbo.config.spring.ReferenceBean;
 import org.apache.dubbo.config.spring.ServiceBean;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 
-@Component
-@ConditionalOnClass(name = "org.apache.dubbo.config.spring.ServiceBean")
-@ConditionalOnProperty(
-   name = {"actuator.rpc.dubbo.enhance.enable"},
-   havingValue = "true",
-   matchIfMissing = true
-)
 public class DubboMetricsBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
    static ApplicationContext applicationContext;
 
