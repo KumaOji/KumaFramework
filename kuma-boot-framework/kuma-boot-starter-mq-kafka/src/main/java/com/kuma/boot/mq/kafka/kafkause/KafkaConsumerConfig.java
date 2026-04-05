@@ -21,7 +21,7 @@ import java.util.Map;
  * Kafka消费者配置
  */
 @Configuration
-@ConditionalOnProperty(prefix = "spring.kafka.consumer", name = "bootstrap-servers")
+@ConditionalOnProperty(prefix = "kuma.boot.mq.kafka", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.consumer.bootstrap-servers}")

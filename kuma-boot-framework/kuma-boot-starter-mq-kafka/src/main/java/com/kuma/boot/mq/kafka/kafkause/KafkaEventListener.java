@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(prefix = "spring.kafka.consumer", name = "bootstrap-servers")
+@ConditionalOnProperty(prefix = "kuma.boot.mq.kafka", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class KafkaEventListener {
 
     @KafkaListener(

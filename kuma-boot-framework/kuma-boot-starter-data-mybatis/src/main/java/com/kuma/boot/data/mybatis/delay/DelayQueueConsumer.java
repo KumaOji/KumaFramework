@@ -21,6 +21,7 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import java.time.LocalDateTime;
 import java.util.concurrent.DelayQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 延迟消息消费者
  */
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.data.mybatis.delay", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class DelayQueueConsumer implements Runnable {
 
     /**

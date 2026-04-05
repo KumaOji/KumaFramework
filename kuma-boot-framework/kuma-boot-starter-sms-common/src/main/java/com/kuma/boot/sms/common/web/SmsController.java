@@ -5,6 +5,7 @@ import com.kuma.boot.sms.common.exception.VerificationCodeIsNullException;
 import com.kuma.boot.sms.common.exception.VerifyFailException;
 import com.kuma.boot.sms.common.model.NoticeInfo;
 import com.kuma.boot.sms.common.model.VerifyInfo;
+import com.kuma.boot.sms.common.condition.ConditionalOnSmsEnabled;
 import com.kuma.boot.sms.common.service.NoticeService;
 import com.kuma.boot.sms.common.service.VerificationCodeService;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@ConditionalOnSmsEnabled
 public class SmsController {
    private final VerificationCodeService verificationCodeService;
    private final NoticeService noticeService;

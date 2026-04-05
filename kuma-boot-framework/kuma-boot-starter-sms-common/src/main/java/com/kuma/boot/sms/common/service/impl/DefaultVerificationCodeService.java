@@ -19,9 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
-import org.springframework.stereotype.Service;
 
-@Service
 public class DefaultVerificationCodeService implements VerificationCodeService {
    private final VerificationCodeRepository repository;
    private final VerificationCodeProperties config;

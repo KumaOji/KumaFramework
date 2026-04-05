@@ -9,6 +9,7 @@ import java.util.Set;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class AuthorizeCheckService {
     private static final Logger log = LoggerFactory.getLogger(AuthorizeCheckService.class);
     private final RedisRepository redisRepository;
 
-    public AuthorizeCheckService(RedisRepository redisRepository) {
+    public AuthorizeCheckService(@Nullable RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 
@@ -54,6 +55,10 @@ public class AuthorizeCheckService {
 
     private List<String> getAuthorities(String name, Authentication auth) {
         // Try to get from Redis cache first (namespace-aware key)
+        if (redisRepository == null) {
+            return auth.getAuthorities() == null ? List.of() :
+                    auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        }
         String cacheKey = "user:authorities:" + name;
         Object cached = redisRepository.get(cacheKey);
         if (cached instanceof UserEntity userEntity && userEntity.getAuthorities() != null) {

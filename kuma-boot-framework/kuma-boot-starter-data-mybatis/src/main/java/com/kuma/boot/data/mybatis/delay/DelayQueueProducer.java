@@ -17,12 +17,14 @@
 package com.kuma.boot.data.mybatis.delay;
 
 import java.util.concurrent.DelayQueue;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
  * 延迟消息生产者
  */
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.data.mybatis.delay", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class DelayQueueProducer {
 
     /**

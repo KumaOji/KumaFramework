@@ -19,6 +19,7 @@ package com.kuma.boot.data.mybatis.delay;
 import com.alibaba.fastjson2.JSON;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
  * 延迟消息超时事件监听器
  */
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.data.mybatis.delay", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class DelayMessageListener {
 
     /** 延迟消息生产者 */
