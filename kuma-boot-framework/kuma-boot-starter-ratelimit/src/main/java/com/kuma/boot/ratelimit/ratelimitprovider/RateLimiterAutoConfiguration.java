@@ -51,6 +51,7 @@ public class RateLimiterAutoConfiguration {
 
     @Configuration
     @ConditionalOnClass(RedissonClient.class)
+    @ConditionalOnProperty(prefix = LimitProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
     public static class RateLimitAspectHandlerConfiguration {
 
         @Bean

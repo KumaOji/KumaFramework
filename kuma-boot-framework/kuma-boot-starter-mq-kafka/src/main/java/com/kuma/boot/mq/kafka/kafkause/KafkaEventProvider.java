@@ -7,7 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(prefix = "spring.kafka.producer", name = "bootstrap-servers")
+@ConditionalOnProperty(prefix = "kuma.boot.mq.kafka", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class KafkaEventProvider {
 
     @Resource

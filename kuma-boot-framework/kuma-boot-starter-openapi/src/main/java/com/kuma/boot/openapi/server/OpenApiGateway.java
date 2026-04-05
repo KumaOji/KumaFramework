@@ -43,11 +43,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@ConditionalOnProperty(prefix = "kuma.boot.openapi", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class OpenApiGateway {
    private final Map apiHandlerMap = new HashMap();
    private final Context context;

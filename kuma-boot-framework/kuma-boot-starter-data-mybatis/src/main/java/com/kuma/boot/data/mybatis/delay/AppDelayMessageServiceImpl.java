@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Primary;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Primary
 @Service
+@ConditionalOnProperty(prefix = "kuma.boot.data.mybatis.delay", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class AppDelayMessageServiceImpl extends ServiceImpl<AppDelayMessageMapper, AppDelayMessage>
         implements AppDelayMessageService, ApplicationEventPublisherAware {
 

@@ -22,12 +22,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
-import org.springframework.stereotype.Component;
 
 /**
  * <p>OAuth 2.0 Endpoint 工具方法类 </p>
  * <p>
- * 新版 spring-security-oauth2-authorization-server 很多代码都是“包”级可访问的，外部无法使用。为了方便扩展将其提取出来，便于使用。
+ * 新版 spring-security-oauth2-authorization-server 很多代码都是”包”级可访问的，外部无法使用。为了方便扩展将其提取出来，便于使用。
  * <p>
  * 代码内容与原包代码基本一致。
  *
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Component;
  * @version 2023.07
  * @since 2023-07-12 09:10:51
  */
-@Component
 public class OAuth2AccessTokenStore {
     /**
      * 根据 id 查询时放入Redis中的部分 key

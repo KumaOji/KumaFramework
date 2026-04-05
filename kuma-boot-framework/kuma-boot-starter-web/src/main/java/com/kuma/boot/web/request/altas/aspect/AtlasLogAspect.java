@@ -17,7 +17,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -32,7 +31,6 @@ import java.util.List;
  * @since 0.2.0
  */
 @Aspect
-@Component
 public class AtlasLogAspect {
 
     private final SpelExpressionEvaluator spelExpressionEvaluator;

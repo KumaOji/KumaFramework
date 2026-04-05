@@ -19,7 +19,7 @@ import java.util.Map;
  * Kafka生产者配置
  */
 @Configuration
-@ConditionalOnProperty(prefix = "spring.kafka.producer", name = "bootstrap-servers")
+@ConditionalOnProperty(prefix = "kuma.boot.mq.kafka", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class KafkaProviderConfig {
 
     @Value("${spring.kafka.producer.bootstrap-servers}")

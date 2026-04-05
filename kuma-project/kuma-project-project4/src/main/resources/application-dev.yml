@@ -22,7 +22,7 @@ server:
 
 spring:
   main:
-    lazy-initialization: true
+    lazy-initialization: false
     log-startup-info: false
   threads:
     virtual:

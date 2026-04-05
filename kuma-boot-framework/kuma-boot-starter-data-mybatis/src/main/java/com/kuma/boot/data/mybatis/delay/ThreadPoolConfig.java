@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -31,6 +32,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  */
 @EnableAsync
 @Configuration("delayThreadPoolConfig")
+@ConditionalOnProperty(prefix = "kuma.boot.data.mybatis.delay", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class ThreadPoolConfig {
     /**
      * 核心线程数量
