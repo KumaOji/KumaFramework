@@ -368,6 +368,8 @@ kuma:
     cache:
       redis:
         enabled: false
+        cache-manager:
+          enabled: false
       caffeine:
         enabled: false
       jetcache:

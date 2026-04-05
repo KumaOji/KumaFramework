@@ -67,6 +67,7 @@ import org.jspecify.annotations.Nullable;
 @EnableCaching
 @AutoConfiguration(after = {RedisAutoConfiguration.class})
 @EnableConfigurationProperties({CacheProperties.class})
+@ConditionalOnBean(RedisSerializer.class)
 @ConditionalOnProperty(
         prefix = CacheManagerProperties.PREFIX,
         name = "enabled",
