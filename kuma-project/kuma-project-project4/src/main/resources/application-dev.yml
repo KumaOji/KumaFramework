@@ -160,6 +160,15 @@ logging:
     org.springframework.security: INFO
     "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
 
+# Atlas 日志拦截器（web starter 内置，默认 true + matchIfMissing，必须显式关闭）
+atlas:
+  log:
+    enabled: false
+
+# HttpExchange 客户端（web starter 内置，默认 true + matchIfMissing，必须显式关闭）
+http-exchange:
+  enabled: false
+
 mybatis-plus:
   global-config:
     banner: false
@@ -194,7 +203,7 @@ management:
       enabled: true
   health:
     kmc:
-      enabled: true
+      enabled: false
   info:
     env:
       enabled: true
@@ -262,10 +271,32 @@ kuma:
     backlog: 128
     reader-idle-seconds: 0
     logging-enabled: false
+  # ── kuma-cloud-starter-kmc ─────────────────────────────────────────
+  cloud:
+    kmc:
+      discovery:
+        enabled: false
+      router:
+        enabled: false
+      circuitbreaker:
+        enabled: false
+      ratelimit:
+        enabled: false
+      config:
+        enabled: false
+    # ── kuma-cloud-starter-alibaba ─────────────────────────────────────
+    alibaba:
+      nacos:
+        enabled: false
+      sentinel:
+        enabled: false
+    # ── kuma-cloud-starter-stream ──────────────────────────────────────
+    stream:
+      enabled: false
   boot:
     core:
       enabled: true
-      collect-hook-enabled: true
+      collect-hook-enabled: false
       context-restart-enabled: false
       async:
         enabled: true
@@ -294,16 +325,19 @@ kuma:
           - /swagger-ui/**
           - /doc.html
       filter:
-        version: true
-        tenant: true
-        trace: true
-        web-context: true
-        report: true
-        ping: true
+        version: false
+        tenant: false
+        trace: false
+        web-context: false
+        report: false
+        ping: false
       request:
-        enabled: true
+        enabled: false
         types:
           - LOGGER
+      i18n:
+        fallback-language-tag: zh-CN
+        use-code-as-default-message: true
       global-exception:
         enabled: true
         types:
@@ -317,7 +351,7 @@ kuma:
         endpoint:
           uaa-service-uri: http://127.0.0.1:33336
       justauth:
-        enabled: true
+        enabled: false
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**
@@ -333,11 +367,11 @@ kuma:
         allowed-clock-skew-seconds: 60
     cache:
       redis:
-        enabled: true
+        enabled: false
       caffeine:
-        enabled: true
+        enabled: false
       jetcache:
-        enabled: true
+        enabled: false
         desensitization: true
         clear-remote-on-exit: false
         allow-null-values: true
@@ -348,14 +382,15 @@ kuma:
         health-enabled: false
       mybatis:
         mybatis-plus:
-          enabled: true
+          enabled: false
     office:
       enabled: false
     mq:
+      enabled: false
       kafka:
         enabled: false
     springdoc:
-      enabled: true
+      enabled: false
       type: SERVICE
       title: Project4 API 文档
       description: RESTful API 接口文档
@@ -371,29 +406,56 @@ kuma:
         name: Apache 2.0
         url: https://www.apache.org/licenses/LICENSE-2.0.html
     ip2region:
-      enabled: true
+      enabled: false
     idempotent:
-      enabled: true
+      enabled: false
     lock:
-      enabled: true
+      enabled: false
       type: LOCAL
     ratelimit:
       enabled: false
     dingtalk:
-      enabled: true
+      enabled: false
       project-id: project4-demo
       dingers:
         DINGTALK:
-          # 替换为真实的钉钉 Webhook access_token
           token-id: ${DINGTALK_TOKEN_ID:demo_token_placeholder}
           secret: ${DINGTALK_SECRET:demo_secret_placeholder}
     captcha:
-      enabled: true
+      enabled: false
+    totp:
+      secret:
+        length: 32
+      code:
+        length: 6
+      time:
+        period: 30
+        discrepancy: 1
+    sentinel:
+      enabled: false
+    encrypt:
+      enabled: false
+    crypto:
+      enabled: false
+    sign:
+      enabled: false
+    openapi:
+      enabled: false
+    sms:
+      enabled: false
+    oss:
+      enabled: false
     actuator:
       managedresource:
-        enabled: true
+        enabled: false
     prometheus:
-      enabled: true
+      enabled: false
+    # ── kuma-boot-starter-grpc ─────────────────────────────────────────
+    grpc:
+      enabled: false
+    # ── kuma-boot-starter-monitor ──────────────────────────────────────
+    monitor:
+      enabled: false
 
 # Seata 分布式事务（本地无 Seata Server，禁用）
 seata:
@@ -403,8 +465,16 @@ seata:
 rocketmq:
   enabled: false
 
-# MyBatis 多租户
+# MyBatis
 mybatis:
+  # 真实 SQL 日志
+  actual:
+    sql:
+      show-sql: false
+      show-method: false
+      show-elapsed: false
+      show-rows: false
+  # 多租户
   tenant:
     config:
       enable: false
