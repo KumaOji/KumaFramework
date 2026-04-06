@@ -15,4 +15,7 @@ public class LoginResponse implements Serializable {
     private String username;
     private String nickname;
     private boolean isAdmin;
+
+    /** 密码验证通过但需要继续输入 TOTP 动态码时为 true，前端据此展示验证码输入框 */
+    private boolean requireTotp;
 }
