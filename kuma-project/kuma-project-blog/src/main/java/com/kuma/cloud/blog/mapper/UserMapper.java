@@ -9,4 +9,6 @@ import org.apache.ibatis.annotations.Param;
 public interface UserMapper extends BaseMapper<User> {
 
     User selectByUsername(@Param("username") String username);
+
+    User selectByWechatOpenId(@Param("openId") String openId);
 }

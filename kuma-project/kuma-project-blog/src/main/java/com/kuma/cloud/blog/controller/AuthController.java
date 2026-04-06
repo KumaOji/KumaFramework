@@ -2,6 +2,7 @@ package com.kuma.cloud.blog.controller;
 
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
+import com.kuma.cloud.blog.config.WechatProperties;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
@@ -9,6 +10,7 @@ import com.kuma.cloud.blog.security.LoginRateLimiter;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.TokenService;
 import com.kuma.cloud.blog.service.UserService;
+import com.kuma.cloud.blog.service.WechatOAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -22,6 +24,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 import java.util.UUID;
 
 @Tag(name = "认证管理")
@@ -34,6 +38,8 @@ public class AuthController {
     private final TokenService tokenService;
     private final PermissionService permissionService;
     private final LoginRateLimiter loginRateLimiter;
+    private final WechatOAuthService wechatOAuthService;
+    private final WechatProperties wechatProperties;
 
     @Value("${blog.token-expire-seconds:86400}")
     private long tokenExpireSeconds;
@@ -56,14 +62,15 @@ public class AuthController {
             throw new BusinessException("用户名或密码错误");
         }
 
-        // TOTP 校验：仅在用户已启用 MFA 时生效
-        if (user.getTotpEnabled() != null && user.getTotpEnabled() == 1) {
-            if (!StringUtils.hasText(request.getTotpCode())) {
-                throw new BusinessException("请输入动态验证码");
-            }
-            if (!userService.verifyTotp(user.getTotpSecret(), request.getTotpCode())) {
-                throw new BusinessException("动态验证码错误");
-            }
+        // TOTP 必须验证：账号密码登录强制要求动态验证码
+        if (user.getTotpSecret() == null) {
+            throw new BusinessException("账号未绑定动态验证码，请先扫码绑定");
+        }
+        if (!StringUtils.hasText(request.getTotpCode())) {
+            throw new BusinessException("请输入动态验证码");
+        }
+        if (!userService.verifyTotp(user.getTotpSecret(), request.getTotpCode())) {
+            throw new BusinessException("动态验证码错误");
         }
 
         loginRateLimiter.reset(ip);
@@ -96,6 +103,44 @@ public class AuthController {
         }
         return Result.success(lr);
     }
+
+    // ── 微信扫码登录 ──────────────────────────────────────────────
+
+    @Operation(summary = "获取微信扫码授权 URL（前端跳转或嵌入 iframe）")
+    @GetMapping("/wechat/qr-url")
+    public Result<String> wechatQrUrl() {
+        return Result.success(wechatOAuthService.buildQrUrl());
+    }
+
+    @Operation(summary = "微信回调（微信授权后自动跳转，无需前端直接调用）")
+    @GetMapping("/wechat/callback")
+    public void wechatCallback(@RequestParam String code,
+                               @RequestParam String state,
+                               HttpServletResponse response) throws IOException {
+        wechatOAuthService.validateState(state);
+
+        WechatOAuthService.WechatTokenResult token = wechatOAuthService.getAccessToken(code);
+        WechatOAuthService.WechatUserInfo info = wechatOAuthService.getUserInfo(token.getAccessToken(), token.getOpenId());
+
+        User user = userService.findOrCreateByWechat(info.getOpenId(), info.getNickname(), info.getAvatar());
+        userService.updateLastLoginTime(user.getId());
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setUserId(user.getId());
+        loginResponse.setUsername(user.getUsername());
+        loginResponse.setNickname(user.getNickname());
+        loginResponse.setAdmin(user.getIsAdmin() != null && user.getIsAdmin() == 1);
+
+        String blogToken = java.util.UUID.randomUUID().toString().replace("-", "");
+        tokenService.saveToken(blogToken, loginResponse, tokenExpireSeconds);
+        permissionService.loadAndCachePermissions(user.getId(), user.getUsername(), tokenExpireSeconds);
+        setTokenCookie(response, blogToken);
+
+        // 登录成功后重定向回前端首页
+        response.sendRedirect(wechatProperties.getFrontendUrl());
+    }
+
+    // ── TOTP ─────────────────────────────────────────────────────
 
     @Operation(summary = "生成 TOTP 二维码（开启 MFA 第一步）")
     @GetMapping("/totp/setup")

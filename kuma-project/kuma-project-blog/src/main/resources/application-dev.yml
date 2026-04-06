@@ -72,6 +72,13 @@ python:
     update-models: false
 
 blog:
+  wechat:
+    app-id: YOUR_WECHAT_APP_ID
+    app-secret: YOUR_WECHAT_APP_SECRET
+    # 必须与微信开放平台配置的回调域名一致
+    redirect-uri: http://localhost:9000/api/auth/wechat/callback
+    # 登录成功后跳转的前端地址
+    frontend-url: http://localhost:3000
   tool:
     repkg:
       tool-dir: E:\blog-resource\tool
