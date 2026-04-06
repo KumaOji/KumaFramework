@@ -17,4 +17,7 @@ public class LoginRequest implements Serializable {
 
     @NotBlank
     private String password;
+
+    // TOTP 动态码，仅在用户开启了 MFA 时必填
+    private String totpCode;
 }

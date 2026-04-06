@@ -17,6 +17,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +41,9 @@ public class AuthController {
     @Value("${blog.cookie-secure:false}")
     private boolean cookieSecure;
 
+    @Value("${blog.totp-issuer:KumaBlog}")
+    private String totpIssuer;
+
     @Operation(summary = "用户登录")
     @PostMapping("/login")
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request,
@@ -50,6 +55,17 @@ public class AuthController {
         if (user == null || !userService.checkPassword(request.getPassword(), user.getPassword())) {
             throw new BusinessException("用户名或密码错误");
         }
+
+        // TOTP 校验：仅在用户已启用 MFA 时生效
+        if (user.getTotpEnabled() != null && user.getTotpEnabled() == 1) {
+            if (!StringUtils.hasText(request.getTotpCode())) {
+                throw new BusinessException("请输入动态验证码");
+            }
+            if (!userService.verifyTotp(user.getTotpSecret(), request.getTotpCode())) {
+                throw new BusinessException("动态验证码错误");
+            }
+        }
+
         loginRateLimiter.reset(ip);
         userService.updateLastLoginTime(user.getId());
 
@@ -79,6 +95,32 @@ public class AuthController {
             throw new BusinessException("未登录");
         }
         return Result.success(lr);
+    }
+
+    @Operation(summary = "生成 TOTP 二维码（开启 MFA 第一步）")
+    @GetMapping("/totp/setup")
+    public Result<String> totpSetup(@AuthenticationPrincipal UserDetails principal) {
+        User user = userService.getByUsername(principal.getUsername());
+        String qrDataUri = userService.setupTotp(user.getId(), totpIssuer);
+        return Result.success(qrDataUri);
+    }
+
+    @Operation(summary = "验证并启用 TOTP（扫码后确认）")
+    @PostMapping("/totp/enable")
+    public Result<String> totpEnable(@AuthenticationPrincipal UserDetails principal,
+                                     @RequestParam String code) {
+        User user = userService.getByUsername(principal.getUsername());
+        userService.enableTotp(user.getId(), code);
+        return Result.success("MFA 已启用");
+    }
+
+    @Operation(summary = "关闭 TOTP")
+    @PostMapping("/totp/disable")
+    public Result<String> totpDisable(@AuthenticationPrincipal UserDetails principal,
+                                      @RequestParam String code) {
+        User user = userService.getByUsername(principal.getUsername());
+        userService.disableTotp(user.getId(), code);
+        return Result.success("MFA 已关闭");
     }
 
     @Operation(summary = "用户登出")

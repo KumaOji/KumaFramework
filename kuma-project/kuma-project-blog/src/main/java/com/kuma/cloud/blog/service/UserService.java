@@ -9,4 +9,16 @@ public interface UserService {
     String encodePassword(String rawPassword);
     Long createUser(User user);
     void updateLastLoginTime(Long userId);
+
+    /** 生成 TOTP secret，保存到 DB（尚未启用），返回 QR 码 data URI */
+    String setupTotp(Long userId, String issuer);
+
+    /** 验证 code 正确后正式启用 TOTP */
+    void enableTotp(Long userId, String code);
+
+    /** 关闭 TOTP（需先验证当前 code） */
+    void disableTotp(Long userId, String code);
+
+    /** 验证 TOTP 动态码 */
+    boolean verifyTotp(String secret, String code);
 }
