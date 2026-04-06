@@ -5,6 +5,7 @@ import com.kuma.boot.security.spring.utils.SecurityUtils;
 import com.kuma.boot.totp.exceptions.QrGenerationException;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.mapper.UserMapper;
+import com.kuma.cloud.blog.security.TotpAttemptLimiter;
 import com.kuma.cloud.blog.service.UserService;
 import com.kuma.boot.totp.code.DefaultCodeGenerator;
 import com.kuma.boot.totp.code.DefaultCodeVerifier;
@@ -15,6 +16,7 @@ import com.kuma.boot.totp.qr.ZxingPngQrGenerator;
 import com.kuma.boot.totp.secret.DefaultSecretGenerator;
 import com.kuma.boot.totp.time.SystemTimeProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +24,13 @@ import java.time.LocalDateTime;
 
 import static com.kuma.boot.totp.util.Utils.getDataUriForImage;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
+    private final TotpAttemptLimiter totpAttemptLimiter;
 
     @Override
     public User getByUsername(String username) {
@@ -91,7 +95,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(update);
 
         try {
-            QrDataFactory factory = new QrDataFactory(HashingAlgorithm.SHA256, 6, 30);
+            QrDataFactory factory = new QrDataFactory(HashingAlgorithm.SHA1, 6, 30);
             QrData data = factory.newBuilder()
                     .label(user.getUsername())
                     .secret(secret)
@@ -110,7 +114,12 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectById(userId);
         if (user == null) throw new BusinessException("用户不存在");
         if (user.getTotpSecret() == null) throw new BusinessException("请先调用 setup 接口生成二维码");
-        if (!verifyTotp(user.getTotpSecret(), code)) throw new BusinessException("动态码错误");
+        totpAttemptLimiter.checkLock(userId);
+        if (!verifyTotp(user.getTotpSecret(), code)) {
+            int remaining = totpAttemptLimiter.recordFailure(userId);
+            throw new BusinessException("动态验证码错误，本轮还可尝试 " + remaining + " 次");
+        }
+        totpAttemptLimiter.reset(userId);
 
         User update = new User();
         update.setId(userId);
@@ -125,7 +134,12 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectById(userId);
         if (user == null) throw new BusinessException("用户不存在");
         if (user.getTotpEnabled() == null || user.getTotpEnabled() != 1) throw new BusinessException("TOTP 未启用");
-        if (!verifyTotp(user.getTotpSecret(), code)) throw new BusinessException("动态码错误");
+        totpAttemptLimiter.checkLock(userId);
+        if (!verifyTotp(user.getTotpSecret(), code)) {
+            int remaining = totpAttemptLimiter.recordFailure(userId);
+            throw new BusinessException("动态验证码错误，本轮还可尝试 " + remaining + " 次");
+        }
+        totpAttemptLimiter.reset(userId);
 
         User update = new User();
         update.setId(userId);
@@ -138,9 +152,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean verifyTotp(String secret, String code) {
         if (secret == null || code == null) return false;
-        DefaultCodeVerifier verifier = new DefaultCodeVerifier(
-                new DefaultCodeGenerator(HashingAlgorithm.SHA256, 6),
-                new SystemTimeProvider());
+        DefaultCodeGenerator generator = new DefaultCodeGenerator(HashingAlgorithm.SHA1, 6);
+        SystemTimeProvider timeProvider = new SystemTimeProvider();
+        // 调试：打印服务端当前期望的验证码（前/当前/后各一步），排查完成后可删除
+        try {
+            long bucket = Math.floorDiv(timeProvider.getTime(), 30);
+//            log.debug("TOTP verify - input={}, expected[prev/curr/next]={}/{}/{}",
+//                    code,
+//                    generator.generate(secret, bucket - 1),
+//                    generator.generate(secret, bucket),
+//                    generator.generate(secret, bucket + 1));
+        } catch (Exception e) {
+            log.warn("TOTP debug log failed: {}", e.getMessage());
+        }
+        DefaultCodeVerifier verifier = new DefaultCodeVerifier(generator, timeProvider);
+        verifier.setAllowedTimePeriodDiscrepancy(1);
         return verifier.isValidCode(secret, code);
     }
 }

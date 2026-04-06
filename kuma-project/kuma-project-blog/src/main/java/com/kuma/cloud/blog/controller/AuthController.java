@@ -6,6 +6,7 @@ import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
 import com.kuma.cloud.blog.security.LoginRateLimiter;
+import com.kuma.cloud.blog.security.TotpAttemptLimiter;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.TokenService;
 import com.kuma.cloud.blog.service.UserService;
@@ -34,6 +35,7 @@ public class AuthController {
     private final TokenService tokenService;
     private final PermissionService permissionService;
     private final LoginRateLimiter loginRateLimiter;
+    private final TotpAttemptLimiter totpAttemptLimiter;
 
     @Value("${blog.token-expire-seconds:86400}")
     private long tokenExpireSeconds;
@@ -64,9 +66,12 @@ public class AuthController {
                 pending.setRequireTotp(true);
                 return Result.success(pending);
             }
+            totpAttemptLimiter.checkLock(user.getId());
             if (!userService.verifyTotp(user.getTotpSecret(), request.getTotpCode())) {
-                throw new BusinessException("动态验证码错误");
+                int remaining = totpAttemptLimiter.recordFailure(user.getId());
+                throw new BusinessException("动态验证码错误，本轮还可尝试 " + remaining + " 次");
             }
+            totpAttemptLimiter.reset(user.getId());
         }
 
         loginRateLimiter.reset(ip);

@@ -125,11 +125,6 @@ CREATE TABLE IF NOT EXISTS `user` (
     INDEX `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
--- 若表已存在（旧版本未含这两列），执行以下 ALTER 补充字段
-ALTER TABLE `user`
-    ADD COLUMN IF NOT EXISTS `totp_secret`  VARCHAR(128) DEFAULT NULL       COMMENT 'TOTP 密钥（Base32）',
-    ADD COLUMN IF NOT EXISTS `totp_enabled` TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '是否启用 TOTP MFA：0-否，1-是';
-
 -- -------------------------
 -- 9. source
 -- -------------------------
