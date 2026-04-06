@@ -67,21 +67,21 @@ public class KafkaProviderConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory() {
-        DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(producerConfigs());
+    public ProducerFactory<Object, Object> producerFactory() {
+        DefaultKafkaProducerFactory<Object, Object> factory = new DefaultKafkaProducerFactory<>(producerConfigs());
         //开启事务，会导致 LINGER_MS_CONFIG 配置失效
 //        factory.setTransactionIdPrefix(transactionIdPrefix);
         return factory;
     }
 
 //    @Bean
-//    public KafkaTransactionManager<String, Object> kafkaTransactionManager(ProducerFactory<String, Object> producerFactory) {
+//    public KafkaTransactionManager<Object, Object> kafkaTransactionManager(ProducerFactory<Object, Object> producerFactory) {
 //        return new KafkaTransactionManager<>(producerFactory);
 //    }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate() {
-        KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<Object, Object> kafkaTemplate() {
+        KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<>(producerFactory());
         kafkaTemplate.setProducerListener(kafkaSendResultHandler);
         return kafkaTemplate;
     }

@@ -18,6 +18,7 @@ import com.kuma.boot.encrypt.encrypt2.handler.SecurityHandler;
 import com.kuma.boot.encrypt.encrypt2.handler.SensitiveHandler;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -81,6 +82,7 @@ public class EncryptAutoConfiguration {
 
    @Bean
    @ConditionalOnMissingBean
+   @ConditionalOnBean(SecurityProcessor.class)
    public SecurityHandler commonSecurityHandler(@Autowired SecurityProcessor aesProcessor) {
       LogUtils.debug("encrypt-starter loading SecurityProcessor: {}", new Object[]{aesProcessor.getClass().getName()});
       return new CommonSecurityHandler(aesProcessor, this.securityProperties.getMode(), this.securityProperties.getCharset());
@@ -101,12 +103,14 @@ public class EncryptAutoConfiguration {
 
    @Bean
    @ConditionalOnMissingBean
+   @ConditionalOnBean(SecurityHandler.class)
    public DecryptRequestAdvice decryptRequestAdvice() {
       return new DecryptRequestAdvice(this.securityProperties.getMaxDeep(), this.securityProperties.getClassPackage());
    }
 
    @Bean
    @ConditionalOnMissingBean
+   @ConditionalOnBean(SecurityHandler.class)
    public EncryptResponseAdvice encryptResponseAdvice() {
       List<String> classPackage = this.securityProperties.getClassPackage();
       LogUtils.debug("encrypt-starter scan class packages: {}", new Object[]{classPackage});
