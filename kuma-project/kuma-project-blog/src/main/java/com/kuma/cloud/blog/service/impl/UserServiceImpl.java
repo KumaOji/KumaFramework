@@ -86,13 +86,20 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectById(userId);
         if (user == null) throw new BusinessException("用户不存在");
 
-        String secret = new DefaultSecretGenerator(64).generate();
-        User update = new User();
-        update.setId(userId);
-        update.setTotpSecret(secret);
-        update.setTotpEnabled(0);
-        update.setUpdateTime(LocalDateTime.now());
-        userMapper.updateById(update);
+        // 若已有待确认的 secret（totp_enabled=0），复用它而不是重新生成
+        // 避免多次调用 setup 导致 App 里扫的码与数据库 secret 不一致
+        String secret;
+        if (user.getTotpSecret() != null && (user.getTotpEnabled() == null || user.getTotpEnabled() == 0)) {
+            secret = user.getTotpSecret();
+        } else {
+            secret = new DefaultSecretGenerator(64).generate();
+            User update = new User();
+            update.setId(userId);
+            update.setTotpSecret(secret);
+            update.setTotpEnabled(0);
+            update.setUpdateTime(LocalDateTime.now());
+            userMapper.updateById(update);
+        }
 
         try {
             QrDataFactory factory = new QrDataFactory(HashingAlgorithm.SHA1, 6, 30);
@@ -157,11 +164,11 @@ public class UserServiceImpl implements UserService {
         // 调试：打印服务端当前期望的验证码（前/当前/后各一步），排查完成后可删除
         try {
             long bucket = Math.floorDiv(timeProvider.getTime(), 30);
-//            log.debug("TOTP verify - input={}, expected[prev/curr/next]={}/{}/{}",
-//                    code,
-//                    generator.generate(secret, bucket - 1),
-//                    generator.generate(secret, bucket),
-//                    generator.generate(secret, bucket + 1));
+            log.debug("TOTP verify - input={}, expected[prev/curr/next]={}/{}/{}",
+                    code,
+                    generator.generate(secret, bucket - 1),
+                    generator.generate(secret, bucket),
+                    generator.generate(secret, bucket + 1));
         } catch (Exception e) {
             log.warn("TOTP debug log failed: {}", e.getMessage());
         }
