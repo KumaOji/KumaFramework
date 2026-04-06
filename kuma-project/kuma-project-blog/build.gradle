@@ -21,6 +21,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
     api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-boot-framework:kuma-boot-starter-totp')
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
     }

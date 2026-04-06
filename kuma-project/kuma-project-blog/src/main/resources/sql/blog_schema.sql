@@ -118,10 +118,16 @@ CREATE TABLE IF NOT EXISTS `user` (
     `create_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
+    `totp_secret`     VARCHAR(128)          DEFAULT NULL COMMENT 'TOTP 密钥（Base32）',
+    `totp_enabled`    TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '是否启用 TOTP MFA：0-否，1-是',
     UNIQUE KEY `uk_username` (`username`),
     INDEX `idx_email` (`email`),
     INDEX `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+
+-- 若表已存在则手动执行以下 ALTER 补充字段
+-- ALTER TABLE `user` ADD COLUMN `totp_secret` VARCHAR(128) DEFAULT NULL COMMENT 'TOTP 密钥';
+-- ALTER TABLE `user` ADD COLUMN `totp_enabled` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否启用 TOTP MFA';
 
 -- -------------------------
 -- 9. source

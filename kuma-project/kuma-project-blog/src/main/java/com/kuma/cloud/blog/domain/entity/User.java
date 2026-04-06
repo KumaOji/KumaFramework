@@ -44,6 +44,12 @@ public class User implements Serializable {
     @TableField("status")
     private Integer status;
 
+    @TableField("totp_secret")
+    private String totpSecret;
+
+    @TableField("totp_enabled")
+    private Integer totpEnabled;
+
     @TableField("last_login_time")
     private LocalDateTime lastLoginTime;
 
