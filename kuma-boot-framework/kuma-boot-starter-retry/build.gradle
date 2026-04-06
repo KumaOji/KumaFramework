@@ -1,20 +1,16 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework 重试模块 — 基于 Guava Retrying 的注解式重试'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-test {
-    useJUnitPlatform()
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context
+    api projectLibs.guava.retrying3        // io.github.itning:guava-retrying3，提供 RetryerBuilder / StopStrategies 等
+    api projectLibs.aspectjweaver          // @Aspect / ProceedingJoinPoint
+    api projectLibs.spring.boot.starter.aop
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

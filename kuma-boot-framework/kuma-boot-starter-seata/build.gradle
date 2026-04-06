@@ -1,20 +1,20 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework Seata 分布式事务模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-test {
-    useJUnitPlatform()
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')  // StandardDatabaseScript
+    api projectLibs.seata.spring.boot.starter       // org.apache.seata.*（core/rm-tcc/spring/serializer/discovery/metrics）
+    api projectLibs.netty.all                        // TtcSerializer 用到 ByteBuf / Unpooled
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context             // @RefreshScope
+    api projectLibs.hutool.core                      // StrUtil
+    api projectLibs.guava                            // Lists.newArrayList
+    compileOnly projectLibs.jakarta.servlet.api      // OncePerRequestFilter / HttpServletRequest
+    compileOnly projectLibs.jakarta.annotation.api  // @Nullable
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }
