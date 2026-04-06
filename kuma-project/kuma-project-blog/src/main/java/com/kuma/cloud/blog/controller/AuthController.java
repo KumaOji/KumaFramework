@@ -5,6 +5,7 @@ import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.domain.vo.TotpStatusResponse;
 import com.kuma.cloud.blog.security.LoginRateLimiter;
 import com.kuma.cloud.blog.security.TotpAttemptLimiter;
 import com.kuma.cloud.blog.service.PermissionService;
@@ -58,8 +59,8 @@ public class AuthController {
             throw new BusinessException("用户名或密码错误");
         }
 
-        // TOTP 验证：账号已绑定时强制要求动态验证码；未绑定时直接放行并提示去绑定
-        if (user.getTotpSecret() != null) {
+        // TOTP 验证：totp_enabled=1 才视为已启用，否则放行（用户可在登录后完成 setup/enable）
+        if (user.getTotpEnabled() != null && user.getTotpEnabled() == 1) {
             if (!StringUtils.hasText(request.getTotpCode())) {
                 // 密码正确但未携带 TOTP，告知前端需要输入动态验证码
                 LoginResponse pending = new LoginResponse();
@@ -107,6 +108,16 @@ public class AuthController {
 
     // ── TOTP ─────────────────────────────────────────────────────
 
+    @Operation(summary = "查询当前用户 TOTP 状态")
+    @GetMapping("/totp/status")
+    public Result<TotpStatusResponse> totpStatus(@AuthenticationPrincipal UserDetails principal) {
+        User user = userService.getByUsername(principal.getUsername());
+        TotpStatusResponse resp = new TotpStatusResponse();
+        resp.setEnabled(user.getTotpEnabled() != null && user.getTotpEnabled() == 1);
+        resp.setSecretBound(user.getTotpSecret() != null);
+        return Result.success(resp);
+    }
+
     @Operation(summary = "生成 TOTP 二维码（开启 MFA 第一步）")
     @GetMapping("/totp/setup")
     public Result<String> totpSetup(@AuthenticationPrincipal UserDetails principal) {
@@ -122,6 +133,18 @@ public class AuthController {
         User user = userService.getByUsername(principal.getUsername());
         userService.enableTotp(user.getId(), code);
         return Result.success("MFA 已启用");
+    }
+
+    @Operation(summary = "解锁 TOTP（管理员用，清除指定用户的验证码锁定状态）")
+    @PostMapping("/totp/unlock")
+    public Result<String> totpUnlock(@AuthenticationPrincipal UserDetails principal,
+                                     @RequestParam Long userId) {
+        User operator = userService.getByUsername(principal.getUsername());
+        if (operator.getIsAdmin() == null || operator.getIsAdmin() != 1) {
+            throw new BusinessException("无权限");
+        }
+        totpAttemptLimiter.reset(userId);
+        return Result.success("已解锁");
     }
 
     @Operation(summary = "关闭 TOTP")
