@@ -22,9 +22,9 @@ import com.kuma.cloud.cache.support.proxy.bs.CacheProxyBs;
 import com.kuma.cloud.cache.support.proxy.bs.DefaultCacheProxyBsContext;
 import com.kuma.cloud.cache.support.proxy.bs.CacheProxyBsContext;
 import java.lang.reflect.Method;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.MethodProxy;
 
 /**
  * CGLIB 代理类
