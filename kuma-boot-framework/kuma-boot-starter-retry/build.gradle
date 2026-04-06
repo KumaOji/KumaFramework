@@ -10,7 +10,6 @@ dependencies {
     api projectLibs.spring.cloud.context
     api projectLibs.guava.retrying3        // io.github.itning:guava-retrying3，提供 RetryerBuilder / StopStrategies 等
     api projectLibs.aspectjweaver          // @Aspect / ProceedingJoinPoint
-    api projectLibs.spring.boot.starter.aop
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }

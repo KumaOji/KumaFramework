@@ -21,4 +21,7 @@ public interface UserService {
 
     /** 验证 TOTP 动态码 */
     boolean verifyTotp(String secret, String code);
+
+    /** 根据微信 openId 查找用户，不存在则自动注册 */
+    User findOrCreateByWechat(String openId, String nickname, String avatar);
 }

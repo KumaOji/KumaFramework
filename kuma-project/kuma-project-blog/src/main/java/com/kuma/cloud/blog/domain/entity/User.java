@@ -44,6 +44,9 @@ public class User implements Serializable {
     @TableField("status")
     private Integer status;
 
+    @TableField("wechat_openid")
+    private String wechatOpenid;
+
     @TableField("totp_secret")
     private String totpSecret;
 

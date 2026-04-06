@@ -136,6 +136,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public User findOrCreateByWechat(String openId, String nickname, String avatar) {
+        User user = userMapper.selectByWechatOpenId(openId);
+        if (user != null) return user;
+
+        // 首次微信登录，自动注册
+        user = new User();
+        user.setUsername("wx_" + openId.substring(0, 8));
+        user.setPassword(encodePassword(openId)); // 不可直接密码登录
+        user.setNickname(nickname);
+        user.setAvatar(avatar);
+        user.setWechatOpenid(openId);
+        user.setIsAdmin(0);
+        user.setStatus(1);
+        LocalDateTime now = LocalDateTime.now();
+        user.setCreateTime(now);
+        user.setUpdateTime(now);
+        userMapper.insert(user);
+        return user;
+    }
+
+    @Override
     public boolean verifyTotp(String secret, String code) {
         if (secret == null || code == null) return false;
         DefaultCodeVerifier verifier = new DefaultCodeVerifier(
