@@ -148,3 +148,6 @@ include 'kuma-boot-framework:kuma-boot-starter-oss-common'
 include 'kuma-boot-framework:kuma-boot-starter-sms-common'
 
 include 'kuma-boot-framework:kuma-boot-starter-monitor'
+
+include 'kuma-boot-framework:kuma-boot-starter-retry'
+include 'kuma-boot-framework:kuma-boot-starter-seata'
