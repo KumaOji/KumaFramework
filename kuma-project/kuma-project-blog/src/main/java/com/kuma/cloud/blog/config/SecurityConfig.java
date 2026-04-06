@@ -41,7 +41,6 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/auth/login", "/auth/logout", "/auth/current").permitAll()
-                        .requestMatchers("/auth/wechat/**").permitAll()
                         .requestMatchers("/auth/totp/**").authenticated()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/actuator/health").permitAll()  // 供负载均衡健康检查
