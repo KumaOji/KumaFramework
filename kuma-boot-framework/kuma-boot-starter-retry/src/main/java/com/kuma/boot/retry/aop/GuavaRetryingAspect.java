@@ -67,7 +67,7 @@ public class GuavaRetryingAspect {
    }
 
    public void guavaRetry() {
-      Retryer<Boolean> retryer = RetryerBuilder.newBuilder().retryIfExceptionOfType(IOException.class).retryIfResult((res) -> !res).withWaitStrategy(WaitStrategies.exponentialWait(100L, 5L, TimeUnit.MINUTES)).withStopStrategy(StopStrategies.stopAfterAttempt(3)).withRetryListener(new RetryListener() {
+      Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder().retryIfExceptionOfType(IOException.class).retryIfResult((res) -> !res).withWaitStrategy(WaitStrategies.exponentialWait(100L, 5L, TimeUnit.MINUTES)).withStopStrategy(StopStrategies.stopAfterAttempt(3)).withRetryListener(new RetryListener() {
          {
             Objects.requireNonNull(GuavaRetryingAspect.this);
          }
