@@ -14,7 +14,7 @@ RUN mkdir -p /app /data/music /data/blog/logs \
 WORKDIR /app
 
 # ---- copy fat jar (place blog.jar next to Dockerfile before building) ----
-COPY blog-2026.03.jar app.jar
+COPY blog-2026.04.jar app.jar
 RUN chown blog:blog app.jar
 
 # ---- runtime user (non-root) ----

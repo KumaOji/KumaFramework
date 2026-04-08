@@ -250,9 +250,6 @@ INSERT INTO `article_category` (`id`, `code`, `name`, `parent_id`, `level`, `ico
 (26,   'BigData',          '大数据', 2,    1, 'BarChartOutlined',  14),
 (221,  'BackEndJava',      'Java',   22,   2, 'CoffeeOutlined',    1),
 (222,  'BackEndPython',    'Python', 22,   2, 'ThunderboltOutlined',2),
-(2210, 'BackEndJavaJavaSE','JavaSE', 221,  3, '',                  1),
-(2211, 'BackEndJavaJuc',   'Juc',    221,  3, '',                  2),
-(2212, 'BackEndJavaSpring','Spring', 221,  3, 'CloudOutlined',     3),
 (261,  'BigDataFlink',     'Flink',  26,   2, 'RocketOutlined',    1)
 ON DUPLICATE KEY UPDATE
     `name`       = VALUES(`name`),
