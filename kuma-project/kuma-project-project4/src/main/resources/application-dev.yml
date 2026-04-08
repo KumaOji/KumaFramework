@@ -425,6 +425,9 @@ kuma:
           secret: ${DINGTALK_SECRET:demo_secret_placeholder}
     captcha:
       enabled: false
+    boot:
+      seata:
+        enabled: false
     totp:
       secret:
         length: 32
@@ -459,9 +462,49 @@ kuma:
     monitor:
       enabled: false
 
-# Seata 分布式事务（本地无 Seata Server，禁用）
+# Seata 分布式事务（本地无 Seata Server 时保持 enabled: false）
+# kuma.boot.seata.enabled 控制 kuma wrapper（XID 传播过滤器 + undo_log 自动建表）
+
 seata:
   enabled: false
+  application-id: ${spring.application.name}
+  # 事务分组名，需与 Seata Server 的 vgroup-mapping 保持一致
+  tx-service-group: project4_tx_group
+  # 注册中心：使用 File 模式（KmcRegistryProvider @LoadLevel File），本地直连 Seata Server
+  registry:
+    type: file
+    file:
+      name: file.conf
+  # 配置中心：使用 kmc 模式（KmcConfiguration），由框架 SPI 提供，无需额外配置
+  config:
+    type: file
+    file:
+      name: file.conf
+  service:
+    vgroup-mapping:
+      # 事务分组 → Seata Server 集群名（默认 default）
+      project4_tx_group: default
+    grouplist:
+      # Seata Server 地址（TC）
+      default: 127.0.0.1:8091
+    disable-global-transaction: false
+  client:
+    rm:
+      # undo_log 序列化方式（jackson / kryo / fst）
+      undo-log-serialization: jackson
+      # undo_log 数据压缩（zip / gzip / none）
+      undo-log-compress-alg: zip
+      # undo_log 压缩阈值（字节），超过此值才压缩
+      undo-log-compress-threshold: 64000
+      report-retry-count: 5
+      table-meta-check-enable: false
+    tm:
+      commit-retry-count: 5
+      rollback-retry-count: 5
+      default-global-transaction-timeout: 60000
+  # AT 模式异步提交缓冲（默认关闭）
+  store:
+    mode: file
 
 # RocketMQ（本地无 Broker，通过 ImportFilter 禁用）
 rocketmq:

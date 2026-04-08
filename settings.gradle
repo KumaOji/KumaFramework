@@ -122,6 +122,13 @@ for (name in frameworkOtherSubModules) {
     include "kuma-other-framework:kuma-cloud-${name}"
 }
 
+def frameworkBigdataSubModules = ['dolphinscheduler', 'doris', 'flink', 'hadoop',
+                                  'hive', 'hudi', 'paimon', 'seatunnel',
+                                  'spark', 'tidb', 'trino']
+for (name in frameworkBigdataSubModules) {
+    include "kuma-bigdata-framework:kuma-cloud-${name}"
+}
+
 // idea-plugin 单独开发，需独立 Gradle 项目（org.jetbrains.intellij.platform 会下载完整 IDE ~1.5GB）
 def frameworkCloudPluginSubModules = ['elasticsearch-plugin', 'maven-plugin']
 for (name in frameworkCloudPluginSubModules) {

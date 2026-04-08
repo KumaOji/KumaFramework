@@ -29,6 +29,9 @@ buildscript {
 plugins {
     id 'java-library'
     id 'idea'
+    // apply false：只将插件 jar 放入 classpath，不应用到根项目；
+    // 子项目可直接 apply plugin: 'com.google.cloud.tools.jib' 无需再指定版本
+    id 'com.google.cloud.tools.jib' apply false
 }
 
 allprojects {
