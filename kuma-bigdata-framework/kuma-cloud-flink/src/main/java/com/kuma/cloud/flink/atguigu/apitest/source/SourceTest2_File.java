@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.flink.atguigu.apitest.source;
+
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+/**
+ * SourceTest2_File
+ *
+ * @author kuma
+ * @version 2026.03
+ * @since 2025-12-19 09:30:45
+ */
+public class SourceTest2_File {
+
+    public static void main( String[] args ) throws Exception {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(1);
+
+        // 从文件读取数据
+        DataStream<String> dataStream =
+                env.readTextFile(
+                        "D:\\Projects\\BigData\\FlinkTutorial\\src\\main\\resources\\sensor.txt");
+
+        // 打印输出
+        dataStream.print();
+
+        env.execute();
+    }
+}
