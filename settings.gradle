@@ -123,21 +123,25 @@ for (name in frameworkOtherSubModules) {
 }
 
 // idea-plugin 单独开发，需独立 Gradle 项目（org.jetbrains.intellij.platform 会下载完整 IDE ~1.5GB）
-def frameworkCloudPluginSubModules = ['gradle-plugin', 'elasticsearch-plugin', 'maven-plugin']
+def frameworkCloudPluginSubModules = ['elasticsearch-plugin', 'maven-plugin']
 for (name in frameworkCloudPluginSubModules) {
     include "kuma-other-framework:kuma-cloud-plugin:kuma-cloud-${name}"
 }
 
+// kuma-cloud-gradle-plugin 作为组合构建引入：
+// Gradle 会在配置阶段直接替换插件依赖，无需先 publishToMavenLocal，解决 chicken-and-egg 问题
+includeBuild('kuma-other-framework/kuma-cloud-plugin/kuma-cloud-gradle-plugin')
+
 include "kuma-project"
 include "kuma-project:engine"
-def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'blog', 'base']
+def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'project31', 'blog', 'base']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }
 
 gradle.settingsEvaluated {
     if (JavaVersion.current() < JavaVersion.VERSION_25) {
-        throw new GradleException("This build requires JDK 25. Current: ${JavaVersion.current()}. Use -Dorg.gradle.ignoreBuildJavaVersionCheck to skip.")
+        throw new IllegalStateException("This build requires JDK 25. Current: ${JavaVersion.current()}. Use -Dorg.gradle.ignoreBuildJavaVersionCheck to skip.")
     }
 }
 

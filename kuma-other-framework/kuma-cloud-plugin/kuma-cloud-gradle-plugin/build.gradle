@@ -89,6 +89,15 @@ dependencies {
 
 group = "com.kuma.cloud.gradle"
 
+repositories {
+    mavenLocal()
+    maven { url = 'https://maven.aliyun.com/repository/public' }
+    maven { url = 'https://maven.aliyun.com/repository/central' }
+    maven { url = 'https://repo.spring.io/release' }
+    mavenCentral()
+    gradlePluginPortal()
+}
+
 gradlePlugin {
     website = 'https://github.com/kuma/kuma-cloud-project'
     vcsUrl = 'https://github.com/kuma/kuma-cloud-project.git'

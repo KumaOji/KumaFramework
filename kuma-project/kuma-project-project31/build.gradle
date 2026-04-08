@@ -1,0 +1,37 @@
+// ============================================================
+// kuma-cloud-gradle-plugin 使用演示
+//
+// kuma-cloud-gradle-plugin 通过 includeBuild 引入（见 settings.gradle），
+// Gradle 在配置阶段直接替换插件依赖，无需提前 publishToMavenLocal。
+// ============================================================
+plugins {
+    // io.github.kuma.plugin.service → ServicePlugin
+    //   ├─ JavaPlugin
+    //   ├─ ModulePlugin
+    //   │   ├─ CompileArgsPlugin  → 统一编译参数 / UTF-8 / Java 25 / -parameters
+    //   │   └─ CorePlugin
+    //   │       ├─ ManagementPlugin   → 创建 management 配置（BOM 引入器）
+    //   │       ├─ OptionalPlugin     → 支持 optional 依赖
+    //   │       ├─ CompileProcessorPlugin → 统一注解处理器配置
+    //   │       └─ ManifestPlugin     → 写入 MANIFEST.MF
+    //   └─ BootPlugin               → SpringBootPlugin + buildInfo + fat-jar 命名
+    id 'io.github.kuma.plugin.service'   // Spring Boot 服务完整配置（来自 includeBuild）
+
+    // io.github.kuma.plugin → MyPlugin → 注册 SayHelloTask（./gradlew hello）
+    id 'io.github.kuma.plugin'           // 来自 includeBuild，无需版本号
+}
+
+description = 'kuma-cloud-gradle-plugin 使用演示 —— SayHelloTask / ServicePlugin / ManagementPlugin'
+
+dependencies {
+    // management 是 ManagementPlugin 创建的配置，等价于 spring dependency management 的 BOM 引入
+    management platform("org.springframework.boot:spring-boot-dependencies:4.0.3")
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

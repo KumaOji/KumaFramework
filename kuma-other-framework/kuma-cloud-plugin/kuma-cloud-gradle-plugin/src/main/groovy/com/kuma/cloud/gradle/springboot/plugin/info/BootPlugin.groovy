@@ -35,7 +35,6 @@ abstract class BootPlugin implements Plugin<Project> {
         def bootJar = project.tasks.named(SpringBootPlugin.BOOT_JAR_TASK_NAME).get() as BootJar
         bootJar.archiveBaseName.set(project.name)
         bootJar.archiveFileName.set(bootJar.archiveBaseName.get() + "." + bootJar.archiveExtension.get())
-        bootJar.launchScript()
         (project.tasks.named(JavaPlugin.JAR_TASK_NAME).get() as Jar).enabled = false
     }
 }
