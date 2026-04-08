@@ -1,0 +1,73 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.kuma.cloud.flink.doe.high;
+
+/**
+ * @since: 2024/1/3
+ * @Author: Hang.Nian.YY
+ * @WX: 17710299606
+ * @Tips: 学大数据 ,到多易教育
+ * @DOC: https://blog.csdn.net/qq_37933018?spm=1000.2115.3001.5343
+ * @Description:
+ */
+public class OrderBean {
+    private int oid;
+    private double money;
+    private int uid;
+    private long ts;
+
+    public OrderBean() {}
+
+    public OrderBean(int oid, double money, int uid, long ts) {
+        this.oid = oid;
+        this.money = money;
+        this.uid = uid;
+        this.ts = ts;
+    }
+
+    public int getOid() {
+        return oid;
+    }
+
+    public void setOid(int oid) {
+        this.oid = oid;
+    }
+
+    public double getMoney() {
+        return money;
+    }
+
+    public void setMoney(double money) {
+        this.money = money;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
+
+    public long getTs() {
+        return ts;
+    }
+
+    public void setTs(long ts) {
+        this.ts = ts;
+    }
+}
