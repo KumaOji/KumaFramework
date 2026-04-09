@@ -19,7 +19,9 @@ package com.kuma.cloud.flink.kmc.checkpoint;
 import java.time.Duration;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -38,6 +40,12 @@ public class CheckpointConfigDemo {
         // TODO 最终检查点：1.15开始，默认是true
         //        configuration.set(ENABLE_CHECKPOINTS_AFTER_TASKS_FINISH, false);
 
+        // 2、指定检查点的存储位置（Flink 2.x 通过 Configuration 配置）
+        configuration.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, "hdfs://hadoop102:8020/chk");
+        // 6、取消作业时，checkpoint的数据 是否保留在外部系统
+        configuration.set(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION,
+                ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
+
         StreamExecutionEnvironment env =
                 StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration);
         env.setParallelism(1);
@@ -53,19 +61,12 @@ public class CheckpointConfigDemo {
         // 1、启用检查点: 默认是barrier对齐的，周期为5s, 精准一次
         env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
-        // 2、指定检查点的存储位置
-        checkpointConfig.setCheckpointStorage("hdfs://hadoop102:8020/chk");
         // 3、checkpoint的超时时间: 默认10分钟
         checkpointConfig.setCheckpointTimeout(60000);
         // 4、同时运行中的checkpoint的最大数量
         checkpointConfig.setMaxConcurrentCheckpoints(1);
         // 5、最小等待间隔: 上一轮checkpoint结束 到 下一轮checkpoint开始 之间的间隔
         checkpointConfig.setMinPauseBetweenCheckpoints(1000);
-        // 6、取消作业时，checkpoint的数据 是否保留在外部系统
-        // DELETE_ON_CANCELLATION:主动cancel时，删除存在外部系统的chk-xx目录 （如果是程序突然挂掉，不会删）
-        // RETAIN_ON_CANCELLATION:主动cancel时，外部系统的chk-xx目录会保存下来
-        checkpointConfig.setExternalizedCheckpointCleanup(
-                CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         // 7、允许 checkpoint 连续失败的次数，默认0--》表示checkpoint一失败，job就挂掉
         checkpointConfig.setTolerableCheckpointFailureNumber(10);
 
