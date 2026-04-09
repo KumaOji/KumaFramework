@@ -19,13 +19,15 @@ package com.kuma.cloud.flink.kmc.sink;
 import com.kuma.cloud.flink.kmc.bean.WaterSensor;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import com.kuma.cloud.flink.kmc.functions.WaterSensorMapFunction;
+import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
-import org.apache.flink.connector.jdbc.JdbcSink;
+//import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
 /**
  * TODO
@@ -50,34 +52,34 @@ public class SinkMySQL {
          *    第三个参数： 执行选项 ---》 攒批、重试
          *    第四个参数： 连接选项 ---》 url、用户名、密码
          */
-        SinkFunction<WaterSensor> jdbcSink =
-                JdbcSink.sink(
-                        "insert into ws values(?,?,?)",
-                        new JdbcStatementBuilder<WaterSensor>() {
-                            @Override
-                            public void accept(
-                                    PreparedStatement preparedStatement, WaterSensor waterSensor)
-                                    throws SQLException {
-                                // 每收到一条WaterSensor，如何去填充占位符
-                                preparedStatement.setString(1, waterSensor.getId());
-                                preparedStatement.setLong(2, waterSensor.getTs());
-                                preparedStatement.setInt(3, waterSensor.getVc());
-                            }
-                        },
-                        JdbcExecutionOptions.builder()
-                                .withMaxRetries(3) // 重试次数
-                                .withBatchSize(100) // 批次的大小：条数
-                                .withBatchIntervalMs(3000) // 批次的时间
-                                .build(),
-                        new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                                .withUrl(
-                                        "jdbc:mysql://hadoop102:3306/test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8")
-                                .withUsername("root")
-                                .withPassword("000000")
-                                .withConnectionCheckTimeoutSeconds(60) // 重试的超时时间
-                                .build());
-
-        sensorDS.addSink(jdbcSink);
+//        Sink<WaterSensor> jdbcSink =
+//                JdbcSink.sink(
+//                        "insert into ws values(?,?,?)",
+//                        new JdbcStatementBuilder<WaterSensor>() {
+//                            @Override
+//                            public void accept(
+//                                    PreparedStatement preparedStatement, WaterSensor waterSensor)
+//                                    throws SQLException {
+//                                // 每收到一条WaterSensor，如何去填充占位符
+//                                preparedStatement.setString(1, waterSensor.getId());
+//                                preparedStatement.setLong(2, waterSensor.getTs());
+//                                preparedStatement.setInt(3, waterSensor.getVc());
+//                            }
+//                        },
+//                        JdbcExecutionOptions.builder()
+//                                .withMaxRetries(3) // 重试次数
+//                                .withBatchSize(100) // 批次的大小：条数
+//                                .withBatchIntervalMs(3000) // 批次的时间
+//                                .build(),
+//                        new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+//                                .withUrl(
+//                                        "jdbc:mysql://hadoop102:3306/test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8")
+//                                .withUsername("root")
+//                                .withPassword("000000")
+//                                .withConnectionCheckTimeoutSeconds(60) // 重试的超时时间
+//                                .build());
+//
+//        sensorDS.sinkTo(jdbcSink);
 
         env.execute();
     }
