@@ -18,6 +18,7 @@ package com.kuma.cloud.flink.kmc.sink;
 
 import java.sql.Connection;
 
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
