@@ -25,8 +25,6 @@ import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
-import org.apache.flink.runtime.state.hashmap.HashMapStateBackend;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
@@ -63,12 +61,13 @@ public class StateBackendDemo {
          *    jar包
          */
 
-        // 1. 使用 hashmap状态后端
-        HashMapStateBackend hashMapStateBackend = new HashMapStateBackend();
-        env.setStateBackend(hashMapStateBackend);
-        // 2. 使用 rocksdb状态后端
-        EmbeddedRocksDBStateBackend embeddedRocksDBStateBackend = new EmbeddedRocksDBStateBackend();
-        env.setStateBackend(embeddedRocksDBStateBackend);
+        // 1. 使用 hashmap状态后端 (Flink 2.x 通过配置文件或命令行参数设置)
+        // HashMapStateBackend hashMapStateBackend = new HashMapStateBackend();
+        // env.setStateBackend(hashMapStateBackend);
+
+        // 2. 使用 rocksdb状态后端 (Flink 2.x 通过配置文件或命令行参数设置)
+        // EmbeddedRocksDBStateBackend embeddedRocksDBStateBackend = new EmbeddedRocksDBStateBackend();
+        // env.setStateBackend(embeddedRocksDBStateBackend);
 
         SingleOutputStreamOperator<WaterSensor> sensorDS =
                 env.socketTextStream("hadoop102", 7777)
