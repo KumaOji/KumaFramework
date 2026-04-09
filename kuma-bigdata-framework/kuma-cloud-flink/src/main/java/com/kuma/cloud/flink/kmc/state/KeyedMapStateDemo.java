@@ -19,7 +19,10 @@ package com.kuma.cloud.flink.kmc.state;
 import com.kuma.cloud.flink.kmc.bean.WaterSensor;
 import java.time.Duration;
 import java.util.Map;
+
+import com.kuma.cloud.flink.kmc.functions.WaterSensorMapFunction;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
