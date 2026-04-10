@@ -166,3 +166,4 @@ include 'kuma-boot-framework:kuma-boot-starter-data-shardingsphere'
 
 include 'kuma-boot-framework:kuma-boot-starter-elk'
 include 'kuma-boot-framework:kuma-boot-starter-logger'
+include 'kuma-boot-framework:kuma-boot-starter-skywalking'

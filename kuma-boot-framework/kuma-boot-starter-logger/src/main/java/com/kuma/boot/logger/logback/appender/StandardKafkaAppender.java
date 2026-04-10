@@ -196,7 +196,7 @@ public class StandardKafkaAppender<E> extends KafkaAppenderConfig<E> {
    }
 
    private void ensureDeferredAppends() {
-      Object event;
+      E event;
       while((event = this.queue.poll()) != null) {
          super.doAppend(event);
       }

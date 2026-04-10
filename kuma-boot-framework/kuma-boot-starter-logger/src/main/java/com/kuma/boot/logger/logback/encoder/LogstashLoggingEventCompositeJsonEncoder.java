@@ -2,11 +2,11 @@ package com.kuma.boot.logger.logback.encoder;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.spi.ContextAware;
+import com.fasterxml.jackson.core.JsonGenerator;
 import java.io.IOException;
 import net.logstash.logback.composite.AbstractCompositeJsonFormatter;
 import net.logstash.logback.composite.loggingevent.LoggingEventCompositeJsonFormatter;
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
-import tools.jackson.core.JsonGenerator;
 
 public class LogstashLoggingEventCompositeJsonEncoder extends LoggingEventCompositeJsonEncoder {
    public LogstashLoggingEventCompositeJsonEncoder() {
