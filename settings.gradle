@@ -52,10 +52,11 @@ for (name in oneLayerProjects) {
     include "kuma-ai-${name}"
 }
 
-def frameworkAiSubModules = ['python', 'agent']
-for (name in frameworkAiSubModules) {
-    include "kuma-ai-framework:kuma-ai-${name}"
-}
+//def frameworkAiSubModules = ['python', 'agent']
+//for (name in frameworkAiSubModules) {
+//    include "kuma-ai-framework:kuma-ai-${name}"
+//}
+
 
 def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'data-mybatis', 'office', 'actuator',
@@ -66,7 +67,9 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'ratelimit', 'idempotent', 'lock',
                                'security-jstauth', 'totp', 'captcha',
                                'dingtalk', 'sentinel', 'frp',
-                               'prometheus']
+                               'prometheus','grpc','encrypt',
+                                'openapi','oss-common','sms-common',
+                                'retry','monitor','seata']
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
@@ -74,74 +77,77 @@ for (name in frameworkBootSubModules) {
 def frameworkCloudSubModules = ['bootstrap', 'seata', 'kmc',
                                 'sentinel', 'stream', 'alibaba',
                                 'cache', 'jdbcpool', 'netty']
-def frameworkCloudSubModules2 = ['tx', 'mq',
-                                 'ccsr', 'job', 'rpc']
+//def frameworkCloudSubModules2 = ['tx', 'mq',
+//                                 'ccsr', 'job', 'rpc']
 for (name in frameworkCloudSubModules) {
     include "kuma-cloud-framework:kuma-cloud-starter-${name}"
 }
-for (name in frameworkCloudSubModules2) {
-    include "kuma-cloud-framework:kuma-cloud-${name}"
-}
+//for (name in frameworkCloudSubModules2) {
+//    include "kuma-cloud-framework:kuma-cloud-${name}"
+//}
 
 // tx：rm → common；tm → rm；consistency → common；server(SpringBoot App)；distribution(打包任务)
-def txSubModules = ['common', 'rm', 'tm', 'consistency', 'server', 'distribution']
-for (name in txSubModules) {
-    include "kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-${name}"
-}
+//def txSubModules = ['common', 'rm', 'tm', 'consistency', 'server', 'distribution']
+//for (name in txSubModules) {
+//    include "kuma-cloud-framework:kuma-cloud-tx:kuma-cloud-tx-${name}"
+//}
 
 // ccsr：client-starter → client → api + spi; api → common; server/server-starter 库模块；dashboard/example(SpringBoot App)；distribution(打包任务)
-def ccsrSubModules = ['api', 'client', 'client-starter', 'common', 'core', 'server-starter', 'spi',
-                      'server', 'dashboard', 'example', 'distribution']
-for (name in ccsrSubModules) {
-    include "kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-${name}"
-}
+//def ccsrSubModules = ['api', 'client', 'client-starter', 'common', 'core', 'server-starter', 'spi',
+//                      'server', 'dashboard', 'example', 'distribution']
+//for (name in ccsrSubModules) {
+//    include "kuma-cloud-framework:kuma-cloud-ccsr:kuma-cloud-ccsr-${name}"
+//}
 
 // job：完整依赖链 common → worker → retry → api → dag/datasource/consistency；server/nameserver/dashboard(SpringBoot App)；distribution(打包任务)
-def jobSubModules = ['common', 'worker', 'retry', 'api', 'dag', 'datasource', 'consistency',
-                     'client', 'server', 'nameserver', 'dashboard', 'example', 'distribution']
-for (name in jobSubModules) {
-    include "kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-${name}"
-}
+//def jobSubModules = ['common', 'worker', 'retry', 'api', 'dag', 'datasource', 'consistency',
+//                     'client', 'server', 'nameserver', 'dashboard', 'example', 'distribution']
+//for (name in jobSubModules) {
+//    include "kuma-cloud-framework:kuma-cloud-job:kuma-cloud-job-${name}"
+//}
 
 // mq：完整依赖链 common → plugin → metrics/proxy → cluster/consistency → broker → client；nameserver/dashboard(SpringBoot App)；distribution/example
-def mqSubModules = ['common', 'plugin', 'metrics', 'proxy', 'cluster', 'consistency',
-                    'broker', 'client', 'nameserver', 'dashboard', 'example', 'distribution']
-for (name in mqSubModules) {
-    include "kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-${name}"
-}
+//def mqSubModules = ['common', 'plugin', 'metrics', 'proxy', 'cluster', 'consistency',
+//                    'broker', 'client', 'nameserver', 'dashboard', 'example', 'distribution']
+//for (name in mqSubModules) {
+//    include "kuma-cloud-framework:kuma-cloud-mq:kuma-cloud-mq-${name}"
+//}
 
 // rpc：完整依赖链 common → core → filter/plugin/serialization/registry/metrics/cluster → consistency → server/client；nameserver/dashboard(SpringBoot App)；distribution
-def rpcSubModules = ['common', 'core', 'filter', 'plugin', 'serialization', 'registry', 'metrics',
-                     'cluster', 'consistency', 'client', 'server', 'nameserver', 'dashboard', 'distribution']
-for (name in rpcSubModules) {
-    include "kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-${name}"
-}
+//def rpcSubModules = ['common', 'core', 'filter', 'plugin', 'serialization', 'registry', 'metrics',
+//                     'cluster', 'consistency', 'client', 'server', 'nameserver', 'dashboard', 'distribution']
+//for (name in rpcSubModules) {
+//    include "kuma-cloud-framework:kuma-cloud-rpc:kuma-cloud-rpc-${name}"
+//}
 
-def frameworkOtherSubModules = ['design-patterns', 'plugin']
-for (name in frameworkOtherSubModules) {
-    include "kuma-other-framework:kuma-cloud-${name}"
-}
+//def frameworkOtherSubModules = ['design-patterns', 'plugin']
+//for (name in frameworkOtherSubModules) {
+//    include "kuma-other-framework:kuma-cloud-${name}"
+//}
 
-def frameworkBigdataSubModules = ['dolphinscheduler', 'doris', 'flink', 'hadoop',
-                                  'hive', 'hudi', 'paimon', 'seatunnel',
-                                  'spark', 'tidb', 'trino']
-for (name in frameworkBigdataSubModules) {
-    include "kuma-bigdata-framework:kuma-cloud-${name}"
-}
+//def frameworkBigdataSubModules = ['dolphinscheduler', 'doris', 'flink', 'hadoop',
+//                                  'hive', 'hudi', 'paimon', 'seatunnel',
+//                                  'spark', 'tidb', 'trino']
+//for (name in frameworkBigdataSubModules) {
+//    include "kuma-bigdata-framework:kuma-cloud-${name}"
+//}
 
 // idea-plugin 单独开发，需独立 Gradle 项目（org.jetbrains.intellij.platform 会下载完整 IDE ~1.5GB）
-def frameworkCloudPluginSubModules = ['elasticsearch-plugin', 'maven-plugin']
-for (name in frameworkCloudPluginSubModules) {
-    include "kuma-other-framework:kuma-cloud-plugin:kuma-cloud-${name}"
-}
+//def frameworkCloudPluginSubModules = ['elasticsearch-plugin', 'maven-plugin']
+//for (name in frameworkCloudPluginSubModules) {
+//    include "kuma-other-framework:kuma-cloud-plugin:kuma-cloud-${name}"
+//}
 
 // kuma-cloud-gradle-plugin 作为组合构建引入：
 // Gradle 会在配置阶段直接替换插件依赖，无需先 publishToMavenLocal，解决 chicken-and-egg 问题
-includeBuild('kuma-other-framework/kuma-cloud-plugin/kuma-cloud-gradle-plugin')
+//includeBuild('kuma-other-framework/kuma-cloud-plugin/kuma-cloud-gradle-plugin')
 
 include "kuma-project"
-include "kuma-project:engine"
-def projectBootSubModules = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'project31', 'blog', 'base']
+//def projectBootSubModules = ['engine','project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'project31', 'blog', 'base']
+//for (name in projectBootSubModules) {
+//    include "kuma-project:kuma-project-${name}"
+//}
+def projectBootSubModules = ['project4', 'blog']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }
@@ -152,13 +158,3 @@ gradle.settingsEvaluated {
     }
 }
 
-include 'kuma-boot-framework:kuma-boot-starter-grpc'
-include 'kuma-boot-framework:kuma-boot-starter-encrypt'
-include 'kuma-boot-framework:kuma-boot-starter-openapi'
-include 'kuma-boot-framework:kuma-boot-starter-oss-common'
-include 'kuma-boot-framework:kuma-boot-starter-sms-common'
-
-include 'kuma-boot-framework:kuma-boot-starter-monitor'
-
-include 'kuma-boot-framework:kuma-boot-starter-retry'
-include 'kuma-boot-framework:kuma-boot-starter-seata'
