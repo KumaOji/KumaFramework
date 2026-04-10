@@ -22,26 +22,29 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+/**
+ * <b>Aspect 拦截信息检索辅助类</b>
+ */
 public class AspectHelper {
-   private static ExpressionParser expressionParser = new SpelExpressionParser();
-   private static ConcurrentMap<String, Expression> expressionMap = new ConcurrentHashMap();
 
-   public AspectHelper() {
-   }
+   private static ExpressionParser expressionParser = new SpelExpressionParser();
+   private static ConcurrentMap<String, Expression> expressionMap = new ConcurrentHashMap<>();
 
    public static EvaluationContext buildContext(JoinPoint point, Object result) {
       EvaluationContext context = buildContext(point);
       context.setVariable("result", result);
+
       return context;
    }
 
    public static EvaluationContext buildContext(JoinPoint point) {
       EvaluationContext context = new StandardEvaluationContext();
-      MethodSignature ms = (MethodSignature)point.getSignature();
+      MethodSignature ms = (MethodSignature) point.getSignature();
+
       String[] parameterNames = ms.getParameterNames();
       Object[] args = point.getArgs();
 
-      for(int i = 0; i < parameterNames.length; ++i) {
+      for (int i = 0; i < parameterNames.length; i++) {
          context.setVariable(parameterNames[i], args[i]);
       }
 
@@ -50,42 +53,68 @@ public class AspectHelper {
 
    public static Method getMethod(JoinPoint point) {
       Class<?> targetCls = point.getTarget().getClass();
-      MethodSignature ms = (MethodSignature)point.getSignature();
+      MethodSignature ms = (MethodSignature) point.getSignature();
 
       try {
          return targetCls.getDeclaredMethod(ms.getName(), ms.getParameterTypes());
-      } catch (NoSuchMethodException var4) {
+      }
+      catch (NoSuchMethodException e) {
          return null;
       }
    }
 
    public static Class<?> getMethodReturnType(JoinPoint point) {
       Method targetMethod = getMethod(point);
-      return targetMethod == null ? null : targetMethod.getReturnType();
+
+      if (targetMethod == null) {
+         return null;
+      }
+
+      return targetMethod.getReturnType();
    }
 
-   public static <T extends Annotation> T getMethodAnnotation(JoinPoint point, Class<T> annotationType) {
+   public static <T extends Annotation> T getMethodAnnotation(JoinPoint point,
+                                                              Class<T> annotationType) {
       Method targetMethod = getMethod(point);
-      return (T)(targetMethod == null ? null : (Annotation)MergedAnnotations.from(targetMethod, SearchStrategy.INHERITED_ANNOTATIONS).get(annotationType).synthesize(MergedAnnotation::isPresent).orElse((Object)null));
+
+      if (targetMethod == null) {
+         return null;
+      }
+
+      return MergedAnnotations.from(targetMethod, SearchStrategy.INHERITED_ANNOTATIONS)
+              .get(annotationType).synthesize(MergedAnnotation::isPresent).orElse(null);
    }
 
    public static Annotation[] getMethodAnnotations(JoinPoint point) {
       Method targetMethod = getMethod(point);
-      return targetMethod == null ? new Annotation[0] : (Annotation[])MergedAnnotations.from(targetMethod, SearchStrategy.INHERITED_ANNOTATIONS).stream().map(MergedAnnotation::synthesize).toArray((x$0) -> new Annotation[x$0]);
+
+      if (targetMethod == null) {
+         return new Annotation[0];
+      }
+
+      return MergedAnnotations.from(targetMethod, SearchStrategy.INHERITED_ANNOTATIONS).stream()
+              .map(MergedAnnotation::synthesize).toArray(Annotation[]::new);
    }
 
-   public static <T extends Annotation> T getClassAnnotation(JoinPoint point, Class<T> annotationType) {
+   public static <T extends Annotation> T getClassAnnotation(JoinPoint point,
+                                                             Class<T> annotationType) {
       Class<?> targetCls = point.getTarget().getClass();
-      return (T)(MergedAnnotations.from(targetCls, SearchStrategy.INHERITED_ANNOTATIONS).get(annotationType).synthesize(MergedAnnotation::isPresent).orElse((Object)null));
+
+      return MergedAnnotations.from(targetCls, SearchStrategy.INHERITED_ANNOTATIONS)
+              .get(annotationType).synthesize(MergedAnnotation::isPresent).orElse(null);
    }
 
    public static Annotation[] getClassAnnotations(JoinPoint point) {
       Class<?> targetCls = point.getTarget().getClass();
-      return (Annotation[])MergedAnnotations.from(targetCls, SearchStrategy.INHERITED_ANNOTATIONS).stream().map(MergedAnnotation::synthesize).toArray((x$0) -> new Annotation[x$0]);
+
+      return MergedAnnotations.from(targetCls, SearchStrategy.INHERITED_ANNOTATIONS).stream()
+              .map(MergedAnnotation::synthesize).toArray(Annotation[]::new);
    }
 
-   public static <T extends Annotation> T getMethodOrClassAnnotation(JoinPoint point, Class<T> annotationType) {
+   public static <T extends Annotation> T getMethodOrClassAnnotation(JoinPoint point,
+                                                                     Class<T> annotationType) {
       T annotation = getMethodAnnotation(point, annotationType);
+
       if (annotation == null) {
          annotation = getClassAnnotation(point, annotationType);
       }
@@ -95,21 +124,23 @@ public class AspectHelper {
 
    public static Expression getExpressionByKey(String key) {
       if (expressionMap.containsKey(key)) {
-         return (Expression)expressionMap.get(key);
-      } else {
-         Expression expression = expressionParser.parseExpression(key);
-         expressionMap.putIfAbsent(key, expression);
-         return expression;
+         return expressionMap.get(key);
       }
+
+      Expression expression = expressionParser.parseExpression(key);
+      expressionMap.putIfAbsent(key, expression);
+
+      return expression;
    }
 
    public static Map<String, Object> getParameters(JoinPoint point) {
-      MethodSignature ms = (MethodSignature)point.getSignature();
+      MethodSignature ms = (MethodSignature) point.getSignature();
       String[] parameterNames = ms.getParameterNames();
       Object[] args = point.getArgs();
-      Map<String, Object> paramMap = new HashMap(parameterNames.length);
 
-      for(int i = 0; i < parameterNames.length; ++i) {
+      Map<String, Object> paramMap = new HashMap<>(parameterNames.length);
+
+      for (int i = 0; i < parameterNames.length; i++) {
          paramMap.put(parameterNames[i], args[i]);
       }
 
@@ -120,12 +151,13 @@ public class AspectHelper {
       return point.getArgs();
    }
 
+   @SuppressWarnings("unchecked")
    public static <T> T findFirstArgByType(JoinPoint point, Class<? extends T> clazz) {
       Object[] args = getArgs(point);
 
-      for(Object arg : args) {
+      for (Object arg : args) {
          if (clazz.isInstance(arg)) {
-            return (T)arg;
+            return (T) arg;
          }
       }
 
@@ -135,8 +167,8 @@ public class AspectHelper {
    public static Object findFirstArgByTypes(JoinPoint point, Class<?>... clazzes) {
       Object[] args = getArgs(point);
 
-      for(Object arg : args) {
-         for(Class<?> clazz : clazzes) {
+      for (Object arg : args) {
+         for (Class<?> clazz : clazzes) {
             if (clazz.isInstance(arg)) {
                return arg;
             }
@@ -146,21 +178,30 @@ public class AspectHelper {
       return null;
    }
 
-   public abstract static class AnnotationHolder<T extends Annotation> {
-      private final Map<Object, SoftReference<T>> map = new ConcurrentHashMap();
+   /**
+    * <b>注解信息持有者</b>
+    */
+   abstract public static class AnnotationHolder<T extends Annotation> {
+
+      private final Map<Object, SoftReference<T>> map = new ConcurrentHashMap<>();
 
       public AnnotationHolder() {
       }
 
-      public T findAnnotation(JoinPoint jp, Function<JoinPoint, Object> funcKey, BiFunction<JoinPoint, Class<T>, T> funcFind) {
+      @SuppressWarnings("unchecked")
+      public T findAnnotation(JoinPoint jp, Function<JoinPoint, Object> funcKey,
+                              BiFunction<JoinPoint, Class<T>, T> funcFind) {
          Object key = funcKey.apply(jp);
-         T val = (T)(Optional.ofNullable((SoftReference)this.map.get(key)).map(SoftReference::get).orElse((Object)null));
+         T val = Optional.ofNullable(map.get(key)).map(SoftReference::get).orElse(null);
+
          if (val == null) {
-            ParameterizedType type = (ParameterizedType)this.getClass().getGenericSuperclass();
-            Class<T> tClazz = (Class)type.getActualTypeArguments()[0];
-            val = (T)(funcFind.apply(jp, tClazz));
+            ParameterizedType type = (ParameterizedType) this.getClass().getGenericSuperclass();
+            Class<T> tClazz = (Class<T>) type.getActualTypeArguments()[0];
+
+            val = funcFind.apply(jp, tClazz);
+
             if (val != null) {
-               this.map.put(key, new SoftReference(val));
+               map.put(key, new SoftReference<>(val));
             }
          }
 
@@ -168,15 +209,19 @@ public class AspectHelper {
       }
 
       public T findAnnotationByMethod(JoinPoint jp) {
-         return (T)this.findAnnotation(jp, (j) -> ((MethodSignature)j.getSignature()).getMethod(), AspectHelper::getMethodAnnotation);
+         return findAnnotation(jp, (j) -> ((MethodSignature) j.getSignature()).getMethod(),
+                 AspectHelper::getMethodAnnotation);
       }
 
       public T findAnnotationByMethodOrClass(JoinPoint jp) {
-         return (T)this.findAnnotation(jp, (j) -> ((MethodSignature)j.getSignature()).getMethod(), AspectHelper::getMethodOrClassAnnotation);
+         return findAnnotation(jp, (j) -> ((MethodSignature) j.getSignature()).getMethod(),
+                 AspectHelper::getMethodOrClassAnnotation);
       }
 
       public T findAnnotationByClass(JoinPoint jp) {
-         return (T)this.findAnnotation(jp, (j) -> j.getTarget().getClass(), AspectHelper::getClassAnnotation);
+         return findAnnotation(jp, (j) -> j.getTarget().getClass(),
+                 AspectHelper::getClassAnnotation);
       }
    }
+
 }
