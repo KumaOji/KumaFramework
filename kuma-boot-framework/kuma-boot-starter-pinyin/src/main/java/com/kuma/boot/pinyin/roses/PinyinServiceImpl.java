@@ -2,7 +2,6 @@ package com.kuma.boot.pinyin.roses;
 
 import com.kuma.boot.pinyin.roses.api.PinYinApi;
 import com.kuma.boot.pinyin.roses.api.exception.PinyinException;
-import java.util.Properties;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -10,78 +9,99 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
+import java.util.Properties;
+import java.util.Set;
+
+import static com.kuma.boot.pinyin.roses.api.constants.PinyinConstants.CHINESE_WORDS_REGEX;
+
+/** 拼音工具类的实现 */
 public class PinyinServiceImpl implements PinYinApi {
+
    private final Properties properties = new Properties();
 
    public PinyinServiceImpl() {
-      this.init();
+      init();
    }
 
+   /** 初始化多音字中文字和拼音首字母大写的映射 */
    public void init() {
-      this.properties.put("\u533a", "O");
-      this.properties.put("\u665f", "C");
-      this.properties.put("\u4e50", "Y");
-      this.properties.put("\u5458", "Y");
-      this.properties.put("\u8d20", "Y");
-      this.properties.put("\u9ed1", "H");
-      this.properties.put("\u91cd", "C");
-      this.properties.put("\u4ec7", "Q");
-      this.properties.put("\u79d8", "B");
-      this.properties.put("\u51bc", "X");
-      this.properties.put("\u89e3", "X");
-      this.properties.put("\u6298", "S");
-      this.properties.put("\u5355", "S");
-      this.properties.put("\u6734", "P");
-      this.properties.put("\u7fdf", "Z");
-      this.properties.put("\u67e5", "Z");
-      this.properties.put("\u76d6", "G");
-      this.properties.put("\u4e07\u4fdf", "M I");
-      this.properties.put("\u5c09\u8fdf", "Y C");
+      // 百家姓多音字的汉语-首字母大写的映射
+      properties.put("\u533A", "O");
+      properties.put("\u665F", "C");
+      properties.put("\u4E50", "Y");
+      properties.put("\u5458", "Y");
+      properties.put("\u8D20", "Y");
+      properties.put("\u9ED1", "H");
+      properties.put("\u91CD", "C");
+      properties.put("\u4EC7", "Q");
+      properties.put("\u79D8", "B");
+      properties.put("\u51BC", "X");
+      properties.put("\u89E3", "X");
+      properties.put("\u6298", "S");
+      properties.put("\u5355", "S");
+      properties.put("\u6734", "P");
+      properties.put("\u7FDF", "Z");
+      properties.put("\u67E5", "Z");
+      properties.put("\u76D6", "G");
+      properties.put("\u4E07\u4FDF", "M I");
+      properties.put("\u5C09\u8FDF", "Y C");
    }
 
+   @Override
    public String getLastnameFirstLetterUpper(String lastnameChines) {
-      for(Object lastNameObject : this.properties.keySet()) {
-         String lastname = (String)lastNameObject;
+      // 从百家姓多音字映射中去比对，有没有包含多音字的，包含多音字姓的以映射表为准，不包含的以普通拼音解析为准
+      Set<Object> keys = properties.keySet();
+      for (Object lastNameObject : keys) {
+         String lastname = (String) lastNameObject;
          if (lastnameChines.length() >= lastname.length() && lastnameChines.startsWith(lastname)) {
-            return this.properties.getProperty(lastname);
+            return properties.getProperty(lastname);
          }
       }
 
+      // 返回普通姓氏的首字符大写
       return getFirstLetters(lastnameChines, HanyuPinyinCaseType.UPPERCASE);
    }
 
+   @Override
    public String getChineseStringFirstLetterUpper(String chineseString) {
       return getFirstLetters(chineseString, HanyuPinyinCaseType.UPPERCASE);
    }
 
+   @Override
    public String parsePinyinString(String chineseString) {
+
+      // 拆分每个汉字
       char[] chineseWordsArray = chineseString.toCharArray();
+
+      // 拼音格式化
       HanyuPinyinOutputFormat hanyuPinyinOutputFormat = new HanyuPinyinOutputFormat();
       hanyuPinyinOutputFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
       hanyuPinyinOutputFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
       hanyuPinyinOutputFormat.setVCharType(HanyuPinyinVCharType.WITH_V);
-      StringBuilder finalPinyinString = new StringBuilder();
 
+      // 最终的拼音字符串
+      StringBuilder finalPinyinString = new StringBuilder();
       try {
-         for(char chineseWord : chineseWordsArray) {
-            if (Character.toString(chineseWord).matches("[\u4e00-\u9fa5]+")) {
+         // 每一个汉字分别转化为拼音
+         for (char chineseWord : chineseWordsArray) {
+            // 判断是否为汉字字符
+            if (Character.toString(chineseWord).matches(CHINESE_WORDS_REGEX)) {
                String[] strings = PinyinHelper.toHanyuPinyinStringArray(chineseWord, hanyuPinyinOutputFormat);
                finalPinyinString.append(strings[0]);
             } else {
                finalPinyinString.append(chineseWord);
             }
          }
-
          return finalPinyinString.toString();
       } catch (BadHanyuPinyinOutputFormatCombination e1) {
          throw new PinyinException(e1.getMessage());
       }
    }
 
+   @Override
    public String parseEveryPinyinFirstLetter(String chinesString) {
       StringBuilder convert = new StringBuilder();
-
-      for(int i = 0; i < chinesString.length(); ++i) {
+      for (int i = 0; i < chinesString.length(); i++) {
          char word = chinesString.charAt(i);
          String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
          if (pinyinArray != null) {
@@ -90,38 +110,57 @@ public class PinyinServiceImpl implements PinYinApi {
             convert.append(word);
          }
       }
-
       return convert.toString();
    }
 
+   @Override
    public String getChineseAscii(String chineseString) {
       StringBuilder strBuf = new StringBuilder();
       byte[] bGBK = chineseString.getBytes();
-
-      for(byte b : bGBK) {
-         strBuf.append(Integer.toHexString(b & 255));
+      for (byte b : bGBK) {
+         strBuf.append(Integer.toHexString(b & 0xff));
       }
-
       return strBuf.toString();
    }
 
+   /**
+    * 获取中文字符串的首字母，大小写根据传参决定
+    *
+    * @param chineseString 中文字符串
+    * @param caseType 大小写类型
+    * @return 首字母大小写
+    */
    private static String getFirstLetters(String chineseString, HanyuPinyinCaseType caseType) {
       char[] chinesWords = chineseString.trim().toCharArray();
       StringBuilder hanyupinyin = new StringBuilder();
+
       HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
+
+      // 输出拼音全部大写
       defaultFormat.setCaseType(caseType);
+
+      // 不带声调
       defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
 
       try {
-         for(char word : chinesWords) {
+         for (char word : chinesWords) {
             String str = String.valueOf(word);
-            if (str.matches("[\u4e00-\u9fa5]+")) {
+
+            // 如果字符是中文,则将中文转为汉语拼音,并取第一个字母
+            if (str.matches(CHINESE_WORDS_REGEX)) {
                hanyupinyin.append(PinyinHelper.toHanyuPinyinStringArray(word, defaultFormat)[0].charAt(0));
-            } else if (str.matches("[0-9]+")) {
+            }
+            // 如果字符是数字,取数字
+            else if (str.matches("[0-9]+")) {
                hanyupinyin.append(word);
-            } else if (str.matches("[a-zA-Z]+")) {
+            }
+            // 如果字符是字母,取字母
+            else if (str.matches("[a-zA-Z]+")) {
                hanyupinyin.append(word);
-            } else {
+
+            }
+            // 否则不转换，如果是标点符号的话，也带着
+            else {
                hanyupinyin.append(word);
             }
          }

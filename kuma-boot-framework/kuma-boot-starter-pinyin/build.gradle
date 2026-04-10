@@ -12,4 +12,10 @@ dependencies {
 
     // Guava（Lists、Maps 等集合工具）
     api projectLibs.guava
+
+    // Pinyin4j（net.sourceforge.pinyin4j - 汉字转拼音）
+    api projectLibs.pinyin4j
+
+    // Hutool Extra（cn.hutool.extra.spring.SpringUtil）
+    api projectLibs.hutool.extra
 }
