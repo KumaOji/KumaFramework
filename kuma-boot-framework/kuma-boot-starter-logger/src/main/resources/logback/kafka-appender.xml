@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+	<appender name="KAFKA_APPENDER"
+		class="com.kuma.boot.logger.logback.appender.StandardKafkaAppender">
+		<!--	<appender name="KAFKA" class="com.github.rahulsinghai.logback.kafka.KafkaAppender">-->
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout
+				class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+				<pattern>
+					{
+					"app_name": "${APP_NAME:-}",
+					"server_ip": "${SERVER_IP:-}",
+					"server_port": "${SERVER_PORT:-}",
+					"env": "${SPRING_PROFILES_ACTIVE:-}",
+					"version": "${KMC_VERSION:-}",
+					"timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+					"logday": "%d{yyyy-MM-dd}",
+					"thread": "%thread",
+					"pid": "${PID:-}",
+					"logger": "%logger{360}",
+					"tlog": "%X{tl}",
+					"class": "%class{360}",
+					"level": "%p",
+					"file": "%F",
+					"method": "%M",
+					"line": "%L",
+					"message": "%replace(%msg){'\"', '\''}",
+					"stack_trace": "%replace(%ex){'\"', '\''}",
+					"host": "${SERVER_IP:-}",
+					"otlp_parent_span_id": "%X{X-B3-ParentSpanId:-}",
+					"otlp_span_id": "%X{X-B3-SpanId:-}",
+					"otlp_trace_id": "%X{X-B3-TraceId:-}",
+					"otlp_span_export": "%X{X-Span-Export:-}",
+					"skywalking_trace_id": "%X{tid:-}",
+					"trace_id": "%X{kmc-trace-id:-}",
+					"tenant_id": "%X{kmc-tenant-id:-}",
+					"request_version": "%X{kmc-request-version:-}",
+					"source": "sys-log-${APP_NAME:-}"
+					}
+				</pattern>
+			</layout>
+		</encoder>
+<!--		<topic>sys-log-${APP_NAME}</topic>-->
+		<topic>sys-log</topic>
+		<keyingStrategy
+			class="com.github.rahulsinghai.logback.kafka.keying.NoKeyKeyingStrategy"/>
+		<deliveryStrategy
+			class="com.github.rahulsinghai.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+		<producerConfig>bootstrap.servers=${BOOTSTRAP_SERVERS}</producerConfig>
+		<producerConfig>key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
+		</producerConfig>
+		<producerConfig>value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer
+		</producerConfig>
+		<producerConfig>partitioner.class=org.apache.kafka.clients.producer.RoundRobinPartitioner
+		</producerConfig>
+		<producerConfig>acks=0</producerConfig>
+		<producerConfig>linger.ms=100</producerConfig>
+		<producerConfig>retries=0</producerConfig>
+		<producerConfig>batch.size=16384</producerConfig>
+		<producerConfig>buffer.memory=33554432</producerConfig>
+		<producerConfig>max.request.size=1048576</producerConfig>
+		<producerConfig>max.block.ms=60000</producerConfig>
+		<producerConfig>compression.type=gzip</producerConfig>
+	</appender>
+
+	<appender name="KAFKA_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+		<queueSize>500</queueSize>
+		<neverBlock>true</neverBlock>
+		<discardingThreshold>0</discardingThreshold>
+		<includeCallerData>true</includeCallerData>
+
+		<appender-ref ref="KAFKA_APPENDER"/>
+	</appender>
+
+</included>
