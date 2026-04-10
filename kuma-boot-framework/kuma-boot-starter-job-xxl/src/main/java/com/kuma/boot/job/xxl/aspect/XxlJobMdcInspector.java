@@ -66,7 +66,7 @@ public class XxlJobMdcInspector {
 
 			String traceId = IdGeneratorUtils.getIdStr();
 			TraceContextHolder.setTraceId(traceId);
-			TraceUtils.setTtcTraceId(traceId);
+			TraceUtils.setKmcTraceId(traceId);
 
 			try {
 				String tracedId = Objects.requireNonNull(tracer.nextSpan()).context().traceId();
@@ -125,7 +125,7 @@ public class XxlJobMdcInspector {
 
 			TraceContextHolder.clear();
 
-			TraceUtils.removeTtcTraceId();
+			TraceUtils.removeKmcTraceId();
 			TraceUtils.removeOtlpTraceId();
 			TraceUtils.removeOtlpSpanId();
 
