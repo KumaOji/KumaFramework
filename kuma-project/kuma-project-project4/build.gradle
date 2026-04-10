@@ -54,6 +54,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-totp')
     api project(':kuma-boot-framework:kuma-boot-starter-dingtalk')
     api project(':kuma-boot-framework:kuma-boot-starter-sentinel')
+    api project(':kuma-boot-framework:kuma-boot-starter-retry')
     api project(':kuma-boot-framework:kuma-boot-starter-encrypt')
     api project(':kuma-boot-framework:kuma-boot-starter-seata')
     api project(':kuma-boot-framework:kuma-boot-starter-grpc')

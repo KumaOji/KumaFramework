@@ -52,8 +52,8 @@ jakarta-servlet-api = "6.0.0"
 jakarta-validation-api = "3.0.2"
 swagger-annotations = "2.2.41"
 swagger-models = "2.2.41"
-jackson = "3.0.4"
-jackson-annotations = "2.20"
+jackson = "2.18.2"
+jackson-annotations = "2.18.2"
 slf4j = "2.0.17"
 logback = "1.5.18"
 jspecify = "1.0.0"
@@ -243,9 +243,9 @@ javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation-api" }
 aspectjweaver = { module = "org.aspectj:aspectjweaver", version.ref = "aspectjweaver" }
 spring-context-support = { module = "org.springframework:spring-context-support", version.ref = "spring-context-support" }
-jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
-jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
-jackson-datatype-jsr353 = { module = "tools.jackson.datatype:jackson-datatype-jsr353", version.ref = "jackson" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr353 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr353", version.ref = "jackson" }
 javax-json-api = { module = "javax.json:javax.json-api", version.ref = "javax-json-api" }
 javax-json-impl = { module = "org.glassfish:javax.json", version.ref = "javax-json-impl" }
 orika-core = { module = "ma.glasnost.orika:orika-core", version.ref = "orika" }
