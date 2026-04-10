@@ -149,8 +149,8 @@ oshi = "6.6.1"
 logback-gelf = "4.0.1"
 loki-logback-appender = "1.5.2"
 opentelemetry = "1.37.0"
-opentelemetry-logback = "2.3.0"
-logback-kafka-appender = "0.2.0-BETA"
+opentelemetry-logback = "2.3.0-alpha"
+logback-kafka-appender = "master-SNAPSHOT"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -381,7 +381,7 @@ logback-gelf = { module = "de.siegmar:logback-gelf", version.ref = "logback-gelf
 loki-logback-appender = { module = "com.github.loki4j:loki-logback-appender", version.ref = "loki-logback-appender" }
 opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
 opentelemetry-logback-appender = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0", version.ref = "opentelemetry-logback" }
-logback-kafka-appender = { module = "com.github.rahulsinghai.logback:logback-kafka-appender", version.ref = "logback-kafka-appender" }
+logback-kafka-appender = { module = "com.github.rahulsinghai:logback-kafka-appender", version.ref = "logback-kafka-appender" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]
