@@ -1,20 +1,15 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework 拼音模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-test {
-    useJUnitPlatform()
+    // Spring Boot 自动装配（@AutoConfiguration、@ConditionalOnMissingBean 等）
+    api projectLibs.spring.boot.autoconfigure
+
+    // Guava（Lists、Maps 等集合工具）
+    api projectLibs.guava
 }
