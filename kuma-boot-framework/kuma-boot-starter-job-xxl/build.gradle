@@ -20,7 +20,7 @@ dependencies {
     // Micrometer Tracing（Tracer、Span、ScopedSpan、SpanNamer 等）
     api projectLibs.micrometer.tracing.api
 
-    // XXL-Job Core（XxlJobSpringExecutor、@XxlJob、XxlJobHelper 等；xxl-tool 随之传递）
+    // XXL-Job Core（XxlJobSpringExecutor、@XxlJob、XxlJobHelper 等）
     api projectLibs.xxl.job.core
 
     // Hutool
