@@ -10,6 +10,9 @@ dependencies {
     // Spring Boot 自动装配（@ConfigurationProperties、@AutoConfiguration 等）
     api projectLibs.spring.boot.autoconfigure
 
+    // spring-boot-starter-jdbc（DataSourceAutoConfiguration 位于此模块）
+    api projectLibs.spring.boot.starter.jdbc
+
     // Spring Cloud Context（@RefreshScope）
     api projectLibs.spring.cloud.context
 

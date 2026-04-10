@@ -24,14 +24,18 @@ public class OrderTableAlgorithm implements StandardShardingAlgorithm<LocalDateT
       if (date == null) {
          return (String)collection.stream().findFirst().get();
       } else {
-         String tableName = preciseShardingValue.getLogicTableName();
+         String logicTableName = preciseShardingValue.getLogicTableName();
          LocalDateTime minBaseDate = LocalDateTime.parse(StaticValue.userBaseTableMinDate, dateFormatter);
+         String tableName;
          if (date.isAfter(minBaseDate)) {
             String tableSuffix = date.format(monthFormatter);
-            tableName = tableName.concat("_").concat(tableSuffix);
+            tableName = logicTableName.concat("_").concat(tableSuffix);
+         } else {
+            tableName = logicTableName;
          }
 
-         return (String)collection.stream().filter((str) -> str.equals(tableName)).findFirst().orElseThrow(() -> new RuntimeException(tableName + "\u5206\u8868\u4e0d\u5b58\u5728"));
+         final String finalTableName = tableName;
+         return (String)collection.stream().filter((str) -> str.equals(finalTableName)).findFirst().orElseThrow(() -> new RuntimeException(finalTableName + "\u5206\u8868\u4e0d\u5b58\u5728"));
       }
    }
 
