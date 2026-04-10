@@ -48,8 +48,11 @@ dependencies {
     // Kafka Clients（KafkaProducer）
     api projectLibs.kafka.clients
 
-    // SkyWalking APM Toolkit（TraceIdPatternLogbackLayout）
+    // SkyWalking APM Toolkit Trace
     api projectLibs.skywalking.apm.toolkit.trace
+
+    // SkyWalking APM Toolkit Logback（LogbackPatternConverter、LogbackMDCPatternConverter 等）
+    api projectLibs.skywalking.apm.toolkit.logback
 
     // AOP
     api projectLibs.aspectjweaver

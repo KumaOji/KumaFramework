@@ -1,0 +1,11 @@
+package com.kuma.boot.skywalking;
+
+public interface ClusterTrace {
+   default String getTraceId() {
+      return "";
+   }
+
+   void setTraceId(String traceId);
+
+   void removeTraceId();
+}
