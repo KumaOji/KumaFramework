@@ -1,0 +1,34 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework tracer模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-p6spy')
+
+    // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties 等）
+    api projectLibs.spring.boot.autoconfigure
+
+    // Spring Cloud Context（@RefreshScope）
+    api projectLibs.spring.cloud.context
+
+    // Micrometer Core（MeterRegistry、CountedAspect、MeterTagAnnotationHandler 等）
+    api projectLibs.micrometer.core
+
+    // Micrometer Commons（ValueResolver、ValueExpressionResolver 等）
+    api projectLibs.micrometer.commons
+
+    // Micrometer Context Propagation（ContextSnapshot、ContextSnapshotFactory 等）
+    api projectLibs.micrometer.context.propagation
+
+    // P6spy（P6ModuleManager）
+    api projectLibs.p6spy
+
+    // AOP（ProceedingJoinPoint）
+    api projectLibs.aspectjweaver
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
