@@ -57,6 +57,9 @@ dependencies {
     // Loki4j（Loki Appender）
     api projectLibs.loki.logback.appender
 
+    // OpenTelemetry API（io.opentelemetry.api.OpenTelemetry）
+    api projectLibs.opentelemetry.api
+
     // OpenTelemetry Logback Appender
     api projectLibs.opentelemetry.logback.appender
 
