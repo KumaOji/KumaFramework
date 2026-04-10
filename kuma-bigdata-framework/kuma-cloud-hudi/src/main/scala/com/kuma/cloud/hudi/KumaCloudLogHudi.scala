@@ -15,7 +15,7 @@
  */
 package com.kuma.cloud.hudi
 
-import com.kuma.cloud.hudi.util.{SparkHelper, TaoTaoCloudUtil}
+import com.kuma.cloud.hudi.util.{SparkHelper, KumaCloudUtil}
 import org.apache.spark.sql.functions.from_json
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
@@ -23,22 +23,22 @@ import org.slf4j.{Logger, LoggerFactory}
 
 /**
 *
-TaoTaoCloudLogConsole
+KumaCloudLogConsole
 *
 *   -e dev -b host:9092 -t kuma-cloud-sys-log -m 0
 *
-*   spark-submit --master spark://192.168.10.200:7077 --class com.kuma.cloud.hudi.TaoTaoCloudLogHudi  kuma-cloud-hudi-1.8.0.jar
+*   spark-submit --master spark://192.168.10.200:7077 --class com.kuma.cloud.hudi.KumaCloudLogHudi  kuma-cloud-hudi-1.8.0.jar
 *
-*   java -cp kuma-cloud-hudi-1.8.0.jar  com.kuma.cloud.hudi.TaoTaoCloudLogHudi
+*   java -cp kuma-cloud-hudi-1.8.0.jar  com.kuma.cloud.hudi.KumaCloudLogHudi
 *
 *
 *
-* @author shuigedeng
+* @author kuma
 * @version 2022.10
 * @since 2022 -07-21 10:45:53
 */
-object TaoTaoCloudLogHudi {
-  val logger: Logger = LoggerFactory.getLogger(TaoTaoCloudLogHudi.getClass)
+object KumaCloudLogHudi {
+  val logger: Logger = LoggerFactory.getLogger(KumaCloudLogHudi.getClass)
 
   def main(args: Array[String]): Unit = {
     System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
@@ -46,7 +46,7 @@ object TaoTaoCloudLogHudi {
 
     System.setProperty("HADOOP_USER_NAME", "root")
 
-    //    val config: AccessLogConf = AccessLogConf.parseConf(TaoTaoCloudLogHudi, args)
+    //    val config: AccessLogConf = AccessLogConf.parseConf(KumaCloudLogHudi, args)
     //    val spark: SparkSession = SparkHelper.getSparkSession(config.env)
     val spark: SparkSession = SparkHelper.getSparkSession("dev")
 
@@ -62,8 +62,8 @@ object TaoTaoCloudLogHudi {
       .option("staringOffsets", "earliest")
       .option("maxOffsetsPerTrigger", 100000)
       .option("failOnDataLoss", value = false)
-      .option("kafka.consumer.commit.groupid", "TaoTaoCloudLogHudi")
-      .option("group.id", "TaoTaoCloudLogHudi")
+      .option("kafka.consumer.commit.groupid", "KumaCloudLogHudi")
+      .option("group.id", "KumaCloudLogHudi")
       .load()
 
     dataframe
@@ -113,10 +113,10 @@ object TaoTaoCloudLogHudi {
 
           val requestLogDF: DataFrame = requestLogDS
             .selectExpr("cast (kafka_value as string) as json")
-            .select(from_json($"json", schema = TaoTaoCloudUtil.requestLogSchema).as("requestLog"))
+            .select(from_json($"json", schema = KumaCloudUtil.requestLogSchema).as("requestLog"))
             .select("requestLog.*")
 
-          TaoTaoCloudUtil.requestLog(requestLogDF, topic)
+          KumaCloudUtil.requestLog(requestLogDF, topic)
         }
 
         val sysLogDS: Dataset[LogEevent] = batchDF.filter(_.kafka_topic.startsWith("sys-log"))
@@ -129,9 +129,9 @@ object TaoTaoCloudLogHudi {
 
           val sysLogDF: DataFrame = sysLogDS
             .selectExpr("cast (kafka_value as string) as json")
-            .select(from_json($"json", schema = TaoTaoCloudUtil.sysLogSchema).as("sysLog"))
+            .select(from_json($"json", schema = KumaCloudUtil.sysLogSchema).as("sysLog"))
             .select("sysLog.*")
-          TaoTaoCloudUtil.sysLog(sysLogDF, topic)
+          KumaCloudUtil.sysLog(sysLogDF, topic)
         }
 
         batchDF.unpersist()

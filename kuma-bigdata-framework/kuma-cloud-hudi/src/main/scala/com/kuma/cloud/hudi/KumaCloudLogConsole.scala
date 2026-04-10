@@ -22,22 +22,22 @@ import org.slf4j.{Logger, LoggerFactory}
 
 /**
 *
-TaoTaoCloudLogConsole
+KumaCloudLogConsole
 *
 *   -e dev -b host:9092 -t kuma-cloud-sys-log -m 0
 *
-*   spark-submit --master spark://192.168.10.200:7077 --class com.kuma.cloud.hudi.TaoTaoCloudLogConsole  kuma-cloud-hudi-1.8.0.jar
+*   spark-submit --master spark://192.168.10.200:7077 --class com.kuma.cloud.hudi.KumaCloudLogConsole  kuma-cloud-hudi-1.8.0.jar
 *
-*   java -cp kuma-cloud-hudi-1.8.0.jar  com.kuma.cloud.hudi.TaoTaoCloudLogConsole
+*   java -cp kuma-cloud-hudi-1.8.0.jar  com.kuma.cloud.hudi.KumaCloudLogConsole
 *
 *
 *
-* @author shuigedeng
+* @author kuma
 * @version 2022.10
 * @since 2022 -07-21 10:45:33
 */
-object TaoTaoCloudLogConsole {
-  val logger: Logger = LoggerFactory.getLogger(TaoTaoCloudLogConsole.getClass)
+object KumaCloudLogConsole {
+  val logger: Logger = LoggerFactory.getLogger(KumaCloudLogConsole.getClass)
 
   def main(args: Array[String]): Unit = {
     System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
@@ -45,7 +45,7 @@ object TaoTaoCloudLogConsole {
 
     System.setProperty("HADOOP_USER_NAME", "root")
 
-    //    val config: AccessLogConf = AccessLogConf.parseConf(TaoTaoCloudLogConsole, args)
+    //    val config: AccessLogConf = AccessLogConf.parseConf(KumaCloudLogConsole, args)
     //    val spark: SparkSession = SparkHelper.getSparkSession(config.env)
     val spark: SparkSession = SparkHelper.getSparkSession("dev")
 

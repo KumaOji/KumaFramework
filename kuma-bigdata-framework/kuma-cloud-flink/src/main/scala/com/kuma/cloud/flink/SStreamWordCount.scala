@@ -25,7 +25,7 @@ JBatchWordCount
 *
 *
 *
-* @author shuigedeng
+* @author kuma
 * @version 2022.10
 * @since 2022 -07-21 10:44:31
 */

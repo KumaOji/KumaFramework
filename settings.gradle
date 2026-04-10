@@ -158,3 +158,5 @@ gradle.settingsEvaluated {
     }
 }
 
+
+include 'kuma-boot-framework:kuma-boot-starter-data-p6spy'

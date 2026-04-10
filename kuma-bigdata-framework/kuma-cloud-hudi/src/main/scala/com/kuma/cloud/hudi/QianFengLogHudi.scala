@@ -30,7 +30,7 @@ import scala.collection.mutable
 
 /**
 *
-TaoTaoCloudLogHudi
+KumaCloudLogHudi
 *
 *   kuma-cloud-hudi-1.0.jar -e dev -b kuma-cloud:9092 -t kuma-cloud-access-log -m 0 -i 10 -c /checkpoint/spark/kuma/cloud/access/log/hudi -g /kuma/cloud/access/log/cow/parquet -s kuma-cloud-acccess-log -y cow -r jdbc:hive2://192.168.1.5:10000 -n root
 *
@@ -40,7 +40,7 @@ TaoTaoCloudLogHudi
 *
 *
 *
-* @author shuigedeng
+* @author kuma
 * @version 2022.10
 * @since 2022 -07-21 10:46:00
 */
