@@ -71,10 +71,12 @@ public class YmlUtils {
    public static Map<String, Object> getPatterns() {
       Map<String, Object> map = new HashMap();
       Object patterns = patternMap.get("patterns");
-      if (patterns instanceof List<Map<String, Object>> list) {
+      if (patterns instanceof List<?> list) {
          if (!CollectionUtils.isEmpty(list)) {
-            for(Map<String, Object> maps : list) {
-               assembleMap(map, maps);
+            for (Object item : list) {
+               if (item instanceof Map) {
+                  assembleMap(map, (Map<String, Object>) item);
+               }
             }
 
             return map;

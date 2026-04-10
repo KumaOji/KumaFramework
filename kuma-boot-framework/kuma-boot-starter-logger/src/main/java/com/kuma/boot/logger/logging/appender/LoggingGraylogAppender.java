@@ -4,7 +4,6 @@ import ch.qos.logback.classic.LoggerContext;
 import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.logger.logging.config.LoggingProperties;
-import de.siegmar.logbackgelf.CompressionMethod;
 import de.siegmar.logbackgelf.GelfEncoder;
 import de.siegmar.logbackgelf.GelfUdpAppender;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,6 @@ public class LoggingGraylogAppender implements ILoggingAppender {
       gelfUdpAppender.setGraylogHost("127.0.0.1");
       gelfUdpAppender.setGraylogPort(12201);
       gelfUdpAppender.setMaxChunkSize(508);
-      gelfUdpAppender.setCompressionMethod(CompressionMethod.GZIP);
       gelfUdpAppender.setEncoder(layoutWrappingEncoder(context));
       gelfUdpAppender.start();
       context.getLogger("ROOT").detachAppender("GRAYLOG");
