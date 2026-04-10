@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework test模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // Spring Boot Test（JUnit Jupiter、Spring Test、MockMvc、SpringBootContextLoader 等）
+    api projectLibs.spring.boot.starter.test
+
+    // Hutool Core & Extra（DateUtil、TemplateException 等）
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
+    // Guava（Preconditions、Maps、ThreadFactoryBuilder 等）
+    api projectLibs.guava
+
+    // Freemarker（HTML 报告模板渲染）
+    api projectLibs.freemarker
+
+    // Apache Commons Math3（DescriptiveStatistics、SynchronizedDescriptiveStatistics）
+    api projectLibs.commons.math3
+
+    // Apache Lucene Core（RamUsageEstimator，内存估算）
+    api projectLibs.lucene.core
+
+    // Datafaker（FakerUtils 测试数据生成）
+    api projectLibs.datafaker
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

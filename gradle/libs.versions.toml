@@ -152,6 +152,10 @@ loki-logback-appender = "1.5.2"
 opentelemetry = "1.37.0"
 opentelemetry-logback = "2.3.0-alpha"
 logback-kafka-appender = "master-SNAPSHOT"
+freemarker = "2.3.33"
+commons-math3 = "3.6.1"
+lucene = "9.11.1"
+datafaker = "2.4.3"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -387,6 +391,10 @@ loki-logback-appender = { module = "com.github.loki4j:loki-logback-appender", ve
 opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
 opentelemetry-logback-appender = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0", version.ref = "opentelemetry-logback" }
 logback-kafka-appender = { module = "com.github.rahulsinghai:logback-kafka-appender", version.ref = "logback-kafka-appender" }
+freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
+commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
+lucene-core = { module = "org.apache.lucene:lucene-core", version.ref = "lucene" }
+datafaker = { module = "net.datafaker:datafaker", version.ref = "datafaker" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]
