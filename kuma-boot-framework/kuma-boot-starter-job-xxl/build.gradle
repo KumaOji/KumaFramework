@@ -1,20 +1,48 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework xxl-job模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-lock')
 
-test {
-    useJUnitPlatform()
+    // Spring Boot 自动装配（@AutoConfiguration、@ConditionalOnBean 等）
+    api projectLibs.spring.boot.autoconfigure
+
+    // Spring Cloud Context（@RefreshScope）
+    api projectLibs.spring.cloud.context
+
+    // Spring Cloud Commons（DiscoveryClient）
+    api projectLibs.spring.cloud.commons
+
+    // Micrometer Tracing（Tracer、Span、ScopedSpan、SpanNamer 等）
+    api projectLibs.micrometer.tracing.api
+
+    // XXL-Job Core（XxlJobSpringExecutor、@XxlJob、XxlJobHelper 等；xxl-tool 随之传递）
+    api projectLibs.xxl.job.core
+
+    // Hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.http
+    api projectLibs.hutool.json
+
+    // Fastjson2
+    api projectLibs.fastjson2
+
+    // AOP Alliance（MethodInterceptor、MethodInvocation）
+    api projectLibs.aopalliance
+
+    // AspectJ（@Aspect、ProceedingJoinPoint 等）
+    api projectLibs.aspectjweaver
+
+    // Spring AOP（ProxyFactoryBean、AopConfigException）
+    api projectLibs.spring.aop
+
+    // Spring Expression（SpelExpressionParser、StandardEvaluationContext 等）
+    api projectLibs.spring.expression
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

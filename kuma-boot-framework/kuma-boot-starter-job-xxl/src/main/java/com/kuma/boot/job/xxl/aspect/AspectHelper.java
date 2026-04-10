@@ -1,0 +1,182 @@
+package com.kuma.boot.job.xxl.aspect;
+
+import java.lang.annotation.Annotation;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+public class AspectHelper {
+   private static ExpressionParser expressionParser = new SpelExpressionParser();
+   private static ConcurrentMap<String, Expression> expressionMap = new ConcurrentHashMap();
+
+   public AspectHelper() {
+   }
+
+   public static EvaluationContext buildContext(JoinPoint point, Object result) {
+      EvaluationContext context = buildContext(point);
+      context.setVariable("result", result);
+      return context;
+   }
+
+   public static EvaluationContext buildContext(JoinPoint point) {
+      EvaluationContext context = new StandardEvaluationContext();
+      MethodSignature ms = (MethodSignature)point.getSignature();
+      String[] parameterNames = ms.getParameterNames();
+      Object[] args = point.getArgs();
+
+      for(int i = 0; i < parameterNames.length; ++i) {
+         context.setVariable(parameterNames[i], args[i]);
+      }
+
+      return context;
+   }
+
+   public static Method getMethod(JoinPoint point) {
+      Class<?> targetCls = point.getTarget().getClass();
+      MethodSignature ms = (MethodSignature)point.getSignature();
+
+      try {
+         return targetCls.getDeclaredMethod(ms.getName(), ms.getParameterTypes());
+      } catch (NoSuchMethodException var4) {
+         return null;
+      }
+   }
+
+   public static Class<?> getMethodReturnType(JoinPoint point) {
+      Method targetMethod = getMethod(point);
+      return targetMethod == null ? null : targetMethod.getReturnType();
+   }
+
+   public static <T extends Annotation> T getMethodAnnotation(JoinPoint point, Class<T> annotationType) {
+      Method targetMethod = getMethod(point);
+      return (T)(targetMethod == null ? null : (Annotation)MergedAnnotations.from(targetMethod, SearchStrategy.INHERITED_ANNOTATIONS).get(annotationType).synthesize(MergedAnnotation::isPresent).orElse((Object)null));
+   }
+
+   public static Annotation[] getMethodAnnotations(JoinPoint point) {
+      Method targetMethod = getMethod(point);
+      return targetMethod == null ? new Annotation[0] : (Annotation[])MergedAnnotations.from(targetMethod, SearchStrategy.INHERITED_ANNOTATIONS).stream().map(MergedAnnotation::synthesize).toArray((x$0) -> new Annotation[x$0]);
+   }
+
+   public static <T extends Annotation> T getClassAnnotation(JoinPoint point, Class<T> annotationType) {
+      Class<?> targetCls = point.getTarget().getClass();
+      return (T)(MergedAnnotations.from(targetCls, SearchStrategy.INHERITED_ANNOTATIONS).get(annotationType).synthesize(MergedAnnotation::isPresent).orElse((Object)null));
+   }
+
+   public static Annotation[] getClassAnnotations(JoinPoint point) {
+      Class<?> targetCls = point.getTarget().getClass();
+      return (Annotation[])MergedAnnotations.from(targetCls, SearchStrategy.INHERITED_ANNOTATIONS).stream().map(MergedAnnotation::synthesize).toArray((x$0) -> new Annotation[x$0]);
+   }
+
+   public static <T extends Annotation> T getMethodOrClassAnnotation(JoinPoint point, Class<T> annotationType) {
+      T annotation = getMethodAnnotation(point, annotationType);
+      if (annotation == null) {
+         annotation = getClassAnnotation(point, annotationType);
+      }
+
+      return annotation;
+   }
+
+   public static Expression getExpressionByKey(String key) {
+      if (expressionMap.containsKey(key)) {
+         return (Expression)expressionMap.get(key);
+      } else {
+         Expression expression = expressionParser.parseExpression(key);
+         expressionMap.putIfAbsent(key, expression);
+         return expression;
+      }
+   }
+
+   public static Map<String, Object> getParameters(JoinPoint point) {
+      MethodSignature ms = (MethodSignature)point.getSignature();
+      String[] parameterNames = ms.getParameterNames();
+      Object[] args = point.getArgs();
+      Map<String, Object> paramMap = new HashMap(parameterNames.length);
+
+      for(int i = 0; i < parameterNames.length; ++i) {
+         paramMap.put(parameterNames[i], args[i]);
+      }
+
+      return paramMap;
+   }
+
+   public static Object[] getArgs(JoinPoint point) {
+      return point.getArgs();
+   }
+
+   public static <T> T findFirstArgByType(JoinPoint point, Class<? extends T> clazz) {
+      Object[] args = getArgs(point);
+
+      for(Object arg : args) {
+         if (clazz.isInstance(arg)) {
+            return (T)arg;
+         }
+      }
+
+      return null;
+   }
+
+   public static Object findFirstArgByTypes(JoinPoint point, Class<?>... clazzes) {
+      Object[] args = getArgs(point);
+
+      for(Object arg : args) {
+         for(Class<?> clazz : clazzes) {
+            if (clazz.isInstance(arg)) {
+               return arg;
+            }
+         }
+      }
+
+      return null;
+   }
+
+   public abstract static class AnnotationHolder<T extends Annotation> {
+      private final Map<Object, SoftReference<T>> map = new ConcurrentHashMap();
+
+      public AnnotationHolder() {
+      }
+
+      public T findAnnotation(JoinPoint jp, Function<JoinPoint, Object> funcKey, BiFunction<JoinPoint, Class<T>, T> funcFind) {
+         Object key = funcKey.apply(jp);
+         T val = (T)(Optional.ofNullable((SoftReference)this.map.get(key)).map(SoftReference::get).orElse((Object)null));
+         if (val == null) {
+            ParameterizedType type = (ParameterizedType)this.getClass().getGenericSuperclass();
+            Class<T> tClazz = (Class)type.getActualTypeArguments()[0];
+            val = (T)(funcFind.apply(jp, tClazz));
+            if (val != null) {
+               this.map.put(key, new SoftReference(val));
+            }
+         }
+
+         return val;
+      }
+
+      public T findAnnotationByMethod(JoinPoint jp) {
+         return (T)this.findAnnotation(jp, (j) -> ((MethodSignature)j.getSignature()).getMethod(), AspectHelper::getMethodAnnotation);
+      }
+
+      public T findAnnotationByMethodOrClass(JoinPoint jp) {
+         return (T)this.findAnnotation(jp, (j) -> ((MethodSignature)j.getSignature()).getMethod(), AspectHelper::getMethodOrClassAnnotation);
+      }
+
+      public T findAnnotationByClass(JoinPoint jp) {
+         return (T)this.findAnnotation(jp, (j) -> j.getTarget().getClass(), AspectHelper::getClassAnnotation);
+      }
+   }
+}
