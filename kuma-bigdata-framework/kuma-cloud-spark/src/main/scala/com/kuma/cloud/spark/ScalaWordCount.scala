@@ -21,7 +21,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  *
  * 1.本地运行 本地数据参数
  * <p>
- * ----	 /Users/shuigedeng/spark/input /Users/shuigedeng/spark/input
+ * ----	 /Users/kuma/spark/input /Users/kuma/spark/input
  * <p>
  * 2.本地运行 hadoop数据参数
  * <p>
@@ -41,7 +41,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  * /opt/spark/input /opt/spark/output
  * <p>
  *
- * @author shuigedeng
+ * @author kuma
  * @version 2023.2.01
  * @since 2022 -07-21 10:45:19
  */

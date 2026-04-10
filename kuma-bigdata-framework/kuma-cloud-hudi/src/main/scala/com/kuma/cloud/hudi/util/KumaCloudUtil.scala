@@ -8,7 +8,7 @@ import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
 
-object TaoTaoCloudUtil {
+object KumaCloudUtil {
   val dataFrameWriterEsOptions = Map(
     "es.index.auto.create" -> "true",
     "es.nodes.wan.only" -> "true",

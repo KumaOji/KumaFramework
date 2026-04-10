@@ -8,7 +8,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')  // StandardDatabaseScript
     api projectLibs.seata.spring.boot.starter       // org.apache.seata.*（core/rm-tcc/spring/serializer/discovery/metrics）
-    api projectLibs.netty.all                        // TtcSerializer 用到 ByteBuf / Unpooled
+    api projectLibs.netty.all                        // KmcSerializer 用到 ByteBuf / Unpooled
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.cloud.context             // @RefreshScope
     api projectLibs.hutool.core                      // StrUtil
