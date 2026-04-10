@@ -90,6 +90,8 @@ spring-cloud-context-ver = "5.0.1"
 taobao-text = "0.0.3"
 justauth = "1.16.7"
 druid = "1.2.27"
+p6spy = "3.9.1"
+shardingsphere = "5.5.2"
 jdom2 = "2.0.6.1"
 antlr4 = "4.13.2"
 calcite = "1.36.0"
@@ -293,6 +295,8 @@ spring-grpc-server-starter = { module = "org.springframework.grpc:spring-grpc-se
 taobao-text-ui = { module = "com.taobao.text:text-ui", version.ref = "taobao-text" }
 justauth = { module = "me.zhyd.oauth:JustAuth", version.ref = "justauth" }
 druid-starter = { module = "com.alibaba:druid-spring-boot-3-starter", version.ref = "druid" }
+p6spy = { module = "p6spy:p6spy", version.ref = "p6spy" }
+shardingsphere-jdbc = { module = "org.apache.shardingsphere:shardingsphere-jdbc", version.ref = "shardingsphere" }
 jdom2 = { module = "org.jdom:jdom2", version.ref = "jdom2" }
 antlr4-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr4" }
 calcite-core = { module = "org.apache.calcite:calcite-core", version.ref = "calcite" }

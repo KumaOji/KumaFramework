@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework data-p6spy模块'
+description = 'Myframework data-shardingsphere模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
@@ -13,15 +13,14 @@ dependencies {
     // Spring Cloud Context（@RefreshScope）
     api projectLibs.spring.cloud.context
 
-    // p6spy SQL 拦截
-    api projectLibs.p6spy
+    // ShardingSphere JDBC（分库分表核心）
+    api projectLibs.shardingsphere.jdbc
 
-    // Kafka（KafkaLogger 使用 KafkaTemplate 发送 SQL 日志）
-    api projectLibs.spring.kafka
-
-    // Hutool（StrUtil、SqlFormatter）
+    // Hutool（DateUtil、Convert）
     api projectLibs.hutool.core
-    api projectLibs.hutool.db
+
+    // Commons Collections（CollectionUtils）
+    api projectLibs.commons.collections4
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
