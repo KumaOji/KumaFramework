@@ -1,0 +1,248 @@
+# 配置数据源
+datasource:
+  names: ds-master-0,ds-slave-0-1,ds-slave-0-2,ds-master-1,ds-slave-1-1,ds-slave-1-2  # 给每个数据源取别名，下面的ds1,ds2任意取名字
+  # 给master-ds0每个数据源配置数据库连接信息
+  ds-master-0:
+    jdbc-url: jdbc:mysql://${KUMA_CLOUD_MYSQL_HOST:127.0.0.1}:3316/${spring.application.name}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${KUMA_CLOUD_MYSQL_USERNAME:root}
+    password: ${KUMA_CLOUD_MYSQL_PASSWORD:123456}
+    auto-commit: true
+    connection-timeout: 30000
+    idle-timeout: 25000
+    login-timeout: 5
+    validation-timeout: 3000
+    max-lifetime: 50000
+    read-only: false
+    connection-test-query: SELECT 1
+    maximum-pool-size: 15
+    minimum-idle: 10
+    pool-name: DatebookHikariCP
+    register-mbeans: true
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+  ds-slave-0-1:
+    jdbc-url: jdbc:mysql://${KUMA_CLOUD_MYSQL_HOST:127.0.0.1}:3326/${spring.application.name}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${KUMA_CLOUD_MYSQL_USERNAME:root}
+    password: ${KUMA_CLOUD_MYSQL_PASSWORD:123456}
+    auto-commit: true
+    connection-timeout: 30000
+    idle-timeout: 25000
+    login-timeout: 5
+    validation-timeout: 3000
+    max-lifetime: 50000
+    read-only: false
+    connection-test-query: SELECT 1
+    maximum-pool-size: 15
+    minimum-idle: 10
+    pool-name: DatebookHikariCP
+    register-mbeans: true
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+  ds-slave-0-2:
+    jdbc-url: jdbc:mysql://${KUMA_CLOUD_MYSQL_HOST:127.0.0.1}:3336/${spring.application.name}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${KUMA_CLOUD_MYSQL_USERNAME:root}
+    password: ${KUMA_CLOUD_MYSQL_PASSWORD:123456}
+    auto-commit: true
+    connection-timeout: 30000
+    idle-timeout: 25000
+    login-timeout: 5
+    validation-timeout: 3000
+    max-lifetime: 50000
+    read-only: false
+    connection-test-query: SELECT 1
+    maximum-pool-size: 15
+    minimum-idle: 10
+    pool-name: DatebookHikariCP
+    register-mbeans: true
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+  ds-master-1:
+    jdbc-url: jdbc:mysql://${KUMA_CLOUD_MYSQL_HOST:127.0.0.1}:3376/${spring.application.name}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${KUMA_CLOUD_MYSQL_USERNAME:root}
+    password: ${KUMA_CLOUD_MYSQL_PASSWORD:123456}
+    auto-commit: true
+    connection-timeout: 30000
+    idle-timeout: 25000
+    login-timeout: 5
+    validation-timeout: 3000
+    max-lifetime: 50000
+    read-only: false
+    connection-test-query: SELECT 1
+    maximum-pool-size: 15
+    minimum-idle: 10
+    pool-name: DatebookHikariCP
+    register-mbeans: true
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+  ds-slave-1-1:
+    jdbc-url: jdbc:mysql://${KUMA_CLOUD_MYSQL_HOST:127.0.0.1}:3386/${spring.application.name}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${KUMA_CLOUD_MYSQL_USERNAME:root}
+    password: ${KUMA_CLOUD_MYSQL_PASSWORD:123456}
+    auto-commit: true
+    connection-timeout: 30000
+    idle-timeout: 25000
+    login-timeout: 5
+    validation-timeout: 3000
+    max-lifetime: 50000
+    read-only: false
+    connection-test-query: SELECT 1
+    maximum-pool-size: 15
+    minimum-idle: 10
+    pool-name: DatebookHikariCP
+    register-mbeans: true
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+  ds-slave-1-2:
+    jdbc-url: jdbc:mysql://${KUMA_CLOUD_MYSQL_HOST:127.0.0.1}:3396/${spring.application.name}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${KUMA_CLOUD_MYSQL_USERNAME:root}
+    password: ${KUMA_CLOUD_MYSQL_PASSWORD:123456}
+    auto-commit: true
+    connection-timeout: 30000
+    idle-timeout: 25000
+    login-timeout: 5
+    validation-timeout: 3000
+    max-lifetime: 50000
+    read-only: false
+    connection-test-query: SELECT 1
+    maximum-pool-size: 15
+    minimum-idle: 10
+    pool-name: DatebookHikariCP
+    register-mbeans: true
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+
+mode:
+  type: Cluster
+  overwrite: true
+  repository:
+    type: ZooKeeper
+    props:
+      namespace: kuma-cloud-shardingsphere
+      server-lists: 127.0.0.1:2181
+      retryIntervalMilliseconds: 500
+      maxRetries: 3
+      timeToLiveSeconds: 60
+      operationTimeoutMilliseconds: 500
+      digest:
+
+rules:
+- !ENCRYPT # 分库分表的 数据加密和 单节点的配置是一样的
+  tables:
+    t_user:
+      columns:
+        # 加密的列
+        password:
+          # 密文列的名称
+          cipherColumn: password
+          # 加解密器的名称
+          encryptorName: pwd_encryptor
+  # 加解密器的相关配置
+  encryptors:
+    pwd_encryptor:
+      type: AES
+      props:
+        aes-key-value: 123456abc
+
+- !TRANSACTION
+  defaultType: BASE
+  providerType: Seata
+
+- !SQL_PARSER
+  sqlCommentParseEnabled: true # 是否解析 SQL 注释
+  sqlStatementCache: # SQL 语句本地缓存配置项
+    initialCapacity: 2000 # 本地缓存初始容量
+    maximumSize: 65535 # 本地缓存最大容量
+  parseTreeCache: # 解析树本地缓存配置项
+    initialCapacity: 128 # 本地缓存初始容量
+    maximumSize: 1024 # 本地缓存最大容量
+
+# 读写分离
+- !READWRITE_SPLITTING
+  load-balancers:
+    round-robin:
+      type: ROUND_ROBIN
+      props:
+        worker-id: 123
+    random:
+      type: RANDOM
+      props:
+        worker-id: 123
+  data-sources:
+    ds-master-0:
+      type: Static
+      load-balancer-name: round-robin
+      props:
+        write-data-source-name: ds-master-0
+        read-data-source-names: ds-slave-0-1,ds-slave-0-2
+    ds-master-1:
+      type: Static
+      load-balancer-name: round-robin
+      props:
+        write-data-source-name: ds-master-1
+        read-data-source-names: ds-slave-1-1,ds-slave-1-2
+# 配置分片策略
+- !SHARDING
+  shardingAlgorithms: # 分片算法
+    database-inline:
+      type: INLINE #使用了内置的分片算法-INLINE
+      props:
+        algorithm-expression: ds-master-$->{id % 2}
+    tt-sys-user-inline:
+      type: INLINE
+      props:
+        algorithm-expression: tt_sys_user_$->{id % 3}
+  # 默认的数据源分片策略
+  defaultDatabaseStrategy:
+    standard:
+      sharding-column: id # 根据哪一列做分片
+      sharding-algorithm-name: database-inline  # 分片算法名称 在下面的sharding-algorithms定义具体的分片算法
+  keyGenerators:  # 使用雪花算法
+    snowflake:
+      type: SNOWFLAKE
+      props:
+        worker-id: 123
+  tables:
+    tt_sys_user:  # t_user 逻辑表名
+      actual-data-nodes: ds-master-$->{0..1}.tt_sys_user_$->{0..2}  # 数据节点：数据源$->{0..N}.逻辑表名$->{0..N}
+      key-generate-strategy:
+        column: id
+        key-generator-name: snowflake
+      database-strategy: # 拆分库策略
+        standard:
+          sharding-column: id  # 分片字段（分片键）
+          sharding-algorithm-name: database-inline # 分片算法名称 在下面的sharding-algorithms定义具体的分片算法
+      table-strategy: # 拆分表策略
+        standard:
+          sharding-column: id # 分片字段（分片键）
+          sharding-algorithm-name: tt-sys-user-inline # 分片算法名称 在下面的sharding-algorithms定义具体的分片算法
+      # 定义键的生成策略
+      keyGenerateStrategy:
+        # 主键的列名
+        column: id
+        # 使用的生成策略的名称，名称可以随便写，唯一即可，在下面的keyGenerators中定义具体实现
+        keyGeneratorName: snowflake
+
+props:
+  sql-show: true #是否在日志中打印 SQL
+  sql-simple: false #是否在日志中打印简单风格的 SQL
+  check-table-metadata-enabled: true #在程序启动和更新时，是否检查分片元数据的结构一致性
+  kernel-executor-size: 20 #用于设置任务处理线程池的大小每个 ShardingSphereDataSource 使用一个独立的线程池，同一个 JVM 的不同数据源不共享线程池
+  max-connections-size-per-query: 50 #一次查询请求在每个数据库实例中所能使用的最大连接数

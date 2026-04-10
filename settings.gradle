@@ -67,9 +67,9 @@ def frameworkBootSubModules = ['common', 'core', 'data-datasource',
                                'ratelimit', 'idempotent', 'lock',
                                'security-jstauth', 'totp', 'captcha',
                                'dingtalk', 'sentinel', 'frp',
-                               'prometheus','grpc','encrypt',
-                                'openapi','oss-common','sms-common',
-                                'retry','monitor','seata']
+                               'prometheus', 'grpc', 'encrypt',
+                               'openapi', 'oss-common', 'sms-common',
+                               'retry', 'monitor', 'seata']
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
@@ -160,3 +160,9 @@ gradle.settingsEvaluated {
 
 
 include 'kuma-boot-framework:kuma-boot-starter-data-p6spy'
+include 'kuma-boot-framework:kuma-boot-starter-job-xxl'
+include 'kuma-boot-framework:kuma-boot-starter-job-common'
+include 'kuma-boot-framework:kuma-boot-starter-data-shardingsphere'
+
+include 'kuma-boot-framework:kuma-boot-starter-elk'
+include 'kuma-boot-framework:kuma-boot-starter-logger'

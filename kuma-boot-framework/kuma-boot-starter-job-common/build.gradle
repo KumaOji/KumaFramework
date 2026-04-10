@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework job-common模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

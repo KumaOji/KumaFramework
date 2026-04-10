@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework elk模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot 自动装配（@ConfigurationProperties、@AutoConfiguration 等）
+    api projectLibs.spring.boot.autoconfigure
+
+    // Spring Cloud Context（@RefreshScope）
+    api projectLibs.spring.cloud.context
+
+    // Spring Web MVC（HandlerInterceptor、WebMvcConfigurer、RequestContextHolder）
+    api projectLibs.spring.boot.starter.web
+
+    // Logback（LoggerContext、Level、ILoggingEvent 等）
+    api projectLibs.logback.classic
+
+    // Logstash Logback Encoder（LogstashTcpSocketAppender、LogstashEncoder、MapEntriesAppendingMarker）
+    api projectLibs.logstash.logback.encoder
+
+    // AOP（@Aspect、ProceedingJoinPoint）
+    api projectLibs.aspectjweaver
+
+    // Hutool
+    api projectLibs.hutool.core
+
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.jakarta.annotation.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
