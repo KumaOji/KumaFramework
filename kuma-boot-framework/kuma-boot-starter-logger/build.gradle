@@ -13,6 +13,9 @@ dependencies {
     // Spring Boot Web（RestTemplate、HandlerInterceptor 等）
     api projectLibs.spring.boot.starter.web
 
+    // Spring Cloud Context（@RefreshScope，LoggingProperties / LoggerProperties）
+    api projectLibs.spring.cloud.context
+
     // Logback（LoggerContext、ILoggingEvent、PatternLayout 等）
     api projectLibs.logback.classic
     api projectLibs.logback.access
@@ -51,6 +54,15 @@ dependencies {
     // AOP
     api projectLibs.aspectjweaver
 
+    // AOP Alliance（org.aopalliance.intercept.*，AccessLogInterceptor / AccessLogHelper）
+    api projectLibs.aopalliance
+
+    // Commons Lang3（ObjectUtils，LocalPortConverter）
+    api projectLibs.commons.lang3
+
+    // SnakeYAML（YmlUtils）
+    api projectLibs.snakeyaml
+
     // Graylog（GELF Appender）
     api projectLibs.logback.gelf
 
@@ -68,6 +80,7 @@ dependencies {
 
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.jakarta.annotation.api
+    compileOnly projectLibs.jetbrains.annotations
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }
