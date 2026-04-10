@@ -26,6 +26,9 @@ dependencies {
     api projectLibs.hutool.core
     api projectLibs.hutool.db
 
+    // Hutool Extra（ContextUtils -> SpringUtil）
+    api projectLibs.hutool.extra
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }
