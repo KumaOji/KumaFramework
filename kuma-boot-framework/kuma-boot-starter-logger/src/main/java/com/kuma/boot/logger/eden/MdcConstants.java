@@ -1,0 +1,18 @@
+package com.kuma.boot.logger.eden;
+
+public class MdcConstants {
+   public static final String APP = "app";
+   public static final String PROFILE = "profile";
+   public static final String CLASS_NAME = "className";
+   public static final String METHOD_NAME = "methodName";
+   public static final String ARGUMENTS = "arguments";
+   public static final String RETURN_VALUE = "returnValue";
+   public static final String DURATION = "duration";
+   public static final String REQUEST_URI = "requestURI";
+   public static final String REMOTE_USER = "remoteUser";
+   public static final String REMOTE_ADDR = "remoteAddr";
+   public static final String LOCAL_ADDR = "localAddr";
+
+   public MdcConstants() {
+   }
+}

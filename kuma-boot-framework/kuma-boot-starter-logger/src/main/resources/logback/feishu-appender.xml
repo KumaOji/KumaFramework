@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+	<appender name="FEISHU_APPENDER"
+		class="com.kuma.boot.logger.logback.appender.LogBackHttpFeiShuAppender">
+		<!--我的webhook-->
+		<url>https://xxxxxxxxx</url>
+		<encoder>
+			<pattern>${outPattern}</pattern>
+			<charset>${charSet}</charset>
+		</encoder>
+		<!--仅输出error级别以上的日志-->
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>warn</level>
+		</filter>
+	</appender>
+
+	<!--http appender 队列-->
+	<appender name="FEISHU_ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+		<!--队列大小-->
+		<queueSize>512</queueSize>
+		<!--当队列的剩余容量小于这个阈值则丢弃INFO以下级别日志。默认为queueSize大小的20%。设置等于队列大小丢弃INFO以下日志-->
+		<discardingThreshold>512</discardingThreshold>
+		<!--日志以非阻塞的方式进入队列，队列满时日志被舍弃日志被丢弃-->
+		<neverBlock>true</neverBlock>
+		<!--是否收集调用方数据-->
+		<includeCallerData>true</includeCallerData>
+		<appender-ref ref="FEISHU_APPENDER"/>
+	</appender>
+
+</included>

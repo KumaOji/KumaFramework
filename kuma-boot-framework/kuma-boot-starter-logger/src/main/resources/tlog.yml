@@ -1,0 +1,5 @@
+tlog:
+  pattern: "$preApp:$preIp:$spanId:$traceId"
+  enableInvokeTimePrint: false
+  idGenerator: com.kuma.boot.logger.tlog.TlogIdGenerator
+  mdcEnable: true

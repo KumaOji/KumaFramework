@@ -1,20 +1,70 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework logger模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-test {
-    useJUnitPlatform()
+    // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties 等）
+    api projectLibs.spring.boot.autoconfigure
+
+    // Spring Boot Web（RestTemplate、HandlerInterceptor 等）
+    api projectLibs.spring.boot.starter.web
+
+    // Logback（LoggerContext、ILoggingEvent、PatternLayout 等）
+    api projectLibs.logback.classic
+    api projectLibs.logback.access
+
+    // SLF4J API
+    api projectLibs.slf4j.api
+
+    // Logstash Logback Encoder（LogstashTcpSocketAppender、LogstashEncoder 等）
+    api projectLibs.logstash.logback.encoder
+
+    // Disruptor（高性能异步队列）
+    api projectLibs.disruptor
+
+    // TTL（TransmittableThreadLocal，MDC 上下文跨线程传递）
+    api projectLibs.transmittable.thread.local
+
+    // Hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.json
+
+    // Fastjson2（FeiShu Appender）
+    api projectLibs.fastjson2
+
+    // Guava（Stopwatch）
+    api projectLibs.guava
+
+    // OkHttp（Loki HTTP 客户端）
+    api projectLibs.okhttp3
+
+    // Kafka Clients（KafkaProducer）
+    api projectLibs.kafka.clients
+
+    // SkyWalking APM Toolkit（TraceIdPatternLogbackLayout）
+    api projectLibs.skywalking.apm.toolkit.trace
+
+    // AOP
+    api projectLibs.aspectjweaver
+
+    // Graylog（GELF Appender）
+    api projectLibs.logback.gelf
+
+    // Loki4j（Loki Appender）
+    api projectLibs.loki.logback.appender
+
+    // OpenTelemetry Logback Appender
+    api projectLibs.opentelemetry.logback.appender
+
+    // Logback Kafka Appender（KafkaAppenderConfig）
+    api projectLibs.logback.kafka.appender
+
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.jakarta.annotation.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }
