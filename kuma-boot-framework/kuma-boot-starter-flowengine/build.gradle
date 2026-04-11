@@ -1,0 +1,62 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework 流程引擎模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+
+    // Spring Boot
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.jdbc
+    api projectLibs.spring.expression
+
+    // Groovy (GroovyScriptExpressionEngine)
+    api projectLibs.groovy
+
+    // Guava (Maps, Lists, Joiner, Iterables)
+    api projectLibs.guava
+
+    // FastJSON2
+    api projectLibs.fastjson2
+
+    // Hutool
+    api projectLibs.hutool.core
+
+    // Commons Lang3, Collections4
+    api projectLibs.commons.lang3
+    api projectLibs.commons.collections4
+
+    // SnakeYAML (YAML flow definition parsing)
+    api projectLibs.snakeyaml
+
+    // Javassist (bytecode manipulation)
+    api projectLibs.javassist
+
+    // Apache Commons JEXL3 (JexlExpressionEngine)
+    api projectLibs.commons.jexl3
+
+    // Janino (dynamic Java compilation in Compiler.java)
+    api projectLibs.janino
+    api projectLibs.commons.compiler
+
+    // Joda-Time (RetryRetreatTimeUnitEnum)
+    api projectLibs.joda.time
+
+    // MVEL2 (MvelScriptContext expression scripting)
+    api projectLibs.mvel2
+
+    // CFFU (CompletableFuture utilities for ParallelFlow)
+    api projectLibs.cffu
+
+    // SLF4J
+    api projectLibs.slf4j.api
+
+    // Jakarta Validation
+    compileOnly projectLibs.jakarta.validation.api
+
+    // XXL-Job (optional retry scheduling integration)
+    compileOnly projectLibs.xxl.job.core
+}
