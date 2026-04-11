@@ -1,0 +1,43 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework XSS防护过滤模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot AutoConfiguration
+    api projectLibs.spring.boot.autoconfigure
+
+    // Hutool
+    api projectLibs.hutool.core
+
+    // Commons Lang3
+    api projectLibs.commons.lang3
+
+    // Jsoup (HTML解析与XSS净化)
+    api projectLibs.jsoup
+
+    // OWASP AntiSamy (基于策略文件的XSS过滤)
+    api projectLibs.antisamy
+
+    // SLF4J
+    api projectLibs.slf4j.api
+
+    // Jackson 3.x (XssStringJsonSerializer / XssStringJsonDeserializer)
+    compileOnly projectLibs.jackson.core
+    compileOnly projectLibs.jackson.databind
+
+    // Jakarta Servlet API (Filter / HttpServletRequestWrapper)
+    compileOnly projectLibs.jakarta.servlet.api
+
+    // Jakarta Validation (XSS注解校验器)
+    compileOnly projectLibs.jakarta.validation.api
+
+    // Spring Web + WebMVC (OncePerRequestFilter / AsyncHandlerInterceptor / WebMvcConfigurer)
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // Spring Cloud Context (@RefreshScope on XssProperties)
+    compileOnly projectLibs.spring.cloud.context
+}

@@ -1,0 +1,49 @@
+##Apollo 配置 https://www.apolloconfig.com/#/zh/usage/java-sdk-user-guide?id=_12-%e5%bf%85%e9%80%89%e8%ae%be%e7%bd%ae
+
+#所属环境
+env: test
+#  AppId是应用的身份信息，是从服务端获取配置的一个重要信息。
+app:
+  id: 001
+apollo:
+  #元数据中心地址  Meta server地址也可以填入IP，如http://1.1.1.1:8080,http://2.2.2.2:8080，
+  ## 不过生产环境还是建议使用域名（走slb），因为机器扩容、缩容等都可能导致IP列表的变化。
+  meta: http://127.0.0.1:8080
+  #配置服务，多个逗号分隔
+  configService: aaa
+  #缓存根目录
+  cacheDir: d:\\apollo
+  #集群，默认值 default
+  cluster: SomeCluster
+  #连接超时时间，默认 1000（毫秒）
+  connectTimeout: 1000
+  #刷新时间， 默认 5 （分钟）
+  refreshInterval: 5
+  #读取时间 默认 5000 （毫秒）
+  readTimeout: 5000
+  #加载配置 每秒几次，默认 2
+  loadConfigQPS: 2
+  #	长轮询 每秒几次，默认 2
+  longPollQPS: 2
+  #Mills 中的长轮询初始延迟 默认 2000（毫秒）
+  longPollingInitialDelayInMills: 2000
+  # Spring应用通常会使用 Placeholder 来注入配置，如${someKey:someDefaultValue}，冒号前面的是 key，冒号后面的是默认值。
+  # 如果想关闭 placeholder 在运行时自动更新功能，可以设置为 false。
+  autoUpdateInjectedSpringProperties: false
+  bootstrap:
+    enabled: true
+    #2、注入默认application namespace或多个非默认namespace的配置示例
+    namespaces: application,TEST1.public.yml,TEST2.app002_public
+    #3、将Apollo配置加载提到初始化日志系统之前(1.2.0+) （默认false）
+    # 使Apollo的加载顺序放到日志系统加载之前，不过这会导致Apollo的启动过程无法通过日志的方式输出
+    eagerLoad:
+      enabled: true
+  # 如果是运行jar文件，需要注意格式是java -Denv=YOUR-ENVIRONMENT -jar xxx.jar
+  # 属性排序，默认 false
+  property:
+    order:
+      enable: true
+  accesskey:
+    #  配置访问秘钥
+    secret: 1cf998c4e2ad4704b45a98a509d15719
+

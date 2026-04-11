@@ -1,0 +1,44 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework UserAgent解析模块（Browscap / YAUAA + 手机号归属地）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot AutoConfiguration
+    api projectLibs.spring.boot.autoconfigure
+
+    // FastJSON2
+    api projectLibs.fastjson2
+
+    // JSpecify (@NonNull)
+    api projectLibs.jspecify
+
+    // Browscap UA 解析器 (@ConditionalOnClass — 可选实现一)
+    compileOnly projectLibs.browscap
+
+    // YAUAA UA 解析器 (@ConditionalOnClass — 可选实现二)
+    compileOnly projectLibs.yauaa
+
+    // libphonenumber 手机号解析 / 归属地 / 运营商
+    compileOnly projectLibs.libphonenumber
+    compileOnly projectLibs.libphonenumber.geocoder
+    compileOnly projectLibs.libphonenumber.carrier
+
+    // Jakarta Servlet API (OncePerRequestFilter / FilterRegistrationBean)
+    compileOnly projectLibs.jakarta.servlet.api
+
+    // Spring Web MVC (HandlerMethodArgumentResolver / WebMvcConfigurer)
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // Spring WebFlux (WebFilter / WebFluxConfigurer — 响应式支持)
+    compileOnly projectLibs.spring.boot.starter.webflux
+
+    // Reactor Core (Mono / Context)
+    compileOnly projectLibs.reactor.core
+
+    // Spring Cloud Context (@RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+}
