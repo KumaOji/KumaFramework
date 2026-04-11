@@ -1,19 +1,19 @@
 package com.kuma.boot.flowengine.simpleflow.api.model;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
 
+import java.time.LocalDateTime;
+import java.util.*;
+
+/**
+ * 流程定义模型
+ * <p>
+ * 定义一个完整的工作流程，包括步骤、依赖关系和配置
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
 public class FlowDefinition {
+
    private String id;
    private String name;
    private String description;
@@ -23,85 +23,121 @@ public class FlowDefinition {
    private Map<String, Object> properties;
    private LocalDateTime createdTime;
    private LocalDateTime updatedTime;
-   private String threadPoolName;
-   private boolean sync;
+   private String threadPoolName;  // 线程池名称，不为空则使用线程池执行
+   private boolean sync;           // 是否同步执行，true=同步，false=异步
 
-   public FlowDefinition() {
-   }
-
+   /**
+    * 根据ID查找步骤
+    *
+    * @param stepId 步骤ID
+    * @return 步骤定义，如果不存在则返回Optional.empty()
+    */
    public Optional<StepDefinition> findStep(String stepId) {
-      return this.steps.stream().filter((step) -> Objects.equals(step.getId(), stepId)).findFirst();
+      return steps.stream()
+              .filter(step -> Objects.equals(step.getId(), stepId))
+              .findFirst();
    }
 
+   /**
+    * 获取指定步骤的依赖步骤
+    *
+    * @param stepId 步骤ID
+    * @return 依赖步骤ID列表
+    */
    public List<String> getStepDependencies(String stepId) {
-      return (List)this.dependencies.getOrDefault(stepId, Collections.emptyList());
+      return dependencies.getOrDefault(stepId, Collections.emptyList());
    }
 
+   /**
+    * 获取指定步骤的后续步骤
+    *
+    * @param stepId 步骤ID
+    * @return 后续步骤ID列表
+    */
    public List<String> getStepSuccessors(String stepId) {
-      return (List)this.dependencies.entrySet().stream().filter((entry) -> ((List)entry.getValue()).contains(stepId)).map(Map.Entry::getKey).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+      return dependencies.entrySet().stream()
+              .filter(entry -> entry.getValue().contains(stepId))
+              .map(Map.Entry::getKey)
+              .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
    }
 
+   /**
+    * 检查是否存在循环依赖
+    *
+    * @return 是否存在循环依赖
+    */
    public boolean hasCyclicDependency() {
-      Set<String> visited = new HashSet();
-      Set<String> recursionStack = new HashSet();
+      Set<String> visited = new HashSet<>();
+      Set<String> recursionStack = new HashSet<>();
 
-      for(StepDefinition step : this.steps) {
-         if (this.hasCyclicDependencyUtil(step.getId(), visited, recursionStack)) {
+      for (StepDefinition step : steps) {
+         if (hasCyclicDependencyUtil(step.getId(), visited, recursionStack)) {
             return true;
          }
       }
-
       return false;
    }
 
    private boolean hasCyclicDependencyUtil(String stepId, Set<String> visited, Set<String> recursionStack) {
       if (recursionStack.contains(stepId)) {
          return true;
-      } else if (visited.contains(stepId)) {
-         return false;
-      } else {
-         visited.add(stepId);
-         recursionStack.add(stepId);
-
-         for(String successor : this.getStepSuccessors(stepId)) {
-            if (this.hasCyclicDependencyUtil(successor, visited, recursionStack)) {
-               return true;
-            }
-         }
-
-         recursionStack.remove(stepId);
+      }
+      if (visited.contains(stepId)) {
          return false;
       }
+
+      visited.add(stepId);
+      recursionStack.add(stepId);
+
+      List<String> successors = getStepSuccessors(stepId);
+      for (String successor : successors) {
+         if (hasCyclicDependencyUtil(successor, visited, recursionStack)) {
+            return true;
+         }
+      }
+
+      recursionStack.remove(stepId);
+      return false;
    }
 
+   /**
+    * 获取流程的拓扑排序
+    *
+    * @return 拓扑排序后的步骤ID列表
+    */
    public List<String> getTopologicalOrder() {
-      Map<String, Integer> inDegree = new HashMap();
-      Queue<String> queue = new LinkedList();
-      List<String> result = new ArrayList();
+      Map<String, Integer> inDegree = new HashMap<>();
+      Queue<String> queue = new LinkedList<>();
+      List<String> result = new ArrayList<>();
 
-      for(StepDefinition step : this.steps) {
+      // 初始化入度
+      for (StepDefinition step : steps) {
          inDegree.put(step.getId(), 0);
       }
 
-      for(Map.Entry<String, List<String>> entry : this.dependencies.entrySet()) {
-         for(String dependency : (List)entry.getValue()) {
-            inDegree.put((String)entry.getKey(), (Integer)inDegree.get(entry.getKey()) + 1);
+      // 计算入度
+      for (Map.Entry<String, List<String>> entry : dependencies.entrySet()) {
+         for (String dependency : entry.getValue()) {
+            inDegree.put(entry.getKey(), inDegree.get(entry.getKey()) + 1);
          }
       }
 
-      for(Map.Entry<String, Integer> entry : inDegree.entrySet()) {
-         if ((Integer)entry.getValue() == 0) {
-            queue.offer((String)entry.getKey());
+      // 找到入度为0的节点
+      for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
+         if (entry.getValue() == 0) {
+            queue.offer(entry.getKey());
          }
       }
 
-      while(!queue.isEmpty()) {
-         String current = (String)queue.poll();
+      // 拓扑排序
+      while (!queue.isEmpty()) {
+         String current = queue.poll();
          result.add(current);
 
-         for(String successor : this.getStepSuccessors(current)) {
-            inDegree.put(successor, (Integer)inDegree.get(successor) - 1);
-            if ((Integer)inDegree.get(successor) == 0) {
+         List<String> successors = getStepSuccessors(current);
+         for (String successor : successors) {
+            inDegree.put(successor, inDegree.get(successor) - 1);
+            if (inDegree.get(successor) == 0) {
                queue.offer(successor);
             }
          }
@@ -110,28 +146,37 @@ public class FlowDefinition {
       return result;
    }
 
+   @Override
    public boolean equals(Object o) {
       if (this == o) {
          return true;
-      } else if (o != null && this.getClass() == o.getClass()) {
-         FlowDefinition that = (FlowDefinition)o;
-         return Objects.equals(this.id, that.id) && Objects.equals(this.version, that.version);
-      } else {
+      }
+      if (o == null || getClass() != o.getClass()) {
          return false;
       }
+      FlowDefinition that = (FlowDefinition) o;
+      return Objects.equals(id, that.id) && Objects.equals(version, that.version);
    }
 
+   @Override
    public int hashCode() {
-      return Objects.hash(new Object[]{this.id, this.version});
+      return Objects.hash(id, version);
    }
 
+   @Override
    public String toString() {
-      String var10000 = this.id;
-      return "FlowDefinition{id='" + var10000 + "', name='" + this.name + "', version='" + this.version + "', steps=" + this.steps.size() + ", threadPoolName='" + this.threadPoolName + "', sync=" + this.sync + "}";
+      return "FlowDefinition{" +
+              "id='" + id + '\'' +
+              ", name='" + name + '\'' +
+              ", version='" + version + '\'' +
+              ", steps=" + steps.size() +
+              ", threadPoolName='" + threadPoolName + '\'' +
+              ", sync=" + sync +
+              '}';
    }
 
    public String getId() {
-      return this.id;
+      return id;
    }
 
    public void setId(String id) {
@@ -139,7 +184,7 @@ public class FlowDefinition {
    }
 
    public String getName() {
-      return this.name;
+      return name;
    }
 
    public void setName(String name) {
@@ -147,7 +192,7 @@ public class FlowDefinition {
    }
 
    public String getDescription() {
-      return this.description;
+      return description;
    }
 
    public void setDescription(String description) {
@@ -155,7 +200,7 @@ public class FlowDefinition {
    }
 
    public String getVersion() {
-      return this.version;
+      return version;
    }
 
    public void setVersion(String version) {
@@ -163,7 +208,7 @@ public class FlowDefinition {
    }
 
    public List<StepDefinition> getSteps() {
-      return this.steps;
+      return steps;
    }
 
    public void setSteps(List<StepDefinition> steps) {
@@ -171,7 +216,7 @@ public class FlowDefinition {
    }
 
    public Map<String, List<String>> getDependencies() {
-      return this.dependencies;
+      return dependencies;
    }
 
    public void setDependencies(Map<String, List<String>> dependencies) {
@@ -179,7 +224,7 @@ public class FlowDefinition {
    }
 
    public Map<String, Object> getProperties() {
-      return this.properties;
+      return properties;
    }
 
    public void setProperties(Map<String, Object> properties) {
@@ -187,7 +232,7 @@ public class FlowDefinition {
    }
 
    public LocalDateTime getCreatedTime() {
-      return this.createdTime;
+      return createdTime;
    }
 
    public void setCreatedTime(LocalDateTime createdTime) {
@@ -195,7 +240,7 @@ public class FlowDefinition {
    }
 
    public LocalDateTime getUpdatedTime() {
-      return this.updatedTime;
+      return updatedTime;
    }
 
    public void setUpdatedTime(LocalDateTime updatedTime) {
@@ -203,7 +248,7 @@ public class FlowDefinition {
    }
 
    public String getThreadPoolName() {
-      return this.threadPoolName;
+      return threadPoolName;
    }
 
    public void setThreadPoolName(String threadPoolName) {
@@ -211,7 +256,7 @@ public class FlowDefinition {
    }
 
    public boolean isSync() {
-      return this.sync;
+      return sync;
    }
 
    public void setSync(boolean sync) {
@@ -223,6 +268,7 @@ public class FlowDefinition {
    }
 
    public static final class FlowDefinitionBuilder {
+
       private String id;
       private String name;
       private String description;
@@ -237,6 +283,7 @@ public class FlowDefinition {
 
       private FlowDefinitionBuilder() {
       }
+
 
       public FlowDefinitionBuilder id(String id) {
          this.id = id;
@@ -295,17 +342,17 @@ public class FlowDefinition {
 
       public FlowDefinition build() {
          FlowDefinition flowDefinition = new FlowDefinition();
-         flowDefinition.setId(this.id);
-         flowDefinition.setName(this.name);
-         flowDefinition.setDescription(this.description);
-         flowDefinition.setVersion(this.version);
-         flowDefinition.setSteps(this.steps);
-         flowDefinition.setDependencies(this.dependencies);
-         flowDefinition.setProperties(this.properties);
-         flowDefinition.setCreatedTime(this.createdTime);
-         flowDefinition.setUpdatedTime(this.updatedTime);
-         flowDefinition.setThreadPoolName(this.threadPoolName);
-         flowDefinition.setSync(this.sync);
+         flowDefinition.setId(id);
+         flowDefinition.setName(name);
+         flowDefinition.setDescription(description);
+         flowDefinition.setVersion(version);
+         flowDefinition.setSteps(steps);
+         flowDefinition.setDependencies(dependencies);
+         flowDefinition.setProperties(properties);
+         flowDefinition.setCreatedTime(createdTime);
+         flowDefinition.setUpdatedTime(updatedTime);
+         flowDefinition.setThreadPoolName(threadPoolName);
+         flowDefinition.setSync(sync);
          return flowDefinition;
       }
    }

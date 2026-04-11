@@ -3,226 +3,307 @@ package com.kuma.boot.flowengine.simpleflow.expression.evaluator;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.flowengine.simpleflow.expression.api.Expression;
 import com.kuma.boot.flowengine.simpleflow.expression.api.ExpressionException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * JEXL 表达式包装器
+ * <p>
+ * 将 JEXL 表达式包装为通用表达式接口
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
+
 public class JexlExpressionWrapper implements Expression {
+
+
    private final String expressionString;
    private final JexlExpression jexlExpression;
    private final Set<String> variableNames;
-   private final Expression.ExpressionType type;
+   private final ExpressionType type;
    private final Class<?> returnType;
 
+   /**
+    * 构造函数
+    *
+    * @param expressionString 表达式字符串
+    * @param jexlExpression   JEXL 表达式对象
+    */
    public JexlExpressionWrapper(String expressionString, JexlExpression jexlExpression) {
       this.expressionString = expressionString;
       this.jexlExpression = jexlExpression;
-      this.variableNames = this.extractVariableNames();
-      this.type = this.determineExpressionType();
-      this.returnType = this.determineReturnType();
+      this.variableNames = extractVariableNames();
+      this.type = determineExpressionType();
+      this.returnType = determineReturnType();
    }
 
+   @Override
    public Object execute(Map<String, Object> context) throws ExpressionException {
       try {
-         JexlContext jexlContext = this.createJexlContext(context);
-         Object result = this.jexlExpression.evaluate(jexlContext);
-         LogUtils.debug("Executed expression '{}' with result: {}", new Object[]{this.expressionString, result});
+         JexlContext jexlContext = createJexlContext(context);
+         Object result = jexlExpression.evaluate(jexlContext);
+
+         LogUtils.debug("Executed expression '{}' with result: {}", expressionString, result);
          return result;
       } catch (JexlException e) {
-         LogUtils.error("Failed to execute expression: {}", new Object[]{this.expressionString, e});
-         throw new ExpressionException("Failed to execute expression: " + e.getMessage(), this.expressionString, e);
+         LogUtils.error("Failed to execute expression: {}", expressionString, e);
+         throw new ExpressionException("Failed to execute expression: " + e.getMessage(), expressionString, e);
       } catch (Exception e) {
-         LogUtils.error("Unexpected error executing expression: {}", new Object[]{this.expressionString, e});
-         throw new ExpressionException("Unexpected error: " + e.getMessage(), this.expressionString, e);
+         LogUtils.error("Unexpected error executing expression: {}", expressionString, e);
+         throw new ExpressionException("Unexpected error: " + e.getMessage(), expressionString, e);
       }
    }
 
+   @Override
    public <T> T execute(Map<String, Object> context, Class<T> expectedType) throws ExpressionException {
-      Object result = this.execute(context);
+      Object result = execute(context);
+
       if (result == null) {
          return null;
-      } else if (expectedType.isInstance(result)) {
-         return (T)expectedType.cast(result);
-      } else {
-         try {
-            return (T)this.convertType(result, expectedType);
-         } catch (Exception e) {
-            throw new ExpressionException("Cannot convert result of type " + result.getClass().getSimpleName() + " to expected type " + expectedType.getSimpleName(), this.expressionString, e);
-         }
+      }
+
+      if (expectedType.isInstance(result)) {
+         return expectedType.cast(result);
+      }
+
+      // 尝试类型转换
+      try {
+         return convertType(result, expectedType);
+      } catch (Exception e) {
+         throw new ExpressionException(
+                 "Cannot convert result of type " + result.getClass().getSimpleName() +
+                         " to expected type " + expectedType.getSimpleName(), expressionString, e);
       }
    }
 
+   @Override
    public String getExpressionString() {
-      return this.expressionString;
+      return expressionString;
    }
 
+   @Override
    public Set<String> getVariableNames() {
-      return Collections.unmodifiableSet(this.variableNames);
+      return Collections.unmodifiableSet(variableNames);
    }
 
+   @Override
    public boolean isConstant() {
-      return this.variableNames.isEmpty();
+      return variableNames.isEmpty();
    }
 
-   public Expression.ExpressionType getType() {
-      return this.type;
+   @Override
+   public ExpressionType getType() {
+      return type;
    }
 
+   @Override
    public Class<?> getReturnType() {
-      return this.returnType;
+      return returnType;
    }
 
-   public Expression.ValidationResult validate(Map<String, Object> context) {
-      Set<String> missingVariables = new HashSet();
-
-      for(String variableName : this.variableNames) {
+   @Override
+   public ValidationResult validate(Map<String, Object> context) {
+      // 检查必需的变量是否存在
+      Set<String> missingVariables = new HashSet<>();
+      for (String variableName : variableNames) {
          if (context == null || !context.containsKey(variableName)) {
             missingVariables.add(variableName);
          }
       }
 
       if (!missingVariables.isEmpty()) {
-         return Expression.ValidationResult.missingVariables(missingVariables);
-      } else {
-         try {
-            this.execute(context);
-            return Expression.ValidationResult.success();
-         } catch (ExpressionException e) {
-            return Expression.ValidationResult.failure(e.getMessage());
-         }
+         return ValidationResult.missingVariables(missingVariables);
+      }
+
+      // 尝试执行表达式以验证其有效性
+      try {
+         execute(context);
+         return ValidationResult.success();
+      } catch (ExpressionException e) {
+         return ValidationResult.failure(e.getMessage());
       }
    }
 
+   /**
+    * 提取表达式中的变量名
+    *
+    * @return 变量名集合
+    */
    private Set<String> extractVariableNames() {
-      Set<String> variables = new HashSet();
+      Set<String> variables = new HashSet<>();
 
       try {
-         String expr = this.expressionString;
-         String cleanExpr = expr.replaceAll("'[^']*'", " ").replaceAll("\"[^\"]*\"", " ");
-         cleanExpr = cleanExpr.replaceAll("[>=<!?:+\\-*/()\\[\\]{}.,;]", " ");
-         Pattern pattern = Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b");
-         Matcher matcher = pattern.matcher(cleanExpr);
+         // JEXL 3.x 中需要通过其他方式获取变量
+         // 这里使用简单的字符串解析作为替代方案
+         String expr = expressionString;
 
-         while(matcher.find()) {
+         // 先移除字符串字面量，避免误识别
+         String cleanExpr = expr.replaceAll("'[^']*'", " ").replaceAll("\"[^\"]*\"", " ");
+
+         // 移除操作符和特殊字符，保留标识符
+         cleanExpr = cleanExpr.replaceAll("[>=<!?:+\\-*/()\\[\\]{}.,;]", " ");
+
+         // 简单的变量名提取逻辑（可以根据需要改进）
+         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b");
+         java.util.regex.Matcher matcher = pattern.matcher(cleanExpr);
+         while (matcher.find()) {
             String token = matcher.group().trim();
-            if (!token.isEmpty() && !this.isKeywordOrConstant(token) && !token.matches("\\d+")) {
+            // 排除关键字、常量和数字
+            if (!token.isEmpty() && !isKeywordOrConstant(token) && !token.matches("\\d+")) {
                variables.add(token);
             }
          }
       } catch (Exception e) {
-         LogUtils.warn("Failed to extract variables from expression: {}", new Object[]{this.expressionString, e});
+         LogUtils.warn("Failed to extract variables from expression: {}", expressionString, e);
       }
 
       return variables;
    }
 
+   /**
+    * 检查是否为关键字或常量
+    */
    private boolean isKeywordOrConstant(String token) {
-      return "true".equals(token) || "false".equals(token) || "null".equals(token) || "if".equals(token) || "else".equals(token) || "for".equals(token) || "while".equals(token) || "return".equals(token) || "new".equals(token) || "var".equals(token) || "function".equals(token) || "size".equals(token) || "length".equals(token) || "empty".equals(token);
+      return "true".equals(token) || "false".equals(token) || "null".equals(token) ||
+              "if".equals(token) || "else".equals(token) || "for".equals(token) ||
+              "while".equals(token) || "return".equals(token) || "new".equals(token) ||
+              "var".equals(token) || "function".equals(token) || "size".equals(token) ||
+              "length".equals(token) || "empty".equals(token);
    }
 
-   private Expression.ExpressionType determineExpressionType() {
-      String expr = this.expressionString.toLowerCase().trim();
-      if (!expr.contains("==") && !expr.contains("!=") && !expr.contains(">=") && !expr.contains("<=") && !expr.contains(">") && !expr.contains("<") && !expr.contains("&&") && !expr.contains("||") && !expr.contains("!") && !expr.equals("true") && !expr.equals("false")) {
-         if (!expr.matches(".*[+\\-*/].*") && !expr.matches("\\d+(\\.\\d+)?")) {
-            return (!expr.startsWith("'") || !expr.endsWith("'")) && (!expr.startsWith("\"") || !expr.endsWith("\"")) ? Expression.ExpressionType.UNKNOWN : Expression.ExpressionType.STRING;
-         } else {
-            return Expression.ExpressionType.NUMERIC;
-         }
-      } else {
-         return Expression.ExpressionType.BOOLEAN;
+   /**
+    * 确定表达式类型
+    *
+    * @return 表达式类型
+    */
+   private ExpressionType determineExpressionType() {
+      // 简单的类型推断，基于表达式字符串的模式
+      String expr = expressionString.toLowerCase().trim();
+
+      // 布尔表达式模式
+      if (expr.contains("==") || expr.contains("!=") || expr.contains(">=") ||
+              expr.contains("<=") || expr.contains(">") || expr.contains("<") ||
+              expr.contains("&&") || expr.contains("||") || expr.contains("!") ||
+              expr.equals("true") || expr.equals("false")) {
+         return ExpressionType.BOOLEAN;
       }
+
+      // 数值表达式模式
+      if (expr.matches(".*[+\\-*/].*") || expr.matches("\\d+(\\.\\d+)?")) {
+         return ExpressionType.NUMERIC;
+      }
+
+      // 字符串表达式模式
+      if (expr.startsWith("'") && expr.endsWith("'") ||
+              expr.startsWith("\"") && expr.endsWith("\"")) {
+         return ExpressionType.STRING;
+      }
+
+      return ExpressionType.UNKNOWN;
    }
 
+   /**
+    * 确定返回类型
+    *
+    * @return 返回类型
+    */
    private Class<?> determineReturnType() {
-      switch (this.type) {
-         case BOOLEAN -> {
+      switch (type) {
+         case BOOLEAN:
             return Boolean.class;
-         }
-         case NUMERIC -> {
+         case NUMERIC:
             return Number.class;
-         }
-         case STRING -> {
+         case STRING:
             return String.class;
-         }
-         default -> {
+         default:
             return Object.class;
-         }
       }
    }
 
+   /**
+    * 创建 JEXL 上下文
+    *
+    * @param context 上下文变量
+    * @return JEXL 上下文
+    */
    private JexlContext createJexlContext(Map<String, Object> context) {
       JexlContext jexlContext = new MapContext();
       if (context != null) {
-         Objects.requireNonNull(jexlContext);
          context.forEach(jexlContext::set);
       }
-
       return jexlContext;
    }
 
+   /**
+    * 类型转换
+    *
+    * @param value      原始值
+    * @param targetType 目标类型
+    * @param <T>        目标类型
+    * @return 转换后的值
+    */
+   @SuppressWarnings("unchecked")
    private <T> T convertType(Object value, Class<T> targetType) {
       if (targetType == String.class) {
-         return (T)value.toString();
-      } else {
-         if (targetType == Boolean.class || targetType == Boolean.TYPE) {
-            if (value instanceof Boolean) {
-               return (T)value;
-            }
-
-            if (value instanceof Number) {
-               return (T)((Number)value).doubleValue() != (double)0.0F;
-            }
-
-            if (value instanceof String) {
-               return (T)Boolean.parseBoolean((String)value);
-            }
-         }
-
-         if (targetType == Integer.class || targetType == Integer.TYPE) {
-            if (value instanceof Number) {
-               return (T)((Number)value).intValue();
-            }
-
-            if (value instanceof String) {
-               return (T)Integer.parseInt((String)value);
-            }
-         }
-
-         if (targetType == Long.class || targetType == Long.TYPE) {
-            if (value instanceof Number) {
-               return (T)((Number)value).longValue();
-            }
-
-            if (value instanceof String) {
-               return (T)Long.parseLong((String)value);
-            }
-         }
-
-         if (targetType == Double.class || targetType == Double.TYPE) {
-            if (value instanceof Number) {
-               return (T)((Number)value).doubleValue();
-            }
-
-            if (value instanceof String) {
-               return (T)Double.parseDouble((String)value);
-            }
-         }
-
-         String var10002 = String.valueOf(value.getClass());
-         throw new ClassCastException("Cannot convert " + var10002 + " to " + String.valueOf(targetType));
+         return (T) value.toString();
       }
+
+      if (targetType == Boolean.class || targetType == boolean.class) {
+         if (value instanceof Boolean) {
+            return (T) value;
+         }
+         if (value instanceof Number) {
+            return (T) Boolean.valueOf(((Number) value).doubleValue() != 0.0);
+         }
+         if (value instanceof String) {
+            return (T) Boolean.valueOf(Boolean.parseBoolean((String) value));
+         }
+      }
+
+      if (targetType == Integer.class || targetType == int.class) {
+         if (value instanceof Number) {
+            return (T) Integer.valueOf(((Number) value).intValue());
+         }
+         if (value instanceof String) {
+            return (T) Integer.valueOf(Integer.parseInt((String) value));
+         }
+      }
+
+      if (targetType == Long.class || targetType == long.class) {
+         if (value instanceof Number) {
+            return (T) Long.valueOf(((Number) value).longValue());
+         }
+         if (value instanceof String) {
+            return (T) Long.valueOf(Long.parseLong((String) value));
+         }
+      }
+
+      if (targetType == Double.class || targetType == double.class) {
+         if (value instanceof Number) {
+            return (T) Double.valueOf(((Number) value).doubleValue());
+         }
+         if (value instanceof String) {
+            return (T) Double.valueOf(Double.parseDouble((String) value));
+         }
+      }
+
+      throw new ClassCastException("Cannot convert " + value.getClass() + " to " + targetType);
    }
 
+   @Override
    public String toString() {
-      String var10000 = this.expressionString;
-      return "JexlExpressionWrapper{expression='" + var10000 + "', type=" + String.valueOf(this.type) + ", variables=" + String.valueOf(this.variableNames) + "}";
+      return "JexlExpressionWrapper{" +
+              "expression='" + expressionString + '\'' +
+              ", type=" + type +
+              ", variables=" + variableNames +
+              '}';
    }
 }

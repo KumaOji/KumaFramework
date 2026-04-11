@@ -4,226 +4,280 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.flowengine.simpleflow.expression.api.Expression;
 import com.kuma.boot.flowengine.simpleflow.expression.api.ExpressionEngine;
 import com.kuma.boot.flowengine.simpleflow.expression.api.ExpressionException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 基于 Kotlin 脚本的表达式引擎实现
+ *
+ * 使用 Kotlin 脚本引擎来执行条件表达式
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
 
 public class KotlinScriptExpressionEngine implements ExpressionEngine {
+
    private final ScriptEngine kotlinEngine;
-   private final Map<String, Object> compiledScriptCache;
+   private final Map<String, Object> compiledScriptCache = new ConcurrentHashMap<>();
    private final boolean cacheEnabled;
 
+   /**
+    * 默认构造函数
+    */
    public KotlinScriptExpressionEngine() {
       this(true);
    }
 
+   /**
+    * 构造函数
+    *
+    * @param cacheEnabled 是否启用脚本缓存
+    */
    public KotlinScriptExpressionEngine(boolean cacheEnabled) {
-      this.compiledScriptCache = new ConcurrentHashMap();
       this.cacheEnabled = cacheEnabled;
       ScriptEngineManager manager = new ScriptEngineManager();
       this.kotlinEngine = manager.getEngineByExtension("kts");
+
       if (this.kotlinEngine == null) {
          throw new RuntimeException("Kotlin script engine not found. Please ensure kotlin-scripting-jsr223 is in the classpath.");
       }
    }
 
+   /**
+    * 构造函数
+    *
+    * @param configuration 配置参数
+    */
    public KotlinScriptExpressionEngine(Map<String, Object> configuration) {
-      this.compiledScriptCache = new ConcurrentHashMap();
-      Boolean cacheEnabledConfig = (Boolean)configuration.get("cacheEnabled");
+      Boolean cacheEnabledConfig = (Boolean) configuration.get("cacheEnabled");
       this.cacheEnabled = cacheEnabledConfig != null ? cacheEnabledConfig : true;
+
       ScriptEngineManager manager = new ScriptEngineManager();
       this.kotlinEngine = manager.getEngineByExtension("kts");
+
       if (this.kotlinEngine == null) {
          throw new RuntimeException("Kotlin script engine not found. Please ensure kotlin-scripting-jsr223 is in the classpath.");
       }
    }
 
+   @Override
    public Object evaluate(String expression, Map<String, Object> context) throws ExpressionException {
-      if (expression != null && !expression.trim().isEmpty()) {
-         try {
-            Bindings bindings = this.kotlinEngine.createBindings();
-            if (context != null) {
-               bindings.putAll(context);
-            }
-
-            Object result;
-            if (this.cacheEnabled) {
-               String cacheKey = expression + "_" + (context != null ? context.hashCode() : 0);
-               result = this.compiledScriptCache.computeIfAbsent(cacheKey, (key) -> {
-                  try {
-                     return this.kotlinEngine.eval(expression, bindings);
-                  } catch (ScriptException e) {
-                     throw new RuntimeException("Failed to evaluate Kotlin script: " + expression, e);
-                  }
-               });
-            } else {
-               result = this.kotlinEngine.eval(expression, bindings);
-            }
-
-            LogUtils.debug("Kotlin script '{}' evaluated to: {}", new Object[]{expression, result});
-            return result;
-         } catch (ScriptException e) {
-            LogUtils.error("Failed to evaluate Kotlin script: {}", new Object[]{expression, e});
-            throw new ExpressionException("Kotlin script evaluation failed: " + e.getMessage(), e);
-         } catch (Exception e) {
-            LogUtils.error("Unexpected error evaluating Kotlin script: {}", new Object[]{expression, e});
-            throw new ExpressionException("Kotlin script evaluation failed: " + e.getMessage(), e);
-         }
-      } else {
+      if (expression == null || expression.trim().isEmpty()) {
          throw new ExpressionException("Expression cannot be null or empty");
+      }
+
+      try {
+         // 设置绑定变量
+         Bindings bindings = kotlinEngine.createBindings();
+         if (context != null) {
+            bindings.putAll(context);
+         }
+
+         // 执行脚本
+         Object result;
+         if (cacheEnabled) {
+            // 简单的缓存实现，实际项目中可能需要更复杂的缓存策略
+            String cacheKey = expression + "_" + (context != null ? context.hashCode() : 0);
+            result = compiledScriptCache.computeIfAbsent(cacheKey, key -> {
+               try {
+                  return kotlinEngine.eval(expression, bindings);
+               } catch (ScriptException e) {
+                  throw new RuntimeException("Failed to evaluate Kotlin script: " + expression, e);
+               }
+            });
+         } else {
+            result = kotlinEngine.eval(expression, bindings);
+         }
+
+         LogUtils.debug("Kotlin script '{}' evaluated to: {}", expression, result);
+         return result;
+
+      } catch (ScriptException e) {
+         LogUtils.error("Failed to evaluate Kotlin script: {}", expression, e);
+         throw new ExpressionException("Kotlin script evaluation failed: " + e.getMessage(), e);
+      } catch (Exception e) {
+         LogUtils.error("Unexpected error evaluating Kotlin script: {}", expression, e);
+         throw new ExpressionException("Kotlin script evaluation failed: " + e.getMessage(), e);
       }
    }
 
+   @Override
    public <T> T evaluate(String expression, Map<String, Object> context, Class<T> expectedType) throws ExpressionException {
-      Object result = this.evaluate(expression, context);
-
+      Object result = evaluate(expression, context);
       try {
-         return (T)this.convertType(result, expectedType);
+         return convertType(result, expectedType);
       } catch (Exception e) {
          throw new ExpressionException("Failed to convert result to expected type: " + expectedType.getName(), e);
       }
    }
 
+   @Override
    public boolean evaluateBoolean(String expression, Map<String, Object> context) throws ExpressionException {
-      Object result = this.evaluate(expression, context);
+      Object result = evaluate(expression, context);
       if (result instanceof Boolean) {
-         return (Boolean)result;
+         return (Boolean) result;
       } else if (result instanceof Number) {
-         return ((Number)result).doubleValue() != (double)0.0F;
+         return ((Number) result).doubleValue() != 0.0;
       } else if (result instanceof String) {
-         return Boolean.parseBoolean((String)result);
+         return Boolean.parseBoolean((String) result);
       } else {
          return result != null;
       }
    }
 
+   @Override
    public String evaluateString(String expression, Map<String, Object> context) throws ExpressionException {
-      Object result = this.evaluate(expression, context);
+      Object result = evaluate(expression, context);
       return result != null ? result.toString() : null;
    }
 
+   @Override
    public Number evaluateNumber(String expression, Map<String, Object> context) throws ExpressionException {
-      Object result = this.evaluate(expression, context);
+      Object result = evaluate(expression, context);
       if (result instanceof Number) {
-         return (Number)result;
+         return (Number) result;
       } else if (result instanceof String) {
          try {
-            return Double.parseDouble((String)result);
+            return Double.parseDouble((String) result);
          } catch (NumberFormatException e) {
-            throw new ExpressionException("Cannot convert string to number: " + String.valueOf(result), e);
+            throw new ExpressionException("Cannot convert string to number: " + result, e);
          }
       } else {
-         throw new ExpressionException("Result is not a number: " + String.valueOf(result));
+         throw new ExpressionException("Result is not a number: " + result);
       }
    }
 
+   @Override
    public boolean isValidExpression(String expression) {
-      if (expression != null && !expression.trim().isEmpty()) {
-         try {
-            this.kotlinEngine.eval(expression, this.kotlinEngine.createBindings());
-            return true;
-         } catch (Exception e) {
-            LogUtils.debug("Invalid Kotlin script: {}", new Object[]{expression, e});
-            return false;
-         }
-      } else {
+      if (expression == null || expression.trim().isEmpty()) {
+         return false;
+      }
+
+      try {
+         // 尝试编译脚本来验证语法
+         kotlinEngine.eval(expression, kotlinEngine.createBindings());
+         return true;
+      } catch (Exception e) {
+         LogUtils.debug("Invalid Kotlin script: {}", expression, e);
          return false;
       }
    }
 
+   @Override
    public Expression parseExpression(String expression) throws ExpressionException {
       try {
-         if (!this.isValidExpression(expression)) {
+         // 验证脚本语法
+         if (!isValidExpression(expression)) {
             throw new ExpressionException("Invalid Kotlin script syntax: " + expression);
-         } else {
-            return new KotlinScriptExpression(expression, this.kotlinEngine);
          }
+         return new KotlinScriptExpression(expression, kotlinEngine);
       } catch (Exception e) {
          throw new ExpressionException("Failed to parse Kotlin script: " + expression, e);
       }
    }
 
+   @Override
    public String getEngineName() {
       return "Kotlin Script";
    }
 
+   @Override
    public String getEngineVersion() {
-      return this.kotlinEngine != null ? this.kotlinEngine.getFactory().getEngineVersion() : "Unknown";
+      return kotlinEngine != null ? kotlinEngine.getFactory().getEngineVersion() : "Unknown";
    }
 
+   @Override
    public String getSupportedSyntax() {
       return "Kotlin Script Syntax - Full Kotlin language support for condition evaluation";
    }
 
+   /**
+    * 类型转换
+    *
+    * @param value 原始值
+    * @param targetType 目标类型
+    * @param <T> 目标类型
+    * @return 转换后的值
+    */
+   @SuppressWarnings("unchecked")
    private <T> T convertType(Object value, Class<T> targetType) {
       if (value == null) {
          return null;
-      } else if (targetType.isInstance(value)) {
-         return (T)value;
-      } else if (targetType == String.class) {
-         return (T)value.toString();
-      } else if (targetType != Boolean.class && targetType != Boolean.TYPE) {
-         if (Number.class.isAssignableFrom(targetType)) {
-            if (value instanceof Number) {
-               Number num = (Number)value;
-               if (targetType == Integer.class || targetType == Integer.TYPE) {
-                  return (T)num.intValue();
-               }
+      }
 
-               if (targetType == Long.class || targetType == Long.TYPE) {
-                  return (T)num.longValue();
-               }
+      if (targetType.isInstance(value)) {
+         return (T) value;
+      }
 
-               if (targetType == Double.class || targetType == Double.TYPE) {
-                  return (T)num.doubleValue();
-               }
+      if (targetType == String.class) {
+         return (T) value.toString();
+      }
 
-               if (targetType == Float.class || targetType == Float.TYPE) {
-                  return (T)num.floatValue();
-               }
-            } else if (value instanceof String) {
-               String str = (String)value;
-               if (targetType == Integer.class || targetType == Integer.TYPE) {
-                  return (T)Integer.valueOf(str);
-               }
+      if (targetType == Boolean.class || targetType == boolean.class) {
+         if (value instanceof Boolean) {
+            return (T) value;
+         } else if (value instanceof Number) {
+            return (T) Boolean.valueOf(((Number) value).doubleValue() != 0.0);
+         } else {
+            return (T) Boolean.valueOf(value.toString());
+         }
+      }
 
-               if (targetType == Long.class || targetType == Long.TYPE) {
-                  return (T)Long.valueOf(str);
-               }
-
-               if (targetType == Double.class || targetType == Double.TYPE) {
-                  return (T)Double.valueOf(str);
-               }
-
-               if (targetType == Float.class || targetType == Float.TYPE) {
-                  return (T)Float.valueOf(str);
-               }
+      if (Number.class.isAssignableFrom(targetType)) {
+         if (value instanceof Number) {
+            Number num = (Number) value;
+            if (targetType == Integer.class || targetType == int.class) {
+               return (T) Integer.valueOf(num.intValue());
+            } else if (targetType == Long.class || targetType == long.class) {
+               return (T) Long.valueOf(num.longValue());
+            } else if (targetType == Double.class || targetType == double.class) {
+               return (T) Double.valueOf(num.doubleValue());
+            } else if (targetType == Float.class || targetType == float.class) {
+               return (T) Float.valueOf(num.floatValue());
+            }
+         } else if (value instanceof String) {
+            String str = (String) value;
+            if (targetType == Integer.class || targetType == int.class) {
+               return (T) Integer.valueOf(str);
+            } else if (targetType == Long.class || targetType == long.class) {
+               return (T) Long.valueOf(str);
+            } else if (targetType == Double.class || targetType == double.class) {
+               return (T) Double.valueOf(str);
+            } else if (targetType == Float.class || targetType == float.class) {
+               return (T) Float.valueOf(str);
             }
          }
-
-         String var10002 = String.valueOf(value.getClass());
-         throw new IllegalArgumentException("Cannot convert " + var10002 + " + to " + String.valueOf(targetType));
-      } else if (value instanceof Boolean) {
-         return (T)value;
-      } else {
-         return (T)(value instanceof Number ? ((Number)value).doubleValue() != (double)0.0F : Boolean.valueOf(value.toString()));
       }
+
+      throw new IllegalArgumentException("Cannot convert " + value.getClass() + " + to " + targetType);
    }
 
+   /**
+    * 清空脚本缓存
+    */
    public void clearCache() {
-      this.compiledScriptCache.clear();
-      LogUtils.debug("Kotlin script cache cleared", new Object[0]);
+      compiledScriptCache.clear();
+      LogUtils.debug("Kotlin script cache cleared");
    }
 
+   /**
+    * 获取缓存大小
+    *
+    * @return 缓存大小
+    */
    public int getCacheSize() {
-      return this.compiledScriptCache.size();
+      return compiledScriptCache.size();
    }
 
+   /**
+    * Kotlin 脚本表达式包装类
+    */
    private static class KotlinScriptExpression implements Expression {
       private final String expressionString;
       private final ScriptEngine engine;
@@ -233,56 +287,65 @@ public class KotlinScriptExpressionEngine implements ExpressionEngine {
          this.engine = engine;
       }
 
+      @Override
       public Object execute(Map<String, Object> context) throws ExpressionException {
          try {
-            Bindings bindings = this.engine.createBindings();
+            Bindings bindings = engine.createBindings();
             if (context != null) {
                bindings.putAll(context);
             }
-
-            return this.engine.eval(this.expressionString, bindings);
+            return engine.eval(expressionString, bindings);
          } catch (ScriptException e) {
-            throw new ExpressionException("Failed to execute Kotlin script: " + this.expressionString, e);
+            throw new ExpressionException("Failed to execute Kotlin script: " + expressionString, e);
          }
       }
 
+      @Override
       public <T> T execute(Map<String, Object> context, Class<T> expectedType) throws ExpressionException {
-         Object result = this.execute(context);
+         Object result = execute(context);
          if (result == null) {
             return null;
-         } else if (expectedType.isInstance(result)) {
-            return (T)expectedType.cast(result);
-         } else {
-            throw new ExpressionException("Cannot convert result to expected type: " + expectedType.getName());
          }
+         if (expectedType.isInstance(result)) {
+            return expectedType.cast(result);
+         }
+         throw new ExpressionException("Cannot convert result to expected type: " + expectedType.getName());
       }
 
+      @Override
       public String getExpressionString() {
-         return this.expressionString;
+         return expressionString;
       }
 
-      public Set<String> getVariableNames() {
-         return new HashSet();
+      @Override
+      public java.util.Set<String> getVariableNames() {
+         // 简单实现：从表达式字符串中提取变量名
+         // 这里可以根据需要实现更复杂的解析逻辑
+         return new java.util.HashSet<>();
       }
 
+      @Override
       public boolean isConstant() {
-         return this.getVariableNames().isEmpty();
+         return getVariableNames().isEmpty();
       }
 
-      public Expression.ExpressionType getType() {
-         return Expression.ExpressionType.OBJECT;
+      @Override
+      public ExpressionType getType() {
+         return ExpressionType.OBJECT;
       }
 
+      @Override
       public Class<?> getReturnType() {
          return Object.class;
       }
 
-      public Expression.ValidationResult validate(Map<String, Object> context) {
+      @Override
+      public ValidationResult validate(Map<String, Object> context) {
          try {
-            this.execute(context);
-            return Expression.ValidationResult.success();
+            execute(context);
+            return ValidationResult.success();
          } catch (ExpressionException e) {
-            return Expression.ValidationResult.failure(e.getMessage());
+            return ValidationResult.failure(e.getMessage());
          }
       }
    }

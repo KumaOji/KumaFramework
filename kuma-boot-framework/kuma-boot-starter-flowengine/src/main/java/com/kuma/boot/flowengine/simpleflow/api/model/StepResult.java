@@ -1,15 +1,30 @@
 package com.kuma.boot.flowengine.simpleflow.api.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
+/**
+ * 步骤执行结果模型
+ *
+ * 包含单个步骤执行的完整结果信息
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
 public class StepResult {
+
+   /**
+    * 执行状态枚举
+    */
+   public enum Status {
+      SUCCESS,    // 成功
+      FAILED,     // 失败
+      SKIPPED,    // 跳过
+      TIMEOUT,    // 超时
+      CANCELLED,  // 取消
+      RETRY       // 重试中
+   }
+
    private String stepId;
    private String stepName;
    private Status status;
@@ -25,25 +40,39 @@ public class StepResult {
    private String executorName;
    private boolean skipped;
 
-   public StepResult(String stepId, String stepName, Status status, LocalDateTime startTime, LocalDateTime endTime, long durationMs, Map<String, Object> outputData, Exception error, String errorMessage, List<String> logs, Map<String, Object> metadata, int retryCount, String executorName, boolean skipped) {
-      this.stepId = (String)Objects.requireNonNull(stepId, "Step ID cannot be null");
+   public StepResult(
+           String stepId,
+           String stepName,
+           Status status,
+           LocalDateTime startTime,
+           LocalDateTime endTime,
+           long durationMs,
+           Map<String, Object> outputData,
+           Exception error,
+           String errorMessage,
+           List<String> logs,
+           Map<String, Object> metadata,
+           int retryCount,
+           String executorName,
+           boolean skipped) {
+      this.stepId = Objects.requireNonNull(stepId, "Step ID cannot be null");
       this.stepName = stepName;
-      this.status = (Status)Objects.requireNonNull(status, "Status cannot be null");
+      this.status = Objects.requireNonNull(status, "Status cannot be null");
       this.startTime = startTime;
       this.endTime = endTime;
       this.durationMs = durationMs;
-      this.outputData = outputData != null ? Collections.unmodifiableMap(new HashMap(outputData)) : Collections.emptyMap();
+      this.outputData = outputData != null ? Collections.unmodifiableMap(new HashMap<>(outputData)) : Collections.emptyMap();
       this.error = error;
       this.errorMessage = errorMessage;
-      this.logs = logs != null ? Collections.unmodifiableList(new ArrayList(logs)) : Collections.emptyList();
-      this.metadata = metadata != null ? Collections.unmodifiableMap(new HashMap(metadata)) : Collections.emptyMap();
+      this.logs = logs != null ? Collections.unmodifiableList(new ArrayList<>(logs)) : Collections.emptyList();
+      this.metadata = metadata != null ? Collections.unmodifiableMap(new HashMap<>(metadata)) : Collections.emptyMap();
       this.retryCount = Math.max(0, retryCount);
       this.executorName = executorName;
       this.skipped = skipped;
    }
 
    public boolean isSkipped() {
-      return this.skipped;
+      return skipped;
    }
 
    public void setSkipped(boolean skipped) {
@@ -51,7 +80,7 @@ public class StepResult {
    }
 
    public String getExecutorName() {
-      return this.executorName;
+      return executorName;
    }
 
    public void setExecutorName(String executorName) {
@@ -59,7 +88,7 @@ public class StepResult {
    }
 
    public int getRetryCount() {
-      return this.retryCount;
+      return retryCount;
    }
 
    public void setRetryCount(int retryCount) {
@@ -67,7 +96,7 @@ public class StepResult {
    }
 
    public Map<String, Object> getMetadata() {
-      return this.metadata;
+      return metadata;
    }
 
    public void setMetadata(Map<String, Object> metadata) {
@@ -75,7 +104,7 @@ public class StepResult {
    }
 
    public List<String> getLogs() {
-      return this.logs;
+      return logs;
    }
 
    public void setLogs(List<String> logs) {
@@ -83,7 +112,7 @@ public class StepResult {
    }
 
    public String getErrorMessage() {
-      return this.errorMessage;
+      return errorMessage;
    }
 
    public void setErrorMessage(String errorMessage) {
@@ -91,7 +120,7 @@ public class StepResult {
    }
 
    public Exception getError() {
-      return this.error;
+      return error;
    }
 
    public void setError(Exception error) {
@@ -99,7 +128,7 @@ public class StepResult {
    }
 
    public Map<String, Object> getOutputData() {
-      return this.outputData;
+      return outputData;
    }
 
    public void setOutputData(Map<String, Object> outputData) {
@@ -107,7 +136,7 @@ public class StepResult {
    }
 
    public long getDurationMs() {
-      return this.durationMs;
+      return durationMs;
    }
 
    public void setDurationMs(long durationMs) {
@@ -115,7 +144,7 @@ public class StepResult {
    }
 
    public LocalDateTime getEndTime() {
-      return this.endTime;
+      return endTime;
    }
 
    public void setEndTime(LocalDateTime endTime) {
@@ -123,7 +152,7 @@ public class StepResult {
    }
 
    public LocalDateTime getStartTime() {
-      return this.startTime;
+      return startTime;
    }
 
    public void setStartTime(LocalDateTime startTime) {
@@ -131,7 +160,7 @@ public class StepResult {
    }
 
    public Status getStatus() {
-      return this.status;
+      return status;
    }
 
    public void setStatus(Status status) {
@@ -139,7 +168,7 @@ public class StepResult {
    }
 
    public String getStepName() {
-      return this.stepName;
+      return stepName;
    }
 
    public void setStepName(String stepName) {
@@ -147,129 +176,197 @@ public class StepResult {
    }
 
    public String getStepId() {
-      return this.stepId;
+      return stepId;
    }
 
    public void setStepId(String stepId) {
       this.stepId = stepId;
    }
 
+   /**
+    * 获取指定输出数据
+    */
+   @SuppressWarnings("unchecked")
    public <T> Optional<T> getOutputData(String key) {
-      return Optional.ofNullable(this.outputData.get(key));
+      return Optional.ofNullable((T) outputData.get(key));
    }
 
+   /**
+    * 获取指定输出数据，如果不存在则返回默认值
+    */
+   @SuppressWarnings("unchecked")
    public <T> T getOutputData(String key, T defaultValue) {
-      return (T)this.outputData.getOrDefault(key, defaultValue);
+      return (T) outputData.getOrDefault(key, defaultValue);
    }
 
+   /**
+    * 获取指定元数据
+    */
+   @SuppressWarnings("unchecked")
    public <T> Optional<T> getMetadata(String key) {
-      return Optional.ofNullable(this.metadata.get(key));
+      return Optional.ofNullable((T) metadata.get(key));
    }
 
+   /**
+    * 检查是否成功
+    */
    public boolean isSuccess() {
-      return this.status == StepResult.Status.SUCCESS;
+      return status == Status.SUCCESS;
    }
 
+   /**
+    * 检查是否失败
+    */
    public boolean isFailed() {
-      return this.status == StepResult.Status.FAILED;
+      return status == Status.FAILED;
    }
 
+   /**
+    * 检查是否超时
+    */
    public boolean isTimeout() {
-      return this.status == StepResult.Status.TIMEOUT;
+      return status == Status.TIMEOUT;
    }
 
+   /**
+    * 检查是否被取消
+    */
    public boolean isCancelled() {
-      return this.status == StepResult.Status.CANCELLED;
+      return status == Status.CANCELLED;
    }
 
+   /**
+    * 检查是否在重试中
+    */
    public boolean isRetrying() {
-      return this.status == StepResult.Status.RETRY;
+      return status == Status.RETRY;
    }
 
+   /**
+    * 检查是否有错误
+    */
    public boolean hasError() {
-      return this.error != null || this.errorMessage != null;
+      return error != null || errorMessage != null;
    }
 
+   /**
+    * 检查是否有日志
+    */
    public boolean hasLogs() {
-      return !this.logs.isEmpty();
+      return !logs.isEmpty();
    }
 
+   /**
+    * 检查是否有输出数据
+    */
    public boolean hasOutputData() {
-      return !this.outputData.isEmpty();
+      return !outputData.isEmpty();
    }
 
+   /**
+    * 检查是否进行了重试
+    */
    public boolean hasRetried() {
-      return this.retryCount > 0;
+      return retryCount > 0;
    }
 
+   @Override
    public boolean equals(Object o) {
-      if (this == o) {
-         return true;
-      } else if (o != null && this.getClass() == o.getClass()) {
-         StepResult that = (StepResult)o;
-         return Objects.equals(this.stepId, that.stepId) && Objects.equals(this.startTime, that.startTime);
-      } else {
-         return false;
-      }
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      StepResult that = (StepResult) o;
+      return Objects.equals(stepId, that.stepId) && Objects.equals(startTime, that.startTime);
    }
 
+   @Override
    public int hashCode() {
-      return Objects.hash(new Object[]{this.stepId, this.startTime});
+      return Objects.hash(stepId, startTime);
    }
 
+   @Override
    public String toString() {
-      String var10000 = this.stepId;
-      return "StepResult{stepId='" + var10000 + "', stepName='" + this.stepName + "', status=" + String.valueOf(this.status) + ", durationMs=" + this.durationMs + ", retryCount=" + this.retryCount + ", skipped=" + this.skipped + "}";
+      return "StepResult{" +
+              "stepId='" + stepId + '\'' +
+              ", stepName='" + stepName + '\'' +
+              ", status=" + status +
+              ", durationMs=" + durationMs +
+              ", retryCount=" + retryCount +
+              ", skipped=" + skipped +
+              '}';
    }
 
+   /**
+    * 创建成功结果
+    * @param stepId 步骤ID
+    * @param stepName 步骤名称
+    */
    public static StepResult success(String stepId, String stepName) {
       LocalDateTime now = LocalDateTime.now();
-      return new StepResult(stepId, stepName, StepResult.Status.SUCCESS, now, now, 0L, Collections.emptyMap(), (Exception)null, (String)null, Collections.emptyList(), Collections.emptyMap(), 0, (String)null, false);
+      return new StepResult(stepId, stepName, Status.SUCCESS, now, now, 0,
+              Collections.emptyMap(), null, null, Collections.emptyList(),
+              Collections.emptyMap(), 0, null, false);
    }
 
+   /**
+    * 创建成功结果（带输出数据）
+    * @param stepId 步骤ID
+    * @param stepName 步骤名称
+    * @param outputData 输出数据
+    */
    public static StepResult success(String stepId, String stepName, Map<String, Object> outputData) {
       LocalDateTime now = LocalDateTime.now();
-      return new StepResult(stepId, stepName, StepResult.Status.SUCCESS, now, now, 0L, outputData, (Exception)null, (String)null, Collections.emptyList(), Collections.emptyMap(), 0, (String)null, false);
+      return new StepResult(stepId, stepName, Status.SUCCESS, now, now, 0,
+              outputData, null, null, Collections.emptyList(),
+              Collections.emptyMap(), 0, null, false);
    }
 
+   /**
+    * 创建失败结果
+    * @param stepId 步骤ID
+    * @param stepName 步骤名称
+    * @param error 异常对象
+    */
    public static StepResult failure(String stepId, String stepName, Exception error) {
       LocalDateTime now = LocalDateTime.now();
-      return new StepResult(stepId, stepName, StepResult.Status.FAILED, now, now, 0L, Collections.emptyMap(), error, (String)null, Collections.emptyList(), Collections.emptyMap(), 0, (String)null, false);
+      return new StepResult(stepId, stepName, Status.FAILED, now, now, 0,
+              Collections.emptyMap(), error, null, Collections.emptyList(),
+              Collections.emptyMap(), 0, null, false);
    }
 
+   /**
+    * 创建失败结果（带错误消息）
+    * @param stepId 步骤ID
+    * @param stepName 步骤名称
+    * @param errorMessage 错误消息
+    */
    public static StepResult failure(String stepId, String stepName, String errorMessage) {
       LocalDateTime now = LocalDateTime.now();
-      return new StepResult(stepId, stepName, StepResult.Status.FAILED, now, now, 0L, Collections.emptyMap(), (Exception)null, errorMessage, Collections.emptyList(), Collections.emptyMap(), 0, (String)null, false);
+      return new StepResult(stepId, stepName, Status.FAILED, now, now, 0,
+              Collections.emptyMap(), null, errorMessage, Collections.emptyList(),
+              Collections.emptyMap(), 0, null, false);
    }
 
+   /**
+    * 创建跳过结果
+    * @param stepId 步骤ID
+    * @param stepName 步骤名称
+    * @param reason 跳过原因
+    */
    public static StepResult skipped(String stepId, String stepName, String reason) {
-      Map<String, Object> metadata = new HashMap();
+      Map<String, Object> metadata = new HashMap<>();
       metadata.put("skipReason", reason);
-      return new StepResult(stepId, stepName, StepResult.Status.SKIPPED, (LocalDateTime)null, (LocalDateTime)null, 0L, Collections.emptyMap(), (Exception)null, (String)null, Collections.emptyList(), metadata, 0, (String)null, true);
+      return new StepResult(stepId, stepName, Status.SKIPPED, null, null, 0,
+              Collections.emptyMap(), null, null, Collections.emptyList(),
+              metadata, 0, null, true);
    }
 
    public static StepResultBuilder builder() {
       return new StepResultBuilder();
    }
 
-   public static enum Status {
-      SUCCESS,
-      FAILED,
-      SKIPPED,
-      TIMEOUT,
-      CANCELLED,
-      RETRY;
-
-      private Status() {
-      }
-
-      // $FF: synthetic method
-      private static Status[] $values() {
-         return new Status[]{SUCCESS, FAILED, SKIPPED, TIMEOUT, CANCELLED, RETRY};
-      }
-   }
 
    public static final class StepResultBuilder {
+
       private String stepId;
       private String stepName;
       private Status status;
@@ -359,7 +456,8 @@ public class StepResult {
       }
 
       public StepResult build() {
-         return new StepResult(this.stepId, this.stepName, this.status, this.startTime, this.endTime, this.durationMs, this.outputData, this.error, this.errorMessage, this.logs, this.metadata, this.retryCount, this.executorName, this.skipped);
+         return new StepResult(stepId, stepName, status, startTime, endTime, durationMs, outputData, error,
+                 errorMessage, logs, metadata, retryCount, executorName, skipped);
       }
    }
 }
