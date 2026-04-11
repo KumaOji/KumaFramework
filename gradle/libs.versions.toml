@@ -398,6 +398,7 @@ logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-enc
 commons-email = { module = "org.apache.commons:commons-email", version.ref = "commons-email" }
 dubbo-spring-boot-starter = { module = "org.apache.dubbo:dubbo-spring-boot-starter", version.ref = "dubbo" }
 xxl-job-core = { module = "com.xuxueli:xxl-job-core", version.ref = "xxl-job" }
+xxl-tool = { module = "com.xuxueli:xxl-tool", version.ref = "xxl-job" }
 pinyin4j = { module = "com.belerweb:pinyin4j", version.ref = "pinyin4j" }
 hdrhistogram = { module = "org.hdrhistogram:HdrHistogram", version.ref = "hdrhistogram" }
 oshi-core    = { module = "com.github.oshi:oshi-core",        version.ref = "oshi" }

@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * 链路追踪工具类
  *
- * @author shuigedeng
+ * @author kuma
  * @version 2023.01
  * @since 2023-01-03 11:32:50
  */

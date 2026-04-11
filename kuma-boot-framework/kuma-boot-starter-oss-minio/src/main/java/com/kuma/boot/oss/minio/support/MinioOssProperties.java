@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.oss.minio.support;
 
 import java.util.HashMap;
@@ -6,26 +22,32 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
+/**
+ * minio oss属性
+ *
+ * @author kuma
+ * @version 2022.04
+ * @since 2022-04-27 17:41:57
+ */
 @RefreshScope
-@ConfigurationProperties("kuma.boot.oss.platform.miniooss")
+@ConfigurationProperties(MinioOssProperties.PREFIX)
 public class MinioOssProperties extends MinioOssConfig implements InitializingBean {
+
    public static final String PREFIX = "kuma.boot.oss.platform.miniooss";
-   private Map<String, MinioOssConfig> ossConfig = new HashMap();
 
-   public MinioOssProperties() {
-   }
+   private Map<String, MinioOssConfig> ossConfig = new HashMap<>();
 
+   @Override
    public void afterPropertiesSet() {
-      if (this.ossConfig.isEmpty()) {
+      if (ossConfig.isEmpty()) {
          this.init();
       } else {
-         this.ossConfig.values().forEach(MinioOssConfig::init);
+         ossConfig.values().forEach(MinioOssConfig::init);
       }
-
    }
 
    public Map<String, MinioOssConfig> getOssConfig() {
-      return this.ossConfig;
+      return ossConfig;
    }
 
    public void setOssConfig(Map<String, MinioOssConfig> ossConfig) {
