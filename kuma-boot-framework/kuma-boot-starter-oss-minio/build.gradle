@@ -1,20 +1,28 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework oss-minio模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
 
-test {
-    useJUnitPlatform()
+    // minio
+    api projectLibs.minio
+
+    // hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
+    // guava (ByteStreams)
+    api projectLibs.guava
+
+    // okhttp3 (MinioOssConfiguration uses OkHttpClient)
+    api projectLibs.okhttp3
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring web (MultipartFile, HttpServletRequest/Response)
+    compileOnly projectLibs.spring.boot.starter.web
 }
