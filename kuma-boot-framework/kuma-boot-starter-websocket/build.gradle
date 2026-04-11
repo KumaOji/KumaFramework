@@ -1,0 +1,62 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework WebSocket模块（Spring WebSocket + STOMP + 原生JSR-356）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot AutoConfiguration
+    api projectLibs.spring.boot.autoconfigure
+
+    // Spring WebSocket + STOMP (spring-websocket / spring-messaging 传递依赖)
+    api projectLibs.spring.boot.starter.websocket
+
+    // Spring Messaging (StompHeaderAccessor / SimpMessagingTemplate / ChannelInterceptor)
+    api projectLibs.spring.messaging
+
+    // Spring Data Redis (RedisTemplate / RedisMessageListenerContainer — 分布式消息分发)
+    api projectLibs.spring.boot.starter.data.redis
+
+    // Redisson (RTopic — Redis Pub/Sub 分布式推送)
+    api projectLibs.spring.redisson
+
+    // Hutool
+    api projectLibs.hutool.core
+
+    // FastJSON2
+    api projectLibs.fastjson2
+
+    // Guava
+    api projectLibs.guava
+
+    // Commons Collections4 / Lang3
+    api projectLibs.commons.collections4
+    api projectLibs.commons.lang3
+
+    // SLF4J
+    api projectLibs.slf4j.api
+
+    // Jackson annotations (com.fasterxml.jackson.annotation.@JsonFormat 等)
+    compileOnly projectLibs.jackson.annotations
+
+    // Jackson 3.x (tools.jackson.* — JsonMapper / JsonReadFeature)
+    compileOnly projectLibs.jackson.core
+    compileOnly projectLibs.jackson.databind
+
+    // Swagger / OpenAPI (@Schema)
+    compileOnly projectLibs.swagger.annotations
+
+    // Jakarta WebSocket API (jakarta.websocket.* — JSR-356 原生 @ServerEndpoint)
+    compileOnly projectLibs.jakarta.websocket.api
+
+    // Jakarta Servlet API
+    compileOnly projectLibs.jakarta.servlet.api
+
+    // Spring Session (AbstractSessionWebSocketMessageBrokerConfigurer)
+    compileOnly projectLibs.spring.session.core
+
+    // RocketMQ Spring (RocketMQTemplate / @RocketMQMessageListener — 可选消息分发器)
+    compileOnly projectLibs.rocketmq.spring.boot.starter
+}

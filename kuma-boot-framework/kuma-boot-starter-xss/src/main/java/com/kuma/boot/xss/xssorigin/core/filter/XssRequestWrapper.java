@@ -1,0 +1,132 @@
+package com.kuma.boot.xss.xssorigin.core.filter;
+
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
+import com.kuma.boot.common.support.html.HtmlFilter;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+public class XssRequestWrapper extends HttpServletRequestWrapper {
+   private static final ThreadLocal<HtmlFilter> FILTER = ThreadLocal.withInitial(() -> {
+      Map<String, Object> map = MapUtil.newHashMap();
+      Map<String, List<String>> vAllowed = new HashMap();
+      ArrayList<String> a_atts = new ArrayList();
+      a_atts.add("href");
+      a_atts.add("target");
+      vAllowed.put("a", a_atts);
+      ArrayList<String> img_atts = new ArrayList();
+      img_atts.add("src");
+      img_atts.add("width");
+      img_atts.add("height");
+      img_atts.add("alt");
+      vAllowed.put("img", img_atts);
+      ArrayList<String> no_atts = new ArrayList();
+      vAllowed.put("b", no_atts);
+      vAllowed.put("strong", no_atts);
+      vAllowed.put("i", no_atts);
+      vAllowed.put("em", no_atts);
+      String[] vSelfClosingTags = new String[]{"img"};
+      String[] vNeedClosingTags = new String[]{"a", "b", "strong", "i", "em"};
+      String[] vDisallowed = new String[0];
+      String[] vAllowedProtocols = new String[]{"http", "mailto", "https"};
+      String[] vProtocolAtts = new String[]{"src", "href"};
+      String[] vRemoveBlanks = new String[]{"a", "b", "strong", "i", "em"};
+      String[] vAllowedEntities = new String[]{"amp", "gt", "lt", "quot"};
+      boolean stripComment = true;
+      boolean encodeQuotes = false;
+      boolean alwaysMakeTags = true;
+      map.put("vAllowed", vAllowed);
+      map.put("vSelfClosingTags", vSelfClosingTags);
+      map.put("vNeedClosingTags", vNeedClosingTags);
+      map.put("vDisallowed", vDisallowed);
+      map.put("vAllowedProtocols", vAllowedProtocols);
+      map.put("vProtocolAtts", vProtocolAtts);
+      map.put("vRemoveBlanks", vRemoveBlanks);
+      map.put("vAllowedEntities", vAllowedEntities);
+      map.put("stripComment", stripComment);
+      map.put("encodeQuotes", encodeQuotes);
+      map.put("alwaysMakeTags", alwaysMakeTags);
+      return new HtmlFilter(map);
+   });
+
+   public XssRequestWrapper(HttpServletRequest request) {
+      super(request);
+   }
+
+   private static String filter(String val) {
+      return StrUtil.isEmpty(val) ? val : ((HtmlFilter)FILTER.get()).filter(val);
+   }
+
+   public String getParameter(String name) {
+      return filter(super.getParameter(name));
+   }
+
+   public String[] getParameterValues(String name) {
+      String[] values = super.getParameterValues(name);
+      return ArrayUtil.isEmpty(values) ? values : (String[])Arrays.stream(values).map(XssRequestWrapper::filter).toArray((x$0) -> new String[x$0]);
+   }
+
+   public Map<String, String[]> getParameterMap() {
+      Map<String, String[]> parameters = super.getParameterMap();
+      if (MapUtil.isEmpty(parameters)) {
+         return parameters;
+      } else {
+         for(Map.Entry<String, String[]> entry : parameters.entrySet()) {
+            String[] values = (String[])entry.getValue();
+
+            for(int i = 0; i < values.length; ++i) {
+               values[i] = filter(values[i]);
+            }
+         }
+
+         return parameters;
+      }
+   }
+
+   public String getHeader(String name) {
+      return filter(super.getHeader(name));
+   }
+
+   public ServletInputStream getInputStream() throws IOException {
+      boolean json = StrUtil.startWithIgnoreCase(this.getContentType(), "application/json");
+      if (!json) {
+         return super.getInputStream();
+      } else {
+         String content = IoUtil.readUtf8(super.getInputStream());
+         content = filter(content);
+         final ByteArrayInputStream bain = new ByteArrayInputStream(content.getBytes());
+         return new ServletInputStream() {
+            {
+               Objects.requireNonNull(XssRequestWrapper.this);
+            }
+
+            public int read() {
+               return bain.read();
+            }
+
+            public boolean isFinished() {
+               return true;
+            }
+
+            public boolean isReady() {
+               return true;
+            }
+
+            public void setReadListener(ReadListener readListener) {
+            }
+         };
+      }
+   }
+}

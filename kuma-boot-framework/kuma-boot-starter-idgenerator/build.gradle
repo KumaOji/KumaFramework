@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework idgenerator模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+}
