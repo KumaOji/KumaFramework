@@ -48,9 +48,6 @@ dependencies {
     // MVEL2 (MvelScriptContext expression scripting)
     api projectLibs.mvel2
 
-    // CFFU (CompletableFuture utilities for ParallelFlow)
-    api projectLibs.cffu
-
     // SLF4J
     api projectLibs.slf4j.api
 

@@ -162,7 +162,6 @@ commons-jexl3 = "3.3"
 janino = "3.1.12"
 joda-time = "2.13.1"
 mvel2 = "2.5.2.Final"
-cffu = "1.0.0"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -373,7 +372,6 @@ janino = { module = "org.codehaus.janino:janino", version.ref = "janino" }
 commons-compiler = { module = "org.codehaus.janino:commons-compiler", version.ref = "janino" }
 joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
 mvel2 = { module = "org.mvel:mvel2", version.ref = "mvel2" }
-cffu = { module = "io.foldright:cffu", version.ref = "cffu" }
 hibernate-validator = { module = "org.hibernate.validator:hibernate-validator", version.ref = "hibernate-validator" }
 spring-boot-starter-mail = { module = "org.springframework.boot:spring-boot-starter-mail", version.ref = "springboot" }
 sentinel-parameter-flow-control = { module = "com.alibaba.csp:sentinel-parameter-flow-control", version.ref = "sentinel" }
