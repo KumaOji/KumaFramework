@@ -10,26 +10,42 @@ import com.kuma.boot.flowengine.simpleflow.api.model.FlowResult;
 import com.kuma.boot.flowengine.simpleflow.api.model.StepDefinition;
 import com.kuma.boot.flowengine.simpleflow.api.model.StepResult;
 import com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneStepExecutorRegistry;
-import java.time.Duration;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * 流程执行实例
+ * <p>
+ * 负责单个流程的执行过程管理
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
+
 public class FlowExecution {
+
+
    private final String executionId;
    private final FlowDefinition flowDefinition;
    private final Map<String, Object> input;
-   private final AtomicReference<String> status = new AtomicReference("RUNNING");
+   private final AtomicReference<String> status = new AtomicReference<>("RUNNING");
    private final AtomicBoolean stopped = new AtomicBoolean(false);
    private final AtomicBoolean paused = new AtomicBoolean(false);
    private final LocalDateTime startTime;
    private volatile LocalDateTime endTime;
 
+   /**
+    * 构造函数
+    *
+    * @param executionId    执行ID
+    * @param flowDefinition 流程定义
+    * @param input          输入参数
+    */
    public FlowExecution(String executionId, FlowDefinition flowDefinition, Map<String, Object> input) {
       this.executionId = executionId;
       this.flowDefinition = flowDefinition;
@@ -37,209 +53,326 @@ public class FlowExecution {
       this.startTime = LocalDateTime.now();
    }
 
+   /**
+    * 执行流程
+    *
+    * @return 流程执行结果
+    */
    public FlowResult execute() {
-      LogUtils.info("Starting execution of flow '{}' with execution ID '{}'", new Object[]{this.flowDefinition.getId(), this.executionId});
+      LogUtils.info("Starting execution of flow '{}' with execution ID '{}'",
+              flowDefinition.getId(), executionId);
 
       try {
-         Map<String, StepResult> stepResults = new HashMap();
-         if (this.stopped.get()) {
-            this.status.set("CANCELLED");
-            this.endTime = LocalDateTime.now();
-            return FlowResult.builder().executionId(this.executionId).flowId(this.flowDefinition.getId()).flowName(this.flowDefinition.getName()).startTime(this.startTime).status(FlowResult.Status.CANCELLED).endTime(this.endTime).stepResults(stepResults).build();
-         } else {
-            LogUtils.info("Flow has {} steps to execute", new Object[]{this.flowDefinition.getSteps().size()});
+         // 这里是简化的执行逻辑，实际实现会更复杂
+         // 包括步骤依赖解析、并行执行、错误处理等
 
-            for(StepDefinition step : this.flowDefinition.getSteps()) {
-               LogUtils.info("Processing step: {} with type: {}", new Object[]{step.getId(), step.getType()});
-               if (this.stopped.get()) {
-                  this.status.set("CANCELLED");
-                  break;
-               }
+         Map<String, StepResult> stepResults = new HashMap<>();
 
-               while(this.paused.get() && !this.stopped.get()) {
-                  try {
-                     Thread.sleep(100L);
-                  } catch (InterruptedException var5) {
-                     Thread.currentThread().interrupt();
-                     this.stopped.set(true);
-                     break;
-                  }
-               }
-
-               if (this.stopped.get()) {
-                  this.status.set("CANCELLED");
-                  break;
-               }
-
-               LogUtils.info("About to call executeStep for: {}", new Object[]{step.getId()});
-               StepResult stepResult = this.executeStep(step);
-               LogUtils.info("executeStep returned for {}: {}", new Object[]{step.getId(), stepResult.getStatus()});
-               stepResults.put(step.getId(), stepResult);
-               if (stepResult.getStatus() == StepResult.Status.FAILED) {
-                  this.status.set("FAILED");
-                  break;
-               }
-            }
-
-            if (((String)this.status.get()).equals("RUNNING")) {
-               this.status.set("SUCCESS");
-            }
-
-            this.endTime = LocalDateTime.now();
-            FlowResult.Status finalStatus;
-            switch ((String)this.status.get()) {
-               case "SUCCESS" -> finalStatus = FlowResult.Status.SUCCESS;
-               case "FAILED" -> finalStatus = FlowResult.Status.FAILED;
-               case "CANCELLED" -> finalStatus = FlowResult.Status.CANCELLED;
-               default -> finalStatus = FlowResult.Status.FAILED;
-            }
-
-            FlowResult result = FlowResult.builder().executionId(this.executionId).flowId(this.flowDefinition.getId()).flowName(this.flowDefinition.getName()).startTime(this.startTime).status(finalStatus).endTime(this.endTime).durationMs(Duration.between(this.startTime, this.endTime).toMillis()).error(((String)this.status.get()).equals("FAILED") ? new RuntimeException("Execution failed") : null).stepResults(stepResults).build();
-            LogUtils.info("Completed execution of flow '{}' with execution ID '{}', status: {}", new Object[]{this.flowDefinition.getId(), this.executionId, result.getStatus()});
-            return result;
+         // 检查是否被停止
+         if (stopped.get()) {
+            status.set("CANCELLED");
+            endTime = LocalDateTime.now();
+            return FlowResult.builder()
+                    .executionId(executionId)
+                    .flowId(flowDefinition.getId())
+                    .flowName(flowDefinition.getName())
+                    .startTime(startTime)
+                    .status(FlowResult.Status.CANCELLED)
+                    .endTime(endTime)
+                    .stepResults(stepResults)
+                    .build();
          }
+
+         // 模拟执行步骤
+         LogUtils.info("Flow has {} steps to execute", flowDefinition.getSteps().size());
+
+         for (StepDefinition step : flowDefinition.getSteps()) {
+            LogUtils.info("Processing step: {} with type: {}", step.getId(), step.getType());
+
+            if (stopped.get()) {
+               status.set("CANCELLED");
+               break;
+            }
+
+            // 等待暂停状态解除
+            while (paused.get() && !stopped.get()) {
+               try {
+                  Thread.sleep(100);
+               } catch (InterruptedException e) {
+                  Thread.currentThread().interrupt();
+                  stopped.set(true);
+                  break;
+               }
+            }
+
+            if (stopped.get()) {
+               status.set("CANCELLED");
+               break;
+            }
+
+            // 执行步骤
+            LogUtils.info("About to call executeStep for: {}", step.getId());
+            StepResult stepResult = executeStep(step);
+            LogUtils.info("executeStep returned for {}: {}", step.getId(), stepResult.getStatus());
+            stepResults.put(step.getId(), stepResult);
+
+            if (stepResult.getStatus() == StepResult.Status.FAILED) {
+               status.set("FAILED");
+               break;
+            }
+         }
+
+         if (status.get().equals("RUNNING")) {
+            status.set("SUCCESS");
+         }
+
+         endTime = LocalDateTime.now();
+
+         FlowResult.Status finalStatus;
+         switch (status.get()) {
+            case "SUCCESS":
+               finalStatus = FlowResult.Status.SUCCESS;
+               break;
+            case "FAILED":
+               finalStatus = FlowResult.Status.FAILED;
+               break;
+            case "CANCELLED":
+               finalStatus = FlowResult.Status.CANCELLED;
+               break;
+            default:
+               finalStatus = FlowResult.Status.FAILED;
+         }
+
+         FlowResult result = FlowResult.builder()
+                 .executionId(executionId)
+                 .flowId(flowDefinition.getId())
+                 .flowName(flowDefinition.getName())
+                 .startTime(startTime)
+                 .status(finalStatus)
+                 .endTime(endTime)
+                 .durationMs(java.time.Duration.between(startTime, endTime).toMillis())
+                 .error(status.get().equals("FAILED") ? new RuntimeException("Execution failed") : null)
+                 .stepResults(stepResults)
+                 .build();
+
+         LogUtils.info("Completed execution of flow '{}' with execution ID '{}', status: {}",
+                 flowDefinition.getId(), executionId, result.getStatus());
+
+         return result;
+
       } catch (Exception e) {
-         LogUtils.error("Error during execution of flow '{}' with execution ID '{}'", new Object[]{this.flowDefinition.getId(), this.executionId, e});
-         this.status.set("FAILED");
-         this.endTime = LocalDateTime.now();
-         return FlowResult.builder().executionId(this.executionId).flowId(this.flowDefinition.getId()).flowName(this.flowDefinition.getName()).status(FlowResult.Status.FAILED).startTime(this.startTime).endTime(this.endTime).durationMs(Duration.between(this.startTime, this.endTime).toMillis()).error(e).errorMessage(e.getMessage()).stepResults(Collections.emptyMap()).build();
+         LogUtils.error("Error during execution of flow '{}' with execution ID '{}'",
+                 flowDefinition.getId(), executionId, e);
+
+         status.set("FAILED");
+         endTime = LocalDateTime.now();
+
+         return FlowResult.builder()
+                 .executionId(executionId)
+                 .flowId(flowDefinition.getId())
+                 .flowName(flowDefinition.getName())
+                 .status(FlowResult.Status.FAILED)
+                 .startTime(startTime)
+                 .endTime(endTime)
+                 .durationMs(java.time.Duration.between(startTime, endTime).toMillis())
+                 .error(e)
+                 .errorMessage(e.getMessage())
+                 .stepResults(Collections.emptyMap())
+                 .build();
       }
    }
 
-   private StepResult executeStep(StepDefinition stepDefinition) {
-      LogUtils.info("Executing step '{}' in flow '{}' with type: {}", new Object[]{stepDefinition.getId(), this.flowDefinition.getId(), stepDefinition.getType()});
+   /**
+    * 执行单个步骤
+    *
+    * @param stepDefinition 步骤定义
+    * @return 步骤执行结果
+    */
+   private StepResult executeStep( StepDefinition stepDefinition) {
+      LogUtils.info("Executing step '{}' in flow '{}' with type: {}", stepDefinition.getId(), flowDefinition.getId(),
+              stepDefinition.getType());
+
       LocalDateTime stepStartTime = LocalDateTime.now();
 
       try {
+         // 根据步骤类型调用相应的执行器
          String executorClass = stepDefinition.getExecutorClass();
          if (executorClass == null) {
-            executorClass = this.determineExecutorByBeanType(stepDefinition);
+            // 根据bean名称获取实际对象，判断其类型来选择执行器
+            executorClass = determineExecutorByBeanType(stepDefinition);
          }
 
-         LogUtils.info("Using executor class: {} for step: {}", new Object[]{executorClass, stepDefinition.getId()});
+         LogUtils.info("Using executor class: {} for step: {}", executorClass, stepDefinition.getId());
+
+         // 创建执行器实例
          Class<?> clazz = Class.forName(executorClass);
-         StepExecutor executor = (StepExecutor)clazz.getDeclaredConstructor().newInstance();
-         LogUtils.info("Created executor instance: {} for step: {}", new Object[]{executor.getClass().getSimpleName(), stepDefinition.getId()});
-         FlowContext context = this.createFlowContext(stepDefinition);
-         LogUtils.info("About to execute step: {} with parameters: {}", new Object[]{stepDefinition.getId(), stepDefinition.getParameters()});
+         StepExecutor executor = (StepExecutor) clazz.getDeclaredConstructor()
+                 .newInstance();
+
+         LogUtils.info("Created executor instance: {} for step: {}", executor.getClass().getSimpleName(),
+                 stepDefinition.getId());
+
+         // 创建流程上下文
+         FlowContext context = createFlowContext(stepDefinition);
+
+         LogUtils.info("About to execute step: {} with parameters: {}", stepDefinition.getId(),
+                 stepDefinition.getParameters());
+
+         // 执行步骤
          StepResult result = executor.execute(context);
-         LogUtils.info("Step execution completed: {} with status: {}", new Object[]{stepDefinition.getId(), result.getStatus()});
+
+         LogUtils.info("Step execution completed: {} with status: {}", stepDefinition.getId(), result.getStatus());
+
          LocalDateTime stepEndTime = LocalDateTime.now();
-         long duration = Duration.between(stepStartTime, stepEndTime).toMillis();
-         return StepResult.builder().stepId(stepDefinition.getId()).stepName(stepDefinition.getName()).status(result.getStatus()).startTime(stepStartTime).endTime(stepEndTime).durationMs(duration).outputData(result.getOutputData() != null ? result.getOutputData() : Collections.emptyMap()).logs(Collections.emptyList()).metadata(Collections.emptyMap()).retryCount(0).skipped(false).build();
+
+         long duration = java.time.Duration.between(stepStartTime, stepEndTime).toMillis();
+         return StepResult.builder()
+                 .stepId(stepDefinition.getId())
+                 .stepName(stepDefinition.getName())
+                 .status(result.getStatus())
+                 .startTime(stepStartTime)
+                 .endTime(stepEndTime)
+                 .durationMs(duration)
+                 .outputData(result.getOutputData() != null ? result.getOutputData() : Collections.emptyMap())
+                 .logs(Collections.emptyList())
+                 .metadata(Collections.emptyMap())
+                 .retryCount(0)
+                 .skipped(false)
+                 .build();
+
       } catch (Exception e) {
-         LogUtils.error("Error executing step '{}' in flow '{}'", new Object[]{stepDefinition.getId(), this.flowDefinition.getId(), e});
+         LogUtils.error("Error executing step '{}' in flow '{}'",
+                 stepDefinition.getId(), flowDefinition.getId(), e);
+
          LocalDateTime failureTime = LocalDateTime.now();
-         long duration = Duration.between(stepStartTime, failureTime).toMillis();
-         return StepResult.builder().stepId(stepDefinition.getId()).stepName(stepDefinition.getName()).status(StepResult.Status.FAILED).startTime(stepStartTime).endTime(failureTime).durationMs(duration).outputData(Collections.emptyMap()).error(e).errorMessage(e.getMessage()).logs(Collections.emptyList()).metadata(Collections.emptyMap()).retryCount(0).skipped(false).build();
+         long duration = java.time.Duration.between(stepStartTime, failureTime).toMillis();
+         return StepResult.builder()
+                 .stepId(stepDefinition.getId())
+                 .stepName(stepDefinition.getName())
+                 .status(StepResult.Status.FAILED)
+                 .startTime(stepStartTime)
+                 .endTime(failureTime)
+                 .durationMs(duration)
+                 .outputData(Collections.emptyMap())
+                 .error(e)
+                 .errorMessage(e.getMessage())
+                 .logs(Collections.emptyList())
+                 .metadata(Collections.emptyMap())
+                 .retryCount(0)
+                 .skipped(false)
+                 .build();
       }
    }
 
-   private String determineExecutorByBeanType(StepDefinition stepDefinition) {
+   /**
+    * 根据bean类型确定执行器类
+    *
+    * @param stepDefinition 步骤定义
+    * @return 执行器类名
+    */
+   private String determineExecutorByBeanType( StepDefinition stepDefinition) {
       Map<String, Object> parameters = stepDefinition.getParameters();
       if (parameters == null) {
          throw new IllegalArgumentException("Step parameters cannot be null for step: " + stepDefinition.getId());
+      }
+
+      // 获取bean名称
+      String beanName = (String) parameters.get("bean");
+      String nodeName = (String) parameters.get("node");
+
+      // 优先使用node参数（新的ExecutableNode/ConditionNode方式）
+      if (nodeName != null && !nodeName.trim().isEmpty()) {
+         return determineExecutorByNodeType(nodeName);
+      }
+
+      // 兼容旧的bean参数方式
+      if (beanName != null && !beanName.trim().isEmpty()) {
+         return determineExecutorByBeanName(beanName);
+      }
+
+      // 如果都没有，根据步骤类型选择默认执行器
+      if (stepDefinition.getType() == StepDefinition.StepType.SERVICE) {
+         return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneBeanStepExecutor";
+      } else if (stepDefinition.getType() == StepDefinition.StepType.CONDITIONAL) {
+         return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneConditionalStepExecutor";
+      } else if (stepDefinition.getType() == StepDefinition.StepType.SCRIPT_CONDITIONAL) {
+         return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneConditionalStepExecutor";
       } else {
-         String beanName = (String)parameters.get("bean");
-         String nodeName = (String)parameters.get("node");
-         if (nodeName != null && !nodeName.trim().isEmpty()) {
-            return this.determineExecutorByNodeType(nodeName);
-         } else if (beanName != null && !beanName.trim().isEmpty()) {
-            return this.determineExecutorByBeanName(beanName);
-         } else if (stepDefinition.getType() == StepDefinition.StepType.SERVICE) {
-            return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneBeanStepExecutor";
-         } else if (stepDefinition.getType() == StepDefinition.StepType.CONDITIONAL) {
-            return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneConditionalStepExecutor";
-         } else if (stepDefinition.getType() == StepDefinition.StepType.SCRIPT_CONDITIONAL) {
-            return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneConditionalStepExecutor";
-         } else {
-            throw new IllegalArgumentException("Unsupported step type: " + String.valueOf(stepDefinition.getType()));
-         }
+         throw new IllegalArgumentException("Unsupported step type: " + stepDefinition.getType());
       }
    }
 
+   /**
+    * 根据节点名称确定执行器类（新的ExecutableNode/ConditionNode方式）
+    *
+    * @param nodeName 节点名称
+    * @return 执行器类名
+    */
    private String determineExecutorByNodeType(String nodeName) {
-      StandaloneStepExecutorRegistry registry = StandaloneStepExecutorRegistry.getInstance();
+      StandaloneStepExecutorRegistry registry =
+              StandaloneStepExecutorRegistry.getInstance();
+
+      // 检查是否为ExecutableNode
       if (registry.hasExecutableNode(nodeName)) {
          return "com.kuma.boot.flowengine.simpleflow.core.executor.ExecutableNodeStepExecutor";
-      } else if (registry.hasConditionNode(nodeName)) {
-         return "com.kuma.boot.flowengine.simpleflow.core.executor.ConditionNodeStepExecutor";
-      } else {
-         throw new IllegalArgumentException("Node not found in registry: " + nodeName);
       }
+
+      // 检查是否为ConditionNode
+      if (registry.hasConditionNode(nodeName)) {
+         return "com.kuma.boot.flowengine.simpleflow.core.executor.ConditionNodeStepExecutor";
+      }
+
+      throw new IllegalArgumentException("Node not found in registry: " + nodeName);
    }
 
+   /**
+    * 根据bean名称确定执行器类（兼容旧方式）
+    *
+    * @param beanName bean名称
+    * @return 执行器类名
+    */
    private String determineExecutorByBeanName(String beanName) {
-      StandaloneStepExecutorRegistry registry = StandaloneStepExecutorRegistry.getInstance();
+      StandaloneStepExecutorRegistry registry =
+              StandaloneStepExecutorRegistry.getInstance();
+
+      // 获取bean实例
       Object beanInstance = registry.getBean(beanName);
       if (beanInstance == null) {
          throw new IllegalArgumentException("Bean not found in registry: " + beanName);
-      } else if (beanInstance instanceof ExecutableNode) {
+      }
+
+      // 检查bean类型
+      if (beanInstance instanceof ExecutableNode) {
          return "com.kuma.boot.flowengine.simpleflow.core.executor.ExecutableNodeStepExecutor";
+      } else if (beanInstance instanceof ConditionNode) {
+         return "com.kuma.boot.flowengine.simpleflow.core.executor.ConditionNodeStepExecutor";
       } else {
-         return beanInstance instanceof ConditionNode ? "com.kuma.boot.flowengine.simpleflow.core.executor.ConditionNodeStepExecutor" : "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneBeanStepExecutor";
+         // 默认使用StandaloneBeanStepExecutor处理其他类型的bean
+         return "com.kuma.boot.flowengine.simpleflow.core.executor.StandaloneBeanStepExecutor";
       }
    }
 
-   private FlowContext createFlowContext(StepDefinition stepDefinition) {
-      SimpleFlowContext context = new SimpleFlowContext(stepDefinition, this.input);
+   /**
+    * 创建流程上下文
+    *
+    * @param stepDefinition 步骤定义
+    * @return 流程上下文
+    */
+   private FlowContext createFlowContext( StepDefinition stepDefinition) {
+      // 这里需要创建一个FlowContext实例
+      // 由于没有具体的实现类，我们需要创建一个简单的实现
+      SimpleFlowContext context = new SimpleFlowContext(stepDefinition, input);
+      // 将当前步骤定义添加到上下文中，供StandaloneBeanStepExecutor使用
       context.set("currentStepDefinition", stepDefinition);
       return context;
    }
 
-   public boolean stop() {
-      LogUtils.info("Stopping execution: {}", new Object[]{this.executionId});
-      this.stopped.set(true);
-      this.paused.set(false);
-      return true;
-   }
-
-   public boolean pause() {
-      if (this.stopped.get()) {
-         return false;
-      } else {
-         LogUtils.info("Pausing execution: {}", new Object[]{this.executionId});
-         this.paused.set(true);
-         return true;
-      }
-   }
-
-   public boolean resume() {
-      if (this.stopped.get()) {
-         return false;
-      } else {
-         LogUtils.info("Resuming execution: {}", new Object[]{this.executionId});
-         this.paused.set(false);
-         return true;
-      }
-   }
-
-   public String getStatus() {
-      return this.paused.get() ? "PAUSED" : (String)this.status.get();
-   }
-
-   public String getExecutionId() {
-      return this.executionId;
-   }
-
-   public FlowDefinition getFlowDefinition() {
-      return this.flowDefinition;
-   }
-
-   public Map<String, Object> getInput() {
-      return this.input;
-   }
-
-   public LocalDateTime getStartTime() {
-      return this.startTime;
-   }
-
-   public LocalDateTime getEndTime() {
-      return this.endTime;
-   }
-
+   /**
+    * 简单的FlowContext实现
+    */
    private static class SimpleFlowContext implements FlowContext {
-      private final Map<String, Object> data = new ConcurrentHashMap();
+
+      private final Map<String, Object> data = new java.util.concurrent.ConcurrentHashMap<>();
       private final StepDefinition currentStep;
       private String status = "RUNNING";
       private Exception error;
@@ -247,151 +380,287 @@ public class FlowExecution {
       private boolean cancelled = false;
       private boolean paused = false;
 
-      public SimpleFlowContext(StepDefinition currentStep, Map<String, Object> input) {
+      public SimpleFlowContext( StepDefinition currentStep, Map<String, Object> input) {
          this.currentStep = currentStep;
          if (input != null) {
             this.data.putAll(input);
          }
-
       }
 
+      @Override
       public String getExecutionId() {
          return "simple-exec";
       }
 
+      @Override
       public String getFlowId() {
          return "simple-flow";
       }
 
+      @Override
       public String getFlowName() {
          return "Simple Flow";
       }
 
+      @Override
       public LocalDateTime getStartTime() {
          return LocalDateTime.now();
       }
 
+      @Override
       public LocalDateTime getEndTime() {
          return null;
       }
 
+      @Override
       public String getStatus() {
-         return this.status;
+         return status;
       }
 
+      @Override
       public void setStatus(String status) {
          this.status = status;
       }
 
-      public <T> Optional<T> get(String key) {
-         return Optional.ofNullable(this.data.get(key));
+      @Override
+      @SuppressWarnings("unchecked")
+      public <T> java.util.Optional<T> get(String key) {
+         return java.util.Optional.ofNullable((T) data.get(key));
       }
 
+      @Override
+      @SuppressWarnings("unchecked")
       public <T> T get(String key, T defaultValue) {
-         return (T)this.data.getOrDefault(key, defaultValue);
+         return (T) data.getOrDefault(key, defaultValue);
       }
 
+      @Override
       public void set(String key, Object value) {
-         this.data.put(key, value);
+         data.put(key, value);
       }
 
-      public <T> Optional<T> remove(String key) {
-         return Optional.ofNullable(this.data.remove(key));
+      @Override
+      @SuppressWarnings("unchecked")
+      public <T> java.util.Optional<T> remove(String key) {
+         return java.util.Optional.ofNullable((T) data.remove(key));
       }
 
+      @Override
       public boolean contains(String key) {
-         return this.data.containsKey(key);
+         return data.containsKey(key);
       }
 
+      @Override
       public Map<String, Object> getAll() {
-         return new HashMap(this.data);
+         return new HashMap<>(data);
       }
 
+      @Override
       public void setAll(Map<String, Object> variables) {
          if (variables != null) {
-            this.data.putAll(variables);
+            data.putAll(variables);
          }
-
       }
 
+      @Override
       public void clear() {
-         this.data.clear();
+         data.clear();
       }
 
-      public Optional<StepResult> getStepResult(String stepId) {
-         return Optional.empty();
+      @Override
+      public java.util.Optional<StepResult> getStepResult(String stepId) {
+         return java.util.Optional.empty();
       }
 
+      @Override
       public void setStepResult(String stepId, StepResult result) {
+         // 简单实现，不存储步骤结果
       }
 
+      @Override
       public Map<String, StepResult> getAllStepResults() {
-         return new HashMap();
+         return new HashMap<>();
       }
 
-      public Optional<String> getCurrentStepId() {
-         return Optional.ofNullable(this.currentStep != null ? this.currentStep.getId() : null);
+      @Override
+      public java.util.Optional<String> getCurrentStepId() {
+         return java.util.Optional.ofNullable(currentStep != null ? currentStep.getId() : null);
       }
 
+      @Override
       public void setCurrentStepId(String stepId) {
+         // 在这个简单实现中，我们不需要修改当前步骤ID
       }
 
-      public Optional<Exception> getError() {
-         return Optional.ofNullable(this.error);
+      @Override
+      public java.util.Optional<Exception> getError() {
+         return java.util.Optional.ofNullable(error);
       }
 
+      @Override
       public void setError(Exception error) {
          this.error = error;
       }
 
+      @Override
       public boolean hasError() {
-         return this.error != null;
+         return error != null;
       }
 
+      @Override
       public int getRetryCount() {
-         return this.retryCount;
+         return retryCount;
       }
 
+      @Override
       public void incrementRetryCount() {
-         ++this.retryCount;
+         retryCount++;
       }
 
+      @Override
       public void resetRetryCount() {
-         this.retryCount = 0;
+         retryCount = 0;
       }
 
+      @Override
       public boolean isCancelled() {
-         return this.cancelled;
+         return cancelled;
       }
 
+      @Override
       public void cancel() {
-         this.cancelled = true;
+         cancelled = true;
       }
 
+      @Override
       public boolean isPaused() {
-         return this.paused;
+         return paused;
       }
 
+      @Override
       public void pause() {
-         this.paused = true;
+         paused = true;
       }
 
+      @Override
       public void resume() {
-         this.paused = false;
+         paused = false;
       }
 
+      @Override
       public FlowContext createChildContext(String stepId) {
-         return new SimpleFlowContext(this.currentStep, this.data);
+         return new SimpleFlowContext(currentStep, data);
       }
 
-      public Optional<FlowContext> getParentContext() {
-         return Optional.empty();
+      @Override
+      public java.util.Optional<FlowContext> getParentContext() {
+         return java.util.Optional.empty();
       }
 
+      @Override
       public FlowContext copy() {
-         SimpleFlowContext copy = new SimpleFlowContext(this.currentStep, (Map)null);
+         SimpleFlowContext copy = new SimpleFlowContext(this.currentStep, null);
          copy.data.putAll(this.data);
          return copy;
       }
+   }
+
+   /**
+    * 停止执行
+    *
+    * @return 是否成功停止
+    */
+   public boolean stop() {
+      LogUtils.info("Stopping execution: {}", executionId);
+      stopped.set(true);
+      paused.set(false); // 解除暂停状态
+      return true;
+   }
+
+   /**
+    * 暂停执行
+    *
+    * @return 是否成功暂停
+    */
+   public boolean pause() {
+      if (stopped.get()) {
+         return false;
+      }
+
+      LogUtils.info("Pausing execution: {}", executionId);
+      paused.set(true);
+      return true;
+   }
+
+   /**
+    * 恢复执行
+    *
+    * @return 是否成功恢复
+    */
+   public boolean resume() {
+      if (stopped.get()) {
+         return false;
+      }
+
+      LogUtils.info("Resuming execution: {}", executionId);
+      paused.set(false);
+      return true;
+   }
+
+   /**
+    * 获取执行状态
+    *
+    * @return 执行状态
+    */
+   public String getStatus() {
+      if (paused.get()) {
+         return "PAUSED";
+      }
+      return status.get();
+   }
+
+   /**
+    * 获取执行ID
+    *
+    * @return 执行ID
+    */
+   public String getExecutionId() {
+      return executionId;
+   }
+
+   /**
+    * 获取流程定义
+    *
+    * @return 流程定义
+    */
+   public FlowDefinition getFlowDefinition() {
+      return flowDefinition;
+   }
+
+   /**
+    * 获取输入参数
+    *
+    * @return 输入参数
+    */
+   public Map<String, Object> getInput() {
+      return input;
+   }
+
+   /**
+    * 获取开始时间
+    *
+    * @return 开始时间
+    */
+   public LocalDateTime getStartTime() {
+      return startTime;
+   }
+
+   /**
+    * 获取结束时间
+    *
+    * @return 结束时间
+    */
+   public LocalDateTime getEndTime() {
+      return endTime;
    }
 }

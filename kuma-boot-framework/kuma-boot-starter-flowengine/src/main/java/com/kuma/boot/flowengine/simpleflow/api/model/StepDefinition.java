@@ -1,11 +1,37 @@
 package com.kuma.boot.flowengine.simpleflow.api.model;
 
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * 步骤定义模型
+ * <p>
+ * 定义工作流程中的单个步骤
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
 public class StepDefinition {
+
+   /**
+    * 步骤类型枚举
+    */
+   public enum StepType {
+      SIMPLE,      // 简单步骤
+      CONDITIONAL, // 条件步骤
+      PARALLEL,    // 并行步骤
+      LOOP,        // 循环步骤
+      SCRIPT,      // 脚本步骤
+      SCRIPT_CONDITIONAL, // 脚本条件步骤
+      SERVICE,     // 服务调用步骤
+      HUMAN_TASK,  // 人工任务步骤
+      TIMER,       // 定时器步骤
+      GATEWAY      // 网关步骤
+   }
+
    private String id;
    private String name;
    private String description;
@@ -24,67 +50,102 @@ public class StepDefinition {
    private Map<String, String> outputMappings;
    private ParallelConfig parallelConfig;
 
-   public StepDefinition() {
-   }
-
+   /**
+    * 获取指定参数值
+    */
+   @SuppressWarnings("unchecked")
    public <T> Optional<T> getParameter(String key) {
-      return Optional.ofNullable(this.parameters.get(key));
+      return Optional.ofNullable((T) parameters.get(key));
    }
 
+   /**
+    * 获取指定参数值，如果不存在则返回默认值
+    */
+   @SuppressWarnings("unchecked")
    public <T> T getParameter(String key, T defaultValue) {
-      return (T)this.parameters.getOrDefault(key, defaultValue);
+      return (T) parameters.getOrDefault(key, defaultValue);
    }
 
+   /**
+    * 获取指定属性值
+    */
+   @SuppressWarnings("unchecked")
    public <T> Optional<T> getProperty(String key) {
-      return Optional.ofNullable(this.properties.get(key));
+      return Optional.ofNullable((T) properties.get(key));
    }
 
+   /**
+    * 获取指定属性值，如果不存在则返回默认值
+    */
+   @SuppressWarnings("unchecked")
    public <T> T getProperty(String key, T defaultValue) {
-      return (T)this.properties.getOrDefault(key, defaultValue);
+      return (T) properties.getOrDefault(key, defaultValue);
    }
 
+   /**
+    * 检查是否有条件
+    */
    public boolean hasCondition() {
-      return this.condition != null && !this.condition.trim().isEmpty();
+      return condition != null && !condition.trim().isEmpty();
    }
 
+   /**
+    * 检查是否有子步骤
+    */
    public boolean hasSubSteps() {
-      return !this.subSteps.isEmpty();
+      return !subSteps.isEmpty();
    }
 
+   /**
+    * 检查是否为并行步骤
+    */
    public boolean isParallel() {
-      return this.type == StepDefinition.StepType.PARALLEL;
+      return type == StepType.PARALLEL;
    }
 
+   /**
+    * 检查是否为条件步骤
+    */
    public boolean isConditional() {
-      return this.type == StepDefinition.StepType.CONDITIONAL || this.hasCondition();
+      return type == StepType.CONDITIONAL || hasCondition();
    }
 
+   /**
+    * 检查是否为循环步骤
+    */
    public boolean isLoop() {
-      return this.type == StepDefinition.StepType.LOOP;
+      return type == StepType.LOOP;
    }
 
+   @Override
    public boolean equals(Object o) {
       if (this == o) {
          return true;
-      } else if (o != null && this.getClass() == o.getClass()) {
-         StepDefinition that = (StepDefinition)o;
-         return Objects.equals(this.id, that.id);
-      } else {
+      }
+      if (o == null || getClass() != o.getClass()) {
          return false;
       }
+      StepDefinition that = (StepDefinition) o;
+      return Objects.equals(id, that.id);
    }
 
+   @Override
    public int hashCode() {
-      return Objects.hash(new Object[]{this.id});
+      return Objects.hash(id);
    }
 
+   @Override
    public String toString() {
-      String var10000 = this.id;
-      return "StepDefinition{id='" + var10000 + "', name='" + this.name + "', type=" + String.valueOf(this.type) + ", executorClass='" + this.executorClass + "'}";
+      return "StepDefinition{" +
+              "id='" + id + '\'' +
+              ", name='" + name + '\'' +
+              ", type=" + type +
+              ", executorClass='" + executorClass + '\'' +
+              '}';
    }
 
    public String getId() {
-      return this.id;
+      return id;
    }
 
    public void setId(String id) {
@@ -92,7 +153,7 @@ public class StepDefinition {
    }
 
    public String getName() {
-      return this.name;
+      return name;
    }
 
    public void setName(String name) {
@@ -100,7 +161,7 @@ public class StepDefinition {
    }
 
    public String getDescription() {
-      return this.description;
+      return description;
    }
 
    public void setDescription(String description) {
@@ -108,7 +169,7 @@ public class StepDefinition {
    }
 
    public StepType getType() {
-      return this.type;
+      return type;
    }
 
    public void setType(StepType type) {
@@ -116,7 +177,7 @@ public class StepDefinition {
    }
 
    public String getExecutorClass() {
-      return this.executorClass;
+      return executorClass;
    }
 
    public void setExecutorClass(String executorClass) {
@@ -124,7 +185,7 @@ public class StepDefinition {
    }
 
    public Map<String, Object> getParameters() {
-      return this.parameters;
+      return parameters;
    }
 
    public void setParameters(Map<String, Object> parameters) {
@@ -132,7 +193,7 @@ public class StepDefinition {
    }
 
    public Map<String, Object> getProperties() {
-      return this.properties;
+      return properties;
    }
 
    public void setProperties(Map<String, Object> properties) {
@@ -140,7 +201,7 @@ public class StepDefinition {
    }
 
    public boolean isRetryEnabled() {
-      return this.retryEnabled;
+      return retryEnabled;
    }
 
    public void setRetryEnabled(boolean retryEnabled) {
@@ -148,7 +209,7 @@ public class StepDefinition {
    }
 
    public int getMaxRetries() {
-      return this.maxRetries;
+      return maxRetries;
    }
 
    public void setMaxRetries(int maxRetries) {
@@ -156,7 +217,7 @@ public class StepDefinition {
    }
 
    public long getRetryDelayMs() {
-      return this.retryDelayMs;
+      return retryDelayMs;
    }
 
    public void setRetryDelayMs(long retryDelayMs) {
@@ -164,7 +225,7 @@ public class StepDefinition {
    }
 
    public long getTimeoutMs() {
-      return this.timeoutMs;
+      return timeoutMs;
    }
 
    public void setTimeoutMs(long timeoutMs) {
@@ -172,7 +233,7 @@ public class StepDefinition {
    }
 
    public boolean isSkipOnError() {
-      return this.skipOnError;
+      return skipOnError;
    }
 
    public void setSkipOnError(boolean skipOnError) {
@@ -180,7 +241,7 @@ public class StepDefinition {
    }
 
    public String getCondition() {
-      return this.condition;
+      return condition;
    }
 
    public void setCondition(String condition) {
@@ -188,7 +249,7 @@ public class StepDefinition {
    }
 
    public List<StepDefinition> getSubSteps() {
-      return this.subSteps;
+      return subSteps;
    }
 
    public void setSubSteps(List<StepDefinition> subSteps) {
@@ -196,7 +257,7 @@ public class StepDefinition {
    }
 
    public Map<String, String> getInputMappings() {
-      return this.inputMappings;
+      return inputMappings;
    }
 
    public void setInputMappings(Map<String, String> inputMappings) {
@@ -204,7 +265,7 @@ public class StepDefinition {
    }
 
    public Map<String, String> getOutputMappings() {
-      return this.outputMappings;
+      return outputMappings;
    }
 
    public void setOutputMappings(Map<String, String> outputMappings) {
@@ -212,10 +273,10 @@ public class StepDefinition {
    }
 
    public ParallelConfig getParallelConfig() {
-      return this.parallelConfig;
+      return parallelConfig;
    }
 
-   public void setParallelConfig(ParallelConfig parallelConfig) {
+   public void setParallelConfig( ParallelConfig parallelConfig) {
       this.parallelConfig = parallelConfig;
    }
 
@@ -223,28 +284,8 @@ public class StepDefinition {
       return new StepDefinitionBuilder();
    }
 
-   public static enum StepType {
-      SIMPLE,
-      CONDITIONAL,
-      PARALLEL,
-      LOOP,
-      SCRIPT,
-      SCRIPT_CONDITIONAL,
-      SERVICE,
-      HUMAN_TASK,
-      TIMER,
-      GATEWAY;
-
-      private StepType() {
-      }
-
-      // $FF: synthetic method
-      private static StepType[] $values() {
-         return new StepType[]{SIMPLE, CONDITIONAL, PARALLEL, LOOP, SCRIPT, SCRIPT_CONDITIONAL, SERVICE, HUMAN_TASK, TIMER, GATEWAY};
-      }
-   }
-
    public static final class StepDefinitionBuilder {
+
       private String id;
       private String name;
       private String description;
@@ -265,6 +306,7 @@ public class StepDefinition {
 
       private StepDefinitionBuilder() {
       }
+
 
       public StepDefinitionBuilder id(String id) {
          this.id = id;
@@ -346,30 +388,30 @@ public class StepDefinition {
          return this;
       }
 
-      public StepDefinitionBuilder parallelConfig(ParallelConfig parallelConfig) {
+      public StepDefinitionBuilder parallelConfig( ParallelConfig parallelConfig) {
          this.parallelConfig = parallelConfig;
          return this;
       }
 
       public StepDefinition build() {
          StepDefinition stepDefinition = new StepDefinition();
-         stepDefinition.setId(this.id);
-         stepDefinition.setName(this.name);
-         stepDefinition.setDescription(this.description);
-         stepDefinition.setType(this.type);
-         stepDefinition.setExecutorClass(this.executorClass);
-         stepDefinition.setParameters(this.parameters);
-         stepDefinition.setProperties(this.properties);
-         stepDefinition.setRetryEnabled(this.retryEnabled);
-         stepDefinition.setMaxRetries(this.maxRetries);
-         stepDefinition.setRetryDelayMs(this.retryDelayMs);
-         stepDefinition.setTimeoutMs(this.timeoutMs);
-         stepDefinition.setSkipOnError(this.skipOnError);
-         stepDefinition.setCondition(this.condition);
-         stepDefinition.setSubSteps(this.subSteps);
-         stepDefinition.setInputMappings(this.inputMappings);
-         stepDefinition.setOutputMappings(this.outputMappings);
-         stepDefinition.setParallelConfig(this.parallelConfig);
+         stepDefinition.setId(id);
+         stepDefinition.setName(name);
+         stepDefinition.setDescription(description);
+         stepDefinition.setType(type);
+         stepDefinition.setExecutorClass(executorClass);
+         stepDefinition.setParameters(parameters);
+         stepDefinition.setProperties(properties);
+         stepDefinition.setRetryEnabled(retryEnabled);
+         stepDefinition.setMaxRetries(maxRetries);
+         stepDefinition.setRetryDelayMs(retryDelayMs);
+         stepDefinition.setTimeoutMs(timeoutMs);
+         stepDefinition.setSkipOnError(skipOnError);
+         stepDefinition.setCondition(condition);
+         stepDefinition.setSubSteps(subSteps);
+         stepDefinition.setInputMappings(inputMappings);
+         stepDefinition.setOutputMappings(outputMappings);
+         stepDefinition.setParallelConfig(parallelConfig);
          return stepDefinition;
       }
    }

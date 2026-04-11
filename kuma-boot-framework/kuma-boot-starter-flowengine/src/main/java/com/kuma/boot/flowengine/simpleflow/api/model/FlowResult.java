@@ -1,13 +1,29 @@
 package com.kuma.boot.flowengine.simpleflow.api.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
+/**
+ * 流程执行结果模型
+ *
+ * 包含流程执行的完整结果信息
+ *
+ * @author Simple Flow Team
+ * @since 1.0.0
+ */
 public class FlowResult {
+
+   /**
+    * 执行状态枚举
+    */
+   public enum Status {
+      SUCCESS,    // 成功
+      FAILED,     // 失败
+      CANCELLED,  // 取消
+      TIMEOUT,    // 超时
+      PARTIAL     // 部分成功
+   }
+
    private String executionId;
    private String flowId;
    private String flowName;
@@ -26,11 +42,8 @@ public class FlowResult {
    private int failedSteps;
    private int skippedSteps;
 
-   public FlowResult() {
-   }
-
    public String getExecutionId() {
-      return this.executionId;
+      return executionId;
    }
 
    public void setExecutionId(String executionId) {
@@ -38,7 +51,7 @@ public class FlowResult {
    }
 
    public String getFlowId() {
-      return this.flowId;
+      return flowId;
    }
 
    public void setFlowId(String flowId) {
@@ -46,7 +59,7 @@ public class FlowResult {
    }
 
    public String getFlowName() {
-      return this.flowName;
+      return flowName;
    }
 
    public void setFlowName(String flowName) {
@@ -54,7 +67,7 @@ public class FlowResult {
    }
 
    public Status getStatus() {
-      return this.status;
+      return status;
    }
 
    public void setStatus(Status status) {
@@ -62,7 +75,7 @@ public class FlowResult {
    }
 
    public LocalDateTime getStartTime() {
-      return this.startTime;
+      return startTime;
    }
 
    public void setStartTime(LocalDateTime startTime) {
@@ -70,7 +83,7 @@ public class FlowResult {
    }
 
    public LocalDateTime getEndTime() {
-      return this.endTime;
+      return endTime;
    }
 
    public void setEndTime(LocalDateTime endTime) {
@@ -78,7 +91,7 @@ public class FlowResult {
    }
 
    public long getDurationMs() {
-      return this.durationMs;
+      return durationMs;
    }
 
    public void setDurationMs(long durationMs) {
@@ -86,15 +99,16 @@ public class FlowResult {
    }
 
    public Map<String, StepResult> getStepResults() {
-      return this.stepResults;
+      return stepResults;
    }
 
-   public void setStepResults(Map<String, StepResult> stepResults) {
+   public void setStepResults(
+           Map<String, StepResult> stepResults) {
       this.stepResults = stepResults;
    }
 
    public Map<String, Object> getOutputData() {
-      return this.outputData;
+      return outputData;
    }
 
    public void setOutputData(Map<String, Object> outputData) {
@@ -102,7 +116,7 @@ public class FlowResult {
    }
 
    public Exception getError() {
-      return this.error;
+      return error;
    }
 
    public void setError(Exception error) {
@@ -110,7 +124,7 @@ public class FlowResult {
    }
 
    public String getErrorMessage() {
-      return this.errorMessage;
+      return errorMessage;
    }
 
    public void setErrorMessage(String errorMessage) {
@@ -118,7 +132,7 @@ public class FlowResult {
    }
 
    public List<String> getWarnings() {
-      return this.warnings;
+      return warnings;
    }
 
    public void setWarnings(List<String> warnings) {
@@ -126,7 +140,7 @@ public class FlowResult {
    }
 
    public Map<String, Object> getMetadata() {
-      return this.metadata;
+      return metadata;
    }
 
    public void setMetadata(Map<String, Object> metadata) {
@@ -134,7 +148,7 @@ public class FlowResult {
    }
 
    public int getTotalSteps() {
-      return this.totalSteps;
+      return totalSteps;
    }
 
    public void setTotalSteps(int totalSteps) {
@@ -142,7 +156,7 @@ public class FlowResult {
    }
 
    public int getSuccessfulSteps() {
-      return this.successfulSteps;
+      return successfulSteps;
    }
 
    public void setSuccessfulSteps(int successfulSteps) {
@@ -150,7 +164,7 @@ public class FlowResult {
    }
 
    public int getFailedSteps() {
-      return this.failedSteps;
+      return failedSteps;
    }
 
    public void setFailedSteps(int failedSteps) {
@@ -158,110 +172,176 @@ public class FlowResult {
    }
 
    public int getSkippedSteps() {
-      return this.skippedSteps;
+      return skippedSteps;
    }
 
    public void setSkippedSteps(int skippedSteps) {
       this.skippedSteps = skippedSteps;
    }
 
+   /**
+    * 获取指定步骤的结果
+    *
+    * @param stepId 步骤ID
+    * @return 步骤结果，如果不存在则返回Optional.empty()
+    */
    public Optional<StepResult> getStepResult(String stepId) {
-      return Optional.ofNullable((StepResult)this.stepResults.get(stepId));
+      return Optional.ofNullable(stepResults.get(stepId));
    }
 
+   /**
+    * 获取指定输出数据
+    *
+    * @param <T> 返回值类型
+    * @param key 数据键
+    * @return 输出数据，如果不存在则返回Optional.empty()
+    */
+   @SuppressWarnings("unchecked")
    public <T> Optional<T> getOutputData(String key) {
-      return Optional.ofNullable(this.outputData.get(key));
+      return Optional.ofNullable((T) outputData.get(key));
    }
 
+   /**
+    * 获取指定输出数据，如果不存在则返回默认值
+    *
+    * @param <T> 返回值类型
+    * @param key 数据键
+    * @param defaultValue 默认值
+    * @return 输出数据或默认值
+    */
+   @SuppressWarnings("unchecked")
    public <T> T getOutputData(String key, T defaultValue) {
-      return (T)this.outputData.getOrDefault(key, defaultValue);
+      return (T) outputData.getOrDefault(key, defaultValue);
    }
 
+   /**
+    * 获取指定元数据
+    *
+    * @param <T> 返回值类型
+    * @param key 元数据键
+    * @return 元数据，如果不存在则返回Optional.empty()
+    */
+   @SuppressWarnings("unchecked")
    public <T> Optional<T> getMetadata(String key) {
-      return Optional.ofNullable(this.metadata.get(key));
+      return Optional.ofNullable((T) metadata.get(key));
    }
 
+   /**
+    * 检查是否成功
+    *
+    * @return 是否成功
+    */
    public boolean isSuccess() {
-      return this.status == FlowResult.Status.SUCCESS;
+      return status == Status.SUCCESS;
    }
 
+   /**
+    * 检查是否失败
+    *
+    * @return 是否失败
+    */
    public boolean isFailed() {
-      return this.status == FlowResult.Status.FAILED;
+      return status == Status.FAILED;
    }
 
+   /**
+    * 检查是否被取消
+    *
+    * @return 是否被取消
+    */
    public boolean isCancelled() {
-      return this.status == FlowResult.Status.CANCELLED;
+      return status == Status.CANCELLED;
    }
 
+   /**
+    * 检查是否超时
+    */
    public boolean isTimeout() {
-      return this.status == FlowResult.Status.TIMEOUT;
+      return status == Status.TIMEOUT;
    }
 
+   /**
+    * 检查是否部分成功
+    */
    public boolean isPartial() {
-      return this.status == FlowResult.Status.PARTIAL;
+      return status == Status.PARTIAL;
    }
 
+   /**
+    * 检查是否有错误
+    */
    public boolean hasError() {
-      return this.error != null || this.errorMessage != null;
+      return error != null || errorMessage != null;
    }
 
+   /**
+    * 检查是否有警告
+    */
    public boolean hasWarnings() {
-      return !this.warnings.isEmpty();
+      return !warnings.isEmpty();
    }
 
+   /**
+    * 获取成功率
+    */
    public double getSuccessRate() {
-      return this.totalSteps == 0 ? (double)0.0F : (double)this.successfulSteps / (double)this.totalSteps;
-   }
-
-   public List<StepResult> getFailedStepResults() {
-      return (List)this.stepResults.values().stream().filter((result) -> result.getStatus() == StepResult.Status.FAILED).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-   }
-
-   public List<StepResult> getSuccessfulStepResults() {
-      return (List)this.stepResults.values().stream().filter((result) -> result.getStatus() == StepResult.Status.SUCCESS).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-   }
-
-   public boolean equals(Object o) {
-      if (this == o) {
-         return true;
-      } else if (o != null && this.getClass() == o.getClass()) {
-         FlowResult that = (FlowResult)o;
-         return Objects.equals(this.executionId, that.executionId);
-      } else {
-         return false;
+      if (totalSteps == 0) {
+         return 0.0;
       }
+      return (double) successfulSteps / totalSteps;
    }
 
+   /**
+    * 获取失败的步骤结果
+    */
+   public List<StepResult> getFailedStepResults() {
+      return stepResults.values().stream()
+              .filter(result -> result.getStatus() == StepResult.Status.FAILED)
+              .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+   }
+
+   /**
+    * 获取成功的步骤结果
+    */
+   public List<StepResult> getSuccessfulStepResults() {
+      return stepResults.values().stream()
+              .filter(result -> result.getStatus() == StepResult.Status.SUCCESS)
+              .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      FlowResult that = (FlowResult) o;
+      return Objects.equals(executionId, that.executionId);
+   }
+
+   @Override
    public int hashCode() {
-      return Objects.hash(new Object[]{this.executionId});
+      return Objects.hash(executionId);
    }
 
+   @Override
    public String toString() {
-      String var10000 = this.executionId;
-      return "FlowResult{executionId='" + var10000 + "', flowId='" + this.flowId + "', status=" + String.valueOf(this.status) + ", durationMs=" + this.durationMs + ", totalSteps=" + this.totalSteps + ", successfulSteps=" + this.successfulSteps + ", failedSteps=" + this.failedSteps + "}";
+      return "FlowResult{" +
+              "executionId='" + executionId + '\'' +
+              ", flowId='" + flowId + '\'' +
+              ", status=" + status +
+              ", durationMs=" + durationMs +
+              ", totalSteps=" + totalSteps +
+              ", successfulSteps=" + successfulSteps +
+              ", failedSteps=" + failedSteps +
+              '}';
    }
+
 
    public static FlowResultBuilder builder() {
       return new FlowResultBuilder();
    }
 
-   public static enum Status {
-      SUCCESS,
-      FAILED,
-      CANCELLED,
-      TIMEOUT,
-      PARTIAL;
-
-      private Status() {
-      }
-
-      // $FF: synthetic method
-      private static Status[] $values() {
-         return new Status[]{SUCCESS, FAILED, CANCELLED, TIMEOUT, PARTIAL};
-      }
-   }
-
    public static final class FlowResultBuilder {
+
       private String executionId;
       private String flowId;
       private String flowName;
@@ -370,23 +450,23 @@ public class FlowResult {
 
       public FlowResult build() {
          FlowResult flowResult = new FlowResult();
-         flowResult.setExecutionId(this.executionId);
-         flowResult.setFlowId(this.flowId);
-         flowResult.setFlowName(this.flowName);
-         flowResult.setStatus(this.status);
-         flowResult.setStartTime(this.startTime);
-         flowResult.setEndTime(this.endTime);
-         flowResult.setDurationMs(this.durationMs);
-         flowResult.setStepResults(this.stepResults);
-         flowResult.setOutputData(this.outputData);
-         flowResult.setError(this.error);
-         flowResult.setErrorMessage(this.errorMessage);
-         flowResult.setWarnings(this.warnings);
-         flowResult.setMetadata(this.metadata);
-         flowResult.setTotalSteps(this.totalSteps);
-         flowResult.setSuccessfulSteps(this.successfulSteps);
-         flowResult.setFailedSteps(this.failedSteps);
-         flowResult.setSkippedSteps(this.skippedSteps);
+         flowResult.setExecutionId(executionId);
+         flowResult.setFlowId(flowId);
+         flowResult.setFlowName(flowName);
+         flowResult.setStatus(status);
+         flowResult.setStartTime(startTime);
+         flowResult.setEndTime(endTime);
+         flowResult.setDurationMs(durationMs);
+         flowResult.setStepResults(stepResults);
+         flowResult.setOutputData(outputData);
+         flowResult.setError(error);
+         flowResult.setErrorMessage(errorMessage);
+         flowResult.setWarnings(warnings);
+         flowResult.setMetadata(metadata);
+         flowResult.setTotalSteps(totalSteps);
+         flowResult.setSuccessfulSteps(successfulSteps);
+         flowResult.setFailedSteps(failedSteps);
+         flowResult.setSkippedSteps(skippedSteps);
          return flowResult;
       }
    }

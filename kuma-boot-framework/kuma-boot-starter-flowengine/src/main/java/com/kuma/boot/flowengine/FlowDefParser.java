@@ -1,6 +1,5 @@
 package com.kuma.boot.flowengine;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.flowengine.exception.FlowException;
 import com.kuma.boot.flowengine.module.ActivityNode;
 import com.kuma.boot.flowengine.module.Condition;
@@ -19,11 +18,13 @@ import com.kuma.boot.flowengine.module.StartNode;
 import com.kuma.boot.flowengine.module.Transition;
 import com.kuma.boot.flowengine.state.retry.RetryFailTypeEnum;
 import com.kuma.boot.flowengine.state.retry.RetryTransitionListener;
+import com.kuma.boot.common.utils.lang.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class FlowDefParser {
+
    public static final String NAME_ATTRIBUTE = "name";
    public static final String VERSION_ATTRIBUTE = "version";
    public static final String TRIGGERS_CLASS_ATTRIBUTE = "triggers";
@@ -61,39 +62,43 @@ public class FlowDefParser {
    public static final String SUB_FLOW_ELEMENT_NAME_ATTRIBUTE = "name";
    public static final String SUB_FLOW_ELEMENT_VERSION_ATTRIBUTE = "version";
 
-   public FlowDefParser() {
-   }
 
    public Flow parse(Element rootElement) {
-      Flow flow = this.flowAssignment(rootElement);
-      NodeList nodeList = rootElement.getChildNodes();
-      int i = 0;
+      //－1.流程创建属性赋值
+      Flow flow = flowAssignment(rootElement);
 
-      for(int j = nodeList.getLength(); i < j; ++i) {
+      //－2.节点分析
+      NodeList nodeList = rootElement.getChildNodes();
+      for (int i = 0, j = nodeList.getLength(); i < j; i++) {
          Node node = nodeList.item(i);
-         if (node.getNodeType() == 1) {
-            FlowDefParser.NodeCreator.creator(node.getLocalName()).create(flow, (Element)node);
+         if (node.getNodeType() == Element.ELEMENT_NODE) {
+            NodeCreator.creator(node.getLocalName()).create(flow, (Element) node);
          }
       }
 
-      i = this.reInitRetryNode(flow);
-      if (i) {
-         this.reInitRetryListen(flow);
-      }
+      //重新初始化重试节点
+      boolean hasRetry = reInitRetryNode(flow);
 
+      //添加重试监听
+      if (hasRetry) {
+         reInitRetryListen(flow);
+      }
       return flow;
    }
 
+
    private boolean reInitRetryNode(Flow flow) {
       boolean hasRetry = false;
-
-      for(ActivityNode node : flow.getNodes()) {
-         if (node instanceof RetryNode retryNode) {
+      //动态初始化处理重试节点
+      for (ActivityNode node : flow.getNodes()) {
+         if (node instanceof RetryNode) {
+            RetryNode retryNode = (RetryNode) node;
+            //动态初始化处理重试节点
             retryNode.addRetryInit(flow);
+
             hasRetry = true;
          }
       }
-
       return hasRetry;
    }
 
@@ -102,204 +107,258 @@ public class FlowDefParser {
          flow.setEventListeners(new EventListeners());
       }
 
-      EventListener retryListener = new EventListener(RetryTransitionListener.class.getName(), "\u91cd\u8bd5\u76d1\u542c");
+      EventListener retryListener = new EventListener(RetryTransitionListener.class.getName(),
+              "重试监听");
       flow.getEventListeners().addListener(retryListener);
-      flow.addEvent("retry_exit");
+      flow.addEvent(RetryNode.RETRY_EXIT_EVENT);
    }
 
    private Flow flowAssignment(Element rootElement) {
       Flow flow = new Flow();
-      String name = rootElement.getAttribute("name");
-      int version = Integer.parseInt(rootElement.getAttribute("version"));
-      String triggers = rootElement.getAttribute("triggers");
+
+      String name = rootElement.getAttribute(NAME_ATTRIBUTE);
+      int version = Integer.parseInt(rootElement.getAttribute(VERSION_ATTRIBUTE));
+      String triggers = rootElement.getAttribute(TRIGGERS_CLASS_ATTRIBUTE);
+
       flow.setName(name);
       flow.setVersion(version);
       flow.setTriggerClass(triggers);
-      String logName = rootElement.getAttribute("log_name");
+
+      String logName = rootElement.getAttribute(LOG_NAME);
       if (StringUtils.isBlank(logName)) {
          logName = Flow.class.getName();
       }
-
       flow.setLogName(logName);
+
       return flow;
    }
 
-   static enum NodeCreator {
-      start_node("start") {
+   enum NodeCreator {
+      start_node(START_ELEMENT) {
+         @Override
          void create(Flow flow, Element startElement) {
+            //－1.构建开始节点
             StartNode startNode = new StartNode();
             flow.setStartNode(startNode);
-            startNode.setName(startElement.getAttribute("name"));
-            startNode.setTriggerClass(startElement.getAttribute("trigger_class"));
-            startNode.setTraceLog(Boolean.parseBoolean("trace_log"));
-            this.analyze(startElement, startNode, flow);
+
+            startNode.setName(startElement.getAttribute(COMMON_NAME_ATTRIBUTE));
+            startNode.setTriggerClass(
+                    startElement.getAttribute(COMMON_TRIGGER_CLASS_ATTRIBUTE));
+
+            startNode.setTraceLog(Boolean.parseBoolean(COMMON_TRANCE_LOG));
+
+            //－2.分析transition并构建Condition(开始节点不包含Condition)以及ErrorPolicy覆盖
+            analyze(startElement, startNode, flow);
          }
       },
-      end_node("end") {
+
+      end_node(END_ELEMENT) {
+         @Override
          void create(Flow flow, Element endElement) {
-            String name = endElement.getAttribute("name");
-            String triggerClass = endElement.getAttribute("trigger_class");
+            String name = endElement.getAttribute(COMMON_NAME_ATTRIBUTE);
+            String triggerClass = endElement.getAttribute(COMMON_TRIGGER_CLASS_ATTRIBUTE);
+
             EndNode endNode = new EndNode();
             endNode.setTriggerClass(triggerClass);
             endNode.setName(name);
-            endNode.setTraceLog(Boolean.parseBoolean("trace_log"));
+            endNode.setTraceLog(Boolean.parseBoolean(COMMON_TRANCE_LOG));
+
             flow.setEndNode(endNode);
          }
       },
-      event_listeners("event_listeners") {
+
+      event_listeners(EVENT_LISTENERS) {
+         @Override
          void create(Flow flow, Element node) {
             EventListeners eventListeners = new EventListeners();
             flow.setEventListeners(eventListeners);
-            NodeList listenerElements = node.getElementsByTagName("listener");
-            int i = 0;
 
-            for(int j = listenerElements.getLength(); i < j; ++i) {
+            NodeList listenerElements = node.getElementsByTagName(EVENT_LISTENER);
+            for (int i = 0, j = listenerElements.getLength(); i < j; i++) {
                Node listenerNode = listenerElements.item(i);
-               if (listenerNode.getNodeType() == 1 && listenerNode.getLocalName().equals("listener")) {
-                  Element listenerElement = (Element)listenerNode;
-                  EventListener eventListener = new EventListener(listenerElement.getAttribute("class"), listenerElement.getAttribute("description"));
+               if (listenerNode.getNodeType() == Element.ELEMENT_NODE
+                       && listenerNode.getLocalName().equals(EVENT_LISTENER)) {
+                  Element listenerElement = (Element) listenerNode;
+
+                  EventListener eventListener = new EventListener(
+                          listenerElement.getAttribute(EVENT_LISTENER_ATTRIBUTE_CLASS),
+                          listenerElement.getAttribute(EVENT_LISTENER_ATTRIBUTE_DESCRIPTION)
+                  );
                   eventListeners.addListener(eventListener);
                }
             }
+         }
+      },
 
-         }
-      },
-      error_monitor("monitor") {
+      error_monitor(ERROR_MONITOR) {
+         @Override
          void create(Flow flow, Element errorPolicyElement) {
-            this.analyzeErrorMonitor(flow, errorPolicyElement);
+            analyzeErrorMonitor(flow, errorPolicyElement);
          }
       },
-      description("description") {
+
+      description(DESCRIPTION) {
+         @Override
          void create(Flow flow, Element nodeElement) {
             flow.setDescription(nodeElement.getTextContent());
          }
       },
+
       standard_node("APP_KIT_FLOW_STANDARD") {
+         @Override
          void create(Flow flow, Element nodeElement) {
             StandardActivityNode standardActivityNode = new StandardActivityNode();
-            this.initStandardNode(standardActivityNode, flow, nodeElement);
-            this.analyze(nodeElement, standardActivityNode, flow);
+            initStandardNode(standardActivityNode, flow, nodeElement);
+
+            // 分析Condition、Transition
+            analyze(nodeElement, standardActivityNode, flow);
          }
       },
-      auto_task("auto_task") {
+
+      auto_task(AUTO_ELEMENT) {
+         @Override
          void create(Flow flow, Element activeElement) {
             standard_node.create(flow, activeElement);
          }
       },
-      active_node("active_node") {
+
+      active_node(ACTIVE_ELEMENT) {
+         @Override
          void create(Flow flow, Element activeElement) {
             standard_node.create(flow, activeElement);
          }
       },
-      retry_task("retry_task") {
+
+      retry_task(RETRY_ELEMENT) {
+         @Override
          void create(Flow flow, Element nodeElement) {
             RetryNode retryNode = new RetryNode();
-            this.initStandardNode(retryNode, flow, nodeElement);
-            retryNode.setTarget(nodeElement.getAttribute("target"));
-            retryNode.setTriggerClass(nodeElement.getAttribute("trigger_class"));
-            retryNode.setRetryMaxLimitNode(nodeElement.getAttribute("retryMaxLimitNode"));
-            retryNode.setRetryInfo(nodeElement.getAttribute("retryInfo"));
-            retryNode.setRetryFailType(RetryFailTypeEnum.getByCode(nodeElement.getAttribute("retryFail")));
+            initStandardNode(retryNode, flow, nodeElement);
+
+            //直接固定重试触发动作
+            retryNode.setTarget(nodeElement.getAttribute(RETRY_TARGET));
+            retryNode.setTriggerClass(nodeElement.getAttribute(COMMON_TRIGGER_CLASS_ATTRIBUTE));
+            retryNode.setRetryMaxLimitNode(
+                    nodeElement.getAttribute(RETRY_MAX_LIMIT_NODE_ATTRIBUTE));
+            retryNode.setRetryInfo(nodeElement.getAttribute(RETRY_INFO_ATTRIBUTE));
+            retryNode.setRetryFailType(
+                    RetryFailTypeEnum.getByCode(nodeElement.getAttribute(RETRY_FAIL_ATTRIBUTE)));
+
          }
       },
-      sub_fLow("sub_flow") {
+
+      sub_fLow(SUB_FLOW_ELEMENT) {
+         @Override
          void create(Flow flow, Element subFLowElement) {
-            String refName = subFLowElement.getAttribute("sub_flow_name");
-            String name = subFLowElement.getAttribute("name");
-            int version = Integer.parseInt(subFLowElement.getAttribute("version"));
+            String refName = subFLowElement.getAttribute(SUB_FLOW_ELEMENT_REFNAME_ATTRIBUTE);
+            String name = subFLowElement.getAttribute(SUB_FLOW_ELEMENT_NAME_ATTRIBUTE);
+
+            int version = Integer.parseInt(
+                    subFLowElement.getAttribute(SUB_FLOW_ELEMENT_VERSION_ATTRIBUTE));
+
             FlowRef flowRef = new FlowRef(name, refName, version);
-            this.analyze(subFLowElement, flowRef, flow);
+            analyze(subFLowElement, flowRef, flow);
             flow.addNode(flowRef);
          }
       };
 
-      private String elementName;
-
-      void initStandardNode(StandardActivityNode standardActivityNode, Flow flow, Element nodeElement) {
+      void initStandardNode(StandardActivityNode standardActivityNode, Flow flow,
+                            Element nodeElement) {
          standardActivityNode.setNodeType(NodeType.get(nodeElement.getLocalName()));
-         standardActivityNode.setName(nodeElement.getAttribute("name"));
-         standardActivityNode.setTriggerClass(nodeElement.getAttribute("trigger_class"));
-         standardActivityNode.setTraceLog(Boolean.parseBoolean(nodeElement.getAttribute("trace_log")));
+         standardActivityNode.setName(nodeElement.getAttribute(COMMON_NAME_ATTRIBUTE));
+         standardActivityNode.setTriggerClass(
+                 nodeElement.getAttribute(COMMON_TRIGGER_CLASS_ATTRIBUTE));
+         standardActivityNode.setTraceLog(
+                 Boolean.parseBoolean(nodeElement.getAttribute(COMMON_TRANCE_LOG)));
+
          flow.addNode(standardActivityNode);
       }
 
       void analyze(Element element, FlowNode from, Flow flow) {
          NodeList nodeList = element.getChildNodes();
-         int i = 0;
-
-         for(int j = nodeList.getLength(); i < j; ++i) {
+         for (int i = 0, j = nodeList.getLength(); i < j; i++) {
             Node node = nodeList.item(i);
-            if (node.getNodeType() == 1) {
-               this.analyzeCondition(node, (ActivityNode)from, flow);
+            if (node.getNodeType() == Element.ELEMENT_NODE) {
+               // ActivityNode子类
+               analyzeCondition(node, (ActivityNode) from, flow);
             }
          }
-
       }
 
       void analyzeCondition(Node node, ActivityNode from, Flow flow) {
-         Element element = (Element)node;
+         Element element = (Element) node;
          Condition condition = new Condition();
-         if (element.getLocalName().equals("condition")) {
-            condition.setMvelScript(element.getAttribute("mvel_script"));
-            NodeList transitionNodes = element.getElementsByTagName("transition");
+
+         if (element.getLocalName().equals(CONDITION_ELEMENT)) {
+            condition.setMvelScript(element.getAttribute(CONDITION_ELEMENT_SCRIPT_ATTRIBUTE));
+            NodeList transitionNodes = element.getElementsByTagName(TRANSITION_ELEMENT);
+
             if (transitionNodes == null || transitionNodes.getLength() == 0) {
-               throw new FlowException(String.format("FLow=%s,Version=%s,Node=%s\u5b9a\u4e49\u6761\u4ef6\u51fa\u9519,\u6ca1\u6709\u6b63\u786e\u5b9a\u4e49transition\u5c5e\u6027", flow.getName(), flow.getVersion(), from.getName()));
+               throw new FlowException(
+                       String.format("FLow=%s,Version=%s,Node=%s定义条件出错,没有正确定义transition属性"
+                               , flow.getName(), flow.getVersion(), from.getName()));
             }
-
-            int x = 0;
-
-            for(int y = transitionNodes.getLength(); x < y; ++x) {
-               Element transitionElement = (Element)transitionNodes.item(x);
-               this.buildCondition(flow, condition, from, transitionElement);
+            for (int x = 0, y = transitionNodes.getLength(); x < y; x++) {
+               Element transitionElement = (Element) transitionNodes.item(x);
+               buildCondition(flow, condition, from, transitionElement);
             }
-         } else {
-            this.buildCondition(flow, condition, from, element);
          }
-
+         else {
+            //针对只有一条transition连线的节点,直接执行即可。
+            buildCondition(flow, condition, from, element);
+         }
          from.setCondition(condition);
       }
 
       void buildCondition(Flow flow, Condition condition, ActivityNode from, Element element) {
          Transition transition = new Transition();
-         transition.setDescription(element.getAttribute("description"));
-         String event = element.getAttribute("event");
+         transition.setDescription(
+                 element.getAttribute(TRANSITION_ELEMENT_DESCRIPTION_ATTRIBUTE));
+         String event = element.getAttribute(TRANSITION_ELEMENT_EVENT_ATTRIBUTE);
          transition.setEvent(event);
          flow.addEvent(event);
          transition.setFrom(from);
-         NodeRef nodeRef = new NodeRef(element.getAttribute("to"));
+         NodeRef nodeRef = new NodeRef(element.getAttribute(TRANSITION_ELEMENT_TO_ATTRIBUTE));
          transition.setTo(nodeRef);
          condition.addTransition(transition);
+
       }
 
       void analyzeErrorMonitor(Flow flow, Node node) {
-         Element errorMonitorElement = (Element)node;
+         Element errorMonitorElement = (Element) node;
+
          ErrorMonitor errorMonitor = new ErrorMonitor();
          flow.setErrorMonitor(errorMonitor);
-         errorMonitor.setErrorMonitorClass(errorMonitorElement.getAttribute("monitor_class"));
-         Element excpMappingElement = (Element)errorMonitorElement.getElementsByTagName("exception_mappings").item(0);
-         NodeList exceptionsNode = excpMappingElement.getChildNodes();
-         if (exceptionsNode.getLength() > 0) {
-            int i = 0;
 
-            for(int j = exceptionsNode.getLength(); i < j; ++i) {
+         errorMonitor.setErrorMonitorClass(
+                 errorMonitorElement.getAttribute(ERROR_MONITOR_ELEMENT_CLASS_ATTRIBUTE));
+
+         Element excpMappingElement = (Element) errorMonitorElement.getElementsByTagName(
+                 EXCEPTION_MAPPINGS).item(0);
+         NodeList exceptionsNode = excpMappingElement.getChildNodes();
+
+         if (exceptionsNode.getLength() > 0) {
+            for (int i = 0, j = exceptionsNode.getLength(); i < j; i++) {
                Node exceptionNo = exceptionsNode.item(i);
-               if (exceptionNo.getNodeType() == 1 && exceptionNo.getLocalName().equals("exception_mapping")) {
-                  Element exceptionElement = (Element)exceptionNo;
-                  errorMonitor.getExceptionMapping().addThrowable(exceptionElement.getAttribute("exception_class"));
+               if (exceptionNo.getNodeType() == Element.ELEMENT_NODE
+                       && exceptionNo.getLocalName().equals(EXCEPTION_MAPPING)) {
+                  Element exceptionElement = (Element) exceptionNo;
+                  errorMonitor.getExceptionMapping()
+                          .addThrowable(exceptionElement.getAttribute(EXCEPTION_CLASS));
                }
             }
          }
-
       }
+
+      private String elementName;
 
       private NodeCreator(String elementName) {
          this.elementName = elementName;
       }
 
-      public static NodeCreator creator(String elementName) {
-         NodeCreator creator = null;
-
-         for(NodeCreator f : values()) {
+      public static FlowDefParser.NodeCreator creator(String elementName) {
+         FlowDefParser.NodeCreator creator = null;
+         for (NodeCreator f : values()) {
             if (elementName.equals(f.elementName)) {
                creator = f;
                break;
@@ -308,16 +367,14 @@ public class FlowDefParser {
             if (creator == null) {
                creator = standard_node;
             }
-         }
 
+
+         }
          return creator;
       }
 
       abstract void create(Flow flow, Element nodeElement);
 
-      // $FF: synthetic method
-      private static NodeCreator[] $values() {
-         return new NodeCreator[]{start_node, end_node, event_listeners, error_monitor, description, standard_node, auto_task, active_node, retry_task, sub_fLow};
-      }
    }
 }
+
