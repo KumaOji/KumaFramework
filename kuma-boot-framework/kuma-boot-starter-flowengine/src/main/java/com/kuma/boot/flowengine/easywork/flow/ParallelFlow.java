@@ -25,9 +25,9 @@ import com.kuma.boot.flowengine.easywork.util.Strings;
 import com.kuma.boot.flowengine.easywork.work.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import io.foldright.cffu2.Cffu;
-import io.foldright.cffu2.CffuFactory;
-import io.foldright.cffu2.MCffu;
+import io.foldright.cffu.Cffu;
+import io.foldright.cffu.CffuFactory;
+import io.foldright.cffu.MCffu;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -59,4 +59,5 @@ dependencies {
 
     // XXL-Job (optional retry scheduling integration)
     compileOnly projectLibs.xxl.job.core
+    compileOnly projectLibs.xxl.tool
 }

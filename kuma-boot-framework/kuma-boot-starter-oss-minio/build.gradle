@@ -25,4 +25,7 @@ dependencies {
 
     // spring web (MultipartFile, HttpServletRequest/Response)
     compileOnly projectLibs.spring.boot.starter.web
+
+    // spring cloud context (@RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
 }
