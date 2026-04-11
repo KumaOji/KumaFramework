@@ -162,7 +162,7 @@ commons-jexl3 = "3.3"
 janino = "3.1.12"
 joda-time = "2.13.1"
 mvel2 = "2.5.2.Final"
-cffu = "1.0.0-RC1"
+cffu = "1.0.0"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
