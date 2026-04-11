@@ -1,4 +1,4 @@
-package com.taotao.boot.flowengine;
+package com.kuma.boot.flowengine;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
@@ -174,7 +174,7 @@ public class Compiler {
 
    public static <T> String genClassNameWithPath(Class<T> supperclass, String path) {
       StringBuilder className = new StringBuilder();
-      className.append(null != path ? path : "com.taotao.boot.common.kit.").append(PROXY_PREFIX)
+      className.append(null != path ? path : "com.kuma.boot.common.kit.").append(PROXY_PREFIX)
               .append(supperclass.getSimpleName()).append(counter());
       return className.toString();
    }
