@@ -2,8 +2,38 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework mqtt模块'
+description = 'Myframework MQTT模块（Eclipse Paho MQTTv5 + Spring Integration）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot AutoConfiguration
+    api projectLibs.spring.boot.autoconfigure
+
+    // Eclipse Paho MQTTv5 客户端
+    api projectLibs.paho.mqttv5
+
+    // Spring Integration Core (IntegrationFlow / MessageHandler / @MessagingGateway)
+    api projectLibs.spring.integration.core
+
+    // Spring Integration MQTT (Mqttv5PahoMessageDrivenChannelAdapter / Mqttv5PahoMessageHandler)
+    api projectLibs.spring.integration.mqtt
+
+    // Spring Messaging (MessageHeaders / @Header)
+    api projectLibs.spring.messaging
+
+    // Hutool
+    api projectLibs.hutool.core
+
+    // FastJSON2 (JSONB)
+    api projectLibs.fastjson2
+
+    // Guava
+    api projectLibs.guava
+
+    // SLF4J
+    api projectLibs.slf4j.api
+
+    // Jakarta Annotation API (@PostConstruct)
+    compileOnly projectLibs.jakarta.annotation.api
 }

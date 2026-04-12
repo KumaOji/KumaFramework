@@ -2,8 +2,49 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework sensitive模块'
+description = 'Myframework 数据脱敏模块（Jackson / FastJSON2 序列化脱敏 + Logback 日志脱敏）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot AutoConfiguration
+    api projectLibs.spring.boot.autoconfigure
+
+    // Hutool (DesensitizedUtil / AnnotationUtil / ReflectUtil / SpringUtil)
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
+    // FastJSON2 (ContextValueFilter / FastJsonConfig)
+    api projectLibs.fastjson2
+
+    // FastJSON2 Spring6 扩展 (FastJsonHttpMessageConverter)
+    api projectLibs.fastjson2.extension.spring6
+
+    // Guava
+    api projectLibs.guava
+
+    // xk-time (CollectionUtil)
+    api projectLibs.xk.time
+
+    // Spring Expression (SpEL — 条件脱敏表达式)
+    api projectLibs.spring.expression
+
+    // Jackson annotations (com.fasterxml — @JacksonAnnotationsInside)
+    compileOnly projectLibs.jackson.annotations
+
+    // Jackson 3.x (tools.jackson — ValueSerializer / @JsonSerialize)
+    compileOnly projectLibs.jackson.core
+    compileOnly projectLibs.jackson.databind
+
+    // Logback Classic (PatternLayout / ClassicConverter — 日志脱敏)
+    compileOnly projectLibs.logback.classic
+
+    // Jakarta Servlet API
+    compileOnly projectLibs.jakarta.servlet.api
+
+    // Spring Web MVC (RequestMappingHandlerMapping / HandlerMethod)
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // Spring Cloud Context (@RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
 }
