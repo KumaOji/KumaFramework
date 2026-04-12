@@ -5,5 +5,18 @@ plugins {
 description = 'Myframework mail模块'
 
 dependencies {
+    // 基础公共工具（LogUtils 等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // JavaMailSender / MimeMessageHelper / SimpleMailMessage /
+    // MailSenderAutoConfiguration / MailProperties（spring.mail.*）
+    api projectLibs.spring.boot.starter.mail
+
+    // cn.hutool.extra.mail（Mail / MailAccount）
+    api projectLibs.hutool.extra
+    // cn.hutool.core（CollUtil / StrUtil / ListUtil / IoUtil / MapUtil / ObjectUtil）
+    api projectLibs.hutool.core
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

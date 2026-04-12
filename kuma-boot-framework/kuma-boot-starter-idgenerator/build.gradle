@@ -5,5 +5,42 @@ plugins {
 description = 'Myframework idgenerator模块'
 
 dependencies {
+    // 基础公共工具（LogUtils / ContextUtils 等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // StrUtil（RedisIdGenerator）
+    api projectLibs.hutool.core
+
+    // commons-io（ZookeeperIdGenerator.updateLocalWorkerID - FileUtils）
+    api projectLibs.commons.io
+
+    // Jackson（ZookeeperIdGenerator - JsonMapper）
+    api projectLibs.jackson.databind
+
+    // @AutoConfiguration / @ConditionalOn* 等自动配置注解
+    compileOnly projectLibs.spring.boot.autoconfigure
+
+    // RedisRepository（RedisIdGenerator / RedisLockIdGenerator，@ConditionalOnBean）
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+
+    // DistributedLock（RedisLockIdGenerator，@ConditionalOnBean）
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-lock')
+
+    // Redisson / RedissonConnection（RedisIdGenerator，@ConditionalOnClass）
+    compileOnly projectLibs.spring.redisson
+
+    // CuratorFramework（ZookeeperIdGenerator，@ConditionalOnClass）
+    compileOnly projectLibs.curator.recipes
+
+    // DataSource / JdbcTemplate / MySQLMaxValueIncrementer（JDBC 相关，@ConditionalOnClass）
+    compileOnly projectLibs.spring.boot.starter.jdbc
+
+    // StandardDatabaseScript（IdGeneratorDatabaseAutoConfiguration，@ConditionalOnClass）
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+
+    // @Mapper / @Insert / @Select（WorkerNodeDAO，uid 包下 MyBatis Mapper）
+    compileOnly projectLibs.mybatis.core
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

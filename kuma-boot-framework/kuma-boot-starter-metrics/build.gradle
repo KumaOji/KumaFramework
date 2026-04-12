@@ -5,5 +5,34 @@ plugins {
 description = 'Myframework metrics模块'
 
 dependencies {
+    // 基础公共工具（LogUtils / 公共注解等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+    // spring-boot-starter-actuator + micrometer-core + ObservationRegistry
+    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
+
+    // OTLP 指标注册表（io.micrometer.registry.otlp.OtlpMeterRegistry）
+    api projectLibs.micrometer.registry.otlp
+
+    // AOP 支持（MethodMetricsAspect / @Aspect / ProceedingJoinPoint）
+    api projectLibs.aspectjweaver
+
+    // StrUtil / ListUtil（OtlpHealthAutoConfiguration）
+    api projectLibs.hutool.core
+
+    // @AutoConfiguration / @ConditionalOn* 等自动配置注解
+    compileOnly projectLibs.spring.boot.autoconfigure
+
+    // Druid 指标采集（DruidMetricsConfiguration，@ConditionalOnClass(DruidDataSource.class)）
+    compileOnly projectLibs.druid.starter
+    // DataSourceUnwrapper / DataSourcePoolMetadataProvider
+    compileOnly projectLibs.spring.boot.starter.jdbc
+
+    // Sentinel 指标扩展（SentinelMetricsExtension，MetricExtension 接口）
+    compileOnly projectLibs.sentinel.core
+
+    // HealthCheckProvider（OtlpHealthAutoConfiguration，@ConditionalOnClass）
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-monitor')
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

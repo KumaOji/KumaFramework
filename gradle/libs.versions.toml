@@ -18,6 +18,13 @@ mybatis = "3.5.19"
 spring-mybatis = "3.0.3"
 mybatis-spring-boot = "4.0.1"
 guava = "32.1.3-jre"
+greenrobot-eventbus = "3.2.0"
+easy-es = "2.1.0"
+bboss-util = "6.2.9"
+forest = "1.5.36"
+retrofit-spring-boot = "3.1.6"
+canal = "1.1.7"
+apollo-client = "2.4.0"
 redisson = "3.24.3"
 mapstruct = "1.5.5.Final"
 mapstruct-lombok = "0.2.0"
@@ -51,6 +58,8 @@ spring-webflux = "7.0.3"
 spring-expression = "7.0.3"
 spring-messaging = "7.0.3"
 spring-tx = "7.0.3"
+spring-integration = "7.0.1"
+paho-mqttv5 = "1.2.5"
 jakarta-servlet-api = "6.0.0"
 jakarta-websocket-api = "2.1.1"
 jakarta-validation-api = "3.0.2"
@@ -256,6 +265,9 @@ libphonenumber-carrier = { module = "com.googlecode.libphonenumber:carrier", ver
 spring-expression = { module = "org.springframework:spring-expression", version.ref = "spring-expression" }
 spring-messaging = { module = "org.springframework:spring-messaging", version.ref = "spring-messaging" }
 spring-tx = { module = "org.springframework:spring-tx", version.ref = "spring-tx" }
+spring-integration-core = { module = "org.springframework.integration:spring-integration-core", version.ref = "spring-integration" }
+spring-integration-mqtt = { module = "org.springframework.integration:spring-integration-mqtt", version.ref = "spring-integration" }
+paho-mqttv5 = { module = "org.eclipse.paho:org.eclipse.paho.mqttv5.client", version.ref = "paho-mqttv5" }
 curator-recipes = { module = "org.apache.curator:curator-recipes", version.ref = "curator" }
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet-api" }
 jakarta-websocket-api = { module = "jakarta.websocket:jakarta.websocket-api", version.ref = "jakarta-websocket-api" }
@@ -277,6 +289,7 @@ jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-ap
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "springboot" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 fastjson2 = { module = "com.alibaba.fastjson2:fastjson2", version.ref = "fastjson2" }
+fastjson2-extension-spring6 = { module = "com.alibaba.fastjson2:fastjson2-extension-spring6", version.ref = "fastjson2" }
 groovy = { module = "org.apache.groovy:groovy", version.ref = "groovy" }
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation-api" }
@@ -306,6 +319,9 @@ spring-retry = { module = "org.springframework.retry:spring-retry", version.ref 
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 spring-boot-starter-data-mongodb = { module = "org.springframework.boot:spring-boot-starter-data-mongodb", version.ref = "springboot" }
 spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "springboot" }
+spring-boot-starter-data-elasticsearch = { module = "org.springframework.boot:spring-boot-starter-data-elasticsearch", version.ref = "springboot" }
+easy-es = { module = "org.dromara:easy-es-boot-starter", version.ref = "easy-es" }
+bboss-util = { module = "com.bbossgroups:bboss-util", version.ref = "bboss-util" }
 jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
 jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
@@ -343,6 +359,7 @@ pagehelper = { module = "com.github.pagehelper:pagehelper", version.ref = "pageh
 easy-rules = { module = "org.jeasy:easy-rules", version.ref = "easy-rules" }
 easy-rules-mvel = { module = "org.jeasy:easy-rules-mvel", version.ref = "easy-rules" }
 disruptor = { module = "com.lmax:disruptor", version.ref = "disruptor" }
+greenrobot-eventbus = { module = "org.greenrobot:eventbus", version.ref = "greenrobot-eventbus" }
 javers-core = { module = "org.javers:javers-core", version.ref = "javers" }
 jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
 commons-pool2 = { module = "org.apache.commons:commons-pool2", version.ref = "commons-pool2" }
@@ -367,6 +384,7 @@ sentinel-cluster-server-default = { module = "com.alibaba.csp:sentinel-cluster-s
 micrometer-tracing-api = { module = "io.micrometer:micrometer-tracing", version.ref = "micrometer-tracing" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer-tracing" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
+micrometer-registry-otlp = { module = "io.micrometer:micrometer-registry-otlp", version.ref = "micrometer" }
 micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometer-commons = { module = "io.micrometer:micrometer-commons", version.ref = "micrometer" }
 micrometer-context-propagation = { module = "io.micrometer:context-propagation", version.ref = "micrometer-context-propagation" }
@@ -389,6 +407,10 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "j
 json-path = { module = "com.jayway.jsonpath:json-path", version.ref = "json-path" }
 guava-retrying3 = { module = "io.github.itning:guava-retrying3", version.ref = "guava-retrying3" }
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp3" }
+forest-spring-boot3-starter = { module = "com.dtflys.forest:forest-spring-boot3-starter", version.ref = "forest" }
+retrofit-spring-boot-starter = { module = "com.github.lianjiatech:retrofit-spring-boot-starter", version.ref = "retrofit-spring-boot" }
+canal-client = { module = "com.alibaba.otter:canal.client", version.ref = "canal" }
+apollo-client = { module = "com.ctrip.framework.apollo:apollo-client", version.ref = "apollo-client" }
 minio = { module = "io.minio:minio", version.ref = "minio" }
 commons-jexl3 = { module = "org.apache.commons:commons-jexl3", version.ref = "commons-jexl3" }
 janino = { module = "org.codehaus.janino:janino", version.ref = "janino" }

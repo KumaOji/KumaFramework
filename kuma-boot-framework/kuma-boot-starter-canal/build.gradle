@@ -5,5 +5,22 @@ plugins {
 description = 'Myframework canal模块'
 
 dependencies {
+    // 基础公共工具（LogUtils / StringUtils 等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Canal Client（CanalConnector / CanalConnectors / CanalEntry / Message / CanalClientException，
+    // canal.client 传递引入 canal.protocol）
+    api projectLibs.canal.client
+
+    // Guava Lists.newLinkedList / Lists.newArrayList（CanalConnectorConfiguration）
+    api projectLibs.guava
+
+    // StrUtil.isBlank（CanalConnectorConfiguration）
+    api projectLibs.hutool.core
+
+    // @AutoConfiguration / @ConditionalOnProperty / @ConditionalOnClass 等自动配置注解
+    compileOnly projectLibs.spring.boot.autoconfigure
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }
