@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.webagg.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
@@ -14,9 +30,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.support.ColumnCache;
 import com.baomidou.mybatisplus.core.toolkit.support.LambdaMeta;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
-import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -33,6 +46,14 @@ import com.kuma.boot.lock.support.DistributedLock;
 import com.kuma.boot.webagg.entity.SuperEntity;
 import com.kuma.boot.webagg.service.AbstractBaseSuperService;
 import jakarta.annotation.Resource;
+import org.apache.ibatis.reflection.property.PropertyNamer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.jspecify.annotations.NonNull;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -45,322 +66,447 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
-import org.apache.ibatis.reflection.property.PropertyNamer;
-import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
-public class BaseSuperServiceImpl<T extends SuperEntity<T, I>, I extends Serializable, M extends MpSuperMapper<T, I>, R extends JpaSuperRepository<T, I>> extends AbstractBaseSuperService<T, I, M> {
+/**
+ * BaseService
+ *
+ * @author kuma
+ * @version 2022.03
+ * @since 2021/10/10 10:21
+ */
+public class BaseSuperServiceImpl<
+        T extends SuperEntity<T, I>,
+        I extends Serializable,
+        M extends MpSuperMapper<T,I>,
+        R extends JpaSuperRepository<T, I>>
+        extends AbstractBaseSuperService<T, I, M> {
+
    protected static final int MAX_BATCH_KEY_SIZE = 20;
+
    @Autowired
    private R repository;
+
    @Resource
    private JdbcClient jdbcClient;
+
    @Resource
    private JdbcTemplate jdbcTemplate;
+
    @Resource
    private RedisRepository redisRepository;
-   public static final int DEFAULT_BATCH_SIZE = 1000;
 
-   public BaseSuperServiceImpl() {
-   }
-
+   @Override
    public MpSuperMapper<T, I> mapper() {
-      return (MpSuperMapper)super.getBaseMapper();
+      return super.getBaseMapper();
    }
 
+   @Override
    public JpaSuperRepository<T, I> respository() {
-      return this.repository;
+      return repository;
    }
 
+   @Override
    public JdbcTemplate jdbcTemplate() {
-      return this.jdbcTemplate;
+      return jdbcTemplate;
    }
 
+   @Override
    public JdbcClient jdbcClient() {
-      return this.jdbcClient;
+      return jdbcClient;
    }
 
    protected CacheKeyBuilder cacheKeyBuilder() {
       return () -> super.getEntityClass().getSimpleName();
    }
 
+   @Override
    public void refreshCache() {
-      this.list().forEach(this::setCache);
+      list().forEach(this::setCache);
    }
 
+   @Override
    public void clearCache() {
-      this.list().forEach(this::delCache);
+      list().forEach(this::delCache);
    }
 
+   @Override
    public T getByIdCache(I id) {
-      CacheKey cacheKey = this.cacheKeyBuilder().key(new Object[]{id});
-      return (T)(this.redisRepository.get(cacheKey, (k) -> (SuperEntity)super.getById(id), new boolean[0]));
+      CacheKey cacheKey = cacheKeyBuilder().key(id);
+      return redisRepository.get(cacheKey, k -> super.getById(id));
    }
 
-   @Transactional(
-      readOnly = true
-   )
+   @Override
+   @SuppressWarnings("unchecked")
+   @Transactional(readOnly = true)
    public T getByKey(CacheKey key, Function<CacheKey, Object> loader) {
-      Object id = this.redisRepository.get(key, loader, new boolean[0]);
-      return (T)(id == null ? null : this.getByIdCache(Convert.toLong(id)));
+      Object id = redisRepository.get(key, loader);
+      return id == null ? null : getByIdCache((I) Convert.toLong(id));
    }
 
-   @Transactional(
-      readOnly = true
-   )
-   public List<T> findByIds(@NonNull Collection<? extends Serializable> ids, Function<Collection<? extends Serializable>, Collection<T>> loader) {
+   @Override
+   @SuppressWarnings("unchecked")
+   @Transactional(readOnly = true)
+   public List<T> findByIds(
+           @NonNull Collection<? extends Serializable> ids,
+           Function<Collection<? extends Serializable>, Collection<T>> loader) {
       if (ids.isEmpty()) {
          return Collections.emptyList();
-      } else {
-         Stream var10000 = ids.stream();
-         CacheKeyBuilder var10001 = this.cacheKeyBuilder();
-         Objects.requireNonNull(var10001);
-         CacheKeyBuilder var4 = var10001;
-         List<CacheKey> keys = var10000.map((xva$0) -> var4.key(new Object[]{xva$0})).toList();
-         List<List<CacheKey>> partitionKeys = Lists.partition(keys, 20);
-         List<T> valueList = partitionKeys.stream().map((ks) -> (List)this.redisRepository.findByListCacheKey(ks)).flatMap(Collection::stream).toList();
-         List<Serializable> keysList = Lists.newArrayList(ids);
-         Set<Serializable> missedKeys = Sets.newLinkedHashSet();
-         List<T> allList = new ArrayList();
-
-         for(int i = 0; i < valueList.size(); ++i) {
-            T v = (T)(valueList.get(i));
-            Serializable k = (Serializable)keysList.get(i);
-            if (v == null) {
-               missedKeys.add(k);
-            } else {
-               allList.add(v);
-            }
-         }
-
-         if (CollUtil.isNotEmpty(missedKeys)) {
-            if (loader == null) {
-               loader = this::listByIds;
-            }
-
-            Collection<T> missList = (Collection)loader.apply(missedKeys);
-            missList.forEach(this::setCache);
-            allList.addAll(missList);
-         }
-
-         return allList;
       }
+      // 拼接keys
+      List<CacheKey> keys = ids.stream().map(cacheKeyBuilder()::key).toList();
+      // 切割
+      List<List<CacheKey>> partitionKeys = Lists.partition(keys, MAX_BATCH_KEY_SIZE);
+
+      // 用切割后的 partitionKeys 分批去缓存查， 返回的是缓存中存在的数据
+      List<T> valueList = partitionKeys.stream()
+              .map(ks -> (List<T>) redisRepository.findByListCacheKey(ks))
+              .flatMap(Collection::stream)
+              .toList();
+
+      // 所有的key
+      List<Serializable> keysList = Lists.newArrayList(ids);
+      // 缓存不存在的key
+      Set<Serializable> missedKeys = Sets.newLinkedHashSet();
+
+      List<T> allList = new ArrayList<>();
+      for (int i = 0; i < valueList.size(); i++) {
+         T v = valueList.get(i);
+         Serializable k = keysList.get(i);
+         if (v == null) {
+            missedKeys.add(k);
+         } else {
+            allList.add(v);
+         }
+      }
+      // 加载miss 的数据，并设置到缓存
+      if (CollUtil.isNotEmpty(missedKeys)) {
+         if (loader == null) {
+            loader = this::listByIds;
+         }
+         Collection<T> missList = loader.apply(missedKeys);
+         missList.forEach(this::setCache);
+         allList.addAll(missList);
+      }
+      return allList;
    }
 
-   public boolean saveIdempotency(T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper, String msg) {
+   /**
+    * 幂等性新增记录 例子如下：
+    *
+    * <p>String username = sysUser.getUsername();
+    *
+    * <p>boolean result = super.saveIdempotency( sysUser , lock , LOCK_KEY_USERNAME+username , new
+    * QueryWrapper<SysUser>().eq("username", username) );
+    *
+    * @param entity    实体对象
+    * @param lock      锁实例
+    * @param lockKey   锁的key
+    * @param predicate 判断是否存在的条件
+    * @param msg       对象已存在提示信息
+    */
+   @Override
+   public boolean saveIdempotency(
+           T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper, String msg) {
       if (lock == null) {
-         throw new LockException("\u5206\u5e03\u5f0f\u9501\u4e3a\u7a7a");
-      } else if (StrUtil.isEmpty(lockKey)) {
-         throw new LockException("\u9501\u7684key\u4e3a\u7a7a");
-      } else {
-         boolean var9;
-         try {
-            lock.lock(lockKey);
-            if (!Objects.nonNull(predicate)) {
-               if (!Objects.nonNull(countWrapper)) {
-                  return true;
-               }
+         throw new LockException("分布式锁为空");
+      }
+      if (StrUtil.isEmpty(lockKey)) {
+         throw new LockException("锁的key为空");
+      }
 
-               long count = super.count(countWrapper);
-               if (count == 0L) {
-                  var9 = super.save(entity);
-                  return var9;
-               }
+      try {
+         lock.lock(lockKey);
 
-               throw new IdempotencyException(StrUtil.isEmpty(msg) ? "\u6570\u636e\u5df2\u5b58\u5728" : msg);
+         // 使用jpa判断
+         if (Objects.nonNull(predicate)) {
+            long count = repository.count(predicate);
+            if (count == 0) {
+               repository.save(entity);
+               return true;
+            } else {
+               throw new IdempotencyException(StrUtil.isEmpty(msg) ? "数据已存在" : msg);
             }
-
-            long count = this.repository.count(predicate);
-            if (count != 0L) {
-               throw new IdempotencyException(StrUtil.isEmpty(msg) ? "\u6570\u636e\u5df2\u5b58\u5728" : msg);
-            }
-
-            this.repository.save(entity);
-            var9 = true;
-         } catch (Exception e) {
-            LogUtils.error(e);
-            return true;
-         } finally {
-            lock.unlock();
          }
 
-         return var9;
+         // 使用mybatis判断
+         if (Objects.nonNull(countWrapper)) {
+            // 判断记录是否已存在
+            long count = super.count(countWrapper);
+            if (count == 0) {
+               return super.save(entity);
+            } else {
+               throw new IdempotencyException(StrUtil.isEmpty(msg) ? "数据已存在" : msg);
+            }
+         }
+      } catch (Exception e) {
+         LogUtils.error(e);
+      } finally {
+         lock.unlock();
       }
+
+      return true;
    }
 
-   public boolean saveIdempotency(T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper) {
-      return this.saveIdempotency(entity, lock, lockKey, predicate, countWrapper, (String)null);
+   /**
+    * 幂等性新增记录
+    *
+    * @param entity    实体对象
+    * @param lock      锁实例
+    * @param lockKey   锁的key
+    * @param predicate 判断是否存在的条件
+    */
+   @Override
+   public boolean saveIdempotency(
+           T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper) {
+      return saveIdempotency(entity, lock, lockKey, predicate, countWrapper, null);
    }
 
-   public boolean saveOrUpdateIdempotency(T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper, String msg) {
+   /**
+    * 幂等性新增或更新记录 例子如下： String username = sysUser.getUsername(); boolean result =
+    * super.saveOrUpdateIdempotency(sysUser, lock , LOCK_KEY_USERNAME+username , new
+    * QueryWrapper<SysUser>().eq("username", username));
+    *
+    * @param entity    实体对象
+    * @param lock      锁实例
+    * @param lockKey   锁的key
+    * @param predicate 判断是否存在的条件
+    * @param msg       对象已存在提示信息
+    */
+   @Override
+   public boolean saveOrUpdateIdempotency(
+           T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper, String msg) {
       if (null != entity) {
          Class<?> cls = entity.getClass();
          TableInfo tableInfo = TableInfoHelper.getTableInfo(cls);
          if (null != tableInfo && StrUtil.isNotEmpty(tableInfo.getKeyProperty())) {
             Object idVal = ReflectionKit.getFieldValue(entity, tableInfo.getKeyProperty());
-            return !StringUtils.checkValNull(idVal) && !Objects.isNull(this.getById((Serializable)idVal)) ? this.updateById(entity) : this.saveIdempotency(entity, lock, lockKey, predicate, countWrapper, StrUtil.isEmpty(msg) ? "\u6570\u636e\u5df2\u5b58\u5728" : msg);
+            if (StringUtils.checkValNull(idVal) || Objects.isNull(getById((Serializable) idVal))) {
+               return this.saveIdempotency(
+                       entity, lock, lockKey, predicate, countWrapper, StrUtil.isEmpty(msg) ? "数据已存在" : msg);
+            } else {
+               return updateById(entity);
+            }
          } else {
-            throw ExceptionUtils.mpe("\u6267\u884c\u9519\u8bef,\u672a\u627e\u5230@TableId.", new Object[0]);
+            throw ExceptionUtils.mpe("执行错误,未找到@TableId.");
          }
-      } else {
-         return false;
       }
+      return false;
    }
 
-   public boolean saveOrUpdateIdempotency(T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper) {
-      return this.saveOrUpdateIdempotency(entity, lock, lockKey, predicate, countWrapper, (String)null);
+   /**
+    * 幂等性新增或更新记录 例子如下： String username = sysUser.getUsername(); boolean result =
+    * super.saveOrUpdateIdempotency(sysUser, lock , LOCK_KEY_USERNAME+username , new
+    * QueryWrapper<SysUser>().eq("username", username));
+    *
+    * @param entity       实体对象
+    * @param lock         锁实例
+    * @param lockKey      锁的key
+    * @param lockKey      锁的key
+    * @param countWrapper countWrapper
+    */
+   @Override
+   public boolean saveOrUpdateIdempotency(
+           T entity, DistributedLock lock, String lockKey, Predicate predicate, Wrapper<T> countWrapper) {
+      return saveOrUpdateIdempotency(entity, lock, lockKey, predicate, countWrapper, null);
    }
 
    protected void setCache(T model) {
-      Object id = this.getId(model);
+      Object id = getId(model);
       if (id != null) {
-         CacheKey key = this.cacheKeyBuilder().key(new Object[]{id});
-         this.redisRepository.set(key, model, new boolean[0]);
+         CacheKey key = cacheKeyBuilder().key(id);
+         redisRepository.set(key, model);
       }
-
    }
 
    protected Object getId(T model) {
       if (model instanceof SuperEntity) {
-         return ((SuperEntity)model).getId();
+         return ((SuperEntity) model).getId();
       } else {
-         TableInfo tableInfo = TableInfoHelper.getTableInfo(this.getEntityClass());
+         // 实体没有继承 Entity 和 SuperEntity
+         TableInfo tableInfo = TableInfoHelper.getTableInfo(getEntityClass());
          if (tableInfo == null) {
             return null;
-         } else {
-            Class<?> keyType = tableInfo.getKeyType();
-            if (keyType == null) {
-               return null;
-            } else {
-               String keyProperty = tableInfo.getKeyProperty();
-               Field idField = ReflectUtil.getField(this.getEntityClass(), keyProperty);
-               return ReflectUtil.getFieldValue(model, idField);
-            }
          }
+         // 主键类型
+         Class<?> keyType = tableInfo.getKeyType();
+         if (keyType == null) {
+            return null;
+         }
+         // id 字段名
+         String keyProperty = tableInfo.getKeyProperty();
+
+         // 反射得到 主键的值
+         Field idField = ReflectUtil.getField(getEntityClass(), keyProperty);
+         return ReflectUtil.getFieldValue(model, idField);
       }
    }
 
    protected void delCache(Serializable... ids) {
-      this.delCache((Collection)Arrays.asList(ids));
+      delCache(Arrays.asList(ids));
    }
 
    protected void delCache(Collection<?> idList) {
-      CacheKey[] keys = (CacheKey[])idList.stream().map((id) -> this.cacheKeyBuilder().key(new Object[]{id})).toArray((x$0) -> new CacheKey[x$0]);
-      this.redisRepository.del(keys);
+      CacheKey[] keys = idList.stream().map(id -> cacheKeyBuilder().key(id)).toArray(CacheKey[]::new);
+      redisRepository.del(keys);
    }
 
    protected void delCache(T model) {
-      Object id = this.getId(model);
+      Object id = getId(model);
       if (id != null) {
-         CacheKey key = this.cacheKeyBuilder().key(new Object[]{id});
-         this.redisRepository.del(new CacheKey[]{key});
+         CacheKey key = cacheKeyBuilder().key(id);
+         redisRepository.del(key);
       }
-
    }
 
+   /**
+    * 默认批次提交数量
+    */
+   public static final int DEFAULT_BATCH_SIZE = 1000;
+
+   @Override
    public Class<T> getEntityClass() {
       return super.getEntityClass();
    }
 
+   /**
+    * 获取主键明
+    */
    protected String getKeyProperty() {
-      TableInfo tableInfo = TableInfoHelper.getTableInfo(this.getEntityClass());
-      Assert.notNull(tableInfo, "\u9519\u8bef:\u65e0\u6cd5\u6267\u884c.\u56e0\u4e3a\u627e\u4e0d\u5230\u5b9e\u4f53\u7684 TableInfo \u7f13\u5b58!");
+      TableInfo tableInfo = TableInfoHelper.getTableInfo(getEntityClass());
+      Assert.notNull(tableInfo, "错误:无法执行.因为找不到实体的 TableInfo 缓存!");
       String keyProperty = tableInfo.getKeyProperty();
-      Assert.notNull(keyProperty, "\u9519\u8bef:\u65e0\u6cd5\u6267\u884c.\u56e0\u4e3a\u65e0\u6cd5\u4ece\u5b9e\u4f53\u4e2d\u627e\u5230\u4e3b\u952e\u7684\u5217!");
+      Assert.notNull(keyProperty, "错误:无法执行.因为无法从实体中找到主键的列!");
       return keyProperty;
    }
 
-   @Transactional(
-      rollbackFor = {Exception.class}
-   )
+   /*
+    * 以下的方法使用介绍:
+    *
+    * 一. 名称介绍
+    * 1. 方法名带有 query 的为对数据的查询操作, 方法名带有 update 的为对数据的修改操作
+    * 2. 方法名带有 lambda 的为内部方法入参 column 支持函数式的
+    * 二. 支持介绍
+    *
+    * 1. 方法名带有 query 的支持以 {@link ChainQuery} 内部的方法名结尾进行数据查询操作
+    * 2. 方法名带有 update 的支持以 {@link ChainUpdate} 内部的方法名为结尾进行数据修改操作
+    *
+    * 三. 使用示例,只用不带 lambda 的方法各展示一个例子,其他类推
+    * 1. 根据条件获取一条数据: `query().eq("column", value).one()`
+    * 2. 根据条件删除一条数据: `update().eq("column", value).remove()`
+    *
+    */
+
+   @Override
+   @Transactional(rollbackFor = Exception.class)
    public List<T> saveAll(List<T> list) {
       if (CollUtil.isNotEmpty(list)) {
-         this.saveBatch(list, 1000);
+         saveBatch(list, DEFAULT_BATCH_SIZE);
       }
-
       return list;
    }
 
-   @Transactional(
-      rollbackFor = {Exception.class}
-   )
+   @Override
+   @Transactional(rollbackFor = Exception.class)
    public boolean updateAllById(Collection<T> entityList) {
-      return this.updateBatchById(entityList, 1000);
+      return updateBatchById(entityList, DEFAULT_BATCH_SIZE);
    }
 
+   @Override
    public boolean updateByField(T t, SFunction<T, ?> field, Object fieldValue) {
-      return ((LambdaUpdateChainWrapper)this.lambdaUpdate().eq(field, fieldValue)).update(t);
+      return lambdaUpdate().eq(field, fieldValue).update(t);
    }
 
+   @Override
    public List<T> findAll() {
-      return this.lambdaQuery().list();
+      return lambdaQuery().list();
    }
 
+   @Override
    public Optional<T> findById(Serializable id) {
-      return Optional.ofNullable((SuperEntity)((MpSuperMapper)this.baseMapper).selectById(id));
+      return Optional.ofNullable(baseMapper.selectById(id));
    }
 
+   @Override
    public Optional<T> findByField(SFunction<T, ?> field, Object fieldValue) {
-      return ((LambdaQueryChainWrapper)this.lambdaQuery().eq(field, fieldValue)).oneOpt();
+      return lambdaQuery().eq(field, fieldValue).oneOpt();
    }
 
+   @Override
    public List<T> findAllByIds(Collection<? extends Serializable> idList) {
-      return (List<T>)(CollUtil.isEmpty(idList) ? new ArrayList(0) : ((MpSuperMapper)this.baseMapper).selectByIds(idList));
+      if (CollUtil.isEmpty(idList)) {
+         return new ArrayList<>(0);
+      }
+      return baseMapper.selectByIds(idList);
    }
 
+   @Override
    public List<T> findAllByField(SFunction<T, ?> field, Object fieldValue) {
-      return ((LambdaQueryChainWrapper)this.lambdaQuery().eq(field, fieldValue)).list();
+      return lambdaQuery().eq(field, fieldValue).list();
    }
 
+   @Override
    public List<T> findAllByFields(SFunction<T, ?> field, Collection<? extends Serializable> fieldValues) {
-      return (List<T>)(CollUtil.isEmpty(fieldValues) ? new ArrayList(0) : ((LambdaQueryChainWrapper)this.lambdaQuery().in(field, fieldValues)).list());
+      if (CollUtil.isEmpty(fieldValues)) {
+         return new ArrayList<>(0);
+      }
+      return lambdaQuery().in(field, fieldValues).list();
    }
 
+   @Override
    public boolean existedById(Serializable id) {
       String keyProperty = this.getKeyProperty();
-      return ((QueryChainWrapper)this.query().eq(keyProperty, id)).exists();
+      return query().eq(keyProperty, id).exists();
    }
 
+   @Override
    public boolean existedByField(SFunction<T, ?> field, Object fieldValue) {
-      return ((LambdaQueryChainWrapper)this.lambdaQuery().eq(field, fieldValue)).exists();
+      return lambdaQuery().eq(field, fieldValue).exists();
    }
 
+   @Override
    public boolean existedByField(SFunction<T, ?> field, Object fieldValue, Serializable id) {
       String keyProperty = this.getKeyProperty();
-      return ((QueryChainWrapper)((QueryChainWrapper)this.query().eq(this.getColumnName(field), fieldValue)).ne(keyProperty, id)).exists();
+      return query().eq(getColumnName(field), fieldValue).ne(keyProperty, id).exists();
    }
 
+   @Override
    public Long countByField(SFunction<T, ?> field, Object fieldValue) {
-      return ((LambdaQueryChainWrapper)this.lambdaQuery().eq(field, fieldValue)).count();
+      return lambdaQuery().eq(field, fieldValue).count();
    }
 
+   @Override
    public boolean deleteById(Serializable id) {
-      return SqlHelper.retBool(((MpSuperMapper)this.baseMapper).deleteById(id));
+      return SqlHelper.retBool(baseMapper.deleteById(id));
    }
 
+   @Override
    public boolean deleteByIds(Collection<? extends Serializable> idList) {
-      return CollUtil.isNotEmpty(idList) ? SqlHelper.retBool(((MpSuperMapper)this.baseMapper).deleteByIds(idList)) : false;
+      if (CollUtil.isNotEmpty(idList)) {
+         return SqlHelper.retBool(baseMapper.deleteByIds(idList));
+      }
+      return false;
    }
 
+   @Override
    public boolean deleteByField(SFunction<T, ?> field, Object fieldValue) {
-      return ((LambdaUpdateChainWrapper)this.lambdaUpdate().eq(field, fieldValue)).remove();
+      return lambdaUpdate().eq(field, fieldValue).remove();
    }
 
+   @Override
    public boolean deleteByFields(SFunction<T, ?> field, Collection<?> fieldValues) {
-      return CollUtil.isEmpty(fieldValues) ? false : ((LambdaUpdateChainWrapper)this.lambdaUpdate().in(field, fieldValues)).remove();
+      if (CollUtil.isEmpty(fieldValues)) {
+         return false;
+      }
+      return lambdaUpdate().in(field, fieldValues).remove();
    }
 
+   @Override
    public String getColumnName(SFunction<T, ?> function) {
       LambdaMeta meta = LambdaUtils.extract(function);
       Map<String, ColumnCache> columnMap = LambdaUtils.getColumnMap(meta.getInstantiatedClass());
-      Assert.notEmpty(columnMap, "\u9519\u8bef:\u65e0\u6cd5\u6267\u884c.\u56e0\u4e3a\u65e0\u6cd5\u83b7\u53d6\u5230\u5b9e\u4f53\u7c7b\u7684\u8868\u5bf9\u5e94\u7f13\u5b58!");
+      Assert.notEmpty(columnMap, "错误:无法执行.因为无法获取到实体类的表对应缓存!");
       String fieldName = PropertyNamer.methodToProperty(meta.getImplMethodName());
-      ColumnCache columnCache = (ColumnCache)columnMap.get(LambdaUtils.formatKey(fieldName));
+      ColumnCache columnCache = columnMap.get(LambdaUtils.formatKey(fieldName));
       return columnCache.getColumn();
    }
 }

@@ -17,6 +17,10 @@ dependencies {
     // LMAX Disruptor（DisruptorEventListenerRegistry - Disruptor / RingBuffer）
     api projectLibs.disruptor
 
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
+
     // BasicThreadFactory（DisruptorEventListenerRegistry）
     api projectLibs.commons.lang3
 

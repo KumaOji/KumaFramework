@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * 批量操作DTO
  *
- * @author shuigedeng
+ * @author kuma
  * @version 2022.03
  * @since 2021/10/11 15:07
  */
@@ -60,7 +60,7 @@ public record BatchDTO<SaveDTO, UpdateDTO, I extends Serializable>(
    /**
     * BatchUpdate
     *
-    * @author shuigedeng
+    * @author kuma
     * @version 2021.10
     * @since 2021-10-11 15:21:31
     */

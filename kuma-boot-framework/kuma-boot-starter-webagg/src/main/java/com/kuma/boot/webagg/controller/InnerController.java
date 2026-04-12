@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import com.kuma.boot.web.annotation.InnerApi;
  *
  * <p>基类该类后，没有任何方法。 可以让业务Controller继承 SuperSimpleController 后，按需实现 *Controller 接口
  *
- * @author shuigedeng
+ * @author kuma
  * @version 2021.9
  * @since 2021-09-02 21:15:37
  */

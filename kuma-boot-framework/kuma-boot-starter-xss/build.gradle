@@ -12,6 +12,7 @@ dependencies {
 
     // Hutool
     api projectLibs.hutool.core
+    api projectLibs.hutool.extra
 
     // Commons Lang3
     api projectLibs.commons.lang3
