@@ -59,4 +59,13 @@ dependencies {
 
     // RocketMQ Spring (RocketMQTemplate / @RocketMQMessageListener — 可选消息分发器)
     compileOnly projectLibs.rocketmq.spring.boot.starter
+
+    // Hutool JSON (JSONUtil.toJsonStr)
+    compileOnly projectLibs.hutool.json
+
+    // Hutool Extra (SpringUtil via ContextUtils)
+    compileOnly projectLibs.hutool.extra
+
+    // Redis Repository (RedisRepository — distributed session tracking)
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
 }

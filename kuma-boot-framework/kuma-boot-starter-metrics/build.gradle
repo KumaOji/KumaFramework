@@ -35,4 +35,9 @@ dependencies {
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
+
+    // OpenTelemetry API (io.opentelemetry.api.OpenTelemetry — ConditionalOnClass)
+    compileOnly projectLibs.opentelemetry.api
+    // OpenTelemetry HikariCP instrumentation (HikariTelemetry — ConditionalOnClass)
+    compileOnly projectLibs.opentelemetry.hikaricp
 }

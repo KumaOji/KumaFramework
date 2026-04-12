@@ -106,7 +106,7 @@ public class ZookeeperIdGenerator implements CommandLineRunner {
             Map<String, Integer> nodeMap = Maps.newHashMap();
             Map<String, String> realNode = Maps.newHashMap();
 
-            for(String key : (List)this.curator.getChildren().forPath(this.PATH_FOREVER)) {
+            for(String key : (List<String>)this.curator.getChildren().forPath(this.PATH_FOREVER)) {
                String[] nodeKey = key.split("-");
                realNode.put(nodeKey[0], key);
                nodeMap.put(nodeKey[0], Integer.parseInt(nodeKey[1]));

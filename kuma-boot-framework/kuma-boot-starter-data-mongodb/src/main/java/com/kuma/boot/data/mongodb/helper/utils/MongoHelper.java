@@ -560,7 +560,7 @@ public class MongoHelper {
       for(Object object : list) {
          Object value = ReflectUtil.getFieldValue(object, property);
          if (value != null && value.getClass().equals(clazz)) {
-            rs.add(value);
+            rs.add((T)value);
          }
       }
 
@@ -572,31 +572,31 @@ public class MongoHelper {
       switch (lambda.getImplMethodName()) {
          case "getId":
             if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             } else if (lambda.getImplMethodKind() == 5 && lambda.getFunctionalInterfaceClass().equals("com/kuma/boot/data/mongodb/helper/reflection/SerializableFunction") && lambda.getFunctionalInterfaceMethodName().equals("apply") && lambda.getFunctionalInterfaceMethodSignature().equals("(Ljava/lang/Object;)Ljava/lang/Object;") && lambda.getImplClass().equals("com/kuma/boot/data/mongodb/helper/config/Constant") && lambda.getImplMethodSignature().equals("()Ljava/lang/String;")) {
-               return Constant::getId;
+               return (SerializableFunction<Constant, String>) Constant::getId;
             }
          default:
             throw new IllegalArgumentException("Invalid lambda deserialization");

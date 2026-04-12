@@ -18,15 +18,15 @@ public class RequestMappingResolver implements HandlerMethodResolver {
    }
 
    public HandlerMethod resolve() {
-      Optional var10000 = Optional.ofNullable(RequestContextHolder.getRequestAttributes());
-      Objects.requireNonNull(ServletRequestAttributes.class);
-      var10000 = var10000.filter(ServletRequestAttributes.class::isInstance);
-      Objects.requireNonNull(ServletRequestAttributes.class);
-      var10000 = var10000.map(ServletRequestAttributes.class::cast).map(ServletRequestAttributes::getRequest).map(this::getHandler).map(HandlerExecutionChain::getHandler);
-      Objects.requireNonNull(HandlerMethod.class);
-      var10000 = var10000.filter(HandlerMethod.class::isInstance);
-      Objects.requireNonNull(HandlerMethod.class);
-      return (HandlerMethod)var10000.map(HandlerMethod.class::cast).orElse((Object)null);
+      return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+            .filter(ServletRequestAttributes.class::isInstance)
+            .map(ServletRequestAttributes.class::cast)
+            .map(ServletRequestAttributes::getRequest)
+            .map(this::getHandler)
+            .map(HandlerExecutionChain::getHandler)
+            .filter(HandlerMethod.class::isInstance)
+            .map(HandlerMethod.class::cast)
+            .orElse(null);
    }
 
    public final HandlerExecutionChain getHandler(HttpServletRequest request) {

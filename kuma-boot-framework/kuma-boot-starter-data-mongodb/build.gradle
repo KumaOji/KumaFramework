@@ -38,6 +38,9 @@ dependencies {
     // SystemUtil（SystemTool）
     compileOnly projectLibs.hutool.system
 
+    // SpringUtil（MongoStartedEventListener via ContextUtils）
+    compileOnly projectLibs.hutool.extra
+
     // @Schema（BaseMongoEntity，Jakarta EE 版本）
     compileOnly projectLibs.swagger.annotations.jakarta
 

@@ -11,7 +11,7 @@ public abstract class EnumUtils {
       if (value == null) {
          return null;
       } else {
-         for(T t : (ValuedEnum[])clz.getEnumConstants()) {
+         for(T t : clz.getEnumConstants()) {
             if (value.equals(t.value())) {
                return t;
             }

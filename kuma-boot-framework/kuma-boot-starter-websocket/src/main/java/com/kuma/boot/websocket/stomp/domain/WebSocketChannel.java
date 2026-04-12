@@ -50,7 +50,7 @@ public enum WebSocketChannel {
    static {
       for(WebSocketChannel webSocketChannel : values()) {
          INDEX_MAP.put(webSocketChannel.name(), webSocketChannel);
-         JSON_STRUCT.add(webSocketChannel.ordinal(), ImmutableMap.builder().put("value", webSocketChannel.ordinal()).put("key", webSocketChannel.name()).put("text", webSocketChannel.getDescription()).build());
+         JSON_STRUCT.add(webSocketChannel.ordinal(), ImmutableMap.<String, Object>builder().put("value", webSocketChannel.ordinal()).put("key", webSocketChannel.name()).put("text", webSocketChannel.getDescription()).build());
       }
 
    }

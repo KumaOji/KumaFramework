@@ -64,7 +64,7 @@ public class SensitiveService<T> implements Sensitive<T> {
                Object fieldNewObject = field.get(copyObject);
                this.handleClassField(context, fieldNewObject, fieldTypeClass);
             } else if (ClassTypeUtils.isArray(fieldTypeClass)) {
-               Object[] arrays = field.get(copyObject);
+               Object[] arrays = (Object[]) field.get(copyObject);
                if (ArrayUtils.isNotEmpty(arrays)) {
                   Object firstArrayEntry = arrays[0];
                   Class entryFieldClass = firstArrayEntry.getClass();

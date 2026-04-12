@@ -69,7 +69,7 @@ public class MongoStartedEventListener {
                   IndexResolver resolver = new MongoPersistentEntityIndexResolver(this.mongoMappingContext);
                   Iterable var10000 = resolver.resolveIndexFor(clazz);
                   Objects.requireNonNull(indexOps);
-                  var10000.forEach(indexOps::createIndex);
+                  ((Iterable<org.springframework.data.mongodb.core.index.IndexDefinition>)var10000).forEach(indexOps::createIndex);
                   Field[] fields = ReflectUtil.getFields(clazz);
 
                   for(Field field : fields) {

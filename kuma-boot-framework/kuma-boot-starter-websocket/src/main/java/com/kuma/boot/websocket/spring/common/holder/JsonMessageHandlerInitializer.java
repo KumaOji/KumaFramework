@@ -15,7 +15,7 @@ public class JsonMessageHandlerInitializer {
    @PostConstruct
    public void initJsonMessageHandlerHolder() {
       for(JsonMessageHandler<? extends JsonWebSocketMessage> jsonMessageHandler : this.jsonMessageHandlerList) {
-         JsonMessageHandlerHolder.addHandler(jsonMessageHandler);
+         JsonMessageHandlerHolder.addHandler((JsonMessageHandler<JsonWebSocketMessage>) jsonMessageHandler);
       }
 
    }

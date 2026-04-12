@@ -47,4 +47,10 @@ dependencies {
 
     // Spring Cloud Context (@RefreshScope)
     compileOnly projectLibs.spring.cloud.context
+
+    // Redis Repository (conditional component for sensitive words)
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+
+    // Apache Commons Lang3 (StringUtils.removeStart)
+    compileOnly projectLibs.commons.lang3
 }
