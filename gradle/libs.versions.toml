@@ -412,6 +412,7 @@ okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp3" }
 forest-spring-boot3-starter = { module = "com.dtflys.forest:forest-spring-boot3-starter", version.ref = "forest" }
 retrofit-spring-boot-starter = { module = "com.github.lianjiatech:retrofit-spring-boot-starter", version.ref = "retrofit-spring-boot" }
 canal-client = { module = "com.alibaba.otter:canal.client", version.ref = "canal" }
+canal-protocol = { module = "com.alibaba.otter:canal.protocol", version.ref = "canal" }
 apollo-client = { module = "com.ctrip.framework.apollo:apollo-client", version.ref = "apollo-client" }
 minio = { module = "io.minio:minio", version.ref = "minio" }
 commons-jexl3 = { module = "org.apache.commons:commons-jexl3", version.ref = "commons-jexl3" }

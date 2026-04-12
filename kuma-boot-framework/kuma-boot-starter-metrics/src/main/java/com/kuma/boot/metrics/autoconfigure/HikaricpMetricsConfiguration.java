@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.autoconfigure;
+package com.kuma.boot.metrics.autoconfigure;
 
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.metrics.MetricsTrackerFactory;

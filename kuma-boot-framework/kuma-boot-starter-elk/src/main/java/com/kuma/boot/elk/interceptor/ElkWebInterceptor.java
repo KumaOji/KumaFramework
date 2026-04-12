@@ -13,7 +13,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 public class ElkWebInterceptor implements HandlerInterceptor {
-   private final ThreadLocal<Long> local = new ThreadLocal();
+   private final ThreadLocal<Long> local = new ThreadLocal<>();
    private final LogstashTcpSocketAppender logstashTcpSocketAppender;
 
    public ElkWebInterceptor(LogstashTcpSocketAppender logstashTcpSocketAppender) {
@@ -38,7 +38,7 @@ public class ElkWebInterceptor implements HandlerInterceptor {
          long costTime = System.currentTimeMillis() - startTime;
          String path = httpServletRequest.getRequestURI();
          HandlerMethod handler = (HandlerMethod)o;
-         Map<String, Object> values = new HashMap();
+         Map<String, Object> values = new HashMap<>();
          values.put("logger_type", "api");
          values.put("service", handler.getBeanType().getName());
          String var10002 = handler.getBeanType().getName();

@@ -27,6 +27,8 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-data-common')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mongodb')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-elasticsearch')
 
     // 缓存
     api project(':kuma-boot-framework:kuma-boot-starter-cache-common')
@@ -62,6 +64,46 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-openapi')
     api project(':kuma-boot-framework:kuma-boot-starter-sms-common')
     api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-canal')
+    api project(':kuma-boot-framework:kuma-boot-starter-eventbus')
+    api project(':kuma-boot-framework:kuma-boot-starter-idgenerator')
+    api project(':kuma-boot-framework:kuma-boot-starter-client')
+    api project(':kuma-boot-framework:kuma-boot-starter-apollo')
+    api project(':kuma-boot-framework:kuma-boot-starter-threadpool')
+    api project(':kuma-boot-framework:kuma-boot-starter-useragent')
+
+    // Web 增强
+    api project(':kuma-boot-framework:kuma-boot-starter-xss')
+    api project(':kuma-boot-framework:kuma-boot-starter-websocket')
+    api project(':kuma-boot-framework:kuma-boot-starter-webagg')
+
+    // 链路追踪 / 可观测性
+    api project(':kuma-boot-framework:kuma-boot-starter-tracer')
+    api project(':kuma-boot-framework:kuma-boot-starter-skywalking')
+    api project(':kuma-boot-framework:kuma-boot-starter-metrics')
+    api project(':kuma-boot-framework:kuma-boot-starter-elk')
+    api project(':kuma-boot-framework:kuma-boot-starter-logger')
+
+    // 数据处理
+    api project(':kuma-boot-framework:kuma-boot-starter-translation')
+    api project(':kuma-boot-framework:kuma-boot-starter-sensitive')
+    api project(':kuma-boot-framework:kuma-boot-starter-pinyin')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-p6spy')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-shardingsphere')
+
+    // 状态机 / 流程引擎
+    api project(':kuma-boot-framework:kuma-boot-starter-statemachine')
+    api project(':kuma-boot-framework:kuma-boot-starter-flowengine')
+
+    // 消息通讯
+    api project(':kuma-boot-framework:kuma-boot-starter-mqtt')
+
+    // 调度任务
+    api project(':kuma-boot-framework:kuma-boot-starter-job-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-job-xxl')
+
+    // 存储
+    api project(':kuma-boot-framework:kuma-boot-starter-oss-minio')
 
     // ── kuma-cloud-framework ──────────────────────────────────────────────
     api project(':kuma-cloud-framework:kuma-cloud-starter-jdbcpool')
@@ -79,7 +121,7 @@ dependencies {
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.doc.webmvc
-    implementation projectLibs.spring.boot.starter.mail
+    api project(':kuma-boot-framework:kuma-boot-starter-mail')
 
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok

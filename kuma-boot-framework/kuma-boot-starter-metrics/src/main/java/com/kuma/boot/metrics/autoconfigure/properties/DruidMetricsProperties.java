@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.autoconfigure.properties;
+package com.kuma.boot.metrics.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;

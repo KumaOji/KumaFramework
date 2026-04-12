@@ -24,6 +24,12 @@ dependencies {
     // bboss StringUtil（ElasticsearchTemplate - StringUtil.isNotEmpty / collectionToDelimitedString）
     api projectLibs.bboss.util
 
+    // spring-web（@RestController / @RequestMapping，ElasticController）
+    compileOnly projectLibs.spring.web
+
+    // @RefreshScope（ElasticsearchProperties / RestClientPoolProperties）
+    compileOnly projectLibs.spring.cloud.context
+
     // @AutoConfiguration / @ConditionalOnProperty / @ConditionalOnExpression 等自动配置注解
     compileOnly projectLibs.spring.boot.autoconfigure
 

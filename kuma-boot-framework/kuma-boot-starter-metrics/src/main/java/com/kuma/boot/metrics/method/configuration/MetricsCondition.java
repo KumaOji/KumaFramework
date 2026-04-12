@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.method.configuration;
+package com.kuma.boot.metrics.method.configuration;
 
 public class MetricsCondition {
    public MetricsCondition() {

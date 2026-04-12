@@ -8,9 +8,14 @@ dependencies {
     // 基础公共工具（LogUtils / StringUtils 等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-    // Canal Client（CanalConnector / CanalConnectors / CanalEntry / Message / CanalClientException，
-    // canal.client 传递引入 canal.protocol）
+    // Canal Client（CanalConnector / CanalConnectors / Message / CanalClientException）
     api projectLibs.canal.client
+
+    // Canal Protocol（CanalEntry / Message 等协议类，显式声明避免传递依赖缺失）
+    api projectLibs.canal.protocol
+
+    // fastjson2（RowDataCustomParser / DefaultRowDtaCustomParser / AbstractEventHandler）
+    api projectLibs.fastjson2
 
     // Guava Lists.newLinkedList / Lists.newArrayList（CanalConnectorConfiguration）
     api projectLibs.guava
@@ -20,6 +25,12 @@ dependencies {
 
     // @AutoConfiguration / @ConditionalOnProperty / @ConditionalOnClass 等自动配置注解
     compileOnly projectLibs.spring.boot.autoconfigure
+
+    // @RefreshScope（CanalProperties）
+    compileOnly projectLibs.spring.cloud.context
+
+    // SpringUtil（ContextUtils.getBeansByType → cn.hutool.extra.spring.SpringUtil）
+    compileOnly projectLibs.hutool.extra
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

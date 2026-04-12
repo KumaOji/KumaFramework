@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.method.annotation;
+package com.kuma.boot.metrics.method.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

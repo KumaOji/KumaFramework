@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.method.autoconfigure;
+package com.kuma.boot.metrics.method.autoconfigure;
 
 import com.kuma.boot.metrics.method.aspect.MethodMetricsAspect;
 import io.micrometer.core.instrument.MeterRegistry;

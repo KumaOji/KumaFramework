@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.method.autoconfigure;
+package com.kuma.boot.metrics.method.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
