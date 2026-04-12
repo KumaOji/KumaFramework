@@ -1,18 +1,29 @@
 package com.kuma.boot.sensitive.sensitiveword.support.data;
 
 import com.kuma.boot.sensitive.sensitiveword.api.ISensitiveWordDestroy;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 树节点
+ *
+ * @since 0.7.0
+ */
 public class WordDataTreeNode implements ISensitiveWordDestroy {
+
+   /**
+    * 关键词结束标识
+    */
    private boolean end;
+
+   /**
+    * 子节点(key是下级字符,value是下级节点)
+    */
    private Map<Character, WordDataTreeNode> subNodeMap;
 
-   public WordDataTreeNode() {
-   }
-
    public boolean end() {
-      return this.end;
+      return end;
    }
 
    public WordDataTreeNode end(boolean end) {
@@ -21,38 +32,47 @@ public class WordDataTreeNode implements ISensitiveWordDestroy {
    }
 
    public WordDataTreeNode getSubNode(final char c) {
-      return this.subNodeMap == null ? null : (WordDataTreeNode)this.subNodeMap.get(c);
-   }
+      if(subNodeMap == null) {
+         return null;
+      }
 
+      return subNodeMap.get(c);
+   }
    public int getNodeSize() {
-      return this.subNodeMap == null ? 0 : this.subNodeMap.size();
+      if (subNodeMap == null) {
+         return 0;
+      }
+      return subNodeMap.size();
    }
 
    public void clearNode() {
-      if (this.subNodeMap != null) {
-         this.subNodeMap = null;
+      if (subNodeMap == null) {
+         return;
       }
+      subNodeMap=null;
    }
 
    public void removeNode(final char c) {
-      if (this.subNodeMap != null) {
-         this.subNodeMap.remove(c);
+      if (subNodeMap == null) {
+         return;
       }
+      subNodeMap.remove(c);
    }
 
    public WordDataTreeNode addSubNode(char c, WordDataTreeNode subNode) {
-      if (this.subNodeMap == null) {
-         this.subNodeMap = new HashMap();
+      if(this.subNodeMap == null) {
+         subNodeMap = new HashMap<>();
       }
 
-      this.subNodeMap.put(c, subNode);
+      subNodeMap.put(c, subNode);
       return this;
    }
 
+   @Override
    public void destroy() {
-      if (this.subNodeMap != null) {
-         this.subNodeMap.clear();
+      if(subNodeMap != null) {
+         subNodeMap.clear();
       }
-
    }
+
 }

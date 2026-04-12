@@ -1,39 +1,80 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.webagg.controller;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.reflect.ReflectionUtils;
-import com.kuma.boot.web.request.annotation.RequestLogger;
 import com.kuma.boot.webagg.entity.SuperEntity;
+import com.kuma.boot.web.request.annotation.RequestLogger;
 import io.swagger.v3.oas.annotations.Operation;
-import java.io.Serializable;
-import java.util.Objects;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-public interface BaseSaveController<T extends SuperEntity<T, I>, I extends Serializable, SaveDTO> extends BaseController<T, I> {
-   @Operation(
-      summary = "\u901a\u7528\u5355\u4f53\u65b0\u589e",
-      description = "\u901a\u7528\u5355\u4f53\u65b0\u589e"
-   )
+import java.io.Serializable;
+import java.util.Objects;
+
+/**
+ * SaveController
+ *
+ * @param <T> 实体
+ * @param <I> id
+ * @param <SaveDTO> 添加参数
+ * @author shuigedeng
+ * @version 2021.9
+ * @since 2021-09-02 21:12:22
+ */
+public interface BaseSaveController<T extends SuperEntity<T, I>, I extends Serializable, SaveDTO>
+        extends BaseController<T, I> {
+
+   /**
+    * 通用单体新增
+    *
+    * @param saveDTO 保存对象
+    * @return 报错结果
+    * @since 2021-09-02 21:12:44
+    */
+   @Operation(summary = "通用单体新增", description = "通用单体新增")
    @PostMapping
-   @RequestLogger("\u901a\u7528\u5355\u4f53\u65b0\u589e")
+   @RequestLogger("通用单体新增")
+   // @PreAuthorize("@pms.hasPermission('save')")
    default Result<Boolean> save(@Validated @RequestBody SaveDTO saveDTO) {
-      if (this.handlerSave(saveDTO) && ReflectionUtils.checkField(saveDTO.getClass(), this.getEntityClass())) {
-         T t = (T)(ReflectUtil.newInstanceIfPossible(this.getEntityClass()));
-         return this.success(this.service().save((SuperEntity)ReflectionUtils.copyPropertiesIfRecord(t, saveDTO)));
-      } else {
-         throw new BusinessException("\u901a\u7528\u5355\u4f53\u65b0\u589e\u5931\u8d25");
+      if (handlerSave(saveDTO)) {
+         if (ReflectionUtils.checkField(saveDTO.getClass(), getEntityClass())) {
+            T t = ReflectUtil.newInstanceIfPossible(getEntityClass());
+            return success(service().save(ReflectionUtils.copyPropertiesIfRecord(t, saveDTO)));
+         }
       }
+      throw new BusinessException("通用单体新增失败");
    }
 
+   /**
+    * 自定义新增
+    *
+    * @param model 新增对象
+    * @return 新增结果
+    * @since 2021-10-11 17:06:06
+    */
    default Boolean handlerSave(SaveDTO model) {
       if (Objects.isNull(model)) {
-         throw new BusinessException("\u65b0\u589eDTO\u4e0d\u80fd\u4e3a\u7a7a");
-      } else {
-         return true;
+         throw new BusinessException("新增DTO不能为空");
       }
+      return true;
    }
 }
