@@ -11,11 +11,17 @@ dependencies {
     // StrUtil（RedisIdGenerator）
     api projectLibs.hutool.core
 
+    // commons-lang3（BitsAllocator / DateUtils / NamingThreadFactory / WorkerNodeEntity 等）
+    api projectLibs.commons.lang3
+
     // commons-io（ZookeeperIdGenerator.updateLocalWorkerID - FileUtils）
     api projectLibs.commons.io
 
     // Jackson（ZookeeperIdGenerator - JsonMapper）
     api projectLibs.jackson.databind
+
+    // @NotNull @Length（UidGenProperties，hibernate-validator 注解）
+    compileOnly projectLibs.hibernate.validator
 
     // @AutoConfiguration / @ConditionalOn* 等自动配置注解
     compileOnly projectLibs.spring.boot.autoconfigure

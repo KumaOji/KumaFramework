@@ -26,6 +26,21 @@ dependencies {
     // @AutoConfiguration / @ConditionalOn* 等自动配置注解
     compileOnly projectLibs.spring.boot.autoconfigure
 
+    // @PostConstruct（多个 Registry / Template 类）
+    compileOnly projectLibs.jakarta.annotation.api
+
+    // Logger / LoggerFactory / MDC（DisruptorProvider / Distributor / WorkerStation 等）
+    compileOnly projectLibs.slf4j.api
+
+    // StrUtil / Tuple / Copier（EventBusTypeEnum / DisruptorService 等）
+    compileOnly projectLibs.hutool.core
+
+    // JSON（CustomExceptionHandler）
+    compileOnly projectLibs.fastjson2
+
+    // @RefreshScope（DisruptorProperties）
+    compileOnly projectLibs.spring.cloud.context
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }

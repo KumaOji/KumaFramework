@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.autoconfigure;
+package com.kuma.boot.metrics.autoconfigure;
 
 import com.alibaba.druid.filter.stat.StatFilter;
 import com.alibaba.druid.pool.DruidDataSource;

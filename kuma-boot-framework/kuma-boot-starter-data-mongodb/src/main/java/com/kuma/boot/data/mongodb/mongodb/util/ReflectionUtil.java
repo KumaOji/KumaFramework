@@ -69,6 +69,8 @@ public class ReflectionUtil {
             Field field = superClass.getDeclaredField(fieldName);
             field.setAccessible(true);
             return field;
+         } catch (NoSuchFieldException e) {
+            // 继续向父类查找
          }
       }
 
@@ -96,6 +98,8 @@ public class ReflectionUtil {
             Method method = superClass.getDeclaredMethod(methodName, parameterTypes);
             method.setAccessible(true);
             return method;
+         } catch (NoSuchMethodException e) {
+            // 继续向父类查找
          }
       }
 

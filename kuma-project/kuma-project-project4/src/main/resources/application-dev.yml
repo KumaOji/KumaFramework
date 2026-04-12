@@ -134,6 +134,21 @@ spring:
       concurrency: 5
       ack-mode: manual_immediate
       missing-topics-fatal: false
+  # ── MongoDB（kuma.boot.data.mongodb.enabled=false 时仅声明 URI，连接懒建立）──
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/${spring.application.name}
+      auto-index-creation: false
+
+  # ── Elasticsearch（kuma.boot.data.elasticsearch.enabled=false 时保持默认）──
+  elasticsearch:
+    uris: http://localhost:9200
+    connection-timeout: 3s
+    socket-timeout: 30s
+  dynamic:
+    tp:
+          enabled: false
+
   # ── Mail（已引入 spring-boot-starter-mail，本地无 SMTP 时保持注释）──
   #mail:
   #  host: smtp.qq.com
@@ -149,6 +164,15 @@ spring:
   #          required: true
   #        socketFactory:
   #          class: javax.net.ssl.SSLSocketFactory
+
+# Apollo 配置中心（本地无 Apollo Server 时保持 false）
+apollo:
+  bootstrap:
+    enabled: false
+    namespaces: application.yml
+  meta: http://localhost:8080
+
+# DynamicTP 动态线程池（kuma.boot.threadpool.enabled=false 时无需采集/报警配置）
 
 logging:
   config: classpath:logback-spring.xml
@@ -385,6 +409,15 @@ kuma:
       mybatis:
         mybatis-plus:
           enabled: false
+      mongodb:
+        enabled: false
+        print: false
+        slow-query: false
+        slow-time: 1000
+      elasticsearch:
+        enabled: false
+      p6spy:
+        enabled: false
     office:
       enabled: false
     mq:
@@ -438,6 +471,25 @@ kuma:
         discrepancy: 1
     sentinel:
       enabled: false
+    retry:
+      enabled: false
+    canal:
+      enabled: false
+      instances: {}
+    eventbus:
+      enabled: false
+    idgenerator:
+      enabled: false
+      type: REDIS
+    third-client:
+      forest:
+        enabled: false
+      retrofit:
+        enabled: false
+    threadpool:
+      enabled: false
+    useragent:
+      enabled: false
     encrypt:
       enabled: false
     crypto:
@@ -450,6 +502,12 @@ kuma:
       enabled: false
     oss:
       enabled: false
+      platform:
+        minio:
+                  url: http://localhost:9000
+                  bucket-name: ${spring.application.name}
+                  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+                  secret-key: ${MINIO_SECRET_KEY:minioadmin}
     actuator:
       managedresource:
         enabled: false
@@ -461,6 +519,91 @@ kuma:
     # ── kuma-boot-starter-monitor ──────────────────────────────────────
     monitor:
       enabled: false
+    # ── kuma-boot-starter-xss ────────────────────────��────────────────
+    xss:
+      enabled: false
+      mode: clear
+      patterns:
+        - /*
+    # ── kuma-boot-starter-websocket ───────────────────────────────────
+    websocket:
+      original:
+        enabled: false
+      spring:
+        enabled: false
+        path: /ws
+        with-sockjs: false
+      stomp:
+        enabled: false
+        endpoint: stomp/ws
+    # ── kuma-boot-starter-tracer（Micrometer Tracing / OTLP）──────────
+    micrometer:
+      enabled: false
+    otlp:
+      enabled: false
+    # ── kuma-boot-starter-skywalking ──────────────────────────────────
+    skywalking:
+      enabled: false
+    # ── kuma-boot-starter-metrics ─────────────────────────────────────
+    metrics:
+      enabled: false
+      druid:
+        enabled: false
+      sentinel:
+        enabled: false
+      undertow:
+        enabled: false
+    # ── kuma-boot-starter-elk ─────────────────────────────────────────
+    elk:
+      enabled: false
+      destinations:
+        - 127.0.0.1:4560
+    # ── kuma-boot-starter-logger ──────────────────────────────────────
+    logger:
+      enabled: false
+      logging:
+        logstash:
+          enabled: false
+          destinations: 127.0.0.1:5000
+        loki:
+          enabled: false
+          http-url: http://localhost:3100/loki/api/v1/push
+    # ── kuma-boot-starter-translation ────────────────────────────────
+    translation:
+      enabled: false
+    # ── kuma-boot-starter-sensitive ───────────────────────────────────
+    sensitive:
+      enabled: false
+    # ── kuma-boot-starter-statemachine ───────────────────────────────
+    statemachine:
+      enabled: false
+    # ── kuma-boot-starter-flowengine ─────────────────────────────────
+    flowengine:
+      enabled: false
+    # ── kuma-boot-starter-mail ───────────────────────────────��────────
+    mail:
+      enabled: false
+    # ── kuma-boot-starter-mqtt ────────────────────────────────────────
+    mqtt:
+      enabled: false
+      configs:
+        default:
+          server-urls:
+            - tcp://localhost:1883
+    # ── kuma-boot-starter-job-xxl ────────────────────────────────────
+    job:
+      xxl:
+        enabled: false
+        admin:
+          addresses: http://127.0.0.1:8080/xxl-job-admin
+        executor:
+          app-name: ${spring.application.name}
+          ip:
+          port: 9999
+          log-path: ${user.home}/logs/${spring.application.name}/applogs/xxl-job/jobhandler
+          log-retention-days: 30
+    # ── kuma-boot-starter-oss-minio ──────────────────────────────────
+
 
 # Seata 分布式事务（本地无 Seata Server 时保持 enabled: false）
 # kuma.boot.seata.enabled 控制 kuma wrapper（XID 传播过滤器 + undo_log 自动建表）

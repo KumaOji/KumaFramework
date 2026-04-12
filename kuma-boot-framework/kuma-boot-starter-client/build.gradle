@@ -24,6 +24,15 @@ dependencies {
     // @AutoConfiguration / @ConditionalOnProperty 等自动配置注解
     compileOnly projectLibs.spring.boot.autoconfigure
 
+    // @RefreshScope（ForestProperties / RetrofitProperties）
+    compileOnly projectLibs.spring.cloud.context
+
+    // JSONObject（ClusterApis）
+    compileOnly projectLibs.fastjson2
+
+    // HttpServletRequest（TokenHolder）
+    compileOnly projectLibs.jakarta.servlet.api
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }

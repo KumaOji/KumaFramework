@@ -1,6 +1,6 @@
-package com.taotao.boot.metrics.autoconfigure.otlp;
+package com.kuma.boot.metrics.autoconfigure.otlp;
 
-import com.taotao.boot.metrics.autoconfigure.properties.OtlpMetricsProperties;
+import com.kuma.boot.metrics.autoconfigure.properties.OtlpMetricsProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

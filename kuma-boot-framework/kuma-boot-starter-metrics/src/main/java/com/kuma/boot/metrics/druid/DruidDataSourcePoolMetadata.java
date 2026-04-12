@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.druid;
+package com.kuma.boot.metrics.druid;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.boot.jdbc.metadata.AbstractDataSourcePoolMetadata;

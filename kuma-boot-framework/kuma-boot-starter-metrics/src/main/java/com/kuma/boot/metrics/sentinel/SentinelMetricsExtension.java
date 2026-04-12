@@ -1,4 +1,4 @@
-package com.taotao.boot.metrics.sentinel;
+package com.kuma.boot.metrics.sentinel;
 
 import com.alibaba.csp.sentinel.metric.extension.MetricExtension;
 import com.alibaba.csp.sentinel.slots.block.BlockException;

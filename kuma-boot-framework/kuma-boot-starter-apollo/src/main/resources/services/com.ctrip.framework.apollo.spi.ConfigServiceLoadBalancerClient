@@ -1,1 +1,1 @@
-com.taotao.boot.apollo.api.TtcServiceLoadBalancerClient
+com.kuma.boot.apollo.spi.KmcServiceLoadBalancerClient

@@ -1,9 +1,9 @@
-package com.taotao.boot.metrics.autoconfigure.otlp;
+package com.kuma.boot.metrics.autoconfigure.otlp;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.taotao.boot.metrics.autoconfigure.properties.OtlpMetricsProperties;
+import com.kuma.boot.metrics.autoconfigure.properties.OtlpMetricsProperties;
 import com.kuma.boot.monitor.Monitor;
 import com.kuma.boot.monitor.autoconfigure.HealthAutoConfiguration;
 import com.kuma.boot.monitor.collect.HealthCheckProvider;

@@ -29,6 +29,15 @@ dependencies {
     // @AutoConfiguration / @ConditionalOnProperty 等自动配置注解
     compileOnly projectLibs.spring.boot.autoconfigure
 
+    // WebServerInitializedEvent / WebServerApplicationContext（MongoStartedEventListener）
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // @RefreshScope（MongodbProperties）
+    compileOnly projectLibs.spring.cloud.context
+
+    // SystemUtil（SystemTool）
+    compileOnly projectLibs.hutool.system
+
     // @Schema（BaseMongoEntity，Jakarta EE 版本）
     compileOnly projectLibs.swagger.annotations.jakarta
 

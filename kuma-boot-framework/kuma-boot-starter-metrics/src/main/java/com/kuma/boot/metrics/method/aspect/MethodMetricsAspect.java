@@ -1,7 +1,7 @@
-package com.taotao.boot.metrics.method.aspect;
+package com.kuma.boot.metrics.method.aspect;
 
-import com.taotao.boot.metrics.method.annotation.TimedMethod;
-import com.taotao.boot.metrics.method.autoconfigure.MethodMetricsProperties;
+import com.kuma.boot.metrics.method.annotation.TimedMethod;
+import com.kuma.boot.metrics.method.autoconfigure.MethodMetricsProperties;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;

@@ -17,6 +17,9 @@ dependencies {
     // cn.hutool.core（CollUtil / StrUtil / ListUtil / IoUtil / MapUtil / ObjectUtil）
     api projectLibs.hutool.core
 
+    // @RefreshScope（MailProperties）
+    compileOnly projectLibs.spring.cloud.context
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }
