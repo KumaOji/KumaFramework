@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.taotaocloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.webagg.controller;
+package com.kuma.boot.common.model.result;
 
-import com.kuma.boot.web.annotation.BusinessApi;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
- * 简单的实现了BaseController，为了获取注入 Service 和 实体类型
- *
- * <p>基类该类后，没有任何方法。 可以让业务Controller继承 SuperSimpleController 后，按需实现 *Controller 接口
+ * 返回实体类
  *
  * @author shuigedeng
- * @version 2021.9
- * @since 2021-09-02 21:15:37
+ * @version 2023.04
+ * @since 2023-05-10 15:50:14
  */
-@BusinessApi
-public abstract class BusinessController implements CommonController {
+@Schema(description = "返回结果对象")
+public class EmptyResult implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = -3685249101751401211L;
+
+	public static EmptyResult empty() {
+		return new EmptyResult();
+	}
 
 }

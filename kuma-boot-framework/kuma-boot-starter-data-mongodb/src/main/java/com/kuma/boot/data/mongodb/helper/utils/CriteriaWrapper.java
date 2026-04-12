@@ -1,6 +1,21 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.data.mongodb.helper.utils;
 
-import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.data.mongodb.helper.reflection.ReflectionUtil;
 import com.kuma.boot.data.mongodb.helper.reflection.SerializableFunction;
 import java.util.ArrayList;
@@ -8,138 +23,358 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.data.mongodb.core.query.Criteria;
 
+/**
+ * 查询语句生成器
+ *
+ * @author shuigedeng
+ * @version 2022.05
+ * @since 2022-05-27 21:53:28
+ */
 public abstract class CriteriaWrapper {
+
+   /** 和链接 */
    protected boolean andLink = true;
+
+   /** 标准 */
    protected Criteria criteria;
-   protected List<Criteria> list = new ArrayList();
 
-   public CriteriaWrapper() {
-   }
+   /** 列表 */
+   protected List<Criteria> list = new ArrayList<>();
 
+   /**
+    * 将Wrapper转化为Criteria
+    *
+    * @return {@link Criteria }
+    * @since 2022-05-27 21:53:28
+    */
    public Criteria build() {
-      this.criteria = new Criteria();
-      if (!this.list.isEmpty()) {
-         if (this.andLink) {
-            this.criteria.andOperator(this.listToArry(this.list));
+      criteria = new Criteria();
+      if (!list.isEmpty()) {
+         if (andLink) {
+            criteria.andOperator(listToArry(list));
          } else {
-            this.criteria.orOperator(this.listToArry(this.list));
+            criteria.orOperator(listToArry(list));
          }
       }
-
-      return this.criteria;
+      return criteria;
    }
 
+   /**
+    * 转义正则特殊字符 （$()*+.[]?\^{} \\需要第一个替换，否则replace方法替换时会有逻辑bug
+    *
+    * @param str str
+    * @return {@link String }
+    * @since 2022-05-27 21:53:29
+    */
    public static String replaceRegExp(String str) {
-      return StrUtil.isEmpty(str) ? str : str.replace("\\", "\\\\").replace("*", "\\*").replace("+", "\\+").replace("|", "\\|").replace("{", "\\{").replace("}", "\\}").replace("(", "\\(").replace(")", "\\)").replace("^", "\\^").replace("$", "\\$").replace("[", "\\[").replace("]", "\\]").replace("?", "\\?").replace(",", "\\,").replace(".", "\\.").replace("&", "\\&");
+      if (StrUtil.isEmpty(str)) {
+         return str;
+      }
+
+      return str.replace("\\", "\\\\")
+              .replace("*", "\\*") //
+              .replace("+", "\\+")
+              .replace("|", "\\|") //
+              .replace("{", "\\{")
+              .replace("}", "\\}") //
+              .replace("(", "\\(")
+              .replace(")", "\\)") //
+              .replace("^", "\\^")
+              .replace("$", "\\$") //
+              .replace("[", "\\[")
+              .replace("]", "\\]") //
+              .replace("?", "\\?")
+              .replace(",", "\\,") //
+              .replace(".", "\\.")
+              .replace("&", "\\&");
    }
 
+   /**
+    * 列表来进行
+    *
+    * @param list 列表
+    * @return {@link Criteria[] }
+    * @since 2022-05-27 21:53:29
+    */
    private Criteria[] listToArry(List<Criteria> list) {
-      return (Criteria[])list.toArray(new Criteria[list.size()]);
+      return list.toArray(new Criteria[list.size()]);
    }
 
+   /**
+    * 等于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper eq(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).is(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).is(params));
       return this;
    }
 
+   /**
+    * 不等于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper ne(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).ne(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).ne(params));
       return this;
    }
 
+   /**
+    * 小于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper lt(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).lt(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).lt(params));
       return this;
    }
 
+   /**
+    * 小于或等于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper lte(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).lte(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).lte(params));
       return this;
    }
 
+   /**
+    * 大于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper gt(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).gt(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).gt(params));
       return this;
    }
 
+   /**
+    * 大于或等于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper gte(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).gte(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).gte(params));
       return this;
    }
 
+   /**
+    * 包含
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper contain(SerializableFunction<E, R> column, Object params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).all(new Object[]{params}));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).all(params));
       return this;
    }
 
-   public <E, R> CriteriaWrapper containOr(SerializableFunction<E, R> column, Collection<?> params) {
+   /**
+    * 包含,以或连接
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
+   public <E, R> CriteriaWrapper containOr(
+           SerializableFunction<E, R> column, Collection<?> params) {
       CriteriaOrWrapper criteriaOrWrapper = new CriteriaOrWrapper();
-
-      for(Object object : params) {
+      for (Object object : params) {
          criteriaOrWrapper.contain(column, object);
       }
 
-      this.list.add(criteriaOrWrapper.build());
+      list.add(criteriaOrWrapper.build());
       return this;
    }
 
+   /**
+    * 包含,以或连接
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper containOr(SerializableFunction<E, R> column, Object[] params) {
-      return this.containOr(column, Arrays.asList(params));
+      return containOr(column, Arrays.asList(params));
    }
 
-   public <E, R> CriteriaWrapper containAnd(SerializableFunction<E, R> column, Collection<?> params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).all(params));
+   /**
+    * 包含,以且连接
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
+   public <E, R> CriteriaWrapper containAnd(
+           SerializableFunction<E, R> column, Collection<?> params) {
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).all(params));
       return this;
    }
 
+   /**
+    * 包含,以且连接
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper containAnd(SerializableFunction<E, R> column, Object[] params) {
-      return this.containAnd(column, Arrays.asList(params));
+      return containAnd(column, Arrays.asList(params));
    }
 
+   /**
+    * 相似于
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper like(SerializableFunction<E, R> column, String params) {
-      Pattern pattern = Pattern.compile("^.*" + replaceRegExp(params) + ".*$", 2);
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).regex(pattern));
+      Pattern pattern =
+              Pattern.compile("^.*" + replaceRegExp(params) + ".*$", Pattern.CASE_INSENSITIVE);
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).regex(pattern));
       return this;
    }
 
+   /**
+    * 在其中
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper in(SerializableFunction<E, R> column, Collection<?> params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).in(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).in(params));
       return this;
    }
 
+   /**
+    * 在其中
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper in(SerializableFunction<E, R> column, Object[] params) {
-      return this.in(column, Arrays.asList(params));
+      return in(column, Arrays.asList(params));
    }
 
+   /**
+    * 不在其中
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper nin(SerializableFunction<E, R> column, Collection<?> params) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).nin(params));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).nin(params));
       return this;
    }
 
+   /**
+    * 不在其中
+    *
+    * @param column 字段
+    * @param params 参数
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper nin(SerializableFunction<E, R> column, Object[] params) {
-      return this.nin(column, Arrays.asList(params));
+      return nin(column, Arrays.asList(params));
    }
 
+   /**
+    * 为空
+    *
+    * @param column 字段
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper isNull(SerializableFunction<E, R> column) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).is((Object)null));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).is(null));
       return this;
    }
 
+   /**
+    * 不为空
+    *
+    * @param column 字段
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
    public <E, R> CriteriaWrapper isNotNull(SerializableFunction<E, R> column) {
-      this.list.add(Criteria.where(ReflectionUtil.getFieldName(column)).ne((Object)null));
+      list.add(Criteria.where(ReflectionUtil.getFieldName(column)).ne(null));
       return this;
    }
 
-   public <E, R> CriteriaWrapper findArray(String arr, SerializableFunction<E, R> column, String param) {
-      this.list.add(Criteria.where(arr).elemMatch(Criteria.where(ReflectionUtil.getFieldName(column)).is(param)));
+   /**
+    * 数组查询
+    *
+    * @param arr 数组名
+    * @param column 字段名
+    * @param param 字段值
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
+   public <E, R> CriteriaWrapper findArray(
+           String arr, SerializableFunction<E, R> column, String param) {
+      list.add(
+              Criteria.where(arr)
+                      .elemMatch(Criteria.where(ReflectionUtil.getFieldName(column)).is(param)));
       return this;
    }
 
-   public <E, R> CriteriaWrapper findArrayLike(String arr, SerializableFunction<E, R> column, String param) {
-      Pattern pattern = Pattern.compile("^.*" + replaceRegExp(param) + ".*$", 2);
-      this.list.add(Criteria.where(arr).elemMatch(Criteria.where(ReflectionUtil.getFieldName(column)).regex(pattern)));
+   /**
+    * 数组模糊查询
+    *
+    * @param arr 数组名
+    * @param column 字段名
+    * @param param 字段值
+    * @return {@link CriteriaWrapper }
+    * @since 2022-05-27 21:53:29
+    */
+   public <E, R> CriteriaWrapper findArrayLike(
+           String arr, SerializableFunction<E, R> column, String param) {
+      Pattern pattern =
+              Pattern.compile("^.*" + replaceRegExp(param) + ".*$", Pattern.CASE_INSENSITIVE);
+      list.add(
+              Criteria.where(arr)
+                      .elemMatch(
+                              Criteria.where(ReflectionUtil.getFieldName(column))
+                                      .regex(pattern)));
       return this;
    }
 }

@@ -1,13 +1,28 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.eventbus.disruptor.tmp.factory;
 
-import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.kuma.boot.eventbus.disruptor.tmp.support.DisruptorCustomizer;
 import com.kuma.boot.eventbus.disruptor.tmp.support.SpringDisruptor;
 import com.kuma.boot.eventbus.disruptor.tmp.support.SpringEventHandler;
+
 import java.util.concurrent.ThreadFactory;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -17,70 +32,79 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.jspecify.annotations.NonNull;
 import org.springframework.util.StringUtils;
 
-public class DisruptorFactoryBean<T> implements FactoryBean<SpringDisruptor<T>>, BeanFactoryAware, InitializingBean, DisposableBean {
-   private AnnotationAttributes attributes;
-   private BeanFactory beanFactory;
-   private SpringDisruptor<T> disruptor;
-   private Class<T> type;
+public class DisruptorFactoryBean<T>
+        implements FactoryBean<SpringDisruptor<T>>, BeanFactoryAware, InitializingBean, DisposableBean {
 
-   public DisruptorFactoryBean() {
-   }
+   private AnnotationAttributes attributes;
 
    public void setAttributes(AnnotationAttributes attributes) {
       this.attributes = attributes;
    }
 
+   private BeanFactory beanFactory;
+
+   private SpringDisruptor<T> disruptor;
+
+   private Class<T> type;
+
    public void setType(Class<T> type) {
       this.type = type;
    }
 
+   @Override
    public SpringDisruptor<T> getObject() {
-      return this.disruptor;
+      return disruptor;
    }
 
+   @Override
    public Class<?> getObjectType() {
       return SpringDisruptor.class;
    }
 
+   @Override
    public void setBeanFactory(@NonNull BeanFactory beanFactory) throws BeansException {
       this.beanFactory = beanFactory;
    }
 
    private ThreadFactory createThreadFactory() {
-      String threadFactoryBeanName = this.attributes.getString("threadFactoryBeanName");
+      String threadFactoryBeanName = attributes.getString("threadFactoryBeanName");
       if (StringUtils.hasText(threadFactoryBeanName)) {
-         return (ThreadFactory)this.beanFactory.getBean(threadFactoryBeanName, ThreadFactory.class);
-      } else {
-         Class<? extends ThreadFactory> factoryClass = this.attributes.getClass("threadFactory");
-         return (ThreadFactory)BeanUtils.instantiateClass(factoryClass);
+         return beanFactory.getBean(threadFactoryBeanName, ThreadFactory.class);
       }
+      Class<? extends ThreadFactory> factoryClass = attributes.getClass("threadFactory");
+      return BeanUtils.instantiateClass(factoryClass);
    }
 
    private WaitStrategy createWaitStrategy() {
-      String strategyBeanName = this.attributes.getString("strategyBeanName");
+      String strategyBeanName = attributes.getString("strategyBeanName");
       if (StringUtils.hasText(strategyBeanName)) {
-         return (WaitStrategy)this.beanFactory.getBean(strategyBeanName, WaitStrategy.class);
-      } else {
-         Class<? extends WaitStrategy> strategyClass = this.attributes.getClass("strategy");
-         return (WaitStrategy)BeanUtils.instantiateClass(strategyClass);
+         return beanFactory.getBean(strategyBeanName, WaitStrategy.class);
       }
+      Class<? extends WaitStrategy> strategyClass = attributes.getClass("strategy");
+      return BeanUtils.instantiateClass(strategyClass);
    }
 
+   @Override
    public void afterPropertiesSet() {
-      SpringEventFactory<T> factory = new SpringEventFactory<T>();
-      ResolvableType disruptorCustomizerType = ResolvableType.forClassWithGenerics(DisruptorCustomizer.class, new Class[]{this.type});
-      SpringEventHandler<T> springEventHandler = new SpringEventHandler<T>(this.beanFactory, this.type);
-      int bufferSize = this.attributes.getNumber("bufferSize").intValue();
-      ProducerType producerType = (ProducerType)this.attributes.getEnum("type");
-      this.disruptor = new SpringDisruptor<T>(factory, bufferSize, this.createThreadFactory(), producerType, this.createWaitStrategy());
-      this.disruptor.handleEventsWith(new EventHandler[]{springEventHandler});
-      this.beanFactory.getBeanProvider(disruptorCustomizerType).forEach((customizer) -> customizer.customize(this.disruptor));
-      this.disruptor.start();
+      SpringEventFactory<T> factory = new SpringEventFactory<>();
+      ResolvableType disruptorCustomizerType = ResolvableType.forClassWithGenerics(DisruptorCustomizer.class, type);
+      SpringEventHandler<T> springEventHandler = new SpringEventHandler<>(beanFactory, type);
+      int bufferSize = attributes.getNumber("bufferSize").intValue();
+      ProducerType producerType = attributes.getEnum("type");
+      disruptor =
+              new SpringDisruptor<>(factory, bufferSize, createThreadFactory(), producerType, createWaitStrategy());
+      disruptor.handleEventsWith(springEventHandler);
+      beanFactory
+              .<DisruptorCustomizer<T>>getBeanProvider(disruptorCustomizerType)
+              .forEach(customizer -> customizer.customize(disruptor));
+      disruptor.start();
    }
 
+   @Override
    public void destroy() {
-      this.disruptor.shutdown();
+      disruptor.shutdown();
    }
 }
