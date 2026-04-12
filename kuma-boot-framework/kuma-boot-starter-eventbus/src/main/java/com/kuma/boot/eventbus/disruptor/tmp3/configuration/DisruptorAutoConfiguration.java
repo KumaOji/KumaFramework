@@ -15,6 +15,7 @@ import com.kuma.boot.eventbus.disruptor.tmp3.context.DisruptorEventAwareProcesso
 import com.kuma.boot.eventbus.disruptor.tmp3.context.DisruptorTemplate;
 import com.kuma.boot.eventbus.disruptor.tmp3.context.EventHandlerDefinition;
 import com.kuma.boot.eventbus.disruptor.tmp3.context.Ini;
+import com.kuma.boot.eventbus.disruptor.tmp3.context.Section;
 import com.kuma.boot.eventbus.disruptor.tmp3.event.DisruptorApplicationEvent;
 import com.kuma.boot.eventbus.disruptor.tmp3.event.DisruptorBindEventFactory;
 import com.kuma.boot.eventbus.disruptor.tmp3.event.DisruptorEvent;
@@ -141,7 +142,7 @@ public class DisruptorAutoConfiguration implements ApplicationContextAware, Init
    protected Map<String, String> parseHandlerChainDefinitions(String definitions) {
       Ini ini = new Ini();
       ini.load(definitions);
-      Ini.Section section = ini.getSection("urls");
+      Section section = ini.getSection("urls");
       if (CollectionUtils.isEmpty(section)) {
          section = ini.getSection("");
       }

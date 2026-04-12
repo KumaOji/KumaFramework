@@ -36,7 +36,7 @@ public class ResultObjectTranslationHandler implements TranslationHandler {
          this.translationService.translation(data);
       } else {
          Map<String, Object> stringObjectMap = this.translationService.translationToMap(data);
-         resResult.setData(stringObjectMap);
+         ((Result)resResult).setData(stringObjectMap);
       }
 
    }

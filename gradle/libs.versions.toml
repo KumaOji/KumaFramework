@@ -452,6 +452,7 @@ logback-gelf = { module = "de.siegmar:logback-gelf", version.ref = "logback-gelf
 loki-logback-appender = { module = "com.github.loki4j:loki-logback-appender", version.ref = "loki-logback-appender" }
 opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
 opentelemetry-logback-appender = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0", version.ref = "opentelemetry-logback" }
+opentelemetry-hikaricp = { module = "io.opentelemetry.instrumentation:opentelemetry-hikaricp-3.0", version.ref = "opentelemetry-logback" }
 logback-kafka-appender = { module = "com.github.rahulsinghai:logback-kafka-appender", version.ref = "logback-kafka-appender" }
 freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }

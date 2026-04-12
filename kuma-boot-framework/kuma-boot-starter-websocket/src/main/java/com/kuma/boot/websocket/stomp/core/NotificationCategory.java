@@ -46,7 +46,7 @@ public enum NotificationCategory {
    }
 
    public static NotificationCategory get(Integer index) {
-      return (NotificationCategory)INDEX_MAP.getOrDefault(index, (Object)null);
+      return INDEX_MAP.getOrDefault(index, null);
    }
 
    public static List<Map<String, Object>> getPreprocessedJsonStructure() {
@@ -61,7 +61,7 @@ public enum NotificationCategory {
    static {
       for(NotificationCategory notificationCategory : values()) {
          INDEX_MAP.put(notificationCategory.getValue(), notificationCategory);
-         JSON_STRUCTURE.add(notificationCategory.getValue(), ImmutableMap.builder().put("value", notificationCategory.getValue()).put("key", notificationCategory.name()).put("text", notificationCategory.getDescription()).put("index", notificationCategory.getValue()).build());
+         JSON_STRUCTURE.add(notificationCategory.getValue(), ImmutableMap.<String, Object>builder().put("value", notificationCategory.getValue()).put("key", notificationCategory.name()).put("text", notificationCategory.getDescription()).put("index", notificationCategory.getValue()).build());
       }
 
    }

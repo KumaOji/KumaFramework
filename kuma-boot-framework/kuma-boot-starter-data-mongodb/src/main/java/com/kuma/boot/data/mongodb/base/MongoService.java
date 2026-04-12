@@ -39,7 +39,7 @@ public interface MongoService<E extends BaseMongoEntity, ID extends Serializable
    }
 
    default E findById(ID id) {
-      return (E)(this.getRepository().findById(id).orElse((Object)null));
+      return (E)(this.getRepository().findById(id).orElse(null));
    }
 
    default void deleteById(ID id) {
