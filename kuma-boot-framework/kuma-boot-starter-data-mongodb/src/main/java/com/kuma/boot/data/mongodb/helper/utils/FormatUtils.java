@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * FormatUtils
  *
- * @author shuigedeng
+ * @author kuma
  * @version 2022.05
  * @since 2022-05-27 21:53:43
  */

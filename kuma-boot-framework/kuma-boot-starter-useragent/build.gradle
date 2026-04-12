@@ -13,6 +13,9 @@ dependencies {
     // FastJSON2
     api projectLibs.fastjson2
 
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
     // JSpecify (@NonNull)
     api projectLibs.jspecify
 
