@@ -5,12 +5,12 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.interceptor.CustomizableTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Role;
 
 @AutoConfiguration
-@EnableAspectJAutoProxy
+@ConditionalOnProperty(name = "kuma.boot.jpa.trace.enabled", havingValue = "true", matchIfMissing = false)
 @Role(2)
 public class InterceptorAutoConfiguration {
    public InterceptorAutoConfiguration() {

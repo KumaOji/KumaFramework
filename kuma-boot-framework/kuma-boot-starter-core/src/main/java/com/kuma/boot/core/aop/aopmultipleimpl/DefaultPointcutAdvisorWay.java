@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Role;
 public class DefaultPointcutAdvisorWay {
 
     @Configuration
-    @ConditionalOnProperty(name = "aop.exception.pointcut", matchIfMissing = true)
+    @ConditionalOnProperty(name = "aop.exception.pointcut", havingValue = "true", matchIfMissing = false)
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public static class ServiceAopConfig {
 

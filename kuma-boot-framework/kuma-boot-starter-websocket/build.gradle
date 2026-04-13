@@ -54,9 +54,6 @@ dependencies {
     // Jakarta Servlet API
     compileOnly projectLibs.jakarta.servlet.api
 
-    // Spring Session (AbstractSessionWebSocketMessageBrokerConfigurer)
-    compileOnly projectLibs.spring.session.core
-
     // RocketMQ Spring (RocketMQTemplate / @RocketMQMessageListener — 可选消息分发器)
     compileOnly projectLibs.rocketmq.spring.boot.starter
 
