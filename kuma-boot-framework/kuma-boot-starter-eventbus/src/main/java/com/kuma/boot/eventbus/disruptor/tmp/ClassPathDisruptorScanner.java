@@ -1,12 +1,30 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.eventbus.disruptor.tmp;
 
 import com.kuma.boot.common.utils.reflect.AnnotationUtils;
 import com.kuma.boot.eventbus.disruptor.tmp.annotation.DisruptorEvent;
-import com.kuma.boot.eventbus.disruptor.tmp.factory.DisruptorFactoryBean;
+
 import java.lang.annotation.Annotation;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.jspecify.annotations.NonNull;
+
+import com.kuma.boot.eventbus.disruptor.tmp.factory.DisruptorFactoryBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -20,59 +38,92 @@ import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.jspecify.annotations.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * The type Class path disruptor scanner.
+ *
+ */
 public class ClassPathDisruptorScanner extends ClassPathBeanDefinitionScanner {
-   private final BeanNameGenerator beanNameGenerator;
 
-   public ClassPathDisruptorScanner(BeanDefinitionRegistry registry) {
-      this(registry, new DefaultBeanNameGenerator());
-   }
+    private final BeanNameGenerator beanNameGenerator;
 
-   public ClassPathDisruptorScanner(BeanDefinitionRegistry registry, BeanNameGenerator beanNameGenerator) {
-      super(registry, false);
-      this.beanNameGenerator = beanNameGenerator;
-   }
+    /**
+     * Instantiates a new Class path disruptor scanner.
+     *
+     * @param registry the registry
+     */
+    public ClassPathDisruptorScanner(BeanDefinitionRegistry registry) {
+        this(registry, new DefaultBeanNameGenerator());
+    }
 
-   public void registerFilters(Class<? extends Annotation> annotationType) {
-      this.addIncludeFilter(new AnnotationTypeFilter(annotationType));
-   }
+    /**
+     * Instantiates a new Class path disruptor scanner.
+     *
+     * @param registry          the registry
+     * @param beanNameGenerator the bean name generator
+     */
+    public ClassPathDisruptorScanner(BeanDefinitionRegistry registry, BeanNameGenerator beanNameGenerator) {
+        super(registry, false);
+        this.beanNameGenerator = beanNameGenerator;
+    }
 
-   protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-      return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
-   }
+    /**
+     * Register filters.
+     *
+     * @param annotationType the annotation type
+     */
+    public void registerFilters(Class<? extends Annotation> annotationType) {
+        addIncludeFilter(new AnnotationTypeFilter(annotationType));
+    }
 
-   protected @NonNull Set<BeanDefinitionHolder> doScan(String... basePackages) {
-      BeanDefinitionRegistry registry = super.getRegistry();
-      Assert.notNull(registry, "registry not be null");
-      Assert.notEmpty(basePackages, "At least one base package must be specified");
+    @Override
+    protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+        return beanDefinition.getMetadata().isIndependent()
+                && !beanDefinition.getMetadata().isAnnotation();
+    }
 
-      for(String basePackage : basePackages) {
-         for(BeanDefinition candidateComponent : this.findCandidateComponents(basePackage)) {
-            if (candidateComponent instanceof ScannedGenericBeanDefinition scannedGenericBeanDefinition) {
-               AnnotationMetadata metadata = scannedGenericBeanDefinition.getMetadata();
-               AnnotationAttributes attributes = AnnotationUtils.attributesFor(metadata, DisruptorEvent.class);
-               String beanClassName = candidateComponent.getBeanClassName();
-               Assert.notNull(beanClassName, "beanClassName not be null");
-               Class<?> type = ClassUtils.resolveClassName(beanClassName, super.getResourceLoader().getClassLoader());
-               BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(DisruptorFactoryBean.class);
-               builder.addPropertyValue("attributes", attributes);
-               builder.addPropertyValue("type", type);
-               builder.setAutowireMode(2);
-               AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-               String name = attributes.getString("value");
-               String beanName = StringUtils.hasText(name) ? name : this.beanNameGenerator.generateBeanName(beanDefinition, registry);
-               if (this.checkCandidate(beanName, beanDefinition)) {
-                  beanDefinition.setAttribute("factoryBeanObjectType", beanClassName);
-                  BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, beanName);
-                  this.registerBeanDefinition(holder, registry);
-               }
+    @NonNull
+    @Override
+    protected Set<BeanDefinitionHolder> doScan(@NonNull String... basePackages) {
+        BeanDefinitionRegistry registry = super.getRegistry();
+        Assert.notNull(registry, "registry not be null");
+        Assert.notEmpty(basePackages, "At least one base package must be specified");
+
+        for (String basePackage : basePackages) {
+            Set<BeanDefinition> candidateComponents = findCandidateComponents(basePackage);
+            for (BeanDefinition candidateComponent : candidateComponents) {
+                if (candidateComponent instanceof ScannedGenericBeanDefinition scannedGenericBeanDefinition) {
+                    AnnotationMetadata metadata = scannedGenericBeanDefinition.getMetadata();
+                    AnnotationAttributes attributes = AnnotationUtils.attributesFor(metadata, DisruptorEvent.class);
+                    String beanClassName = candidateComponent.getBeanClassName();
+                    Assert.notNull(beanClassName, "beanClassName not be null");
+                    Class<?> type = ClassUtils.resolveClassName(
+                            beanClassName, super.getResourceLoader().getClassLoader());
+                    BeanDefinitionBuilder builder =
+                            BeanDefinitionBuilder.genericBeanDefinition(DisruptorFactoryBean.class);
+                    builder.addPropertyValue("attributes", attributes);
+                    builder.addPropertyValue("type", type);
+                    builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+
+                    AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+                    String name = attributes.getString("value");
+                    String beanName = StringUtils.hasText(name)
+                            ? name
+                            : beanNameGenerator.generateBeanName(beanDefinition, registry);
+                    if (checkCandidate(beanName, beanDefinition)) {
+                        beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, beanClassName);
+
+                        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, beanName);
+                        registerBeanDefinition(holder, registry);
+                    }
+                }
             }
-         }
-      }
+        }
 
-      return new LinkedHashSet();
-   }
+        return new LinkedHashSet<>();
+    }
 }
