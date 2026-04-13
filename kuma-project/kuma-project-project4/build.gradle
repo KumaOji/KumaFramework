@@ -27,8 +27,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-data-common')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-jpa')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mongodb')
     api project(':kuma-boot-framework:kuma-boot-starter-data-elasticsearch')
+    api project(':kuma-boot-framework:kuma-boot-starter-ddd')
 
     // 缓存
     api project(':kuma-boot-framework:kuma-boot-starter-cache-common')

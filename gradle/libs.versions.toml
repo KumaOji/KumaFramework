@@ -182,6 +182,10 @@ commons-jexl3 = "3.3"
 janino = "3.1.12"
 joda-time = "2.13.1"
 mvel2 = "2.5.2.Final"
+hibernate = "7.0.0.Final"
+blaze-persistence = "1.6.14"
+dom4j = "2.1.4"
+commons-beanutils = "1.9.4"
 
 ## gradle 插件版本
 gradle-git-properties     = "2.4.2"
@@ -420,6 +424,14 @@ janino = { module = "org.codehaus.janino:janino", version.ref = "janino" }
 commons-compiler = { module = "org.codehaus.janino:commons-compiler", version.ref = "janino" }
 joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
 mvel2 = { module = "org.mvel:mvel2", version.ref = "mvel2" }
+hibernate-envers = { module = "org.hibernate.orm:hibernate-envers", version.ref = "hibernate" }
+spring-data-envers = { module = "org.springframework.data:spring-data-envers", version.ref = "springboot" }
+spring-data-commons = { module = "org.springframework.data:spring-data-commons", version.ref = "springboot" }
+blaze-persistence-core-api = { module = "com.blazebit:blaze-persistence-core-api-jakarta", version.ref = "blaze-persistence" }
+blaze-persistence-core-impl = { module = "com.blazebit:blaze-persistence-core-impl-jakarta", version.ref = "blaze-persistence" }
+blaze-persistence-integration-hibernate = { module = "com.blazebit:blaze-persistence-integration-hibernate-6.2", version.ref = "blaze-persistence" }
+dom4j = { module = "org.dom4j:dom4j", version.ref = "dom4j" }
+commons-beanutils = { module = "commons-beanutils:commons-beanutils", version.ref = "commons-beanutils" }
 hibernate-validator = { module = "org.hibernate.validator:hibernate-validator", version.ref = "hibernate-validator" }
 spring-boot-starter-mail = { module = "org.springframework.boot:spring-boot-starter-mail", version.ref = "springboot" }
 sentinel-parameter-flow-control = { module = "com.alibaba.csp:sentinel-parameter-flow-control", version.ref = "sentinel" }
