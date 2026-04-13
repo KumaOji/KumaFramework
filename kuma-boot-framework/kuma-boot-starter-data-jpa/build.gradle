@@ -14,7 +14,12 @@ dependencies {
     api projectLibs.spring.boot.starter.data.jpa
 
     // QueryDSL JPA（JPAQueryFactory / QuerydslJpaPredicateExecutor 等）
-    api projectLibs.querydsl.jpa
+    // 使用 jakarta classifier，匹配 Spring Boot 3.x 的 jakarta.persistence 命名空间
+    api(projectLibs.querydsl.jpa) {
+        artifact {
+            classifier = 'jakarta'
+        }
+    }
     api projectLibs.querydsl.core
 
     // Hibernate Envers（@Audited / DefaultRevisionEntity / RevisionListener 等审计类）
