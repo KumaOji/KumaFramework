@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.webagg.entity;
 
 import com.querydsl.core.types.Path;
@@ -26,8 +31,9 @@ public class QBaseSuperEntity extends EntityPathBase<BaseSuperEntity<? extends S
    public final StringPath remark;
    public final NumberPath<Integer> version;
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public QBaseSuperEntity(String variable) {
-      super(BaseSuperEntity.class, PathMetadataFactory.forVariable(variable));
+      super((Class) BaseSuperEntity.class, PathMetadataFactory.forVariable(variable));
       this.id = this._super.id;
       this.modifyDate = this.createDateTime("modifyDate", LocalDateTime.class);
       this.modifyUser = this.createString("modifyUser");
@@ -35,8 +41,9 @@ public class QBaseSuperEntity extends EntityPathBase<BaseSuperEntity<? extends S
       this.version = this.createNumber("version", Integer.class);
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public QBaseSuperEntity(Path<? extends BaseSuperEntity> path) {
-      super(path.getType(), path.getMetadata());
+      super((Class) path.getType(), path.getMetadata());
       this.id = this._super.id;
       this.modifyDate = this.createDateTime("modifyDate", LocalDateTime.class);
       this.modifyUser = this.createString("modifyUser");
@@ -44,8 +51,9 @@ public class QBaseSuperEntity extends EntityPathBase<BaseSuperEntity<? extends S
       this.version = this.createNumber("version", Integer.class);
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public QBaseSuperEntity(PathMetadata metadata) {
-      super(BaseSuperEntity.class, metadata);
+      super((Class) BaseSuperEntity.class, metadata);
       this.id = this._super.id;
       this.modifyDate = this.createDateTime("modifyDate", LocalDateTime.class);
       this.modifyUser = this.createString("modifyUser");

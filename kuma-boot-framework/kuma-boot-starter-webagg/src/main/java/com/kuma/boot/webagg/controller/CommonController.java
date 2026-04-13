@@ -18,7 +18,7 @@ package com.kuma.boot.webagg.controller;
 
 import com.kuma.boot.common.model.result.EmptyResult;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.security.spring.support.utils.SecurityUtils;
+import com.kuma.boot.security.spring.utils.SecurityUtils;
 
 /**
  * BaseController

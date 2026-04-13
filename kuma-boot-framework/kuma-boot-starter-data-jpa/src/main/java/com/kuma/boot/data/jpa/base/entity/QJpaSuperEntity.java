@@ -27,15 +27,18 @@ public class QJpaSuperEntity extends EntityPathBase<JpaSuperEntity<? extends Ser
    public final StringPath modifyUser = this.createString("modifyUser");
    public final NumberPath<Integer> version = this.createNumber("version", Integer.class);
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public QJpaSuperEntity(String variable) {
-      super((Class<? extends JpaSuperEntity<? extends Serializable>>) JpaSuperEntity.class, PathMetadataFactory.forVariable(variable));
+      super((Class) JpaSuperEntity.class, PathMetadataFactory.forVariable(variable));
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public QJpaSuperEntity(Path<? extends JpaSuperEntity> path) {
-      super((Class<? extends JpaSuperEntity<? extends Serializable>>) path.getType(), path.getMetadata());
+      super((Class) path.getType(), path.getMetadata());
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public QJpaSuperEntity(PathMetadata metadata) {
-      super((Class<? extends JpaSuperEntity<? extends Serializable>>) JpaSuperEntity.class, metadata);
+      super((Class) JpaSuperEntity.class, metadata);
    }
 }
