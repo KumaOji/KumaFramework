@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.application.dto;
 
 import java.util.ArrayList;
@@ -5,19 +10,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class MultiResponse extends Response {
+public class MultiResponse<T> extends Response {
    private static final long serialVersionUID = 1L;
-   private Collection data;
+   private Collection<T> data;
 
-   public List getData() {
+   public MultiResponse() {
+   }
+
+   public List<T> getData() {
       if (null == this.data) {
          return Collections.emptyList();
       } else {
-         return (List)(this.data instanceof List ? (List)this.data : new ArrayList(this.data));
+         return (List<T>)(this.data instanceof List ? (List)this.data : new ArrayList(this.data));
       }
    }
 
-   public void setData(Collection data) {
+   public void setData(Collection<T> data) {
       this.data = data;
    }
 
@@ -43,8 +51,8 @@ public class MultiResponse extends Response {
       return response;
    }
 
-   public static MultiResponse of(Collection data) {
-      MultiResponse<T> response = new MultiResponse();
+   public static <T> MultiResponse<T> of(Collection<T> data) {
+      MultiResponse<T> response = new MultiResponse<T>();
       response.setSuccess(true);
       response.setData(data);
       return response;

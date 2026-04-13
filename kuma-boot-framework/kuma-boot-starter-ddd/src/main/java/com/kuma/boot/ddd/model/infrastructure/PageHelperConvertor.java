@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.infrastructure;
 
 import com.github.pagehelper.PageHelper;
@@ -17,15 +22,15 @@ public interface PageHelperConvertor {
       PageHelper.startPage(pageQuery.getPageIndex(), pageQuery.getPageSize(), orderBy);
    }
 
-   static PageResponse toPageResponse(PageInfo pageInfo) {
+   static <T> PageResponse<T> toPageResponse(PageInfo<T> pageInfo) {
       return PageResponse.of(pageInfo.getList(), Long.valueOf(pageInfo.getTotal()).intValue(), pageInfo.getPageSize(), pageInfo.getPageNum());
    }
 
-   static PageResponse toPageResponse(List listResult) {
+   static <T> PageResponse<T> toPageResponse(List<T> listResult) {
       return toPageResponse(PageInfo.of(listResult));
    }
 
-   static PageResponse toPageResponse(PageInfo pageInfo, Function convertor) {
+   static <T, R> PageResponse<R> toPageResponse(PageInfo<T> pageInfo, Function<T, R> convertor) {
       List<R> resultList = Collections.emptyList();
       if (null != pageInfo.getList() && !pageInfo.getList().isEmpty()) {
          resultList = (List)pageInfo.getList().stream().map(convertor).collect(Collectors.toList());
@@ -34,7 +39,7 @@ public interface PageHelperConvertor {
       return PageResponse.of(resultList, Long.valueOf(pageInfo.getTotal()).intValue(), pageInfo.getPageSize(), pageInfo.getPageNum());
    }
 
-   static PageResponse toPageResponse(List listResult, Function convertor) {
+   static <T, R> PageResponse<R> toPageResponse(List<T> listResult, Function<T, R> convertor) {
       return toPageResponse(PageInfo.of(listResult), convertor);
    }
 }

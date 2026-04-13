@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.application.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -6,12 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Schema(
-   name = "BaseResult",
-   description = "客户端基础返回对象"
+        name = "BaseResult",
+        description = "客户端基础返回对象"
 )
 public abstract class BaseResult implements Serializable {
    private static final long serialVersionUID = -7605952923416404638L;
-   protected Map extValues = new HashMap();
+   protected Map<String, Object> extValues = new HashMap();
+
+   public BaseResult() {
+   }
 
    public Object getExtField(String key) {
       return this.extValues != null ? this.extValues.get(key) : null;
@@ -21,11 +29,11 @@ public abstract class BaseResult implements Serializable {
       this.extValues.put(fieldName, value);
    }
 
-   public Map getExtValues() {
+   public Map<String, Object> getExtValues() {
       return this.extValues;
    }
 
-   public void setExtValues(Map extValues) {
+   public void setExtValues(Map<String, Object> extValues) {
       this.extValues = extValues;
    }
 }

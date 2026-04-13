@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.infrastructure;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -24,11 +29,11 @@ public interface MpPageConvertor {
       return page;
    }
 
-   static PageResponse toPageResponse(IPage pageResult) {
+   static <T> PageResponse<T> toPageResponse(IPage<T> pageResult) {
       return PageResponse.of(pageResult.getRecords(), Long.valueOf(pageResult.getTotal()).intValue(), Long.valueOf(pageResult.getCurrent()).intValue(), Long.valueOf(pageResult.getSize()).intValue());
    }
 
-   static PageResponse toPageResponse(IPage pageResult, Function convertor) {
+   static <T, R> PageResponse<R> toPageResponse(IPage<T> pageResult, Function<T, R> convertor) {
       List<R> resultList = Collections.emptyList();
       if (CollectionUtils.isNotEmpty(pageResult.getRecords())) {
          resultList = (List)pageResult.getRecords().stream().map(convertor).collect(Collectors.toList());

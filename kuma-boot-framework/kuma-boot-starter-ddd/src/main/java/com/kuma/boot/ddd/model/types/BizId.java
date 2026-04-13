@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.types;
 
 import cn.hutool.core.util.IdUtil;
@@ -11,7 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class BizId extends Identifier {
+public class BizId extends Identifier<Long> {
    private @NotNull @Positive Long id;
 
    BizId() {
@@ -30,7 +35,7 @@ public class BizId extends Identifier {
       return new BizId(IdUtil.getSnowflakeNextId());
    }
 
-   public static Set toValues(Collection bizIds) {
+   public static Set<Long> toValues(Collection<BizId> bizIds) {
       Validates.notEmpty(bizIds, "BizId list is empty");
       return (Set)bizIds.stream().map(BizId::getId).collect(Collectors.toSet());
    }
@@ -39,13 +44,13 @@ public class BizId extends Identifier {
       return new BizId(id);
    }
 
-   public static Set fromValues(Collection values) {
+   public static Set<BizId> fromValues(Collection<Long> values) {
       Validates.notEmpty(values, "BizId value list is empty");
       return (Set)values.stream().map(BizId::new).collect(Collectors.toSet());
    }
 
-   public static Set fromNullableValues(Collection values) {
-      return (Set)(!Objects.isNull(values) && !values.isEmpty() ? (Set)values.stream().map(BizId::new).collect(Collectors.toSet()) : new HashSet());
+   public static Set<BizId> fromNullableValues(Collection<Long> values) {
+      return (Set<BizId>)(!Objects.isNull(values) && !values.isEmpty() ? (Set)values.stream().map(BizId::new).collect(Collectors.toSet()) : new HashSet());
    }
 
    public String toString() {

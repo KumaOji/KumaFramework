@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.domain.handler;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -12,8 +17,8 @@ import org.springframework.util.Assert;
 
 @Component
 @RocketMQTransactionListener(
-   corePoolSize = 16,
-   maximumPoolSize = 32
+        corePoolSize = 16,
+        maximumPoolSize = 32
 )
 public class DomainEventTransactionHandler extends AbstractTransactionHandler {
    private final DomainEventService domainEventService;

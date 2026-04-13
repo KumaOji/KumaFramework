@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.application.assembler;
 
 import com.kuma.boot.ddd.model.domain.ValueObjectEnum;
@@ -10,8 +15,8 @@ public class BaseAssembler {
    private BaseAssembler() {
    }
 
-   public static Object convert(Object source, Class targetClass) {
-      R target = (R)null;
+   public static <T, R> R convert(T source, Class<R> targetClass) {
+      R target = null;
 
       try {
          target = (R)targetClass.newInstance();
@@ -26,7 +31,7 @@ public class BaseAssembler {
       return target;
    }
 
-   public static Object copyVoEnumValue(Object source, Object target) {
+   public static <T, R> R copyVoEnumValue(T source, R target) {
       BeanWrapperImpl sourceWrapper = new BeanWrapperImpl(source);
       BeanWrapperImpl targetWrapper = new BeanWrapperImpl(target);
       PropertyDescriptor[] sourcePropertyDescriptors = sourceWrapper.getPropertyDescriptors();

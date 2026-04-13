@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.domain.handler;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -12,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RemoveCacheEventHandler extends AbstractDomainEventHandler {
-   private final List cacheManagers;
+   private final List<CacheManager> cacheManagers;
 
-   public RemoveCacheEventHandler(DomainEventPublisher rocketMQDomainEventPublisher, List cacheManagers) {
+   public RemoveCacheEventHandler(DomainEventPublisher rocketMQDomainEventPublisher, List<CacheManager> cacheManagers) {
       super(rocketMQDomainEventPublisher);
       this.cacheManagers = cacheManagers;
    }

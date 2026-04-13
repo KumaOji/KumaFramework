@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.domain.handler;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -8,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 
-public abstract class AbstractDomainEventHandler extends TraceHandler implements RocketMQListener {
+public abstract class AbstractDomainEventHandler extends TraceHandler implements RocketMQListener<MessageExt> {
    protected final DomainEventPublisher rocketMQDomainEventPublisher;
 
    protected AbstractDomainEventHandler(DomainEventPublisher rocketMQDomainEventPublisher) {

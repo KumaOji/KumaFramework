@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.util.validation;
 
 import com.kuma.boot.ddd.model.exception.ValidateException;
@@ -19,16 +24,19 @@ public class Validates {
    private static final String SEPARATOR_COLON = ": ";
    private static final String SEPARATOR_COMMA = ", ";
    private static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-   public static BiFunction errorToExceptionFunc = (errCode, errMessage) -> (RuntimeException)Optional.ofNullable(errCode).map((errCodeInner) -> new ValidateException(errMessage)).orElse(new ValidateException(errMessage));
-   private static final ThreadLocal validationExceptionHolder = new ThreadLocal();
+   public static BiFunction<String, String, RuntimeException> errorToExceptionFunc = (errCode, errMessage) -> (RuntimeException)Optional.ofNullable(errCode).map((errCodeInner) -> new ValidateException(errMessage)).orElse(new ValidateException(errMessage));
+   private static final ThreadLocal<RuntimeException> validationExceptionHolder = new ThreadLocal();
 
-   public static void validateEntity(Object object, Class... groups) {
+   public Validates() {
+   }
+
+   public static <T> void validateEntity(T object, Class<?>... groups) {
       Set<ConstraintViolation<T>> constraintViolations = validator.validate(object, groups);
       RuntimeException validationException = getValidationException(true);
       if (Objects.nonNull(validationException)) {
          throw validationException;
       } else if (null != constraintViolations && !constraintViolations.isEmpty()) {
-         throw (RuntimeException)errorToExceptionFunc.apply((Object)null, convertConstraintViolations(constraintViolations));
+         throw (RuntimeException)errorToExceptionFunc.apply((String) null, convertConstraintViolations(constraintViolations));
       }
    }
 
@@ -49,15 +57,15 @@ public class Validates {
       Validates.validator = validator;
    }
 
-   public static String convertConstraintViolations(Set constraintViolations) {
+   public static <T> String convertConstraintViolations(Set<ConstraintViolation<T>> constraintViolations) {
       return null != constraintViolations && !constraintViolations.isEmpty() ? (String)constraintViolations.stream().map(Validates::convertConstrainViolation).collect(Collectors.joining(", ")) : null;
    }
 
-   public static String convertConstraintViolationsUnknownType(Set constraintViolations) {
+   public static <T> String convertConstraintViolationsUnknownType(Set<ConstraintViolation<?>> constraintViolations) {
       return null != constraintViolations && !constraintViolations.isEmpty() ? (String)constraintViolations.stream().map(Validates::convertConstrainViolation).collect(Collectors.joining(", ")) : null;
    }
 
-   public static String convertConstrainViolation(ConstraintViolation constraintViolation) {
+   public static String convertConstrainViolation(ConstraintViolation<?> constraintViolation) {
       String rootBeanName = constraintViolation.getRootBeanClass().getSimpleName();
       String path = constraintViolation.getPropertyPath().toString();
       String errMsg = constraintViolation.getMessage();
@@ -127,38 +135,38 @@ public class Validates {
    }
 
    public static void notEmpty(String str, String errMessage) {
-      notEmpty((String)str, (String)null, errMessage);
+      notEmpty(str, (String)null, errMessage);
    }
 
    public static void notEmpty(String str) {
       notEmpty(str, "[Assertion failed] Must not empty");
    }
 
-   public static void notEmpty(Collection collection, String errCode, String errMessage) {
+   public static void notEmpty(Collection<?> collection, String errCode, String errMessage) {
       if (collection == null || collection.isEmpty()) {
          throw (RuntimeException)errorToExceptionFunc.apply(errCode, errMessage);
       }
    }
 
-   public static void notEmpty(Collection collection, String errMessage) {
+   public static void notEmpty(Collection<?> collection, String errMessage) {
       notEmpty((Collection)collection, (String)null, errMessage);
    }
 
-   public static void notEmpty(Collection collection) {
+   public static void notEmpty(Collection<?> collection) {
       notEmpty(collection, "[Assertion failed] Collection must not be empty: it must contain at least 1 element");
    }
 
-   public static void notEmpty(Map map, String errCode, String errMessage) {
+   public static void notEmpty(Map<?, ?> map, String errCode, String errMessage) {
       if (map == null || map.isEmpty()) {
          throw (RuntimeException)errorToExceptionFunc.apply(errCode, errMessage);
       }
    }
 
-   public static void notEmpty(Map map, String errMessage) {
+   public static void notEmpty(Map<?, ?> map, String errMessage) {
       notEmpty((Map)map, (String)null, errMessage);
    }
 
-   public static void notEmpty(Map map) {
+   public static void notEmpty(Map<?, ?> map) {
       notEmpty(map, "[Assertion failed] Map must not be empty: it must contain at least one entry");
    }
 

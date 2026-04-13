@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.infrastructure;
 
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -24,11 +29,11 @@ public interface JpaPageConvertor {
       return pageRequest;
    }
 
-   static PageResponse toPageResponse(Page pageResult) {
+   static <T> PageResponse<T> toPageResponse(Page<T> pageResult) {
       return PageResponse.of(pageResult.getContent(), Long.valueOf(pageResult.getTotalElements()).intValue(), pageResult.getPageable().getPageSize(), pageResult.getPageable().getPageNumber() + 1);
    }
 
-   static PageResponse toPageResponse(Page pageResult, Function convertor) {
+   static <T, R> PageResponse<R> toPageResponse(Page<T> pageResult, Function<T, R> convertor) {
       List<R> resultList = Collections.emptyList();
       if (CollectionUtils.isNotEmpty(pageResult.getContent())) {
          resultList = (List)pageResult.getContent().stream().map(convertor).collect(Collectors.toList());
