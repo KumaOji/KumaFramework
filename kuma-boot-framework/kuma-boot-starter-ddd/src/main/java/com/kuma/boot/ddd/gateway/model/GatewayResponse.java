@@ -1,11 +1,19 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.gateway.model;
 
-public class GatewayResponse {
+public class GatewayResponse<T> {
    private GatewayResponseStatus status;
    private String failCode;
    private String failMsg;
-   private Object result;
+   private T result;
    private GatewayRecord gatewayRecord;
+
+   public GatewayResponse() {
+   }
 
    public GatewayResponseStatus getStatus() {
       return this.status;
@@ -31,11 +39,11 @@ public class GatewayResponse {
       this.failMsg = failMsg;
    }
 
-   public Object getResult() {
+   public T getResult() {
       return this.result;
    }
 
-   public void setResult(Object result) {
+   public void setResult(T result) {
       this.result = result;
    }
 

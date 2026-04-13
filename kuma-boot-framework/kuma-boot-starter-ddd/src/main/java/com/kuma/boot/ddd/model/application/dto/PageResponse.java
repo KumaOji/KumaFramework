@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.application.dto;
 
 import java.util.ArrayList;
@@ -5,12 +10,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class PageResponse extends Response {
+public class PageResponse<T> extends Response {
    private static final long serialVersionUID = 1L;
    private int totalCount = 0;
    private int pageSize = 1;
    private int pageIndex = 1;
-   private Collection data;
+   private Collection<T> data;
+
+   public PageResponse() {
+   }
 
    public int getTotalCount() {
       return this.totalCount;
@@ -46,15 +54,15 @@ public class PageResponse extends Response {
 
    }
 
-   public List getData() {
+   public List<T> getData() {
       if (null == this.data) {
          return Collections.emptyList();
       } else {
-         return (List)(this.data instanceof List ? (List)this.data : new ArrayList(this.data));
+         return (List<T>)(this.data instanceof List ? (List)this.data : new ArrayList(this.data));
       }
    }
 
-   public void setData(Collection data) {
+   public void setData(Collection<T> data) {
       this.data = data;
    }
 
@@ -84,8 +92,8 @@ public class PageResponse extends Response {
       return response;
    }
 
-   public static PageResponse of(int pageSize, int pageIndex) {
-      PageResponse<T> response = new PageResponse();
+   public static <T> PageResponse<T> of(int pageSize, int pageIndex) {
+      PageResponse<T> response = new PageResponse<T>();
       response.setSuccess(true);
       response.setData(Collections.emptyList());
       response.setTotalCount(0);
@@ -94,8 +102,8 @@ public class PageResponse extends Response {
       return response;
    }
 
-   public static PageResponse of(Collection data, int totalCount, int pageSize, int pageIndex) {
-      PageResponse<T> response = new PageResponse();
+   public static <T> PageResponse<T> of(Collection<T> data, int totalCount, int pageSize, int pageIndex) {
+      PageResponse<T> response = new PageResponse<T>();
       response.setSuccess(true);
       response.setData(data);
       response.setTotalCount(totalCount);

@@ -8,6 +8,7 @@ dependencies {
     // 基础公共工具（LogUtils 等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-lock')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
 
     // Spring Data JPA（JpaRepository / SimpleJpaRepository / AuditingEntityListener 等核心类）
     api projectLibs.spring.boot.starter.data.jpa

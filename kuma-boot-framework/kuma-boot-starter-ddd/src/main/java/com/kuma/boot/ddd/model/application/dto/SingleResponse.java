@@ -1,14 +1,22 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.application.dto;
 
-public class SingleResponse extends Response {
+public class SingleResponse<T> extends Response {
    private static final long serialVersionUID = 1L;
-   private Object data;
+   private T data;
 
-   public Object getData() {
+   public SingleResponse() {
+   }
+
+   public T getData() {
       return this.data;
    }
 
-   public void setData(Object data) {
+   public void setData(T data) {
       this.data = data;
    }
 
@@ -26,8 +34,8 @@ public class SingleResponse extends Response {
       return response;
    }
 
-   public static SingleResponse of(Object data) {
-      SingleResponse<T> response = new SingleResponse();
+   public static <T> SingleResponse<T> of(T data) {
+      SingleResponse<T> response = new SingleResponse<T>();
       response.setSuccess(true);
       response.setData(data);
       return response;

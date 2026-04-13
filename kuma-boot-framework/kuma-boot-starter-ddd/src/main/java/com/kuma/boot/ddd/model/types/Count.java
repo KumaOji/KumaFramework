@@ -1,8 +1,13 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.types;
 
 import com.kuma.boot.ddd.model.domain.ValueObject;
 
-public class Count implements ValueObject {
+public class Count implements ValueObject<Count> {
    private final Integer value;
 
    Count(Integer value) {

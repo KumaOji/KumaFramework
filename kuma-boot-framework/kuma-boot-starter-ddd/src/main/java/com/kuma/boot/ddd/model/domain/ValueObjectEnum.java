@@ -1,14 +1,19 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.model.domain;
 
 import com.kuma.boot.ddd.model.exception.ValidateException;
 import java.util.stream.Stream;
 
-public interface ValueObjectEnum extends ValueObject {
-   Object getValue();
+public interface ValueObjectEnum<T> extends ValueObject<T> {
+   T getValue();
 
    String getDesc();
 
-   static ValueObjectEnum of(Object value, Class valueObjectEnumClass) {
-      return (ValueObjectEnum)Stream.of((ValueObjectEnum[])valueObjectEnumClass.getEnumConstants()).filter((curEnum) -> curEnum.getValue().equals(value)).findFirst().orElseThrow(() -> new ValidateException(String.format("%s.value is illegal", valueObjectEnumClass.getSimpleName())));
+   static <E extends ValueObjectEnum<T>, T> E of(T value, Class<E> valueObjectEnumClass) {
+      return (E)(Stream.of((ValueObjectEnum[])valueObjectEnumClass.getEnumConstants()).filter((curEnum) -> curEnum.getValue().equals(value)).findFirst().orElseThrow(() -> new ValidateException(String.format("%s.value is illegal", valueObjectEnumClass.getSimpleName()))));
    }
 }

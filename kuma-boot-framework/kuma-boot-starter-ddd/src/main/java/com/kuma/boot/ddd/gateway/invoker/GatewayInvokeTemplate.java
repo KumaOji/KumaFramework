@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.ddd.gateway.invoker;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -13,13 +18,13 @@ import com.kuma.boot.ddd.gateway.model.GatewayResponse;
 import com.kuma.boot.ddd.gateway.model.GatewayRouter;
 import java.util.LinkedList;
 
-public class GatewayInvokeTemplate {
-   private LinkedList preInterceptors;
-   private LinkedList postInterceptors;
-   private GatewayRouter gatewayRouter;
+public class GatewayInvokeTemplate<P, R> {
+   private LinkedList<GatewayPreInterceptor<P>> preInterceptors;
+   private LinkedList<GatewayPostInterceptor<R>> postInterceptors;
+   private GatewayRouter<P> gatewayRouter;
    private String description;
 
-   public GatewayInvokeTemplate(LinkedList preInterceptors, LinkedList postInterceptors, GatewayRouter gatewayRouter, String description) {
+   public GatewayInvokeTemplate(LinkedList<GatewayPreInterceptor<P>> preInterceptors, LinkedList<GatewayPostInterceptor<R>> postInterceptors, GatewayRouter<P> gatewayRouter, String description) {
       this.preInterceptors = preInterceptors;
       this.postInterceptors = postInterceptors;
       this.gatewayRouter = gatewayRouter;
@@ -31,7 +36,7 @@ public class GatewayInvokeTemplate {
       this.postInterceptors.addLast(ExceptionProcessInterceptor.getInstance());
    }
 
-   public GatewayInvokeTemplate(LinkedList preInterceptors, LinkedList postInterceptors, GatewayRouter gatewayRouter, String description, Object ext) {
+   public GatewayInvokeTemplate(LinkedList<GatewayPreInterceptor<P>> preInterceptors, LinkedList<GatewayPostInterceptor<R>> postInterceptors, GatewayRouter<P> gatewayRouter, String description, Object ext) {
       this.preInterceptors = preInterceptors;
       this.postInterceptors = postInterceptors;
       this.gatewayRouter = gatewayRouter;
@@ -43,7 +48,7 @@ public class GatewayInvokeTemplate {
       this.postInterceptors.addLast(ExceptionProcessInterceptor.getInstance());
    }
 
-   public GatewayResponse invoke(GatewayRequest request) {
+   public GatewayResponse<R> invoke(GatewayRequest<P> request) {
       GatewayContext context = new GatewayContext();
       context.setDescription(this.description);
       context.setTraceId(request.getGatewayRecord().getTraceId());
@@ -75,15 +80,15 @@ public class GatewayInvokeTemplate {
       }
    }
 
-   private void doPre(GatewayRequest request, GatewayContext context) {
-      for(GatewayPreInterceptor interceptor : this.preInterceptors) {
+   private void doPre(GatewayRequest<P> request, GatewayContext context) {
+      for(GatewayPreInterceptor<P> interceptor : this.preInterceptors) {
          interceptor.intercept(request, context);
       }
 
    }
 
-   private void doPost(GatewayResponse response, GatewayContext context) {
-      for(GatewayPostInterceptor interceptor : this.postInterceptors) {
+   private void doPost(GatewayResponse<R> response, GatewayContext context) {
+      for(GatewayPostInterceptor<R> interceptor : this.postInterceptors) {
          try {
             if (interceptor.shouldFilter(context)) {
                interceptor.intercept(response, context);
@@ -99,27 +104,27 @@ public class GatewayInvokeTemplate {
 
    }
 
-   public LinkedList getPreInterceptors() {
+   public LinkedList<GatewayPreInterceptor<P>> getPreInterceptors() {
       return this.preInterceptors;
    }
 
-   public void setPreInterceptors(LinkedList preInterceptors) {
+   public void setPreInterceptors(LinkedList<GatewayPreInterceptor<P>> preInterceptors) {
       this.preInterceptors = preInterceptors;
    }
 
-   public LinkedList getPostInterceptors() {
+   public LinkedList<GatewayPostInterceptor<R>> getPostInterceptors() {
       return this.postInterceptors;
    }
 
-   public void setPostInterceptors(LinkedList postInterceptors) {
+   public void setPostInterceptors(LinkedList<GatewayPostInterceptor<R>> postInterceptors) {
       this.postInterceptors = postInterceptors;
    }
 
-   public GatewayRouter getGatewayRouter() {
+   public GatewayRouter<P> getGatewayRouter() {
       return this.gatewayRouter;
    }
 
-   public void setGatewayRouter(GatewayRouter gatewayRouter) {
+   public void setGatewayRouter(GatewayRouter<P> gatewayRouter) {
       this.gatewayRouter = gatewayRouter;
    }
 
