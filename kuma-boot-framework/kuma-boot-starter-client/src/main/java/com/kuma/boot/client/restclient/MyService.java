@@ -3,7 +3,7 @@ package com.kuma.boot.client.restclient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-@Service
+@Service("restClientMyService")
 public class MyService {
    private final RestClient restClient;
 

@@ -11,6 +11,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.adapter.AdvisorAdapter;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
@@ -27,6 +28,7 @@ import java.lang.reflect.Method;
 public class DefaultPointcutAdvisorDynamicWay {
 
     @Configuration
+    @ConditionalOnProperty(name = "kuma.boot.aop.dynamic-way.enabled", havingValue = "true", matchIfMissing = false)
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public static class WebmvcConfig {
 
