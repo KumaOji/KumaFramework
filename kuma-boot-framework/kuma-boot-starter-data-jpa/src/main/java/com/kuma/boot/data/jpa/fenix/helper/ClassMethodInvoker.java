@@ -10,20 +10,30 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * 通过反射调用 class 方法中的指定方法的工具类.
+ *
+ * @author blinkfox on 2019-08-11.
+ * @since v1.0.0
+ */
 public final class ClassMethodInvoker {
-   public ClassMethodInvoker() {
-   }
 
+   /**
+    * 根据被调用类的 class、被调用类的方法名和参数的 Map 映射关系来调用此方法.
+    *
+    * @param cls 被调用类的 class
+    * @param method 被调用类的方法名
+    * @param paramMap 被调用类的方法的参数 Map 映射关系，即 key 是参数名，value 是参数值.
+    * @return {@link SqlInfo} 对象
+    */
    public static SqlInfo invoke(Class<?> cls, String method, Map<String, Object> paramMap) {
       Method[] methods = cls.getMethods();
-
-      for(Method m : methods) {
+      for (Method m : methods) {
          if (m.getName().equals(method)) {
             Parameter[] parameters = m.getParameters();
-            List<Object> paramValues = new ArrayList(parameters.length);
-
-            for(Parameter p : parameters) {
-               Param param = (Param)p.getAnnotation(Param.class);
+            List<Object> paramValues = new ArrayList<>(parameters.length);
+            for (Parameter p : parameters) {
+               Param param = p.getAnnotation(Param.class);
                paramValues.add(param != null ? paramMap.get(param.value()) : null);
             }
 
@@ -31,16 +41,27 @@ public final class ClassMethodInvoker {
          }
       }
 
-      String var10002 = cls.getName();
-      throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u672a\u627e\u5230\u3010" + var10002 + "\u3011\u7c7b\u4e2d\u53ef\u6267\u884c\u7684\u516c\u5171\u3010" + method + "\u3011\u65b9\u6cd5\uff0c\u8bf7\u68c0\u67e5\u8be5\u65b9\u6cd5\u662f\u5426\u5b58\u5728\u6216\u8005\u8bbf\u95ee\u6743\u9650\u662f public \u578b\u7684\uff01");
+      throw new FenixException("【Fenix 异常】未找到【" + cls.getName() + "】类中可执行的公共【" + method + "】方法，"
+              + "请检查该方法是否存在或者访问权限是 public 型的！");
    }
 
+   /**
+    * 正式通过反射调用某个 class 的某个方法.
+    *
+    * @param cls 被调用类的 class
+    * @param m 被调用类的方法名
+    * @param paramValues 参数值的集合.
+    * @return {@link SqlInfo} 对象
+    */
    private static SqlInfo invokeMethod(Class<?> cls, Method m, List<Object> paramValues) {
       try {
          m.setAccessible(true);
-         return (SqlInfo)m.invoke(cls.getDeclaredConstructor().newInstance(), paramValues.toArray());
-      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u521b\u5efa\u3010" + cls.getName() + "\u3011\u7c7b\u7684\u5b9e\u4f8b\u5f02\u5e38\uff0c\u8bf7\u68c0\u67e5\u6784\u9020\u65b9\u6cd5\u662f\u5426\u662f\u65e0\u53c2 public \u578b\u7684\uff0c\u6216\u8005\u68c0\u67e5\u8c03\u7528\u7684\u3010" + m.getName() + "\u3011\u65b9\u6cd5\u662f\u5426\u662f public \u578b\u7684\uff01", e);
+         return (SqlInfo) m.invoke(cls.getDeclaredConstructor().newInstance(), paramValues.toArray());
+      } catch (InstantiationException | NoSuchMethodException
+               | IllegalAccessException | InvocationTargetException e) {
+         throw new FenixException("【Fenix 异常】创建【" + cls.getName() + "】类的实例异常，请检查构造方法是否是无参 public 型的，"
+                 + "或者检查调用的【" + m.getName() + "】方法是否是 public 型的！", e);
       }
    }
+
 }

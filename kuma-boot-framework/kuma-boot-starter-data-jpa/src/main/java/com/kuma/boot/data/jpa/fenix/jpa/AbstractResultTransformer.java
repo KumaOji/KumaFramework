@@ -20,114 +20,169 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 
+/**
+ * 抽象的、具有公共代码的结果转换类.
+ *
+ * @author blinkfox on 2022-03-25.
+ * @see FenixResultTransformer
+ * @since 2.7.0
+ */
 public abstract class AbstractResultTransformer implements ResultTransformer {
-   protected static final DefaultConversionService defaultConversionService = new DefaultConversionService();
-   protected Class<?> resultClass;
 
-   public AbstractResultTransformer() {
+   /**
+    * 全局默认通用的类型转换服务.
+    */
+   protected static final DefaultConversionService defaultConversionService = new DefaultConversionService();
+
+   static {
+      defaultConversionService.addConverter(ClobToStringConverter.INSTANCE);
+      defaultConversionService.addConverter(BlobToStringConverter.INSTANCE);
+      // 添加 Java 8 时间类型到 Date 的转换器，以兼容 Spring Data JPA 4.0 / Hibernate 7.x
+      defaultConversionService.addConverter(LocalDateTimeToDateConverter.INSTANCE);
+      defaultConversionService.addConverter(LocalDateToDateConverter.INSTANCE);
    }
 
-   public void setResultClass(Class<?> resultClass) {
+   /**
+    * 要转换类型的 class 实例.
+    */
+   protected Class<?> resultClass;
+
+   public void setResultClass( Class<?> resultClass ) {
       this.resultClass = resultClass;
    }
 
+   /**
+    * 做一些初始化操作，默认空实现，各个实现类可视具体情况初始化一些数据.
+    */
    public void init() {
+      // do nothing
    }
 
+   /**
+    * 通过反射创建出一个新的查询结果对象实例，并返回其包装对象 {@link BeanWrapper}.
+    *
+    * <p>注意：不过该对象实例的所有属性都是空的，待进一步填充.</p>
+    *
+    * @return 查询结果对象的包装对象
+    */
    protected BeanWrapper newResultBeanWrapper() {
+      // 构造结果实例.
       Object resultObject;
       try {
          resultObject = this.resultClass.getDeclaredConstructor().newInstance();
-      } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
-         throw new FenixException(e, "\u3010Fenix \u5f02\u5e38\u3011\u5b9e\u4f8b\u5316\u3010{}\u3011\u7c7b\u51fa\u9519\uff0c\u8bf7\u68c0\u67e5\u8be5\u7c7b\u662f\u5426\u5305\u542b\u53ef\u516c\u5f00\u8bbf\u95ee\u7684\u65e0\u53c2\u6784\u9020\u65b9\u6cd5\uff01", new Object[]{this.resultClass.getName()});
+      } catch (InstantiationException | IllegalAccessException
+               | NoSuchMethodException | InvocationTargetException e) {
+         throw new FenixException(e, "【Fenix 异常】实例化【{}】类出错，请检查该类是否包含可公开访问的无参构造方法！", this.resultClass.getName());
       }
-
       return PropertyAccessorFactory.forBeanPropertyAccess(resultObject);
    }
 
+   /**
+    * 设置结果对象实例某个属性的属性值.
+    *
+    * @param beanWrapper 对象 Bean 的包装类
+    * @param propertyName 属性名称
+    * @param value 属性值
+    */
    protected void setResultPropertyValue(BeanWrapper beanWrapper, String propertyName, Object value) {
       if (StringHelper.isNotBlank(propertyName)) {
          try {
             beanWrapper.setPropertyValue(propertyName, value);
-         } catch (TypeMismatchException | NotWritablePropertyException e) {
-            throw new FenixException(e, "\u3010Fenix \u5f02\u5e38\u3011\u8bbe\u7f6e\u7ed3\u679c\u7c7b\u3010{}\u3011\u7684\u3010{}\u3011\u5c5e\u6027\u503c\u4e3a\u3010{}\u3011\u65f6\u5f02\u5e38\uff0c\u8bf7\u68c0\u67e5\u8be5\u5c5e\u6027\u662f\u5426\u5b58\u5728\u6216\u8005\u662f\u5426\u6709 public \u578b\u7684 Setter \u65b9\u6cd5\uff0c\u6216\u8005\u68c0\u67e5\u5b57\u6bb5\u7c7b\u578b\u662f\u5426\u652f\u6301 JPA \u7684\u9ed8\u8ba4\u8f6c\u6362\uff01", new Object[]{beanWrapper.getWrappedClass().getName(), propertyName, value});
+         } catch (NotWritablePropertyException | TypeMismatchException e) {
+            throw new FenixException(e, "【Fenix 异常】设置结果类【{}】的【{}】属性值为【{}】时异常，请检查该属性是否存在或者"
+                    + "是否有 public 型的 Setter 方法，或者检查字段类型是否支持 JPA 的默认转换！",
+                    beanWrapper.getWrappedClass().getName(), propertyName, value);
          }
       }
-
    }
 
+   /**
+    * 转换成集合，直接返回集合本身即可.
+    *
+    * @param list 集合.
+    * @return 集合
+    */
+   @Override
    public List<?> transformList(List list) {
       return list;
    }
 
-   static {
-      defaultConversionService.addConverter(AbstractResultTransformer.ClobToStringConverter.INSTANCE);
-      defaultConversionService.addConverter(AbstractResultTransformer.BlobToStringConverter.INSTANCE);
-      defaultConversionService.addConverter(AbstractResultTransformer.LocalDateTimeToDateConverter.INSTANCE);
-      defaultConversionService.addConverter(AbstractResultTransformer.LocalDateToDateConverter.INSTANCE);
-   }
+   /**
+    * Clob 转换为 String 的转换器类.
+    *
+    * @author blinkfox 2019-10-08.
+    */
+   protected enum ClobToStringConverter implements Converter<Clob, String> {
 
-   protected static enum ClobToStringConverter implements Converter<Clob, String> {
+      /**
+       * 单实例.
+       */
       INSTANCE;
 
-      private ClobToStringConverter() {
-      }
-
+      @Override
       public String convert(Clob source) {
          return DataHelper.extractString(source);
       }
-
-      // $FF: synthetic method
-      private static ClobToStringConverter[] $values() {
-         return new ClobToStringConverter[]{INSTANCE};
-      }
    }
 
-   protected static enum BlobToStringConverter implements Converter<Blob, String> {
+   /**
+    * Blob 转换为 String 的转换器类.
+    *
+    * @author blinkfox 2019-10-08.
+    */
+   protected enum BlobToStringConverter implements Converter<Blob, String> {
+
+      /**
+       * 单实例.
+       */
       INSTANCE;
 
-      private BlobToStringConverter() {
-      }
-
+      @Override
       public String convert(Blob source) {
          return BlobJavaType.INSTANCE.toString(source);
       }
-
-      // $FF: synthetic method
-      private static BlobToStringConverter[] $values() {
-         return new BlobToStringConverter[]{INSTANCE};
-      }
    }
 
-   protected static enum LocalDateTimeToDateConverter implements Converter<LocalDateTime, Date> {
+   /**
+    * LocalDateTime 转换为 Date 的转换器类.
+    *
+    * <p>用于兼容 Spring Data JPA 4.0 / Hibernate 7.x 中查询结果从 Timestamp 变为 LocalDateTime 后类型转换失败的问题.</p>
+    *
+    * @author blinkfox 2025-12-03.
+    * @since v4.0.0
+    */
+   protected enum LocalDateTimeToDateConverter implements Converter<LocalDateTime, Date> {
+
+      /**
+       * 单实例.
+       */
       INSTANCE;
 
-      private LocalDateTimeToDateConverter() {
-      }
-
+      @Override
       public Date convert(LocalDateTime source) {
          return Date.from(source.atZone(ZoneId.systemDefault()).toInstant());
       }
-
-      // $FF: synthetic method
-      private static LocalDateTimeToDateConverter[] $values() {
-         return new LocalDateTimeToDateConverter[]{INSTANCE};
-      }
    }
 
-   protected static enum LocalDateToDateConverter implements Converter<LocalDate, Date> {
+   /**
+    * LocalDate 转换为 Date 的转换器类.
+    *
+    * <p>用于兼容 Spring Data JPA 4.0 / Hibernate 7.x 中查询结果从 Timestamp 变为 LocalDateTime 后类型转换失败的问题.</p>
+    *
+    * @author blinkfox 2025-12-03.
+    * @since v4.0.0
+    */
+   protected enum LocalDateToDateConverter implements Converter<LocalDate, Date> {
+
+      /**
+       * 单实例.
+       */
       INSTANCE;
 
-      private LocalDateToDateConverter() {
-      }
-
+      @Override
       public Date convert(LocalDate source) {
          return Date.from(source.atStartOfDay(ZoneId.systemDefault()).toInstant());
       }
-
-      // $FF: synthetic method
-      private static LocalDateToDateConverter[] $values() {
-         return new LocalDateToDateConverter[]{INSTANCE};
-      }
    }
+
 }

@@ -4,6 +4,8 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.data.jpa.fenix.config.scanner.TaggerScanner;
 import com.kuma.boot.data.jpa.fenix.config.scanner.XmlResource;
 import com.kuma.boot.data.jpa.fenix.config.scanner.XmlScanner;
+import com.kuma.boot.data.jpa.fenix.consts.Const;
+import com.kuma.boot.data.jpa.fenix.consts.XpathConst;
 import com.kuma.boot.data.jpa.fenix.exception.FenixException;
 import com.kuma.boot.data.jpa.fenix.exception.NodeNotFoundException;
 import com.kuma.boot.data.jpa.fenix.helper.ParamWrapper;
@@ -12,111 +14,179 @@ import com.kuma.boot.data.jpa.fenix.helper.StringHelper;
 import com.kuma.boot.data.jpa.fenix.helper.XmlNodeHelper;
 import com.kuma.boot.data.jpa.fenix.jpa.transformer.PrefixUnderscoreTransformer;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.dom4j.Node;
 
+/**
+ * Fenix 的配置信息管理器单例类，用于加载 Fenix 所需的各种配置信息到内存中.
+ *
+ * @author blinkfox on 2019-08-04.
+ * @see FenixConfig
+ * @see XmlResource
+ * @since v1.0.0
+ */
 public final class FenixConfigManager {
-   private static final String BANNER_TEXT = "\n___________           .__        \n\\_   _____/___   ____ |__|__  ___\n |    __)/ __ \\ /    \\|  \\  \\/  /\n |     \\\\  ___/|   |  \\  |>    < \n \\___  / \\___  >___|  /__/__/\\_ \\\n     \\/      \\/     \\/         \\/ v4.0.0\n";
-   private FenixConfig fenixConfig;
-   private static final FenixConfigManager confManager = new FenixConfigManager();
 
-   public FenixConfigManager() {
-   }
+   /**
+    * Fenix 的 banner 文本.
+    */
+   private static final String BANNER_TEXT = "\n"
+           + "___________           .__        \n"
+           + "\\_   _____/___   ____ |__|__  ___\n"
+           + " |    __)/ __ \\ /    \\|  \\  \\/  /\n"
+           + " |     \\\\  ___/|   |  \\  |>    < \n"
+           + " \\___  / \\___  >___|  /__/__/\\_ \\\n"
+           + "     \\/      \\/     \\/         \\/ v4.0.0\n";
+
+   /**
+    * Fenix 配置信息实例.
+    */
+   private FenixConfig fenixConfig;
 
    public FenixConfig getFenixConfig() {
-      return this.fenixConfig;
+      return fenixConfig;
    }
 
+   /**
+    * 初始化的 {@link FenixConfigManager} 单实例.
+    */
+   private static final FenixConfigManager confManager = new FenixConfigManager();
+
+   /**
+    * 获取 {@link FenixConfigManager} 的唯一实例.
+    *
+    * @return FenixConfigManager 唯一实例
+    */
    public static FenixConfigManager getInstance() {
       return confManager;
    }
 
+   /**
+    * 初始化加载默认的 Fenix 的配置信息到内存中.
+    */
    public void initLoad() {
       this.initLoad(new FenixConfig());
    }
 
+   /**
+    * 初始化加载 Fenix 的配置信息到内存中.
+    *
+    * @param fenixConfig {@link FenixConfig} 的子类配置类实例
+    */
    public void initLoad(FenixConfig fenixConfig) {
+      // 初始化设置 FenixConfig 实例和其中的一些属性.
       this.initFenixConfig(fenixConfig);
-      this.cachingFenixXmlResources((new XmlScanner()).scan(this.fenixConfig.getXmlLocations()));
-      (new TaggerScanner()).scan(this.fenixConfig.getHandlerLocations());
+
+      // 初始化加载 Fenix XML 文件和自定义的标签处理器类.
+      this.cachingFenixXmlResources(new XmlScanner().scan(this.fenixConfig.getXmlLocations()));
+      new TaggerScanner().scan(this.fenixConfig.getHandlerLocations());
+
+      // 初次测试表达式引擎是否能够正确工作和打印 banner 信息.
       this.asyncTestFirstEvaluate();
       this.printBanner();
    }
 
+   /**
+    * 初始化设置 {@link FenixConfig} 实例.
+    *
+    * @param fenixConfig {@link FenixConfig} 实例
+    */
    private void initFenixConfig(FenixConfig fenixConfig) {
       if (fenixConfig == null) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u521d\u59cb\u5316\u52a0\u8f7d\u7684 FenixConfig \u914d\u7f6e\u4fe1\u606f\u5b9e\u4f8b\u4e3a\u7a7a\uff0c\u8bf7\u68c0\u67e5\uff01");
-      } else {
-         this.trySetUnderscoreTransformerPrefix(fenixConfig.getUnderscoreTransformerPrefix());
-         String xmlLocations = fenixConfig.getXmlLocations();
-         fenixConfig.setXmlLocations(StringHelper.isBlank(xmlLocations) ? "fenix" : xmlLocations);
-         this.fenixConfig = fenixConfig;
+         throw new FenixException("【Fenix 异常】初始化加载的 FenixConfig 配置信息实例为空，请检查！");
       }
+
+      // 尝试根据配置的前缀来设置结果转换器的前缀.
+      this.trySetUnderscoreTransformerPrefix(fenixConfig.getUnderscoreTransformerPrefix());
+
+      // 扫描和缓存 Fenix XML 文件资源信息、扫描和配置自定义的 Fenix 标签处理器实例类.
+      String xmlLocations = fenixConfig.getXmlLocations();
+      fenixConfig.setXmlLocations(StringHelper.isBlank(xmlLocations) ? Const.DEFAULT_FENIX_XML_DIR : xmlLocations);
+      this.fenixConfig = fenixConfig;
    }
 
    private void trySetUnderscoreTransformerPrefix(String underscoreTransformerPrefix) {
       if (StringHelper.isNotBlank(underscoreTransformerPrefix)) {
+         // 清空 Fenix 中的所有默认前缀.
          Set<String> prefixSet = PrefixUnderscoreTransformer.getPrefixSet();
          prefixSet.clear();
-
-         for(String prefix : underscoreTransformerPrefix.split(",")) {
+         for (String prefix : underscoreTransformerPrefix.split(Const.COMMA)) {
             prefixSet.add(prefix.trim());
          }
       }
-
    }
 
+   /**
+    * 打印 Fenix Banner.
+    */
    private void printBanner() {
       if (this.fenixConfig.isPrintBanner()) {
-         LogUtils.warn("\n___________           .__        \n\\_   _____/___   ____ |__|__  ___\n |    __)/ __ \\ /    \\|  \\  \\/  /\n |     \\\\  ___/|   |  \\  |>    < \n \\___  / \\___  >___|  /__/__/\\_ \\\n     \\/      \\/     \\/         \\/ v4.0.0\n", new Object[0]);
+         LogUtils.warn(BANNER_TEXT);
       }
-
       if (this.fenixConfig.isDebug()) {
-         LogUtils.warn("\u3010Fenix \u63d0\u793a\u3011\u5df2\u5f00\u542f Fenix \u7684\u3010debug\u3011\u6a21\u5f0f\uff0c\u4ec5\u5efa\u8bae\u4f60\u5728\u5f00\u53d1\u73af\u5883\u4e2d\u5f00\u542f\u6b64\u6a21\u5f0f.", new Object[0]);
+         LogUtils.warn("【Fenix 提示】已开启 Fenix 的【debug】模式，仅建议你在开发环境中开启此模式.");
       }
-
-      LogUtils.warn("\u3010Fenix \u63d0\u793a\u3011\u521d\u59cb\u5316\u52a0\u8f7d Fenix \u914d\u7f6e\u4fe1\u606f\u5b8c\u6210.", new Object[0]);
+      LogUtils.warn("【Fenix 提示】初始化加载 Fenix 配置信息完成.");
    }
 
+   /**
+    * 将每个 Fenix XML 配置文件的 key 和文档缓存到 ConcurrentHashMap 内存缓存中.
+    *
+    * @param xmlResourceMap XML 资源的 Map 集合
+    */
    private void cachingFenixXmlResources(Map<String, XmlResource> xmlResourceMap) {
       if (LogUtils.isDebugEnabled()) {
-         LogUtils.debug("\u3010Fenix \u63d0\u793a\u3011\u626b\u63cf\u5230\u4e86\u8fd9\u4e9b Fenix XML \u6587\u4ef6\uff1a\u3010{}\u3011.", new Object[]{xmlResourceMap.keySet()});
+         LogUtils.debug("【Fenix 提示】扫描到了这些 Fenix XML 文件：【{}】.", xmlResourceMap.keySet());
       }
 
-      boolean debug = this.fenixConfig.isDebug();
+      // 是否开启了 debug 模式.
+      final boolean debug = this.fenixConfig.isDebug();
       Map<String, Set<URL>> xmlUrlMap = FenixConfig.getXmlUrlMap();
 
-      for(XmlResource xmlResource : xmlResourceMap.values()) {
+      // 遍历各个 XML 资源文件信息，将 fenixId 和 对应的 Node 节点缓存起来.
+      Collection<XmlResource> xmlResources = xmlResourceMap.values();
+      for (XmlResource xmlResource : xmlResources) {
          String namespace = xmlResource.getNamespace();
-
-         for(Node fenixNode : xmlResource.getDocument().selectNodes("fenixs/fenix")) {
-            String fenixId = XmlNodeHelper.getNodeText(fenixNode.selectSingleNode("attribute::id"));
+         for (Node fenixNode : xmlResource.getDocument().selectNodes(XpathConst.FENIX_TAG)) {
+            String fenixId = XmlNodeHelper.getNodeText(fenixNode.selectSingleNode(XpathConst.ATTR_ID));
             if (StringHelper.isBlank(fenixId)) {
-               throw new NodeNotFoundException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u547d\u540d\u7a7a\u95f4\u4e3a\u3010" + namespace + "\u3011\u7684 Fenix XML \u6587\u4ef6\u4e2d\u6709 fenix \u8282\u70b9\u7684 id \u5c5e\u6027\u4e3a\u7a7a\uff0c\u8bf7\u68c0\u67e5\uff01\u6587\u4ef6\u4f4d\u7f6e\u5728\u3010" + xmlResource.getUrl().getPath() + "\u3011.");
+               throw new NodeNotFoundException("【Fenix 异常提示】命名空间为【" + namespace + "】的 Fenix XML 文件中有"
+                       + " fenix 节点的 id 属性为空，请检查！文件位置在【" + xmlResource.getUrl().getPath() + "】.");
             }
 
-            if (fenixId.contains(".")) {
-               throw new FenixException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u547d\u540d\u7a7a\u95f4\u4e3a\u3010" + namespace + "\u3011\u7684 XML \u6587\u4ef6\u4e2d\uff0cfenix \u8282\u70b9 id\u3010" + fenixId + "\u3011\u4e0d\u80fd\u5305\u542b '.' \u53f7\uff0c\u8bf7\u4fee\u6b63\uff01\u6587\u4ef6\u4f4d\u7f6e\u5728\u3010" + xmlResource.getUrl().getPath() + "\u3011.");
+            // 判断 fenixId 是否有 '.' 号，如果有的话，就抛出异常提示.
+            if (fenixId.contains(Const.DOT)) {
+               throw new FenixException("【Fenix 异常提示】命名空间为【" + namespace + "】的 XML 文件中，fenix 节点 id"
+                       + "【" + fenixId + "】不能包含 '.' 号，请修正！文件位置在【" + xmlResource.getUrl().getPath() + "】.");
             }
 
-            FenixConfig.getFenixs().put(StringHelper.concat(namespace, ".", fenixId), fenixNode);
+            // 将 fenix 节点缓存到 Map 中，key 是由 namespace 和 fenixId 组成，用 "." 号分隔，value 是 fenixNode.
+            FenixConfig.getFenixs().put(StringHelper.concat(namespace, Const.DOT, fenixId), fenixNode);
+
+            // v2.4.1 版本新增，如果开启了 debug 模式，就建立 namespace 和 xml 路径的映射关系，便于实时读取 XML 文件中的内容.
             if (debug) {
-               Set<URL> urlSet = (Set)xmlUrlMap.computeIfAbsent(namespace, (k) -> new HashSet());
+               Set<URL> urlSet = xmlUrlMap.computeIfAbsent(namespace, k -> new HashSet<>());
                urlSet.add(xmlResource.getUrl());
             }
          }
       }
-
    }
 
+   /**
+    * 清空 Fenix 所有内存缓存中的内容，包括 XML 命名空间路径缓存、XML节点缓存.
+    */
    public void clear() {
       FenixConfig.getFenixs().clear();
       FenixConfig.getTagHandlerMap().clear();
    }
 
+   /**
+    * 异步测试第一次 MVEL 表达式的计算，会缓存 MVEL 相关准备工作，从而加快后续的 MVEL 执行.
+    */
    private void asyncTestFirstEvaluate() {
       CompletableFuture.runAsync(() -> {
          try {
@@ -124,9 +194,9 @@ public final class FenixConfigManager {
             ParseHelper.parseTemplate("@if{?foo != empty}Hello World!@end{}", context);
             ParseHelper.parseExpressWithException("foo != empty", context);
          } catch (Exception e) {
-            LogUtils.error("\u3010Fenix \u5f02\u5e38\u3011\u521d\u6b21\u6d4b\u8bd5\u6267\u884c MVEL \u8868\u8fbe\u5f0f\u65f6\u5f02\u5e38\uff01", new Object[]{e});
+            LogUtils.error("【Fenix 异常】初次测试执行 MVEL 表达式时异常！", e);
          }
-
       });
    }
+
 }

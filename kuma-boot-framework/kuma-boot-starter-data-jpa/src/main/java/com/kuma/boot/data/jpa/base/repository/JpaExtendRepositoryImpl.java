@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.data.jpa.base.repository;
 
 import com.querydsl.core.types.EntityPath;
@@ -32,115 +48,230 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
-public class JpaExtendRepositoryImpl<T, I extends Serializable> extends SimpleJpaRepository<T, I> implements JpaExtendRepository<T, I> {
+/**
+ * 基础jpa Repository
+ *
+ * @param <T> the type of the entity to handle
+ * @param <I> the type of the entity's identifier
+ * @author shuigedeng
+ * @version 2021.9
+ * @since 2021-09-04 07:32:26
+ */
+public class JpaExtendRepositoryImpl<T, I extends Serializable>
+        extends SimpleJpaRepository<T, I> implements JpaExtendRepository<T, I> {
+
    protected final JPAQueryFactory jpaQueryFactory;
    protected final QuerydslJpaPredicateExecutor<T> jpaPredicateExecutor;
    protected final EntityManager em;
    private final EntityPath<T> path;
    protected final Querydsl querydsl;
-   @Resource
-   private JdbcClient jdbcClient;
-   @Resource
-   private JdbcTemplate jdbcTemplate;
 
    public JpaExtendRepositoryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager em) {
       super(entityInformation, em);
+
       Class<T> domainClass = null;
-      if (entityInformation instanceof AbstractEntityInformation<T, I> abstractEntityInformation) {
+      if (entityInformation instanceof AbstractEntityInformation) {
+         AbstractEntityInformation<T, I> abstractEntityInformation = (AbstractEntityInformation<T, I>) entityInformation;
          domainClass = abstractEntityInformation.getJavaType();
       }
 
       if (domainClass == null) {
          throw new IllegalArgumentException("domainClass is null");
-      } else {
-         this.em = em;
-         this.jpaPredicateExecutor = new QuerydslJpaPredicateExecutor(JpaEntityInformationSupport.getEntityInformation(domainClass, em), em, SimpleEntityPathResolver.INSTANCE, this.getRepositoryMethodMetadata());
-         this.jpaQueryFactory = new JPAQueryFactory(em);
-         this.path = SimpleEntityPathResolver.INSTANCE.createPath(domainClass);
-         this.querydsl = new Querydsl(em, new PathBuilder(this.path.getType(), this.path.getMetadata()));
       }
+
+      this.em = em;
+      this.jpaPredicateExecutor =
+              new QuerydslJpaPredicateExecutor<>(
+                      JpaEntityInformationSupport.getEntityInformation(domainClass, em),
+                      em,
+                      SimpleEntityPathResolver.INSTANCE,
+                      getRepositoryMethodMetadata());
+      // todo 此处需要修改
+      this.jpaQueryFactory = new JPAQueryFactory(em);
+      this.path = SimpleEntityPathResolver.INSTANCE.createPath(domainClass);
+      this.querydsl = new Querydsl(em, new PathBuilder<T>(path.getType(), path.getMetadata()));
    }
 
    public JpaExtendRepositoryImpl(Class<T> domainClass, EntityManager em) {
       super(domainClass, em);
       this.em = em;
-      this.jpaPredicateExecutor = new QuerydslJpaPredicateExecutor(JpaEntityInformationSupport.getEntityInformation(domainClass, em), em, SimpleEntityPathResolver.INSTANCE, this.getRepositoryMethodMetadata());
+      this.jpaPredicateExecutor =
+              new QuerydslJpaPredicateExecutor<>(
+                      JpaEntityInformationSupport.getEntityInformation(domainClass, em),
+                      em,
+                      SimpleEntityPathResolver.INSTANCE,
+                      getRepositoryMethodMetadata());
+      // todo 此处需要修改
       this.jpaQueryFactory = new JPAQueryFactory(em);
       this.path = SimpleEntityPathResolver.INSTANCE.createPath(domainClass);
-      this.querydsl = new Querydsl(em, new PathBuilder(this.path.getType(), this.path.getMetadata()));
+      this.querydsl = new Querydsl(em, new PathBuilder<T>(path.getType(), path.getMetadata()));
    }
 
+   @Resource
+   private JdbcClient jdbcClient;
+
+   @Override
    public JdbcClient jdbcClient() {
-      if (this.jdbcClient == null) {
-         ObjectProvider<JdbcClient> beanProvider = ContextUtils.getApplicationContext().getBeanProvider(JdbcClient.class);
-         this.jdbcClient = (JdbcClient)beanProvider.getIfAvailable();
+      if (jdbcClient == null) {
+         ObjectProvider<JdbcClient> beanProvider = ContextUtils.getApplicationContext()
+                 .getBeanProvider(JdbcClient.class);
+         jdbcClient = beanProvider.getIfAvailable();
       }
-
-      return this.jdbcClient;
+      return jdbcClient;
    }
 
+   @Resource
+   private JdbcTemplate jdbcTemplate;
+
+   @Override
    public JdbcTemplate jdbcTemplate() {
-      if (this.jdbcTemplate == null) {
-         ObjectProvider<JdbcTemplate> beanProvider = ContextUtils.getApplicationContext().getBeanProvider(JdbcTemplate.class);
-         this.jdbcTemplate = (JdbcTemplate)beanProvider.getIfAvailable();
+      if (jdbcTemplate == null) {
+         ObjectProvider<JdbcTemplate> beanProvider = ContextUtils.getApplicationContext()
+                 .getBeanProvider(JdbcTemplate.class);
+         jdbcTemplate = beanProvider.getIfAvailable();
       }
-
-      return this.jdbcTemplate;
+      return jdbcTemplate;
    }
 
-   public Page<T> findPageable(Predicate predicate, Pageable pageable, OrderSpecifier<?>... orders) {
-      JPAQuery<T> countQuery = this.jpaQueryFactory.selectFrom(this.path);
+   /**
+    * findPageable
+    *
+    * @param predicate predicate
+    * @param pageable  pageable
+    * @param orders    orders
+    * @return {@link Page}{@literal <T>}
+    * @since 2022-09-02 08:28:43
+    */
+   @Override
+   public Page<T> findPageable(
+           Predicate predicate, Pageable pageable, OrderSpecifier<?>... orders) {
+      final JPAQuery<T> countQuery = jpaQueryFactory.selectFrom(path);
       countQuery.where(predicate);
-      JPQLQuery<T> query = this.querydsl.applyPagination(pageable, countQuery);
+      JPQLQuery<T> query = querydsl.applyPagination(pageable, countQuery);
       query.orderBy(orders);
-      return PageableExecutionUtils.getPage(query.fetch(), pageable, () -> (long)countQuery.fetch().size());
+      return PageableExecutionUtils.getPage(
+              query.fetch(), pageable, () -> countQuery.fetch().size());
    }
 
+   /**
+    * count
+    *
+    * @param predicate predicate
+    * @return int
+    * @since 2022-09-02 08:28:54
+    */
+   @Override
    public int countByPredicate(Predicate predicate) {
-      return ((JPAQuery)this.jpaQueryFactory.selectFrom(this.path).where(predicate)).fetch().size();
+      return jpaQueryFactory.selectFrom(path).where(predicate).fetch().size();
    }
 
+   /**
+    * exists
+    *
+    * @param predicate predicate
+    * @return {@link Boolean }
+    * @since 2022-09-02 08:29:00
+    */
+   @Override
    public Boolean existsByPredicate(Predicate predicate) {
-      return this.jpaPredicateExecutor.exists(predicate);
+      return jpaPredicateExecutor.exists(predicate);
    }
 
+   /**
+    * fetch
+    *
+    * @param predicate predicate
+    * @return {@link List }<{@link T }>
+    * @since 2022-09-02 08:29:03
+    */
+   @Override
    public List<T> fetch(Predicate predicate) {
-      return ((JPAQuery)this.jpaQueryFactory.selectFrom(this.path).where(predicate)).fetch();
+      return jpaQueryFactory.selectFrom(path).where(predicate).fetch();
    }
 
+   /**
+    * fetchOne
+    *
+    * @param predicate predicate
+    * @return {@link T }
+    * @since 2021-10-09 20:30:50
+    */
+   @Override
    public T fetchOne(Predicate predicate) {
-      return (T)((JPAQuery)this.jpaQueryFactory.selectFrom(this.path).where(predicate)).fetchOne();
+      return jpaQueryFactory.selectFrom(path).where(predicate).fetchOne();
    }
 
+   /**
+    * fetchCount
+    *
+    * @param predicate predicate
+    * @return int
+    * @since 2022-09-02 08:29:08
+    */
+   @Override
    public int fetchCount(Predicate predicate) {
-      return ((JPAQuery)this.jpaQueryFactory.selectFrom(this.path).where(predicate)).fetch().size();
+      return jpaQueryFactory.selectFrom(path).where(predicate).fetch().size();
    }
 
+   /**
+    * find
+    *
+    * @param predicate predicate
+    * @param expr      expr
+    * @param o         o
+    * @return {@link List }<{@link ? }>
+    * @since 2022-09-02 08:29:12
+    */
+   @Override
    public List<?> find(Predicate predicate, Expression<?> expr, OrderSpecifier<?>... o) {
-      return ((JPAQuery)((JPAQuery)((JPAQuery)this.jpaQueryFactory.select(expr).from(this.path)).where(predicate)).orderBy(o)).fetch();
+      return jpaQueryFactory.select(expr).from(path).where(predicate).orderBy(o).fetch();
    }
 
+   @Override
    @Lock(LockModeType.PESSIMISTIC_WRITE)
    public Optional<T> findWithLockingById(I id) {
-      return this.findById(id);
+      return findById(id);
    }
 
+   @Override
    @Lock(LockModeType.PESSIMISTIC_WRITE)
    public List<T> findAllWithLockingByIdIn(Collection<I> ids) {
-      return this.findAllById(ids);
+      return findAllById(ids);
    }
 
+   @Override
    @Lock(LockModeType.PESSIMISTIC_WRITE)
    public <S extends T> Optional<S> findOneWithLocking(Example<S> example) {
-      return this.findOne(example);
+      return findOne(example);
    }
 
+//	@Override
+//	@Lock(LockModeType.PESSIMISTIC_WRITE)
+//	public Optional<T> findByIdForUpdate(I id) {
+//		return findById(id);
+//	}
+
+   /**
+    * 通用加锁查询
+    */
+   @Override
    public T findWithLockingWithEm(I id) {
-      return (T)this.em.find(super.getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE);
+      return em.find(super.getDomainClass(), id, LockModeType.PESSIMISTIC_WRITE);
    }
 
+   /**
+    * 通用加锁查询列表
+    */
+   @Override
    public List<T> findAllWithLockingWithEm(List<I> ids) {
-      String jpql = String.format("SELECT e FROM %s e WHERE e.id IN :ids", super.getDomainClass().getSimpleName());
-      return this.em.createQuery(jpql, super.getDomainClass()).setParameter("ids", ids).setLockMode(LockModeType.PESSIMISTIC_WRITE).getResultList();
+      String jpql = String.format("SELECT e FROM %s e WHERE e.id IN :ids",
+              super.getDomainClass().getSimpleName());
+
+      return em.createQuery(jpql, super.getDomainClass())
+              .setParameter("ids", ids)
+              .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+              .getResultList();
    }
+
+
 }

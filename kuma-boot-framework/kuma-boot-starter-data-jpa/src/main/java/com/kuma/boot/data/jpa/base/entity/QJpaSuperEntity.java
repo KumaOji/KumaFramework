@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by Fernflower decompiler)
+//
+
 package com.kuma.boot.data.jpa.base.entity;
 
 import com.querydsl.core.types.Path;
@@ -23,14 +28,14 @@ public class QJpaSuperEntity extends EntityPathBase<JpaSuperEntity<? extends Ser
    public final NumberPath<Integer> version = this.createNumber("version", Integer.class);
 
    public QJpaSuperEntity(String variable) {
-      super(JpaSuperEntity.class, PathMetadataFactory.forVariable(variable));
+      super((Class<? extends JpaSuperEntity<? extends Serializable>>) JpaSuperEntity.class, PathMetadataFactory.forVariable(variable));
    }
 
    public QJpaSuperEntity(Path<? extends JpaSuperEntity> path) {
-      super(path.getType(), path.getMetadata());
+      super((Class<? extends JpaSuperEntity<? extends Serializable>>) path.getType(), path.getMetadata());
    }
 
    public QJpaSuperEntity(PathMetadata metadata) {
-      super(JpaSuperEntity.class, metadata);
+      super((Class<? extends JpaSuperEntity<? extends Serializable>>) JpaSuperEntity.class, metadata);
    }
 }
