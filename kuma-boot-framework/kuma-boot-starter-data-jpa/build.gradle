@@ -7,6 +7,7 @@ description = 'Myframework data-jpa模块'
 dependencies {
     // 基础公共工具（LogUtils 等）
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-lock')
 
     // Spring Data JPA（JpaRepository / SimpleJpaRepository / AuditingEntityListener 等核心类）
     api projectLibs.spring.boot.starter.data.jpa
@@ -73,6 +74,9 @@ dependencies {
 
     // @NotNull / Validator / ConstraintViolation（实体校验）
     compileOnly projectLibs.jakarta.validation.api
+
+    // HibernateValidator / HibernateValidatorConfiguration（BaseValidator 快速失败校验）
+    compileOnly projectLibs.hibernate.validator
 
     // @RefreshScope（TenantProperties / JpaProperties）
     compileOnly projectLibs.spring.cloud.context
