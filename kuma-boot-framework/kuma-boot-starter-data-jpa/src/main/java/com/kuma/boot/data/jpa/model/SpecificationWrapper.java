@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.data.jpa.model;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -7,368 +23,783 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * SpecificationWrapper Jpa 查询
+ *
+ * <p>语法说明：</p>
+ * <p>基本语法：SpecificationWrapper.where(User::getName,"admin").like(User::getNickName,"Ec")</p>
+ * <p>OR语法：.or(SpecificationWrapper.query().eq(UserDO::getUserName, "11")</p>
+ * <p>groupBy语法：.groupBy(UserDO::getStatus)</p>
+ * <p>orderBy语法:.orderDesc(UserDO::getUserName)</p>
+ * <p>join语法: TODO 未实现</p>
+ *
+ * @author GR
+ * @since 2024/1/23 15:05
+ */
 public class SpecificationWrapper implements Specification {
-   private SpecificationBuilder specificationBuilder = new SpecificationBuilder();
-   private Map<QueryOperator, List<SpecificationWrapper>> specificationWrapperMap = new HashMap(1);
+
+   private SpecificationBuilder specificationBuilder;
+
+   private Map<QueryOperator, List<SpecificationWrapper>> specificationWrapperMap;
+
    private String joinTable;
 
    public SpecificationWrapper() {
+      this.specificationBuilder = new SpecificationBuilder();
+      this.specificationWrapperMap = new HashMap<>(1);
    }
 
-   protected <T> SpecificationWrapper(QueryOperator operator, SFunction<T, ?> func, Object obj) {
+   protected <T> SpecificationWrapper( QueryOperator operator, SFunction<T, ?> func, Object obj ) {
+      this.specificationBuilder = new SpecificationBuilder();
+      this.specificationWrapperMap = new HashMap<>(1);
       this.addQueryCondition(operator, func, obj);
    }
 
-   private <T> String getKey(SFunction<T, ?> func) {
+   /**
+    * 获取字段
+    *
+    * @param func func
+    * @return java.lang.String
+    */
+   private <T> String getKey( SFunction<T, ?> func ) {
       return FieldUtils.propertyName(func);
    }
 
-   private <T> SpecificationWrapper addQueryCondition(QueryOperator operator, SFunction<T, ?> func, Object obj) {
-      this.specificationBuilder.getQueryConditions().add(new QueryCondition(operator, this.getKey(func), obj));
+   /**
+    * 添加查询条件
+    *
+    * @param operator 操作类型
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   private <T> SpecificationWrapper addQueryCondition(
+           QueryOperator operator, SFunction<T, ?> func, Object obj ) {
+      this.specificationBuilder
+              .getQueryConditions()
+              .add(new QueryCondition(operator, this.getKey(func), obj));
       return this;
    }
 
-   private <T> void addOrderCondition(SFunction<T, ?> func, Sort.Direction direction) {
-      QueryCondition queryCondition = new QueryCondition((QueryOperator)null, this.getKey(func), (Object)null);
+   /**
+    * 添加排序条件
+    *
+    * @param func func
+    * @param direction Sort.Direction
+    */
+   private <T> void addOrderCondition( SFunction<T, ?> func, Sort.Direction direction ) {
+      // 创建排序条件
+      QueryCondition queryCondition = new QueryCondition(null, this.getKey(func), null);
       queryCondition.direction = direction;
       this.specificationBuilder.getOrderConditions().add(queryCondition);
    }
 
+   /**
+    * 构建SQl查询逻辑
+    *
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
    public static SpecificationWrapper where() {
       return new SpecificationWrapper();
    }
 
-   public <T> SpecificationWrapper eq(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.EQ, func, obj);
+   /**
+    * 等于
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper eq( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.EQ, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper eq(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.EQ, func, obj) : this;
+   /**
+    * 等于
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper eq( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.EQ, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper ne(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.NE, func, obj);
+   /**
+    * 不等于
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper ne( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.NE, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper ne(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.NE, func, obj) : this;
+   /**
+    * 不等于
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper ne( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.NE, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper gt(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.GT, func, obj);
+   /**
+    * 大于
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper gt( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.GT, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper gt(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.GT, func, obj) : this;
+   /**
+    * 大于
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper gt( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.GT, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper gte(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.GE, func, obj);
+   /**
+    * 大于等于
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper gte( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.GE, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper gte(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.GE, func, obj) : this;
+   /**
+    * 大于等于
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper gte( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.GE, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper lt(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.LT, func, obj);
+   /**
+    * 小于
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper lt( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.LT, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper lt(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.LT, func, obj) : this;
+   /**
+    * 小于
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper lt( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.LT, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper lte(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.LE, func, obj);
+   /**
+    * 小于等于
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper lte( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.LE, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper lte(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.LE, func, obj) : this;
+   /**
+    * 小于等于
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper lte( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.LE, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper like(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.LIKE, func, "%" + String.valueOf(obj) + "%");
+   /**
+    * 模糊查询 LIKE
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper like( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.LIKE, func, "%" + obj + "%");
       return this;
    }
 
-   public <T> SpecificationWrapper like(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.LIKE, func, "%" + String.valueOf(obj) + "%") : this;
+   /**
+    * 模糊查询 LIKE
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper like( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.LIKE, func, "%" + obj + "%") : this;
    }
 
-   public <T> SpecificationWrapper leftLike(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.LIKE, func, "%" + String.valueOf(obj));
+   /**
+    * 模糊查询 LEFT LIKE
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper leftLike( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.LIKE, func, "%" + obj);
       return this;
    }
 
-   public <T> SpecificationWrapper leftLike(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.LIKE, func, "%" + String.valueOf(obj)) : this;
+   /**
+    * 模糊查询 LEFT LIKE
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper leftLike( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.LIKE, func, "%" + obj) : this;
    }
 
-   public <T> SpecificationWrapper rightLike(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.LIKE, func, String.valueOf(obj) + "%");
+   /**
+    * 模糊查询 LEFT LIKE
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper rightLike( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.LIKE, func, obj + "%");
       return this;
    }
 
-   public <T> SpecificationWrapper rightLike(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.LIKE, func, String.valueOf(obj) + "%") : this;
+   /**
+    * 模糊查询 LEFT LIKE
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper rightLike( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.LIKE, func, obj + "%") : this;
    }
 
-   public <T> SpecificationWrapper notLike(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.NOT_LIKE, func, "%" + String.valueOf(obj) + "%");
+   /**
+    * 模糊查询 NOT LIKE
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper notLike( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.NOT_LIKE, func, "%" + obj + "%");
       return this;
    }
 
-   public <T> SpecificationWrapper notLike(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.NOT_LIKE, func, "%" + String.valueOf(obj) + "%") : this;
+   /**
+    * 模糊查询 NOT LIKE
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper notLike( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.NOT_LIKE, func, "%" + obj + "%") : this;
    }
 
-   public <T> SpecificationWrapper in(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.IN, func, obj);
+   /**
+    * IN 查询
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper in( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.IN, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper in(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.IN, func, obj) : this;
+   /**
+    * IN 查询
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper in( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.IN, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper notIn(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.NOT_IN, func, obj);
+   /**
+    * NOT IN 查询
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper notIn( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.NOT_IN, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper notIn(Boolean bool, SFunction<T, ?> func, Object obj) {
-      return bool ? this.addQueryCondition(SpecificationWrapper.QueryOperator.NOT_IN, func, obj) : this;
+   /**
+    * NOT IN 查询
+    *
+    * @param bool 是否添加
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper notIn( Boolean bool, SFunction<T, ?> func, Object obj ) {
+      return bool ? this.addQueryCondition(QueryOperator.NOT_IN, func, obj) : this;
    }
 
-   public <T> SpecificationWrapper isNull(SFunction<T, ?> func) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.IS_NULL, func, (Object)null);
+   /**
+    * isNulL 查询
+    *
+    * @param func func
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper isNull( SFunction<T, ?> func ) {
+      this.addQueryCondition(QueryOperator.IS_NULL, func, null);
       return this;
    }
 
-   public <T> SpecificationWrapper isNotNull(SFunction<T, ?> func) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.IS_NOT_NULL, func, (Object)null);
+   /**
+    * isNotNull 查询
+    *
+    * @param func func
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper isNotNull( SFunction<T, ?> func ) {
+      this.addQueryCondition(QueryOperator.IS_NOT_NULL, func, null);
       return this;
    }
 
-   public <T> SpecificationWrapper between(SFunction<T, ?> func, Object min, Object max) {
-      QueryCondition queryCondition = new QueryCondition(SpecificationWrapper.QueryOperator.BETWEEN, this.getKey(func), (Object)null);
+   /**
+    * BETWEEN 查询
+    *
+    * @param func func
+    * @param min min
+    * @param max max
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper between( SFunction<T, ?> func, Object min, Object max ) {
+      QueryCondition queryCondition =
+              new QueryCondition(QueryOperator.BETWEEN, this.getKey(func), null);
       queryCondition.minObj = min;
       queryCondition.maxObj = max;
       this.specificationBuilder.getQueryConditions().add(queryCondition);
       return this;
    }
 
-   public <T> SpecificationWrapper notBetween(SFunction<T, ?> func, Object min, Object max) {
-      QueryCondition queryCondition = new QueryCondition(SpecificationWrapper.QueryOperator.NOT_BETWEEN, this.getKey(func), (Object)null);
+   /**
+    * NOT_BETWEEN 查询
+    *
+    * @param func func
+    * @param min min
+    * @param max max
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper notBetween( SFunction<T, ?> func, Object min, Object max ) {
+      QueryCondition queryCondition =
+              new QueryCondition(QueryOperator.NOT_BETWEEN, this.getKey(func), null);
       queryCondition.minObj = min;
       queryCondition.maxObj = max;
       this.specificationBuilder.getQueryConditions().add(queryCondition);
       return this;
    }
 
-   public <T> SpecificationWrapper groupBy(SFunction<T, ?>... funcs) {
-      this.specificationBuilder.getGroupByKeys().addAll((Collection)Arrays.stream(funcs).map(this::getKey).collect(Collectors.toList()));
+   /**
+    * GROUP_BY 查询
+    *
+    * @param funcs func
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper groupBy( SFunction<T, ?>... funcs ) {
+      this.specificationBuilder
+              .getGroupByKeys()
+              .addAll(Arrays.stream(funcs).map(this::getKey).collect(Collectors.toList()));
       return this;
    }
 
-   public <T> SpecificationWrapper orderBy(Sort.Direction direction, SFunction<T, ?>... funcs) {
-      for(SFunction<T, ?> func : funcs) {
+   /**
+    * ORDER_BY 查询，默认ASC升序
+    *
+    * @param funcs func
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper orderBy( Sort.Direction direction, SFunction<T, ?>... funcs ) {
+      for (SFunction<T, ?> func : funcs) {
          this.addOrderCondition(func, direction);
       }
-
       return this;
    }
 
-   public <T> SpecificationWrapper orderAsc(SFunction<T, ?> func) {
-      this.orderBy(Direction.ASC, func);
+   /**
+    * ORDER_ASC 升序查询
+    *
+    * @param func func
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper orderAsc( SFunction<T, ?> func ) {
+      this.orderBy(Sort.Direction.ASC, func);
       return this;
    }
 
-   public <T> SpecificationWrapper orderDesc(SFunction<T, ?> func) {
-      this.orderBy(Direction.DESC, func);
+   /**
+    * ORDER_DESC 降序查询
+    *
+    * @param func func
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper orderDesc( SFunction<T, ?> func ) {
+      this.orderBy(Sort.Direction.DESC, func);
       return this;
    }
 
-   public <T> SpecificationWrapper exists(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.EXISTS, func, obj);
+   /**
+    * ORDER_DESC 查询
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper exists( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.EXISTS, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper notExists(SFunction<T, ?> func, Object obj) {
-      this.addQueryCondition(SpecificationWrapper.QueryOperator.NOT_EXISTS, func, obj);
+   /**
+    * NOT_EXISTS 查询
+    *
+    * @param func func
+    * @param obj obj
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper notExists( SFunction<T, ?> func, Object obj ) {
+      this.addQueryCondition(QueryOperator.NOT_EXISTS, func, obj);
       return this;
    }
 
-   public <T> SpecificationWrapper or(SpecificationWrapper specificationWrapper) {
-      List<SpecificationWrapper> orDefault = (List)this.specificationWrapperMap.getOrDefault(SpecificationWrapper.QueryOperator.OR, new LinkedList());
+   /**
+    * or
+    *
+    * @param specificationWrapper SpecificationWrapper
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   public <T> SpecificationWrapper or( SpecificationWrapper specificationWrapper ) {
+      List<SpecificationWrapper> orDefault =
+              this.specificationWrapperMap.getOrDefault(QueryOperator.OR, new LinkedList<>());
       orDefault.add(specificationWrapper);
-      this.specificationWrapperMap.put(SpecificationWrapper.QueryOperator.OR, orDefault);
+      this.specificationWrapperMap.put(QueryOperator.OR, orDefault);
       return this;
    }
 
-   private <T> SpecificationWrapper putJoinCondition(QueryOperator operator, SFunction<T, ?> func, SpecificationWrapper specificationWrapper) {
-      specificationWrapper.joinTable = this.getKey(func);
-      List<SpecificationWrapper> orDefault = (List)this.specificationWrapperMap.getOrDefault(SpecificationWrapper.QueryOperator.OR, new LinkedList());
+   /**
+    * 追加连表查询
+    *
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
+   private <T> SpecificationWrapper putJoinCondition(
+           QueryOperator operator,
+           SFunction<T, ?> func,
+           SpecificationWrapper specificationWrapper ) {
+      // 设置joinTable
+      specificationWrapper.joinTable = getKey(func);
+      List<SpecificationWrapper> orDefault =
+              this.specificationWrapperMap.getOrDefault(QueryOperator.OR, new LinkedList<>());
       orDefault.add(specificationWrapper);
       this.specificationWrapperMap.put(operator, orDefault);
       return this;
    }
 
-   /** @deprecated */
+   /**
+    * JOIN 查询 TODO 当前结果验证不正确，暂不使用
+    *
+    * @param func joinTable
+    * @param specificationWrapper SpecificationWrapper
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
    @Deprecated
-   public <T> SpecificationWrapper join(SFunction<T, ?> func, SpecificationWrapper specificationWrapper) {
-      return this.putJoinCondition(SpecificationWrapper.QueryOperator.JOIN, func, specificationWrapper);
+   public <T> SpecificationWrapper join(
+           SFunction<T, ?> func, SpecificationWrapper specificationWrapper ) {
+      return this.putJoinCondition(QueryOperator.JOIN, func, specificationWrapper);
    }
 
-   /** @deprecated */
+   /**
+    * LEFT JOIN 查询 TODO 当前结果验证不正确，暂不使用
+    *
+    * @param func joinTable
+    * @param specificationWrapper SpecificationWrapper
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
    @Deprecated
-   public <T> SpecificationWrapper leftJoin(SFunction<T, ?> func, SpecificationWrapper specificationWrapper) {
-      return this.putJoinCondition(SpecificationWrapper.QueryOperator.LEFT_JOIN, func, specificationWrapper);
+   public <T> SpecificationWrapper leftJoin(
+           SFunction<T, ?> func, SpecificationWrapper specificationWrapper ) {
+      return this.putJoinCondition(QueryOperator.LEFT_JOIN, func, specificationWrapper);
    }
 
-   /** @deprecated */
+   /**
+    * RIGHT JOIN 查询 TODO 当前结果验证不正确，暂不使用
+    *
+    * @param func joinTable
+    * @param specificationWrapper SpecificationWrapper
+    * @return com.easy.cloud.web.component.mysql.query.SpecificationWrapper
+    */
    @Deprecated
-   public <T> SpecificationWrapper rightJoin(SFunction<T, ?> func, SpecificationWrapper specificationWrapper) {
-      return this.putJoinCondition(SpecificationWrapper.QueryOperator.RIGHT_JOIN, func, specificationWrapper);
+   public <T> SpecificationWrapper rightJoin(
+           SFunction<T, ?> func, SpecificationWrapper specificationWrapper ) {
+      return this.putJoinCondition(QueryOperator.RIGHT_JOIN, func, specificationWrapper);
    }
 
-   public Predicate toPredicate(Root root, CriteriaQuery query, CriteriaBuilder cb) {
+   @Override
+   public Predicate toPredicate( Root root, CriteriaQuery query, CriteriaBuilder cb ) {
+      // 构建query
       this.buildQueryPredicate(root, query, cb);
+      // 构建GroupBy
       this.buildGroupByPredicate(root, query, cb);
+      // 构建OrderBy
       this.buildOrderByPredicate(root, query, cb);
+
       return query.getRestriction();
    }
 
-   private List<Predicate> buildBaseQueryPredicate(From root, CriteriaQuery query, CriteriaBuilder cb) {
-      return (List)this.specificationBuilder.getQueryConditions().stream().map((queryCondition) -> {
-         switch (queryCondition.operator.ordinal()) {
-            case 0:
-               return cb.equal(root.get(queryCondition.key), queryCondition.value);
-            case 1:
-               return cb.notEqual(root.get(queryCondition.key), queryCondition.value);
-            case 2:
-               return cb.gt(root.get(queryCondition.key).as(Number.class), (Number)queryCondition.value);
-            case 3:
-               return cb.ge(root.get(queryCondition.key).as(Number.class), (Number)queryCondition.value);
-            case 4:
-               return cb.lt(root.get(queryCondition.key).as(Number.class), (Number)queryCondition.value);
-            case 5:
-               return cb.le(root.get(queryCondition.key).as(Number.class), (Number)queryCondition.value);
-            case 6:
-               return cb.like(root.get(queryCondition.key).as(String.class), (String)queryCondition.value);
-            case 7:
-               return cb.notLike(root.get(queryCondition.key).as(String.class), (String)queryCondition.value);
-            case 8:
-               return root.get(queryCondition.key).in(new Object[]{queryCondition.value});
-            case 9:
-               return cb.not(root.get(queryCondition.key).in(new Object[]{queryCondition.value}));
-            case 10:
-               return cb.isNull(root.get(queryCondition.key));
-            case 11:
-               return cb.isNotNull(root.get(queryCondition.key));
-            case 12:
-               return cb.between(root.get(queryCondition.key), (Comparable)queryCondition.minObj, (Comparable)queryCondition.maxObj);
-            case 13:
-               return cb.between(root.get(queryCondition.key), (Comparable)queryCondition.minObj, (Comparable)queryCondition.maxObj).not();
-            case 14:
-            case 15:
-            case 16:
-            case 17:
-            default:
-               return null;
-            case 18:
-               return null;
-            case 19:
-               return null;
-         }
-      }).filter(Objects::nonNull).collect(Collectors.toList());
+   /**
+    * 查询条件
+    */
+   private List<Predicate> buildBaseQueryPredicate(
+           From root, CriteriaQuery query, CriteriaBuilder cb ) {
+      return this.specificationBuilder.getQueryConditions().stream()
+              .map(
+                      queryCondition -> {
+                         switch (queryCondition.operator) {
+                            case EQ:
+                               return cb.equal(
+                                       root.get(queryCondition.key), queryCondition.value);
+                            case NE:
+                               return cb.notEqual(
+                                       root.get(queryCondition.key), queryCondition.value);
+                            case GT:
+                               return cb.gt(
+                                       root.get(queryCondition.key).as(Number.class),
+                                       (Number) queryCondition.value);
+                            case GE:
+                               return cb.ge(
+                                       root.get(queryCondition.key).as(Number.class),
+                                       (Number) queryCondition.value);
+                            case LT:
+                               return cb.lt(
+                                       root.get(queryCondition.key).as(Number.class),
+                                       (Number) queryCondition.value);
+                            case LE:
+                               return cb.le(
+                                       root.get(queryCondition.key).as(Number.class),
+                                       (Number) queryCondition.value);
+                            case LIKE:
+                               return cb.like(
+                                       root.get(queryCondition.key).as(String.class),
+                                       (String) queryCondition.value);
+                            case NOT_LIKE:
+                               return cb.notLike(
+                                       root.get(queryCondition.key).as(String.class),
+                                       (String) queryCondition.value);
+                            case IN:
+                               return root.get(queryCondition.key).in(queryCondition.value);
+                            case NOT_IN:
+                               return cb.not(
+                                       root.get(queryCondition.key).in(queryCondition.value));
+                            case IS_NULL:
+                               return cb.isNull(root.get(queryCondition.key));
+                            case IS_NOT_NULL:
+                               return cb.isNotNull(root.get(queryCondition.key));
+                            case BETWEEN:
+                               return cb.between(
+                                       root.get(queryCondition.key),
+                                       (Comparable<Object>) queryCondition.minObj,
+                                       (Comparable<Object>) queryCondition.maxObj);
+                            case NOT_BETWEEN:
+                               return cb.between(
+                                               root.get(queryCondition.key),
+                                               (Comparable<Object>) queryCondition.minObj,
+                                               (Comparable<Object>) queryCondition.maxObj)
+                                       .not();
+                            case EXISTS:
+                               return null;
+                            case NOT_EXISTS:
+                               return null;
+                            default:
+                         }
+                         return null;
+                      })
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
    }
 
-   private void buildQueryPredicate(Root root, CriteriaQuery query, CriteriaBuilder cb) {
+   /**
+    * 查询条件
+    */
+   private void buildQueryPredicate( Root root, CriteriaQuery query, CriteriaBuilder cb ) {
+      // 基本数据
       List<Predicate> queryPredicates = this.buildBaseQueryPredicate(root, query, cb);
-      List<Predicate> predicates = new ArrayList();
+      // 查询数据
+      List<Predicate> predicates = new ArrayList<>();
+      // query
       if (!CollectionUtils.isEmpty(queryPredicates)) {
-         predicates.add(cb.and((Predicate[])queryPredicates.toArray(new Predicate[queryPredicates.size()])));
+         predicates.add(cb.and(queryPredicates.toArray(new Predicate[queryPredicates.size()])));
       }
 
-      for(Map.Entry<QueryOperator, List<SpecificationWrapper>> entry : this.specificationWrapperMap.entrySet()) {
-         switch (((QueryOperator)entry.getKey()).ordinal()) {
-            case 14:
-               ((List)Optional.ofNullable((List)this.specificationWrapperMap.get(SpecificationWrapper.QueryOperator.JOIN)).orElse(new LinkedList())).stream().forEach((sw) -> {
-                  Join join = root.join(sw.joinTable, JoinType.INNER);
-                  List<Predicate> joinPredicates = sw.buildBaseQueryPredicate(join, query, cb);
-                  join.on((Predicate[])joinPredicates.toArray(new Predicate[joinPredicates.size()]));
-               });
-               break;
-            case 15:
-               ((List)Optional.ofNullable((List)this.specificationWrapperMap.get(SpecificationWrapper.QueryOperator.JOIN)).orElse(new LinkedList())).stream().forEach((sw) -> {
-                  Join join = root.join(sw.joinTable, JoinType.LEFT);
-                  List<Predicate> joinPredicates = sw.buildBaseQueryPredicate(join, query, cb);
-                  join.on((Predicate[])joinPredicates.toArray(new Predicate[joinPredicates.size()]));
-               });
-               break;
-            case 16:
-               ((List)Optional.ofNullable((List)this.specificationWrapperMap.get(SpecificationWrapper.QueryOperator.JOIN)).orElse(new LinkedList())).stream().forEach((sw) -> {
-                  Join join = root.join(sw.joinTable, JoinType.RIGHT);
-                  List<Predicate> joinPredicates = sw.buildBaseQueryPredicate(join, query, cb);
-                  join.on((Predicate[])joinPredicates.toArray(new Predicate[joinPredicates.size()]));
-               });
-            case 17:
-            case 18:
-            case 19:
-            default:
-               break;
-            case 20:
-               List<Predicate> orPredicates = (List)((List)Optional.ofNullable((List)this.specificationWrapperMap.get(SpecificationWrapper.QueryOperator.OR)).orElse(new LinkedList())).stream().map((sw) -> cb.and((Predicate[])sw.buildBaseQueryPredicate(root, query, cb).toArray(new Predicate[0]))).collect(Collectors.toList());
+      // 遍历特殊操作
+      for (Map.Entry<QueryOperator, List<SpecificationWrapper>> entry :
+              this.specificationWrapperMap.entrySet()) {
+         switch (entry.getKey()) {
+            case OR:
+               List<Predicate> orPredicates =
+                       Optional.ofNullable(this.specificationWrapperMap.get(QueryOperator.OR))
+                               .orElse(new LinkedList<>())
+                               .stream()
+                               .map(
+                                       sw ->
+                                               cb.and(
+                                                       sw.buildBaseQueryPredicate(
+                                                                       root, query, cb)
+                                                               .toArray(new Predicate[]{})))
+                               .collect(Collectors.toList());
                if (!CollectionUtils.isEmpty(orPredicates)) {
-                  predicates.add(cb.or((Predicate[])orPredicates.toArray(new Predicate[orPredicates.size()])));
+                  predicates.add(
+                          cb.or(orPredicates.toArray(new Predicate[orPredicates.size()])));
                }
+               break;
+            case JOIN:
+               Optional.ofNullable(this.specificationWrapperMap.get(QueryOperator.JOIN))
+                       .orElse(new LinkedList<>())
+                       .stream()
+                       .forEach(
+                               sw -> {
+                                  Join join = root.join(sw.joinTable, JoinType.INNER);
+                                  List<Predicate> joinPredicates =
+                                          sw.buildBaseQueryPredicate(join, query, cb);
+                                  join.on(
+                                          joinPredicates.toArray(
+                                                  new Predicate[joinPredicates.size()]));
+                               });
+               break;
+            case LEFT_JOIN:
+               Optional.ofNullable(this.specificationWrapperMap.get(QueryOperator.JOIN))
+                       .orElse(new LinkedList<>())
+                       .stream()
+                       .forEach(
+                               sw -> {
+                                  Join join = root.join(sw.joinTable, JoinType.LEFT);
+                                  List<Predicate> joinPredicates =
+                                          sw.buildBaseQueryPredicate(join, query, cb);
+                                  join.on(
+                                          joinPredicates.toArray(
+                                                  new Predicate[joinPredicates.size()]));
+                               });
+               break;
+            case RIGHT_JOIN:
+               Optional.ofNullable(this.specificationWrapperMap.get(QueryOperator.JOIN))
+                       .orElse(new LinkedList<>())
+                       .stream()
+                       .forEach(
+                               sw -> {
+                                  Join join = root.join(sw.joinTable, JoinType.RIGHT);
+                                  List<Predicate> joinPredicates =
+                                          sw.buildBaseQueryPredicate(join, query, cb);
+                                  join.on(
+                                          joinPredicates.toArray(
+                                                  new Predicate[joinPredicates.size()]));
+                               });
+               break;
+            default:
          }
       }
 
       if (!CollectionUtils.isEmpty(predicates)) {
-         query.where((Predicate[])predicates.toArray(new Predicate[predicates.size()]));
-      }
-
-   }
-
-   private void buildGroupByPredicate(Root root, CriteriaQuery query, CriteriaBuilder cb) {
-      if (!CollectionUtils.isEmpty(this.specificationBuilder.getGroupByKeys())) {
-         Stream var10001 = this.specificationBuilder.getGroupByKeys().stream();
-         Objects.requireNonNull(root);
-         query.groupBy((List)var10001.map(root::get).collect(Collectors.toList()));
+         query.where(predicates.toArray(new Predicate[predicates.size()]));
       }
    }
 
-   private void buildOrderByPredicate(Root root, CriteriaQuery query, CriteriaBuilder cb) {
-      if (!CollectionUtils.isEmpty(this.specificationBuilder.getOrderConditions())) {
-         query.orderBy((List)this.specificationBuilder.getOrderConditions().stream().map((queryCondition) -> Direction.ASC == queryCondition.direction ? cb.asc(root.get(queryCondition.key)) : cb.desc(root.get(queryCondition.key))).collect(Collectors.toList()));
+   /**
+    * 构建GroupBy
+    */
+   private void buildGroupByPredicate( Root root, CriteriaQuery query, CriteriaBuilder cb ) {
+      if (CollectionUtils.isEmpty(this.specificationBuilder.getGroupByKeys())) {
+         return;
       }
+      // 分组
+      query.groupBy(
+              this.specificationBuilder.getGroupByKeys().stream()
+                      .map(root::get)
+                      .collect(Collectors.toList()));
    }
 
-   private static enum QueryOperator {
+   /**
+    * 构建OrderBy
+    */
+   private void buildOrderByPredicate( Root root, CriteriaQuery query, CriteriaBuilder cb ) {
+      if (CollectionUtils.isEmpty(this.specificationBuilder.getOrderConditions())) {
+         return;
+      }
+      // 排序
+      query.orderBy(
+              this.specificationBuilder.getOrderConditions().stream()
+                      .map(
+                              queryCondition ->
+                                      Sort.Direction.ASC == queryCondition.direction
+                                              ? cb.asc(root.get(queryCondition.key))
+                                              : cb.desc(root.get(queryCondition.key)))
+                      .collect(Collectors.toList()));
+   }
+
+   /**
+    * 操作
+    */
+   private enum QueryOperator {
       EQ,
       NE,
       GT,
@@ -389,66 +820,97 @@ public class SpecificationWrapper implements Specification {
       GROUP_BY,
       EXISTS,
       NOT_EXISTS,
-      OR;
-
-      private QueryOperator() {
-      }
-
-      // $FF: synthetic method
-      private static QueryOperator[] $values() {
-         return new QueryOperator[]{EQ, NE, GT, GE, LT, LE, LIKE, NOT_LIKE, IN, NOT_IN, IS_NULL, IS_NOT_NULL, BETWEEN, NOT_BETWEEN, JOIN, LEFT_JOIN, RIGHT_JOIN, GROUP_BY, EXISTS, NOT_EXISTS, OR};
-      }
+      OR
    }
 
+   /**
+    * 查询条件
+    */
    private class QueryCondition {
+
+      /**
+       * 类型
+       */
       QueryOperator operator;
+
+      /**
+       * 查询字段
+       */
       String key;
+
+      /**
+       * 查询值
+       */
       Object value;
+
+      /**
+       * 最小值
+       */
       Object minObj;
+
+      /**
+       * 最大值
+       */
       Object maxObj;
+
+      /**
+       * 排序方式
+       */
       Sort.Direction direction;
 
-      public QueryCondition(QueryOperator operator, String key, Object value) {
-         Objects.requireNonNull(SpecificationWrapper.this);
-         super();
+      public QueryCondition( QueryOperator operator, String key, Object value ) {
          this.operator = operator;
          this.key = key;
          this.value = value;
       }
    }
 
+   /**
+    * SpecificationBuilder
+    *
+    * @author shuigedeng
+    * @version 2026.03
+    * @since 2025-12-19 09:30:45
+    */
    private class SpecificationBuilder {
+
+      /**
+       * 查询条件
+       */
       private LinkedList<QueryCondition> queryConditions;
+
+      /**
+       * 排序
+       */
       private LinkedList<QueryCondition> orderConditions;
+
+      /**
+       * 分组
+       */
       private LinkedList<String> groupByKeys;
 
       public SpecificationBuilder() {
-         Objects.requireNonNull(SpecificationWrapper.this);
-         super();
       }
 
       public LinkedList<QueryCondition> getQueryConditions() {
          if (CollectionUtils.isEmpty(this.queryConditions)) {
-            this.queryConditions = new LinkedList();
+            this.queryConditions = new LinkedList<>();
          }
-
-         return this.queryConditions;
+         return queryConditions;
       }
 
       public LinkedList<QueryCondition> getOrderConditions() {
          if (CollectionUtils.isEmpty(this.orderConditions)) {
-            this.orderConditions = new LinkedList();
+            this.orderConditions = new LinkedList<>();
          }
-
-         return this.orderConditions;
+         return orderConditions;
       }
 
       public LinkedList<String> getGroupByKeys() {
          if (CollectionUtils.isEmpty(this.groupByKeys)) {
-            this.groupByKeys = new LinkedList();
+            this.groupByKeys = new LinkedList<>();
          }
-
-         return this.groupByKeys;
+         return groupByKeys;
       }
    }
 }

@@ -1,6 +1,8 @@
 package com.kuma.boot.data.jpa.fenix.config.scanner;
 
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.data.jpa.fenix.consts.Const;
+import com.kuma.boot.data.jpa.fenix.consts.XpathConst;
 import com.kuma.boot.data.jpa.fenix.exception.ConfigNotFoundException;
 import com.kuma.boot.data.jpa.fenix.exception.FenixException;
 import com.kuma.boot.data.jpa.fenix.helper.StringHelper;
@@ -18,107 +20,134 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 
+/**
+ * 用于扫描指定路径下 Fenix XML 文件资源的扫描器类.
+ *
+ * @author blinkfox on 2019-08-31.
+ * @since v1.0.0
+ */
 public class XmlScanner {
+
+   /**
+    * 用于查找某个目录及目录下所有 XML 文件的模式常量.
+    */
    private static final String DIR_XML_PATTERN = "**/*.xml";
 
-   public XmlScanner() {
-   }
-
+   /**
+    * 扫描指定路径下的相关文件(可以是目录，也可以是具体的文件)，并配置存储起来.
+    *
+    * @param xmlLocations 文件位置路径，可以是多个，用逗号隔开
+    * @return XML 资源的 Map
+    */
    public Map<String, XmlResource> scan(String xmlLocations) {
-      Map<String, XmlResource> xmlResourceMap = new HashMap();
+      Map<String, XmlResource> xmlResourceMap = new HashMap<>();
       if (StringHelper.isBlank(xmlLocations)) {
          return xmlResourceMap;
-      } else {
-         String[] xmlLocationArr = xmlLocations.split(",");
-         if (LogUtils.isDebugEnabled()) {
-            LogUtils.debug("\u3010Fenix \u63d0\u793a\u3011\u5c06\u626b\u63cf\u8fd9\u4e9b\u4f4d\u7f6e\u7684 Fenix XML \u6587\u4ef6\uff1a\u3010{}\u3011", new Object[]{Arrays.asList(xmlLocationArr)});
-         }
-
-         for(String xmlLocation : xmlLocationArr) {
-            if (!StringHelper.isBlank(xmlLocation)) {
-               String location = xmlLocation.trim();
-               if (StringHelper.isXmlFile(location)) {
-                  this.buildXmlResourcesByLocation(xmlResourceMap, location);
-               } else {
-                  location = location.replace(".", "/");
-                  location = location.endsWith("/") ? location : location + "/";
-                  this.buildXmlResourcesByLocation(xmlResourceMap, location + "**/*.xml");
-               }
-            }
-         }
-
-         return xmlResourceMap;
       }
+
+      // 对配置的 XML 路径按逗号分割的规则来解析.
+      String[] xmlLocationArr = xmlLocations.split(Const.COMMA);
+      if (LogUtils.isDebugEnabled()) {
+         LogUtils.debug("【Fenix 提示】将扫描这些位置的 Fenix XML 文件：【{}】", Arrays.asList(xmlLocationArr));
+      }
+
+      for (String xmlLocation : xmlLocationArr) {
+         if (StringHelper.isBlank(xmlLocation)) {
+            continue;
+         }
+
+         // 将该 XML 位置去除两边空白. 如果是 XML 文件则直接查找该 XML 文件，否则替换掉 '.' 号为 '/' 号，就代表资源目录.
+         // 然后解析该目录下所有的 XML 文件，将这些 Fenix XML 文件解析出来，然后构建出 XmlResource 的集合，
+         String location = xmlLocation.trim();
+         if (StringHelper.isXmlFile(location)) {
+            this.buildXmlResourcesByLocation(xmlResourceMap, location);
+         } else {
+            location = location.replace(Const.DOT, Const.SLASH);
+            location = location.endsWith(Const.SLASH) ? location : location + Const.SLASH;
+            this.buildXmlResourcesByLocation(xmlResourceMap, location + DIR_XML_PATTERN);
+         }
+      }
+      return xmlResourceMap;
    }
 
+   /**
+    * 根据指定的一个包扫描其下所有的 XML 文件.
+    *
+    * @param xmlResourceMap XML 资源文件 Map
+    * @param location XML 位置，可以是一个包，也可以是一个具体的文件路径
+    */
    private void buildXmlResourcesByLocation(Map<String, XmlResource> xmlResourceMap, String location) {
+      // 根据位置获取对应的 XML 资源实例.
       Resource[] resources = this.getResourcesByLocation(location);
 
       try {
-         for(Resource resource : resources) {
+         for (Resource resource : resources) {
             URL url = resource.getURL();
             String path = url.getPath();
             if (xmlResourceMap.containsKey(path)) {
-               LogUtils.debug("\u3010Fenix \u63d0\u793a\u3011\u5df2\u7ecf\u626b\u63cf\u8fc7\u4e86\u3010" + path + "\u3011\u6587\u4ef6\uff0c\u5c06\u8df3\u8fc7\u8be5 XML \u6587\u4ef6\u7684\u521d\u59cb\u5316\u52a0\u8f7d.", new Object[0]);
-            } else {
-               InputStream in = resource.getInputStream();
+               LogUtils.debug("【Fenix 提示】已经扫描过了【" + path + "】文件，将跳过该 XML 文件的初始化加载.");
+               continue;
+            }
 
-               try {
-                  XmlResource xmlResource = getFenixXmlResource(in, path);
-                  if (xmlResource != null) {
-                     xmlResourceMap.put(path, xmlResource.setUrl(url));
-                  }
-               } catch (Throwable var14) {
-                  if (in != null) {
-                     try {
-                        in.close();
-                     } catch (Throwable var13) {
-                        var14.addSuppressed(var13);
-                     }
-                  }
-
-                  throw var14;
-               }
-
-               if (in != null) {
-                  in.close();
+            // 获取该资源文件中的 Fenix XML 文件的 Document 对象，并存入到 Map 中.
+            try (InputStream in = resource.getInputStream()) {
+               XmlResource xmlResource = getFenixXmlResource(in, path);
+               if (xmlResource != null) {
+                  xmlResourceMap.put(path, xmlResource.setUrl(url));
                }
             }
          }
-
       } catch (IOException e) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u521d\u59cb\u5316\u8bfb\u53d6\u3010" + location + "\u3011\u4e0b\u7684 Fenix XML \u6587\u4ef6\u51fa\u9519\uff0c\u8bf7\u68c0\u67e5\uff01", e);
+         throw new FenixException("【Fenix 异常】初始化读取【" + location + "】下的 Fenix XML 文件出错，请检查！", e);
       }
    }
 
+   /**
+    * 根据资源文件位置的匹配规则查找到其下对应的 Fenix XML 文件资源的数组.
+    *
+    * @param location 资源文件位置的匹配规则字符串
+    * @return XML 文件资源数组
+    */
    private Resource[] getResourcesByLocation(String location) {
       try {
-         return ResourcePatternUtils.getResourcePatternResolver(new PathMatchingResourcePatternResolver()).getResources(location);
+         return ResourcePatternUtils.getResourcePatternResolver(
+                 new PathMatchingResourcePatternResolver()).getResources(location);
       } catch (IOException expected) {
-         LogUtils.warn("\u3010Fenix \u8b66\u793a\u3011\u672a\u67e5\u627e\u5230\u5339\u914d\u89c4\u5219\u3010" + location + "\u3011\u4e0b\u7684 Fenix XML \u6587\u4ef6.", new Object[]{expected.getMessage()});
+         LogUtils.warn("【Fenix 警示】未查找到匹配规则【" + location + "】下的 Fenix XML 文件.", expected.getMessage());
          return new Resource[0];
       }
    }
 
+   /**
+    * 根据输入流获取 Fenix 的 XML 文件资源信息，并封装到 XmlResource 对象中.
+    *
+    * @param in 资源文件输入流
+    * @param path 文件路径
+    * @return Fenix XML 资源
+    */
    public static XmlResource getFenixXmlResource(InputStream in, String path) {
       Document doc;
       try {
-         doc = (new SAXReader()).read(in);
-      } catch (Exception var5) {
-         LogUtils.info("\u3010Fenix \u63d0\u793a\u3011\u89e3\u6790\u8def\u5f84\u4e3a:\u3010" + path + "\u3011\u7684 Fenix XML \u6587\u4ef6\u5f02\u5e38\uff0c\u5c06\u5ffd\u7565\u6b64\u6587\u4ef6!", new Object[0]);
+         doc = new SAXReader().read(in);
+      } catch (Exception expected) {
+         // 由于只是判断该文件是否能被正确解析，所有这里就不抛出异常堆栈信息了.
+         LogUtils.info("【Fenix 提示】解析路径为:【" + path + "】的 Fenix XML 文件异常，将忽略此文件!");
          return null;
       }
 
+      // 获取 XML 文件的根节点，如果根节点是 '<fenixs></fenixs>'，说明是 Fenix XML 文件
+      // 然后获取其属性 namespace 的值，如果命名空间为空，就抛出异常.
       Node root = doc.getRootElement();
-      if (root != null && "fenixs".equals(root.getName())) {
-         String namespace = XmlNodeHelper.getNodeText(root.selectSingleNode("attribute::namespace"));
+      if (root != null && XpathConst.FENIX_ROOT_NAME.equals(root.getName())) {
+         String namespace = XmlNodeHelper.getNodeText(root.selectSingleNode(XpathConst.ATTR_NAMESPACE));
          if (StringHelper.isBlank(namespace)) {
-            throw new ConfigNotFoundException("\u3010Fenix \u8b66\u793a\u3011Fenix XML \u6587\u4ef6 " + path + " \u7684\u6839\u8282\u70b9 namespace \u547d\u540d\u7a7a\u95f4\u5c5e\u6027\u672a\u914d\u7f6e\uff0c\u8bf7\u914d\u7f6e!");
-         } else {
-            return new XmlResource(namespace, doc);
+            throw new ConfigNotFoundException("【Fenix 警示】Fenix XML 文件 " + path + " 的根节点 namespace "
+                    + "命名空间属性未配置，请配置!");
          }
-      } else {
-         return null;
+         return new XmlResource(namespace, doc);
       }
+
+      return null;
    }
+
 }
