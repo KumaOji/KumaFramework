@@ -1,20 +1,59 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework DDD模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    // 基础公共工具（LogUtils / ContextUtils / JacksonUtils / ObjectUtils / TraceUtils 等）
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-test {
-    useJUnitPlatform()
+    // TransactionalUtils（DomainEventServiceImpl 事务执行）
+    // DynamicDataSourceContextHolder（经由 data-datasource 传递）
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+
+    // @AutoConfiguration（DomainAutoConfig / ApplicationConfig 等自动配置类）
+    compileOnly projectLibs.spring.boot.autoconfigure
+
+    // MyBatis-Plus（@TableName / BaseMapper / IPage / OrderItem / CollectionUtils / Page 等）
+    compileOnly projectLibs.mybatis.plus
+
+    // @MapperScan（DomainAutoConfig）
+    compileOnly projectLibs.mybatis.spring
+
+    // RocketMQ（RocketMQTemplate / RocketMQListener / RocketMQLocalTransactionListener / MessageExt 等）
+    compileOnly projectLibs.rocketmq.spring.boot.starter
+
+    // PageHelper（PageHelperConvertor：PageHelper.startPage / PageInfo）
+    compileOnly projectLibs.pagehelper
+
+    // Spring Cache（RemoveCacheEventHandler：Cache / CacheManager）
+    compileOnly projectLibs.spring.boot.starter.cache
+
+    // MethodArgumentNotValidException（GatewayInvokeTemplate 异常处理）
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // Spring Data Commons（JpaPageConvertor：Page / Pageable / PageRequest / Sort）
+    compileOnly projectLibs.spring.data.commons
+
+    // Micrometer Tracing（TraceUtil：Tracer / TraceContext）
+    compileOnly projectLibs.micrometer.tracing.api
+
+    // @NotNull / @Positive / Validator / ConstraintViolation（Validates 校验工具）
+    compileOnly projectLibs.jakarta.validation.api
+
+    // AttributeConverter（领域值对象 JPA 类型转换）
+    compileOnly projectLibs.jakarta.persistence.api
+
+    // @Schema（DTO 文档注解）
+    compileOnly projectLibs.swagger.annotations.jakarta
+
+    // hutool（BeanUtil.toBean / IdUtil 等）
+    compileOnly projectLibs.hutool.core
+
+    // StringUtils（commons-lang3）
+    compileOnly projectLibs.commons.lang3
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

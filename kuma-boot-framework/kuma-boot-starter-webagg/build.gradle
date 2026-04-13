@@ -8,7 +8,9 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-jpa')
     api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-boot-framework:kuma-boot-starter-ddd')
 
     // Spring Boot AutoConfiguration
     api projectLibs.spring.boot.autoconfigure

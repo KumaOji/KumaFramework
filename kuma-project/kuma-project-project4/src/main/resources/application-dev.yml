@@ -79,6 +79,11 @@ spring:
             minimum-idle: 1
             maximum-pool-size: 10
             connection-timeout: 10000
+        domain:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 5
+            connection-timeout: 10000
   integration:
     management:
       default-logging-enabled: false   # 关闭 SI 默认 logging，减少 integrationEvaluationContext 初始化开销
@@ -139,6 +144,13 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/${spring.application.name}
       auto-index-creation: false
+
+  # ── JPA / Hibernate（kuma-boot-starter-data-jpa）─────────────────────
+  jpa:
+    open-in-view: false          # 关闭 OSIV，避免 N+1 延迟加载风险
+    show-sql: false              # SQL 打印由 kuma.boot.data.jpa.show-sql 统一控制
+    hibernate:
+      ddl-auto: none             # 生产/测试均不自动建表，由 Flyway/Liquibase 或手动 DDL 管理
 
   # ── Elasticsearch（kuma.boot.data.elasticsearch.enabled=false 时保持默认）──
   elasticsearch:
@@ -409,6 +421,18 @@ kuma:
       mybatis:
         mybatis-plus:
           enabled: false
+      jpa:
+        enabled: false
+        show-sql: false           # dev 阶段关闭，调试时可改为 true
+        generate-ddl: false       # 不自动 DDL，由 spring.jpa.hibernate.ddl-auto 接管
+        format-sql: false
+        highlight-sql: false
+        database: MYSQL
+        dialect: org.hibernate.dialect.MySQLDialect
+        time-zone: Asia/Shanghai
+        packages: com.kuma.cloud.project4.biz.model.entity
+        tenant:
+          enabled: false          # 暂不启用多租户，按需开启
       mongodb:
         enabled: false
         print: false

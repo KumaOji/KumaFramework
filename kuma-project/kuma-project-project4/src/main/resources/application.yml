@@ -19,6 +19,11 @@ spring:
           username: ${postgresql_username}
           password: ${postgresql_password}
           driver-class-name: org.postgresql.Driver
+        domain:
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       host: ${redis_host}

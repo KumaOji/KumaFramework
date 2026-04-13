@@ -1,20 +1,94 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
-group = 'io.github.kumaoji'
-version = '2026.04'
-
-repositories {
-    mavenCentral()
-}
+description = 'Myframework data-jpa模块'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:6.0.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
+    // 基础公共工具（LogUtils 等）
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
-test {
-    useJUnitPlatform()
+    // Spring Data JPA（JpaRepository / SimpleJpaRepository / AuditingEntityListener 等核心类）
+    api projectLibs.spring.boot.starter.data.jpa
+
+    // QueryDSL JPA（JPAQueryFactory / QuerydslJpaPredicateExecutor 等）
+    api projectLibs.querydsl.jpa
+    api projectLibs.querydsl.core
+
+    // Hibernate Envers（@Audited / DefaultRevisionEntity / RevisionListener 等审计类）
+    api projectLibs.hibernate.envers
+
+    // Spring Data Envers（EnversRevisionRepositoryFactoryBean / ReflectionRevisionEntityInformation 等）
+    api projectLibs.spring.data.envers
+
+    // Blaze Persistence（可选集成——BlazePersistenceAutoConfiguration；用户需自行添加 impl + integration）
+    compileOnly projectLibs.blaze.persistence.core.api
+    compileOnly projectLibs.blaze.persistence.core.impl
+    compileOnly projectLibs.blaze.persistence.integration.hibernate
+
+    // dom4j（Fenix XML 解析：Document / Node / SAXReader）
+    api projectLibs.dom4j
+
+    // commons-beanutils（JpaExtendQueryUtils：BeanUtils / DynaBean / PropertyUtils）
+    api projectLibs.commons.beanutils
+
+    // commons-lang3（ObjectUtils / SerializationUtils）
+    api projectLibs.commons.lang3
+
+    // commons-collections4（CollectionUtils）
+    api projectLibs.commons.collections4
+
+    // hutool（BeanUtil / ReflectUtil / StrUtil / SpringUtil / SqlFormatter / SecureUtil 等）
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.hutool.db
+    api projectLibs.hutool.crypto
+
+    // Guava（Lists / Sets / MoreObjects 等）
+    api projectLibs.guava
+
+    // Javassist（ClassPool / CtClass — Fenix 字节码处理）
+    api projectLibs.javassist
+
+    // MVEL2（MVEL / TemplateRuntime — Fenix 表达式引擎）
+    api projectLibs.mvel2
+
+    // TransmittableThreadLocal（多租户上下文传递）
+    api projectLibs.transmittable.thread.local
+
+    // jspecify（@NonNull / @Nullable）
+    api projectLibs.jspecify
+
+    // Jackson annotations（@JsonFormat / @JsonIgnore）
+    api projectLibs.jackson.annotations
+
+    // SLF4J（Logger / LoggerFactory）
+    api projectLibs.slf4j.api
+
+    // @AutoConfiguration / @ConditionalOnProperty / @ConditionalOnBean 等自动配置注解
+    compileOnly projectLibs.spring.boot.autoconfigure
+
+    // @Schema（JpaSuperEntity 等实体注解）
+    compileOnly projectLibs.swagger.annotations.jakarta
+
+    // @NotNull / Validator / ConstraintViolation（实体校验）
+    compileOnly projectLibs.jakarta.validation.api
+
+    // @RefreshScope（TenantProperties / JpaProperties）
+    compileOnly projectLibs.spring.cloud.context
+
+    // SecurityContextHolder（AuditorBean 获取当前用户）
+    compileOnly projectLibs.spring.boot.starter.security
+
+    // CacheManager（HerodotusRegionFactory 二级缓存集成）
+    compileOnly projectLibs.spring.boot.starter.cache
+
+    // Druid SQL 解析（TenantInterceptor 多租户 SQL 改写）
+    compileOnly projectLibs.druid.starter
+
+    // ClickHouseDataSourceConfiguration / DorisDataSourceConfiguration（多数据源条件装配）
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }
