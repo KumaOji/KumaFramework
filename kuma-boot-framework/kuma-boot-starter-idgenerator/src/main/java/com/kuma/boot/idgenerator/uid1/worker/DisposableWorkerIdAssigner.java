@@ -8,7 +8,6 @@ import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component("uid1DisposableWorkerIdAssigner")
 public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
@@ -19,7 +18,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
       this.workerNodeResposity = workerNodeResposity;
    }
 
-   @Transactional
+   // 底层为 JdbcTemplate，勿加 @Transactional：否则会走 JPA 事务，Hibernate 多租户启动阶段无 tenant 会失败。
    public long assignWorkerId() {
       WorkerNodeEntity workerNodeEntity = this.buildWorkerNode();
       this.workerNodeResposity.addWorkerNode(workerNodeEntity);

@@ -2,16 +2,18 @@ package com.kuma.boot.ddd.domain.support;
 
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.servlet.TraceUtils;
+import io.micrometer.tracing.CurrentTraceContext;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.Tracer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TraceUtil {
-   private final Tracer tracer;
+   private final ObjectProvider<Tracer> tracerProvider;
 
-   public TraceUtil(Tracer tracer) {
-      this.tracer = tracer;
+   public TraceUtil(ObjectProvider<Tracer> tracerProvider) {
+      this.tracerProvider = tracerProvider;
    }
 
    public String getTraceId() {
@@ -25,6 +27,11 @@ public class TraceUtil {
    }
 
    private TraceContext getContext() {
-      return this.tracer.currentTraceContext().context();
+      Tracer tracer = this.tracerProvider.getIfAvailable();
+      if (tracer == null) {
+         return null;
+      }
+      CurrentTraceContext current = tracer.currentTraceContext();
+      return current == null ? null : current.context();
    }
 }

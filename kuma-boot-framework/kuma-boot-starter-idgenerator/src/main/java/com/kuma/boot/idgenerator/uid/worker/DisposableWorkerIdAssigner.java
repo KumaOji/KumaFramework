@@ -8,7 +8,6 @@ import com.kuma.boot.idgenerator.uid.worker.entity.WorkerNodeEntity;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
@@ -18,7 +17,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
    public DisposableWorkerIdAssigner() {
    }
 
-   @Transactional
+   // MyBatis，勿加 @Transactional 以免走 JPA 多租户事务（启动时无 tenant）。
    public long assignWorkerId() {
       WorkerNodeEntity workerNodeEntity = this.buildWorkerNode();
       this.workerNodeDAO.addWorkerNode(workerNodeEntity);
