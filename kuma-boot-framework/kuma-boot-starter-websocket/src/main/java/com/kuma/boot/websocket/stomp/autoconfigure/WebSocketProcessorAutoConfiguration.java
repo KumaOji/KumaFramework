@@ -25,12 +25,11 @@ import org.springframework.messaging.simp.user.SimpUserRegistry;
 public class WebSocketProcessorAutoConfiguration {
    private static final Logger log = LoggerFactory.getLogger(WebSocketProcessorAutoConfiguration.class);
    private final WebSocketStompProperties webSocketStompProperties;
-   private final SimpUserRegistry simpUserRegistry;
    private final RedissonClient redissonClient;
 
-   public WebSocketProcessorAutoConfiguration(WebSocketStompProperties webSocketStompProperties, SimpUserRegistry simpUserRegistry, RedissonClient redissonClient) {
+   // 构造器不注入 SimpUserRegistry，避免与 DelegatingWebSocketMessageBrokerConfiguration 形成循环依赖；在 webSocketMessageSender 方法参数中注入即可。
+   public WebSocketProcessorAutoConfiguration(WebSocketStompProperties webSocketStompProperties, RedissonClient redissonClient) {
       this.webSocketStompProperties = webSocketStompProperties;
-      this.simpUserRegistry = simpUserRegistry;
       this.redissonClient = redissonClient;
    }
 

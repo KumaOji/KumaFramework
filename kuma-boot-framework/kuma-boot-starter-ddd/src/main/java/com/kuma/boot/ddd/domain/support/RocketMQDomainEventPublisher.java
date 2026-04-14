@@ -2,9 +2,11 @@ package com.kuma.boot.ddd.domain.support;
 
 import com.kuma.boot.ddd.model.domain.event.DomainEvent;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnBean(RocketMQTemplate.class)
 public class RocketMQDomainEventPublisher implements DomainEventPublisher {
    private final RocketMQTemplate rocketMqTemplate;
    private final TraceUtil traceUtil;

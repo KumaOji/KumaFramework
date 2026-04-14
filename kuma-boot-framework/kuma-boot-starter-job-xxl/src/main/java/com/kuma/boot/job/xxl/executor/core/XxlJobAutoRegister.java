@@ -24,6 +24,7 @@ import com.kuma.boot.job.xxl.executor.service.JobGroupService;
 import com.kuma.boot.job.xxl.executor.service.JobInfoService;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -45,6 +46,16 @@ import java.util.Optional;
  * @since 2022-10-25 09:44:17
  */
 @Component
+@ConditionalOnProperty(
+   prefix = "kuma.boot.job.xxl",
+   name = "enabled",
+   havingValue = "true"
+)
+@ConditionalOnProperty(
+   prefix = "kuma.boot.job.xxl",
+   name = "auto-register",
+   havingValue = "true"
+)
 public class XxlJobAutoRegister implements ApplicationListener<ApplicationReadyEvent>, ApplicationContextAware {
 
    private ApplicationContext applicationContext;

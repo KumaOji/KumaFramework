@@ -3,6 +3,7 @@ package com.kuma.boot.eventbus.atlas.config;
 import com.kuma.boot.eventbus.atlas.core.DefaultEventBus;
 import com.kuma.boot.eventbus.atlas.core.EventBus;
 import com.kuma.boot.eventbus.atlas.processor.EventAnnotationProcessor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -11,9 +12,8 @@ import org.springframework.context.annotation.Bean;
 
 /**
  * Atlas 事件总线自动配置：注册 {@link EventBus} 与 {@link EventAnnotationProcessor}。
- * <p>必须使用 {@link Bean} 方法声明处理器并注入 {@link EventBus}：若使用 {@code @Import(Processor.class)}，
- * Spring 可能先于本类中的 {@code eventBus()} 去实例化 {@link BeanPostProcessor}，导致仍报缺少 {@link EventBus}。</p>
- * <p>须由 {@code META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports} 加载。</p>
+ * <p>处理器为 {@link org.springframework.beans.factory.config.BeanPostProcessor}，实例化阶段早于普通单例；
+ * 处理器内通过 {@link ObjectProvider} 延迟获取 {@link EventBus}，避免 BPP 早期阶段解析不到总线 Bean。</p>
  */
 @AutoConfiguration
 @ConditionalOnClass({EventBus.class})
@@ -30,7 +30,7 @@ public class EventAutoConfiguration {
 
    @Bean
    @ConditionalOnMissingBean(EventAnnotationProcessor.class)
-   public EventAnnotationProcessor eventAnnotationProcessor( EventBus eventBus ) {
-      return new EventAnnotationProcessor(eventBus);
+   public EventAnnotationProcessor eventAnnotationProcessor( ObjectProvider<EventBus> eventBusProvider ) {
+      return new EventAnnotationProcessor(eventBusProvider);
    }
 }

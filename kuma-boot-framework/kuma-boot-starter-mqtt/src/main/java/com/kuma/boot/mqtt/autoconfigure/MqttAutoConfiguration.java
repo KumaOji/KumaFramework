@@ -6,12 +6,14 @@ import com.kuma.boot.mqtt.autoconfigure.properties.MqttProperties;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 import org.eclipse.paho.mqttv5.client.IMqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MqttDefaultFilePersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +24,18 @@ import org.springframework.integration.mqtt.core.ClientManager;
 import org.springframework.integration.mqtt.core.Mqttv5ClientManager;
 import org.springframework.integration.mqtt.inbound.Mqttv5PahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.Mqttv5PahoMessageHandler;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 @Configuration(
    proxyBeanMethods = false
 )
 @EnableConfigurationProperties({MqttProperties.class})
+@ConditionalOnProperty(
+   prefix = "kuma.boot.mqtt",
+   name = "server-urls[0]",
+   matchIfMissing = false
+)
 public class MqttAutoConfiguration implements InitializingBean {
    private static final Logger log = LoggerFactory.getLogger(MqttAutoConfiguration.class);
 
@@ -44,7 +53,10 @@ public class MqttAutoConfiguration implements InitializingBean {
 
    @Bean
    public ClientManager<IMqttAsyncClient, MqttConnectionOptions> clientManager(MqttProperties mqttProperties) {
+      List<String> serverUrls = mqttProperties.getServerUrls();
+      Assert.isTrue(!CollectionUtils.isEmpty(serverUrls), "kuma.boot.mqtt.server-urls must not be empty");
       MqttConnectionOptions mqttConnectionOptions = new MqttConnectionOptions();
+      mqttConnectionOptions.setServerURIs(serverUrls.toArray(new String[0]));
       mqttConnectionOptions.setUserName(mqttProperties.getUsername());
       mqttConnectionOptions.setPassword(JSONB.toBytes(mqttProperties.getPassword(), StandardCharsets.UTF_8));
       mqttConnectionOptions.setCleanStart(mqttProperties.getCleanStart());

@@ -9,9 +9,12 @@ import cn.hutool.core.bean.BeanUtil;
 import com.kuma.boot.ddd.domain.service.DomainEventService;
 import com.kuma.boot.ddd.domain.support.DomainEventPublisher;
 import com.kuma.boot.ddd.model.domain.event.DefaultDomainEvent;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnBean(RocketMQTemplate.class)
 public class RemoveDomainEventHandler extends AbstractDomainEventHandler {
    private final DomainEventService domainEventService;
 
