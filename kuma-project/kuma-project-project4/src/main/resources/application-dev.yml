@@ -139,10 +139,11 @@ spring:
       concurrency: 5
       ack-mode: manual_immediate
       missing-topics-fatal: false
-  # ── MongoDB（kuma.boot.data.mongodb.enabled=false 时仅声明 URI，连接懒建立）──
+  # ── MongoDB：未启用时不要配置 uri，否则仍会创建 MongoClient 并在后台连接（monitor 线程报错）──
+  # 启用 kuma.boot.data.mongodb.enabled 时再取消注释并填写 uri
   data:
     mongodb:
-      uri: mongodb://localhost:27017/${spring.application.name}
+      # uri: mongodb://localhost:27017/${spring.application.name}
       auto-index-creation: false
 
   # ── JPA / Hibernate（kuma-boot-starter-data-jpa）─────────────────────

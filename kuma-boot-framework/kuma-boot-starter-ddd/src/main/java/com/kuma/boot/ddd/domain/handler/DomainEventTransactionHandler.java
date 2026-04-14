@@ -11,11 +11,14 @@ import com.kuma.boot.ddd.domain.service.DomainEventService;
 import com.kuma.boot.ddd.domain.support.AbstractTransactionHandler;
 import com.kuma.boot.ddd.model.domain.event.DefaultDomainEvent;
 import org.apache.rocketmq.spring.annotation.RocketMQTransactionListener;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 @Component
+@ConditionalOnBean(RocketMQTemplate.class)
 @RocketMQTransactionListener(
         corePoolSize = 16,
         maximumPoolSize = 32

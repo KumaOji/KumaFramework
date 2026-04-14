@@ -5,19 +5,24 @@ import com.kuma.boot.eventbus.atlas.annotation.EventSubscribe;
 import com.kuma.boot.eventbus.atlas.core.EventBus;
 import java.lang.reflect.Method;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-/** 由 {@link com.kuma.boot.eventbus.atlas.config.EventAutoConfiguration} 导入，勿使用 {@code @Component} 单独扫描。 */
+/**
+ * 由 {@link com.kuma.boot.eventbus.atlas.config.EventAutoConfiguration} 注册。
+ * <p>{@link BeanPostProcessor} 会在容器极早阶段实例化，若构造器直接依赖 {@link EventBus}，此时 {@code eventBus()} 可能尚未创建。
+ * 使用 {@link ObjectProvider} 延迟解析，在首次回调时再 {@link ObjectProvider#getObject()}。</p>
+ */
 public class EventAnnotationProcessor implements BeanPostProcessor {
-   private final EventBus eventBus;
+   private final ObjectProvider<EventBus> eventBusProvider;
 
-   public EventAnnotationProcessor(EventBus eventBus) {
-      this.eventBus = eventBus;
+   public EventAnnotationProcessor( ObjectProvider<EventBus> eventBusProvider ) {
+      this.eventBusProvider = eventBusProvider;
    }
 
    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
       if (this.hasEventSubscribeAnnotation(bean)) {
-         this.eventBus.register(bean);
+         this.eventBusProvider.getObject().register(bean);
       }
 
       if (bean.getClass().isAnnotationPresent(EventPublish.class)) {

@@ -11,11 +11,14 @@ import com.kuma.boot.ddd.domain.handler.domainevent.RemoveCacheEvent;
 import com.kuma.boot.ddd.domain.support.DomainEventPublisher;
 import com.kuma.boot.ddd.model.domain.event.DefaultDomainEvent;
 import java.util.List;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnBean(RocketMQTemplate.class)
 public class RemoveCacheEventHandler extends AbstractDomainEventHandler {
    private final List<CacheManager> cacheManagers;
 
