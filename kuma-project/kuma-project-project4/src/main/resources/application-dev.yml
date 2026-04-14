@@ -22,7 +22,7 @@ server:
 
 spring:
   main:
-    lazy-initialization: true
+    lazy-initialization: false
     log-startup-info: false
   threads:
     virtual:
@@ -65,6 +65,14 @@ spring:
       - com.alibaba.cloud.sentinel.custom.SentinelAutoConfiguration
       # RocketMQ Stream（无 RocketMQ Broker 时禁用，也可通过 rocketmq.enabled=false 控制）
       - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
+      # MongoDB（Spring Boot 4）：classpath 有 spring-boot-starter-data-mongodb 时即会装配 MongoClient。
+      # 未配置 spring.data.mongodb.uri 时仍会用默认 host=localhost、port=27017，与是否配置 uri、kuma.boot.data.mongodb.enabled 无关。
+      # 本地不使用 Mongo 时排除下列类；若 kuma.boot.data.mongodb.enabled=true 且需连库，请删除本段并配置 uri。
+      - org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
+      - org.springframework.boot.mongodb.autoconfigure.metrics.MongoMetricsAutoConfiguration
+      - org.springframework.boot.mongodb.autoconfigure.health.MongoHealthContributorAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoRepositoriesAutoConfiguration
   datasource:
     dynamic:
       lazy: true                 # 数据源懒初始化，首次 DB 操作时才建连接池（省 ~900ms）
@@ -139,8 +147,9 @@ spring:
       concurrency: 5
       ack-mode: manual_immediate
       missing-topics-fatal: false
-  # ── MongoDB：未启用时不要配置 uri，否则仍会创建 MongoClient 并在后台连接（monitor 线程报错）──
-  # 启用 kuma.boot.data.mongodb.enabled 时再取消注释并填写 uri
+  # ── MongoDB：kuma.boot.data.mongodb.enabled 只控制 Kuma 封装；Spring Boot 仍会因 starter 创建 MongoClient。
+  # 未配 uri 时等价于连 localhost:27017。本地不用 Mongo 时在 spring.autoconfigure.exclude 中排除 Boot 的 Mongo 自动配置（见上文）。
+  # 使用 Mongo 时：删除上述 exclude、启用 kuma.boot.data.mongodb.enabled，并取消注释 uri。
   data:
     mongodb:
       # uri: mongodb://localhost:27017/${spring.application.name}

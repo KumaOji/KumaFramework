@@ -41,9 +41,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(
+   prefix = "kuma.boot.data.elasticsearch",
+   name = "enabled",
+   havingValue = "true"
+)
+@ConditionalOnBean({ElasticsearchClient.class, ElasticsearchAsyncClient.class})
 public class ElasticsearchTemplate {
    private final ElasticsearchClient elasticsearchClient;
    private final ElasticsearchAsyncClient elasticsearchAsyncClient;
