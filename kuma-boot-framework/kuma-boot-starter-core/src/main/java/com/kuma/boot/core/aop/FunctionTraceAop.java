@@ -2,6 +2,8 @@ package com.kuma.boot.core.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.interceptor.CustomizableTraceInterceptor;
@@ -10,6 +12,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Role;
 
 /**
@@ -20,7 +23,9 @@ import org.springframework.context.annotation.Role;
  * @since 2025-12-19 09:30:45
  */
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+@Aspect
 @AutoConfiguration
+@EnableAspectJAutoProxy
 public class FunctionTraceAop {
 
     //该类是个综合性的类即可以记录方法执行时间也可以跟踪方法的调用，执行异常情况。
@@ -40,6 +45,10 @@ public class FunctionTraceAop {
         interceptor.setUseDynamicLogger(true);
 
         return interceptor;
+    }
+
+    @Pointcut("@annotation(com.kuma.boot.core.aop.FunctionTrace)")
+    public void functionTrace() {
     }
 
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

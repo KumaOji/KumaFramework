@@ -6,9 +6,8 @@ import com.kuma.boot.eventbus.atlas.core.EventBus;
 import java.lang.reflect.Method;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
 
-@Component
+/** 由 {@link com.kuma.boot.eventbus.atlas.config.EventAutoConfiguration} 导入，勿使用 {@code @Component} 单独扫描。 */
 public class EventAnnotationProcessor implements BeanPostProcessor {
    private final EventBus eventBus;
 
