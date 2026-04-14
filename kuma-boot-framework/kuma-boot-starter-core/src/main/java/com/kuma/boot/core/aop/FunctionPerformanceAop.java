@@ -2,6 +2,8 @@ package com.kuma.boot.core.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.interceptor.PerformanceMonitorInterceptor;
@@ -9,6 +11,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Role;
 
 /**
@@ -19,8 +22,14 @@ import org.springframework.context.annotation.Role;
  * @since 2025-12-19 09:30:45
  */
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+@Aspect
 @AutoConfiguration
+@EnableAspectJAutoProxy
 public class FunctionPerformanceAop {
+
+    @Pointcut("@annotation(com.kuma.boot.core.aop.FunctionPerformance)")
+    public void functionPerformance() {
+    }
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

@@ -1,0 +1,3 @@
+com.kuma.boot.eventbus.atlas.config.EventAutoConfiguration
+com.kuma.boot.eventbus.autoconfigure.EventBusAutoConfiguration
+com.kuma.boot.eventbus.autoconfigure.EventBusPublisherAutoConfiguration
