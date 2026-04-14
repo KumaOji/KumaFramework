@@ -33,6 +33,7 @@ import java.util.List;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -91,6 +92,7 @@ public class MongodbAutoConfiguration implements InitializingBean {
     * @since 2025-12-19 09:30:45
     */
    @Configuration
+   @ConditionalOnBean({MongoDatabaseFactory.class, MongoMappingContext.class})
    public static class MongodbHelperAutoConfiguration {
 
       @Autowired

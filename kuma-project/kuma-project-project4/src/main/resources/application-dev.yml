@@ -22,7 +22,7 @@ server:
 
 spring:
   main:
-    lazy-initialization: false
+    lazy-initialization: true
     log-startup-info: false
   threads:
     virtual:
@@ -67,7 +67,8 @@ spring:
       - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
       # MongoDB（Spring Boot 4）：classpath 有 spring-boot-starter-data-mongodb 时即会装配 MongoClient。
       # 未配置 spring.data.mongodb.uri 时仍会用默认 host=localhost、port=27017，与是否配置 uri、kuma.boot.data.mongodb.enabled 无关。
-      # 本地不使用 Mongo 时排除下列类；若 kuma.boot.data.mongodb.enabled=true 且需连库，请删除本段并配置 uri。
+      # 本地不使用 Mongo 时排除下列类；启用 Kuma Mongo（kuma.boot.data.mongodb.enabled=true）时必须删除本段并配置 uri，
+      # 否则没有 Spring Data 的 MongoDatabaseFactory（starter 已修复为在未排除时正常装配）。
       - org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
       - org.springframework.boot.mongodb.autoconfigure.metrics.MongoMetricsAutoConfiguration
       - org.springframework.boot.mongodb.autoconfigure.health.MongoHealthContributorAutoConfiguration
