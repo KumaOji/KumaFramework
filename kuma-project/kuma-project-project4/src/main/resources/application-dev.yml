@@ -337,6 +337,8 @@ kuma:
         enabled: false
       sentinel:
         enabled: false
+      seata:
+        enabled: false
     # ── kuma-cloud-starter-stream ──────────────────────────────────────
     stream:
       enabled: false
@@ -452,6 +454,8 @@ kuma:
       elasticsearch:
         enabled: false
       p6spy:
+        enabled: false
+      shardingsphere:
         enabled: false
     office:
       enabled: false

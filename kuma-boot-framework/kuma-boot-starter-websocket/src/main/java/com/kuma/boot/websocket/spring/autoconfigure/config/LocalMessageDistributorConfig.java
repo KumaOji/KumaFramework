@@ -3,11 +3,13 @@ package com.kuma.boot.websocket.spring.autoconfigure.config;
 import com.kuma.boot.websocket.spring.common.distribute.LocalMessageDistributor;
 import com.kuma.boot.websocket.spring.common.distribute.MessageDistributor;
 import com.kuma.boot.websocket.spring.common.session.WebSocketSessionStore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@ConditionalOnBean(WebSocketSessionStore.class)
 @ConditionalOnProperty(
    prefix = "kuma.boot.websocket.spring",
    name = {"message-distributor"},
