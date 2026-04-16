@@ -32,6 +32,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -43,6 +44,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @since 2022-05-27 21:54:09
  */
 @AutoConfiguration
+@ConditionalOnBean(MongoTemplate.class)
 public class ImportExportUtil {
 
    /** mongoTemplate 写链接(写到主库,可使用事务) */

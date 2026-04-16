@@ -9,10 +9,12 @@ import com.kuma.boot.idgenerator.uid.exception.UidGenerateException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.idgenerator", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CachedUidGenerator extends DefaultUidGenerator implements DisposableBean {
    private static final int DEFAULT_BOOST_POWER = 3;
    private int boostPower = 3;

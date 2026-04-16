@@ -8,9 +8,11 @@ import com.dtflys.forest.reflection.ForestMethod;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.third-client.forest", name = "enabled", havingValue = "true")
 public class MyInterceptor implements Interceptor {
    private final RedisRepository repository;
    private static final Logger log = LoggerFactory.getLogger(MyInterceptor.class);

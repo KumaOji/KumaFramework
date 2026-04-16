@@ -7,9 +7,11 @@ import com.kuma.boot.idgenerator.uid.worker.dao.WorkerNodeDAO;
 import com.kuma.boot.idgenerator.uid.worker.entity.WorkerNodeEntity;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.RandomUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.idgenerator", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
    @Resource
    private WorkerNodeDAO workerNodeDAO;
