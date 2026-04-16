@@ -7,10 +7,12 @@ import com.kuma.boot.websocket.stomp.processor.WebSocketMessageSender;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.websocket.stomp", name = "enabled", havingValue = "true")
 public class WebSocketConnectedListener extends AbstractWebSocketListener<SessionConnectedEvent> {
    private static final Logger log = LoggerFactory.getLogger(WebSocketConnectedListener.class);
 

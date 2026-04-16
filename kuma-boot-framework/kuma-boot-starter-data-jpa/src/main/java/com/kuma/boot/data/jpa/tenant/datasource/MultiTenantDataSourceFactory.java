@@ -13,10 +13,12 @@ import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "kuma.boot.data.jpa.tenant", name = "enabled", havingValue = "true")
 public class MultiTenantDataSourceFactory {
    @Autowired
    private SysTenantDataSourceRepository sysTenantDataSourceRepository;
