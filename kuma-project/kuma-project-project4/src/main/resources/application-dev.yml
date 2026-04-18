@@ -173,7 +173,7 @@ spring:
     socket-timeout: 30s
   dynamic:
     tp:
-          enabled: false
+      enabled: false
 
   # ── Mail（已引入 spring-boot-starter-mail，本地无 SMTP 时保持注释）──
   #mail:
@@ -348,6 +348,7 @@ kuma:
   boot:
     core:
       enabled: true
+      env: DEV          # 核心环境标识（DEV/TEST/PRE/PRO/KUBERNETES/DOCKER），无默认值
       collect-hook-enabled: false
       context-restart-enabled: false
       async:
@@ -383,6 +384,10 @@ kuma:
         web-context: false
         report: false
         ping: false
+      interceptor:
+        doubt-api: true           # 开启可疑 API 拦截（内存增长阈值告警）
+        doubt-api-threshold: 3145728  # 3MB，超过视为可疑
+        header: true              # 开启请求头拦截器
       request:
         enabled: false
         types:
@@ -435,8 +440,35 @@ kuma:
         enabled: false
         health-enabled: false
       mybatis:
+        enabled: false
+        snow-flake-id-generator: false  # 是否使用雪花 ID 生成器替换 MyBatis-Plus 内置 ID
+        # entity-package-path: com.kuma.cloud.project4.biz.model.entity
         mybatis-plus:
           enabled: false
+          interceptor:
+            enabled: false
+            pagination:
+              enabled: false
+              db-type: MYSQL
+              overflow: true
+              max-limit: 1000
+              optimize-join: true
+            block-attack:
+              enabled: false
+            illegal-sql:
+              enabled: false
+            optimistic-locker:
+              enabled: false
+            data-scope:
+              enabled: false
+            multi-tenant:
+              enabled: false
+              column: tenant_id
+            data-change:
+              enabled: false
+            slow-query:
+              enabled: false
+              slow-sql-threshold-ms: 6000
       jpa:
         enabled: false
         show-sql: false           # dev 阶段关闭，调试时可改为 true
@@ -500,9 +532,8 @@ kuma:
           secret: ${DINGTALK_SECRET:demo_secret_placeholder}
     captcha:
       enabled: false
-    boot:
-      seata:
-        enabled: false
+    seata:
+      enabled: false
     totp:
       secret:
         length: 32
@@ -538,18 +569,41 @@ kuma:
       enabled: false
     sign:
       enabled: false
+      # key: your-sign-secret-key  # 签名密钥，启用时必须配置
+      # ignore: [token, sign, dataSecret]  # 不参与签名的字段
+      encrypt:
+        body:
+          # aes-key: your-aes-key   # 请求体 AES 加密密钥
+          # des-key: your-des-key   # 请求体 DES 加密密钥
+          encoding: UTF-8
     openapi:
       enabled: false
+      client: false   # 是否作为 OpenAPI 客户端
+      server: false   # 是否作为 OpenAPI 服务端
     sms:
       enabled: false
+      # 启用时必须指定服务商：ALIBABA / TENCENT / HUAWEI / YUNPIAN 等
+      # type: ALIBABA
+      load-balancer-type: Random
+      # reg: 手机号正则（可选，使用默认正则时无需配置）
+      async:
+        enable: true
+      verification-code:
+        repository: REDIS
+        expiration-time: 300000   # 验证码有效期（ms）
+        retry-interval-time: 60000  # 重发间隔（ms）
+        code-length: 6
+        delete-by-verify-succeed: true
     oss:
       enabled: false
+      # 启用时需指定存储平台：MINIO / ALIYUN / TENCENT / HUAWEI / LOCAL 等
+      # type: MINIO
       platform:
         minio:
-                  url: http://localhost:9000
-                  bucket-name: ${spring.application.name}
-                  access-key: ${MINIO_ACCESS_KEY:minioadmin}
-                  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+          url: http://localhost:9000
+          bucket-name: ${spring.application.name}
+          access-key: ${MINIO_ACCESS_KEY:minioadmin}
+          secret-key: ${MINIO_SECRET_KEY:minioadmin}
     actuator:
       managedresource:
         enabled: false
@@ -558,10 +612,27 @@ kuma:
     # ── kuma-boot-starter-grpc ─────────────────────────────────────────
     grpc:
       enabled: false
+      server:
+        # port: 9090              # 启用时必须配置，无默认值
+        trace-id-key: TRACE_ID
+        message-size: 512MB
+        keep-alive-time: 7200000  # ms，默认 2h
+        keep-alive-timeout: 20000 # ms，默认 20s
+      client:
+        # host: localhost         # 启用时必须配置，无默认值
+        port: 80
+        trace-id-key: TRACE_ID
+        use-plaintext: false
+        disable-ssl: false
+        enable-retry: true
+        enable-keep-alive: true
+        keep-alive-time: 1800000  # ms，默认 30min
+        keep-alive-timeout: 2000  # ms，默认 2s
     # ── kuma-boot-starter-monitor ──────────────────────────────────────
     monitor:
       enabled: false
-    # ── kuma-boot-starter-xss ────────────────────────��────────────────
+      time-span: 100  # 接口耗时监控阈值（ms），超过此值记录告警
+    # ── kuma-boot-starter-xss ──────────────────────────────────────────
     xss:
       enabled: false
       mode: clear
@@ -598,12 +669,20 @@ kuma:
     # ── kuma-boot-starter-elk ─────────────────────────────────────────
     elk:
       enabled: false
+      app-name: ${spring.application.name}
+      spring-app-name: ${spring.application.name}
       destinations:
         - 127.0.0.1:4560
     # ── kuma-boot-starter-logger ──────────────────────────────────────
     logger:
       enabled: false
       logging:
+        console:
+          enabled: true          # 控制台日志（默认开启）
+          close-after-start: false
+        files:
+          enabled: false         # 文件滚动日志
+          use-json-format: false
         logstash:
           enabled: false
           destinations: 127.0.0.1:5000
@@ -616,22 +695,41 @@ kuma:
     # ── kuma-boot-starter-sensitive ───────────────────────────────────
     sensitive:
       enabled: false
+      sensitive-level: 0  # 脱敏级别（默认 0，级别越高脱敏越严格）
     # ── kuma-boot-starter-statemachine ───────────────────────────────
     statemachine:
       enabled: false
     # ── kuma-boot-starter-flowengine ─────────────────────────────────
     flowengine:
       enabled: false
-    # ── kuma-boot-starter-mail ───────────────────────────────��────────
+      # flow-conf-location: classpath:flow/  # 流程配置文件路径，启用时必须配置
+      retryable: false  # 节点执行失败是否自动重试
+    # ── kuma-boot-starter-mail ─────────────────────────────────────────
     mail:
       enabled: false
     # ── kuma-boot-starter-mqtt ────────────────────────────────────────
     mqtt:
       enabled: false
-      configs:
-        default:
-          server-urls:
-            - tcp://localhost:1883
+      # ── Paho MQTT v5 直连客户端（kuma.boot.mqtt.*）────────────────
+      # server-urls:
+      #   - tcp://localhost:1883
+      # client-id: project4-mqtt-client
+      # username:
+      # password:
+      # keep-alive-interval: 60s
+      # automatic-reconnect: true
+      # ── Spring Integration MQTT（kuma.boot.mqtt.spring.broker.*）──
+      spring:
+        broker:
+          enabled: false
+          configs:
+            default:
+              uri: tcp://localhost:1883
+              # username:
+              # password:
+              subscribe-qos: 0
+              send-qos: 1
+              automatic-reconnect: true
     # ── kuma-boot-starter-job-xxl ────────────────────────────────────
     job:
       xxl:

@@ -19,14 +19,17 @@ package com.kuma.boot.data.datasource.autoconfigure;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.data.datasource.init.DataSourceSqlInvokerBeanProcessor;
+import com.kuma.boot.data.datasource.tx.TransactionalUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
  * 动态数据源切换配置
  */
 @AutoConfiguration
+@Import(TransactionalUtils.class)
 public class KmcDataSourceAutoConfiguration implements InitializingBean {
 
     @Override
