@@ -15,6 +15,7 @@ import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.hibernate.autoconfigure.HibernateProperties;
 import org.springframework.boot.hibernate.autoconfigure.HibernateSettings;
 import org.springframework.boot.jpa.autoconfigure.JpaProperties;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration(
    proxyBeanMethods = false
 )
+@ConditionalOnProperty(prefix = "kuma.boot.data.jpa.tenant", name = "enabled", havingValue = "true")
 @ConditionalOnDatabaseApproach
 @EnableTransactionManagement
 @EntityScan(

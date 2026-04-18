@@ -12,6 +12,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 
 @AutoConfiguration
 @ConditionalOnClass({CanalConnectors.class})
+@ConditionalOnProperty(prefix = "kuma.boot.canal.quick", name = "enabled", havingValue = "true")
 public class CanalConnectorConfiguration implements ApplicationContextAware {
    private final CanalConfigProperties canalConfigProperties;
    protected ApplicationContext applicationContext;

@@ -65,6 +65,9 @@ spring:
       - com.alibaba.cloud.sentinel.custom.SentinelAutoConfiguration
       # RocketMQ Stream（无 RocketMQ Broker 时禁用，也可通过 rocketmq.enabled=false 控制）
       - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
+      # EasyES（无 ES 时禁用）
+      - org.dromara.easyes.spring.config.EasyEsConfiguration
+      - org.dromara.easyes.starter.config.GeneratorConfiguration
       # MongoDB（Spring Boot 4）：classpath 有 spring-boot-starter-data-mongodb 时即会装配 MongoClient。
       # 未配置 spring.data.mongodb.uri 时仍会用默认 host=localhost、port=27017，与是否配置 uri、kuma.boot.data.mongodb.enabled 无关。
       # 本地不使用 Mongo 时排除下列类；启用 Kuma Mongo（kuma.boot.data.mongodb.enabled=true）时必须删除本段并配置 uri，

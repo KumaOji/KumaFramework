@@ -130,6 +130,11 @@
     <!-- Quartz 相关日志 - 减少启动时输出 -->
     <logger name="org.quartz" level="WARN"/>
 
+    <!-- 缓存持久化（每秒调度，INFO 过于嘈杂） -->
+    <logger name="com.kuma.cloud.cache.support.persist.InnerCachePersist" level="WARN"/>
+    <!-- 限流缓存清理任务：LogUtils 动态 logger 名为 java.lang.Thread-run-xxx -->
+    <logger name="java.lang.Thread" level="WARN"/>
+
     <!-- 开发环境配置 -->
     <springProfile name="dev">
         <!-- 开发环境：减少 Spring 框架的详细日志，只保留关键信息 -->
