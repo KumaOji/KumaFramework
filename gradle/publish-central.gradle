@@ -1,0 +1,158 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
+    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId    = rootProject.group
+            artifactId = project.name
+            version    = rootProject.version
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name        = project.name
+                description = 'Kuma Boot Framework common utilities and base components'
+                url         = "https://github.com/kumaoji/kuma-boot-framework"
+
+                licenses {
+                    license {
+                        name         = "The Apache License, Version 2.0"
+                        url          = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                        distribution = "repo"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id    = "kumaoji"
+                        name  = "kumaoji"
+                        email = "cengshuai93@gmail.com"
+                    }
+                }
+
+                scm {
+                    connection          = "scm:git:git@github.com:kumaoji/kuma-boot-framework.git"
+                    developerConnection = "scm:git:ssh://git@github.com:kumaoji/kuma-boot-framework.git"
+                    url                 = "https://github.com/kumaoji/kuma-boot-framework"
+                }
+            }
+        }
+    }
+}
+
+// GPG signing
+signing {
+    useGpgCmd()
+    sign publishing.publications.mavenJava
+}
+
+// Upload bundle to Sonatype Central Portal via REST API
+tasks.register('publishToCentralPortal') {
+    group       = 'publishing'
+    description = 'Bundle signed artifacts and upload to Sonatype Central Portal'
+    dependsOn   tasks.named('signMavenJavaPublication'),
+                tasks.named('generatePomFileForMavenJavaPublication'),
+                tasks.named('sourcesJar'),
+                tasks.named('javadocJar'),
+                tasks.named('jar')
+
+    // project gradle.properties is gitignored — credentials are safe here
+    def usernameProp = (findProperty("MAVEN_CENTRAL_USERNAME") ?: System.getenv("MAVEN_CENTRAL_USERNAME")) as String ?: ""
+    def passwordProp = (findProperty("MAVEN_CENTRAL_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PASSWORD")) as String ?: ""
+    def groupPath = rootProject.group.toString().replace('.', '/')
+    def artId     = project.name
+    def ver       = rootProject.version.toString()
+    def buildDir  = layout.buildDirectory
+
+    doLast {
+        def username = usernameProp
+        def password = passwordProp
+        if (!username || !password) {
+            throw new GradleException("MAVEN_CENTRAL_USERNAME / MAVEN_CENTRAL_PASSWORD not set in ~/.gradle/gradle.properties")
+        }
+
+        def bd       = buildDir.get().asFile
+        def libsDir  = new File(bd, "libs")
+        def pomSrc   = new File(bd, "publications/mavenJava/pom-default.xml")
+        def pomAsc   = new File(bd, "publications/mavenJava/pom-default.xml.asc")
+
+        // compute MD5 / SHA1 for a file
+        def checksum = { File f, String algo ->
+            def md = java.security.MessageDigest.getInstance(algo)
+            f.withInputStream { is ->
+                def buf = new byte[8192]; int n
+                while ((n = is.read(buf)) != -1) md.update(buf, 0, n)
+            }
+            md.digest().encodeHex().toString()
+        }
+        // write artifact + its .md5 / .sha1 into bundleRoot
+        def copyWithChecksums = { File src, File dest ->
+            dest.bytes = src.bytes
+            new File(dest.path + ".md5").text  = checksum(dest, "MD5")
+            new File(dest.path + ".sha1").text = checksum(dest, "SHA-1")
+        }
+
+        // -- assemble bundle directory --
+        def bundleRoot = new File(bd, "central-staging/${groupPath}/${artId}/${ver}")
+        bundleRoot.mkdirs()
+
+        copyWithChecksums(pomSrc, new File(bundleRoot, "${artId}-${ver}.pom"))
+        if (pomAsc.exists()) new File(bundleRoot, "${artId}-${ver}.pom.asc").bytes = pomAsc.bytes
+
+        libsDir.listFiles()?.findAll { it.name.startsWith(artId) && !it.name.endsWith(".asc") }?.each { f ->
+            copyWithChecksums(f, new File(bundleRoot, f.name))
+        }
+        // copy .asc signatures as-is (no checksums needed for signatures)
+        libsDir.listFiles()?.findAll { it.name.startsWith(artId) && it.name.endsWith(".asc") }?.each { f ->
+            new File(bundleRoot, f.name).bytes = f.bytes
+        }
+
+        // -- create ZIP bundle --
+        def zipFile = new File(bd, "central-bundle.zip")
+        if (zipFile.exists()) zipFile.delete()
+        ant.zip(destfile: zipFile, basedir: new File(bd, "central-staging"))
+
+        // -- upload via multipart POST --
+        def token    = Base64.encoder.encodeToString("${username}:${password}".getBytes("UTF-8"))
+        def boundary = "GradleCentralBoundary${System.currentTimeMillis()}"
+        def conn     = new URL("https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED").openConnection()
+        conn.doOutput = true
+        conn.requestMethod = 'POST'
+        conn.setRequestProperty("Authorization", "Bearer ${token}")
+        conn.setRequestProperty("Content-Type",  "multipart/form-data; boundary=${boundary}")
+
+        conn.outputStream.withStream { out ->
+            def CRLF = "\r\n"
+            out << "--${boundary}${CRLF}"
+            out << "Content-Disposition: form-data; name=\"bundle\"; filename=\"bundle.zip\"${CRLF}"
+            out << "Content-Type: application/octet-stream${CRLF}${CRLF}"
+            out << zipFile.bytes
+            out << "${CRLF}--${boundary}--${CRLF}"
+        }
+
+        def code = conn.responseCode
+        def body = (code < 400 ? conn.inputStream : conn.errorStream)?.text ?: ""
+
+        if (code >= 200 && code < 300) {
+            logger.lifecycle("Upload successful! Deployment ID: ${body}")
+            logger.lifecycle("Review at https://central.sonatype.com/publishing/deployments")
+        } else {
+            throw new GradleException("Upload failed (HTTP ${code}): ${body}")
+        }
+    }
+}
