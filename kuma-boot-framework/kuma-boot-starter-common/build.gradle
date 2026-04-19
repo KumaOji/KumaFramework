@@ -69,3 +69,5 @@ dependencies {
     annotationProcessor projectLibs.lombok
 }
 
+apply from: rootProject.file('gradle/publish-central.gradle')
+
