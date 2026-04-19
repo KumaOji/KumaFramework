@@ -7,7 +7,6 @@ package com.kuma.boot.common.support.secret.core.secret;
 
 import com.kuma.boot.common.support.secret.api.SecretContext;
 import com.kuma.boot.common.utils.lang.StringUtils;
-import com.xkzhangsan.time.utils.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class SimpleSubstitutionSecret extends AbstractSecret {
     }
 
     private String buildResult( String source, Map<Character, Character> map ) {
-        if (StringUtil.isEmpty(source)) {
+        if (StringUtils.isEmpty(source)) {
             return source;
         } else {
             char[] chars = source.toCharArray();

@@ -125,3 +125,109 @@ subprojects {
         }
     }
 }
+
+// ── Maven Central publish：subprojects 块之后 apply，确保 java-library 已就绪 ──
+configure(subprojects.findAll { it.name.startsWith('kuma-boot-starter-') }) {
+    apply from: rootProject.file('gradle/publish-central.gradle')
+}
+
+// ── 按依赖层次顺序发布所有 starter 到 Maven Central ──
+gradle.projectsEvaluated {
+    // 发布顺序：按模块依赖层次从底层到高层排列
+    def publishOrder = [
+        // Layer 0 — 无依赖
+        'kuma-boot-starter-common',
+        // Layer 1 — 仅依赖 common
+        'kuma-boot-starter-core',
+        'kuma-boot-starter-lock',
+        'kuma-boot-starter-data-common',
+        'kuma-boot-starter-data-p6spy',
+        'kuma-boot-starter-data-elasticsearch',
+        'kuma-boot-starter-data-mongodb',
+        'kuma-boot-starter-data-shardingsphere',
+        'kuma-boot-starter-mq-common',
+        'kuma-boot-starter-security-common',
+        'kuma-boot-starter-oss-common',
+        'kuma-boot-starter-cache-common',
+        'kuma-boot-starter-cache-caffeine',
+        'kuma-boot-starter-cache-jetcache',
+        'kuma-boot-starter-apollo',
+        'kuma-boot-starter-canal',
+        'kuma-boot-starter-dingtalk',
+        'kuma-boot-starter-elk',
+        'kuma-boot-starter-eventbus',
+        'kuma-boot-starter-frp',
+        'kuma-boot-starter-ip2region',
+        'kuma-boot-starter-job-common',
+        'kuma-boot-starter-logger',
+        'kuma-boot-starter-mail',
+        'kuma-boot-starter-mqtt',
+        'kuma-boot-starter-office',
+        'kuma-boot-starter-openapi',
+        'kuma-boot-starter-pinyin',
+        'kuma-boot-starter-retry',
+        'kuma-boot-starter-sentinel',
+        'kuma-boot-starter-skywalking',
+        'kuma-boot-starter-sms-common',
+        'kuma-boot-starter-springdoc',
+        'kuma-boot-starter-statemachine',
+        'kuma-boot-starter-threadpool',
+        'kuma-boot-starter-totp',
+        'kuma-boot-starter-translation',
+        'kuma-boot-starter-useragent',
+        'kuma-boot-starter-xss',
+        'kuma-boot-starter-sensitive',
+        'kuma-boot-starter-encrypt',
+        // Layer 2
+        'kuma-boot-starter-actuator',
+        'kuma-boot-starter-cache-redis',
+        'kuma-boot-starter-data-datasource',
+        'kuma-boot-starter-mq-kafka',
+        'kuma-boot-starter-oss-minio',
+        // Layer 3
+        'kuma-boot-starter-monitor',
+        'kuma-boot-starter-captcha',
+        'kuma-boot-starter-idempotent',
+        'kuma-boot-starter-ratelimit',
+        'kuma-boot-starter-security-jstauth',
+        'kuma-boot-starter-job-xxl',
+        'kuma-boot-starter-test',
+        'kuma-boot-starter-grpc',
+        'kuma-boot-starter-data-jpa',
+        'kuma-boot-starter-ddd',
+        'kuma-boot-starter-flowengine',
+        'kuma-boot-starter-seata',
+        'kuma-boot-starter-tracer',
+        'kuma-boot-starter-idgenerator',
+        'kuma-boot-starter-client',
+        // Layer 4
+        'kuma-boot-starter-data-mybatis',
+        'kuma-boot-starter-security-spring',
+        'kuma-boot-starter-metrics',
+        'kuma-boot-starter-prometheus',
+        // Layer 5
+        'kuma-boot-starter-web',
+        // Layer 6
+        'kuma-boot-starter-webagg',
+        'kuma-boot-starter-websocket',
+    ]
+
+    def publishTasks = publishOrder.collect { name ->
+        allprojects.find { it.name == name }?.tasks?.findByName('publishToCentralPortal')
+    }.findAll { it != null }
+
+    // 强制顺序：每个 task 必须在前一个完成后才执行
+    publishTasks.eachWithIndex { task, i ->
+        if (i > 0) task.mustRunAfter(publishTasks[i - 1])
+    }
+
+    def publishCount = publishTasks.size()
+    tasks.register('publishAllStartersToCentralPortal') {
+        group       = 'publishing'
+        description = 'Publish all kuma-boot-starter-* to Maven Central in dependency order'
+        dependsOn   publishTasks.collect { it.path }
+        doFirst {
+            logger.lifecycle("Publishing ${publishCount} starter modules to Maven Central...")
+        }
+    }
+}

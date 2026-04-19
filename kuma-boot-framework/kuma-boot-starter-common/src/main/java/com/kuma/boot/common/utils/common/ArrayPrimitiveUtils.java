@@ -21,7 +21,7 @@ import static com.kuma.boot.common.constant.CommonConstants.BLANK;
 import static com.kuma.boot.common.constant.CommonConstants.DOUBLE_QUOTES;
 
 import com.kuma.boot.common.support.handler.Handler;
-import com.xkzhangsan.time.utils.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -663,7 +663,7 @@ public final class ArrayPrimitiveUtils {
      * @since 0.1.49
      */
     public static <E> int[] toIntArray(final List<E> list, final Handler<E, Integer> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return INT_EMPTY;
         }
 
@@ -685,7 +685,7 @@ public final class ArrayPrimitiveUtils {
      */
     public static <E> boolean[] toBooleanArray(
             final List<E> list, final Handler<E, Boolean> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return BOOLEAN_EMPTY;
         }
 
@@ -706,7 +706,7 @@ public final class ArrayPrimitiveUtils {
      * @since 0.1.49
      */
     public static <E> char[] toCharArray(final List<E> list, final Handler<E, Character> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return CHAR_EMPTY;
         }
 
@@ -727,7 +727,7 @@ public final class ArrayPrimitiveUtils {
      * @since 0.1.49
      */
     public static <E> byte[] toByteArray(final List<E> list, final Handler<E, Byte> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return BYTE_EMPTY;
         }
 
@@ -748,7 +748,7 @@ public final class ArrayPrimitiveUtils {
      * @since 0.1.49
      */
     public static <E> short[] toShortArray(final List<E> list, final Handler<E, Short> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return SHORT_EMPTY;
         }
 
@@ -769,7 +769,7 @@ public final class ArrayPrimitiveUtils {
      * @since 0.1.49
      */
     public static <E> long[] toLongArray(final List<E> list, final Handler<E, Long> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return LONG_EMPTY;
         }
 
@@ -790,7 +790,7 @@ public final class ArrayPrimitiveUtils {
      * @since 0.1.49
      */
     public static <E> float[] toFloatArray(final List<E> list, final Handler<E, Float> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return FLOAT_EMPTY;
         }
 
@@ -812,7 +812,7 @@ public final class ArrayPrimitiveUtils {
      */
     public static <E> double[] toDoubleArray(
             final List<E> list, final Handler<E, Double> handler) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return DOUBLE_EMPTY;
         }
 

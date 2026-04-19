@@ -20,7 +20,6 @@ publishing {
             artifactId = project.name
             version    = rootProject.version
 
-            from components.java
             artifact sourcesJar
             artifact javadocJar
 
@@ -55,6 +54,11 @@ publishing {
     }
 }
 
+// components.java is available only after project evaluation — must be outside publications block
+afterEvaluate {
+    publishing.publications.mavenJava.from(components.java)
+}
+
 // GPG signing
 signing {
     useGpgCmd()
@@ -71,7 +75,6 @@ tasks.register('publishToCentralPortal') {
                 tasks.named('javadocJar'),
                 tasks.named('jar')
 
-    // project gradle.properties is gitignored — credentials are safe here
     def usernameProp = (findProperty("MAVEN_CENTRAL_USERNAME") ?: System.getenv("MAVEN_CENTRAL_USERNAME")) as String ?: ""
     def passwordProp = (findProperty("MAVEN_CENTRAL_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PASSWORD")) as String ?: ""
     def groupPath = rootProject.group.toString().replace('.', '/')
@@ -83,15 +86,14 @@ tasks.register('publishToCentralPortal') {
         def username = usernameProp
         def password = passwordProp
         if (!username || !password) {
-            throw new GradleException("MAVEN_CENTRAL_USERNAME / MAVEN_CENTRAL_PASSWORD not set in ~/.gradle/gradle.properties")
+            throw new GradleException("MAVEN_CENTRAL_USERNAME / MAVEN_CENTRAL_PASSWORD not set in gradle.properties")
         }
 
-        def bd       = buildDir.get().asFile
-        def libsDir  = new File(bd, "libs")
-        def pomSrc   = new File(bd, "publications/mavenJava/pom-default.xml")
-        def pomAsc   = new File(bd, "publications/mavenJava/pom-default.xml.asc")
+        def bd      = buildDir.get().asFile
+        def libsDir = new File(bd, "libs")
+        def pomSrc  = new File(bd, "publications/mavenJava/pom-default.xml")
+        def pomAsc  = new File(bd, "publications/mavenJava/pom-default.xml.asc")
 
-        // compute MD5 / SHA1 for a file
         def checksum = { File f, String algo ->
             def md = java.security.MessageDigest.getInstance(algo)
             f.withInputStream { is ->
@@ -100,15 +102,16 @@ tasks.register('publishToCentralPortal') {
             }
             md.digest().encodeHex().toString()
         }
-        // write artifact + its .md5 / .sha1 into bundleRoot
         def copyWithChecksums = { File src, File dest ->
             dest.bytes = src.bytes
             new File(dest.path + ".md5").text  = checksum(dest, "MD5")
             new File(dest.path + ".sha1").text = checksum(dest, "SHA-1")
         }
 
-        // -- assemble bundle directory --
-        def bundleRoot = new File(bd, "central-staging/${groupPath}/${artId}/${ver}")
+        // -- assemble bundle directory (clean before rebuild) --
+        def stagingDir = new File(bd, "central-staging")
+        if (stagingDir.exists()) stagingDir.deleteDir()
+        def bundleRoot = new File(stagingDir, "${groupPath}/${artId}/${ver}")
         bundleRoot.mkdirs()
 
         copyWithChecksums(pomSrc, new File(bundleRoot, "${artId}-${ver}.pom"))
@@ -117,7 +120,6 @@ tasks.register('publishToCentralPortal') {
         libsDir.listFiles()?.findAll { it.name.startsWith(artId) && !it.name.endsWith(".asc") }?.each { f ->
             copyWithChecksums(f, new File(bundleRoot, f.name))
         }
-        // copy .asc signatures as-is (no checksums needed for signatures)
         libsDir.listFiles()?.findAll { it.name.startsWith(artId) && it.name.endsWith(".asc") }?.each { f ->
             new File(bundleRoot, f.name).bytes = f.bytes
         }
@@ -125,28 +127,55 @@ tasks.register('publishToCentralPortal') {
         // -- create ZIP bundle --
         def zipFile = new File(bd, "central-bundle.zip")
         if (zipFile.exists()) zipFile.delete()
-        ant.zip(destfile: zipFile, basedir: new File(bd, "central-staging"))
+        ant.zip(destfile: zipFile, basedir: stagingDir)
 
-        // -- upload via multipart POST --
+        // -- build multipart body in memory, then upload via HttpClient --
+        def CRLF     = "\r\n"
         def token    = Base64.encoder.encodeToString("${username}:${password}".getBytes("UTF-8"))
         def boundary = "GradleCentralBoundary${System.currentTimeMillis()}"
-        def conn     = new URL("https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED").openConnection()
-        conn.doOutput = true
-        conn.requestMethod = 'POST'
-        conn.setRequestProperty("Authorization", "Bearer ${token}")
-        conn.setRequestProperty("Content-Type",  "multipart/form-data; boundary=${boundary}")
 
-        conn.outputStream.withStream { out ->
-            def CRLF = "\r\n"
-            out << "--${boundary}${CRLF}"
-            out << "Content-Disposition: form-data; name=\"bundle\"; filename=\"bundle.zip\"${CRLF}"
-            out << "Content-Type: application/octet-stream${CRLF}${CRLF}"
-            out << zipFile.bytes
-            out << "${CRLF}--${boundary}--${CRLF}"
+        def baos = new ByteArrayOutputStream()
+        baos.write(("--${boundary}${CRLF}" +
+                    "Content-Disposition: form-data; name=\"bundle\"; filename=\"bundle.zip\"${CRLF}" +
+                    "Content-Type: application/octet-stream${CRLF}${CRLF}").getBytes("UTF-8"))
+        zipFile.withInputStream { is ->
+            def buf = new byte[65536]; int n
+            while ((n = is.read(buf)) != -1) baos.write(buf, 0, n)
         }
+        baos.write(("${CRLF}--${boundary}--${CRLF}").getBytes("UTF-8"))
+        def bodyBytes = baos.toByteArray()
 
-        def code = conn.responseCode
-        def body = (code < 400 ? conn.inputStream : conn.errorStream)?.text ?: ""
+        def client = java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(30))
+            .version(java.net.http.HttpClient.Version.HTTP_1_1)
+            .build()
+
+        def request = java.net.http.HttpRequest.newBuilder()
+            .uri(new URI("https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED"))
+            .header("Authorization", "Bearer ${token}")
+            .header("Content-Type",  "multipart/form-data; boundary=${boundary}")
+            .POST(java.net.http.HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
+            .timeout(java.time.Duration.ofMinutes(10))
+            .build()
+
+        def code = 0
+        def body = ""
+        def maxRetries = 3
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                def response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString())
+                code = response.statusCode()
+                body = response.body() ?: ""
+                break
+            } catch (java.io.IOException e) {
+                if (attempt < maxRetries) {
+                    logger.lifecycle("Upload attempt ${attempt} failed (${e.message}), retrying in 5s...")
+                    Thread.sleep(5000)
+                } else {
+                    throw new GradleException("Upload failed after ${maxRetries} attempts: ${e.message}", e)
+                }
+            }
+        }
 
         if (code >= 200 && code < 300) {
             logger.lifecycle("Upload successful! Deployment ID: ${body}")

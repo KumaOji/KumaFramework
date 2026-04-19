@@ -9,7 +9,6 @@ package com.kuma.boot.common.support.secret.core.secret;
 import com.kuma.boot.common.support.secret.api.SecretContext;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
-import com.xkzhangsan.time.utils.StringUtil;
 
 /**
  * CaesarShiftSecret
@@ -35,7 +34,7 @@ public class CaesarShiftSecret extends AbstractSecret {
     }
 
     private String shiftString( String source, int offset ) {
-        if (StringUtil.isEmpty(source)) {
+        if (StringUtils.isEmpty(source)) {
             return source;
         } else {
             Character[] characters = StringUtils.toCharacterArray(source);
