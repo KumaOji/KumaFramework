@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 /**
  * es配置类
  *
- * @author shuigedeng
+ * @author kuma
  * @version 2022.03
  * @since 2020/5/3 06:47
  */
@@ -87,7 +87,7 @@ public class MongodbAutoConfiguration implements InitializingBean {
    /**
     * MongodbHelperAutoConfiguration
     *
-    * @author shuigedeng
+    * @author kuma
     * @version 2026.03
     * @since 2025-12-19 09:30:45
     */
