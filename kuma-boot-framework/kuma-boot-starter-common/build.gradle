@@ -36,7 +36,7 @@ dependencies {
     implementation projectLibs.bouncycastle.provider
     implementation projectLibs.reactor.core
     implementation projectLibs.reactivestreams
-    implementation projectLibs.xk.time
+
     implementation projectLibs.swagger.annotations
     implementation projectLibs.jackson.annotations
     implementation projectLibs.jackson.core
@@ -69,5 +69,4 @@ dependencies {
     annotationProcessor projectLibs.lombok
 }
 
-apply from: rootProject.file('gradle/publish-central.gradle')
 

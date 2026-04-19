@@ -34,7 +34,7 @@ import com.kuma.boot.common.support.handler.Handler;
 import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.system.SystemUtils;
-import com.xkzhangsan.time.utils.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -659,7 +659,7 @@ public final class StringUtils {
             final String splitter,
             final int startIndex,
             final int endIndex) {
-        if (CollectionUtil.isEmpty(collection)) {
+        if (CollectionUtils.isEmpty(collection)) {
             return StringUtils.EMPTY;
         }
 
@@ -689,7 +689,7 @@ public final class StringUtils {
     // */
     // public static <E> String join(final Collection<E> collection, final String
     // splitter) {
-    // final int endIndex = CollectionUtil.getEndIndex(-1, collection);
+    // final int endIndex = CollectionUtils.getEndIndex(-1, collection);
     // return join(collection, splitter, 0, endIndex);
     // }
 
@@ -1017,7 +1017,7 @@ public final class StringUtils {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
-        if (CollectionUtil.isEmpty(indexCollection)) {
+        if (CollectionUtils.isEmpty(indexCollection)) {
             return Collections.singletonList(string);
         }
 
@@ -1145,7 +1145,7 @@ public final class StringUtils {
         if (StringUtils.isEmpty(string)) {
             return Collections.emptyList();
         }
-        if (CollectionUtil.isEmpty(indexList)) {
+        if (CollectionUtils.isEmpty(indexList)) {
             return Collections.singletonList(string);
         }
 
@@ -2095,7 +2095,7 @@ public final class StringUtils {
      * @since 0.1.143
      */
     public static String linesToContent(List<String> lines) {
-        if (CollectionUtil.isEmpty(lines)) {
+        if (CollectionUtils.isEmpty(lines)) {
             return null;
         }
 

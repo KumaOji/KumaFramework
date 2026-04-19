@@ -19,7 +19,7 @@ package com.kuma.boot.common.support.hash;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.support.hash.api.HashCode;
 import com.kuma.boot.common.support.hash.core.HasheCodes;
-import com.xkzhangsan.time.utils.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,7 +61,7 @@ public final class ConsistentHashingBs<T> {
 
     public ConsistentHashing<T> build() {
         ConsistentHashing<T> hashing = new DefaultConsistentHashing(this.virtualNum, this.hashCode);
-        if (CollectionUtil.isNotEmpty(this.nodes)) {
+        if (CollectionUtils.isNotEmpty(this.nodes)) {
             for (T node : this.nodes) {
                 hashing.add(node);
             }

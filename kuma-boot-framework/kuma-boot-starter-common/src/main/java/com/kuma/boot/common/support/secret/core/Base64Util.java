@@ -6,7 +6,7 @@
 package com.kuma.boot.common.support.secret.core;
 
 import com.kuma.boot.common.support.secret.exception.SecretRuntimeException;
-import com.xkzhangsan.time.utils.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 
@@ -105,7 +105,7 @@ public final class Base64Util {
     }
 
     public static char[] encode( String text ) {
-        if (StringUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return new char[0];
         } else {
             byte[] data = text.getBytes();
@@ -114,7 +114,7 @@ public final class Base64Util {
     }
 
     public static String encodeToString( String text ) {
-        if (StringUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return text;
         } else {
             char[] chars = encode(text);
@@ -123,7 +123,7 @@ public final class Base64Util {
     }
 
     public static byte[] decode( String text ) {
-        if (StringUtil.isEmpty(text)) {
+        if (StringUtils.isEmpty(text)) {
             return new byte[0];
         } else {
             char[] chars = text.toCharArray();

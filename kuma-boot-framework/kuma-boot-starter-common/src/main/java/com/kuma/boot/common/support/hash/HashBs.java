@@ -23,7 +23,7 @@ import com.kuma.boot.common.support.hash.api.HashResult;
 import com.kuma.boot.common.support.hash.api.HashResultHandler;
 import com.kuma.boot.common.support.hash.core.HashResultHandlers;
 import com.kuma.boot.common.support.hash.core.Hashes;
-import com.xkzhangsan.time.utils.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -90,7 +90,7 @@ public final class HashBs {
 
     public <T> T execute( String source, HashResultHandler<T> handler ) {
         byte[] bytes = null;
-        if (StringUtil.isNotEmpty(source)) {
+        if (StringUtils.isNotEmpty(source)) {
             bytes = source.getBytes(this.charset);
         }
 
