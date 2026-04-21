@@ -11,6 +11,8 @@ javadoc {
         version = true
         title   = project.name
         links   "https://docs.oracle.com/en/java/javase/25/docs/api"
+        addBooleanOption('noindex', true)  // skip search-index JS (~400 KB)
+        addBooleanOption('notree', true)   // skip class-tree pages
         addStringOption('Xdoclint:none', '-quiet')
         addStringOption('encoding', 'UTF-8')
         addStringOption('charSet', 'UTF-8')
@@ -49,14 +51,25 @@ jar {
 
 tasks.register('sourcesJar', Jar) {
     dependsOn classes
-    from sourceSets.main.allSource
+    from sourceSets.main.java   // Java sources only, skip resources
     archiveClassifier = 'sources'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.register('javadocJar', Jar) {
     dependsOn javadoc
     from javadoc
     archiveClassifier = 'javadoc'
+    // Exclude large static assets bundled by javadoc tool
+    exclude '**/*.map'
+    exclude '**/jquery-*.min.js'
+    exclude '**/jquery-ui.overrides.css'
+    exclude '**/search.js'
+    exclude '**/module-search-index.js'
+    exclude '**/type-search-index.js'
+    exclude '**/member-search-index.js'
+    exclude '**/tag-search-index.js'
+    exclude '**/package-search-index.js'
 }
 
 publishing {
