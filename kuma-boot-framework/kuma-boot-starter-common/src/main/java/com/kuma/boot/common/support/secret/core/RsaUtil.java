@@ -24,10 +24,18 @@ import java.security.spec.X509EncodedKeySpec;
  */
 public final class RsaUtil {
 
+    /**
+     * 生成 RSA 密钥对。
+     *
+     * @deprecated 生成的 1024 位密钥已不符合现代安全标准，请改用 2048 位以上。
+     *             加解密使用的 RSA/ECB/PKCS1Padding 填充易受 Bleichenbacher 攻击，
+     *             新代码应使用 RSA/ECB/OAEPWithSHA-256AndMGF1Padding。
+     */
+    @Deprecated
     public static Pair<String, String> genKeyPair() {
         try {
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-            keyPairGen.initialize(1024, new SecureRandom());
+            keyPairGen.initialize(2048, new SecureRandom()); // 升至 2048 位
             KeyPair keyPair = keyPairGen.generateKeyPair();
             RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
             RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();

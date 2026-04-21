@@ -40,10 +40,21 @@ public class CookieUtils {
      */
     public static void addCookie(
             String key, String value, Integer maxAge, HttpServletResponse response) {
+        addCookie(key, value, maxAge, false, response);
+    }
+
+    /**
+     * 新增 cookie，可控制 HttpOnly 和 Secure 标志。
+     * 存放 token / session 时务必将 httpOnly 和 secure 均设为 true。
+     */
+    public static void addCookie(
+            String key, String value, Integer maxAge, boolean secure, HttpServletResponse response) {
         try {
             Cookie c = new Cookie(key, value);
             c.setMaxAge(maxAge);
             c.setPath("/");
+            c.setHttpOnly(true);   // 阻止 JS 通过 document.cookie 读取
+            c.setSecure(secure);   // 仅在 HTTPS 传输；生产环境 token 应传 true
             response.addCookie(c);
         } catch (Exception e) {
             LogUtils.error("新增cookie错误", e);
