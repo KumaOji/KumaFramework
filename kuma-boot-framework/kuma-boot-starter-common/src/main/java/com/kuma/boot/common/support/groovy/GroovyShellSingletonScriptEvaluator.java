@@ -25,6 +25,12 @@ import org.springframework.util.DigestUtils;
 /**
  * GroovyShellSingletonScriptEvaluator
  *
+ * <p><b>安全警告：</b>此类执行任意 Groovy 脚本，没有沙箱限制。
+ * 脚本内容可访问整个 JVM（文件系统、网络、{@code Runtime.exec()}）。
+ * <b>绝对不能</b>将来自用户输入或外部不可信来源的脚本内容传入此类。
+ * 若需要对脚本加以限制，请在构造时传入带有 {@code SecureASTCustomizer} 的
+ * {@code CompilerConfiguration}。</p>
+ *
  * @author kuma
  * @version 2026.01
  * @since 2025-12-17 10:30:45

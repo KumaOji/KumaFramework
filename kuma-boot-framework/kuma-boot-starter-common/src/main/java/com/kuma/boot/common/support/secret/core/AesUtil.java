@@ -24,6 +24,11 @@ public final class AesUtil {
     private AesUtil() {
     }
 
+    /**
+     * @deprecated AES/ECB 模式不提供语义安全（相同明文块总产生相同密文）。
+     *             新代码请改用 AES/GCM/NoPadding 并附随机 IV。
+     */
+    @Deprecated
     public static byte[] encrypt( byte[] plainBytes, byte[] keyBytes ) {
         try {
             SecretKey secretKey = getSecretKey(keyBytes);

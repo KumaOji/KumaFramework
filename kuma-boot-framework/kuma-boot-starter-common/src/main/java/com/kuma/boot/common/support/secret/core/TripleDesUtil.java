@@ -38,7 +38,7 @@ public final class TripleDesUtil {
     }
 
     public static byte[] encrypt( String plainText, byte[] keyBytes ) {
-        return encrypt(keyBytes, plainText.getBytes());
+        return encrypt(plainText.getBytes(), keyBytes);
     }
 
     public static byte[] decrypt( byte[] secretBytes, byte[] keyBytes ) {
@@ -54,7 +54,7 @@ public final class TripleDesUtil {
 
     public static String decryptToString( byte[] secretBytes, byte[] keyBytes, String charsetName ) {
         try {
-            byte[] bytes = decrypt(keyBytes, secretBytes);
+            byte[] bytes = decrypt(secretBytes, keyBytes);
             return new String(bytes, charsetName);
         } catch (UnsupportedEncodingException e) {
             throw new SecretRuntimeException(e);
@@ -62,6 +62,6 @@ public final class TripleDesUtil {
     }
 
     public static String decryptToString( byte[] secretBytes, byte[] keyBytes ) {
-        return decryptToString(keyBytes, secretBytes, "UTF-8");
+        return decryptToString(secretBytes, keyBytes, "UTF-8");
     }
 }
