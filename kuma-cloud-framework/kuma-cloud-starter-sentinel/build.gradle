@@ -13,4 +13,7 @@ dependencies {
     api projectLibs.sentinel.core
     api 'org.springframework.cloud:spring-cloud-context'
     api projectLibs.spring.boot.autoconfigure
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }

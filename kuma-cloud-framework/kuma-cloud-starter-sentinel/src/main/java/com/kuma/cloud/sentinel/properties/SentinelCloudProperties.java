@@ -16,6 +16,7 @@
 
 package com.kuma.cloud.sentinel.properties;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
@@ -26,6 +27,7 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-07 20:54:47
  */
+@Data
 @RefreshScope
 @ConfigurationProperties(prefix = SentinelCloudProperties.PREFIX)
 public class SentinelCloudProperties {
@@ -33,12 +35,4 @@ public class SentinelCloudProperties {
     public static final String PREFIX = "kuma.cloud.alibaba.sentinel";
 
     private boolean enabled = true;
-
-    public boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 }
