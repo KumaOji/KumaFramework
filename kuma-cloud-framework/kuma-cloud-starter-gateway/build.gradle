@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Myframework cloud gateway模块'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    // Spring Cloud Gateway 5.x renamed the starter; BOM is nested so must be imported explicitly
+    api platform(projectLibs.spring.cloud.gateway.dependencies)
+    api projectLibs.spring.cloud.starter.gateway.server.webflux
+    api 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.webflux
+    api projectLibs.reactor.core
+    api projectLibs.knife4j.gateway
+}

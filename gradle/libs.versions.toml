@@ -156,6 +156,7 @@ jaxb-runtime = "4.0.5"
 spotbugs-annotations = "4.8.6"
 spring-cloud = "2025.1.0"
 spring-cloud-alibaba = "2025.1.0.0"
+spring-cloud-gateway = "5.0.0"
 rocketmq-spring = "2.3.3"
 seata = "2.5.0"
 langchain4j = "1.11.0"
@@ -445,6 +446,8 @@ jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "jaxb
 spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs-annotations" }
 spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
 spring-cloud-alibaba-dependencies = { module = "com.alibaba.cloud:spring-cloud-alibaba-dependencies", version.ref = "spring-cloud-alibaba" }
+spring-cloud-gateway-dependencies = { module = "org.springframework.cloud:spring-cloud-gateway-dependencies", version.ref = "spring-cloud-gateway" }
+spring-cloud-starter-gateway-server-webflux = { module = "org.springframework.cloud:spring-cloud-starter-gateway-server-webflux", version.ref = "spring-cloud-gateway" }
 spring-cloud-starter-alibaba-nacos-discovery = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery", version.ref = "spring-cloud-alibaba" }
 spring-cloud-starter-alibaba-nacos-config = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config", version.ref = "spring-cloud-alibaba" }
 spring-cloud-starter-alibaba-sentinel = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-sentinel", version.ref = "spring-cloud-alibaba" }

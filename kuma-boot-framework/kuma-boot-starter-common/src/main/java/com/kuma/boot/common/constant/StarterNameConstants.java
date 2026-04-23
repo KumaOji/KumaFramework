@@ -282,6 +282,8 @@ public final class StarterNameConstants {
 
     public static final String OPENFEIGN_CLOUD_STARTER = "kuma-cloud-starter-openfeign";
 
+    public static final String GATEWAY_CLOUD_STARTER = "kuma-cloud-starter-gateway";
+
     public static final String SEATA_CLOUD_STARTER = "kuma-cloud-starter-seata";
 
     public static final String SENTINEL_CLOUD_STARTER = "kuma-cloud-starter-sentinel";

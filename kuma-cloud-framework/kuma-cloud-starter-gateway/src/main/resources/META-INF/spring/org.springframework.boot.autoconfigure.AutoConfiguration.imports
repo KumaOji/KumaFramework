@@ -1,0 +1,2 @@
+com.kuma.cloud.gateway.autoconfigure.GatewayAutoConfiguration
+com.kuma.cloud.gateway.autoconfigure.GatewayFilterAutoConfiguration
