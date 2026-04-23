@@ -76,7 +76,7 @@ for (name in frameworkBootSubModules) {
 
 def frameworkCloudSubModules = ['bootstrap', 'seata', 'kmc',
                                 'sentinel', 'stream', 'alibaba',
-                                'cache', 'jdbcpool', 'netty']
+                                'cache', 'jdbcpool', 'netty', 'gateway']
 //def frameworkCloudSubModules2 = ['tx', 'mq',
 //                                 'ccsr', 'job', 'rpc']
 for (name in frameworkCloudSubModules) {
