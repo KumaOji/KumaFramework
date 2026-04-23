@@ -16,6 +16,7 @@
 
 package com.kuma.cloud.gateway.autoconfigure.properties;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
@@ -28,6 +29,7 @@ import java.util.List;
  * @author kuma
  * @since 2026-04-23
  */
+@Data
 @RefreshScope
 @ConfigurationProperties(prefix = GatewayCloudProperties.PREFIX)
 public class GatewayCloudProperties {
@@ -39,40 +41,8 @@ public class GatewayCloudProperties {
     private Auth auth = new Auth();
     private Log log = new Log();
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Cors getCors() {
-        return cors;
-    }
-
-    public void setCors(Cors cors) {
-        this.cors = cors;
-    }
-
-    public Auth getAuth() {
-        return auth;
-    }
-
-    public void setAuth(Auth auth) {
-        this.auth = auth;
-    }
-
-    public Log getLog() {
-        return log;
-    }
-
-    public void setLog(Log log) {
-        this.log = log;
-    }
-
+    @Data
     public static class Cors {
-
         private boolean enabled = true;
         private List<String> allowedOrigins = new ArrayList<>(List.of("*"));
         private List<String> allowedMethods = new ArrayList<>(
@@ -80,97 +50,17 @@ public class GatewayCloudProperties {
         private List<String> allowedHeaders = new ArrayList<>(List.of("*"));
         private boolean allowCredentials = false;
         private long maxAge = 3600L;
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public List<String> getAllowedOrigins() {
-            return allowedOrigins;
-        }
-
-        public void setAllowedOrigins(List<String> allowedOrigins) {
-            this.allowedOrigins = allowedOrigins;
-        }
-
-        public List<String> getAllowedMethods() {
-            return allowedMethods;
-        }
-
-        public void setAllowedMethods(List<String> allowedMethods) {
-            this.allowedMethods = allowedMethods;
-        }
-
-        public List<String> getAllowedHeaders() {
-            return allowedHeaders;
-        }
-
-        public void setAllowedHeaders(List<String> allowedHeaders) {
-            this.allowedHeaders = allowedHeaders;
-        }
-
-        public boolean isAllowCredentials() {
-            return allowCredentials;
-        }
-
-        public void setAllowCredentials(boolean allowCredentials) {
-            this.allowCredentials = allowCredentials;
-        }
-
-        public long getMaxAge() {
-            return maxAge;
-        }
-
-        public void setMaxAge(long maxAge) {
-            this.maxAge = maxAge;
-        }
     }
 
+    @Data
     public static class Auth {
-
         private boolean enabled = false;
         private String tokenHeader = "Authorization";
         private List<String> whiteList = new ArrayList<>();
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public String getTokenHeader() {
-            return tokenHeader;
-        }
-
-        public void setTokenHeader(String tokenHeader) {
-            this.tokenHeader = tokenHeader;
-        }
-
-        public List<String> getWhiteList() {
-            return whiteList;
-        }
-
-        public void setWhiteList(List<String> whiteList) {
-            this.whiteList = whiteList;
-        }
     }
 
+    @Data
     public static class Log {
-
         private boolean enabled = true;
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
     }
 }

@@ -17,4 +17,7 @@ dependencies {
     api projectLibs.spring.boot.starter.webflux
     api projectLibs.reactor.core
     api projectLibs.knife4j.gateway
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
 }
