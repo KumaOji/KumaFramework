@@ -117,6 +117,7 @@ dependencies {
     api project(':kuma-cloud-framework:kuma-cloud-starter-sentinel')
     api project(':kuma-cloud-framework:kuma-cloud-starter-seata')
     api project(':kuma-cloud-framework:kuma-cloud-starter-stream')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-gateway')
 
     // ── 第三方 ────────────────────────────────────────────────────────────
     api projectLibs.hutool.core
@@ -149,19 +150,19 @@ def p4RedisJedisPoolMinIdle      = project.findProperty('redis.jedis.pool.min-id
 processResources {
     filesMatching('**/application.yml') {
         expand(
-            active                     : 'dev',
-            mysql_url                  : p4MysqlUrl,
-            mysql_username             : p4MysqlUsername,
-            mysql_password             : p4MysqlPassword,
-            postgresql_url             : p4PostgresqlUrl,
-            postgresql_username        : p4PostgresqlUsername,
-            postgresql_password        : p4PostgresqlPassword,
-            redis_host                 : p4RedisHost,
-            redis_port                 : p4RedisPort,
-            redis_database             : p4RedisDatabase,
-            redis_jedis_pool_max_active: p4RedisJedisPoolMaxActive,
-            redis_jedis_pool_max_idle  : p4RedisJedisPoolMaxIdle,
-            redis_jedis_pool_min_idle  : p4RedisJedisPoolMinIdle
+                active                     : 'dev',
+                mysql_url                  : p4MysqlUrl,
+                mysql_username             : p4MysqlUsername,
+                mysql_password             : p4MysqlPassword,
+                postgresql_url             : p4PostgresqlUrl,
+                postgresql_username        : p4PostgresqlUsername,
+                postgresql_password        : p4PostgresqlPassword,
+                redis_host                 : p4RedisHost,
+                redis_port                 : p4RedisPort,
+                redis_database             : p4RedisDatabase,
+                redis_jedis_pool_max_active: p4RedisJedisPoolMaxActive,
+                redis_jedis_pool_max_idle  : p4RedisJedisPoolMaxIdle,
+                redis_jedis_pool_min_idle  : p4RedisJedisPoolMinIdle
         )
     }
 }

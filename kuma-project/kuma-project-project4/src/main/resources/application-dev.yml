@@ -131,6 +131,8 @@ spring:
     service-registry:
       auto-registration:
         enabled: false
+    gateway:
+      enabled: false
   kafka:
     producer:
       bootstrap-servers: localhost:9092
@@ -345,6 +347,35 @@ kuma:
     # ── kuma-cloud-starter-stream ──────────────────────────────────────
     stream:
       enabled: false
+    # ── kuma-cloud-starter-gateway ─────────────────────────────────────
+    gateway:
+      enabled: false      # project4 为 MVC/Servlet 应用；独立 Gateway 服务时开启
+      cors:
+        enabled: true
+        allowed-origins:
+          - "*"
+        allowed-methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+          - PATCH
+          - HEAD
+        allowed-headers:
+          - "*"
+        allow-credentials: false
+        max-age: 3600
+      auth:
+        enabled: false    # 开启后所有非白名单请求必须携带 Authorization 头
+        token-header: Authorization
+        white-list:
+          - /actuator/**
+          - /v3/api-docs/**
+          - /swagger-ui/**
+          - /doc.html
+      log:
+        enabled: true     # 请求日志全局过滤器，默认开启
   boot:
     core:
       enabled: true
