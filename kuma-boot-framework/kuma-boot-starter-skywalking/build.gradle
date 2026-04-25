@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework skywalking模块'
+description = 'Kumaframework skywalking模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

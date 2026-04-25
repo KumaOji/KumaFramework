@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework 动态线程池模块（基于 DynamicTP）'
+description = 'Kumaframework 动态线程池模块（基于 DynamicTP）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

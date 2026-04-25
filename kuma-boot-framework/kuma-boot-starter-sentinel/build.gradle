@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework sentinel模块'
+description = 'Kumaframework sentinel模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework 字段翻译模块（Jackson 序列化阶段自动翻译枚举/字典值）'
+description = 'Kumaframework 字段翻译模块（Jackson 序列化阶段自动翻译枚举/字典值）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

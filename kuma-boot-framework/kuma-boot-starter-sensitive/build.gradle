@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework 数据脱敏模块（Jackson / FastJSON2 序列化脱敏 + Logback 日志脱敏）'
+description = 'Kumaframework 数据脱敏模块（Jackson / FastJSON2 序列化脱敏 + Logback 日志脱敏）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework data-jpa模块'
+description = 'Kumaframework data-jpa模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）

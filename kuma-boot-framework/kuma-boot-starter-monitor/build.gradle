@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework 健康监控模块 —— 指标采集、告警通知（钉钉/飞书/邮件）、ELK 导出'
+description = 'Kumaframework 健康监控模块 —— 指标采集、告警通知（钉钉/飞书/邮件）、ELK 导出'
 
 dependencies {
 

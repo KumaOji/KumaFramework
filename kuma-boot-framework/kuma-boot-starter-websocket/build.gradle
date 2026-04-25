@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework WebSocket模块（Spring WebSocket + STOMP + 原生JSR-356）'
+description = 'Kumaframework WebSocket模块（Spring WebSocket + STOMP + 原生JSR-356）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

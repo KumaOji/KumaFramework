@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework data-p6spy模块'
+description = 'Kumaframework data-p6spy模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

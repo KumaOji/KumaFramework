@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework grpc模块'
+description = 'Kumaframework grpc模块'
 
 // grpc 版本需与 spring-grpc-core 所引用的版本保持一致
 def grpcVersion = '1.76.0'
