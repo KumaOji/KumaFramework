@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework lock模块'
+description = 'Kumaframework lock模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

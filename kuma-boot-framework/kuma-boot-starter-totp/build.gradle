@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework totp模块'
+description = 'Kumaframework totp模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

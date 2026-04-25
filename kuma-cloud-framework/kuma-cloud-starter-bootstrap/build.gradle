@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework bootstrap模块'
+description = 'Kumaframework bootstrap模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

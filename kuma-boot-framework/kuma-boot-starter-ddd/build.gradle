@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework DDD模块'
+description = 'Kumaframework DDD模块'
 
 dependencies {
     // 基础公共工具（LogUtils / ContextUtils / JacksonUtils / ObjectUtils / TraceUtils 等）

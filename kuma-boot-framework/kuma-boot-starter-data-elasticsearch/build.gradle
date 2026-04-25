@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework data-elasticsearch模块'
+description = 'Kumaframework data-elasticsearch模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）

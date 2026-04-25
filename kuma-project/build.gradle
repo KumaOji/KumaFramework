@@ -1,4 +1,4 @@
-description = '''Myframework project参考 —— 一组渐进式 Demo 应用，演示框架各能力的用法：
+description = '''Kumaframework project参考 —— 一组渐进式 Demo 应用，演示框架各能力的用法：
   project1 : 最简骨架，无任何依赖，仅验证项目能否正常启动
   project2 : 最简骨架，无任何依赖，仅验证项目能否正常启动
   project3 : Gradle 插件调用示例，演示 gradle/ 目录下所有可复用脚本（springboot / jacoco / spotbugs / checkstyle / pmd / sonar / smart-doc / jib 等）的接入方式

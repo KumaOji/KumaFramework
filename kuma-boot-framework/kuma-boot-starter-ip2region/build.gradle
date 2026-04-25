@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Myframework IP 地址解析模块'
+description = 'Kumaframework IP 地址解析模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

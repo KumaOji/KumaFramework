@@ -72,7 +72,7 @@
 ## 架构总览
 
 ```
-Myframework（Monorepo）
+Kumaframework（Monorepo）
 │
 ├── kuma-boot-framework        ← Layer 1: 60+ Spring Boot Auto-Configuration Starters
 │   └── kuma-boot-starter-*
@@ -268,8 +268,8 @@ common
 ### 克隆项目
 
 ```bash
-git clone https://github.com/kumaoji/Myframework.git
-cd Myframework
+git clone https://github.com/kumaoji/Kumaframework.git
+cd Kumaframework
 ```
 
 ### 配置本地数据库
@@ -397,7 +397,7 @@ dependencies {
 ## 项目结构
 
 ```
-Myframework/
+Kumaframework/
 ├── build.gradle                          # 根项目构建配置
 ├── settings.gradle                       # 子模块声明
 ├── gradle.properties                     # 版本、数据库连接等全局属性
