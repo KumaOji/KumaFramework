@@ -1,6 +1,6 @@
 # Kuma Framework
 
-> 基于 Spring Boot 4 / Spring Cloud 2025 的多层企业级框架 Monorepo，提供 60+ 开箱即用的 Auto-Configuration Starter，覆盖数据访问、缓存、安全、消息、可观测、AI Agent 等领域。
+> 基于 Spring Boot 4 / Spring Cloud 2025 的多层企业级框架 Monorepo，提供 60+ 开箱即用的 Auto-Configuration Starter，覆盖数据访问、缓存、安全、消息、可观测等领域。
 
 ---
 
@@ -13,8 +13,6 @@
 - [快速开始](#快速开始)
 - [构建与运行](#构建与运行)
 - [配置说明](#配置说明)
-- [发布到 Maven Central](#发布到-maven-central)
-- [AI Agent](#ai-agent)
 - [项目结构](#项目结构)
 - [开发规范](#开发规范)
 
@@ -26,7 +24,7 @@
 |------|-----|
 | Group ID | `io.github.kumaoji` |
 | 当前版本 | `2026.04.01` |
-| 构建工具 | Gradle 8 + Version Catalog |
+| 构建工具 | Gradle **9.3.1** + Version Catalog |
 | Java 版本 | **JDK 25**（强制，低于此版本构建失败）|
 | Spring Boot | 4.0.3 |
 | Spring Framework | 7.0.3 |
@@ -50,15 +48,14 @@
 | 连接池 | Druid | 1.2.27 |
 | 缓存 | Redisson / Caffeine / JetCache | 4.1.0 / 3.1.8 / 2.7.8 |
 | 安全 | Sa-Token | 1.35.0.RC |
-| 安全 | Spring Security + JWT (JJWT) | — / 0.12.6 |
+| 安全 | Spring Security + JWT（JJWT） | — / 0.12.6 |
 | 消息 | Kafka / RocketMQ / MQTT | 4.1.1 / 2.3.3 / — |
 | 分布式事务 | Seata | 2.5.0 |
 | 熔断限流 | Sentinel / Resilience4j | 1.8.8 / 2.2.0 |
-| 服务注册 | Nacos (Spring Cloud Alibaba) | 2025.1.0.0 |
+| 服务注册 | Nacos（Spring Cloud Alibaba） | 2025.1.0.0 |
 | 远程调用 | gRPC / Dubbo / Forest / Retrofit | 1.76.0 / 3.3.2 / 1.5.36 / 3.1.6 |
 | 可观测 | Micrometer + Prometheus + SkyWalking + OpenTelemetry | — |
 | 日志 | Logback + ELK + Loki | — |
-| AI | LangChain4j / LangGraph (Python) | 1.11.0 / — |
 | 任务调度 | XXL-Job | 2.4.2 |
 | 对象存储 | MinIO | 8.5.14 |
 | 文档 | SpringDoc OpenAPI / Knife4j | 3.0.1 / 4.5.0 |
@@ -69,7 +66,7 @@
 ## 架构总览
 
 ```
-Myframework (Monorepo)
+Myframework（Monorepo）
 │
 ├── kuma-boot-framework        ← Layer 1: 60+ Spring Boot Auto-Configuration Starters
 │   └── kuma-boot-starter-*
@@ -81,13 +78,10 @@ Myframework (Monorepo)
 │   ├── kuma-project-project4  ← 全功能演示项目（当前主力）
 │   └── kuma-project-blog      ← 博客应用示例
 │
-├── kuma-ai-framework          ← Layer 4: Python AI Agent（LangGraph）
-│   └── kuma-ai-agent/
-│
-├── kuma-bigdata-framework     ← Layer 5: 大数据集成（规划中）
+├── kuma-bigdata-framework     ← Layer 4: 大数据集成（规划中）
 │   └── Flink / Spark / Doris / Hadoop ...
 │
-└── kuma-other-framework       ← Layer 6: 设计模式 / Gradle 插件（规划中）
+└── kuma-other-framework       ← Layer 5: 设计模式 / Gradle 插件（规划中）
 ```
 
 ### Starter 核心依赖链
@@ -261,12 +255,9 @@ common
 | 工具 | 版本要求 |
 |------|---------|
 | JDK | **25**（强制）|
-| Gradle | 8.x（使用 Wrapper，无需手动安装）|
+| Gradle | **9.3.1**（使用 Wrapper，无需手动安装）|
 | MySQL | 8.0+ |
-| PostgreSQL | 14+ |
 | Redis | 7.x |
-| Python | 3.12+（仅 AI Agent 需要）|
-| uv | 最新版（仅 AI Agent 需要）|
 
 ### 克隆项目
 
@@ -277,23 +268,18 @@ cd Myframework
 
 ### 配置本地数据库
 
-复制 `gradle.properties` 中的数据库连接信息，在本地创建数据库：
+在本地 MySQL 中创建数据库（kuma-boot-starter-idempotent，kuma-boot-starter-data-mybatis，kuma-cloud-starter-seata）：
 
 ```sql
--- MySQL
 CREATE DATABASE base CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- PostgreSQL
-CREATE DATABASE base;
 ```
 
-默认凭据（可在 `gradle.properties` 修改）：
+默认连接信息（添加 `gradle.properties` 修改）：
 
 | 服务 | 地址 | 用户名 | 密码 |
-|------|------|--------|------|
-| MySQL | localhost:3306 | root | 123456 |
-| PostgreSQL | localhost:5432 | postgres | 123456 |
-| Redis | localhost:6379 | — | — |
+|------|------|----|---|
+| MySQL | localhost:3306 | —  | — |
+| Redis | localhost:6379 | —  | — |
 
 ---
 
@@ -325,27 +311,6 @@ CREATE DATABASE base;
 ./gradlew :kuma-project:kuma-project-blog:bootRun
 ```
 
-### Docker 镜像
-
-```bash
-# 需要先配置环境变量
-export KUMA_CLOUD_REGISTRY_USERNAME=<your-registry-user>
-export KUMA_CLOUD_REGISTRY_PASSWORD=<your-registry-password>
-
-# 构建并推送镜像
-./gradlew :kuma-project:kuma-project-project4:bootBuildImage
-```
-
-### 发布到本地 Maven 仓库
-
-```bash
-# 发布单个 starter
-./gradlew :kuma-boot-framework:kuma-boot-starter-core:publishToMavenLocal
-
-# 发布所有 starter（按依赖顺序）
-./gradlew publishAllStartersToCentralPortal
-```
-
 ---
 
 ## 配置说明
@@ -361,25 +326,6 @@ export KUMA_CLOUD_REGISTRY_PASSWORD=<your-registry-password>
 | `application-framework.yml` | 框架默认配置（由 Starter 通过 Auto-Config 注入）|
 | `logback-spring.xml` | 结构化日志配置 |
 
-### 多数据源配置示例
-
-```yaml
-spring:
-  datasource:
-    dynamic:
-      primary: mysql
-      datasource:
-        mysql:
-          url: ${mysql_url}
-          username: ${mysql_username}
-          password: ${mysql_password}
-          driver-class-name: com.mysql.cj.jdbc.Driver
-        postgresql:
-          url: ${postgresql_url}
-          username: ${postgresql_username}
-          password: ${postgresql_password}
-          driver-class-name: org.postgresql.Driver
-```
 
 ### 引入 Starter
 
@@ -405,73 +351,6 @@ dependencies {
     <artifactId>kuma-boot-starter-web</artifactId>
     <version>2026.04.01</version>
 </dependency>
-```
-
----
-
-## 发布到 Maven Central
-
-项目使用 Sonatype Central Portal 发布。
-
-### 前置条件
-
-在 `gradle.properties` 中配置以下（**勿提交到版本控制**）：
-
-```properties
-MAVEN_CENTRAL_USERNAME=<your-sonatype-username>
-MAVEN_CENTRAL_PASSWORD=<your-sonatype-password>
-signing.gnupg.keyName=<your-gpg-key-fingerprint>
-signing.gnupg.passphrase=<your-gpg-passphrase>
-```
-
-### 发布命令
-
-```bash
-# 按依赖层次顺序发布所有 starter
-./gradlew publishAllStartersToCentralPortal
-
-# 发布单个模块
-./gradlew :kuma-boot-framework:kuma-boot-starter-core:publishToCentralPortal
-```
-
-发布顺序由 `build.gradle` 中的 `publishOrder` 列表保证（从底层到高层，避免传递依赖缺失）。
-
----
-
-## AI Agent
-
-`kuma-ai-framework` 是基于 **LangGraph + Python** 实现的 AI 对话代理，与 Java 主体完全解耦，通过 HTTP / gRPC 与业务层通信。
-
-### 环境准备
-
-```bash
-cd kuma-ai-framework/kuma-ai-agent/kuma-agent
-
-# 复制并编辑配置
-cp config.yaml.example config.yaml
-```
-
-### 安装依赖
-
-```bash
-uv sync
-```
-
-### 启动服务
-
-```bash
-# HTTP 网关（:8001）
-uv run python app/gateway/server.py
-
-# gRPC 服务（:50051，可选）
-uv run python app/channels/grpc_server.py
-```
-
-### 代码质量
-
-```bash
-uv run ruff check .    # Lint
-uv run ruff format .   # 格式化
 ```
 
 ---
@@ -506,13 +385,9 @@ Myframework/
 │   ├── kuma-cloud-starter-alibaba/      # Nacos 集成
 │   └── kuma-cloud-starter-*/            # 其余 Cloud Starter
 │
-├── kuma-project/
-│   ├── kuma-project-project4/           # 全功能演示应用
-│   └── kuma-project-blog/               # 博客示例应用
-│
-└── kuma-ai-framework/
-    └── kuma-ai-agent/
-        └── kuma-agent/                  # LangGraph Python Agent
+└── kuma-project/
+    ├── kuma-project-project4/           # 全功能演示应用
+    └── kuma-project-blog/               # 博客示例应用
 ```
 
 ---
@@ -532,21 +407,18 @@ Myframework/
 ```groovy
 // 应用 Spring Boot 应用配置（bootJar / bootBuildImage）
 apply from: rootProject.file('gradle/springboot.gradle')
-
-// 应用发布配置（maven-publish + signing）
-apply from: rootProject.file('gradle/publish-central.gradle')
 ```
 
 ### 编译参数
 
 所有子项目自动继承以下编译参数：
 
-```
---enable-preview   Java 25 预览特性
--parameters        保留方法参数名（MyBatis / Spring MVC 反射需要）
--Xlint:unchecked   未检查操作警告
--Xlint:deprecation 废弃 API 警告
-```
+| 参数 | 说明 |
+|------|------|
+| `--enable-preview` | 启用 Java 25 预览特性 |
+| `-parameters` | 保留方法参数名（MyBatis / Spring MVC 反射需要）|
+| `-Xlint:unchecked` | 未检查操作警告 |
+| `-Xlint:deprecation` | 废弃 API 警告 |
 
 ---
 
