@@ -1,5 +1,11 @@
 # Kuma Framework
 
+[![Java](https://img.shields.io/badge/Java-25-blue?logo=openjdk)](https://openjdk.org/projects/jdk/25/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen?logo=spring)](https://spring.io/projects/spring-cloud)
+[![Gradle](https://img.shields.io/badge/Gradle-9.3.1-blue?logo=gradle)](https://gradle.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE.txt)
+
 > 基于 Spring Boot 4 / Spring Cloud 2025 的多层企业级框架 Monorepo，提供 60+ 开箱即用的 Auto-Configuration Starter，覆盖数据访问、缓存、安全、消息、可观测等领域。
 
 ---
@@ -268,18 +274,18 @@ cd Myframework
 
 ### 配置本地数据库
 
-在本地 MySQL 中创建数据库（kuma-boot-starter-idempotent，kuma-boot-starter-data-mybatis，kuma-cloud-starter-seata）：
+在本地 MySQL 中创建数据库：
 
 ```sql
 CREATE DATABASE base CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-默认连接信息（添加 `gradle.properties` 修改）：
+默认连接信息（添加 `gradle.properties` 后修改）：
 
 | 服务 | 地址 | 用户名 | 密码 |
-|------|------|----|---|
-| MySQL | localhost:3306 | —  | — |
-| Redis | localhost:6379 | —  | — |
+|------|------|--------|------|
+| MySQL | localhost:3306 | root | 123456 |
+| Redis | localhost:6379 | — | — |
 
 ---
 
@@ -304,11 +310,22 @@ CREATE DATABASE base CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 # 构建可运行 JAR
 ./gradlew :kuma-project:kuma-project-project4:bootJar
 
-# 直接启动（热开发模式）
+# 直接启动
 ./gradlew :kuma-project:kuma-project-project4:bootRun
 
 # 启动博客应用
 ./gradlew :kuma-project:kuma-project-blog:bootRun
+```
+
+### Docker 镜像
+
+```bash
+# 需要先配置镜像仓库环境变量
+export KUMA_CLOUD_REGISTRY_USERNAME=<your-registry-user>
+export KUMA_CLOUD_REGISTRY_PASSWORD=<your-registry-password>
+
+# 构建并推送镜像
+./gradlew :kuma-project:kuma-project-project4:bootBuildImage
 ```
 
 ---
@@ -323,9 +340,31 @@ CREATE DATABASE base CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 |------|------|
 | `application.yml` | 应用专属配置，通过 `${placeholder}` 引用 `gradle.properties` 中的值 |
 | `application-dev.yml` | 开发环境覆盖配置 |
-| `application-framework.yml` | 框架默认配置（由 Starter 通过 Auto-Config 注入）|
 | `logback-spring.xml` | 结构化日志配置 |
 
+> 框架的默认行为通过各 Starter 的 `@AutoConfiguration` 类自动注入，无需应用手动配置。
+
+### 数据源配置示例
+
+```yaml
+spring:
+  application:
+    name: my-app
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${redis_host}
+      port: ${redis_port}
+      database: ${redis_database}
+```
 
 ### 引入 Starter
 
