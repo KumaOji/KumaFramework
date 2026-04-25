@@ -50,6 +50,10 @@ spring:
       time: HH:mm:ss
   autoconfigure:
     exclude:
+      - org.springframework.cloud.gateway.config.GatewayAutoConfiguration
+      - org.springframework.cloud.gateway.config.GatewayFunctionAutoConfiguration
+      - org.springframework.cloud.gateway.config.GatewayClassPathWarningAutoConfiguration
+      - org.springframework.cloud.gateway.config.GatewayReactiveLoadBalancerClientAutoConfiguration
       # knife4j 与 springdoc 3.0 兼容问题，使用 @EnableKnife4j 替代
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
       # Druid的springboot4暂未支持
