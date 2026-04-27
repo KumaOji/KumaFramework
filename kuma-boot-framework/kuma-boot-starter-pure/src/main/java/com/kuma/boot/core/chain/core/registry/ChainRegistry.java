@@ -1,6 +1,5 @@
 package com.kuma.boot.core.chain.core.registry;
 
-
 import com.kuma.boot.core.chain.core.handler.BaseHandler;
 
 import java.util.ArrayList;
@@ -15,47 +14,25 @@ import java.util.Set;
  * @param <R> Response类型，表示响应结果
  */
 public class ChainRegistry<P, R> {
-    // 存储每个链ID对应的处理者列表
+
     private Map<String, List<BaseHandler<P, R>>> handlerMap = new HashMap<>();
 
-    /**
-     * 注册处理者
-     * @param chainId 链ID
-     * @param handler 处理者
-     */
     public void registerHandler(String chainId, BaseHandler<P, R> handler) {
         handlerMap.computeIfAbsent(chainId, k -> new ArrayList<>()).add(handler);
     }
 
-    /**
-     * 构建指定链ID的责任链
-     * @param chainId 链ID
-     * @return 处理者列表
-     */
     public List<BaseHandler<P, R>> buildChain(String chainId) {
         return handlerMap.getOrDefault(chainId, new ArrayList<>());
     }
 
-    /**
-     * 获取所有注册的链ID
-     * @return 链ID集合
-     */
     public Set<String> getAllChainIds() {
         return handlerMap.keySet();
     }
 
-    /**
-     * 清空所有注册的处理者
-     */
     public void clear() {
         handlerMap.clear();
     }
 
-    public Map<String, List<BaseHandler<P, R>>> getHandlerMap() {
-        return handlerMap;
-    }
-
-    public void setHandlerMap(Map<String, List<BaseHandler<P, R>>> handlerMap) {
-        this.handlerMap = handlerMap;
-    }
+    public Map<String, List<BaseHandler<P, R>>> getHandlerMap() { return handlerMap; }
+    public void setHandlerMap(Map<String, List<BaseHandler<P, R>>> handlerMap) { this.handlerMap = handlerMap; }
 }
