@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 纯净架构核心 — 零 Spring 依赖'
+
+dependencies {
+    api projectLibs.slf4j.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
+
+// 编译后扫描 class 文件，若发现 Spring / AspectJ / Jakarta Annotation 引用则构建失败
+tasks.register('verifyNoSpring') {
+    dependsOn compileJava
+    description = 'Verify no org.springframework.*, org.aspectj.*, or jakarta.annotation.* references exist'
+    group      = 'verification'
+
+    def classesDir = sourceSets.main.output.classesDirs
+
+    doLast {
+        def forbidden = ['org/springframework/', 'org/aspectj/', 'jakarta/annotation/']
+        def violations = []
+
+        classesDir.each { dir ->
+            if (!dir.exists()) return
+            dir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                if (!file.name.endsWith('.class')) return
+                def bytes = file.bytes
+                def content = new String(bytes, 'ISO-8859-1')
+                forbidden.each { prefix ->
+                    if (content.contains(prefix)) {
+                        violations << "${file.name} references ${prefix}"
+                    }
+                }
+            }
+        }
+
+        if (!violations.empty) {
+            throw new GradleException(
+                "[verifyNoSpring] Pure module must not reference Spring/AspectJ/Jakarta-Annotation:\n" +
+                violations.join('\n')
+            )
+        }
+        logger.lifecycle('[verifyNoSpring] PASS — no Spring references found.')
+    }
+}
+
+check.dependsOn verifyNoSpring

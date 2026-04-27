@@ -135,6 +135,8 @@ configure(subprojects.findAll { it.name.startsWith('kuma-boot-starter-') }) {
 gradle.projectsEvaluated {
     // 发布顺序：按模块依赖层次从底层到高层排列
     def publishOrder = [
+        // Layer -1 — 零 Spring 依赖纯净核心
+        'kuma-boot-starter-pure',
         // Layer 0 — 无依赖
         'kuma-boot-starter-common',
         // Layer 1 — 仅依赖 common
