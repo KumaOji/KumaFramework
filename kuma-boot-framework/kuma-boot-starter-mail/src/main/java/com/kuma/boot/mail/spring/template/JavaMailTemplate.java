@@ -1,8 +1,23 @@
+/*
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.kuma.boot.mail.spring.template;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.io.File;
 import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -10,7 +25,17 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.ObjectUtils;
 
+import java.io.File;
+
+/**
+ * JavaMailTemplate
+ *
+ * @author kuma
+ * @version 2021.9
+ * @since 2021-09-09 11:41:05
+ */
 public class JavaMailTemplate implements MailTemplate {
+
    private final JavaMailSender mailSender;
    private final MailProperties mailProperties;
 
@@ -19,52 +44,68 @@ public class JavaMailTemplate implements MailTemplate {
       this.mailProperties = mailProperties;
    }
 
+   @Override
    public void sendSimpleMail(String to, String subject, String content, String... cc) {
       SimpleMailMessage message = new SimpleMailMessage();
-      message.setFrom(this.mailProperties.getUsername());
+      message.setFrom(mailProperties.getUsername());
       message.setTo(to);
       message.setSubject(subject);
       message.setText(content);
       if (!ObjectUtils.isEmpty(cc)) {
          message.setCc(cc);
       }
-
-      this.mailSender.send(message);
+      mailSender.send(message);
    }
 
+   @Override
    public void sendHtmlMail(String to, String subject, String content, String... cc) throws MessagingException {
-      MimeMessage message = this.mailSender.createMimeMessage();
-      this.buildHelper(to, subject, content, message, cc);
-      this.mailSender.send(message);
+      MimeMessage message = mailSender.createMimeMessage();
+      MimeMessageHelper helper = buildHelper(to, subject, content, message, cc);
+      mailSender.send(message);
    }
 
-   public void sendAttachmentsMail(String to, String subject, String content, String filePath, String... cc) throws MessagingException {
-      MimeMessage message = this.mailSender.createMimeMessage();
-      MimeMessageHelper helper = this.buildHelper(to, subject, content, message, cc);
+   @Override
+   public void sendAttachmentsMail(String to, String subject, String content, String filePath, String... cc)
+           throws MessagingException {
+      MimeMessage message = mailSender.createMimeMessage();
+      MimeMessageHelper helper = buildHelper(to, subject, content, message, cc);
       FileSystemResource file = new FileSystemResource(new File(filePath));
       String fileName = filePath.substring(filePath.lastIndexOf(File.separator));
       helper.addAttachment(fileName, file);
-      this.mailSender.send(message);
+      mailSender.send(message);
    }
 
-   public void sendResourceMail(String to, String subject, String content, String rscPath, String rscId, String... cc) throws MessagingException {
-      MimeMessage message = this.mailSender.createMimeMessage();
-      MimeMessageHelper helper = this.buildHelper(to, subject, content, message, cc);
+   @Override
+   public void sendResourceMail(String to, String subject, String content, String rscPath, String rscId, String... cc)
+           throws MessagingException {
+      MimeMessage message = mailSender.createMimeMessage();
+      MimeMessageHelper helper = buildHelper(to, subject, content, message, cc);
       FileSystemResource res = new FileSystemResource(new File(rscPath));
       helper.addInline(rscId, res);
-      this.mailSender.send(message);
+      mailSender.send(message);
    }
 
-   private MimeMessageHelper buildHelper(String to, String subject, String content, MimeMessage message, String... cc) throws MessagingException {
+   /**
+    * 统一封装MimeMessageHelper
+    *
+    * @param to 收件人地址
+    * @param subject 邮件主题
+    * @param content 邮件内容
+    * @param message 消息对象
+    * @param cc 抄送地址
+    * @return MimeMessageHelper
+    * @throws MessagingException 异常
+    */
+   private MimeMessageHelper buildHelper(String to, String subject, String content, MimeMessage message, String... cc)
+           throws MessagingException {
       MimeMessageHelper helper = new MimeMessageHelper(message, true);
-      helper.setFrom(this.mailProperties.getUsername());
+      helper.setFrom(mailProperties.getUsername());
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(content, true);
       if (!ObjectUtils.isEmpty(cc)) {
          helper.setCc(cc);
       }
-
       return helper;
    }
 }
