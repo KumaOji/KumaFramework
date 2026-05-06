@@ -12,7 +12,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
  * @author Freeman
  * @since 3.2.2
  */
-class HttpExchangeRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
+public class HttpExchangeRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
     @Override
     public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {

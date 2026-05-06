@@ -30,6 +30,7 @@ import com.kuma.boot.data.mybatis.mybatisplus.handler.typehandler.like.RightLike
 import com.kuma.boot.data.mybatis.mybatisplus.incrementer.SnowFlakeIdGenerator;
 import com.kuma.boot.data.mybatis.mybatisplus.injector.MateSqlInjector;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.MpInterceptor;
+import com.kuma.boot.data.mybatis.aot.MybatisPlusRuntimeHintsRegistrar;
 import com.kuma.boot.data.mybatis.autoconfigure.properties.MybatisPlusAutoFillProperties;
 import com.kuma.boot.data.mybatis.autoconfigure.properties.MybatisPlusProperties;
 import java.util.Comparator;
@@ -44,25 +45,22 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * MybatisPlusAutoConfiguration
  *
+ * <p>应用侧 Mapper 包须通过 {@code @MapperScan} 在启动类上显式声明，以便 Spring AOT / GraalVM
+ * Native 在编译期解析（本 starter 不再使用 {@code com.kuma.cloud.*} 等 classpath 通配符）。
+ *
  * @author kuma
  * @version 2021.9
  * @since 2021-09-04 07:40:02
  */
-@MapperScan(
-        basePackages = {
-                "com.kuma.boot.mybatis.mapper",
-                "com.kuma.boot.data.mybatis.delay",
-                "com.kuma.cloud.*.biz.mapper",
-                "com.kuma.cloud.*.infrastructure.persistent.mapper",
-                "com.kuma.cloud.*.infrastructure.persistent.*.mapper",
-                "com.kuma.cloud.*.mapper"
-        })
+@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.boot.data.mybatis.delay"})
 @EnableTransactionManagement
+@ImportRuntimeHints(MybatisPlusRuntimeHintsRegistrar.class)
 @AutoConfiguration(after = {com.kuma.boot.data.mybatis.autoconfigure.MybatisPlusInterceptorAutoConfiguration.class})
 @EnableConfigurationProperties({MybatisPlusAutoFillProperties.class, MybatisPlusProperties.class})
 @ConditionalOnProperty(

@@ -8,12 +8,14 @@ import javax.sql.DataSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnNotNativeImage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 import org.springframework.util.ReflectionUtils;
 
 @AutoConfiguration
+@ConditionalOnNotNativeImage
 public class SleuthP6spyAutoConfiguration implements BeanPostProcessor, Ordered, ApplicationContextAware {
    boolean isLoad = false;
    private P6spyProperties p6spyProperties;

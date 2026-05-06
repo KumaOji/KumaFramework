@@ -20,6 +20,7 @@ import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.aop.CountTimeAop;
+import com.kuma.boot.web.aot.WebAopRuntimeHintsRegistrar;
 import com.kuma.boot.web.autoconfigure.properties.WebMvcFilterProperties;
 import com.kuma.boot.web.autoconfigure.properties.WebMvcInterceptorProperties;
 import com.kuma.boot.web.mvc.converter.*;
@@ -45,6 +46,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -70,6 +72,7 @@ import java.util.List;
  * @since 2021-09-02 21:30:20
  */
 @AutoConfiguration
+@ImportRuntimeHints(WebAopRuntimeHintsRegistrar.class)
 @EnableConfigurationProperties({
         WebMvcFilterProperties.class,
         WebMvcInterceptorProperties.class,

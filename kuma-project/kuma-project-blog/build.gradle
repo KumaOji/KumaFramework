@@ -1,6 +1,7 @@
 plugins {
     alias(projectLibs.plugins.springboot)
     alias(projectLibs.plugins.spring.dependency.management)
+    alias(projectLibs.plugins.graalvm.native)
 }
 
 description = '博客系统 Demo —— 完整业务场景，含 Spring Security（OAuth2）/ MySQL / Redis / MyBatis-Plus / SpringDoc，展示框架在真实项目中的集成方式'
@@ -10,6 +11,12 @@ dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
     }
+}
+
+// GraalVM Native Image: starter-common pulls Apache Groovy; Graal polyglot substitutions still target old Groovy APIs
+// (IndyInterface / invalidateSwitchPoints). Blog does not use kuma's Groovy script helpers — drop the jar for native builds.
+configurations.configureEach {
+    exclude group: 'org.apache.groovy', module: 'groovy'
 }
 
 dependencies {
@@ -68,4 +75,19 @@ processResources {
 
 bootJar {
     archiveBaseName = 'blog'
+}
+
+// GraalVM Native Image（需 GraalVM JDK；插件见 gradle/libs.versions.toml `graalvm-native`；配置见 gradle/graalvm.gradle）
+// 构建：./gradlew :kuma-project:kuma-project-blog:nativeCompile
+// 若仍遇 configuration-cache / nativeImageCompileOnly 报错：追加 --no-configuration-cache
+// 反射/资源补全可先用 JVM 跑 fat jar 采集：
+//   java -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image \\
+//        -jar build/libs/blog-*.jar --spring.profiles.active=dev
+apply from: rootProject.file('gradle/graalvm.gradle')
+graalvmNative {
+    binaries {
+        main {
+            imageName.set('blog')
+        }
+    }
 }

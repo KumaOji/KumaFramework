@@ -21,6 +21,7 @@ import com.kuma.boot.common.model.PropertyCache;
 import com.kuma.boot.common.model.Pubsub;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.properties.CoreProperties;
+import com.kuma.boot.core.runtime.aot.KmcRuntimeHints;
 import com.kuma.boot.core.runtime.listener.StartedEventListener;
 import com.kuma.boot.core.runtime.runner.KmcApplicationRunner;
 import com.kuma.boot.core.runtime.runner.KmcCommandLineRunner;
@@ -31,6 +32,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 
 /**
  * 核心配置
@@ -40,6 +42,7 @@ import org.springframework.context.annotation.Bean;
  * @since 2021-09-02 20:05:41
  */
 @AutoConfiguration
+@ImportRuntimeHints(KmcRuntimeHints.class)
 @EnableConfigurationProperties({CoreProperties.class})
 @ConditionalOnProperty(prefix = CoreProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CoreAutoConfiguration implements InitializingBean {

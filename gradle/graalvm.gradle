@@ -1,8 +1,12 @@
-apply plugin: "org.graalvm.buildtools.native"
+// 使用本文件前，请在子工程 plugins {} 中声明：
+//   alias(projectLibs.plugins.graalvm.native)
+// 再 apply from: rootProject.file('gradle/graalvm.gradle')
 
 graalvmNative {
     binaries {
         main {
+            // Windows 上若误开 shared library 会生成 .dll；Spring Boot 可执行映像应为原生可执行文件
+            sharedLibrary.set(false)
             imageName.set(project.name)
             buildArgs.add('--verbose')
             buildArgs.add('--no-fallback')
@@ -11,16 +15,12 @@ graalvmNative {
             buildArgs.add('--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED')
             buildArgs.add('--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED')
 
-            buildArgs.add('--trace-class-initialization=ch.qos.logback.classic.Logger')
-            buildArgs.add('--trace-class-initialization=java.net.Inet4Address')
-
-            buildArgs.add('--trace-object-instantiation=ch.qos.logback.core.AsyncAppenderBase$Worker')
-            buildArgs.add('--trace-object-instantiation=java.net.Inet4Address')
-
             buildArgs.add('--initialize-at-run-time=io.netty.util.NetUtil')
 
             buildArgs.add('--initialize-at-build-time=org.springframework.util.unit.DataSize')
-            buildArgs.add('--initialize-at-build-time=org.slf4j.LoggerFactory,ch.qos.logback')
+            // JetCache AbstractCacheAutoInit.<clinit> calls LoggerFactory early; SLF4J 2.x helpers default to run-time init
+            // and must match heap snapshots — include org.slf4j.helpers (SubstituteServiceProvider, NOP_FallbackServiceProvider).
+            buildArgs.add('--initialize-at-build-time=org.slf4j.LoggerFactory,org.slf4j.helpers,ch.qos.logback')
             buildArgs.add('--initialize-at-build-time=org.slf4j.MDC')
             buildArgs.add('--initialize-at-build-time=ch.qos.logback.classic.Level')
             buildArgs.add('--initialize-at-build-time=ch.qos.logback.classic.Logger')
@@ -35,6 +35,13 @@ graalvmNative {
 
             buildArgs.add('--allow-incomplete-classpath')
             buildArgs.add('-H:+ReportExceptionStackTraces')
+
+            // GraalVM 随 JDK 带的 polyglot Groovy 替换面向旧版 Groovy API；classpath 上有 Groovy 4+（如 kuma-boot-starter-common）
+            // 时会报 Target_org_codehaus_groovy_vmplugin_v7_IndyInterface_invalidateSwitchPoints。博客等应用不需要 polyglot 宿主特性。
+            // 见 https://github.com/oracle/graal/issues/10200 等
+            buildArgs.add('--exclude-config')
+            buildArgs.add('.*/svm/library-support\\.jar')
+            buildArgs.add('META-INF/native-image/com.oracle.svm/polyglot/native-image.properties')
         }
     }
 }

@@ -21,6 +21,7 @@ import static com.kuma.boot.security.spring.utils.SecurityUtils.toRequestMatcher
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.security.spring.annotation.NotAuth;
+import com.kuma.boot.security.spring.aot.SecuritySpringRuntimeHintsRegistrar;
 import com.kuma.boot.security.spring.authentication.login.LoginCustomizer;
 import com.kuma.boot.security.spring.authentication.response.denied.JsonAccessDeniedHandler;
 import com.kuma.boot.security.spring.authentication.response.entrypoint.JsonAuthenticationEntryPoint;
@@ -39,6 +40,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
@@ -59,7 +61,9 @@ import org.springframework.web.util.pattern.PathPattern;
  * @version 2022.03
  * @since 2021/8/25 09:57
  */
-@AutoConfiguration(after = SecurityAuthorizationAutoConfiguration.class)
+@AutoConfiguration(
+        after = SecurityAuthorizationAutoConfiguration.class)
+@ImportRuntimeHints(SecuritySpringRuntimeHintsRegistrar.class)
 public class Oauth2ResourceAutoConfiguration implements InitializingBean {
 
     @Override

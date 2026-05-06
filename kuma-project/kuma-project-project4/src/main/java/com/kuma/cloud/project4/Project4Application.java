@@ -25,15 +25,18 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.mybatis.spring.annotation.MapperScan;
 
 /**
  * Project4 启动类
- * <p>Mapper 扫描由 MybatisPlusAutoConfiguration 统一处理，避免重复扫描产生警告</p>
+ * <p>Mapper 扫描：显式 {@link MapperScan}，兼容 Spring AOT / GraalVM Native（框架 starter 仅扫描
+ * {@code com.kuma.boot} 下 mapper 包）。</p>
  *
  * @author kuma
  */
 @KumaBootApplication
 @KumaCloudApplication
+@MapperScan("com.kuma.cloud.project4.mapper")
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.project4"})
 public class Project4Application extends SpringBootServletInitializer {

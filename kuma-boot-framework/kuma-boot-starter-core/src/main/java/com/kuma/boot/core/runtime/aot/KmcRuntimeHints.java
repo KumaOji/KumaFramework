@@ -16,12 +16,17 @@
 
 package com.kuma.boot.core.runtime.aot;
 
-import com.kuma.boot.common.utils.log.LogUtils;
+import static org.springframework.aot.hint.MemberCategory.ACCESS_DECLARED_FIELDS;
+import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
+import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
+
+import com.kuma.boot.core.autoconfigure.properties.CoreProperties;
+import com.kuma.boot.core.enums.KmcEnvEnum;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
 /**
- * KmcRuntimeHints
+ * GraalVM Native / Spring AOT hints for kuma-boot-starter-core configuration binding.
  *
  * @author kuma
  * @version 2026.01
@@ -30,14 +35,18 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 public class KmcRuntimeHints implements RuntimeHintsRegistrar {
 
     @Override
-    public void registerHints( RuntimeHints hints, ClassLoader classLoader ) {
-
-        // hints.reflection().registerConstructor(SimpleHelloService.class.getConstructors()[0],
-        // ExecutableMode.INVOKE)
-        //	.registerMethod(ReflectionUtils.findMethod(SimpleHelloService.class,"sayHello",String.class),
-        //		ExecutableMode.INVOKE);
-        // hints.resources().registerPattern("hello.txt");
-
-        LogUtils.info("StandardRuntimeHints RuntimeHintsRegistrar");
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        hints.reflection()
+                .registerType(
+                        CoreProperties.class,
+                        INVOKE_PUBLIC_METHODS,
+                        INVOKE_DECLARED_CONSTRUCTORS,
+                        ACCESS_DECLARED_FIELDS);
+        hints.reflection()
+                .registerType(
+                        KmcEnvEnum.class,
+                        INVOKE_PUBLIC_METHODS,
+                        INVOKE_DECLARED_CONSTRUCTORS,
+                        ACCESS_DECLARED_FIELDS);
     }
 }
