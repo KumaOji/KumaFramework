@@ -18,25 +18,23 @@ package com.kuma.boot.web.request.properties;
 
 import com.kuma.boot.web.request.enums.RequestLoggerTypeEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * 审计日志配置
+ * 瀹¤鏃ュ織閰嶇疆
  *
  * @author kuma
  * @version 2022.03
  * @since 2020/5/2 11:19
  */
-@RefreshScope
 @ConfigurationProperties(prefix = RequestLoggerProperties.PREFIX)
 public class RequestLoggerProperties {
 
     public static final String PREFIX = "kuma.boot.web.request";
 
-    /** 是否开启请求日志 */
+    /** 鏄惁寮€鍚姹傛棩蹇?*/
     private Boolean enabled = true;
 
-    /** 日志记录类型(logger/redis/kafka) */
+    /** 鏃ュ織璁板綍绫诲瀷(logger/redis/kafka) */
     private RequestLoggerTypeEnum[] types =
             new RequestLoggerTypeEnum[] {RequestLoggerTypeEnum.LOGGER};
 

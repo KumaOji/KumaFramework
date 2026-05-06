@@ -3,9 +3,7 @@ package com.kuma.boot.xss.autoconfigure.properties;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.xss"
 )

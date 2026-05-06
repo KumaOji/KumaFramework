@@ -17,7 +17,6 @@
 package com.kuma.boot.sentinel.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * SentinelProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-07 20:54:47
  */
-@RefreshScope
 @ConfigurationProperties(prefix = SentinelProperties.PREFIX)
 public class SentinelProperties {
 

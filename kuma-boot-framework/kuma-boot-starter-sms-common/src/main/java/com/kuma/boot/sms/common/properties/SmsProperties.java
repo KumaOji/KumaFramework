@@ -2,9 +2,7 @@ package com.kuma.boot.sms.common.properties;
 
 import com.kuma.boot.sms.common.enums.SmsType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.sms"
 )

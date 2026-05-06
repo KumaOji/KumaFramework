@@ -18,21 +18,19 @@ package com.kuma.boot.actuator.mbean.autoconfigure.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * ManagedResource 配置属性。
+ * ManagedResource 閰嶇疆灞炴€с€?
  *
  * @author kuma
  * @since 2021-09-02
  */
 @Data
-@RefreshScope
 @ConfigurationProperties(prefix = ManagedResourceProperties.PREFIX)
 public class ManagedResourceProperties {
 
     public static final String PREFIX = "kuma.boot.actuator.managedresource";
 
-    /** 是否启用 ManagedResource（默认开启） */
+    /** 鏄惁鍚敤 ManagedResource锛堥粯璁ゅ紑鍚級 */
     private boolean enabled = true;
 }

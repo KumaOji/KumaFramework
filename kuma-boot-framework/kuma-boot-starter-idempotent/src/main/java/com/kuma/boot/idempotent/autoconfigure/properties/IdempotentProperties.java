@@ -8,9 +8,7 @@
 package com.kuma.boot.idempotent.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(prefix="kuma.boot.idempotent")
 public class IdempotentProperties {
     public static final String PREFIX = "kuma.boot.idempotent";

@@ -9,6 +9,12 @@ spring:
   main:
     # Native Image：保证 AOT 与运行时均按 Servlet Web 应用处理，避免未注册 ServletWebServerFactory
     web-application-type: servlet
+  cloud:
+    # Bootstrap 上下文无任何配置（无 bootstrap.yml / Config Server），
+    # 禁用后 AOT 处理器可正常处理主 ApplicationContext；
+    # 否则 Bootstrap 父上下文会拦截 AOT 处理，导致所有主 Bean 定义缺失。
+    bootstrap:
+      enabled: false
   datasource:
     dynamic:
       primary: mysql

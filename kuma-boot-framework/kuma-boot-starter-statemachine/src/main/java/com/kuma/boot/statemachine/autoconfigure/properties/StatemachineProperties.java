@@ -1,9 +1,7 @@
 package com.kuma.boot.statemachine.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties("kuma.boot.statemachine")
 public class StatemachineProperties {
    public static final String PREFIX = "kuma.boot.statemachine";

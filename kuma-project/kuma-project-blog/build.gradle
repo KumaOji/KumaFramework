@@ -31,6 +31,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-totp')
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
+        // Exclude the marker-only jar whose Marker class causes PropertyUtils.MARKER_CLASS_EXISTS=true,
+        // which makes BootstrapApplicationListener always active regardless of
+        // spring.cloud.bootstrap.enabled=false. Without this, AOT only captures Bootstrap beans.
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-bootstrap'
     }
     api project(':kuma-boot-framework:kuma-boot-starter-frp')
 
@@ -55,6 +59,14 @@ def blogRedisDatabase           = project.findProperty('redis.database')        
 def blogRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
 def blogRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
 def blogRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
+
+// Pass the property to the processAot JVM so BootstrapApplicationListener (which fires at
+// APPLICATION_ENVIRONMENT_PREPARED, before application.yml is loaded) skips Bootstrap context
+// creation. Without this, processAot captures only Bootstrap parent-context beans and the
+// full main ApplicationContext bean definitions are absent from the generated AOT sources.
+tasks.named('processAot') {
+    jvmArgs '-Dspring.cloud.bootstrap.enabled=false'
+}
 
 processResources {
     filesMatching('**/application.yml') {

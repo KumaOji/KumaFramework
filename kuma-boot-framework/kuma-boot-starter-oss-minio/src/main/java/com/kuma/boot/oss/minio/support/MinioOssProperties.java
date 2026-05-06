@@ -20,16 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * minio oss属性
+ * minio oss灞炴€?
  *
  * @author kuma
  * @version 2022.04
  * @since 2022-04-27 17:41:57
  */
-@RefreshScope
 @ConfigurationProperties(MinioOssProperties.PREFIX)
 public class MinioOssProperties extends MinioOssConfig implements InitializingBean {
 

@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * SpringdocProperties
@@ -39,14 +38,13 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2022.03
  * @since 2020/4/30 10:11
  */
-@RefreshScope
 @ConfigurationProperties(SpringdocProperties.PREFIX)
 public class SpringdocProperties {
 
     public static final String PREFIX = "kuma.boot.springdoc";
 
     /**
-     * 是否开启springdoc
+     * 鏄惁寮€鍚痵pringdoc
      */
     private Boolean enabled = false;
     private Type type = Type.SERVICE;
@@ -126,7 +124,7 @@ public class SpringdocProperties {
      */
     private String externalUrl = "https://github.com/kuma/kuma-cloud-project/wiki";
     /**
-     * openapi 版本，须为 3.0.0 以兼容 Swagger UI/Knife4j 的版本校验
+     * openapi 鐗堟湰锛岄』涓?3.0.0 浠ュ吋瀹?Swagger UI/Knife4j 鐨勭増鏈牎楠?
      */
     private String openapi = "3.0.0";
 

@@ -17,7 +17,6 @@
 package com.kuma.boot.mq.kafka.kafka.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * XxlProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2022.03
  * @since 2020/6/16 11:36
  */
-@RefreshScope
 @ConfigurationProperties(prefix = KafkaProperties.PREFIX)
 public class KafkaProperties {
 

@@ -18,7 +18,6 @@ package com.kuma.boot.core.autoconfigure.properties;
 
 import com.kuma.boot.core.enums.KmcEnvEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * CoreProperties
@@ -27,30 +26,29 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-02 20:43:31
  */
-@RefreshScope
 @ConfigurationProperties(prefix = CoreProperties.PREFIX)
 public class CoreProperties {
 
     public static final String PREFIX = "kuma.boot.core";
 
     /**
-     * 核心环境变量
+     * 鏍稿績鐜鍙橀噺
      */
     private KmcEnvEnum env;
     /**
-     * 是否开启核心属性配置
+     * 鏄惁寮€鍚牳蹇冨睘鎬ч厤缃?
      */
     private boolean enabled = true;
     /**
-     * 是否开启自定义收集器
+     * 鏄惁寮€鍚嚜瀹氫箟鏀堕泦鍣?
      */
     private boolean collectHookEnabled = true;
     /**
-     * 是否开启配置刷新上下文监听
+     * 鏄惁寮€鍚厤缃埛鏂颁笂涓嬫枃鐩戝惉
      */
     private boolean contextRestartEnabled = false;
     /**
-     * 刷新上下文监听等待时间
+     * 鍒锋柊涓婁笅鏂囩洃鍚瓑寰呮椂闂?
      */
     private int contextRestartTimespan = 10;
 

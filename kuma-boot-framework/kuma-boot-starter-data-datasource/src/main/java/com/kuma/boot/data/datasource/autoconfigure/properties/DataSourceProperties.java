@@ -17,7 +17,6 @@
 package com.kuma.boot.data.datasource.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * DataSourceProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-04 07:44:25
  */
-@RefreshScope
 @ConfigurationProperties(prefix = DataSourceProperties.PREFIX)
 public class DataSourceProperties {
 

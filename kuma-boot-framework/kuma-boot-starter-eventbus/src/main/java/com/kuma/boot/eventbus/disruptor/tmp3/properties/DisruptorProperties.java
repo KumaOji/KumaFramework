@@ -4,9 +4,7 @@ import com.kuma.boot.eventbus.disruptor.tmp3.context.EventHandlerDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.eventbus.disruptor"
 )

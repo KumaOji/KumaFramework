@@ -17,7 +17,6 @@
 package com.kuma.boot.ratelimit.ratelimitaspect;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * LimitProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-03 08:04:34
  */
-@RefreshScope
 @ConfigurationProperties(prefix = LimitProperties.PREFIX)
 public class LimitProperties {
 

@@ -21,12 +21,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * 验证权限配置
+ * 楠岃瘉鏉冮檺閰嶇疆
  */
-@RefreshScope
 @ConfigurationProperties(prefix = SecurityProperties.PREFIX)
 public class SecurityProperties {
 
@@ -69,12 +67,12 @@ public class SecurityProperties {
     };
 
     /**
-     * 忽略URL，List列表形式
+     * 蹇界暐URL锛孡ist鍒楄〃褰㈠紡
      */
     private List<String> ignoreUrl = new ArrayList<>();
 
     /**
-     * 首次加载合并ENDPOINTS
+     * 棣栨鍔犺浇鍚堝苟ENDPOINTS
      */
     @PostConstruct
     public void initIgnoreUrl() {

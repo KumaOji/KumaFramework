@@ -17,16 +17,14 @@
 package com.kuma.boot.ip2region.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * ip2region 配置类
+ * ip2region 閰嶇疆绫?
  *
  * @author kuma
  * @version 2021.9
  * @since 2021-09-02 20:01:42
  */
-@RefreshScope
 @ConfigurationProperties(Ip2regionProperties.PREFIX)
 public class Ip2regionProperties {
 
@@ -34,11 +32,11 @@ public class Ip2regionProperties {
 
     private boolean enabled = true;
 
-    /** ip2region.db 文件路径 */
+    /** ip2region.db 鏂囦欢璺緞 */
     private String dbFileLocation = "classpath:ip2region/ip2region.xdb";
 
     /**
-     * ipv6wry.db 文件路径
+     * ipv6wry.db 鏂囦欢璺緞
      */
     private String ipv6dbFileLocation = "classpath:ip2region/ipv6wry.db";
 

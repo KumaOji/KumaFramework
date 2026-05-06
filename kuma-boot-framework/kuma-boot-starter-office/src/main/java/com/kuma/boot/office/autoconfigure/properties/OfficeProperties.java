@@ -17,7 +17,6 @@
 package com.kuma.boot.office.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * XssProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-02 22:15:05
  */
-@RefreshScope
 @ConfigurationProperties(prefix = OfficeProperties.PREFIX)
 public class OfficeProperties {
 

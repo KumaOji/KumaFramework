@@ -28,6 +28,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
+
 @KumaBootApplication
 @KumaCloudApplication
 @ImportRuntimeHints(BlogRuntimeHintsRegistrar.class)
@@ -39,6 +40,12 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 public class BlogApplication {
 
     public static void main(String[] args) {
+        // System property must be set before any Spring initialization so that
+        // BootstrapApplicationListener (which fires at APPLICATION_ENVIRONMENT_PREPARED,
+        // before application.yml is loaded) sees it and skips Bootstrap context creation.
+        // Without this, AOT processAot captures only the Bootstrap parent context beans
+        // instead of the full main ApplicationContext bean definitions.
+        System.setProperty("spring.cloud.bootstrap.enabled", "false");
         new StartupSpringApplication(BlogApplication.class)
                 .setKmcBanner()
                 .setKmcProfileIfNotExists("dev")

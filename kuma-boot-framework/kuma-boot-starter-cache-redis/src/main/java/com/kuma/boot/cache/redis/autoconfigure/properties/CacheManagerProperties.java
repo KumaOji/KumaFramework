@@ -20,7 +20,6 @@ import com.kuma.boot.cache.redis.enums.CacheType;
 import com.kuma.boot.cache.redis.enums.SerializerType;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Role;
 
 import java.time.Duration;
@@ -33,7 +32,6 @@ import java.util.Map;
  * @version 2021.9
  * @since 2021-09-07 21:15:21
  */
-@RefreshScope
 @ConfigurationProperties(prefix = CacheManagerProperties.PREFIX)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class CacheManagerProperties {
@@ -43,26 +41,26 @@ public class CacheManagerProperties {
     private boolean enabled = true;
 
     /**
-     * 目前只支持 REDIS 和 CAFFEINE ！ CAFFEINE 只用于项目的开发环境或者演示环境使用， 生产环境请用redis！！！
+     * 鐩墠鍙敮鎸?REDIS 鍜?CAFFEINE 锛?CAFFEINE 鍙敤浜庨」鐩殑寮€鍙戠幆澧冩垨鑰呮紨绀虹幆澧冧娇鐢紝 鐢熶骇鐜璇风敤redis锛侊紒锛?
      */
     private CacheType type = CacheType.REDIS;
     /**
-     * 序列化类型
+     * 搴忓垪鍖栫被鍨?
      */
     private SerializerType serializerType = SerializerType.JACK_SON;
     /**
-     * 是否缓存 null 值
+     * 鏄惁缂撳瓨 null 鍊?
      */
     private Boolean cacheNullVal = true;
 
     /**
-     * 通过 @Cacheable 注解标注的方法的缓存策略
+     * 閫氳繃 @Cacheable 娉ㄨВ鏍囨敞鐨勬柟娉曠殑缂撳瓨绛栫暐
      */
     private Cache def = new Cache();
     /**
-     * 针对某几个具体的key特殊配置
+     * 閽堝鏌愬嚑涓叿浣撶殑key鐗规畩閰嶇疆
      *
-     * <p>改属性只对 redis 有效！！！ configs的key需要配置成@Cacheable注解的value
+     * <p>鏀瑰睘鎬у彧瀵?redis 鏈夋晥锛侊紒锛?configs鐨刱ey闇€瑕侀厤缃垚@Cacheable娉ㄨВ鐨剉alue
      */
     private Map<String, Cache> configs;
 
@@ -82,23 +80,23 @@ public class CacheManagerProperties {
 
         public static final String PREFIX = CacheManagerProperties.PREFIX + ".stream";
         /**
-         * 是否开启 stream
+         * 鏄惁寮€鍚?stream
          */
         boolean enable = false;
         /**
-         * consumer group，默认：服务名 + 环境
+         * consumer group锛岄粯璁わ細鏈嶅姟鍚?+ 鐜
          */
         String consumerGroup;
         /**
-         * 消费者名称，默认：ip + 端口
+         * 娑堣垂鑰呭悕绉帮紝榛樿锛歩p + 绔彛
          */
         String consumerName;
         /**
-         * poll 批量大小
+         * poll 鎵归噺澶у皬
          */
         Integer pollBatchSize;
         /**
-         * poll 超时时间
+         * poll 瓒呮椂鏃堕棿
          */
         Duration pollTimeout;
 
@@ -153,29 +151,29 @@ public class CacheManagerProperties {
     public static class Cache {
 
         /**
-         * key 的过期时间 默认1天过期 eg: timeToLive: 1d
+         * key 鐨勮繃鏈熸椂闂?榛樿1澶╄繃鏈?eg: timeToLive: 1d
          */
         private Duration timeToLive = Duration.ofDays(1);
 
         /**
-         * 是否允许缓存null值
+         * 鏄惁鍏佽缂撳瓨null鍊?
          */
         private boolean cacheNullValues = true;
 
         /**
-         * key 的前缀 最后的key格式： keyPrefix + @Cacheable.value + @Cacheable.key
+         * key 鐨勫墠缂€ 鏈€鍚庣殑key鏍煎紡锛?keyPrefix + @Cacheable.value + @Cacheable.key
          *
-         * <p>使用场景： 开发/测试环境 或者 演示/生产 环境，为了节省资源，往往会共用一个redis，即可以根据key前缀来区分(当然，也能用切换 database 来实现)
+         * <p>浣跨敤鍦烘櫙锛?寮€鍙?娴嬭瘯鐜 鎴栬€?婕旂ず/鐢熶骇 鐜锛屼负浜嗚妭鐪佽祫婧愶紝寰€寰€浼氬叡鐢ㄤ竴涓猺edis锛屽嵆鍙互鏍规嵁key鍓嶇紑鏉ュ尯鍒?褰撶劧锛屼篃鑳界敤鍒囨崲 database 鏉ュ疄鐜?
          */
         private String keyPrefix;
 
         /**
-         * 写入redis时，是否使用key前缀
+         * 鍐欏叆redis鏃讹紝鏄惁浣跨敤key鍓嶇紑
          */
         private boolean useKeyPrefix = true;
 
         /**
-         * Caffeine 的最大缓存个数
+         * Caffeine 鐨勬渶澶х紦瀛樹釜鏁?
          */
         private int maxSize = 1000;
 

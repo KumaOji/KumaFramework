@@ -17,7 +17,6 @@
 package com.kuma.boot.mail.hutool.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * RedisLockProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-07 21:15:27
  */
-@RefreshScope
 @ConfigurationProperties(prefix = MailProperties.PREFIX)
 public class MailProperties {
    public static final String PREFIX = "kuma.boot.mail";
@@ -42,53 +40,53 @@ public class MailProperties {
    }
 
    /// **
-   // * SMTP服务器域名
+   // * SMTP鏈嶅姟鍣ㄥ煙鍚?
    // */
    // @Value("")
    // private String host;
    //
    /// **
-   // * SMTP服务端口
+   // * SMTP鏈嶅姟绔彛
    // */
    // private Integer port;
    //
    /// **
-   // * 是否需要用户名密码验证
+   // * 鏄惁闇€瑕佺敤鎴峰悕瀵嗙爜楠岃瘉
    // */
    // private Boolean auth;
    //
    /// **
-   // * 用户名
+   // * 鐢ㄦ埛鍚?
    // */
    // private String user;
    //
    /// **
-   // * 密码
+   // * 瀵嗙爜
    // */
    // private String pass;
    //
    /// **
-   // * 发送方，遵循RFC-822标准
+   // * 鍙戦€佹柟锛岄伒寰猂FC-822鏍囧噯
    // */
    // private String from;
    //
    /// **
-   // * 使用 STARTTLS安全连接，STARTTLS是对纯文本通信协议的扩展。它将纯文本连接升级为加密连接（TLS或SSL）， 而不是使用一个单独的加密通信端口。
+   // * 浣跨敤 STARTTLS瀹夊叏杩炴帴锛孲TARTTLS鏄绾枃鏈€氫俊鍗忚鐨勬墿灞曘€傚畠灏嗙函鏂囨湰杩炴帴鍗囩骇涓哄姞瀵嗚繛鎺ワ紙TLS鎴朣SL锛夛紝 鑰屼笉鏄娇鐢ㄤ竴涓崟鐙殑鍔犲瘑閫氫俊绔彛銆?
    // */
    // private Boolean starttlsEnable;
    //
    /// **
-   // * 使用 SSL安全连接
+   // * 浣跨敤 SSL瀹夊叏杩炴帴
    // */
    // private Boolean sslEnable;
    //
    /// **
-   // * SMTP超时时长，单位毫秒，缺省值不超时
+   // * SMTP瓒呮椂鏃堕暱锛屽崟浣嶆绉掞紝缂虹渷鍊间笉瓒呮椂
    // */
    // private Long timeout;
    //
    /// **
-   // * Socket连接超时值，单位毫秒，缺省值不超时
+   // * Socket杩炴帴瓒呮椂鍊硷紝鍗曚綅姣锛岀己鐪佸€间笉瓒呮椂
    // */
    // private Long connectionTimeout;
    //

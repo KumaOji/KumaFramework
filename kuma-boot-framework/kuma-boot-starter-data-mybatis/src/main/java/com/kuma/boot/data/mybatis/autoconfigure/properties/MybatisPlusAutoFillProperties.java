@@ -17,7 +17,6 @@
 package com.kuma.boot.data.mybatis.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * MybatisPlusAutoFillProperties
@@ -26,34 +25,33 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-04 07:44:25
  */
-@RefreshScope
 @ConfigurationProperties(prefix = MybatisPlusAutoFillProperties.PREFIX)
 public class MybatisPlusAutoFillProperties {
 
     public static final String PREFIX = "kuma.boot.data.mybatis.mybatis-plus.auto-fill";
 
-    /** 是否开启自动填充字段 */
+    /** 鏄惁寮€鍚嚜鍔ㄥ～鍏呭瓧娈?*/
     private Boolean enabled = true;
 
-    /** 是否开启了插入填充 */
+    /** 鏄惁寮€鍚簡鎻掑叆濉厖 */
     private Boolean enableInsertFill = true;
 
-    /** 是否开启了更新填充 */
+    /** 鏄惁寮€鍚簡鏇存柊濉厖 */
     private Boolean enableUpdateFill = true;
 
-    /** 创建时间字段名 */
+    /** 鍒涘缓鏃堕棿瀛楁鍚?*/
     private String idField = "id";
 
-    /** 创建时间字段名 */
+    /** 鍒涘缓鏃堕棿瀛楁鍚?*/
     private String createDateField = "createDate";
 
-    /** 更新时间字段名 */
+    /** 鏇存柊鏃堕棿瀛楁鍚?*/
     private String modifyDateField = "modifyDate";
 
-    /** 创建时间字段名 */
+    /** 鍒涘缓鏃堕棿瀛楁鍚?*/
     private String createUserField = "createUser";
 
-    /** 更新时间字段名 */
+    /** 鏇存柊鏃堕棿瀛楁鍚?*/
     private String modifyUserField = "modifyUser";
 
     public String getIdField() {

@@ -19,7 +19,6 @@ package com.kuma.boot.data.mybatis.autoconfigure.properties;
 import com.kuma.boot.data.mybatis.interceptor.encrypt.enumd.AlgorithmType;
 import com.kuma.boot.data.mybatis.interceptor.encrypt.enumd.EncodeType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * MybatisPlusAutoFillProperties
@@ -28,7 +27,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-04 07:44:25
  */
-@RefreshScope
 @ConfigurationProperties(prefix = MybatisInterceptorProperties.PREFIX)
 public class MybatisInterceptorProperties {
 
@@ -44,37 +42,37 @@ public class MybatisInterceptorProperties {
     private Boolean enabled = true;
 
     /**
-     * sql日志插件
+     * sql鏃ュ織鎻掍欢
      */
     private SqlLog sqlLog;
 
     /**
-     * sql收集插件
+     * sql鏀堕泦鎻掍欢
      */
     private SqlCollector sqlCollector;
 
     /**
-     * 字段加密插件
+     * 瀛楁鍔犲瘑鎻掍欢
      */
     private CipherEncrypt cipherEncrypt;
 
     /**
-     * 字段加密插件
+     * 瀛楁鍔犲瘑鎻掍欢
      */
     private FieldEncrypt fieldEncrypt;
 
     /**
-     * 数据操作插件
+     * 鏁版嵁鎿嶄綔鎻掍欢
      */
     private DataOperate dataOperate;
 
     /**
-     * 慢查询插件
+     * 鎱㈡煡璇㈡彃浠?
      */
     private SlowQuery slowQuery;
 
     /**
-     * 大结果集合插件
+     * 澶х粨鏋滈泦鍚堟彃浠?
      */
     private BigResultQuery bigResultQuery;
 
@@ -128,32 +126,32 @@ public class MybatisInterceptorProperties {
     public static class FieldEncrypt {
 
         /**
-         * 过滤开关
+         * 杩囨护寮€鍏?
          */
         private Boolean enabled = false;
 
         /**
-         * 默认算法
+         * 榛樿绠楁硶
          */
         private AlgorithmType algorithm;
 
         /**
-         * 秘钥。AES、SM4需要
+         * 绉橀挜銆侫ES銆丼M4闇€瑕?
          */
         private String password;
 
         /**
-         * 公钥。RSA、SM2需要
+         * 鍏挜銆俁SA銆丼M2闇€瑕?
          */
         private String publicKey;
 
         /**
-         * 公钥。RSA、SM2需要
+         * 鍏挜銆俁SA銆丼M2闇€瑕?
          */
         private String privateKey;
 
         /**
-         * 编码方式。对加密算法为BASE64的不起作用
+         * 缂栫爜鏂瑰紡銆傚鍔犲瘑绠楁硶涓築ASE64鐨勪笉璧蜂綔鐢?
          */
         private EncodeType encode;
 
@@ -256,7 +254,7 @@ public class MybatisInterceptorProperties {
     public static class SlowQuery {
 
         /**
-         * 是否开启慢查询监控
+         * 鏄惁寮€鍚參鏌ヨ鐩戞帶
          */
         private Boolean enabled = false;
 
@@ -269,7 +267,7 @@ public class MybatisInterceptorProperties {
         }
 
         /**
-         * 最大阈值
+         * 鏈€澶ч槇鍊?
          */
         private Integer slowSqlThresholdMs = 6000;
 
@@ -292,7 +290,7 @@ public class MybatisInterceptorProperties {
     public static class BigResultQuery {
 
         /**
-         * 是否开启大查询监控
+         * 鏄惁寮€鍚ぇ鏌ヨ鐩戞帶
          */
         private Boolean enabled = false;
 
@@ -305,7 +303,7 @@ public class MybatisInterceptorProperties {
         }
 
         /**
-         * 最大阈值
+         * 鏈€澶ч槇鍊?
          */
         private Integer size = 1000;
 

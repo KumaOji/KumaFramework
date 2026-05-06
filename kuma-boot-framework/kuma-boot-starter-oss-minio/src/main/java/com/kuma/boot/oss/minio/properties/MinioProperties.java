@@ -17,7 +17,6 @@
 package com.kuma.boot.oss.minio.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * MinioConfiguration
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2022.04
  * @since 2022-04-13 09:07:11
  */
-@RefreshScope
 @ConfigurationProperties(prefix = MinioProperties.PREFIX)
 public class MinioProperties {
 

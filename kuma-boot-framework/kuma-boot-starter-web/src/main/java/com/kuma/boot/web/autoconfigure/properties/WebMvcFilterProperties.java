@@ -17,7 +17,6 @@
 package com.kuma.boot.web.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * FilterProperties
@@ -26,28 +25,27 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-03 08:04:30
  */
-@RefreshScope
 @ConfigurationProperties(prefix = WebMvcFilterProperties.PREFIX)
 public class WebMvcFilterProperties {
 
     public static final String PREFIX = "kuma.boot.web.filter";
 
-    /** 开启负载均衡隔离规则 */
+    /** 寮€鍚礋杞藉潎琛￠殧绂昏鍒?*/
     private Boolean version = true;
 
-    /** 开启租户过滤器 */
+    /** 寮€鍚鎴疯繃婊ゅ櫒 */
     private Boolean tenant = true;
 
-    /** 开启日志链路追踪过滤器 */
+    /** 寮€鍚棩蹇楅摼璺拷韪繃婊ゅ櫒 */
     private Boolean trace = true;
 
-    /** 开启日志链路追踪过滤器 */
+    /** 寮€鍚棩蹇楅摼璺拷韪繃婊ゅ櫒 */
     private Boolean webContext = true;
 
-    /** 开启监控报表 */
+    /** 寮€鍚洃鎺ф姤琛?*/
     private Boolean report = true;
 
-    /** 开启ping */
+    /** 寮€鍚痯ing */
     private Boolean ping = true;
 
     public WebMvcFilterProperties() {}

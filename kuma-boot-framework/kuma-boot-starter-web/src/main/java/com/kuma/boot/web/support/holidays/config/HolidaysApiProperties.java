@@ -17,32 +17,30 @@
 package com.kuma.boot.web.support.holidays.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * HolidaysApi 配置类
+ * HolidaysApi 閰嶇疆绫?
  */
-@RefreshScope
 @ConfigurationProperties(HolidaysApiProperties.PREFIX)
 public class HolidaysApiProperties {
     public static final String PREFIX = "kuma.boot.web.holidays";
 
     /**
-     * 自行扩展的 json 文件路径
+     * 鑷鎵╁睍鐨?json 鏂囦欢璺緞
      */
     private List<ExtData> extData = new ArrayList<>();
 
     public static class ExtData {
         /**
-         * 年份
+         * 骞翠唤
          */
         private Integer year;
 
         /**
-         * 数据目录
+         * 鏁版嵁鐩綍
          */
         private String dataPath;
 

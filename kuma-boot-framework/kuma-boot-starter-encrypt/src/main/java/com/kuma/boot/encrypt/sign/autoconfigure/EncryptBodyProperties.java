@@ -3,9 +3,7 @@ package com.kuma.boot.encrypt.sign.autoconfigure;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.sign.encrypt.body"
 )

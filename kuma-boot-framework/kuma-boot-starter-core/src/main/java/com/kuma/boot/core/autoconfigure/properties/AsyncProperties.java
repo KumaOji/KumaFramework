@@ -25,73 +25,72 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @version 2021.9
  * @since 2021-09-02 20:44:31
  */
-//@RefreshScope
-@ConfigurationProperties(prefix = AsyncProperties.PREFIX)
+//@ConfigurationProperties(prefix = AsyncProperties.PREFIX)
 public class AsyncProperties {
 
     public static final String PREFIX = "kuma.boot.core.async";
 
     private boolean virtualThreads;
 
-    /** 异步核心线程数，默认：10 */
+    /** 寮傛鏍稿績绾跨▼鏁帮紝榛樿锛?0 */
     private int corePoolSize = 10;
 
-    /** 异步最大线程数，默认：50 */
+    /** 寮傛鏈€澶х嚎绋嬫暟锛岄粯璁わ細50 */
     private int maxPoolSiz = 50;
 
-    /** 队列容量，默认：10000 */
+    /** 闃熷垪瀹归噺锛岄粯璁わ細10000 */
     private int queueCapacity = 10000;
 
-    /** 线程存活时间，默认：300 */
+    /** 绾跨▼瀛樻椿鏃堕棿锛岄粯璁わ細300 */
     private int keepAliveSeconds = 300;
 
     /**
-     * 是否允许核心线程超时
+     * 鏄惁鍏佽鏍稿績绾跨▼瓒呮椂
      *
-     * <p>默认：false
+     * <p>榛樿锛歠alse
      */
     private boolean allowCoreThreadTimeOut = false;
 
     /**
-     * 应用关闭时-是否等待未完成任务继续执行，再继续销毁其他的Bean
+     * 搴旂敤鍏抽棴鏃?鏄惁绛夊緟鏈畬鎴愪换鍔＄户缁墽琛岋紝鍐嶇户缁攢姣佸叾浠栫殑Bean
      *
-     * <p>默认：true
+     * <p>榛樿锛歵rue
      */
     private boolean waitForTasksToCompleteOnShutdown = true;
 
     /**
-     * 依赖 {@linkplain #waitForTasksToCompleteOnShutdown} 为true
+     * 渚濊禆 {@linkplain #waitForTasksToCompleteOnShutdown} 涓簍rue
      *
-     * <p>应用关闭时-继续等待时间（单位：秒）
+     * <p>搴旂敤鍏抽棴鏃?缁х画绛夊緟鏃堕棿锛堝崟浣嶏細绉掞級
      *
-     * <p>如果超过这个时间还没有销毁就强制销毁，以确保应用最后能够被关闭，而不是阻塞住
+     * <p>濡傛灉瓒呰繃杩欎釜鏃堕棿杩樻病鏈夐攢姣佸氨寮哄埗閿€姣侊紝浠ョ‘淇濆簲鐢ㄦ渶鍚庤兘澶熻鍏抽棴锛岃€屼笉鏄樆濉炰綇
      *
-     * <p>默认：5
+     * <p>榛樿锛?
      */
     private Integer awaitTerminationSeconds = 5;
 
-    /** 线程池前缀 */
+    /** 绾跨▼姹犲墠缂€ */
     private String threadNamePrefix = "kmc-async-executor";
 
     private boolean checkHealth = true;
 
     /**
-     * 是否开启 ServletAsyncContext
+     * 鏄惁寮€鍚?ServletAsyncContext
      *
-     * <p>用于阻塞父线程 Servlet 的关闭（调用 destroy() 方法），导致子线程获取的上下文为空 默认：false
+     * <p>鐢ㄤ簬闃诲鐖剁嚎绋?Servlet 鐨勫叧闂紙璋冪敤 destroy() 鏂规硶锛夛紝瀵艰嚧瀛愮嚎绋嬭幏鍙栫殑涓婁笅鏂囦负绌?榛樿锛歠alse
      */
     private boolean enableServletAsyncContext = false;
 
     /**
-     * ServletAsyncContext阻塞超时时长（单位：毫秒），异步上下文最长生命周期（最大阻塞父线程多久）
+     * ServletAsyncContext闃诲瓒呮椂鏃堕暱锛堝崟浣嶏細姣锛夛紝寮傛涓婁笅鏂囨渶闀跨敓鍛藉懆鏈燂紙鏈€澶ч樆濉炵埗绾跨▼澶氫箙锛?
      *
-     * <p>单个方法的阻塞超时时间需要更长时，可以使用 {@code
+     * <p>鍗曚釜鏂规硶鐨勯樆濉炶秴鏃舵椂闂撮渶瑕佹洿闀挎椂锛屽彲浠ヤ娇鐢?{@code
      * ServletUtils.getRequest().setAttribute(AsyncProperties.SERVLET_ASYNC_CONTEXT_TIMEOUT_MILLIS,
-     * 2000)}，为单个异步方法设置单独的超时时长。 默认：600
+     * 2000)}锛屼负鍗曚釜寮傛鏂规硶璁剧疆鍗曠嫭鐨勮秴鏃舵椂闀裤€?榛樿锛?00
      */
     private Long servletAsyncContextTimeoutMillis = 600L;
 
-    /** 是否开启异步 */
+    /** 鏄惁寮€鍚紓姝?*/
     private boolean enabled = true;
 
     public boolean isEnabled() {

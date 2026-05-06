@@ -17,7 +17,6 @@
 package com.kuma.boot.web.error;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.Map;
  * @version 2021.10
  * @since 2022-01-12 08:54:32
  */
-@RefreshScope
 @ConfigurationProperties(prefix = ErrorHandlingProperties.PREFIX)
 public class ErrorHandlingProperties {
 

@@ -17,39 +17,37 @@
 package com.kuma.boot.cache.jetcache.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * JetCache 配置属性。
+ * JetCache 閰嶇疆灞炴€с€?
  *
  * @author kuma
  * @since 2022-07-03
  */
-@RefreshScope
 @ConfigurationProperties(JetCacheProperties.PREFIX)
 public class JetCacheProperties {
 
     public static final String PREFIX = "kuma.boot.cache.jetcache";
 
-    /** 是否启用（默认开启） */
+    /** 鏄惁鍚敤锛堥粯璁ゅ紑鍚級 */
     private boolean enabled = true;
 
-    /** 敏感信息脱敏（默认开启） */
+    /** 鏁忔劅淇℃伅鑴辨晱锛堥粯璁ゅ紑鍚級 */
     private Boolean desensitization = true;
 
-    /** 应用退出时清理远程缓存（默认关闭） */
+    /** 搴旂敤閫€鍑烘椂娓呯悊杩滅▼缂撳瓨锛堥粯璁ゅ叧闂級 */
     private Boolean clearRemoteOnExit = false;
 
-    /** 是否允许缓存 null 值（默认允许） */
+    /** 鏄惁鍏佽缂撳瓨 null 鍊硷紙榛樿鍏佽锛?*/
     private Boolean allowNullValues = true;
 
-    /** cache name 中的分隔符，用于匹配 expires 配置 key（默认 {@code -}） */
+    /** cache name 涓殑鍒嗛殧绗︼紝鐢ㄤ簬鍖归厤 expires 閰嶇疆 key锛堥粯璁?{@code -}锛?*/
     private String separator = "-";
 
-    /** 按 cache name 配置的独立过期时间 */
+    /** 鎸?cache name 閰嶇疆鐨勭嫭绔嬭繃鏈熸椂闂?*/
     private Map<String, Expire> expires = new HashMap<>();
 
     public boolean isEnabled() {

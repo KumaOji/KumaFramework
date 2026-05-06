@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * MybatisPlusAutoFillProperties
@@ -32,7 +31,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-04 07:44:25
  */
-@RefreshScope
 @ConfigurationProperties(prefix = MybatisPlusInterceptorProperties.PREFIX)
 public class MybatisPlusInterceptorProperties {
 
@@ -48,47 +46,47 @@ public class MybatisPlusInterceptorProperties {
     private Boolean enabled = false;
 
     /**
-     * 分页插件
+     * 鍒嗛〉鎻掍欢
      */
     private Pagination pagination;
 
     /**
-     * 防全表更新与删除插件
+     * 闃插叏琛ㄦ洿鏂颁笌鍒犻櫎鎻掍欢
      */
     private BlockAttack blockAttack;
 
     /**
-     * 非法sql插件
+     * 闈炴硶sql鎻掍欢
      */
     private IllegalSql illegalSql;
 
     /**
-     * 乐观锁插件
+     * 涔愯閿佹彃浠?
      */
     private OptimisticLocker optimisticLocker;
 
     /**
-     * 数据权限插件
+     * 鏁版嵁鏉冮檺鎻掍欢
      */
     private DataScope dataScope;
 
     /**
-     * 多租户插件
+     * 澶氱鎴锋彃浠?
      */
     private MultiTenant multiTenant;
 
     /**
-     * 数据操作插件
+     * 鏁版嵁鎿嶄綔鎻掍欢
      */
     private DataOperate dataOperate;
 
     /**
-     * 数据变更插件
+     * 鏁版嵁鍙樻洿鎻掍欢
      */
     private DataChange dataChange;
 
     /**
-     * 慢查询插件
+     * 鎱㈡煡璇㈡彃浠?
      */
     private SlowQuery slowQuery;
 
@@ -104,27 +102,27 @@ public class MybatisPlusInterceptorProperties {
         private Boolean enabled = false;
 
         /**
-         * 溢出总页数后是否进行处理
+         * 婧㈠嚭鎬婚〉鏁板悗鏄惁杩涜澶勭悊
          */
         private boolean overflow = true;
 
         /**
-         * 单页分页条数限制
+         * 鍗曢〉鍒嗛〉鏉℃暟闄愬埗
          */
         protected Long maxLimit = 1000L;
 
         /**
-         * 数据库类型
+         * 鏁版嵁搴撶被鍨?
          */
         private DbType dbType = DbType.MYSQL;
 
         /**
-         * 方言实现类
+         * 鏂硅█瀹炵幇绫?
          */
         private IDialect dialect;
 
         /**
-         * 生成 countSql 优化掉 join
+         * 鐢熸垚 countSql 浼樺寲鎺?join
          */
         protected boolean optimizeJoin = true;
 
@@ -267,12 +265,12 @@ public class MybatisPlusInterceptorProperties {
     public static class MultiTenant {
 
         /**
-         * 是否开启多租户
+         * 鏄惁寮€鍚绉熸埛
          */
         private Boolean enabled = false;
 
         /**
-         * 需要排除的多租户的表
+         * 闇€瑕佹帓闄ょ殑澶氱鎴风殑琛?
          */
         private List<String> ignoreTables =
                 Arrays.asList(
@@ -286,29 +284,29 @@ public class MybatisPlusInterceptorProperties {
                         "tt_sys_attachment");
 
         /**
-         * 多租户字段名称
+         * 澶氱鎴峰瓧娈靛悕绉?
          */
         private String column = "tenant_id";
 
         /**
-         * 排除不进行租户隔离的sql 样例全路径：vip.mate.system.mapper.UserMapper.findList
+         * 鎺掗櫎涓嶈繘琛岀鎴烽殧绂荤殑sql 鏍蜂緥鍏ㄨ矾寰勶細vip.mate.system.mapper.UserMapper.findList
          */
         private List<String> ignoreSqls = new ArrayList<>();
 
         private MultiTenantType multiTenantType = MultiTenantType.COLUMN;
 
         /**
-         * SCHEMA 模式专用
+         * SCHEMA 妯″紡涓撶敤
          */
         private String owner = "";
 
         /**
-         * 当前服务的租户库前缀 仅SCHEMA模式使用
+         * 褰撳墠鏈嶅姟鐨勭鎴峰簱鍓嶇紑 浠匰CHEMA妯″紡浣跨敤
          */
         private String tenantDatabasePrefix = "lamp_base";
 
         /**
-         * SCHEMA 模式专用
+         * SCHEMA 妯″紡涓撶敤
          */
         private DbType dbType;
 
@@ -417,20 +415,20 @@ public class MybatisPlusInterceptorProperties {
         }
 
         /**
-         * 存储方式, 默认为打印
+         * 瀛樺偍鏂瑰紡, 榛樿涓烘墦鍗?
          */
         private StoreType[] types = new StoreType[]{StoreType.LOGGER};
 
         /**
-         * 存储类型
+         * 瀛樺偍绫诲瀷
          */
         public enum StoreType {
             /**
-             * 数据库
+             * 鏁版嵁搴?
              */
             REDIS,
             /**
-             * 打印
+             * 鎵撳嵃
              */
             LOGGER,
             /**
@@ -458,7 +456,7 @@ public class MybatisPlusInterceptorProperties {
     public static class SlowQuery {
 
         /**
-         * 是否开启慢查询监控
+         * 鏄惁寮€鍚參鏌ヨ鐩戞帶
          */
         private Boolean enabled = false;
 
@@ -471,7 +469,7 @@ public class MybatisPlusInterceptorProperties {
         }
 
         /**
-         * 最大阈值
+         * 鏈€澶ч槇鍊?
          */
         private Integer slowSqlThresholdMs = 6000;
 

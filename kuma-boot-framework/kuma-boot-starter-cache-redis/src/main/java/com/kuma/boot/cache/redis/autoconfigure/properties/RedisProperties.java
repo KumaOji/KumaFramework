@@ -17,7 +17,6 @@
 package com.kuma.boot.cache.redis.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * CustomCacheProperties
@@ -26,7 +25,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-07 21:15:21
  */
-@RefreshScope
 @ConfigurationProperties(prefix = RedisProperties.PREFIX)
 public class RedisProperties {
 

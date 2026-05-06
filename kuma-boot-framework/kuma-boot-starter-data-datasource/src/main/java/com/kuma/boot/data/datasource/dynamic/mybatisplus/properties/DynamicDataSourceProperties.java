@@ -17,7 +17,6 @@
 package com.kuma.boot.data.datasource.dynamic.mybatisplus.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * MybatisPlusAutoFillProperties
@@ -26,16 +25,15 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-04 07:44:25
  */
-@RefreshScope
 @ConfigurationProperties(prefix = DynamicDataSourceProperties.PREFIX)
 public class DynamicDataSourceProperties {
 
     public static final String PREFIX = "kuma.boot.data.datasource.dynamic";
 
-    /** 是否开启自动填充字段 */
+    /** 鏄惁寮€鍚嚜鍔ㄥ～鍏呭瓧娈?*/
     private Boolean enabled = false;
 
-    /** sql语句 */
+    /** sql璇彞 */
     private String queryDsSql = "select * from gen_datasource_conf where del_flag = 0";
 
     public String getQueryDsSql() {

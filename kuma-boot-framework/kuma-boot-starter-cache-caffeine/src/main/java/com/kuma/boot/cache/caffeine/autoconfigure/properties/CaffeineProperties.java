@@ -17,22 +17,20 @@
 package com.kuma.boot.cache.caffeine.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * CaffeineProperties 配置
+ * CaffeineProperties 閰嶇疆
  *
  * @author kuma
  * @version 2022.07
  * @since 2022-07-03 09:50:41
  */
-@RefreshScope
 @ConfigurationProperties(CaffeineProperties.PREFIX)
 public class CaffeineProperties {
 
     public static final String PREFIX = "kuma.boot.cache.caffeine";
 
-    /** 是否启用（默认开启） */
+    /** 鏄惁鍚敤锛堥粯璁ゅ紑鍚級 */
     private boolean enabled = true;
 
     public boolean isEnabled() {

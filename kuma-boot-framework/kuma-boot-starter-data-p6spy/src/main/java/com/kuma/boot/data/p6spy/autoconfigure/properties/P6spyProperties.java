@@ -2,11 +2,9 @@ package com.kuma.boot.data.p6spy.autoconfigure.properties;
 
 import cn.hutool.core.util.StrUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.data.p6spy"
 )

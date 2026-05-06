@@ -1,9 +1,7 @@
 package com.kuma.boot.oss.common.propeties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.oss"
 )

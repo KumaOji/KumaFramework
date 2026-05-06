@@ -3,10 +3,8 @@ package com.kuma.boot.logger.logging.config;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.util.ClassUtils;
 
-@RefreshScope
 @ConfigurationProperties("kuma.boot.logger.logging")
 public class LoggingProperties {
    public static final String PREFIX = "kuma.boot.logger.logging";

@@ -22,33 +22,31 @@ import java.util.Map;
 import me.zhyd.oauth.config.AuthConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * JustAuth自动装配配置类
+ * JustAuth鑷姩瑁呴厤閰嶇疆绫?
  *
  * @author yangkai.shen
  * @since Created in 2019-07-22 10:59
  */
-@RefreshScope
 @ConfigurationProperties(prefix = JustAuthProperties.PREFIX)
 public class JustAuthProperties {
 
     public static final String PREFIX = "kuma.boot.security.justauth";
 
-    /** 是否启用 JustAuth */
+    /** 鏄惁鍚敤 JustAuth */
     private boolean enabled;
 
-    /** JustAuth 默认配置 */
+    /** JustAuth 榛樿閰嶇疆 */
     private Map<String, AuthConfig> type = new HashMap<>();
 
-    /** http 相关的配置，可设置请求超时时间和代理配置 */
+    /** http 鐩稿叧鐨勯厤缃紝鍙缃姹傝秴鏃舵椂闂村拰浠ｇ悊閰嶇疆 */
     private JustAuthHttpConfig httpConfig;
 
-    /** JustAuth 自定义配置 */
+    /** JustAuth 鑷畾涔夐厤缃?*/
     @NestedConfigurationProperty private com.kuma.boot.security.justauth.autoconfigure.properties.ExtendProperties extend;
 
-    /** 缓存配置类 */
+    /** 缂撳瓨閰嶇疆绫?*/
     @NestedConfigurationProperty private com.kuma.boot.security.justauth.autoconfigure.properties.CacheProperties cache = new com.kuma.boot.security.justauth.autoconfigure.properties.CacheProperties();
 
     public boolean isEnabled() {

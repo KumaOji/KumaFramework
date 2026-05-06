@@ -17,7 +17,6 @@
 package com.kuma.boot.web.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * FilterProperties
@@ -26,16 +25,15 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-03 08:04:30
  */
-@RefreshScope
 @ConfigurationProperties(prefix = WebMvcInterceptorProperties.PREFIX)
 public class WebMvcInterceptorProperties {
 
     public static final String PREFIX = "kuma.boot.web.interceptor";
 
-    /** 开启负载均衡隔离规则 */
+    /** 寮€鍚礋杞藉潎琛￠殧绂昏鍒?*/
     private Boolean doubtApi = true;
 
-    /** 增长内存统计阈值，默认3M */
+    /** 澧為暱鍐呭瓨缁熻闃堝€硷紝榛樿3M */
     private int doubtApiThreshold = 3 * 1024 * 1024;
 
     private Boolean header = true;

@@ -18,7 +18,6 @@ package com.kuma.boot.lock.autoconfigure.properties;
 
 import com.kuma.boot.lock.enums.LockTypeEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
  * RedisLockProperties
@@ -27,7 +26,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
  * @version 2021.9
  * @since 2021-09-07 21:15:27
  */
-@RefreshScope
 @ConfigurationProperties(prefix = LockProperties.PREFIX)
 public class LockProperties {
 

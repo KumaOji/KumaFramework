@@ -18,16 +18,14 @@ package com.kuma.boot.web.laytpl.properties;
 
 import com.kuma.boot.common.utils.date.DateUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
 /**
- * LayTpl配置
+ * LayTpl閰嶇疆
  *
  * @author kuma
  * @version 2022.04
  * @since 2022-04-27 17:30:16
  */
-@RefreshScope
 @ConfigurationProperties(prefix = LayTplProperties.PREFIX)
 public class LayTplProperties {
 
@@ -35,31 +33,31 @@ public class LayTplProperties {
 
     private boolean enabled = false;
 
-    /** 模板分隔符开始，默认：{{ */
+    /** 妯℃澘鍒嗛殧绗﹀紑濮嬶紝榛樿锛歿{ */
     private String open = "{{";
 
-    /** 模板分隔符结束，默认：}} */
+    /** 妯℃澘鍒嗛殧绗︾粨鏉燂紝榛樿锛殅} */
     private String close = "}}";
 
-    /** 模板前缀，默认：classpath:templates/tpl/ */
+    /** 妯℃澘鍓嶇紑锛岄粯璁わ細classpath:templates/tpl/ */
     private String prefix = "classpath:templates/tpl/";
 
-    /** 缓存模板，默认：true */
+    /** 缂撳瓨妯℃澘锛岄粯璁わ細true */
     private boolean cache = true;
 
-    /** 数字格式化，默认：#.00 */
+    /** 鏁板瓧鏍煎紡鍖栵紝榛樿锛?.00 */
     private String numPattern = "#.00";
 
-    /** Date 日期格式化，默认："yyyy-MM-dd HH:mm:ss" */
+    /** Date 鏃ユ湡鏍煎紡鍖栵紝榛樿锛?yyyy-MM-dd HH:mm:ss" */
     private String datePattern = DateUtils.PATTERN_DATETIME;
 
-    /** java8 LocalTime时间格式化，默认："HH:mm:ss" */
+    /** java8 LocalTime鏃堕棿鏍煎紡鍖栵紝榛樿锛?HH:mm:ss" */
     private String localTimePattern = DateUtils.PATTERN_TIME;
 
-    /** java8 LocalDate日期格式化，默认："yyyy-MM-dd" */
+    /** java8 LocalDate鏃ユ湡鏍煎紡鍖栵紝榛樿锛?yyyy-MM-dd" */
     private String localDatePattern = DateUtils.PATTERN_DATE;
 
-    /** java8 LocalDateTime日期时间格式化，默认："yyyy-MM-dd HH:mm:ss" */
+    /** java8 LocalDateTime鏃ユ湡鏃堕棿鏍煎紡鍖栵紝榛樿锛?yyyy-MM-dd HH:mm:ss" */
     private String localDateTimePattern = DateUtils.PATTERN_DATETIME;
 
     public String getOpen() {

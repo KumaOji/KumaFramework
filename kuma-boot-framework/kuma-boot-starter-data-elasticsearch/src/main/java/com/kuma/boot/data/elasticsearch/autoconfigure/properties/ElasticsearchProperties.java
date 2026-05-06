@@ -1,9 +1,7 @@
 package com.kuma.boot.data.elasticsearch.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.data.elasticsearch"
 )

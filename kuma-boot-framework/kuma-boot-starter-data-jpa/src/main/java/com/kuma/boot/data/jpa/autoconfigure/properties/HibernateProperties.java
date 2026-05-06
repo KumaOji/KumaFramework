@@ -6,10 +6,8 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl;
 import org.hibernate.dialect.MySQLDialect;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.hibernate.SpringImplicitNamingStrategy;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.orm.jpa.vendor.Database;
 
-@RefreshScope
 @ConfigurationProperties(
    prefix = "kuma.boot.data.jpa"
 )
