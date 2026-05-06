@@ -23,7 +23,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * GraalVM Native Image：AOT 处理时 {@code @ConditionalOnMissingBean(ServletWebServerFactory)} 可能对「占位 Bean」
- * 误判为已存在，从而不注册本方法，运行时反而没有可用工厂。博客显式提供 Tomcat 工厂；
+ * 误判为已存在，从而不注册本方法，运行时反而没有可用工厂。通过组件扫描（非 {@code @Import}）注册本类；
+ * {@code @Import} 与组件扫描并存时 AOT 代码生成存在冲突，导致 Bean 定义丢失。
  * {@code TomcatServletWebServerAutoConfiguration} 在 {@link com.kuma.cloud.blog.BlogApplication} 上已排除，避免双注册。
  */
 @Configuration(proxyBeanMethods = false)
