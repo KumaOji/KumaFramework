@@ -25,6 +25,7 @@ import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
 import com.kuma.boot.security.spring.access.expression.AuthorizeExpressionHandler;
 import com.kuma.boot.security.spring.access.expression.RootObject;
 import com.kuma.cloud.blog.config.AdminPasswordInitRunner;
+import com.kuma.cloud.blog.config.BlogServletWebServerConfiguration;
 import com.kuma.cloud.blog.config.SecurityConfig;
 import com.kuma.cloud.blog.config.WebMvcConfig;
 import com.kuma.cloud.blog.domain.entity.Article;
@@ -62,6 +63,7 @@ import com.kuma.cloud.blog.service.TokenService;
 import com.kuma.cloud.blog.service.impl.TokenServiceImpl;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 
 /**
  * GraalVM / Spring AOT：博客领域模型、VO、安全组件与 {@link Authorize} 相关类型的反射 hints。
@@ -115,6 +117,7 @@ public class BlogRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                     SecurityConfig.class,
                     WebMvcConfig.class,
                     AdminPasswordInitRunner.class,
+                    BlogServletWebServerConfiguration.class,
                     TokenService.class,
                     TokenServiceImpl.class,
                 }) {
@@ -125,6 +128,15 @@ public class BlogRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                             INVOKE_DECLARED_CONSTRUCTORS,
                             ACCESS_DECLARED_FIELDS);
         }
+        hints.reflection()
+                .registerType(
+                        TomcatServletWebServerFactory.class,
+                        INVOKE_PUBLIC_METHODS,
+                        INVOKE_DECLARED_CONSTRUCTORS,
+                        ACCESS_DECLARED_FIELDS);
+
+        hints.resources().registerPattern("banner/kmc-banner.txt");
+        hints.resources().registerPattern("**/banner/kmc-banner.txt");
 
         hints.resources().registerPattern("sql/*.sql");
         hints.resources().registerPattern("mapper/*.xml");

@@ -20,19 +20,25 @@ import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
 import com.kuma.boot.core.startup.StartupSpringApplication;
 import com.kuma.boot.web.annotation.KumaBootApplication;
 import com.kuma.cloud.blog.aot.BlogRuntimeHintsRegistrar;
+import com.kuma.cloud.blog.config.BlogServletWebServerConfiguration;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
 @KumaBootApplication
 @KumaCloudApplication
+/** Native / AOT：显式导入 Servlet 容器工厂；仅靠组件扫描时 native 镜像里可能缺少 ServletWebServerFactory Bean。 */
+@Import(BlogServletWebServerConfiguration.class)
 @ImportRuntimeHints(BlogRuntimeHintsRegistrar.class)
 @MapperScan("com.kuma.cloud.blog.mapper")
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.blog"})
-@EnableAutoConfiguration(exclude = DruidDataSourceAutoConfigure.class)
+@EnableAutoConfiguration(
+        exclude = {DruidDataSourceAutoConfigure.class, TomcatServletWebServerAutoConfiguration.class})
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.blog"})
 public class BlogApplication {
 

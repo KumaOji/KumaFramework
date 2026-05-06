@@ -36,6 +36,9 @@ public class KmcRuntimeHints implements RuntimeHintsRegistrar {
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        // Native Image：StartupSpringApplication#setKmcBanner 使用 ResourceBanner 加载该文件；未注册则从镜像中缺失，回退为默认 Spring Boot ASCII banner
+        hints.resources().registerPattern("banner/kmc-banner.txt");
+
         hints.reflection()
                 .registerType(
                         CoreProperties.class,

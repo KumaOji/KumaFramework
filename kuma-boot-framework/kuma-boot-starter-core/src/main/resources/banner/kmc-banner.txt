@@ -11,11 +11,11 @@ ${AnsiColor.MAGENTA}  ::  Spring Boot                       ::  ${spring-boot.ve
 ${AnsiColor.BLUE}  ::  Spring Cloud                      ::  ${spring-cloud.version}
 ${AnsiColor.YELLOW}  ::  SC Dependencies                   ::  ${spring-cloud-dependencies.version}
 ${AnsiColor.GREEN}  ::  SC Alibaba                        ::  ${spring-cloud-alibaba.version}
-${AnsiColor.BRIGHT_CYAN}  ─────────────────────── Author ────────────────────────
+${AnsiColor.BRIGHT_CYAN}  ------------------------- Author -------------------------
 ${AnsiColor.RED}  ::  Author                            ::  ${kmc.author}
 ${AnsiColor.CYAN}  ::  GitHub                            ::  ${kmc.author.github}
 ${AnsiColor.MAGENTA}  ::  Gitee                             ::  ${kmc.author.gitee}
 ${AnsiColor.BLUE}  ::  CSDN                              ::  ${kmc.author.csdn}
 ${AnsiColor.YELLOW}  ::  Juejin                            ::  ${kmc.author.juejin}
-${AnsiColor.BRIGHT_CYAN}  ───────────────────── Application ─────────────────────
+${AnsiColor.BRIGHT_CYAN}  ----------------------- Application ----------------------
 ${AnsiColor.RED}  ::  ${spring.application.name} Starting ...${AnsiColor.DEFAULT}

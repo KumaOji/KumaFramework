@@ -24,6 +24,7 @@ import com.kuma.boot.core.version.SpringCloudDependenciesVersion;
 import com.kuma.boot.core.version.SpringCloudVersion;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.GenericTypeResolver;
@@ -129,6 +130,7 @@ public class StartupSpringApplication extends SpringApplication {
 
     private static void setVersionSystemProperties() {
         putIfNotEmpty("spring.version", SpringVersion.getVersion());
+        putIfNotEmpty("spring-boot.version", SpringBootVersion.getVersion());
         putIfNotEmpty("kmc-boot.version", KmcVersion.getVersion());
         putIfNotEmpty("spring-cloud.version", SpringCloudVersion.getVersion());
         putIfNotEmpty("spring-cloud-dependencies.version", SpringCloudDependenciesVersion.getVersion());

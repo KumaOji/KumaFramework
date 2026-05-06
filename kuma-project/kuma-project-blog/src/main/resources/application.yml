@@ -3,6 +3,12 @@ spring:
     active: ${active}
   application:
     name: blog
+  # JVM 与 Native 均可用；与 StartupSpringApplication#setKmcBanner 互补，避免镜像内仅 System Property 未参与 Banner 解析
+  banner:
+    location: classpath:banner/kmc-banner.txt
+  main:
+    # Native Image：保证 AOT 与运行时均按 Servlet Web 应用处理，避免未注册 ServletWebServerFactory
+    web-application-type: servlet
   datasource:
     dynamic:
       primary: mysql
