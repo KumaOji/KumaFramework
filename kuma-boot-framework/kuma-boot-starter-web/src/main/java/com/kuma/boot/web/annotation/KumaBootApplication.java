@@ -22,6 +22,7 @@ import com.kuma.boot.security.spring.annotation.EnableOauth2ResourceServer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
@@ -41,4 +42,13 @@ import java.lang.annotation.*;
 @EnableOauth2ResourceServer
 //@EnableEncryptableProperties
 @SpringBootApplication
-public @interface KumaBootApplication {}
+public @interface KumaBootApplication {
+
+    /** Forwarded to {@link SpringBootApplication#exclude()} so exclusions apply reliably with AOT / native images. */
+    @AliasFor(annotation = SpringBootApplication.class)
+    Class<?>[] exclude() default {};
+
+    /** Forwarded to {@link SpringBootApplication#excludeName()}. */
+    @AliasFor(annotation = SpringBootApplication.class)
+    String[] excludeName() default {};
+}

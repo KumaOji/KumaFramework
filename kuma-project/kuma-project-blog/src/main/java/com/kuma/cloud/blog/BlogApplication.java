@@ -22,7 +22,6 @@ import com.kuma.boot.web.annotation.KumaBootApplication;
 import com.kuma.cloud.blog.aot.BlogRuntimeHintsRegistrar;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
 import org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -30,19 +29,18 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
 
-@KumaBootApplication
+@KumaBootApplication(
+        exclude = {
+            DruidDataSourceAutoConfigure.class,
+            TomcatServletWebServerAutoConfiguration.class,
+            // 排除 OAuth2 Client：与 @SpringBootApplication 的 exclude 必须经 KumaBootApplication @AliasFor 合并，单独的
+            // @EnableAutoConfiguration 不会替换元注解中的自动配置，Native 仍加载 Client 并在早期触发 MapperFactoryBean / Class<?> 错误
+            OAuth2ClientAutoConfiguration.class,
+        })
 @KumaCloudApplication
 @ImportRuntimeHints(BlogRuntimeHintsRegistrar.class)
 @MapperScan("com.kuma.cloud.blog.mapper")
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.blog"})
-@EnableAutoConfiguration(
-        exclude = {
-            DruidDataSourceAutoConfigure.class,
-            TomcatServletWebServerAutoConfiguration.class,
-            // 博客为本地 Token 认证，不使用 OAuth2 Client；Native/AOT 下 Client 配置会在早期触发
-            // getBeanNamesForType，连带对 MapperFactoryBean 做类型探测，导致 Mapper 构造参数被误解析为可注入的 Class<?>
-            OAuth2ClientAutoConfiguration.class,
-        })
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.blog"})
 public class BlogApplication {
 
