@@ -17,6 +17,10 @@ dependencyManagement {
 // (IndyInterface / invalidateSwitchPoints). Blog does not use kuma's Groovy script helpers — drop the jar for native builds.
 configurations.configureEach {
     exclude group: 'org.apache.groovy', module: 'groovy'
+    // 博客仅 JWT Resource Server。@EnableWebSecurity → OAuth2ImportSelector 若在 classpath 发现
+    // ClientRegistration 会无条件 @Import OAuth2ClientConfiguration → 早期 getBeanNamesForType
+    // 触发 MyBatis MapperFactoryBean(AOT) 误装配 Class<?>。移除 ClientRegistration 可避免该导入链路。
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-oauth2-client'
 }
 
 dependencies {

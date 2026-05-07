@@ -147,7 +147,7 @@ include "kuma-project"
 //for (name in projectBootSubModules) {
 //    include "kuma-project:kuma-project-${name}"
 //}
-def projectBootSubModules = ['project4', 'blog']
+def projectBootSubModules = ['project4', 'blog', 'graalvm-test']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }

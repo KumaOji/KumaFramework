@@ -1,0 +1,31 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = 'GraalVM-Test —— 最小应用，仅依赖 kuma-boot-starter-common 与 kuma-boot-starter-core，用于 Native Image 等验证'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+}
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(active: 'dev')
+    }
+}
+
+bootJar {
+    archiveBaseName = 'graalvm-test'
+}
+
+bootRun {
+    jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
+}

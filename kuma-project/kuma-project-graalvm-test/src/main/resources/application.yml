@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: kuma-cloud-graalvm-test
+  profiles:
+    active: @active@
+
+management:
+  endpoints:
+    enabled-by-default: false
