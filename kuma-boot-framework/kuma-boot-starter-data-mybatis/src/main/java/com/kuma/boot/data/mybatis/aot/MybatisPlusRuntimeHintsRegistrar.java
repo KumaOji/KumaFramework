@@ -35,6 +35,8 @@ import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.binding.MapperProxy;
 import org.apache.ibatis.binding.MapperProxyFactory;
 import org.apache.ibatis.binding.MapperRegistry;
+import org.apache.ibatis.logging.nologging.NoLoggingImpl;
+import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -57,6 +59,9 @@ public class MybatisPlusRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         register(reflection, MapperProxyFactory.class);
         register(reflection, MapperMethod.class);
         register(reflection, MapperRegistry.class);
+        // Native image：LogFactory 通过 Slf4jImpl(String) 探测日志实现，须注册构造函数反射
+        register(reflection, Slf4jImpl.class);
+        register(reflection, NoLoggingImpl.class);
         register(reflection, DefaultObjectFactory.class);
         register(reflection, DefaultObjectWrapperFactory.class);
         // MyBatis Javassist 帮助类在 ibatis 包内非 public，只能按名称注册 AOT hint

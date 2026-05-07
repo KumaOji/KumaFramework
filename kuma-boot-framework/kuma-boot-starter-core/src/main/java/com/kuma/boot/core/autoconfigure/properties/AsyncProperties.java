@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @version 2021.9
  * @since 2021-09-02 20:44:31
  */
-//@ConfigurationProperties(prefix = AsyncProperties.PREFIX)
+@ConfigurationProperties(prefix = AsyncProperties.PREFIX)
 public class AsyncProperties {
 
     public static final String PREFIX = "kuma.boot.core.async";

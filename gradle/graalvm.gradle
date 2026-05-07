@@ -17,6 +17,10 @@ graalvmNative {
 
             buildArgs.add('--initialize-at-run-time=io.netty.util.NetUtil')
 
+            // MyBatis LogFactory：build-time 探测 Slf4j/其他实现时静默失败会留下 logConstructor=null；ClassPathMapperScanner 的 static LOGGER 会触发 LogFactory，须一并推迟到运行时。
+            buildArgs.add('--initialize-at-run-time=org.apache.ibatis.logging.LogFactory')
+            buildArgs.add('--initialize-at-run-time=org.mybatis.spring.mapper.ClassPathMapperScanner')
+
             buildArgs.add('--initialize-at-build-time=org.springframework.util.unit.DataSize')
             // JetCache AbstractCacheAutoInit.<clinit> calls LoggerFactory early; SLF4J 2.x helpers default to run-time init
             // and must match heap snapshots — include org.slf4j.helpers (SubstituteServiceProvider, NOP_FallbackServiceProvider).
@@ -32,6 +36,9 @@ graalvmNative {
             buildArgs.add('--initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder')
             buildArgs.add('--initialize-at-build-time=ch.qos.logback.classic.spi.ThrowableProxy')
             buildArgs.add('--initialize-at-build-time=ch.qos.logback.core.CoreConstants')
+
+            // fastjson2：native-image 分析时 JSONWriterUTF16 等会把 JSONFactory.CacheItem 快照进 heap，须标为 build-time init
+            buildArgs.add('--initialize-at-build-time=com.alibaba.fastjson2')
 
             buildArgs.add('--allow-incomplete-classpath')
             buildArgs.add('-H:+ReportExceptionStackTraces')

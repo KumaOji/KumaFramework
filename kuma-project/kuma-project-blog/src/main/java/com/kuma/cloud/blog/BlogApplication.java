@@ -23,6 +23,7 @@ import com.kuma.cloud.blog.aot.BlogRuntimeHintsRegistrar;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
 import org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,7 +36,13 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 @MapperScan("com.kuma.cloud.blog.mapper")
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.blog"})
 @EnableAutoConfiguration(
-        exclude = {DruidDataSourceAutoConfigure.class, TomcatServletWebServerAutoConfiguration.class})
+        exclude = {
+            DruidDataSourceAutoConfigure.class,
+            TomcatServletWebServerAutoConfiguration.class,
+            // 博客为本地 Token 认证，不使用 OAuth2 Client；Native/AOT 下 Client 配置会在早期触发
+            // getBeanNamesForType，连带对 MapperFactoryBean 做类型探测，导致 Mapper 构造参数被误解析为可注入的 Class<?>
+            OAuth2ClientAutoConfiguration.class,
+        })
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.blog"})
 public class BlogApplication {
 

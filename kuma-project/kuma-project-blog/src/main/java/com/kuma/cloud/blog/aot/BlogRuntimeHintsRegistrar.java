@@ -136,7 +136,6 @@ public class BlogRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
                         ACCESS_DECLARED_FIELDS);
 
         hints.resources().registerPattern("banner/kmc-banner.txt");
-        hints.resources().registerPattern("**/banner/kmc-banner.txt");
 
         hints.resources().registerPattern("sql/*.sql");
         hints.resources().registerPattern("mapper/*.xml");
