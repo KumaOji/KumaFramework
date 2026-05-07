@@ -1,8 +1,27 @@
+# Banner：须与 core 一致 —— classpath:banner/kmc-banner.txt（StartupSpringApplication.DEFAULT_BANNER_LOCATION，
+# kuma-boot-starter-core 资源）。main 中使用 StartupSpringApplication#setKmcBanner() 会先写入同名 System 属性，
+# 此处再在 YAML 声明，便于 AOT/processAot 等非标准入口下 Environment 仍能加载 ResourceBanner。
 spring:
+  profiles:
+    active: ${active}
   application:
     name: kuma-cloud-graalvm-test
-  profiles:
-    active: @active@
+  banner:
+    location: classpath:banner/kmc-banner.txt
+  main:
+    web-application-type: servlet
+  cloud:
+    bootstrap:
+      enabled: false
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
 
 management:
   endpoints:

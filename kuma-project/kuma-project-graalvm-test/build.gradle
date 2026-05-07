@@ -1,9 +1,10 @@
 plugins {
     alias(projectLibs.plugins.springboot)
     alias(projectLibs.plugins.spring.dependency.management)
+    alias(projectLibs.plugins.graalvm.native)
 }
 
-description = 'GraalVM-Test —— 最小应用，仅依赖 kuma-boot-starter-common 与 kuma-boot-starter-core，用于 Native Image 等验证'
+description = 'GraalVM-Test —— Demo 应用：common/core + Web/Security/MyBatis/SpringDoc 等，用于 Native Image 验证'
 
 dependencyManagement {
     imports {
@@ -11,14 +12,46 @@ dependencyManagement {
     }
 }
 
+// Native：common 会拉 Groovy；Graal polyglot Substitution 会与 Groovy 4+ 冲突，与 blog 同样排除 polyglot/Groovy Jar
+configurations.configureEach {
+    exclude group: 'org.apache.groovy', module: 'groovy'
+}
+
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+
+    api projectLibs.hutool.core
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.doc.webmvc
+
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    runtimeOnly projectLibs.mysql
+}
+
+def gtMysqlUrl       = project.findProperty('mysql.url')                   ?: ''
+def gtMysqlUsername  = project.findProperty('mysql.username')              ?: ''
+def gtMysqlPassword  = project.findProperty('mysql.password')              ?: ''
+
+tasks.named('processAot') {
+    jvmArgs '-Dspring.cloud.bootstrap.enabled=false'
 }
 
 processResources {
     filesMatching('**/application.yml') {
-        expand(active: 'dev')
+        expand(
+                active           : 'dev',
+                mysql_url        : gtMysqlUrl,
+                mysql_username   : gtMysqlUsername,
+                mysql_password   : gtMysqlPassword
+        )
     }
 }
 
@@ -28,4 +61,15 @@ bootJar {
 
 bootRun {
     jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
+}
+
+// GraalVM Native Image：需 GraalVM JDK，`JAVA_HOME` 指向 Graal JDK；共用 gradle/graalvm.gradle
+// Windows 产出：kuma-project/kuma-project-graalvm-test/build/native/nativeCompile/graalvm-test.exe
+apply from: rootProject.file('gradle/graalvm.gradle')
+graalvmNative {
+    binaries {
+        main {
+            imageName.set('graalvm-test')
+        }
+    }
 }

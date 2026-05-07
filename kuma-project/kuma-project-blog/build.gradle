@@ -40,7 +40,6 @@ dependencies {
         // spring.cloud.bootstrap.enabled=false. Without this, AOT only captures Bootstrap beans.
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-bootstrap'
     }
-    api project(':kuma-boot-framework:kuma-boot-starter-frp')
 
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web

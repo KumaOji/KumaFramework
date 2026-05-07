@@ -1,0 +1,87 @@
+# ------------------------------------------------------------------------------
+# Banner（必须使用 core 约定路径，与 StartupSpringApplication#setKmcBanner / DEFAULT_BANNER_LOCATION 对齐）
+#
+# • 控制台 KMC Banner 由 com.kuma.boot.core.startup.StartupSpringApplication#setKmcBanner() 写入
+#   System.setProperty("spring.banner.location", "classpath:banner/kmc-banner.txt")；
+# • 内容由 kuma-boot-starter-core 的 banner/kmc-banner.txt 提供（含框架版本占位符）。
+# • 若在 YAML 省略 spring.banner.location，仅依赖 JVM 默认值时仍可工作；显式写明与 Blog 一致，避免误以为可改自定义文件。
+#
+# ⚠ Do not change to another classpath/resource — you will lose KMC version / URL placeholders resolution.
+# ------------------------------------------------------------------------------
+server:
+  port: 9080
+  servlet:
+    context-path: /api
+
+spring:
+  banner:
+    location: classpath:banner/kmc-banner.txt
+  main:
+    lazy-initialization: true
+    log-startup-info: false
+  autoconfigure:
+    exclude:
+      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+  datasource:
+    dynamic:
+      datasource:
+        mysql:
+          hikari:
+            minimum-idle: 1
+            maximum-pool-size: 10
+            connection-timeout: 10000
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
+    com.kuma.boot: INFO
+    com.kuma.cloud.graalvmtest: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
+
+mybatis-plus:
+  global-config:
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+knife4j:
+  enable: false
+
+kuma:
+  boot:
+    core:
+      enabled: true
+      async:
+        enabled: true
+        core-pool-size: 2
+        max-pool-size: 10
+        thread-name-prefix: graalvm-test-async
+    data:
+      datasource:
+        enabled: true
+      mybatis:
+        mybatis-plus:
+          enabled: true
+          interceptor:
+            enabled: true
+            pagination:
+              enabled: true
+    springdoc:
+      enabled: true
+      type: SERVICE
+      title: GraalVM-Test API
+      description: GraalVM-Test 集成验证（Web / MyBatis / SpringDoc）
+      version: 1.0.0
+      packages-to-scan:
+        - com.kuma.cloud.graalvmtest
