@@ -115,6 +115,9 @@ kuma:
       datasource:
         enabled: true
       mybatis:
+        # Native 演示默认关闭延时消息（与 AppAuditCallback 等条件装配一致，减少无关 Bean 与 Mapper 代理面）
+        delay:
+          enabled: false
         mybatis-plus:
           enabled: true
           interceptor:

@@ -3,6 +3,7 @@ package com.kuma.boot.idgenerator.autoconfigure;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.idgenerator.autoconfigure.properties.IdGeneratorProperties;
+import com.kuma.boot.idgenerator.uid.config.UidGenProperties;
 import com.kuma.boot.idgenerator.generator.RedisIdGenerator;
 import com.kuma.boot.idgenerator.generator.RedisLockIdGenerator;
 import com.kuma.boot.idgenerator.generator.ZookeeperIdGenerator;
@@ -24,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
    havingValue = "true",
    matchIfMissing = true
 )
-@EnableConfigurationProperties({IdGeneratorProperties.class})
+@EnableConfigurationProperties({IdGeneratorProperties.class, UidGenProperties.class})
 public class IdGeneratorAutoConfiguration implements InitializingBean {
    public IdGeneratorAutoConfiguration() {
    }

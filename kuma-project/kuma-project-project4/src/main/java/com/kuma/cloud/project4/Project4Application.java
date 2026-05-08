@@ -18,22 +18,25 @@ package com.kuma.cloud.project4;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
+import com.kuma.boot.data.mybatis.autoconfigure.KumaFrameworkMapperScanConfiguration;
 import com.kuma.boot.web.annotation.KumaBootApplication;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.ComponentScan;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 
 /**
  * Project4 启动类
- * <p>Mapper 扫描：显式 {@link MapperScan}，兼容 Spring AOT / GraalVM Native（框架 starter 仅扫描
- * {@code com.kuma.boot} 下 mapper 包）。</p>
+ * <p>业务 Mapper 使用 {@link MapperScan}；框架内置 mapper 在主类上使用 {@link Import} 拉起
+ * {@link KumaFrameworkMapperScanConfiguration}，供 Spring AOT / GraalVM Native 使用。
  *
  * @author kuma
  */
+@Import(KumaFrameworkMapperScanConfiguration.class)
 @KumaBootApplication
 @KumaCloudApplication
 @MapperScan("com.kuma.cloud.project4.mapper")

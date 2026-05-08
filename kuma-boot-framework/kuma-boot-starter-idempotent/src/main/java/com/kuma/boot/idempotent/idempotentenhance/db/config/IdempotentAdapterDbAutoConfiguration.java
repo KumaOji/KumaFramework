@@ -30,9 +30,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * MySQL 幂等仓储装配；{@code BusinessIdempotentMapper} 的扫描由 {@code kuma-boot-starter-data-mybatis} 的
- * {@code MybatisPlusAutoConfiguration}（{@code @MapperScan}）统一声明，避免 Native/AOT 下单独在此类上
- * {@code @MapperScan} 导致装配失败。
+ * MySQL 幂等仓储装配；框架 Mapper 由 {@code KumaFrameworkMapperScanConfiguration} 经主类 {@code @Import} 扫描；
+ * 勿在此类上使用 {@code @MapperScan}，以免 Native/AOT 下装配异常。
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(name = "org.apache.ibatis.session.SqlSessionFactory")

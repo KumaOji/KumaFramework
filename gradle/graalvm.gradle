@@ -20,6 +20,9 @@ graalvmNative {
             // MyBatis LogFactory：build-time 探测 Slf4j/其他实现时静默失败会留下 logConstructor=null；ClassPathMapperScanner 的 static LOGGER 会触发 LogFactory，须一并推迟到运行时。
             buildArgs.add('--initialize-at-run-time=org.apache.ibatis.logging.LogFactory')
             buildArgs.add('--initialize-at-run-time=org.mybatis.spring.mapper.ClassPathMapperScanner')
+            buildArgs.add('--initialize-at-run-time=org.mybatis.spring.mapper.MapperScannerConfigurer')
+            buildArgs.add('--initialize-at-run-time=org.mybatis.logging.LoggerFactory')
+            buildArgs.add('--initialize-at-run-time=org.apache.ibatis.logging.slf4j.Slf4jImpl')
 
             buildArgs.add('--initialize-at-build-time=org.springframework.util.unit.DataSize')
             // JetCache AbstractCacheAutoInit.<clinit> calls LoggerFactory early; SLF4J 2.x helpers default to run-time init

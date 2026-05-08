@@ -29,6 +29,10 @@ import java.lang.annotation.*;
 /**
  * KumaBootApplication
  *
+ * <p>Spring AOT / GraalVM Native：组合注解上的 {@code @Import}（含 Mapper 扫描配置）可能不参与主类的
+ * {@code processAot} 导入解析；使用 MyBatis 的应用请在具体主启动类上声明
+ * {@code @Import(com.kuma.boot.data.mybatis.autoconfigure.KumaFrameworkMapperScanConfiguration.class)}。
+ *
  * @author kuma
  * @version 2021.9
  * @since 2021-09-02 21:02:52

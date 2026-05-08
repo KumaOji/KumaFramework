@@ -48,15 +48,20 @@ import org.springframework.aot.hint.TypeReference;
 /**
  * GraalVM Native Image hints for MyBatis / MyBatis-Plus integration.
  *
- * <p>Framework mapper 包由 {@link com.kuma.boot.data.mybatis.autoconfigure.MybatisPlusAutoConfiguration}
- * 的 {@code @MapperScan} 在 AOT 编译期解析；应用业务 Mapper 仍须在启动类上对 {@code com.kuma.cloud.*.mapper}
- * 等包显式 {@code @MapperScan}。
+ * <p>Framework mapper 包由 {@link KumaFrameworkMapperScanConfiguration}（主类的 {@code @Import}）在 AOT 编译期解析；
+ * 应用业务 Mapper 仍须在启动类上对 {@code com.kuma.cloud.*.mapper} 等包显式 {@code @MapperScan}。
  */
 public class MybatisPlusRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
 
     /** 与 starter 无编译依赖，按 FQCN 注册（Native 下 Mapper 接口方法需可代理） */
     private static final TypeReference BUSINESS_IDEMPOTENT_MAPPER =
             TypeReference.of("com.kuma.boot.idempotent.idempotentenhance.db.mapper.BusinessIdempotentMapper");
+    /** 分布式 UID（旧版 uid 路径）dao，与 starter 无编译耦合 */
+    private static final TypeReference WORKER_NODE_DAO =
+            TypeReference.of("com.kuma.boot.idgenerator.uid.worker.dao.WorkerNodeDAO");
+    /** 延时消息 Mapper，与 starter 同模块但按 FQCN 注册以便与条件装配说明一致 */
+    private static final TypeReference APP_DELAY_MESSAGE_MAPPER =
+            TypeReference.of("com.kuma.boot.data.mybatis.delay.AppDelayMessageMapper");
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
@@ -89,6 +94,8 @@ public class MybatisPlusRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         register(reflection, MybatisEnumTypeHandler.class);
 
         reflection.registerType(BUSINESS_IDEMPOTENT_MAPPER, INVOKE_PUBLIC_METHODS, INVOKE_DECLARED_CONSTRUCTORS);
+        reflection.registerType(WORKER_NODE_DAO, INVOKE_PUBLIC_METHODS, INVOKE_DECLARED_CONSTRUCTORS);
+        reflection.registerType(APP_DELAY_MESSAGE_MAPPER, INVOKE_PUBLIC_METHODS, INVOKE_DECLARED_CONSTRUCTORS);
 
         hints.resources().registerPattern("mapper/*.xml");
         hints.resources().registerPattern("mapper/**/*.xml");

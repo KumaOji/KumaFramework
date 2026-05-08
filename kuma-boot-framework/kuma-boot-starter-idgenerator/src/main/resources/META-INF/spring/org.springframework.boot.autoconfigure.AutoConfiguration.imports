@@ -1,0 +1,2 @@
+com.kuma.boot.idgenerator.autoconfigure.IdGeneratorAutoConfiguration
+com.kuma.boot.idgenerator.autoconfigure.IdGeneratorDatabaseAutoConfiguration

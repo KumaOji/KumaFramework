@@ -18,6 +18,7 @@ package com.kuma.cloud.blog;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
+import com.kuma.boot.data.mybatis.autoconfigure.KumaFrameworkMapperScanConfiguration;
 import com.kuma.boot.web.annotation.KumaBootApplication;
 import com.kuma.cloud.blog.aot.BlogRuntimeHintsRegistrar;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
@@ -27,9 +28,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
 
+@Import(KumaFrameworkMapperScanConfiguration.class)
 @KumaBootApplication(
         exclude = {DruidDataSourceAutoConfigure.class, TomcatServletWebServerAutoConfiguration.class})
 @KumaCloudApplication

@@ -19,8 +19,14 @@ package com.kuma.boot.data.mybatis.delay;
 import com.alibaba.fastjson2.JSON;
 import com.kuma.boot.common.utils.log.LogUtils;
 import cn.hutool.core.util.StrUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /** 超时处理 */
+@ConditionalOnProperty(
+        prefix = "kuma.boot.data.mybatis.delay",
+        name = "enabled",
+        havingValue = "true",
+        matchIfMissing = false)
 @Callback("AppAuditCallback")
 public class AppAuditCallback implements com.kuma.boot.data.mybatis.delay.TimeoutCallback {
 
