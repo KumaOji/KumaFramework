@@ -16,21 +16,20 @@
 
 package com.kuma.cloud.graalvmtest;
 
+import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
- * GraalVM-Test 入口。
- *
- * <p>KMC Banner：{@link StartupSpringApplication#setKmcBanner()} 与 core 中
- * {@link StartupSpringApplication#DEFAULT_BANNER_LOCATION}（classpath:banner/kmc-banner.txt）对齐；
- * {@code application.yml} / {@code application-dev.yml} 的 {@code spring.banner.location} 须保持一致。</p>
+ * GraalVM-Test 轻量入口（未引入 {@code kuma-boot-starter-web} / {@code kuma-boot-starter-security-spring}，
+ * 便于先验证 Native）；自动配置排除与 {@code application.yml} 中 {@code spring.autoconfigure.exclude} 对齐。
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {DruidDataSourceAutoConfigure.class})
+@ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.graalvmtest"})
 public class GraalVmTestApplication {
 
     public static void main(String[] args) {
-        // 与 BlogApplication 一致：在任何 Spring 初始化之前设置，避免 Bootstrap 父上下文优先于主上下文（AOT/Cloud 场景）
         System.setProperty("spring.cloud.bootstrap.enabled", "false");
         new StartupSpringApplication(GraalVmTestApplication.class)
                 .setKmcBanner()

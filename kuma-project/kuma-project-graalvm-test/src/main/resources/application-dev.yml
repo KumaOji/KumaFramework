@@ -21,6 +21,7 @@ spring:
     log-startup-info: false
   autoconfigure:
     exclude:
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
   datasource:
     dynamic:
@@ -67,6 +68,9 @@ kuma:
         core-pool-size: 2
         max-pool-size: 10
         thread-name-prefix: graalvm-test-async
+    cache:
+      redis:
+        enabled: true
     data:
       datasource:
         enabled: true

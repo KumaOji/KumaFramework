@@ -23,6 +23,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
 
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
@@ -36,9 +37,15 @@ dependencies {
     runtimeOnly projectLibs.mysql
 }
 
-def gtMysqlUrl       = project.findProperty('mysql.url')                   ?: ''
-def gtMysqlUsername  = project.findProperty('mysql.username')              ?: ''
-def gtMysqlPassword  = project.findProperty('mysql.password')              ?: ''
+def gtMysqlUrl                = project.findProperty('mysql.url')                   ?: ''
+def gtMysqlUsername           = project.findProperty('mysql.username')              ?: ''
+def gtMysqlPassword           = project.findProperty('mysql.password')              ?: ''
+def gtRedisHost               = project.findProperty('redis.host')                  ?: ''
+def gtRedisPort               = project.findProperty('redis.port')                  ?: ''
+def gtRedisDatabase           = project.findProperty('redis.database')              ?: ''
+def gtRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
+def gtRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
+def gtRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
 
 tasks.named('processAot') {
     jvmArgs '-Dspring.cloud.bootstrap.enabled=false'
@@ -47,10 +54,16 @@ tasks.named('processAot') {
 processResources {
     filesMatching('**/application.yml') {
         expand(
-                active           : 'dev',
-                mysql_url        : gtMysqlUrl,
-                mysql_username   : gtMysqlUsername,
-                mysql_password   : gtMysqlPassword
+                active                     : 'dev',
+                mysql_url                  : gtMysqlUrl,
+                mysql_username             : gtMysqlUsername,
+                mysql_password             : gtMysqlPassword,
+                redis_host                 : gtRedisHost,
+                redis_port                 : gtRedisPort,
+                redis_database             : gtRedisDatabase,
+                redis_jedis_pool_max_active: gtRedisJedisPoolMaxActive,
+                redis_jedis_pool_max_idle  : gtRedisJedisPoolMaxIdle,
+                redis_jedis_pool_min_idle  : gtRedisJedisPoolMinIdle
         )
     }
 }

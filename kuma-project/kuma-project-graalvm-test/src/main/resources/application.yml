@@ -13,6 +13,10 @@ spring:
   cloud:
     bootstrap:
       enabled: false
+  # 未引入 kuma-boot-starter-web 时保留默认嵌入式 Tomcat，此处仅排除 Druid（与 @SpringBootApplication 一致）
+  autoconfigure:
+    exclude:
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
   datasource:
     dynamic:
       primary: mysql
@@ -22,6 +26,16 @@ spring:
           username: ${mysql_username}
           password: ${mysql_password}
           driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${redis_host}
+      port: ${redis_port}
+      database: ${redis_database}
+      jedis:
+        pool:
+          max-active: ${redis_jedis_pool_max_active}
+          max-idle: ${redis_jedis_pool_max_idle}
+          min-idle: ${redis_jedis_pool_min_idle}
 
 management:
   endpoints:
