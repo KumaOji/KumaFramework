@@ -51,14 +51,24 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * MybatisPlusAutoConfiguration
  *
- * <p>应用侧 Mapper 包须通过 {@code @MapperScan} 在启动类上显式声明，以便 Spring AOT / GraalVM
- * Native 在编译期解析（本 starter 不再使用 {@code com.kuma.cloud.*} 等 classpath 通配符）。
+ * <p>本 starter 聚合框架内置 Mapper 包（含延时任务、幂等 DB 等），保证 Spring AOT / Graal Native 在编译期可解析，
+ * 且避免仅在组件扫描中出现的 {@code Configuration} + {@code @MapperScan} 导致 {@code MapperFactoryBean} 失效。
+ *
+ * <p>应用业务 Mapper（如 {@code com.kuma.cloud.*.mapper}）仍须在应用的 {@link org.springframework.boot.autoconfigure.SpringBootApplication}
+ * （或等价入口）上使用 {@code @MapperScan} 显式列出包名。
  *
  * @author kuma
  * @version 2021.9
  * @since 2021-09-04 07:40:02
  */
-@MapperScan(basePackages = {"com.kuma.boot.mybatis.mapper", "com.kuma.boot.data.mybatis.delay"})
+@MapperScan(
+        basePackages = {
+            "com.kuma.boot.mybatis.mapper",
+            "com.kuma.boot.data.mybatis.delay",
+            // Graal Native / Spring AOT：勿把 @MapperScan 放在仅组件扫描载入的 Configuration 上，否则 MapperFactoryBean
+            // 的 Class<?> 参数在镜像中装配失败（与 kuma-boot-starter-idempotent 同仓声明）
+            "com.kuma.boot.idempotent.idempotentenhance.db.mapper",
+        })
 @EnableTransactionManagement
 @ImportRuntimeHints(MybatisPlusRuntimeHintsRegistrar.class)
 @AutoConfiguration(after = {com.kuma.boot.data.mybatis.autoconfigure.MybatisPlusInterceptorAutoConfiguration.class})
