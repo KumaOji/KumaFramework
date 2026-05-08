@@ -11,9 +11,12 @@
 package com.kuma.cloud.graalvmtest.aot;
 
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
+import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
+import static org.springframework.aot.hint.MemberCategory.ACCESS_DECLARED_FIELDS;
 
 import org.apache.ibatis.logging.nologging.NoLoggingImpl;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
@@ -42,5 +45,11 @@ public class GraalVmRuntimeHintsRegistrar implements RuntimeHintsRegistrar {
         hints.reflection().registerType(NoLoggingImpl.class, INVOKE_DECLARED_CONSTRUCTORS);
         hints.reflection().registerType(JSR353_MODULE, INVOKE_DECLARED_CONSTRUCTORS);
         hints.reflection().registerType(JSON_P_PROVIDER_IMPL, INVOKE_DECLARED_CONSTRUCTORS);
+        hints.reflection()
+                .registerType(
+                        TomcatServletWebServerFactory.class,
+                        INVOKE_PUBLIC_METHODS,
+                        INVOKE_DECLARED_CONSTRUCTORS,
+                        ACCESS_DECLARED_FIELDS);
     }
 }

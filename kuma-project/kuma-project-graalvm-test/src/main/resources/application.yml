@@ -19,10 +19,11 @@ spring:
   cloud:
     bootstrap:
       enabled: false
-  # 排除 Druid（与 @SpringBootApplication 一致）；Tomcat Web 容器由 Spring Boot Starter Web 引入
+  # 排除 Druid、Tomcat 自动装配（嵌入式 Tomcat 由 GraalVmServletWebServerConfiguration 手动注册）；与 @KumaBootApplication 对齐
   autoconfigure:
     exclude:
       - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+      - org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration
   datasource:
     dynamic:
       primary: mysql

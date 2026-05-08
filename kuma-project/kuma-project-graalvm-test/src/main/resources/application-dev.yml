@@ -22,6 +22,7 @@ spring:
   autoconfigure:
     exclude:
       - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+      - org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
   datasource:
     dynamic:
@@ -70,6 +71,43 @@ kuma:
         core-pool-size: 2
         max-pool-size: 10
         thread-name-prefix: graalvm-test-async
+    frp:
+      enabled: false
+    web:
+      graceful-response:
+        print-exception-in-global-advice: true
+        origin-exception-using-detail-message: true
+        response-style: 0
+        exclude-packages:
+          - org.springdoc*
+        exclude-paths:
+          - /v3/api-docs/**
+          - /swagger-ui/**
+          - /doc.html
+      filter:
+        version: true
+        trace: true
+      request:
+        enabled: true
+        types:
+          - LOGGER
+      global-exception:
+        enabled: true
+    security:
+      oauth2:
+        endpoint:
+          uaa-service-uri: http://127.0.0.1:33336
+      ignore-url:
+        - /actuator/**
+        - /v3/api-docs/**
+        - /swagger-ui/**
+        - /swagger-ui.html
+        - /doc.html
+        - /webjars/**
+        - /auth/**
+        - /error
+      authentication:
+        expire: 86400
     cache:
       redis:
         enabled: true
