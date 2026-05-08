@@ -83,6 +83,10 @@ graalvmNative {
     binaries {
         main {
             imageName.set('graalvm-test')
+            // MyBatis Native：ClassPathMapperScanner 静态 LOGGER 早于完整 Slf4j 初始化时再碰到 LogFactory 会留下 logConstructor=null
+            buildArgs.add('--initialize-at-run-time=org.mybatis.spring.mapper.MapperScannerConfigurer')
+            buildArgs.add('--initialize-at-run-time=org.mybatis.logging.LoggerFactory')
+            buildArgs.add('--initialize-at-run-time=org.apache.ibatis.logging.slf4j.Slf4jImpl')
         }
     }
 }

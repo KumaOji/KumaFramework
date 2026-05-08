@@ -18,14 +18,17 @@ package com.kuma.cloud.graalvmtest;
 
 import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
+import com.kuma.cloud.graalvmtest.aot.GraalVmRuntimeHintsRegistrar;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.ImportRuntimeHints;
 
 /**
  * GraalVM-Test 轻量入口（未引入 {@code kuma-boot-starter-web} / {@code kuma-boot-starter-security-spring}，
  * 便于先验证 Native）；自动配置排除与 {@code application.yml} 中 {@code spring.autoconfigure.exclude} 对齐。
  */
 @SpringBootApplication(exclude = {DruidDataSourceAutoConfigure.class})
+@ImportRuntimeHints(GraalVmRuntimeHintsRegistrar.class)
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.graalvmtest"})
 public class GraalVmTestApplication {
 

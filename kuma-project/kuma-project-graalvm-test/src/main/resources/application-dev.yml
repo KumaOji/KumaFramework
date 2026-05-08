@@ -47,6 +47,8 @@ mybatis-plus:
     banner: false
   configuration:
     map-underscore-to-camel-case: true
+    # Native：显式适配器 + AOT RuntimeHints（Slf4jImpl 反射），避免 LogFactory.logConstructor 为 null
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 springdoc:
   api-docs:
