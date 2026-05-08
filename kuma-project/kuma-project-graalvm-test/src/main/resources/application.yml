@@ -10,10 +10,16 @@ spring:
     location: classpath:banner/kmc-banner.txt
   main:
     web-application-type: servlet
+  mvc:
+    # Native：FormContentFilter 会拉起 Jackson Module 扫描，误入 JSR353Module → Glassfish JsonProviderImpl
+    # 在 Substrate VM 中与 Class.newInstance() 链不兼容；本模块为 REST/JSON Demo，禁用表单 PUT/PATCH 模拟即可。
+    formcontent:
+      filter:
+        enabled: false
   cloud:
     bootstrap:
       enabled: false
-  # 未引入 kuma-boot-starter-web 时保留默认嵌入式 Tomcat，此处仅排除 Druid（与 @SpringBootApplication 一致）
+  # 排除 Druid（与 @SpringBootApplication 一致）；Tomcat Web 容器由 Spring Boot Starter Web 引入
   autoconfigure:
     exclude:
       - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure

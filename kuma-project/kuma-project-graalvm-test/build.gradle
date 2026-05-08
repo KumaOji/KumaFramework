@@ -90,3 +90,5 @@ graalvmNative {
         }
     }
 }
+
+// 若 nativeCompile 报无法删除 build/native/nativeCompile：先结束 graalvm-test.exe，再手动删掉该目录后重编

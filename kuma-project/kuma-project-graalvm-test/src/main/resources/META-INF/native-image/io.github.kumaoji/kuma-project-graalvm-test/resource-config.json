@@ -1,7 +1,9 @@
 {
   "resources": {
     "includes": [
-      { "pattern": "\\Qbanner/kmc-banner.txt\\E" }
+      { "pattern": "\\Qbanner/kmc-banner.txt\\E" },
+      { "pattern": "META-INF/services/javax.json.spi.JsonProvider" },
+      { "pattern": "META-INF/services/tools.jackson.databind.JacksonModule" }
     ]
   }
 }
