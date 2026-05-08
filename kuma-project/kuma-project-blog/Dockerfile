@@ -35,9 +35,6 @@ ENV SPRING_PROFILES_ACTIVE=prod
 
 EXPOSE 9000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-      CMD curl -sf http://localhost:9000/api/actuator/health || exit 1
-
 # shell form — allows $VAR substitution so env vars override baked-in yml values
 ENTRYPOINT java --enable-preview \
     -XX:+UseG1GC \
