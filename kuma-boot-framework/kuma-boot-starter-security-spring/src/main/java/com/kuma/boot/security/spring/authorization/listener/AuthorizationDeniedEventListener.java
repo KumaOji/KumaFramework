@@ -17,11 +17,19 @@
 package com.kuma.boot.security.spring.authorization.listener;
 
 import com.kuma.boot.common.utils.log.LogUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authorization.event.AuthorizationDeniedEvent;
 
 /**
  * 授权拒绝事件侦听器
+ *
+ * <p>区分两类拒绝来源：
+ * <ul>
+ *   <li><b>HTTP 过滤链</b>：未登录用户访问受保护路径，属预期行为，记 DEBUG</li>
+ *   <li><b>方法级安全</b>：{@code @Authorize}/{@code @PreAuthorize} 校验失败，记 WARN</li>
+ * </ul>
  *
  * @author kuma
  * @version 2023.07
@@ -31,6 +39,17 @@ public class AuthorizationDeniedEventListener {
 
     @EventListener(AuthorizationDeniedEvent.class)
     public void authorizationDeniedEvent(AuthorizationDeniedEvent<?> event) {
-        LogUtils.info("授权失败 authorizationDeniedEvent {}", event.getObject());
+        Object source = event.getObject();
+        if (source instanceof HttpServletRequest request) {
+            // 未认证用户访问受保护 URL，属正常现象，降为 DEBUG
+            LogUtils.debug("HTTP 访问被拒绝 [{} {}]", request.getMethod(), request.getRequestURI());
+        } else if (source instanceof MethodInvocation invocation) {
+            // @Authorize/@PreAuthorize 方法级校验失败，记录方法信息
+            LogUtils.warn("方法级授权拒绝 [{}.{}]",
+                    invocation.getMethod().getDeclaringClass().getSimpleName(),
+                    invocation.getMethod().getName());
+        } else {
+            LogUtils.warn("授权拒绝 authorizationDeniedEvent {}", source);
+        }
     }
 }

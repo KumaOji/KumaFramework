@@ -54,4 +54,22 @@ public final class BlogPermissions {
     public static final String TOOL_ALL = "tool:*";
     /** 使用工具接口（RePKG 文件提取等） */
     public static final String TOOL_USE = "tool:use";
+
+    // ── 项目模块 ──────────────────────────────────────────────────
+
+    /** 项目模块所有权限（用于管理员角色关联） */
+    public static final String PROJECT_ALL    = "project:*";
+    public static final String PROJECT_CREATE = "project:create";
+    public static final String PROJECT_UPDATE = "project:update";
+    public static final String PROJECT_DELETE = "project:delete";
+    public static final String PROJECT_READ   = "project:read";
+
+    // ── 留言板模块 ───────────────────────────────────────────────
+
+    /** 留言板模块所有权限（用于管理员角色关联） */
+    public static final String MESSAGE_ALL    = "message:*";
+    /** 审核留言（通过 / 驳回） */
+    public static final String MESSAGE_AUDIT  = "message:audit";
+    /** 删除留言 */
+    public static final String MESSAGE_DELETE = "message:delete";
 }

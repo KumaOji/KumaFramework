@@ -53,6 +53,9 @@ public class SecurityConfig {
                         .requestMatchers("/article/*").permitAll()
                         .requestMatchers("/music/*").permitAll()
                         .requestMatchers("/ready/list").permitAll()
+                        .requestMatchers("/project/list", "/project/*/view").permitAll()
+                        .requestMatchers("/project/*").permitAll()
+                        .requestMatchers("/message/list", "/message", "/message/*/like").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new JsonAuthenticationEntryPoint())

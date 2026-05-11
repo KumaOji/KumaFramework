@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kuma.cloud.blog.mapper.MessageMapper">
+
+    <update id="incrementLikeCount">
+        UPDATE message SET like_count = like_count + 1 WHERE id = #{id}
+    </update>
+
+    <select id="selectApprovedRepliesByParentIds" resultType="com.kuma.cloud.blog.domain.entity.Message">
+        SELECT * FROM message
+        WHERE status = 1
+          AND parent_id IN
+        <foreach item="pid" collection="parentIds" open="(" separator="," close=")">
+            #{pid}
+        </foreach>
+        ORDER BY create_time ASC
+    </select>
+
+</mapper>
