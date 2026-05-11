@@ -1,9 +1,9 @@
 # ============================================================
 # Blog Spring Boot — Production Image
-# Base: temurin:25 (本地自建 JDK 镜像，服务器执行一次构建后永久缓存)
+# Base: eclipse-temurin:25-jdk (本地自建 JDK 镜像，服务器执行一次构建后永久缓存)
 # Port: 9000
 # ============================================================
-FROM temurin:25
+FROM eclipse-temurin:25-jdk
 
 # ---- runtime directories ----
 RUN mkdir -p /app /data/music /data/blog/logs \
@@ -14,7 +14,7 @@ RUN mkdir -p /app /data/music /data/blog/logs \
 WORKDIR /app
 
 # ---- copy fat jar (place blog.jar next to Dockerfile before building) ----
-COPY blog-2026.04.jar app.jar
+COPY blog-2026.05.01.jar app.jar
 RUN chown blog:blog app.jar
 
 # ---- runtime user (non-root) ----
@@ -34,9 +34,6 @@ ENV SPRING_PROFILES_ACTIVE=prod
 # (REDIS_JEDIS_POOL_MAX_ACTIVE / MAX_IDLE / MIN_IDLE — optional, defaults to 8/8/0)
 
 EXPOSE 9000
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget -qO- http://localhost:9000/api/actuator/health || exit 1
 
 # shell form — allows $VAR substitution so env vars override baked-in yml values
 ENTRYPOINT java --enable-preview \
