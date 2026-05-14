@@ -72,4 +72,14 @@ public final class BlogPermissions {
     public static final String MESSAGE_AUDIT  = "message:audit";
     /** 删除留言 */
     public static final String MESSAGE_DELETE = "message:delete";
+
+    // ── 友链模块 ─────────────────────────────────────────────────
+
+    /** 友链模块所有权限（用于管理员角色关联） */
+    public static final String FRIEND_LINK_ALL    = "friend_link:*";
+    public static final String FRIEND_LINK_CREATE = "friend_link:create";
+    public static final String FRIEND_LINK_UPDATE = "friend_link:update";
+    public static final String FRIEND_LINK_DELETE = "friend_link:delete";
+    /** 审核友链申请（通过） */
+    public static final String FRIEND_LINK_AUDIT  = "friend_link:audit";
 }
