@@ -35,17 +35,5 @@ ENV SPRING_PROFILES_ACTIVE=prod
 
 EXPOSE 9000
 
-# shell form — allows $VAR substitution so env vars override baked-in yml values
-ENTRYPOINT java --enable-preview \
-    -XX:+UseG1GC \
-    -XX:MaxRAMPercentage=75.0 \
-    -Djava.security.egd=file:/dev/./urandom \
-    -Dfile.encoding=UTF-8 \
-    -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE \
-    -Dspring.datasource.dynamic.datasource.mysql.url="$MYSQL_URL" \
-    -Dspring.datasource.dynamic.datasource.mysql.username="$MYSQL_USERNAME" \
-    -Dspring.datasource.dynamic.datasource.mysql.password="$MYSQL_PASSWORD" \
-    -Dspring.data.redis.host="$REDIS_HOST" \
-    -Dspring.data.redis.port="$REDIS_PORT" \
-    -Dspring.data.redis.database="$REDIS_DATABASE" \
-    -jar app.jar
+# exec form: sh -c expands $VAR, exec replaces sh so Java receives OS signals directly
+ENTRYPOINT ["sh", "-c", "exec java --enable-preview -XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Dfile.encoding=UTF-8 \"-Dspring.profiles.active=$SPRING_PROFILES_ACTIVE\" \"-Dspring.datasource.dynamic.datasource.mysql.url=$MYSQL_URL\" \"-Dspring.datasource.dynamic.datasource.mysql.username=$MYSQL_USERNAME\" \"-Dspring.datasource.dynamic.datasource.mysql.password=$MYSQL_PASSWORD\" \"-Dspring.data.redis.host=$REDIS_HOST\" \"-Dspring.data.redis.port=$REDIS_PORT\" \"-Dspring.data.redis.database=$REDIS_DATABASE\" -jar app.jar"]

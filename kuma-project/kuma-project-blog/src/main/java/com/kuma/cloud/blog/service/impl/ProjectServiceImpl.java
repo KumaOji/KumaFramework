@@ -61,9 +61,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectVO getProjectById(Long id) {
         Project project = projectMapper.selectById(id);
         if (project == null) return null;
-        ProjectVO vo = new ProjectVO();
-        BeanUtils.copyProperties(project, vo);
-        return vo;
+        return toVO(project);
     }
 
     @Override
@@ -86,11 +84,7 @@ public class ProjectServiceImpl implements ProjectService {
         int size = pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 10;
 
         IPage<Project> page = projectMapper.selectPage(new Page<>(current, size), qw);
-        return page.convert(p -> {
-            ProjectVO vo = new ProjectVO();
-            BeanUtils.copyProperties(p, vo);
-            return vo;
-        });
+        return page.convert(this::toVO);
     }
 
     @Override
@@ -107,5 +101,17 @@ public class ProjectServiceImpl implements ProjectService {
         project.setIsFeatured(featured ? 1 : 0);
         project.setUpdateTime(LocalDateTime.now());
         return projectMapper.updateById(project) > 0;
+    }
+
+    private static final String[] CATEGORY_NAMES = {"个人项目", "工作项目", "开源项目", "学习项目"};
+
+    private ProjectVO toVO(Project project) {
+        ProjectVO vo = new ProjectVO();
+        BeanUtils.copyProperties(project, vo);
+        Integer cat = project.getCategory();
+        if (cat != null && cat >= 0 && cat < CATEGORY_NAMES.length) {
+            vo.setCategoryName(CATEGORY_NAMES[cat]);
+        }
+        return vo;
     }
 }

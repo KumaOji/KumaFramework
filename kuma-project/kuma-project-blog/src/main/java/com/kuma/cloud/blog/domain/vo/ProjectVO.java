@@ -20,6 +20,8 @@ public class ProjectVO implements Serializable {
     private String coverImage;
     private String techStack;
     private Integer category;
+    /** 0=个人项目 1=工作项目 2=开源项目 3=学习项目 */
+    private String categoryName;
     private Integer status;
     private LocalDate startDate;
     private LocalDate endDate;
