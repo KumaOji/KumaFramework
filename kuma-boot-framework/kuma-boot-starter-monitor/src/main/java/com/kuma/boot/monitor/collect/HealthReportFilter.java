@@ -1,8 +1,8 @@
 package com.kuma.boot.monitor.collect;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.ResponseUtils;
+import com.kuma.boot.core.utils.servlet.ResponseUtils;
 import com.kuma.boot.monitor.autoconfigure.properties.DumpProperties;
 import com.kuma.boot.monitor.model.Report;
 import jakarta.servlet.Filter;

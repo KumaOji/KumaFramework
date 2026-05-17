@@ -3,7 +3,7 @@ package com.kuma.boot.idgenerator.generator;
 import cn.hutool.core.util.StrUtil;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.support.thread.ThreadFactoryCreator;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.util.Objects;
 import java.util.concurrent.ScheduledThreadPoolExecutor;

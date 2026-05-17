@@ -1,6 +1,6 @@
 package com.kuma.boot.encrypt.crypto.ext.annotation;
 
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.encrypt.crypto.ext.CryptoStrategy;
 import org.slf4j.Logger;

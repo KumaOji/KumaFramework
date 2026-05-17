@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.annotation;
 
-import com.kuma.boot.common.utils.context.EnableContextUtils;
+import com.kuma.boot.core.utils.context.EnableContextUtils;
 import com.kuma.boot.security.spring.annotation.EnableOauth2ResourceServer;
 //import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

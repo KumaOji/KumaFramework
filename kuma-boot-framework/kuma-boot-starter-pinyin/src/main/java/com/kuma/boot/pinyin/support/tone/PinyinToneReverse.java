@@ -1,7 +1,7 @@
 package com.kuma.boot.pinyin.support.tone;
 
 import com.google.common.collect.Maps;
-import com.kuma.boot.common.utils.io.FileStreamUtils;
+import com.kuma.boot.core.utils.io.FileStreamUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.pinyin.spi.IPinyinToneReverse;
 import com.kuma.boot.pinyin.spi.IPinyinToneStyle;

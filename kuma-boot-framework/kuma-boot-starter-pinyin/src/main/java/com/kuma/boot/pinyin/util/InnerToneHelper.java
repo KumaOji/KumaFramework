@@ -1,6 +1,6 @@
 package com.kuma.boot.pinyin.util;
 
-import com.kuma.boot.common.utils.io.FileStreamUtils;
+import com.kuma.boot.core.utils.io.FileStreamUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.pinyin.model.CharToneInfo;
 import com.kuma.boot.pinyin.model.ToneItem;

@@ -17,7 +17,7 @@
 package com.kuma.cloud.cache.support.load;
 
 import static cn.hutool.core.util.ReflectUtil.invoke;
-import static com.kuma.boot.common.utils.io.PathUtils.readAllLines;
+import static com.kuma.boot.core.utils.io.PathUtils.readAllLines;
 
 import com.alibaba.fastjson2.JSON;
 import com.kuma.cloud.cache.annotation.CacheInterceptor;

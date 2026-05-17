@@ -18,7 +18,7 @@ package com.kuma.cloud.stream.consumer.trigger;
 
 import cn.hutool.json.JSONUtil;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.cloud.stream.framework.trigger.model.TimeTriggerMsg;
 import com.kuma.cloud.stream.framework.trigger.util.DelayQueueTools;

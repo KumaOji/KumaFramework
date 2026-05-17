@@ -1,10 +1,10 @@
 package com.kuma.boot.monitor.warn;
 
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.monitor.Monitor;
 import com.kuma.boot.monitor.autoconfigure.properties.WarnProperties;
 import com.kuma.boot.monitor.enums.WarnTypeEnum;

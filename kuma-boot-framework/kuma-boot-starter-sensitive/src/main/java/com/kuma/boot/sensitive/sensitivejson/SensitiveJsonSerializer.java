@@ -1,6 +1,6 @@
 package com.kuma.boot.sensitive.sensitivejson;
 
-import com.kuma.boot.common.utils.bean.BeanUtils;
+import com.kuma.boot.core.utils.bean.BeanUtils;
 import java.util.Objects;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;

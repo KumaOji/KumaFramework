@@ -18,7 +18,7 @@ package com.kuma.boot.ratelimit.ratelimitredis;
 
 import com.kuma.boot.common.model.CharPool;
 import com.kuma.boot.common.utils.lang.StringUtils;
-import com.kuma.boot.common.utils.spel.ExpressionEvaluator;
+import com.kuma.boot.core.utils.spel.ExpressionEvaluator;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

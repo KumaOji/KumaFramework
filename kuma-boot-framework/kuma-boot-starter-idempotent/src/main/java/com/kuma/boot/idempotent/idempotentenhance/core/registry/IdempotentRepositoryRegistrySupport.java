@@ -16,7 +16,7 @@
 
 package com.kuma.boot.idempotent.idempotentenhance.core.registry;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.idempotent.idempotentenhance.core.config.properties.IdempotentCoreProperties;
 import com.kuma.boot.idempotent.idempotentenhance.core.exception.IdempotentException;

@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.mvc.interceptor;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.core.support.Collector;
 import com.kuma.boot.web.autoconfigure.properties.WebMvcInterceptorProperties;
 import jakarta.servlet.http.HttpServletRequest;

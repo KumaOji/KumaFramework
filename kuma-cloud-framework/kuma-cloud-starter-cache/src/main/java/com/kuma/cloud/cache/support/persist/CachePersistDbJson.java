@@ -16,9 +16,9 @@
 
 package com.kuma.cloud.cache.support.persist;
 
-import static com.kuma.boot.common.utils.io.FileUtils.createFile;
-import static com.kuma.boot.common.utils.io.FileUtils.truncate;
-import static com.kuma.boot.common.utils.io.FileUtils.write;
+import static com.kuma.boot.core.utils.io.FileUtils.createFile;
+import static com.kuma.boot.core.utils.io.FileUtils.truncate;
+import static com.kuma.boot.core.utils.io.FileUtils.write;
 
 import com.alibaba.fastjson2.JSON;
 import com.kuma.cloud.cache.api.Cache;

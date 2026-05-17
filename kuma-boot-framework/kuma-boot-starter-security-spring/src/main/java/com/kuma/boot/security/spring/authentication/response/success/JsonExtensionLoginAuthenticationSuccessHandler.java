@@ -16,7 +16,7 @@
 
 package com.kuma.boot.security.spring.authentication.response.success;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.security.spring.oauth2.token.JwtTokenGenerator;
 import com.kuma.boot.security.spring.oauth2.token.OAuth2AccessTokenStore;

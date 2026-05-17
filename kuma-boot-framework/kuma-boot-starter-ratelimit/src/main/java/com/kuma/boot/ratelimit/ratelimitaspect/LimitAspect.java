@@ -21,7 +21,7 @@ import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitguava.Limit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

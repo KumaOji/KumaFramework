@@ -1,7 +1,7 @@
 package com.kuma.boot.sensitive.sensitivelog.core.util.strategy;
 
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
+import com.kuma.boot.core.utils.reflect.ClassUtils;
 import com.kuma.boot.sensitive.sensitivelog.annotation.metadata.SensitiveStrategy;
 import com.kuma.boot.sensitive.sensitivelog.annotation.strategy.SensitiveStrategyCardId;
 import com.kuma.boot.sensitive.sensitivelog.annotation.strategy.SensitiveStrategyChineseName;

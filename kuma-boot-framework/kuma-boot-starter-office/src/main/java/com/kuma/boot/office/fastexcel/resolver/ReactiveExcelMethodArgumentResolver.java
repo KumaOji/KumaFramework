@@ -16,8 +16,8 @@
 
 package com.kuma.boot.office.fastexcel.resolver;
 
-import com.kuma.boot.common.utils.bean.BeanUtils;
-import com.kuma.boot.common.utils.io.FileUtils;
+import com.kuma.boot.core.utils.bean.BeanUtils;
+import com.kuma.boot.core.utils.io.FileUtils;
 import com.kuma.boot.office.fastexcel.PartServerHttpRequest;
 import com.kuma.boot.office.fastexcel.annotation.ExcelParam;
 import com.kuma.boot.office.fastexcel.annotation.RequestExcel;

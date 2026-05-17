@@ -19,7 +19,7 @@ package com.kuma.boot.web.utils;
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.enums.UserEnum;
 import com.kuma.boot.common.exception.BusinessException;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
 
 import java.util.Objects;

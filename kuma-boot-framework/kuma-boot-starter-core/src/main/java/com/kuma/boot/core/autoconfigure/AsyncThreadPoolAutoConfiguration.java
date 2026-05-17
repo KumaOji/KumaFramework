@@ -17,9 +17,9 @@
 package com.kuma.boot.core.autoconfigure;
 
 import com.kuma.boot.common.constant.StarterNameConstants;
-import com.kuma.boot.common.support.thread.MDCRequestTaskDecorator;
-import com.kuma.boot.common.support.thread.MDCThreadPoolTaskExecutor;
-import com.kuma.boot.common.support.thread.ThreadPoolFactory;
+import com.kuma.boot.core.support.thread.MDCRequestTaskDecorator;
+import com.kuma.boot.core.support.thread.MDCThreadPoolTaskExecutor;
+import com.kuma.boot.core.support.thread.ThreadPoolFactory;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;
 import org.springframework.beans.factory.InitializingBean;

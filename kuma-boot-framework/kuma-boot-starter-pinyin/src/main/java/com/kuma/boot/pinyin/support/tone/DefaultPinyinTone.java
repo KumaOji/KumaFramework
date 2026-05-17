@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.kuma.boot.common.support.handler.Handler;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
-import com.kuma.boot.common.utils.io.FileStreamUtils;
+import com.kuma.boot.core.utils.io.FileStreamUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;

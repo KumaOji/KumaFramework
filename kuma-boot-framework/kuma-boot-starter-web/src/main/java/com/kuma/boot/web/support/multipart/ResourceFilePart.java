@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.support.multipart;
 
-import com.kuma.boot.common.utils.io.DataBufferUtils;
+import com.kuma.boot.core.utils.io.DataBufferUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;

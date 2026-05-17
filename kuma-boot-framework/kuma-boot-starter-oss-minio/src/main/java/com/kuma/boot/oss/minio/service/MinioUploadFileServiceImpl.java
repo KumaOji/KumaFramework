@@ -1,7 +1,7 @@
 package com.kuma.boot.oss.minio.service;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.oss.common.model.UploadFileInfo;
 import com.kuma.boot.oss.common.service.AbstractUploadFileService;
 import com.kuma.boot.oss.common.util.FileUtil;

@@ -1,7 +1,7 @@
 package com.kuma.boot.eventbus.disruptor.tmp;
 
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import com.kuma.boot.common.utils.reflect.AnnotationUtils;
+import com.kuma.boot.core.utils.reflect.AnnotationUtils;
 import com.kuma.boot.eventbus.disruptor.tmp.annotation.DisruptorEvent;
 import com.kuma.boot.eventbus.disruptor.tmp.annotation.EnableDisruptor;
 import com.kuma.boot.eventbus.disruptor.tmp.exception.DisruptorRegistrarException;

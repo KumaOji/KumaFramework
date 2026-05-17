@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.autoconfigure.exchange;
 
-import com.kuma.boot.common.utils.bean.BeanUtils;
+import com.kuma.boot.core.utils.bean.BeanUtils;
 import org.springframework.boot.actuate.web.exchanges.HttpExchange;
 import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository;
 import org.springframework.data.redis.core.StringRedisTemplate;

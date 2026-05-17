@@ -18,8 +18,8 @@ package com.kuma.boot.ratelimit.ratelimitredisson;
 
 
 import com.kuma.boot.common.support.expression.ExpressionResolver;
-import com.kuma.boot.common.support.expression.SpringExpressionResolver;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.support.expression.SpringExpressionResolver;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitredisson.annotation.Limit;
 
 import java.lang.reflect.Method;

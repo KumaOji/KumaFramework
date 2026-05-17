@@ -16,7 +16,7 @@
 
 package com.kuma.boot.ratelimit.ratelimitbs.spring.aop;
 
-import com.kuma.boot.common.utils.aop.AopUtils;
+import com.kuma.boot.core.utils.aop.AopUtils;
 import com.kuma.boot.ratelimit.ratelimitbs.core.bs.RateLimitBs;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

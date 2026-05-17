@@ -17,7 +17,7 @@
 package com.kuma.boot.core.runtime.runner;
 
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

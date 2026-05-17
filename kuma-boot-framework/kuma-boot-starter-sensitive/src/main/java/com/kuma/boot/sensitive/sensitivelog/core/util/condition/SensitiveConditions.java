@@ -1,7 +1,7 @@
 package com.kuma.boot.sensitive.sensitivelog.core.util.condition;
 
 import com.kuma.boot.common.utils.lang.ObjectUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
+import com.kuma.boot.core.utils.reflect.ClassUtils;
 import com.kuma.boot.sensitive.sensitivelog.annotation.metadata.SensitiveCondition;
 import com.kuma.boot.sensitive.sensitivelog.api.Condition;
 import java.lang.annotation.Annotation;

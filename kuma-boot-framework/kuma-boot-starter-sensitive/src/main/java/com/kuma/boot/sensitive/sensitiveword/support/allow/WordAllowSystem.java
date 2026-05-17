@@ -1,6 +1,6 @@
 package com.kuma.boot.sensitive.sensitiveword.support.allow;
 
-import com.kuma.boot.common.utils.io.FileStreamUtils;
+import com.kuma.boot.core.utils.io.FileStreamUtils;
 import com.kuma.boot.sensitive.sensitiveword.api.IWordAllow;
 import java.util.List;
 

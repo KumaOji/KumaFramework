@@ -1,6 +1,6 @@
 package com.kuma.boot.prometheus.autoconfigure;
 
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.prometheus.autoconfigure.properties.PrometheusProperties;
 import com.kuma.boot.prometheus.collector.PrometheusCollector;
 import io.micrometer.core.instrument.Meter;

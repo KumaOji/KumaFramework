@@ -16,7 +16,7 @@
 
 package com.kuma.boot.security.spring.authentication.compliance.processor.changer;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.security.spring.event.LocalChangeUserStatusEvent;
 import com.kuma.boot.security.spring.event.RemoteChangeUserStatusEvent;
 import com.kuma.boot.security.spring.event.domain.KmcUserStatus;

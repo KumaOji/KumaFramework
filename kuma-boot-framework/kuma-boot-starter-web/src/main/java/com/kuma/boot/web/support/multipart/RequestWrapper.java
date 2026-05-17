@@ -19,7 +19,7 @@ package com.kuma.boot.web.support.multipart;
 import com.kuma.boot.common.utils.lambda.StreamUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.ServletRequest;

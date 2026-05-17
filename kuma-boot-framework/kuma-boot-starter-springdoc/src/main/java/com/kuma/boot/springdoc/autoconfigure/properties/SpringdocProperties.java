@@ -17,7 +17,7 @@
 package com.kuma.boot.springdoc.autoconfigure.properties;
 
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.License;

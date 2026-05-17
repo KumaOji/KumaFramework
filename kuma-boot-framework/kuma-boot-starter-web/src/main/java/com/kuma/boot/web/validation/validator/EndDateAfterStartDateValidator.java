@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.validation.validator;
 
-import com.kuma.boot.common.model.request.DateQuery;
+import com.kuma.boot.core.model.request.DateQuery;
 import com.kuma.boot.web.validation.annotation.EndDateAfterStartDate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

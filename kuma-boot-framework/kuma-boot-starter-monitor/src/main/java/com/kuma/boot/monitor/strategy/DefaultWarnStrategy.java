@@ -1,6 +1,6 @@
 package com.kuma.boot.monitor.strategy;
 
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.monitor.collect.task.IOCollectTask;
 import com.kuma.boot.monitor.model.Report;

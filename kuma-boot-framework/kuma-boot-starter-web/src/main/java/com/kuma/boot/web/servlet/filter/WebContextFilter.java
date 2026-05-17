@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.servlet.filter;
 
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

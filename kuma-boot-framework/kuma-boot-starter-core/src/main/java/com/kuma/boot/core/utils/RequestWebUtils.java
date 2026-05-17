@@ -1,7 +1,7 @@
 package com.kuma.boot.core.utils;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.server.context.ConfigurableWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;

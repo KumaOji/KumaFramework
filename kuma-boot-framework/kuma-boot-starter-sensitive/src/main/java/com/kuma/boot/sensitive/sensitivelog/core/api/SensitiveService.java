@@ -7,7 +7,7 @@ import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.reflect.ClassTypeUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
+import com.kuma.boot.core.utils.reflect.ClassUtils;
 import com.kuma.boot.sensitive.sensitivelog.annotation.metadata.SensitiveCondition;
 import com.kuma.boot.sensitive.sensitivelog.annotation.metadata.SensitiveStrategy;
 import com.kuma.boot.sensitive.sensitivelog.api.Condition;

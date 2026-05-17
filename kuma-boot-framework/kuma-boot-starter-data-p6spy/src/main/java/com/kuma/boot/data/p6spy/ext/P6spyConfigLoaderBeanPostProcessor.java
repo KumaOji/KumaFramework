@@ -1,7 +1,7 @@
 package com.kuma.boot.data.p6spy.ext;
 
 import com.p6spy.engine.spy.P6ModuleManager;
-import com.kuma.boot.common.utils.aop.AopUtils;
+import com.kuma.boot.core.utils.aop.AopUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.data.p6spy.autoconfigure.properties.P6spyProperties;
 import java.lang.reflect.Field;

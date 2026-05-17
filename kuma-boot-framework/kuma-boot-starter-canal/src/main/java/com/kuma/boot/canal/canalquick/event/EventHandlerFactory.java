@@ -1,7 +1,7 @@
 package com.kuma.boot.canal.canalquick.event;
 
 import com.alibaba.otter.canal.protocol.CanalEntry;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import java.util.HashMap;
 import java.util.Map;
 

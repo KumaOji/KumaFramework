@@ -13,7 +13,7 @@
  */
 package com.kuma.boot.idempotent.idempotetduplicate;
 
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Objects;

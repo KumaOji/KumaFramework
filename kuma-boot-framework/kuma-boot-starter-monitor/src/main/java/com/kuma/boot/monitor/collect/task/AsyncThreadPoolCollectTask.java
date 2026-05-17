@@ -1,6 +1,6 @@
 package com.kuma.boot.monitor.collect.task;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;
 import com.kuma.boot.core.support.Collector;

@@ -17,7 +17,7 @@
 package com.kuma.boot.data.mybatis.l2cache;
 
 import com.kuma.boot.cache.jetcache.enhance.JetCacheCreateCacheFactory;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;

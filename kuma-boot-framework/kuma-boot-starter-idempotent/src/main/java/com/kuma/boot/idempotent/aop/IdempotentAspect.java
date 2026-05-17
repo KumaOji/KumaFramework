@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0.152.
- * 
+ *
  * Could not load the following classes:
  *  com.alibaba.fastjson2.JSON
  *  com.alibaba.fastjson2.JSONObject
@@ -23,7 +23,7 @@ package com.kuma.boot.idempotent.aop;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.kuma.boot.common.utils.aop.AopUtils;
+import com.kuma.boot.core.utils.aop.AopUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.idempotent.annotation.Idempotent;

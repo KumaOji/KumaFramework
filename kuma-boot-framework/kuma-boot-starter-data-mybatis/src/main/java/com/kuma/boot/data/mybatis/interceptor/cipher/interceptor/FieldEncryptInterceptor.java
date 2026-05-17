@@ -16,7 +16,7 @@
 
 package com.kuma.boot.data.mybatis.interceptor.cipher.interceptor;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.data.mybatis.interceptor.cipher.annotation.Cipher;
 import com.kuma.boot.data.mybatis.interceptor.cipher.annotation.Encrypted;

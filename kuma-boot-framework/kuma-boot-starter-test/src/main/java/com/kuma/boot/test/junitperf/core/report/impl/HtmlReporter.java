@@ -1,6 +1,6 @@
 package com.kuma.boot.test.junitperf.core.report.impl;
 
-import com.kuma.boot.common.utils.io.PathUtils;
+import com.kuma.boot.core.utils.io.PathUtils;
 import com.kuma.boot.common.utils.lang.ConsoleUtils;
 import com.kuma.boot.test.junitperf.core.report.Reporter;
 import com.kuma.boot.test.junitperf.model.evaluation.EvaluationContext;

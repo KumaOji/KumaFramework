@@ -3,7 +3,7 @@ package com.kuma.boot.data.p6spy.logger;
 import com.p6spy.engine.logging.Category;
 import com.p6spy.engine.spy.P6SpyOptions;
 import com.p6spy.engine.spy.appender.BatchFileLogger;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

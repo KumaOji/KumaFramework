@@ -1,6 +1,6 @@
 package com.kuma.boot.useragent.helper;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.useragent.domain.UserAgent;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;

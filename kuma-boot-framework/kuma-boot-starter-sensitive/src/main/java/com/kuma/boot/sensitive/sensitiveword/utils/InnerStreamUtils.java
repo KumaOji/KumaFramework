@@ -1,6 +1,6 @@
 package com.kuma.boot.sensitive.sensitiveword.utils;
 
-import com.kuma.boot.common.utils.io.FileStreamUtils;
+import com.kuma.boot.core.utils.io.FileStreamUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;

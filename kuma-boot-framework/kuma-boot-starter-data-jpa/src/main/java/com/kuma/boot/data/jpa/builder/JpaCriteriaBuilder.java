@@ -17,14 +17,13 @@
 package com.kuma.boot.data.jpa.builder;
 
 import static com.kuma.boot.common.constant.SymbolConstants.PERCENT;
-import static com.kuma.boot.common.utils.convert.ConvertUtils.ZERO;
+import static com.kuma.boot.core.utils.convert.ConvertUtils.ZERO;
 
-import com.kuma.boot.common.constant.SymbolConstants;
 import com.kuma.boot.common.exception.BusinessException;
-import com.kuma.boot.common.utils.bean.BeanUtils;
+import com.kuma.boot.core.utils.bean.BeanUtils;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.common.StringUtils;
-import com.kuma.boot.common.utils.convert.ConvertUtils;
+import com.kuma.boot.core.utils.convert.ConvertUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import jakarta.persistence.criteria.*;
 import jakarta.validation.constraints.NotNull;

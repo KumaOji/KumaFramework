@@ -18,7 +18,7 @@ package com.kuma.boot.data.mybatis.utils;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import com.baomidou.dynamic.datasource.creator.DefaultDataSourceCreator;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 
 import java.util.Map;
 import javax.sql.DataSource;

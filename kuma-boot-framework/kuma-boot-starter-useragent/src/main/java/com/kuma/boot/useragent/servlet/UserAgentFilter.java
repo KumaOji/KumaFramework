@@ -1,6 +1,6 @@
 package com.kuma.boot.useragent.servlet;
 
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.useragent.domain.UserAgent;
 import com.kuma.boot.useragent.helper.UserAgentHelper;
 import jakarta.servlet.FilterChain;

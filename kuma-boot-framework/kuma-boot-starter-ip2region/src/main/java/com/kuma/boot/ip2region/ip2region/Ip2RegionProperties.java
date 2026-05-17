@@ -16,7 +16,7 @@
 
 package com.kuma.boot.ip2region.ip2region;
 
-import com.kuma.boot.common.utils.io.ResourceUtils;
+import com.kuma.boot.core.utils.io.ResourceUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 

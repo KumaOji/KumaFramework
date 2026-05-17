@@ -19,7 +19,7 @@ package com.kuma.boot.webagg.controller;
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.query.conditions.Wraps;
 import com.kuma.boot.data.mybatis.mybatisplus.query.conditions.query.QueryWrap;
 import com.kuma.boot.webagg.entity.SuperEntity;
@@ -31,7 +31,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import cn.hutool.core.util.StrUtil;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 

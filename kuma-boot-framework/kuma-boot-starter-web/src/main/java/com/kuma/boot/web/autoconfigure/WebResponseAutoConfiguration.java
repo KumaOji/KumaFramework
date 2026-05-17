@@ -19,7 +19,7 @@ package com.kuma.boot.web.autoconfigure;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.ResponseUtils;
+import com.kuma.boot.core.utils.servlet.ResponseUtils;
 import com.kuma.boot.web.annotation.BusinessApi;
 import com.kuma.boot.web.annotation.IgnoreResponseBodyAdvice;
 import jakarta.servlet.Servlet;

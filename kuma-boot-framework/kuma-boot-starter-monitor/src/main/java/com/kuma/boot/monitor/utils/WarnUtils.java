@@ -1,7 +1,7 @@
 package com.kuma.boot.monitor.utils;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 
 public class WarnUtils {
    public static final String ALARM_ERROR = "ERROR";

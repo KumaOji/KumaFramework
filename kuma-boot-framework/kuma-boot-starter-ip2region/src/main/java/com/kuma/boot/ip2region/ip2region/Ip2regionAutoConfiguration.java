@@ -16,7 +16,6 @@
 
 package com.kuma.boot.ip2region.ip2region;
 
-import com.kuma.boot.common.utils.io.FileUtils;
 import com.kuma.boot.ip2region.ip2region.support.IPMethodArgumentResolver;
 import com.kuma.boot.ip2region.ip2region.support.Ip2RegionSearch;
 import com.kuma.boot.ip2region.ip2region.support.RequestIPMethodArgumentResolver;
@@ -28,7 +27,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.Resource;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 

@@ -16,7 +16,7 @@
 
 package com.kuma.boot.core.enums;
 
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 
 import static com.kuma.boot.common.constant.CommonConstants.ACTIVE_PROFILES_ACTIVE;

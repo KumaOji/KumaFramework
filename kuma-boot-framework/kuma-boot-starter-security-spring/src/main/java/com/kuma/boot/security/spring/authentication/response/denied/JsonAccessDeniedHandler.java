@@ -18,7 +18,7 @@ package com.kuma.boot.security.spring.authentication.response.denied;
 
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.ResponseUtils;
+import com.kuma.boot.core.utils.servlet.ResponseUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -19,7 +19,7 @@ package com.kuma.boot.web.laytpl.model;
 import com.kuma.boot.common.constant.StrPoolConstants;
 import com.kuma.boot.common.support.function.Unchecked;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
-import com.kuma.boot.common.utils.io.IoUtils;
+import com.kuma.boot.core.utils.io.IoUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.laytpl.exception.LayTplException;
 import com.kuma.boot.web.laytpl.js.JsConsole;

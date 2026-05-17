@@ -16,8 +16,8 @@
 
 package com.kuma.boot.data.datasource.autoconfigure;
 
-import com.kuma.boot.common.support.thread.MDCThreadPoolExecutor;
-import com.kuma.boot.common.support.thread.ThreadPoolFactory;
+import com.kuma.boot.core.support.thread.MDCThreadPoolExecutor;
+import com.kuma.boot.core.support.thread.ThreadPoolFactory;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;

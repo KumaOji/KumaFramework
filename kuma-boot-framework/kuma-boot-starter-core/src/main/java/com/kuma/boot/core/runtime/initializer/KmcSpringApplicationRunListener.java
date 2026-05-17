@@ -23,8 +23,8 @@ import static com.kuma.boot.common.constant.CommonConstants.KMC_ENV_VERSION;
 
 import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.model.Callable;
-import com.kuma.boot.common.utils.common.PropertyUtils;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.enums.StatusEnum;
 import com.kuma.boot.core.enums.KmcEnvEnum;

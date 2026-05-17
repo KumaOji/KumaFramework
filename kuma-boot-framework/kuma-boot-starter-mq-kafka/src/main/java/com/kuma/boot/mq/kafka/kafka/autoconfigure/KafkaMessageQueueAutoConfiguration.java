@@ -16,8 +16,8 @@
 
 package com.kuma.boot.mq.kafka.kafka.autoconfigure;
 
-import com.kuma.boot.common.support.thread.MDCTaskDecorator;
-import com.kuma.boot.common.support.thread.MDCThreadPoolTaskExecutor;
+import com.kuma.boot.core.support.thread.MDCTaskDecorator;
+import com.kuma.boot.core.support.thread.MDCThreadPoolTaskExecutor;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.mq.common.MessageQueueAutoConfiguration;
 import com.kuma.boot.mq.common.MessageQueueConsumer;

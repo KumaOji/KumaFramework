@@ -17,7 +17,7 @@
 package com.kuma.boot.web.support.template;
 
 import com.kuma.boot.common.utils.lang.StringUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

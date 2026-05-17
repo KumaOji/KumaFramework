@@ -17,7 +17,7 @@
 package com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.handler;
 
 import com.kuma.boot.common.holder.UserContextHolder;
-import com.kuma.boot.common.utils.aop.AopUtils;
+import com.kuma.boot.core.utils.aop.AopUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.NestedPermission;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.Permission;
 import com.kuma.boot.data.mybatis.mybatisplus.interceptor.datascope.perm.local.DataPermContextHolder;

@@ -37,7 +37,7 @@ import com.kuma.boot.common.model.request.BasePageQuery;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.utils.common.AntiSqlFilterUtils;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.lang.reflect.Method;

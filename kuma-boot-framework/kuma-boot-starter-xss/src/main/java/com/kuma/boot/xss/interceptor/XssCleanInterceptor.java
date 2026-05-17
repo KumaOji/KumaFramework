@@ -1,6 +1,6 @@
 package com.kuma.boot.xss.interceptor;
 
-import com.kuma.boot.common.utils.reflect.ClassUtils;
+import com.kuma.boot.core.utils.reflect.ClassUtils;
 import com.kuma.boot.xss.autoconfigure.properties.XssProperties;
 import com.kuma.boot.xss.xsssupport.XssCleanIgnore;
 import com.kuma.boot.xss.xsssupport.XssHolder;

@@ -16,7 +16,7 @@
 
 package com.kuma.boot.web.support.multipart;
 
-import com.kuma.boot.common.utils.io.FileUtils;
+import com.kuma.boot.core.utils.io.FileUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;

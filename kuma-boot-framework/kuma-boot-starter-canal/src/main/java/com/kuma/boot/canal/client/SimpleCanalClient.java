@@ -5,7 +5,7 @@ import com.kuma.boot.canal.annotation.ListenPoint;
 import com.kuma.boot.canal.autoconfigure.properties.CanalProperties;
 import com.kuma.boot.canal.listener.CanalEventListener;
 import com.kuma.boot.canal.model.ListenerPoint;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

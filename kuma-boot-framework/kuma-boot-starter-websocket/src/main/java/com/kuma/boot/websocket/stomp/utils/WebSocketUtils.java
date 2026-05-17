@@ -1,7 +1,7 @@
 package com.kuma.boot.websocket.stomp.utils;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.server.ServerHttpRequest;

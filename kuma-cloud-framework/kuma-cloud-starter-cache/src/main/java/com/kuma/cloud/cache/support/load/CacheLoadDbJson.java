@@ -17,7 +17,7 @@
 package com.kuma.cloud.cache.support.load;
 
 import com.alibaba.fastjson2.JSON;
-import com.kuma.boot.common.utils.io.FileUtils;
+import com.kuma.boot.core.utils.io.FileUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.cloud.cache.api.Cache;
 import com.kuma.cloud.cache.api.CacheLoad;

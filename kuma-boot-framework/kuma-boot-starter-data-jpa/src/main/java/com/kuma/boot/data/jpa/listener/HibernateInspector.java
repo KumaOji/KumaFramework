@@ -18,7 +18,7 @@ package com.kuma.boot.data.jpa.listener;
 
 import cn.hutool.db.sql.SqlFormatter;
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.support.Collector;

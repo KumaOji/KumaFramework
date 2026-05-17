@@ -1,7 +1,7 @@
 package com.kuma.boot.sensitive.sensitiveword.support.tag;
 
 import com.kuma.boot.common.utils.common.ArgUtils;
-import com.kuma.boot.common.utils.io.FileUtils;
+import com.kuma.boot.core.utils.io.FileUtils;
 import com.kuma.boot.sensitive.sensitiveword.api.IWordTag;
 import java.util.List;
 import java.util.Set;

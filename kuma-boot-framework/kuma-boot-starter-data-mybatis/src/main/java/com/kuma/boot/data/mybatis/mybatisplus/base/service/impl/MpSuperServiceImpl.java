@@ -31,7 +31,7 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.tree.TreeUtils;
+import com.kuma.boot.core.tree.TreeUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.base.entity.MpSuperEntity;
 import com.kuma.boot.data.mybatis.mybatisplus.base.mapper.MpSuperMapperOther;

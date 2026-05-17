@@ -5,7 +5,7 @@
  */
 package com.kuma.boot.mq.common;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 
 import java.util.Map;

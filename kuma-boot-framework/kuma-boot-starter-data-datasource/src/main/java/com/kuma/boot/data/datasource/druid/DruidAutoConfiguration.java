@@ -21,7 +21,7 @@ import com.alibaba.druid.support.jakarta.StatViewServlet;
 import com.alibaba.druid.support.jakarta.WebStatFilter;
 import com.alibaba.druid.wall.WallConfig;
 import com.alibaba.druid.wall.WallFilter;
-import com.kuma.boot.common.support.property.YamlPropertySourceFactory;
+import com.kuma.boot.core.support.property.YamlPropertySourceFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;

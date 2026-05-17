@@ -20,7 +20,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.web.exception.domain.ExceptionMessage;
 import com.kuma.boot.web.exception.domain.ExceptionNoticeResponse;
 import com.kuma.boot.web.exception.properties.ExceptionHandleProperties;

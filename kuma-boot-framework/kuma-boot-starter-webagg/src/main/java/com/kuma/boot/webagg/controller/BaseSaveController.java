@@ -19,7 +19,7 @@ package com.kuma.boot.webagg.controller;
 import cn.hutool.core.util.ReflectUtil;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.webagg.entity.SuperEntity;
 import com.kuma.boot.web.request.annotation.RequestLogger;
 import io.swagger.v3.oas.annotations.Operation;

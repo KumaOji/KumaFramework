@@ -18,7 +18,7 @@ package com.kuma.boot.webagg.controller;
 
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.webagg.entity.SuperEntity;
 import com.kuma.boot.web.request.annotation.RequestLogger;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +29,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.Serializable;

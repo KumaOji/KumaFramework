@@ -17,7 +17,7 @@
 package com.kuma.boot.web.support.methodPartAndRetryer;
 
 import com.google.common.collect.Lists;
-import com.kuma.boot.common.utils.reflect.AnnotationUtils;
+import com.kuma.boot.core.utils.reflect.AnnotationUtils;
 import io.github.itning.retry.Retryer;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;

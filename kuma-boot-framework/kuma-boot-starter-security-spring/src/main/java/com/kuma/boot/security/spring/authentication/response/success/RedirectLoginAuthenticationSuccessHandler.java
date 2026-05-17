@@ -16,7 +16,7 @@
 
 package com.kuma.boot.security.spring.authentication.response.success;
 
-import com.kuma.boot.common.utils.servlet.ResponseUtils;
+import com.kuma.boot.core.utils.servlet.ResponseUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

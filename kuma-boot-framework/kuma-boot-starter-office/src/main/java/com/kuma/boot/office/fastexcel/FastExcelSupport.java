@@ -25,7 +25,7 @@ import cn.idev.excel.write.handler.SheetWriteHandler;
 import cn.idev.excel.write.metadata.WriteSheet;
 import cn.idev.excel.write.metadata.holder.WriteSheetHolder;
 import cn.idev.excel.write.metadata.holder.WriteWorkbookHolder;
-import com.kuma.boot.common.utils.io.ResourceUtils;
+import com.kuma.boot.core.utils.io.ResourceUtils;
 import com.kuma.boot.common.utils.lambda.StreamUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.office.fastexcel.annotation.ResponseExcel;

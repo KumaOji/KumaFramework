@@ -16,7 +16,7 @@
 
 package com.kuma.boot.ratelimit.ratelimitredisson.interceptor;
 
-import com.kuma.boot.common.support.aop.AnnotationAbstractPointcutTypeAdvisor;
+import com.kuma.boot.core.support.aop.AnnotationAbstractPointcutTypeAdvisor;
 import com.kuma.boot.ratelimit.ratelimitredisson.LimitExecutor;
 import com.kuma.boot.ratelimit.ratelimitredisson.LimitSupport;
 import com.kuma.boot.ratelimit.ratelimitredisson.annotation.Limit;

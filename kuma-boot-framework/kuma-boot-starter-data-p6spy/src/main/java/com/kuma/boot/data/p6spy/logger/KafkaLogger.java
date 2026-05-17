@@ -3,8 +3,8 @@ package com.kuma.boot.data.p6spy.logger;
 import com.p6spy.engine.logging.Category;
 import com.p6spy.engine.spy.appender.FormattedLogger;
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.utils.common.PropertyUtils;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import java.util.Objects;
 import org.springframework.kafka.core.KafkaTemplate;
 

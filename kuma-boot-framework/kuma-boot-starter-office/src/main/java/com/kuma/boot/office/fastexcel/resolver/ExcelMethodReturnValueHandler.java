@@ -16,7 +16,7 @@
 
 package com.kuma.boot.office.fastexcel.resolver;
 
-import com.kuma.boot.common.utils.reflect.AnnotationUtils;
+import com.kuma.boot.core.utils.reflect.AnnotationUtils;
 import com.kuma.boot.office.fastexcel.FastExcelSupport;
 import com.kuma.boot.office.fastexcel.annotation.ResponseExcel;
 import com.kuma.boot.office.fastexcel.converter.ExcelHttpMessageConverter;

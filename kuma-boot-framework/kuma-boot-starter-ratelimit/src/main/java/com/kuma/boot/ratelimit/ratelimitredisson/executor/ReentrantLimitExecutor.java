@@ -16,7 +16,7 @@
 
 package com.kuma.boot.ratelimit.ratelimitredisson.executor;
 
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitredisson.LimitExecutor;
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -13,7 +13,7 @@
 
 package com.kuma.boot.office.fastexcel.converter;
 
-import com.kuma.boot.common.utils.io.DataBufferUtils;
+import com.kuma.boot.core.utils.io.DataBufferUtils;
 import com.kuma.boot.office.fastexcel.ExcelDataType;
 import com.kuma.boot.office.fastexcel.FastExcelSupport;
 import com.kuma.boot.office.fastexcel.annotation.RequestExcel;

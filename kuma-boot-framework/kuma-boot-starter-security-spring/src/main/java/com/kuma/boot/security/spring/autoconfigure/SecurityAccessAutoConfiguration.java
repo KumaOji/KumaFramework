@@ -20,7 +20,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.security.spring.access.expression.AuthorizeExpressionHandler;
 import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.boot.security.spring.utils.SecurityUtils;

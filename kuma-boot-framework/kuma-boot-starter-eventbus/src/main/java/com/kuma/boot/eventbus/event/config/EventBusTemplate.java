@@ -18,7 +18,7 @@ package com.kuma.boot.eventbus.event.config;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.eventbus.event.annotation.MessageEventBus;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;

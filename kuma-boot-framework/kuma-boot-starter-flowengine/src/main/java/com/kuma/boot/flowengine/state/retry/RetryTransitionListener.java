@@ -1,6 +1,6 @@
 package com.kuma.boot.flowengine.state.retry;
 
-import com.kuma.boot.common.utils.bean.BeanUtils;
+import com.kuma.boot.core.utils.bean.BeanUtils;
 import com.kuma.boot.data.datasource.tx.TxWrapper;
 import com.kuma.boot.flowengine.annotation.Listen;
 import com.kuma.boot.flowengine.delegate.DBPlugin;

@@ -1,7 +1,7 @@
 package com.kuma.boot.monitor.autoconfigure;
 
-import com.kuma.boot.common.support.thread.MDCThreadPoolExecutor;
-import com.kuma.boot.common.support.thread.ThreadPoolFactory;
+import com.kuma.boot.core.support.thread.MDCThreadPoolExecutor;
+import com.kuma.boot.core.support.thread.ThreadPoolFactory;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.CoreAutoConfiguration;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;

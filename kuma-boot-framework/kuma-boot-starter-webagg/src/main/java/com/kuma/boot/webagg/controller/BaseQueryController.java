@@ -18,7 +18,7 @@ package com.kuma.boot.webagg.controller;
 
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.query.conditions.query.QueryWrap;
 import com.kuma.boot.webagg.entity.SuperEntity;
 import com.kuma.boot.web.request.annotation.RequestLogger;

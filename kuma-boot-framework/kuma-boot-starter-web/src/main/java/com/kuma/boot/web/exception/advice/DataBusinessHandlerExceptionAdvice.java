@@ -22,7 +22,7 @@ import com.kuma.boot.common.holder.TraceContextHolder;
 import com.kuma.boot.common.utils.id.IdGeneratorUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.common.utils.servlet.TraceUtils;
 import com.kuma.boot.web.exception.event.ErrorEvent;
 import com.kuma.boot.web.exception.handler.ExceptionHandler;

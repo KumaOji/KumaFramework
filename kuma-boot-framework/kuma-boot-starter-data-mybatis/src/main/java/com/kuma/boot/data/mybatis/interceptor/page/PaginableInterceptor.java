@@ -18,7 +18,7 @@ package com.kuma.boot.data.mybatis.interceptor.page;
 
 import cn.hutool.core.util.ReflectUtil;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

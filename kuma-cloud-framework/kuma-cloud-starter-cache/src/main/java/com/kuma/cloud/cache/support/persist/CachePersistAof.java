@@ -16,10 +16,10 @@
 
 package com.kuma.cloud.cache.support.persist;
 
-import static com.kuma.boot.common.utils.io.FileUtils.createFile;
-import static com.kuma.boot.common.utils.io.FileUtils.exists;
+import static com.kuma.boot.core.utils.io.FileUtils.createFile;
+import static com.kuma.boot.core.utils.io.FileUtils.exists;
 
-import com.kuma.boot.common.utils.io.FileUtils;
+import com.kuma.boot.core.utils.io.FileUtils;
 import com.kuma.cloud.cache.api.Cache;
 import com.xkzhangsan.time.utils.StringUtil;
 import java.util.ArrayList;

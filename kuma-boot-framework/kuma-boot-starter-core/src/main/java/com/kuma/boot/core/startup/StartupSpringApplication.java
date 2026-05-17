@@ -18,7 +18,7 @@ package com.kuma.boot.core.startup;
 
 import com.kuma.boot.common.startup.BaseStat;
 import com.kuma.boot.common.support.version.KmcVersion;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.core.utils.CoreUtils;
 import com.kuma.boot.common.version.SpringCloudAlibabaVersion;
 import com.kuma.boot.common.version.SpringCloudDependenciesVersion;

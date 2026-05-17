@@ -1,6 +1,6 @@
 package com.kuma.boot.sensitive.sensitiveword.support.tag;
 
-import com.kuma.boot.common.utils.io.FileStreamUtils;
+import com.kuma.boot.core.utils.io.FileStreamUtils;
 import com.kuma.boot.sensitive.sensitiveword.api.IWordTag;
 import java.util.List;
 import java.util.Set;

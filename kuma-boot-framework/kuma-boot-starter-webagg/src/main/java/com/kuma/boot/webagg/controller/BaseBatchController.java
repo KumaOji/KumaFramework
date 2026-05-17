@@ -20,7 +20,7 @@ import static com.baomidou.mybatisplus.core.toolkit.ClassUtils.newInstance;
 
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.webagg.dto.BatchDTO;
 import com.kuma.boot.webagg.dto.BatchDTO.BatchUpdate;
 import com.kuma.boot.webagg.entity.SuperEntity;

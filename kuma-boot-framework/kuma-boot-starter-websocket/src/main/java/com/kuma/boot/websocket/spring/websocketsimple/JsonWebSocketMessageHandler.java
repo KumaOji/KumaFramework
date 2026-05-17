@@ -2,7 +2,7 @@ package com.kuma.boot.websocket.spring.websocketsimple;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.TypeUtil;
-import com.kuma.boot.common.utils.io.FileUtils;
+import com.kuma.boot.core.utils.io.FileUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.lang.reflect.Type;
 import java.util.HashMap;

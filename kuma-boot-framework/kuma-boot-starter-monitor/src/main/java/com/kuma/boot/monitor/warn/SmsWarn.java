@@ -1,10 +1,10 @@
 package com.kuma.boot.monitor.warn;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.core.utils.RequestWebUtils;
 import com.kuma.boot.monitor.autoconfigure.properties.WarnProperties;
 import com.kuma.boot.monitor.model.Message;

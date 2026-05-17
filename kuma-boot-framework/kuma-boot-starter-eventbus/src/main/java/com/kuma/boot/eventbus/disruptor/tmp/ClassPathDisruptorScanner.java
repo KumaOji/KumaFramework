@@ -16,7 +16,7 @@
 
 package com.kuma.boot.eventbus.disruptor.tmp;
 
-import com.kuma.boot.common.utils.reflect.AnnotationUtils;
+import com.kuma.boot.core.utils.reflect.AnnotationUtils;
 import com.kuma.boot.eventbus.disruptor.tmp.annotation.DisruptorEvent;
 
 import java.lang.annotation.Annotation;

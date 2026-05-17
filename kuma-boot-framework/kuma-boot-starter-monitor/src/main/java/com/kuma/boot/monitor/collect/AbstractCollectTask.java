@@ -1,6 +1,6 @@
 package com.kuma.boot.monitor.collect;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.monitor.enums.WarnTypeEnum;
 import com.kuma.boot.monitor.model.Message;

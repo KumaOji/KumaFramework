@@ -2,7 +2,7 @@ package com.kuma.boot.job.xxl.autoconfigure;
 
 import com.kuma.boot.common.constant.CommonConstants;
 import com.kuma.boot.common.exception.BusinessException;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.job.xxl.aspect.XxlJobMdcInspector;
 import com.kuma.boot.job.xxl.autoconfigure.properties.XxlAdminProperties;

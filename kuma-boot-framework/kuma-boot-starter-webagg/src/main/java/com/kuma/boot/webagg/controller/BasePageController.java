@@ -22,7 +22,7 @@ import com.kuma.boot.common.model.request.BasePageQuery;
 import com.kuma.boot.common.model.request.BaseQuery;
 import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.MpUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.query.conditions.Wraps;
 import com.kuma.boot.data.mybatis.mybatisplus.query.conditions.query.QueryWrap;

@@ -21,7 +21,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.CharsetUtil;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.security.spring.core.userdetails.KmcUser;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

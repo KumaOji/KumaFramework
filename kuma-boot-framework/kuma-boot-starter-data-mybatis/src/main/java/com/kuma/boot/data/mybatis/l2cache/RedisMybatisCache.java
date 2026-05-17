@@ -18,8 +18,8 @@ package com.kuma.boot.data.mybatis.l2cache;
 
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.exception.BaseException;
-import com.kuma.boot.common.utils.context.ContextUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.reflect.ClassUtils;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;

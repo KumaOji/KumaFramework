@@ -1,6 +1,6 @@
 package com.kuma.boot.xss.xsssupport;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.xss.autoconfigure.properties.XssProperties;
 import com.kuma.boot.xss.utils.XssUtil;

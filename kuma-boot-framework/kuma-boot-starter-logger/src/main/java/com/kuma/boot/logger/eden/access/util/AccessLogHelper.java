@@ -1,7 +1,7 @@
 package com.kuma.boot.logger.eden.access.util;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.logger.eden.IpConfigUtils;

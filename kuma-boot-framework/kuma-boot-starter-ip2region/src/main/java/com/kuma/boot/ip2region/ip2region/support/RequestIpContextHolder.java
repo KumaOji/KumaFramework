@@ -16,7 +16,7 @@
 
 package com.kuma.boot.ip2region.ip2region.support;
 
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.NamedInheritableThreadLocal;
 import org.springframework.core.NamedThreadLocal;

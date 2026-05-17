@@ -1,7 +1,7 @@
 package com.kuma.boot.monitor.dump;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.monitor.exception.HealthException;
 import com.kuma.boot.monitor.utils.ProcessUtils;
 import jakarta.servlet.http.HttpServletResponse;

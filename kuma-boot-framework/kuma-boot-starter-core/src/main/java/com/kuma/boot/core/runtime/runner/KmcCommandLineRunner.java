@@ -17,9 +17,9 @@
 package com.kuma.boot.core.runtime.runner;
 
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.model.PropertyCache;
-import com.kuma.boot.common.utils.common.PropertyUtils;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.model.PropertyCache;
+import com.kuma.boot.core.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.properties.CoreProperties;
 import org.springframework.beans.BeansException;

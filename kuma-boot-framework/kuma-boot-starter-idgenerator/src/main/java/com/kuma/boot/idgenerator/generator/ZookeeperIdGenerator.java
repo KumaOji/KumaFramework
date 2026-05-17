@@ -2,7 +2,7 @@ package com.kuma.boot.idgenerator.generator;
 
 import com.google.common.collect.Maps;
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.ip.IpUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import java.io.File;

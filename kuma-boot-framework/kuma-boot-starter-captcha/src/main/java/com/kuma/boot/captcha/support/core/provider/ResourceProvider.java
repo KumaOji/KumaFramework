@@ -10,7 +10,7 @@ import cn.hutool.system.SystemUtil;
 import com.kuma.boot.captcha.support.core.definition.enums.CaptchaResource;
 import com.kuma.boot.captcha.support.core.definition.enums.FontStyle;
 import com.kuma.boot.captcha.support.core.properties.CaptchaProperties;
-import com.kuma.boot.common.utils.io.ResourceUtils;
+import com.kuma.boot.core.utils.io.ResourceUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.apache.commons.lang3.ArrayUtils;

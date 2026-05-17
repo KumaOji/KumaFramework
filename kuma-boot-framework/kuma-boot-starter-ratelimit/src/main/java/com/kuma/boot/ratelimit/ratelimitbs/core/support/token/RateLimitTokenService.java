@@ -17,7 +17,7 @@
 package com.kuma.boot.ratelimit.ratelimitbs.core.support.token;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.ratelimit.ratelimitbs.api.support.IRateLimitTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import cn.hutool.core.util.ArrayUtil;

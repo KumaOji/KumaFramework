@@ -1,10 +1,10 @@
 package com.kuma.boot.monitor.collect.task;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
-import com.kuma.boot.common.utils.reflect.ReflectionUtils;
+import com.kuma.boot.core.utils.reflect.ClassUtils;
+import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import com.kuma.boot.monitor.annotation.FieldReport;
 import com.kuma.boot.monitor.autoconfigure.properties.CollectTaskProperties;
 import com.kuma.boot.monitor.collect.AbstractCollectTask;

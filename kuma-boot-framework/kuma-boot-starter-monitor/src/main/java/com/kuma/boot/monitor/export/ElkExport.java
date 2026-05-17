@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Context;
 import cn.hutool.core.date.DateUtil;
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.utils.common.PropertyUtils;
+import com.kuma.boot.core.utils.common.PropertyUtils;
 import com.kuma.boot.monitor.autoconfigure.properties.ExportProperties;
 import com.kuma.boot.monitor.model.Report;
 import java.util.Date;

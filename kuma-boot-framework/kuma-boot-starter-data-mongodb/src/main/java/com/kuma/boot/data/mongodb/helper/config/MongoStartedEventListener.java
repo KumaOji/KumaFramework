@@ -3,7 +3,7 @@ package com.kuma.boot.data.mongodb.helper.config;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ReflectUtil;
 import com.mongodb.client.result.UpdateResult;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.data.mongodb.helper.bean.IgnoreDocument;
 import com.kuma.boot.data.mongodb.helper.bean.InitValue;

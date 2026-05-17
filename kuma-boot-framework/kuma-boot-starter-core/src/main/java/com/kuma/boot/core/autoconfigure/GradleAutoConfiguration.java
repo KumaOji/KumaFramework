@@ -16,7 +16,7 @@
 
 package com.kuma.boot.core.autoconfigure;
 
-import com.kuma.boot.common.support.property.YamlPropertySourceFactory;
+import com.kuma.boot.core.support.property.YamlPropertySourceFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.PropertySource;
 

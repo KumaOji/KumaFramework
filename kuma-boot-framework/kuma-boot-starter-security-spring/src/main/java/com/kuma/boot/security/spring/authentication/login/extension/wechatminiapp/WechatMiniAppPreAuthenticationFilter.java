@@ -18,7 +18,7 @@ package com.kuma.boot.security.spring.authentication.login.extension.wechatminia
 
 import tools.jackson.core.JacksonException;
 import com.kuma.boot.common.model.result.Result;
-import com.kuma.boot.common.utils.servlet.ResponseUtils;
+import com.kuma.boot.core.utils.servlet.ResponseUtils;
 import com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.client.WechatLoginResponse;
 import com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.client.WechatMiniAppClient;
 import com.kuma.boot.security.spring.authentication.login.extension.wechatminiapp.service.WechatMiniAppClientService;
