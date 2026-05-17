@@ -12,39 +12,61 @@ processResources {
     }
 }
 
-
 dependencies {
-    implementation projectLibs.hutool.core
-    implementation projectLibs.hutool.extra
-    implementation projectLibs.hutool.crypto
-    implementation projectLibs.hutool.json
-    implementation projectLibs.hutool.http
-    implementation projectLibs.guava
-    implementation projectLibs.commons.lang3
-    implementation projectLibs.commons.collections4
-    implementation projectLibs.commons.codec
-    implementation projectLibs.commons.io
-    implementation projectLibs.commons.compress
-    implementation projectLibs.commons.net
-    implementation projectLibs.bouncycastle.provider
-    implementation projectLibs.jackson.annotations
-    implementation projectLibs.jackson.core
-    implementation projectLibs.jackson.databind
-    implementation projectLibs.snappy.java
-    implementation projectLibs.kryo
-    implementation projectLibs.snakeyaml
-    implementation projectLibs.slf4j.api
-    implementation projectLibs.logback.classic
-    implementation projectLibs.uuid.creator
-    implementation projectLibs.gson
-    implementation projectLibs.fastjson2
-    implementation projectLibs.javassist
-    implementation projectLibs.orika.core
-    implementation projectLibs.hessian
+    // Hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.hutool.crypto
+    api projectLibs.hutool.json
+    api projectLibs.hutool.http
+
+    // Google / Apache utilities
+    api projectLibs.guava
+    api projectLibs.commons.lang3
+    api projectLibs.commons.collections4
+    api projectLibs.commons.codec
+    api projectLibs.commons.io
+    api projectLibs.commons.compress
+    api projectLibs.commons.net
+
+    // Security
+    api projectLibs.bouncycastle.provider
+
+    // JSON / Serialization
+    api projectLibs.jackson.annotations
+    api projectLibs.jackson.core
+    api projectLibs.jackson.databind
+    api projectLibs.jackson.datatype.jsr353
+    api projectLibs.javax.json.api
+    api projectLibs.javax.json.impl
+    api projectLibs.gson
+    api projectLibs.fastjson2
+    api projectLibs.snakeyaml
+
+    // Binary / Compression
+    api projectLibs.snappy.java
+    api projectLibs.kryo
+
+    // Logging
+    api projectLibs.slf4j.api
+    api projectLibs.logback.classic
+
+    // Bean mapping / Bytecode
+    api projectLibs.orika.core
+    api projectLibs.javassist
+    api projectLibs.hessian
+
+    // Misc pure-Java utilities
+    api projectLibs.uuid.creator
+    api projectLibs.transmittable.thread.local
+    api projectLibs.groovy
+    api projectLibs.jsoup
+    api projectLibs.jspecify
+    api projectLibs.taobao.text.ui
+    api projectLibs.swagger.annotations
+
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.jakarta.validation.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }
-
-

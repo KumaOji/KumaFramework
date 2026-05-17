@@ -12,9 +12,7 @@ spring:
     log-startup-info: false
   sql:
     init:
-      mode: always
-      schema-locations: classpath:sql/blog_schema.sql
-      data-locations: classpath:sql/blog_data.sql
+      mode: never
   kafka:
     producer:
       bootstrap-servers: localhost:9092
