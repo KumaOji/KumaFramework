@@ -16,6 +16,10 @@
 
 package com.kuma.boot.core.startup;
 
+import com.kuma.boot.common.startup.BaseStat;
+import com.kuma.boot.common.startup.ChildrenStat;
+import com.kuma.boot.common.startup.ModuleStat;
+import com.kuma.boot.common.startup.SofaBootConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
@@ -51,13 +55,13 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
 
     private BufferingApplicationStartup applicationStartup;
 
-    private com.kuma.boot.core.startup.BaseStat jvmStartingStage;
+    private BaseStat jvmStartingStage;
 
-    private com.kuma.boot.core.startup.BaseStat environmentPrepareStage;
+    private BaseStat environmentPrepareStage;
 
-    private com.kuma.boot.core.startup.ChildrenStat<com.kuma.boot.core.startup.BaseStat> applicationContextPrepareStage;
+    private ChildrenStat<BaseStat> applicationContextPrepareStage;
 
-    private com.kuma.boot.core.startup.BaseStat applicationContextLoadStage;
+    private BaseStat applicationContextLoadStage;
 
     public StartupSpringApplicationRunListener(SpringApplication springApplication, String[] args) {
         this.application = springApplication;
@@ -68,7 +72,7 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
 
     @Override
     public void starting(ConfigurableBootstrapContext bootstrapContext) {
-        jvmStartingStage = new com.kuma.boot.core.startup.BaseStat();
+        jvmStartingStage = new BaseStat();
         jvmStartingStage.setName(com.kuma.boot.core.startup.BootStageConstants.JVM_STARTING_STAGE);
         jvmStartingStage.setStartTime(ManagementFactory.getRuntimeMXBean().getStartTime());
         jvmStartingStage.setEndTime(System.currentTimeMillis());
@@ -77,11 +81,11 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
     @Override
     public void environmentPrepared(
             ConfigurableBootstrapContext bootstrapContext, ConfigurableEnvironment environment) {
-        environmentPrepareStage = new com.kuma.boot.core.startup.BaseStat();
+        environmentPrepareStage = new BaseStat();
         environmentPrepareStage.setName(com.kuma.boot.core.startup.BootStageConstants.ENVIRONMENT_PREPARE_STAGE);
         environmentPrepareStage.setStartTime(jvmStartingStage.getEndTime());
         environmentPrepareStage.setEndTime(System.currentTimeMillis());
-        startupReporter.setAppName(environment.getProperty(com.kuma.boot.core.startup.SofaBootConstants.APP_NAME_KEY));
+        startupReporter.setAppName(environment.getProperty(SofaBootConstants.APP_NAME_KEY));
         startupReporter.bindToStartupReporter(environment);
 
         // create BufferingApplicationStartup if user not custom.
@@ -98,12 +102,12 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext context) {
-        applicationContextPrepareStage = new com.kuma.boot.core.startup.ChildrenStat<>();
+        applicationContextPrepareStage = new ChildrenStat<>();
         applicationContextPrepareStage.setName(com.kuma.boot.core.startup.BootStageConstants.APPLICATION_CONTEXT_PREPARE_STAGE);
         applicationContextPrepareStage.setStartTime(environmentPrepareStage.getEndTime());
         applicationContextPrepareStage.setEndTime(System.currentTimeMillis());
         if (application instanceof com.kuma.boot.core.startup.StartupSpringApplication startupSpringApplication) {
-            List<com.kuma.boot.core.startup.BaseStat> baseStatList = startupSpringApplication.getInitializerStartupStatList();
+            List<BaseStat> baseStatList = startupSpringApplication.getInitializerStartupStatList();
             applicationContextPrepareStage.setChildren(new ArrayList<>(baseStatList));
             baseStatList.clear();
         }
@@ -114,7 +118,7 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
 
     @Override
     public void contextLoaded(ConfigurableApplicationContext context) {
-        applicationContextLoadStage = new com.kuma.boot.core.startup.BaseStat();
+        applicationContextLoadStage = new BaseStat();
         applicationContextLoadStage.setName(com.kuma.boot.core.startup.BootStageConstants.APPLICATION_CONTEXT_LOAD_STAGE);
         applicationContextLoadStage.setStartTime(applicationContextPrepareStage.getEndTime());
         applicationContextLoadStage.setEndTime(System.currentTimeMillis());
@@ -129,13 +133,13 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
     @SuppressWarnings("unchecked")
     public void started(ConfigurableApplicationContext context, Duration timeTaken) {
         // refresh applicationRefreshStage
-        com.kuma.boot.core.startup.ChildrenStat<com.kuma.boot.core.startup.ModuleStat> applicationRefreshStage = (com.kuma.boot.core.startup.ChildrenStat<com.kuma.boot.core.startup.ModuleStat>)
+        ChildrenStat<ModuleStat> applicationRefreshStage = (ChildrenStat<ModuleStat>)
                 startupReporter.getStageNyName(com.kuma.boot.core.startup.BootStageConstants.APPLICATION_CONTEXT_REFRESH_STAGE);
         applicationRefreshStage.setStartTime(applicationContextLoadStage.getEndTime());
         applicationRefreshStage.setCost(applicationRefreshStage.getEndTime() - applicationRefreshStage.getStartTime());
 
         // init rootModuleStat
-        com.kuma.boot.core.startup.ModuleStat rootModule = applicationRefreshStage.getChildren().get(0);
+        ModuleStat rootModule = applicationRefreshStage.getChildren().get(0);
         rootModule.setStartTime(applicationRefreshStage.getStartTime());
         rootModule.setCost(rootModule.getEndTime() - rootModule.getStartTime());
 
@@ -157,9 +161,9 @@ public class StartupSpringApplicationRunListener implements SpringApplicationRun
     private String getStartedMessage(Environment environment, Duration timeTakenToStartup) {
         StringBuilder message = new StringBuilder();
         message.append("application ");
-        message.append(environment.getProperty(com.kuma.boot.core.startup.SofaBootConstants.APP_NAME_KEY));
+        message.append(environment.getProperty(SofaBootConstants.APP_NAME_KEY));
         message.append(" startup Started ");
-        String startupLogExtraInfo = environment.getProperty(com.kuma.boot.core.startup.SofaBootConstants.STARTUP_LOG_EXTRA_INFO);
+        String startupLogExtraInfo = environment.getProperty(SofaBootConstants.STARTUP_LOG_EXTRA_INFO);
         if (StringUtils.hasText(startupLogExtraInfo)) {
             message.append(" with extra info [");
             message.append(startupLogExtraInfo);

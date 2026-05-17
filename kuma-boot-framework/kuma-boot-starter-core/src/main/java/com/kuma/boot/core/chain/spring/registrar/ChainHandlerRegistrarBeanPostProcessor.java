@@ -1,9 +1,9 @@
 package com.kuma.boot.core.chain.spring.registrar;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.core.chain.core.handler.BaseHandler;
-import com.kuma.boot.core.chain.core.registry.ChainRegistry;
-import com.kuma.boot.core.chain.spring.annotation.ChainHandler;
+import com.kuma.boot.common.chain.core.handler.BaseHandler;
+import com.kuma.boot.common.chain.core.registry.ChainRegistry;
+import com.kuma.boot.common.chain.spring.annotation.ChainHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

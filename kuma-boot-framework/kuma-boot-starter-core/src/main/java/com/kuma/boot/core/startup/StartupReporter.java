@@ -16,6 +16,9 @@
 
 package com.kuma.boot.core.startup;
 
+import com.kuma.boot.common.startup.BaseStat;
+import com.kuma.boot.common.startup.BeanStat;
+import com.kuma.boot.common.startup.BeanStatCustomizer;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 import org.springframework.boot.context.metrics.buffering.StartupTimeline;
@@ -62,7 +65,7 @@ public class StartupReporter {
 
     private final StartupStaticsModel startupStaticsModel;
 
-    private final List<com.kuma.boot.core.startup.BeanStatCustomizer> beanStatCustomizers;
+    private final List<BeanStatCustomizer> beanStatCustomizers;
 
     private int bufferSize = 4096;
 
@@ -74,7 +77,7 @@ public class StartupReporter {
                 ManagementFactory.getRuntimeMXBean().getStartTime());
         this.beanStatCustomizers = SpringFactoriesLoader.forDefaultResourceLocation(
                         StartupReporter.class.getClassLoader())
-                .load(com.kuma.boot.core.startup.BeanStatCustomizer.class);
+                .load(BeanStatCustomizer.class);
     }
 
     /**
@@ -113,7 +116,7 @@ public class StartupReporter {
      *
      * @param stat the added CommonStartupStat
      */
-    public void addCommonStartupStat( com.kuma.boot.core.startup.BaseStat stat ) {
+    public void addCommonStartupStat( BaseStat stat ) {
         startupStaticsModel.getStageStats().add(stat);
     }
 
@@ -123,7 +126,7 @@ public class StartupReporter {
      * @param stageName stageName
      * @return the reported stage, return null when can't find the stage
      */
-    public com.kuma.boot.core.startup.BaseStat getStageNyName(String stageName ) {
+    public BaseStat getStageNyName(String stageName ) {
         return startupStaticsModel.getStageStats().stream()
                 .filter(Objects::nonNull)
                 .filter(commonStartupStat -> {
@@ -156,8 +159,8 @@ public class StartupReporter {
         startupStaticsModel.setAppName(this.startupStaticsModel.getAppName());
         startupStaticsModel.setApplicationBootElapsedTime(this.startupStaticsModel.getApplicationBootElapsedTime());
         startupStaticsModel.setApplicationBootTime(this.startupStaticsModel.getApplicationBootTime());
-        List<com.kuma.boot.core.startup.BaseStat> stats = new ArrayList<>();
-        Iterator<com.kuma.boot.core.startup.BaseStat> iterator = this.startupStaticsModel.getStageStats().iterator();
+        List<BaseStat> stats = new ArrayList<>();
+        Iterator<BaseStat> iterator = this.startupStaticsModel.getStageStats().iterator();
         while (iterator.hasNext()) {
             stats.add(iterator.next());
             iterator.remove();
@@ -167,17 +170,17 @@ public class StartupReporter {
     }
 
     /**
-     * Convert {@link BufferingApplicationStartup} to {@link com.kuma.boot.core.startup.BeanStat} list.
+     * Convert {@link BufferingApplicationStartup} to {@link BeanStat} list.
      *
      * @param context the {@link ConfigurableApplicationContext}.
      * @return list of bean stats.
      */
-    public List<com.kuma.boot.core.startup.BeanStat> generateBeanStats(ConfigurableApplicationContext context ) {
+    public List<BeanStat> generateBeanStats(ConfigurableApplicationContext context ) {
 
-        List<com.kuma.boot.core.startup.BeanStat> rootBeanStatList = new ArrayList<>();
+        List<BeanStat> rootBeanStatList = new ArrayList<>();
         ApplicationStartup applicationStartup = context.getApplicationStartup();
         if (applicationStartup instanceof BufferingApplicationStartup bufferingApplicationStartup) {
-            Map<Long, com.kuma.boot.core.startup.BeanStat> beanStatIdMap = new HashMap<>();
+            Map<Long, BeanStat> beanStatIdMap = new HashMap<>();
 
             StartupTimeline startupTimeline = bufferingApplicationStartup.drainBufferedTimeline();
 
@@ -186,16 +189,16 @@ public class StartupReporter {
 
             // convert startup to bean stats
             timelineEvents.forEach(timelineEvent -> {
-                com.kuma.boot.core.startup.BeanStat beanStat = eventToBeanStat(timelineEvent);
+                BeanStat beanStat = eventToBeanStat(timelineEvent);
                 rootBeanStatList.add(beanStat);
                 beanStatIdMap.put(timelineEvent.getStartupStep().getId(), beanStat);
             });
 
             // build stat tree
             timelineEvents.forEach(timelineEvent -> {
-                com.kuma.boot.core.startup.BeanStat parentBeanStat =
+                BeanStat parentBeanStat =
                         beanStatIdMap.get(timelineEvent.getStartupStep().getParentId());
-                com.kuma.boot.core.startup.BeanStat beanStat =
+                BeanStat beanStat =
                         beanStatIdMap.get(timelineEvent.getStartupStep().getId());
 
                 if (parentBeanStat != null) {
@@ -222,7 +225,7 @@ public class StartupReporter {
         return rootBeanStatList;
     }
 
-    private boolean filterBeanInitializeByCost( com.kuma.boot.core.startup.BeanStat beanStat ) {
+    private boolean filterBeanInitializeByCost( BeanStat beanStat ) {
         String name = beanStat.getType();
         if (SPRING_BEAN_INSTANTIATE_TYPES.contains(name)) {
             return beanStat.getCost() >= costThreshold;
@@ -232,8 +235,8 @@ public class StartupReporter {
     }
 
     @SuppressWarnings("deprecation")
-    private com.kuma.boot.core.startup.BeanStat eventToBeanStat(StartupTimeline.TimelineEvent timelineEvent ) {
-        com.kuma.boot.core.startup.BeanStat beanStat = new com.kuma.boot.core.startup.BeanStat();
+    private BeanStat eventToBeanStat(StartupTimeline.TimelineEvent timelineEvent ) {
+        BeanStat beanStat = new BeanStat();
         beanStat.setStartTime(timelineEvent.getStartTime().toEpochMilli());
         beanStat.setEndTime(timelineEvent.getEndTime().toEpochMilli());
         beanStat.setCost(timelineEvent.getDuration().toMillis());
@@ -274,7 +277,7 @@ public class StartupReporter {
         return null;
     }
 
-    private com.kuma.boot.core.startup.BeanStat customBeanStat(ConfigurableApplicationContext context, com.kuma.boot.core.startup.BeanStat beanStat ) {
+    private BeanStat customBeanStat(ConfigurableApplicationContext context, BeanStat beanStat ) {
         if (!context.isActive()) {
             return beanStat;
         }
@@ -285,9 +288,9 @@ public class StartupReporter {
             beanStat.putAttribute(
                     "classType", AopProxyUtils.ultimateTargetClass(bean).getName());
 
-            com.kuma.boot.core.startup.BeanStat result = beanStat;
-            for (com.kuma.boot.core.startup.BeanStatCustomizer customizer : beanStatCustomizers) {
-                com.kuma.boot.core.startup.BeanStat current = customizer.customize(beanName, bean, result);
+            BeanStat result = beanStat;
+            for (BeanStatCustomizer customizer : beanStatCustomizers) {
+                BeanStat current = customizer.customize(beanName, bean, result);
                 if (current == null) {
                     return result;
                 }
@@ -330,7 +333,7 @@ public class StartupReporter {
 
         private long applicationBootTime;
 
-        private List<com.kuma.boot.core.startup.BaseStat> stageStats = new ArrayList<>();
+        private List<BaseStat> stageStats = new ArrayList<>();
 
         public String getAppName() {
             return appName;
@@ -356,11 +359,11 @@ public class StartupReporter {
             this.applicationBootTime = applicationBootTime;
         }
 
-        public List<com.kuma.boot.core.startup.BaseStat> getStageStats() {
+        public List<BaseStat> getStageStats() {
             return stageStats;
         }
 
-        public void setStageStats( List<com.kuma.boot.core.startup.BaseStat> stageStats ) {
+        public void setStageStats( List<BaseStat> stageStats ) {
             this.stageStats = stageStats;
         }
     }

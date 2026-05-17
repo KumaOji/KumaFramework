@@ -93,7 +93,7 @@ Project8 是一个**自研轻量级分布式事务框架**的接入演示应用�
 ```gradle
 // build.gradle
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
 

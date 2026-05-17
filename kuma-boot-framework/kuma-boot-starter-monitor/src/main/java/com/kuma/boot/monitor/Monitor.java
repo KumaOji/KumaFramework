@@ -22,7 +22,7 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.common.utils.thread.ThreadUtils;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;
 import com.kuma.boot.core.support.Collector;
-import com.kuma.boot.core.support.Ref;
+import com.kuma.boot.common.support.Ref;
 import com.kuma.boot.core.support.ShutdownHooks;
 import com.kuma.boot.monitor.autoconfigure.properties.MonitorThreadPoolProperties;
 import cn.hutool.core.collection.CollUtil;

@@ -6,7 +6,7 @@ description = 'Kumaframework DDD模块'
 
 dependencies {
     // 基础公共工具（LogUtils / ContextUtils / JacksonUtils / ObjectUtils / TraceUtils 等）
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // TransactionalUtils（DomainEventServiceImpl 事务执行）
     // DynamicDataSourceContextHolder（经由 data-datasource 传递）

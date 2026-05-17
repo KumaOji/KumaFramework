@@ -8,7 +8,7 @@ description = 'Kumaframework grpc模块'
 def grpcVersion = '1.76.0'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // Spring gRPC 1.0.0-RC1（spring-grpc-core 的 grpc-netty/grpc-stub 为 optional，需显式声明）

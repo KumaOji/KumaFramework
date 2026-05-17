@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework Web聚合层模块（MyBatisPlus / JPA / QueryDSL 多ORM聚合封装）'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     api project(':kuma-boot-framework:kuma-boot-starter-data-jpa')

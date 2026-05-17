@@ -16,6 +16,9 @@
 
 package com.kuma.boot.core.support.strategy;
 
+import com.kuma.boot.common.support.strategy.BusinessHandler;
+import com.kuma.boot.common.support.strategy.HandlerType;
+import com.kuma.boot.common.support.strategy.HandlerTypeImpl;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.util.List;
@@ -33,7 +36,7 @@ import java.util.stream.Collectors;
 public class BusinessHandlerFactory {
 
     /** businessHandlerMap */
-    private Map<HandlerType, com.kuma.boot.core.support.strategy.BusinessHandler> businessHandlerMap;
+    private Map<HandlerType, BusinessHandler> businessHandlerMap;
 
     /**
      * setBusinessHandlerMap
@@ -41,7 +44,7 @@ public class BusinessHandlerFactory {
      * @param orderHandlers orderHandlers
      * @since 2021-09-02 22:15:54
      */
-    public void setBusinessHandlerMap(List<com.kuma.boot.core.support.strategy.BusinessHandler> orderHandlers) {
+    public void setBusinessHandlerMap(List<BusinessHandler> orderHandlers) {
         // 注入各类型的订单处理类
         businessHandlerMap = orderHandlers.stream()
                 .filter(Objects::nonNull)
@@ -58,10 +61,10 @@ public class BusinessHandlerFactory {
      * @param source source
      * @param <T> T
      * @param <R> R
-     * @return {@link com.kuma.boot.core.support.strategy.BusinessHandler }
+     * @return {@link BusinessHandler }
      * @since 2021-09-02 22:15:59
      */
-    public <R, T> com.kuma.boot.core.support.strategy.BusinessHandler businessHandler(String type, String source) {
+    public <R, T> BusinessHandler businessHandler(String type, String source) {
         HandlerType orderHandlerType = new HandlerTypeImpl(type, source);
         return businessHandlerMap.get(orderHandlerType);
     }

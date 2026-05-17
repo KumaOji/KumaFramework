@@ -1,6 +1,6 @@
 package com.kuma.boot.monitor.model;
 
-import com.kuma.boot.core.enums.ExceptionTypeEnum;
+import com.kuma.boot.common.enums.ExceptionTypeEnum;
 import com.kuma.boot.monitor.enums.WarnLevelEnum;
 import com.kuma.boot.monitor.enums.WarnTypeEnum;
 

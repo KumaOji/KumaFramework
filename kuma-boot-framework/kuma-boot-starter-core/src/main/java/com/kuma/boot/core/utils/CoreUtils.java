@@ -1,9 +1,9 @@
 package com.kuma.boot.core.utils;
 
 import com.kuma.boot.common.support.version.KmcVersion;
-import com.kuma.boot.core.version.SpringCloudAlibabaVersion;
-import com.kuma.boot.core.version.SpringCloudDependenciesVersion;
-import com.kuma.boot.core.version.SpringCloudVersion;
+import com.kuma.boot.common.version.SpringCloudAlibabaVersion;
+import com.kuma.boot.common.version.SpringCloudDependenciesVersion;
+import com.kuma.boot.common.version.SpringCloudVersion;
 
 import java.util.HashMap;
 import java.util.Map;

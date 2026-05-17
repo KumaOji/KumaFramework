@@ -6,7 +6,7 @@ description = 'Kumaframework canal模块'
 
 dependencies {
     // 基础公共工具（LogUtils / StringUtils 等）
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // Canal Client（CanalConnector / CanalConnectors / Message / CanalClientException）
     api projectLibs.canal.client

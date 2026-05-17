@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework oss-common模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // hutool
     api projectLibs.hutool.core

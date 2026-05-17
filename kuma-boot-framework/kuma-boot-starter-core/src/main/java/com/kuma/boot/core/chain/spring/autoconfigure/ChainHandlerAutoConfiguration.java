@@ -1,7 +1,7 @@
 package com.kuma.boot.core.chain.spring.autoconfigure;
 
-import com.kuma.boot.core.chain.core.executor.ChainExecutor;
-import com.kuma.boot.core.chain.core.registry.ChainRegistry;
+import com.kuma.boot.common.chain.core.executor.ChainExecutor;
+import com.kuma.boot.common.chain.core.registry.ChainRegistry;
 import com.kuma.boot.core.chain.spring.properties.ChainHandlerProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

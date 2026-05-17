@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework stream消息流模块（RocketMQ + 延迟队列）'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
 
     api platform(projectLibs.spring.cloud.dependencies)

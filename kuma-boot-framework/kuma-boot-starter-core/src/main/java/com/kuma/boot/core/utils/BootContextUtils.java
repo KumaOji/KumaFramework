@@ -1,7 +1,7 @@
 package com.kuma.boot.core.utils;
 
 import com.kuma.boot.common.utils.context.ContextUtils;
-import com.kuma.boot.core.startup.SofaBootConstants;
+import com.kuma.boot.common.startup.SofaBootConstants;
 import org.springframework.boot.web.server.context.ConfigurableWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
 

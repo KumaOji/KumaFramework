@@ -1,5 +1,5 @@
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     implementation projectLibs.spring.context
     implementation projectLibs.jakarta.annotation.api

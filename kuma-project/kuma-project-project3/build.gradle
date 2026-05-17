@@ -172,7 +172,7 @@ apply from: rootProject.file('gradle/google-tools-jib.gradle')
 //  依赖声明（最小化：仅用于编译验证）
 // ============================================================
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')

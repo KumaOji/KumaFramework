@@ -16,12 +16,13 @@
 
 package com.kuma.boot.core.startup;
 
+import com.kuma.boot.common.startup.BaseStat;
 import com.kuma.boot.common.support.version.KmcVersion;
 import com.kuma.boot.common.utils.common.PropertyUtils;
 import com.kuma.boot.core.utils.CoreUtils;
-import com.kuma.boot.core.version.SpringCloudAlibabaVersion;
-import com.kuma.boot.core.version.SpringCloudDependenciesVersion;
-import com.kuma.boot.core.version.SpringCloudVersion;
+import com.kuma.boot.common.version.SpringCloudAlibabaVersion;
+import com.kuma.boot.common.version.SpringCloudDependenciesVersion;
+import com.kuma.boot.common.version.SpringCloudVersion;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContextInitializer;
@@ -49,7 +50,7 @@ public class StartupSpringApplication extends SpringApplication {
 
     public static final String DEFAULT_BANNER_LOCATION = "classpath:banner/kmc-banner.txt";
 
-    private final List<com.kuma.boot.core.startup.BaseStat> initializerStartupStatList = new ArrayList<>();
+    private final List<BaseStat> initializerStartupStatList = new ArrayList<>();
 
     public StartupSpringApplication(Class<?>... primarySources) {
         super(primarySources);
@@ -63,7 +64,7 @@ public class StartupSpringApplication extends SpringApplication {
                     initializer.getClass(), ApplicationContextInitializer.class);
             if (requiredType != null) {
                 Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
-                com.kuma.boot.core.startup.BaseStat stat = new com.kuma.boot.core.startup.BaseStat();
+                BaseStat stat = new BaseStat();
                 stat.setName(initializer.getClass().getName());
                 stat.setStartTime(System.currentTimeMillis());
                 initializer.initialize(context);
@@ -73,7 +74,7 @@ public class StartupSpringApplication extends SpringApplication {
         }
     }
 
-    public List<com.kuma.boot.core.startup.BaseStat> getInitializerStartupStatList() {
+    public List<BaseStat> getInitializerStartupStatList() {
         return initializerStartupStatList;
     }
 

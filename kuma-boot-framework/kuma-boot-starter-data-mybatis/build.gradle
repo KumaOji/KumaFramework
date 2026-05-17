@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework data-mybatis模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-data-common')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-common')

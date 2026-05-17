@@ -18,7 +18,7 @@ package com.kuma.boot.core.autoconfigure;
 
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.core.support.strategy.BusinessHandler;
+import com.kuma.boot.common.support.strategy.BusinessHandler;
 import com.kuma.boot.core.support.strategy.BusinessHandlerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

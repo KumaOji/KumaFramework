@@ -20,6 +20,8 @@ package com.kuma.boot.core.startup;
 
 import static com.kuma.boot.core.startup.BootStageConstants.APPLICATION_CONTEXT_REFRESH_STAGE;
 
+import com.kuma.boot.common.startup.ChildrenStat;
+import com.kuma.boot.common.startup.ModuleStat;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -52,12 +54,12 @@ public class StartupSmartLifecycle implements SmartLifecycle, ApplicationContext
     @Override
     public void start() {
         // init ContextRefreshStageStat
-        com.kuma.boot.core.startup.ChildrenStat<com.kuma.boot.core.startup.ModuleStat> stat = new com.kuma.boot.core.startup.ChildrenStat<>();
+        ChildrenStat<ModuleStat> stat = new ChildrenStat<>();
         stat.setName(APPLICATION_CONTEXT_REFRESH_STAGE);
         stat.setEndTime(System.currentTimeMillis());
 
         // build root ModuleStat
-        com.kuma.boot.core.startup.ModuleStat rootModuleStat = new com.kuma.boot.core.startup.ModuleStat();
+        ModuleStat rootModuleStat = new ModuleStat();
         rootModuleStat.setName(ROOT_MODULE_NAME);
         rootModuleStat.setEndTime(stat.getEndTime());
         rootModuleStat.setThreadName(Thread.currentThread().getName());

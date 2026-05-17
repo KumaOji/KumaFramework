@@ -17,7 +17,7 @@ processResources {
 }
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     implementation(projectLibs.spring.boot.starter.webmvc) {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-undertow"

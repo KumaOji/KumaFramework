@@ -7,7 +7,7 @@ description = 'Kumaframework Prometheus 监控集成 —— Micrometer 指标采
 dependencies {
     // 基础：spring-boot-starter-actuator + micrometer-core + ObservationRegistry
     api project(':kuma-boot-framework:kuma-boot-starter-actuator')
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-monitor')
 
     // @AutoConfiguration / @ConditionalOn* 等自动配置注解

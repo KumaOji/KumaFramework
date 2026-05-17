@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework IP 地址解析模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.context

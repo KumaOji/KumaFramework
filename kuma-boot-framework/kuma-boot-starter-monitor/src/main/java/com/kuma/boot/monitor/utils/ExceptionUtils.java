@@ -5,7 +5,7 @@ import com.kuma.boot.common.utils.common.PropertyUtils;
 import com.kuma.boot.common.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.servlet.RequestUtils;
-import com.kuma.boot.core.enums.ExceptionTypeEnum;
+import com.kuma.boot.common.enums.ExceptionTypeEnum;
 import com.kuma.boot.monitor.Monitor;
 import com.kuma.boot.monitor.enums.WarnLevelEnum;
 import com.kuma.boot.monitor.enums.WarnTypeEnum;

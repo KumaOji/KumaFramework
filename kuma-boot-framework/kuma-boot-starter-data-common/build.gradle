@@ -5,5 +5,5 @@ plugins {
 description = 'Kumaframework data-common模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 }
