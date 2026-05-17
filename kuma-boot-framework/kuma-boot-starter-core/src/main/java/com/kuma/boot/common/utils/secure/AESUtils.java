@@ -19,7 +19,7 @@ package com.kuma.boot.common.utils.secure;
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

@@ -19,7 +19,6 @@ package com.kuma.boot.common.utils.io;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.Serializable;
-import org.springframework.util.Assert;
 
 /**
  * 文件后缀过滤器
@@ -35,12 +34,12 @@ public final class SuffixFileFilter implements FileFilter, Serializable {
     private final String[] suffixes;
 
     public SuffixFileFilter(final String suffix) {
-        Assert.notNull(suffix, "The suffix must not be null");
+        if (suffix == null) throw new IllegalArgumentException("The suffix must not be null");
         this.suffixes = new String[] {suffix};
     }
 
     public SuffixFileFilter(final String[] suffixes) {
-        Assert.notNull(suffixes, "The suffix must not be null");
+        if (suffixes == null) throw new IllegalArgumentException("The suffix must not be null");
         this.suffixes = new String[suffixes.length];
         System.arraycopy(suffixes, 0, this.suffixes, 0, suffixes.length);
     }

@@ -30,7 +30,7 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import org.springframework.util.FastByteArrayOutputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * 内存的代码编译器，参考自 oracle jdk
@@ -89,7 +89,7 @@ public class InMemoryJavaCompiler {
 
         private final CharSequence sourceCode;
 
-        private final FastByteArrayOutputStream byteCode;
+        private final ByteArrayOutputStream byteCode;
 
         public MemoryJavaFileObject( String className, CharSequence sourceCode ) {
             super(
@@ -101,7 +101,7 @@ public class InMemoryJavaCompiler {
                     Kind.SOURCE);
             this.className = className;
             this.sourceCode = sourceCode;
-            this.byteCode = new FastByteArrayOutputStream();
+            this.byteCode = new ByteArrayOutputStream();
         }
 
         @Override

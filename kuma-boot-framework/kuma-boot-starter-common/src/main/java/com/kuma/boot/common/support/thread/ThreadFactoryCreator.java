@@ -18,7 +18,6 @@ package com.kuma.boot.common.support.thread;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.springframework.util.StringUtils;
 
 /**
  * ThreadFactoryCreator
@@ -30,7 +29,7 @@ import org.springframework.util.StringUtils;
 public final class ThreadFactoryCreator {
 
     public static ThreadFactory create( String threadName ) {
-        if (!StringUtils.hasText(threadName)) {
+        if (threadName == null || threadName.isBlank()) {
             throw new IllegalArgumentException("argument [threadName] must not be blank");
         }
         return new NamedWithIdThreadFactory(threadName);

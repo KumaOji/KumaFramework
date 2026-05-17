@@ -18,7 +18,7 @@ package com.kuma.boot.common.utils.number;
 
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -37,7 +37,7 @@ import com.kuma.boot.common.utils.lang.StringUtils;
  * @version 2021.9
  * @since 2021-09-02 16:32:13
  */
-public class NumberUtils extends org.springframework.util.NumberUtils {
+public class NumberUtils {
 
     private NumberUtils() {}
 

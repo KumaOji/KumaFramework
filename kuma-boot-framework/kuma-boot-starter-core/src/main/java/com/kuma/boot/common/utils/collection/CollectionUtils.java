@@ -47,8 +47,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.Assert;
-
 /**
  * 集合工具类
  *
@@ -56,7 +54,15 @@ import org.springframework.util.Assert;
  * @version 2021.9
  * @since 2021-09-02 19:41:13
  */
-public class CollectionUtils extends org.springframework.util.CollectionUtils {
+public class CollectionUtils {
+
+    public static boolean isEmpty(@Nullable Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(@Nullable Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
 
     /**
      * Return {@code true} if the supplied Collection is not {@code null} or empty.
@@ -214,7 +220,7 @@ public class CollectionUtils extends org.springframework.util.CollectionUtils {
      */
     public static <T> List<List<T>> partition( List<T> list, int size ) {
         Objects.requireNonNull(list, "List to partition must not null.");
-        Assert.isTrue(size > 0, "List to partition size must more then zero.");
+        if (size <= 0) throw new IllegalArgumentException("List to partition size must more then zero.");
         return ( list instanceof RandomAccess )
                 ? new RandomAccessPartition<>(list, size)
                 : new Partition<>(list, size);

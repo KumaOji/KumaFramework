@@ -16,8 +16,6 @@
 
 package com.kuma.boot.common.utils.common;
 
-import org.springframework.util.ClassUtils;
-
 /**
  * Native 工具
  *
@@ -32,8 +30,16 @@ public final class NativeUtils {
 
     public static final String GENERATED_CLASS = "org.springframework.aot.StaticSpringFactories";
 
-    public static final boolean GENERATED_CLASS_PRESENT =
-            ClassUtils.isPresent(GENERATED_CLASS, null);
+    public static final boolean GENERATED_CLASS_PRESENT = isClassPresent(GENERATED_CLASS);
+
+    private static boolean isClassPresent(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 
     /**
      * Holds the string that is the name of the system property providing information

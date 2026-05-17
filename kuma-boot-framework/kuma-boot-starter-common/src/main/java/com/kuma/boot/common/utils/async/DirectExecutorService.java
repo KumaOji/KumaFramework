@@ -16,7 +16,7 @@
 
 package com.kuma.boot.common.utils.async;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +59,7 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    @Nonnull
+    @NonNull
     public List<Runnable> shutdownNow() {
         isShutdown = true;
         return Collections.emptyList();
@@ -76,13 +76,13 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    public boolean awaitTermination( long timeout, @Nonnull TimeUnit unit ) {
+    public boolean awaitTermination( long timeout, @NonNull TimeUnit unit ) {
         return isShutdown;
     }
 
     @Override
-    @Nonnull
-    public <T> Future<T> submit( @Nonnull Callable<T> task ) {
+    @NonNull
+    public <T> Future<T> submit( @NonNull Callable<T> task ) {
         throwRejectedExecutionExceptionIfShutdown();
 
         try {
@@ -95,8 +95,8 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    @Nonnull
-    public <T> Future<T> submit( @Nonnull Runnable task, T result ) {
+    @NonNull
+    public <T> Future<T> submit( @NonNull Runnable task, T result ) {
         throwRejectedExecutionExceptionIfShutdown();
 
         task.run();
@@ -105,8 +105,8 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    @Nonnull
-    public Future<?> submit( @Nonnull Runnable task ) {
+    @NonNull
+    public Future<?> submit( @NonNull Runnable task ) {
         throwRejectedExecutionExceptionIfShutdown();
 
         task.run();
@@ -114,8 +114,8 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    @Nonnull
-    public <T> List<Future<T>> invokeAll( @Nonnull Collection<? extends Callable<T>> tasks ) {
+    @NonNull
+    public <T> List<Future<T>> invokeAll( @NonNull Collection<? extends Callable<T>> tasks ) {
         throwRejectedExecutionExceptionIfShutdown();
 
         ArrayList<Future<T>> result = new ArrayList<>();
@@ -131,11 +131,11 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    @Nonnull
+    @NonNull
     public <T> List<Future<T>> invokeAll(
-            @Nonnull Collection<? extends Callable<T>> tasks,
+            @NonNull Collection<? extends Callable<T>> tasks,
             long timeout,
-            @Nonnull TimeUnit unit ) {
+            @NonNull TimeUnit unit ) {
         throwRejectedExecutionExceptionIfShutdown();
 
         long end = System.currentTimeMillis() + unit.toMillis(timeout);
@@ -177,7 +177,7 @@ public class DirectExecutorService implements ExecutorService {
                         }
 
                         @Override
-                        public T get( long timeout, @Nonnull TimeUnit unit ) {
+                        public T get( long timeout, @NonNull TimeUnit unit ) {
                             throw new CancellationException("Task has been cancelled.");
                         }
                     });
@@ -187,8 +187,8 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    @Nonnull
-    public <T> T invokeAny( @Nonnull Collection<? extends Callable<T>> tasks )
+    @NonNull
+    public <T> T invokeAny( @NonNull Collection<? extends Callable<T>> tasks )
             throws ExecutionException {
         throwRejectedExecutionExceptionIfShutdown();
 
@@ -208,7 +208,7 @@ public class DirectExecutorService implements ExecutorService {
 
     @Override
     public <T> T invokeAny(
-            @Nonnull Collection<? extends Callable<T>> tasks, long timeout, @Nonnull TimeUnit unit )
+            @NonNull Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit )
             throws ExecutionException, TimeoutException {
         throwRejectedExecutionExceptionIfShutdown();
 
@@ -236,7 +236,7 @@ public class DirectExecutorService implements ExecutorService {
     }
 
     @Override
-    public void execute( @Nonnull Runnable command ) {
+    public void execute( @NonNull Runnable command ) {
         throwRejectedExecutionExceptionIfShutdown();
 
         command.run();
@@ -292,7 +292,7 @@ public class DirectExecutorService implements ExecutorService {
         }
 
         @Override
-        public V get( long timeout, @Nonnull TimeUnit unit ) throws ExecutionException {
+        public V get( long timeout, @NonNull TimeUnit unit ) throws ExecutionException {
             return get();
         }
     }

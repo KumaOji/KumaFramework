@@ -135,11 +135,17 @@ public class StringUtils {
     }
 
     public static String trimLeft(String str, char trim) {
-        return org.springframework.util.StringUtils.trimLeadingCharacter(str, trim);
+        if (str == null) return null;
+        int i = 0;
+        while (i < str.length() && str.charAt(i) == trim) i++;
+        return str.substring(i);
     }
 
     public static String trimRight(String str, char trim) {
-        return org.springframework.util.StringUtils.trimTrailingCharacter(str, trim);
+        if (str == null) return null;
+        int i = str.length();
+        while (i > 0 && str.charAt(i - 1) == trim) i--;
+        return str.substring(0, i);
     }
 
     public static String trim(String str, char trim) {

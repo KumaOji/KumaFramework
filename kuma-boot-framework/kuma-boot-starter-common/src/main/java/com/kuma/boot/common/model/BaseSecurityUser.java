@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.util.Assert;
 
 /**
  * 用户手机号和账号密码 身份权限认证类 登陆身份认证
@@ -220,9 +219,9 @@ public class BaseSecurityUser implements Serializable, Cloneable {
             boolean accountNonLocked,
             Set<String> permissions,
             Set<String> roleCodes ) {
-        Assert.isTrue(
-                username != null && !username.isEmpty() && password != null,
-                "Cannot pass null or empty values to constructor");
+        if (!(username != null && !username.isEmpty() && password != null)) {
+            throw new IllegalArgumentException("Cannot pass null or empty values to constructor");
+        }
         this.userId = userId;
         this.username = username;
         this.password = password;

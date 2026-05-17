@@ -44,7 +44,7 @@ import com.kuma.boot.common.utils.exception.ExceptionUtils;
 import com.kuma.boot.common.utils.io.FileUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;

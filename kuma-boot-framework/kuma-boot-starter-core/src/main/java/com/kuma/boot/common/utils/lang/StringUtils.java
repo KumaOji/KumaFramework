@@ -60,14 +60,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.PatternMatchUtils;
-import org.springframework.web.util.HtmlUtils;
 
 /** 字符串工具类 */
 public final class StringUtils extends StrUtil {
@@ -3028,7 +3026,8 @@ public final class StringUtils extends StrUtil {
      * @return the delimited {@code String}
      */
     public static String join(Collection<?> coll) {
-        return org.springframework.util.StringUtils.collectionToCommaDelimitedString(coll);
+        if (coll == null || coll.isEmpty()) return "";
+        return coll.stream().map(o -> o == null ? "" : o.toString()).collect(Collectors.joining(","));
     }
 
     /**
@@ -3041,7 +3040,8 @@ public final class StringUtils extends StrUtil {
      * @return the delimited {@code String}
      */
     public static String join(Collection<?> coll, String delim) {
-        return org.springframework.util.StringUtils.collectionToDelimitedString(coll, delim);
+        if (coll == null || coll.isEmpty()) return "";
+        return coll.stream().map(o -> o == null ? "" : o.toString()).collect(Collectors.joining(delim));
     }
 
     /**
@@ -3066,7 +3066,8 @@ public final class StringUtils extends StrUtil {
      * @return the delimited {@code String}
      */
     public static String join(Object[] arr, String delim) {
-        return org.springframework.util.StringUtils.arrayToDelimitedString(arr, delim);
+        if (arr == null || arr.length == 0) return "";
+        return Arrays.stream(arr).map(o -> o == null ? "" : o.toString()).collect(Collectors.joining(delim));
     }
 
     /**
@@ -3076,7 +3077,21 @@ public final class StringUtils extends StrUtil {
      * @return 字符串数组
      */
     public static String[] split(@Nullable String str, @Nullable String delimiter) {
-        return org.springframework.util.StringUtils.delimitedListToStringArray(str, delimiter);
+        if (str == null) return new String[0];
+        if (delimiter == null) return new String[]{str};
+        if (delimiter.isEmpty()) {
+            String[] result = new String[str.length()];
+            for (int i = 0; i < str.length(); i++) result[i] = String.valueOf(str.charAt(i));
+            return result;
+        }
+        List<String> parts = new ArrayList<>();
+        int pos = 0, delLen = delimiter.length(), idx;
+        while ((idx = str.indexOf(delimiter, pos)) != -1) {
+            parts.add(str.substring(pos, idx));
+            pos = idx + delLen;
+        }
+        parts.add(str.substring(pos));
+        return parts.toArray(new String[0]);
     }
 
     /**
@@ -3086,8 +3101,9 @@ public final class StringUtils extends StrUtil {
      * @return 字符串数组
      */
     public static String[] splitTrim(@Nullable String str, @Nullable String delimiter) {
-        return org.springframework.util.StringUtils.delimitedListToStringArray(
-                str, delimiter, " \t\n\n\f");
+        String[] parts = split(str, delimiter);
+        for (int i = 0; i < parts.length; i++) parts[i] = parts[i].trim();
+        return parts;
     }
 
     /**
@@ -3100,7 +3116,25 @@ public final class StringUtils extends StrUtil {
      * @return 是否匹配
      */
     public static boolean simpleMatch(@Nullable String pattern, @Nullable String str) {
-        return PatternMatchUtils.simpleMatch(pattern, str);
+        if (pattern == null || str == null) return false;
+        int firstIndex = pattern.indexOf('*');
+        if (firstIndex == -1) return pattern.equals(str);
+        if (firstIndex == 0) {
+            if (pattern.length() == 1) return true;
+            int nextIndex = pattern.indexOf('*', 1);
+            if (nextIndex == -1) return str.endsWith(pattern.substring(1));
+            String part = pattern.substring(1, nextIndex);
+            if (part.isEmpty()) return simpleMatch(pattern.substring(nextIndex), str);
+            int partIndex = str.indexOf(part);
+            while (partIndex != -1) {
+                if (simpleMatch(pattern.substring(nextIndex), str.substring(partIndex + part.length()))) return true;
+                partIndex = str.indexOf(part, partIndex + 1);
+            }
+            return false;
+        }
+        return str.length() >= firstIndex
+                && pattern.substring(0, firstIndex).equals(str.substring(0, firstIndex))
+                && simpleMatch(pattern.substring(firstIndex), str.substring(firstIndex));
     }
 
     /**
@@ -3113,7 +3147,12 @@ public final class StringUtils extends StrUtil {
      * @return 是否匹配
      */
     public static boolean simpleMatch(@Nullable String[] patterns, String str) {
-        return PatternMatchUtils.simpleMatch(patterns, str);
+        if (patterns != null) {
+            for (String pattern : patterns) {
+                if (simpleMatch(pattern, str)) return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -3149,7 +3188,20 @@ public final class StringUtils extends StrUtil {
      * @return {String}
      */
     public static String escapeHtml(String html) {
-        return HtmlUtils.htmlEscape(html);
+        if (html == null || html.isEmpty()) return html;
+        StringBuilder sb = new StringBuilder(html.length());
+        for (int i = 0; i < html.length(); i++) {
+            char c = html.charAt(i);
+            switch (c) {
+                case '&': sb.append("&amp;"); break;
+                case '<': sb.append("&lt;"); break;
+                case '>': sb.append("&gt;"); break;
+                case '"': sb.append("&quot;"); break;
+                case '\'': sb.append("&#x27;"); break;
+                default: sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -3204,7 +3256,7 @@ public final class StringUtils extends StrUtil {
         if (count == 0) {
             return StrPoolConstants.EMPTY;
         }
-        Assert.isTrue(count > 0, "Requested random string length " + count + " is less than 0.");
+        if (count <= 0) throw new IllegalArgumentException("Requested random string length " + count + " is less than 0.");
         final Random random = RandomHolder.SECURE_RANDOM;
         char[] buffer = new char[count];
         for (int i = 0; i < count; i++) {
@@ -3540,7 +3592,7 @@ public final class StringUtils extends StrUtil {
         if (str == null) {
             return null;
         }
-        if (!org.springframework.util.StringUtils.hasLength(padStr)) {
+        if (padStr == null || padStr.isEmpty()) {
             padStr = StrPoolConstants.SPACE;
         }
         final int padLen = padStr.length();

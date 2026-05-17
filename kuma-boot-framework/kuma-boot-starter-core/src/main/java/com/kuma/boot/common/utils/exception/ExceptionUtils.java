@@ -24,7 +24,7 @@ import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.utils.async.RunnableWithException;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;

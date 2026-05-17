@@ -46,7 +46,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.ResourceUtils;
 
 /** 路径工具类 */
 public final class PathUtils {
@@ -498,16 +497,15 @@ public final class PathUtils {
         }
         String protocol = url.getProtocol();
         String file = UrlUtils.decode(url.getPath(), StandardCharsets.UTF_8);
-        if (ResourceUtils.URL_PROTOCOL_FILE.equals(protocol)) {
+        if ("file".equals(protocol)) {
             return new File(file).getParentFile().getParentFile().getAbsolutePath();
-        } else if (ResourceUtils.URL_PROTOCOL_JAR.equals(protocol)
-                || ResourceUtils.URL_PROTOCOL_ZIP.equals(protocol)) {
-            int ipos = file.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+        } else if ("jar".equals(protocol) || "zip".equals(protocol)) {
+            int ipos = file.indexOf("!/");
             if (ipos > 0) {
                 file = file.substring(0, ipos);
             }
-            if (file.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
-                file = file.substring(ResourceUtils.FILE_URL_PREFIX.length());
+            if (file.startsWith("file:")) {
+                file = file.substring("file:".length());
             }
             return new File(file).getParentFile().getAbsolutePath();
         }

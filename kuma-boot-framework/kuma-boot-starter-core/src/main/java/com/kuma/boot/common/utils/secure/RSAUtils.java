@@ -20,7 +20,7 @@ import com.kuma.boot.common.support.tuple.pair.KeyPair;
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

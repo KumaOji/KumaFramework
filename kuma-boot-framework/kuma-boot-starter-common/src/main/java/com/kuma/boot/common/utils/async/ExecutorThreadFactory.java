@@ -18,7 +18,7 @@ package com.kuma.boot.common.utils.async;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
