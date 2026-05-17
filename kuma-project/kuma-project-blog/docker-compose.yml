@@ -1,0 +1,111 @@
+services:
+
+  blog-mysql:
+    image: mysql:8.0
+    container_name: blog-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: base
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - blog-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  blog-redis:
+    image: redis:7
+    container_name: blog-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - /data/redis:/data
+    networks:
+      - blog-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  blog-background:
+    image: blog:2026.05.01
+    container_name: blog-background
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - /data/blog/background/music:/data/music
+      - /data/blog/background/logs:/data/blog/logs
+    environment:
+      ADMIN_INITIAL_PASSWORD: "admin123"
+      MYSQL_URL: "jdbc:mysql://blog-mysql:3306/base?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true"
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: "123456"
+      REDIS_HOST: blog-redis
+      REDIS_PORT: 6379
+      REDIS_DATABASE: 0
+    networks:
+      - blog-net
+    depends_on:
+      blog-mysql:
+        condition: service_healthy
+      blog-redis:
+        condition: service_healthy
+
+  blog-fronted:
+    image: nginx:1.26.2
+    container_name: blog-fronted
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - /data/blog/fronted/dist:/usr/share/nginx/html
+      - /data/blog/fronted/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - blog-net
+    depends_on:
+      - blog-background
+
+  blog-qdrant:
+    image: qdrant/qdrant:v1.11.5
+    container_name: blog-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333-6334:6333-6334"
+    volumes:
+      - /data/qdrant:/qdrant/storage
+    networks:
+      - blog-net
+
+  blog-ai-ui:
+    image: ghcr.m.daocloud.io/open-webui/open-webui:main
+    container_name: blog-ai-ui
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - /data/open-webui:/app/backend/data
+    environment:
+      HF_ENDPOINT: "https://hf-mirror.com"
+      HF_HUB_OFFLINE: "1"
+      RAG_EMBEDDING_ENGINE: "ollama"
+    networks:
+      - blog-net
+
+networks:
+  blog-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
