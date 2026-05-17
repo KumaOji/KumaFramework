@@ -18,6 +18,7 @@ package com.kuma.boot.common.utils.collection;
 
 import com.google.common.collect.Lists;
 import com.kuma.boot.common.constant.CommonConstants;
+import com.kuma.boot.common.extension.CollectionUtils;
 import com.kuma.boot.common.support.handler.Handler;
 import java.util.ArrayList;
 import java.util.Collections;
