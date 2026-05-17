@@ -20,13 +20,6 @@ dependencies {
     implementation projectLibs.hutool.json
     implementation projectLibs.hutool.http
     implementation projectLibs.guava
-    implementation projectLibs.spring.core
-    implementation projectLibs.spring.context
-    implementation projectLibs.spring.beans
-    implementation projectLibs.spring.aop
-    implementation projectLibs.spring.web
-    implementation projectLibs.spring.webflux
-    implementation projectLibs.spring.expression
     implementation projectLibs.commons.lang3
     implementation projectLibs.commons.collections4
     implementation projectLibs.commons.codec
@@ -34,33 +27,18 @@ dependencies {
     implementation projectLibs.commons.compress
     implementation projectLibs.commons.net
     implementation projectLibs.bouncycastle.provider
-    implementation projectLibs.reactor.core
-    implementation projectLibs.reactivestreams
-
-    implementation projectLibs.swagger.annotations
     implementation projectLibs.jackson.annotations
     implementation projectLibs.jackson.core
     implementation projectLibs.jackson.databind
-    implementation projectLibs.jackson.datatype.jsr353
-    implementation projectLibs.javax.json.api
-    implementation projectLibs.javax.json.impl
-    implementation projectLibs.transmittable.thread.local
     implementation projectLibs.snappy.java
     implementation projectLibs.kryo
-    implementation projectLibs.jsoup
     implementation projectLibs.snakeyaml
     implementation projectLibs.slf4j.api
     implementation projectLibs.logback.classic
-    implementation projectLibs.jspecify
     implementation projectLibs.uuid.creator
-    implementation projectLibs.aopalliance
     implementation projectLibs.gson
     implementation projectLibs.fastjson2
-    implementation projectLibs.groovy
     implementation projectLibs.javassist
-    implementation projectLibs.aspectjweaver
-    implementation projectLibs.spring.context.support
-    implementation projectLibs.jakarta.annotation.api
     implementation projectLibs.orika.core
     implementation projectLibs.hessian
     compileOnly projectLibs.jakarta.servlet.api
