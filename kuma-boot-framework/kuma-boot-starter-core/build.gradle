@@ -5,7 +5,6 @@ plugins {
 description = 'Kumaframework 核心模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-pure')
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api projectLibs.hutool.core
     api projectLibs.hutool.extra
@@ -33,6 +32,8 @@ dependencies {
     api projectLibs.fastjson2
     api projectLibs.guava
     api projectLibs.commons.io
+    api projectLibs.jspecify
+    compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }
