@@ -26,6 +26,9 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import com.kuma.boot.common.support.thread.MDCCallable;
+import com.kuma.boot.common.support.thread.MDCRunnable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**

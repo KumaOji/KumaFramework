@@ -20,6 +20,8 @@ package com.kuma.boot.core.model;
 import static com.kuma.boot.core.utils.convert.ConvertUtils.convert;
 
 import com.kuma.boot.common.enums.EventEnum;
+import com.kuma.boot.common.model.Callable;
+import com.kuma.boot.common.model.Pubsub;
 import com.kuma.boot.core.utils.common.PropertyUtils;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;

@@ -19,6 +19,8 @@ package com.kuma.boot.core.utils.spel;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.kuma.boot.common.utils.spel.ExpressionRootObject;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.expression.AnnotatedElementKey;

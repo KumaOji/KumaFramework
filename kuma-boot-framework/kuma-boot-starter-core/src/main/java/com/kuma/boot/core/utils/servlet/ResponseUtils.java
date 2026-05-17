@@ -24,6 +24,7 @@ import com.kuma.boot.common.holder.VersionContextHolder;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.common.utils.servlet.TraceUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;

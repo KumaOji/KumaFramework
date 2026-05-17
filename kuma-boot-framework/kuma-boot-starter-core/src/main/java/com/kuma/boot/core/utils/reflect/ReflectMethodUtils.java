@@ -24,6 +24,9 @@ import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
+import com.kuma.boot.common.utils.reflect.TypeUtils;
+import tools.jackson.databind.deser.bean.CreatorCandidate;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -109,7 +112,7 @@ public final class ReflectMethodUtils {
      * （1）如果没有指定对应的注解信息，则直接返回 argIndex 比如：arg0 arg1
      * @param method 方法信息
      * @return 方法名称列表
-     * @see Param 参数注解
+     * @see CreatorCandidate.Param 参数注解
      */
     public static List<String> getParamNames(final Method method) {
         ArgUtils.notNull(method, "method");

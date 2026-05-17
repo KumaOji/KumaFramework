@@ -20,6 +20,8 @@ import com.kuma.boot.common.support.serializer.Serializer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+
+import com.kuma.boot.common.support.serializer.impl.JdkSerializer;
 import org.springframework.core.ConfigurableObjectInputStream;
 
 /**

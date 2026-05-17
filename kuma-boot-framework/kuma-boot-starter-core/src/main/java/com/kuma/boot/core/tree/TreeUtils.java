@@ -18,6 +18,7 @@ package com.kuma.boot.core.tree;
 
 import cn.hutool.core.lang.tree.TreeNodeConfig;
 import com.kuma.boot.common.exception.BusinessException;
+import com.kuma.boot.common.tree.TreeUtil;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.core.utils.reflect.ReflectionUtils;
 import java.io.Serializable;

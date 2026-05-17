@@ -22,6 +22,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import com.kuma.boot.common.support.thread.MDCCallable;
+import com.kuma.boot.common.support.thread.MDCRunnable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**

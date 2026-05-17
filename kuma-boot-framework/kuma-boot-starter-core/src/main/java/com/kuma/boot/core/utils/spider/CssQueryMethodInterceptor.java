@@ -16,6 +16,7 @@
 
 package com.kuma.boot.core.utils.spider;
 
+import com.kuma.boot.common.utils.spider.CssQuery;
 import com.kuma.boot.core.utils.convert.ConvertUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import jakarta.annotation.Nullable;

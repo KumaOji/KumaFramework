@@ -19,6 +19,7 @@ package com.kuma.boot.core.support.thread;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.kuma.boot.common.support.thread.ThreadPoolUncaughtExceptionHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -70,7 +71,7 @@ public class ThreadPoolFactory implements ThreadFactory {
                 new Thread(group, r, namePrefix + "-thread-" + threadNumber.getAndIncrement(), 0);
 
         Thread.UncaughtExceptionHandler handler = t.getUncaughtExceptionHandler();
-        if (!( handler instanceof ThreadPoolUncaughtExceptionHandler )) {
+        if (!( handler instanceof ThreadPoolUncaughtExceptionHandler)) {
             t.setUncaughtExceptionHandler(new ThreadPoolUncaughtExceptionHandler(handler));
         }
 
