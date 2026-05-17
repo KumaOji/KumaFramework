@@ -18,14 +18,18 @@ package com.kuma.boot.common.utils.ip;
 
 import tools.jackson.databind.JsonNode;
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import com.kuma.boot.common.utils.io.HttpUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
+import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URL;
+import java.net.HttpURLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Objects;
 
@@ -66,7 +70,7 @@ public class IpUtils {
      */
     public static String getHttpCityInfo(String ip) {
         String api = String.format("http://whois.pconline.com.cn/ipJson.jsp?ip=%s&json=true", ip);
-        JsonNode node = JacksonUtils.parse((String) HttpUtils.getRequest(api, "gbk"));
+        JsonNode node = JacksonUtils.parse(httpGet(api, "gbk"));
         if (Objects.nonNull(node)) {
             LogUtils.info(node.toString());
             return node.get("addr").toString();
@@ -75,16 +79,35 @@ public class IpUtils {
         return null;
     }
 
+    private static String httpGet(String url, String charset) {
+        try {
+            HttpURLConnection conn = (HttpURLConnection) URI.create(url).toURL().openConnection();
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+            try (InputStreamReader reader =
+                    new InputStreamReader(conn.getInputStream(), Charset.forName(charset))) {
+                char[] buf = new char[4096];
+                StringBuilder sb = new StringBuilder();
+                int n;
+                while ((n = reader.read(buf)) != -1) sb.append(buf, 0, n);
+                return sb.toString();
+            }
+        } catch (Exception e) {
+            LogUtils.error("IpUtils httpGet error: {}", e.getMessage());
+            return null;
+        }
+    }
+
     public static final String DEFAULT_IP = "127.0.0.1";
 
     private static String ip = null;
 
     public static String getLocalIpByNetCard() {
         try {
-            Enumeration e = NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 
             while (e.hasMoreElements()) {
-                NetworkInterface item = (NetworkInterface) e.nextElement();
+                NetworkInterface item = e.nextElement();
 
                 for (InterfaceAddress address : item.getInterfaceAddresses()) {
                     if (!item.isLoopback()

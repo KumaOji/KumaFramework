@@ -148,7 +148,7 @@ public class LocalDateTimeDeserializer extends JSR310DateTimeDeserializerBase<Lo
             throws JacksonException {
         // 字符串
         if (parser.hasTokenId(JsonTokenId.ID_STRING)) {
-            String string = parser.getText().trim();
+            String string = parser.getString().trim();
             if (string.length() == 0) {
                 return null;
             }

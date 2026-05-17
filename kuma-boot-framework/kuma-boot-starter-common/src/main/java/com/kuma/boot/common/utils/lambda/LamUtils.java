@@ -629,6 +629,7 @@ public class LamUtils {
      * @param filters    过滤条件，可以添加多个，所有条件同时成立才添加到新的集合中
      * @return 新的List集合
      */
+    @SafeVarargs
     @SuppressWarnings({"all"})
     public static <T, R> List<R> mapFiltersToList(
             List<T> originList, Function<T, R> mapper, Predicate<R>... filters) {
@@ -654,6 +655,7 @@ public class LamUtils {
      * @param filters    过滤条件，可以添加多个，所有条件同时成立才添加到新的集合中
      * @return 新的List集合
      */
+    @SafeVarargs
     @SuppressWarnings({"all"})
     public static <T, R> List<R> mapDistinctFiltersToList(
             List<T> originList, Function<T, R> mapper, Predicate<R>... filters) {
@@ -1370,7 +1372,9 @@ public class LamUtils {
                 oldList.stream()
                         .filter(s -> existsList.stream().noneMatch(t -> mapper.apply(t, s)))
                         .collect(Collectors.toList());
-        return new List[]{stayAddIds, stayDelIds, existsList};
+        @SuppressWarnings("unchecked")
+        List<T>[] result = new List[]{stayAddIds, stayDelIds, existsList};
+        return result;
     }
 
     // =================================================================================================================

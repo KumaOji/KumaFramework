@@ -21,6 +21,7 @@ import com.kuma.boot.common.support.dataframe.iframe.function.NumberFunction;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -242,7 +243,7 @@ public class CollectorsPlusUtil {
                     a[0] = a[0].add(b[0]);
                     return a;
                 },
-                a -> a[0].divide(a[1], MathContext.DECIMAL32).setScale(newScale, roundingMode),
+                a -> a[0].divide(a[1], MathContext.DECIMAL32).setScale(newScale, RoundingMode.values()[roundingMode]),
                 CH_NOID);
     }
 }

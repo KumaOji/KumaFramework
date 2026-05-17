@@ -68,7 +68,7 @@ public final class FailOverUtils {
             }
             if (result.success && times > 0) {
                 LogUtils.info(
-                        PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY)
+                        System.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "")
                                 + " {} 补偿成功, 补偿次数：{}",
                         NAME,
                         times);

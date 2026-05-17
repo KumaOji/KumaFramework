@@ -293,16 +293,6 @@ public class CollectionUtils {
      */
     public static final List EMPTY_LIST = Collections.emptyList();
 
-    /**
-     * 是否为空
-     *
-     * @param collection 集合
-     * @return {@code true} 是
-     */
-    public static boolean isEmpty( Collection collection ) {
-        return null == collection || collection.isEmpty(); // 更有可读性
-    }
-
     public static boolean isEmpty( Object[] array ) {
         return array == null || array.length == 0;
     }
@@ -324,7 +314,7 @@ public class CollectionUtils {
      * @param collection 集合
      * @return {@code true} 是
      */
-    public static boolean isNotEmpty( Collection collection ) {
+    public static boolean isNotEmpty(@Nullable Collection<?> collection) {
         return !isEmpty(collection);
     }
 

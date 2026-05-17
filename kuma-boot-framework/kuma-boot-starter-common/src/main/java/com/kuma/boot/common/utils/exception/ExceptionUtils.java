@@ -833,6 +833,7 @@ public class ExceptionUtils {
      * The same as {@link #findThrowable(Throwable, Class)}, but rethrows original
      * exception if the expected exception was not found.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Throwable> void assertThrowable(
             Throwable throwable, Class<T> searchType) throws T {
         if (findThrowable(throwable, searchType).isEmpty()) {
@@ -944,6 +945,7 @@ public class ExceptionUtils {
      * The same as {@link #findThrowableWithMessage(Throwable, String)}, but rethrows
      * original exception if the expected exception was not found.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Throwable> void assertThrowableWithMessage(
             Throwable throwable, String searchMessage) throws T {
         if (findThrowableWithMessage(throwable, searchMessage).isEmpty()) {

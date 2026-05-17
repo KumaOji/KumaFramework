@@ -166,7 +166,7 @@ public class MathUtils {
             return null;
         }
         BigDecimal subtract = nowValue.subtract(preValue);
-        BigDecimal growRate = subtract.divide(preValue, 8, BigDecimal.ROUND_HALF_UP);
+        BigDecimal growRate = subtract.divide(preValue, 8, RoundingMode.HALF_UP);
         if (multi100) {
             growRate = growRate.multiply(ONE_HUNDRED);
         }
@@ -187,7 +187,7 @@ public class MathUtils {
                                 e -> {
                                     // ｜(e-avg)/avg｜
                                     return e.subtract(avg)
-                                            .divide(avg, 8, BigDecimal.ROUND_HALF_UP)
+                                            .divide(avg, 8, RoundingMode.HALF_UP)
                                             .abs();
                                 })
                         .collect(Collectors.toList());

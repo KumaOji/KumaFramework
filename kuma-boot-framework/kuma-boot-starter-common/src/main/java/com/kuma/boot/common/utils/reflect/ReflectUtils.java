@@ -23,8 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import com.kuma.boot.common.utils.lang.StringUtils;
 
-import static org.springframework.util.StringUtils.capitalize;
-
 /** 反射工具类. 提供调用getter/setter方法, 访问私有变量, 调用私有方法, 获取泛型类型Class, 被AOP过的真实类等工具函数. */
 @SuppressWarnings("rawtypes")
 public class ReflectUtils extends ReflectUtil {
@@ -64,7 +62,7 @@ public class ReflectUtils extends ReflectUtil {
         try {
             final Constructor<MethodHandles.Lookup> constructor =
                     MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-            if (!constructor.isAccessible()) {
+            if (!constructor.canAccess(null)) {
                 constructor.setAccessible(true);
             }
             final Class<?> declaringClass = method.getDeclaringClass();
@@ -85,5 +83,10 @@ public class ReflectUtils extends ReflectUtil {
         return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC))
                 == Modifier.PUBLIC)
                 && method.getDeclaringClass().isInterface();
+    }
+
+    private static String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 }

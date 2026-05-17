@@ -16,14 +16,6 @@
 
 package com.kuma.boot.common.utils.async.concurrency;
 
-import org.slf4j.MDC;
-import org.springframework.web.context.request.RequestContextHolder;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Supplier;
-
 /**
  * Represents a utility class for handling threads in a virtualized environment.
  * This abstract class provides a thread factory and an executor service for executing tasks.

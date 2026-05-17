@@ -64,6 +64,7 @@ import com.kuma.boot.common.utils.lang.StringUtils;
  * @author caizhihao
  * @param <T>
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractDataFrameImpl<T> extends AbstractWindowDataFrame<T> {
 
     protected AbstractDataFrameImpl() {}

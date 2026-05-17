@@ -24,10 +24,7 @@ import com.kuma.boot.common.utils.collection.ArrayUtils;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.collection.MapUtils;
 import com.kuma.boot.common.utils.reflect.ClassTypeUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
-import com.kuma.boot.common.utils.reflect.ReflectFieldUtils;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +36,7 @@ import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
 /** Object 工具类 */
-public final class ObjectUtils extends org.springframework.util.ObjectUtils {
+public final class ObjectUtils {
 
     /**
      * 判断对象为null
@@ -630,54 +627,6 @@ public final class ObjectUtils extends org.springframework.util.ObjectUtils {
     // }
 
     /**
-     * empty 转换为 null
-     * @param object 对象
-     */
-    public static void emptyToNull(Object object) {
-        if (null == object) {
-            return;
-        }
-
-        List<Field> fieldList = ClassUtils.getAllFieldList(object.getClass());
-        for (Field field : fieldList) {
-            Object value = ReflectFieldUtils.getValue(field, object);
-            if (isEmpty(value)) {
-                ReflectFieldUtils.setValue(field, object, null);
-            }
-        }
-    }
-
-    /**
-     * 基于反射的属性拷贝
-     * @param source 源头
-     * @param target 目标
-     */
-    public static void copyProperties(Object source, Object target) {
-        if (source == null || target == null) {
-            return;
-        }
-
-        Map<String, Field> sourceFieldMap = ClassUtils.getAllFieldMap(source.getClass());
-        Map<String, Field> targetFieldMap = ClassUtils.getAllFieldMap(target.getClass());
-
-        // 遍历
-        for (Map.Entry<String, Field> entry : sourceFieldMap.entrySet()) {
-            String sourceFieldName = entry.getKey();
-            Field sourceField = entry.getValue();
-            Field targetField = targetFieldMap.get(sourceFieldName);
-
-            if (targetField == null) {
-                continue;
-            }
-
-            if (ClassUtils.isAssignable(sourceField.getType(), targetField.getType())) {
-                Object sourceVal = ReflectFieldUtils.getValue(sourceField, source);
-                ReflectFieldUtils.setValue(targetField, target, sourceVal);
-            }
-        }
-    }
-
-    /**
      * 是否为相同的值 null null 被认为相同
      * @param valueOne 第一个
      * @param valueTwo 第二个
@@ -1034,5 +983,54 @@ public final class ObjectUtils extends org.springframework.util.ObjectUtils {
             throw new NullPointerException();
         }
         return obj;
+    }
+
+    public static boolean isEmpty(@Nullable Object[] array) {
+        return array == null || array.length == 0;
+    }
+
+    public static boolean nullSafeEquals(@Nullable Object o1, @Nullable Object o2) {
+        if (o1 == o2) return true;
+        if (o1 == null || o2 == null) return false;
+        if (o1.equals(o2)) return true;
+        if (o1.getClass().isArray() && o2.getClass().isArray()) {
+            if (o1 instanceof Object[] && o2 instanceof Object[]) return Arrays.equals((Object[]) o1, (Object[]) o2);
+            if (o1 instanceof boolean[] && o2 instanceof boolean[]) return Arrays.equals((boolean[]) o1, (boolean[]) o2);
+            if (o1 instanceof byte[] && o2 instanceof byte[]) return Arrays.equals((byte[]) o1, (byte[]) o2);
+            if (o1 instanceof char[] && o2 instanceof char[]) return Arrays.equals((char[]) o1, (char[]) o2);
+            if (o1 instanceof double[] && o2 instanceof double[]) return Arrays.equals((double[]) o1, (double[]) o2);
+            if (o1 instanceof float[] && o2 instanceof float[]) return Arrays.equals((float[]) o1, (float[]) o2);
+            if (o1 instanceof int[] && o2 instanceof int[]) return Arrays.equals((int[]) o1, (int[]) o2);
+            if (o1 instanceof long[] && o2 instanceof long[]) return Arrays.equals((long[]) o1, (long[]) o2);
+            if (o1 instanceof short[] && o2 instanceof short[]) return Arrays.equals((short[]) o1, (short[]) o2);
+        }
+        return false;
+    }
+
+    public static String nullSafeToString(@Nullable Object obj) {
+        if (obj == null) return "null";
+        if (obj instanceof String) return (String) obj;
+        if (obj instanceof Object[]) return Arrays.deepToString((Object[]) obj);
+        if (obj instanceof boolean[]) return Arrays.toString((boolean[]) obj);
+        if (obj instanceof byte[]) return Arrays.toString((byte[]) obj);
+        if (obj instanceof char[]) return Arrays.toString((char[]) obj);
+        if (obj instanceof double[]) return Arrays.toString((double[]) obj);
+        if (obj instanceof float[]) return Arrays.toString((float[]) obj);
+        if (obj instanceof int[]) return Arrays.toString((int[]) obj);
+        if (obj instanceof long[]) return Arrays.toString((long[]) obj);
+        if (obj instanceof short[]) return Arrays.toString((short[]) obj);
+        return obj.toString();
+    }
+
+    public static boolean containsElement(@Nullable Object[] array, Object element) {
+        if (array == null) return false;
+        for (Object o : array) {
+            if (nullSafeEquals(o, element)) return true;
+        }
+        return false;
+    }
+
+    public static String toString(@Nullable Object obj) {
+        return obj == null ? "" : obj.toString();
     }
 }

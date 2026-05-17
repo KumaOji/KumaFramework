@@ -60,10 +60,9 @@ public class Request<T extends RequestBase> implements Serializable {
         return request;
     }
 
-    public static <T extends RequestBase> Request<T> empty() {
-        Request<T> request =  new Request<T>();
-        EmptyRequest emptyRequest = new EmptyRequest();
-        request.setOrder((T)emptyRequest);
+    public static Request<EmptyRequest> empty() {
+        Request<EmptyRequest> request = new Request<>();
+        request.setOrder(new EmptyRequest());
         return request;
     }
 

@@ -56,6 +56,7 @@ public class Async {
     /**
      * 出发点
      */
+    @SuppressWarnings("unchecked")
     public static boolean beginWork(
             long timeout, ExecutorService executorService, List<WorkerWrapper<?, ?>> workerWrappers)
             throws ExecutionException, InterruptedException {

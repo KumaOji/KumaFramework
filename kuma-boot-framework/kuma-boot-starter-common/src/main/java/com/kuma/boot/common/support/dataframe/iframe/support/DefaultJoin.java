@@ -31,12 +31,13 @@ import java.lang.reflect.ParameterizedType;
 public class DefaultJoin<T, K, R> implements Join<T, K, R> {
 
     @Override
+    @SuppressWarnings("unchecked")
     public R join(T t, K k) {
         try {
             ParameterizedType parameterizedType =
                     (ParameterizedType) this.getClass().getGenericSuperclass();
             Class<R> rClass = (Class<R>) parameterizedType.getActualTypeArguments()[2];
-            R r = rClass.newInstance();
+            R r = rClass.getDeclaredConstructor().newInstance();
             for (Field field : r.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 String fieldName = field.getName();
@@ -58,11 +59,7 @@ public class DefaultJoin<T, K, R> implements Join<T, K, R> {
                 field.set(r, fieldValue);
             }
             return r;
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchFieldException e) {
+        } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }

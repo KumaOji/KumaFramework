@@ -183,6 +183,7 @@ public final class SafeExecutor {
      * @param <P> 参数的类型
      * @return 任务的返回值，如果发生异常则返回 null
      */
+    @SafeVarargs
     public static <R, P> R callWithoutException(CallableWithParams<R, P> callable, P... params) {
         return callWithoutException(callable, null, IGNORE_EXCEPTION_HANDLER, params);
     }
@@ -197,6 +198,7 @@ public final class SafeExecutor {
      * @param <P> 参数的类型
      * @return 任务的返回值，如果发生异常则返回默认值
      */
+    @SafeVarargs
     public static <R, P> R callWithoutException(
             CallableWithParams<R, P> callable,
             R defaultValue,
@@ -218,6 +220,7 @@ public final class SafeExecutor {
      * @param <P> 参数的类型
      * @return 一个 CompletableFuture，表示任务的返回值，如果发生异常则返回 null
      */
+    @SafeVarargs
     public static <R, P> CompletableFuture<R> callAsyncWithoutException(
             CallableWithParams<R, P> callable, P... params) {
         return callAsyncWithoutException(callable, null, IGNORE_EXCEPTION_HANDLER, params);
@@ -233,6 +236,7 @@ public final class SafeExecutor {
      * @param <P> 参数的类型
      * @return 一个 CompletableFuture，表示任务的返回值，如果发生异常则返回默认值
      */
+    @SafeVarargs
     public static <R, P> CompletableFuture<R> callAsyncWithoutException(
             CallableWithParams<R, P> callable,
             R defaultValue,

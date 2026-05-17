@@ -37,6 +37,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +53,7 @@ import org.springframework.web.method.HandlerMethod;
 /**
  * Class 工具类
  */
-public final class ClassUtils extends org.springframework.util.ClassUtils {
+public final class ClassUtils {
 
     private ClassUtils() {}
 
@@ -563,5 +564,181 @@ public final class ClassUtils extends org.springframework.util.ClassUtils {
     // Class<?> targetClass = method.getDeclaringClass();
     // return AnnotatedElementUtils.isAnnotated(targetClass, annotationType);
     // }
+
+    @Nullable
+    public static ClassLoader getDefaultClassLoader() {
+        ClassLoader cl = null;
+        try {
+            cl = Thread.currentThread().getContextClassLoader();
+        } catch (Throwable ex) {
+            // ignore
+        }
+        if (cl == null) {
+            cl = ClassUtils.class.getClassLoader();
+            if (cl == null) {
+                try {
+                    cl = ClassLoader.getSystemClassLoader();
+                } catch (Throwable ex) {
+                    // ignore
+                }
+            }
+        }
+        return cl;
+    }
+
+    public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
+        try {
+            forName(className, classLoader);
+            return true;
+        } catch (ClassNotFoundException | LinkageError ex) {
+            return false;
+        }
+    }
+
+    public static Class<?> forName(String name, @Nullable ClassLoader classLoader) throws ClassNotFoundException {
+        switch (name) {
+            case "boolean": return boolean.class;
+            case "byte":    return byte.class;
+            case "char":    return char.class;
+            case "double":  return double.class;
+            case "float":   return float.class;
+            case "int":     return int.class;
+            case "long":    return long.class;
+            case "short":   return short.class;
+            case "void":    return void.class;
+        }
+        ClassLoader clToUse = (classLoader != null) ? classLoader : getDefaultClassLoader();
+        if (clToUse == null) clToUse = ClassUtils.class.getClassLoader();
+        try {
+            return Class.forName(name, false, clToUse);
+        } catch (ClassNotFoundException ex) {
+            int lastDot = name.lastIndexOf('.');
+            if (lastDot != -1) {
+                String inner = name.substring(0, lastDot) + '$' + name.substring(lastDot + 1);
+                try {
+                    return Class.forName(inner, false, clToUse);
+                } catch (ClassNotFoundException ignored) {
+                    // fall through to original exception
+                }
+            }
+            throw ex;
+        }
+    }
+
+    public static Class<?> resolveClassName(String className, @Nullable ClassLoader classLoader) {
+        try {
+            return forName(className, classLoader);
+        } catch (ClassNotFoundException ex) {
+            throw new IllegalArgumentException("Could not find class [" + className + "]", ex);
+        }
+    }
+
+    public static String convertClassNameToResourcePath(String className) {
+        return className.replace('.', '/');
+    }
+
+    public static boolean isVoidType(@Nullable Class<?> clazz) {
+        return Void.class == clazz || void.class == clazz;
+    }
+
+    public static boolean isAssignableValue(Class<?> type, @Nullable Object value) {
+        return value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive();
+    }
+
+    public static String getShortClassName(Class<?> clazz) {
+        return getShortClassName(clazz.getName());
+    }
+
+    public static String getShortClassName(String className) {
+        int lastDot = className.lastIndexOf('.');
+        return lastDot != -1 ? className.substring(lastDot + 1) : className;
+    }
+
+    public static String getShortName(Class<?> clazz) {
+        return getShortName(clazz.getName());
+    }
+
+    public static String getShortName(String className) {
+        return getShortClassName(className).replace('$', '.');
+    }
+
+    public static String getPackageName(Class<?> clazz) {
+        return getPackageName(clazz.getName());
+    }
+
+    public static String getPackageName(String fqClassName) {
+        int lastDot = fqClassName.lastIndexOf('.');
+        return lastDot != -1 ? fqClassName.substring(0, lastDot) : "";
+    }
+
+    public static Class<?> getUserClass(Class<?> clazz) {
+        if (clazz.getName().contains("$$")) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass != null && superclass != Object.class) {
+                return superclass;
+            }
+        }
+        return clazz;
+    }
+
+    public static Class<?> getUserClass(Object instance) {
+        return getUserClass(instance.getClass());
+    }
+
+    @Nullable
+    public static Method getMethodIfAvailable(Class<?> clazz, String methodName, @Nullable Class<?>... paramTypes) {
+        try {
+            return (paramTypes != null) ? clazz.getMethod(methodName, paramTypes) : findPublicMethod(clazz, methodName);
+        } catch (NoSuchMethodException ex) {
+            return null;
+        }
+    }
+
+    private static Method findPublicMethod(Class<?> clazz, String methodName) throws NoSuchMethodException {
+        for (Method m : clazz.getMethods()) {
+            if (m.getName().equals(methodName)) return m;
+        }
+        throw new NoSuchMethodException(clazz.getName() + '.' + methodName);
+    }
+
+    public static Class<?>[] getAllInterfacesForClass(Class<?> clazz) {
+        return getAllInterfacesForClass(clazz, null);
+    }
+
+    public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, @Nullable ClassLoader classLoader) {
+        Set<Class<?>> interfaces = new LinkedHashSet<>();
+        collectInterfaces(clazz, interfaces);
+        return interfaces.toArray(new Class<?>[0]);
+    }
+
+    private static void collectInterfaces(Class<?> clazz, Set<Class<?>> result) {
+        if (clazz.isInterface()) {
+            result.add(clazz);
+        }
+        for (Class<?> ifc : clazz.getInterfaces()) {
+            collectInterfaces(ifc, result);
+        }
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            collectInterfaces(superclass, result);
+        }
+    }
+
+    public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
+        if (targetClass == null || targetClass == method.getDeclaringClass()) {
+            return method;
+        }
+        try {
+            return targetClass.getMethod(method.getName(), method.getParameterTypes());
+        } catch (NoSuchMethodException ex) {
+            // fall through
+        }
+        try {
+            return targetClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+        } catch (NoSuchMethodException ex) {
+            // fall through
+        }
+        return method;
+    }
 
 }

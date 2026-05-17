@@ -32,18 +32,22 @@ public final class HashResultHandlers {
     private HashResultHandlers() {
     }
 
+    @SuppressWarnings("unchecked")
     public static HashResultHandler<String> hex() {
         return (HashResultHandler) Instances.singleton(HexHashResultHandler.class);
     }
 
+    @SuppressWarnings("unchecked")
     public static HashResultHandler<String> base64() {
         return (HashResultHandler) Instances.singleton(Base64HashResultHandler.class);
     }
 
+    @SuppressWarnings("unchecked")
     public static HashResultHandler<HashResult> defaults() {
         return (HashResultHandler) Instances.singleton(DefaultHashResultHandler.class);
     }
 
+    @SuppressWarnings("unchecked")
     public static HashResultHandler<byte[]> bytes() {
         return (HashResultHandler) Instances.singleton(BytesHashResultHandler.class);
     }

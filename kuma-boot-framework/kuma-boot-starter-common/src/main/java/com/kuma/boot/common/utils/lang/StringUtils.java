@@ -36,12 +36,9 @@ import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.date.DateUtils;
 import com.kuma.boot.common.utils.number.NumberUtils;
 import com.kuma.boot.common.utils.reflect.ClassTypeUtils;
-import com.kuma.boot.common.utils.reflect.ClassUtils;
-import com.kuma.boot.common.utils.reflect.ReflectFieldUtils;
 import com.kuma.boot.common.utils.system.SystemUtils;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -665,54 +662,6 @@ public final class StringUtils extends StrUtil {
             return null;
         }
         return object.getClass();
-    }
-
-    /**
-     * empty 转换为 null
-     * @param object 对象
-     */
-    public static void emptyToNull(Object object) {
-        if (null == object) {
-            return;
-        }
-
-        List<Field> fieldList = ClassUtils.getAllFieldList(object.getClass());
-        for (Field field : fieldList) {
-            Object value = ReflectFieldUtils.getValue(field, object);
-            if (isEmpty(value)) {
-                ReflectFieldUtils.setValue(field, object, null);
-            }
-        }
-    }
-
-    /**
-     * 基于反射的属性拷贝
-     * @param source 源头
-     * @param target 目标
-     */
-    public static void copyProperties(Object source, Object target) {
-        if (source == null || target == null) {
-            return;
-        }
-
-        Map<String, Field> sourceFieldMap = ClassUtils.getAllFieldMap(source.getClass());
-        Map<String, Field> targetFieldMap = ClassUtils.getAllFieldMap(target.getClass());
-
-        // 遍历
-        for (Map.Entry<String, Field> entry : sourceFieldMap.entrySet()) {
-            String sourceFieldName = entry.getKey();
-            Field sourceField = entry.getValue();
-            Field targetField = targetFieldMap.get(sourceFieldName);
-
-            if (targetField == null) {
-                continue;
-            }
-
-            if (ClassUtils.isAssignable(sourceField.getType(), targetField.getType())) {
-                Object sourceVal = ReflectFieldUtils.getValue(sourceField, source);
-                ReflectFieldUtils.setValue(targetField, target, sourceVal);
-            }
-        }
     }
 
     /**

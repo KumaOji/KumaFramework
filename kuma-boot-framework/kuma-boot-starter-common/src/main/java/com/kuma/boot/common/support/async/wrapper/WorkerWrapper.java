@@ -206,6 +206,7 @@ public class WorkerWrapper<T, V> {
     /**
      * 进行下一个任务
      */
+    @SuppressWarnings("unchecked")
     private void beginNext( ExecutorService executorService, long now, long remainTime ) {
         // 花费的时间
         long costTime = SystemClock.now() - now;

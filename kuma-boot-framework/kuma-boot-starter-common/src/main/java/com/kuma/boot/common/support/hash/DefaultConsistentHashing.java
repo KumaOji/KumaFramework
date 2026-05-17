@@ -33,7 +33,7 @@ public class DefaultConsistentHashing<T> implements ConsistentHashing<T> {
 
     private final int virtualNum;
     private final HashCode hashCode;
-    private final TreeMap<Integer, T> nodeMap = new TreeMap();
+    private final TreeMap<Integer, T> nodeMap = new TreeMap<>();
 
     public DefaultConsistentHashing( int virtualNum, HashCode hashCode ) {
         this.virtualNum = virtualNum;

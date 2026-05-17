@@ -41,12 +41,15 @@ import com.kuma.boot.common.support.function.CheckedConsumer;
 import com.kuma.boot.common.support.jackson.JacksonModule;
 import com.kuma.boot.common.utils.collection.CollectionUtils;
 import com.kuma.boot.common.utils.exception.ExceptionUtils;
-import com.kuma.boot.common.utils.io.FileUtils;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.lang.StringUtils;
 import org.jspecify.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -1013,7 +1016,7 @@ public final class JacksonUtils {
      * @return 结果列表
      */
     public static List<String> getIndexList(final String compressJsonPath, final int size) {
-        final String json = FileUtils.getFileContent(compressJsonPath);
+        final String json = readFileQuietly(compressJsonPath);
         if (StringUtils.isEmptyTrim(json) || size <= 0) {
             return Collections.emptyList();
         }
@@ -1030,7 +1033,7 @@ public final class JacksonUtils {
      */
     public static List<String> getIndexList(
             final String compressJsonPath, final List<?> indexPrefixList) {
-        final String json = FileUtils.getFileContent(compressJsonPath);
+        final String json = readFileQuietly(compressJsonPath);
         if (StringUtils.isEmptyTrim(json) || CollectionUtils.isEmpty(indexPrefixList)) {
             return Collections.emptyList();
         }
@@ -1065,6 +1068,14 @@ public final class JacksonUtils {
         }
 
         return results;
+    }
+
+    private static String readFileQuietly(String path) {
+        try {
+            return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     /**

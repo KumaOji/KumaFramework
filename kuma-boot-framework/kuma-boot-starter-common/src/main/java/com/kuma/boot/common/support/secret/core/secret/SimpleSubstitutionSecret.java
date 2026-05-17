@@ -55,7 +55,7 @@ public class SimpleSubstitutionSecret extends AbstractSecret {
     }
 
     private Map<Character, Character> buildMap( String keys, String values ) {
-        Map<Character, Character> map = new HashMap(26);
+        Map<Character, Character> map = new HashMap<>(26);
         char[] kyeChars = keys.toCharArray();
         char[] valueChars = values.toCharArray();
 

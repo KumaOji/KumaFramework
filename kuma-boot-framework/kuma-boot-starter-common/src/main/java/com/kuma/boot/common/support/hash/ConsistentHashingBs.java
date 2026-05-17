@@ -35,7 +35,7 @@ public final class ConsistentHashingBs<T> {
 
     private int virtualNum = 16;
     private HashCode hashCode = HasheCodes.jdk();
-    private Collection<T> nodes = new HashSet();
+    private Collection<T> nodes = new HashSet<>();
 
     public static <T> ConsistentHashingBs<T> newInstance() {
         return new ConsistentHashingBs<T>();
@@ -60,7 +60,7 @@ public final class ConsistentHashingBs<T> {
     }
 
     public ConsistentHashing<T> build() {
-        ConsistentHashing<T> hashing = new DefaultConsistentHashing(this.virtualNum, this.hashCode);
+        ConsistentHashing<T> hashing = new DefaultConsistentHashing<>(this.virtualNum, this.hashCode);
         if (CollectionUtils.isNotEmpty(this.nodes)) {
             for (T node : this.nodes) {
                 hashing.add(node);

@@ -16,6 +16,7 @@
 
 package com.kuma.boot.common.model;
 
+
 import static com.kuma.boot.common.utils.convert.ConvertUtils.convert;
 
 import com.kuma.boot.common.enums.EventEnum;

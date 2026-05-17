@@ -35,6 +35,7 @@ public interface CallableWithParams<R, P> extends Serializable {
      * @return 任务的结果
      * @throws Exception 自定义异常
      */
+    @SuppressWarnings("unchecked")
     R call(P... params) throws Exception;
 
     /**
@@ -42,6 +43,7 @@ public interface CallableWithParams<R, P> extends Serializable {
      * @param params 参数
      * @return 任务的结果
      */
+    @SuppressWarnings("unchecked")
     default R callWithRuntimeException(P... params) {
         try {
             return call(params);
@@ -55,6 +57,7 @@ public interface CallableWithParams<R, P> extends Serializable {
      * @param params 参数
      * @return 任务的结果
      */
+    @SuppressWarnings("unchecked")
     default R callWithoutException(P... params) {
         try {
             return call(params);

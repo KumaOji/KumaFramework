@@ -30,6 +30,7 @@ import com.kuma.boot.common.utils.common.ArgUtils;
 import com.kuma.boot.common.utils.convert.Converter;
 import com.kuma.boot.common.utils.lang.ObjectUtils;
 import com.kuma.boot.common.utils.reflect.ClassUtils;
+import com.kuma.boot.common.utils.reflect.ReflectFieldUtils;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -623,7 +624,20 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
      * @param target 目标
      */
     public static void copyProperties(final Object source, final Object target) {
-        ObjectUtils.copyProperties(source, target);
+        if (source == null || target == null) {
+            return;
+        }
+        Map<String, Field> sourceFieldMap = ClassUtils.getAllFieldMap(source.getClass());
+        Map<String, Field> targetFieldMap = ClassUtils.getAllFieldMap(target.getClass());
+        for (Map.Entry<String, Field> entry : sourceFieldMap.entrySet()) {
+            Field sourceField = entry.getValue();
+            Field targetField = targetFieldMap.get(entry.getKey());
+            if (targetField == null) continue;
+            if (ClassUtils.isAssignable(sourceField.getType(), targetField.getType())) {
+                Object sourceVal = ReflectFieldUtils.getValue(sourceField, source);
+                ReflectFieldUtils.setValue(targetField, target, sourceVal);
+            }
+        }
     }
 
     /// **

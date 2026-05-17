@@ -61,7 +61,7 @@ public final class TimeWatchUtils {
             T t = action0.invoke();
             long e = System.currentTimeMillis();
             LogUtils.info(
-                    PropertyUtils.getProperty(CommonConstants.SPRING_APP_NAME_KEY)
+                    System.getProperty(CommonConstants.SPRING_APP_NAME_KEY, "")
                             + "--"
                             + msg
                             + " 耗时: {}, ",

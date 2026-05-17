@@ -18,6 +18,7 @@ import com.kuma.boot.common.support.secret.core.AesUtil;
  */
 public class AesSecret extends AbstractSecret {
 
+    @SuppressWarnings("deprecation")
     public byte[] doEncrypt( SecretContext context ) {
         return AesUtil.encrypt(context.source(), context.key());
     }

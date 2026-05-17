@@ -89,6 +89,7 @@ public abstract class AbstractCommonFrame<T> implements IFrame<T> {
 
     protected abstract List<T> viewList();
 
+    @SuppressWarnings("deprecation")
     protected int getOldRoundingMode() {
         switch (defaultRoundingMode) {
             case UP:
@@ -313,6 +314,7 @@ public abstract class AbstractCommonFrame<T> implements IFrame<T> {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     protected static <R extends Number> R bigDecimalToClassValue(
             BigDecimal value, Class<R> valueClass ) {
         if (value == null) {

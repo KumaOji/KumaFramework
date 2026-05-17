@@ -152,10 +152,11 @@ public class FunctionalUtils {
     /**
      * 创建与给定集合类型相同的空集合实例。
      */
+    @SuppressWarnings("unchecked")
     private static <T> Collection<T> createCollectionInstance(Collection<T> collection) {
         try {
-            return collection.getClass().newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return (Collection<T>) collection.getClass().getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
             throw new RuntimeException(
                     "Could not create a new instance of the collection class", e);
         }
@@ -164,6 +165,7 @@ public class FunctionalUtils {
     /**
      * 对集合中的元素应用转换函数，并返回一个新的集合。
      */
+    @SuppressWarnings("unchecked")
     public static <T, R> Collection<R> map(Collection<T> collection, Function<T, R> mapper) {
         Collection<R> result = (Collection<R>) createCollectionInstance(collection);
         for (T item : collection) {
@@ -212,6 +214,7 @@ public class FunctionalUtils {
     /**
      * 执行一个事务性操作，确保所有步骤都成功完成，否则回滚。
      */
+    @SafeVarargs
     public static <T> boolean performTransaction(Supplier<Boolean>... operations) {
         boolean success = true;
         for (Supplier<Boolean> operation : operations) {

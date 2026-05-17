@@ -22,7 +22,7 @@ CORE_PKG   = CORE   / PKG
 COMMON_PKG = COMMON / PKG
 
 SPRING_RE = re.compile(r'\bimport\s+(org\.springframework\.|jakarta\.annotation\.(Nullable|Nonnull|NonNull))')
-KUMA_IMPORT_RE = re.compile(r'\bimport\s+(com\.kuma\.boot\.common\.[\w.]+);')
+KUMA_IMPORT_RE = re.compile(r'\bimport\s+(?:static\s+)?(com\.kuma\.boot\.common\.[\w.]+);')
 EXTENDS_SPRING_RE = re.compile(r'(?:extends|implements)\s+org\.springframework\.')
 
 def all_java(root: Path):
@@ -72,21 +72,30 @@ def collect_common_files():
         result.add(rel)
     return result
 
+def strip_comments(text: str) -> str:
+    """Strip Java block comments (/* ... */) and line comments (// ...) from source text."""
+    # Remove block comments
+    text = re.sub(r'/\*.*?\*/', ' ', text, flags=re.DOTALL)
+    # Remove line comments
+    text = re.sub(r'//[^\n]*', ' ', text)
+    return text
+
 def same_package_siblings(f: Path, core_files: dict) -> set[str]:
     """
     Find other core files in the same directory that are referenced (by simple class name)
-    inside the non-import body of this file, without an explicit import.
+    inside the non-import, non-comment body of this file, without an explicit import.
     Returns relpaths of those sibling core files.
     """
     text = f.read_text(encoding='utf-8', errors='replace')
+    # Strip imports and comments before searching
+    non_imports = re.sub(r'^import\s+.*?;\s*$', '', text, flags=re.MULTILINE)
+    code_only = strip_comments(non_imports)
     pkg_dir = f.parent
     siblings = set()
     for rel, sibling_path in core_files.items():
         if sibling_path.parent == pkg_dir and sibling_path != f:
             simple_name = sibling_path.stem
-            # Search in non-import lines for the class name used as a type/constructor
-            non_imports = re.sub(r'^import\s+.*?;\s*$', '', text, flags=re.MULTILINE)
-            if re.search(r'\b' + re.escape(simple_name) + r'\b', non_imports):
+            if re.search(r'\b' + re.escape(simple_name) + r'\b', code_only):
                 siblings.add(rel)
     return siblings
 
@@ -126,19 +135,19 @@ def migrate():
             if spring_deps.get(rel, True):
                 continue  # has Spring dep → stays in core
 
-            # Check all kuma deps are in common
+            # Only block on deps that HAVE Spring (they'll stay in core).
+            # Spring-free deps still in core will also be moving this round.
             blocking = set()
             for dep_rel in kuma_dep_rels.get(rel, set()):
                 if dep_rel not in common_files and dep_rel in core_files:
-                    blocking.add(dep_rel)
+                    if spring_deps.get(dep_rel, True):
+                        blocking.add(dep_rel)
 
-            # Check same-package siblings (references without imports)
+            # Same for same-package siblings: only block on Spring-having siblings.
             sibling_blocking = set()
             for sib_rel in same_package_siblings(path, core_files):
                 if sib_rel not in common_files and sib_rel in core_files:
-                    # only block if that sibling also has no Spring dep
-                    # (if it does have Spring dep, they share a package and can't move anyway)
-                    if not spring_deps.get(sib_rel, True):
+                    if spring_deps.get(sib_rel, True):
                         sibling_blocking.add(sib_rel)
 
             if blocking or sibling_blocking:

@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 2026.01
  * @since 2025-12-17 10:30:45
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class XmMap<K, V> extends HashMap<K, V> {
 
     private static final long serialVersionUID = -5260635176470805065L;
@@ -92,10 +93,10 @@ public class XmMap<K, V> extends HashMap<K, V> {
             try {
                 // 提取SerializedLambda并缓存
                 Method method = fnClass.getDeclaredMethod("writeReplace");
-                boolean isAccessible = method.isAccessible();
-                method.setAccessible(Boolean.TRUE);
+                boolean wasAccessible = method.canAccess(fn);
+                method.setAccessible(true);
                 lambda = (SerializedLambda) method.invoke(fn);
-                method.setAccessible(isAccessible);
+                method.setAccessible(wasAccessible);
                 CLASS_LAMDBA_CACHE.put(fnClass, lambda);
             } catch (Exception e) {
                 e.printStackTrace();
