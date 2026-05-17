@@ -1,6 +1,7 @@
 plugins {
     alias(projectLibs.plugins.springboot)
     alias(projectLibs.plugins.spring.dependency.management)
+    alias(projectLibs.plugins.gradle.git.properties)   // com.gorylenko.gradle-git-properties
 }
 
 description = '博客系统 Demo —— 完整业务场景，含 Spring Security（OAuth2）/ MySQL / Redis / MyBatis-Plus / SpringDoc，展示框架在真实项目中的集成方式'
@@ -65,6 +66,10 @@ processResources {
         )
     }
 }
+
+// Git 属性注入：将 branch / commit id / 构建时间写入 git.properties
+// 启动后可通过 GET /actuator/info 查看当前部署的 commit 信息
+apply from: rootProject.file('gradle/git.gradle')
 
 bootJar {
     archiveBaseName = 'blog'
