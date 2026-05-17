@@ -71,6 +71,8 @@ processResources {
 // 启动后可通过 GET /actuator/info 查看当前部署的 commit 信息
 apply from: rootProject.file('gradle/git.gradle')
 
+tasks.named('generateGitProperties') { enabled = false }
+
 bootJar {
     archiveBaseName = 'blog'
 }
