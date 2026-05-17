@@ -23,8 +23,6 @@ plugins {
     alias(projectLibs.plugins.smart.doc)           // com.ly.smart-doc
     // ⚠️ springdoc-openapi 需要应用正常启动才能生成文档；project3 的 bootJar 已禁用，故注释
     // alias(projectLibs.plugins.springdoc.openapi)   // org.springdoc.openapi-gradle-plugin
-    // ⚠️ swagger 同理，需要运行中的应用；启用前确保 bootJar enabled = true
-    // alias(projectLibs.plugins.swagger)             // io.swagger.core.v3.swagger-gradle-plugin
 
     // ── 打包 / 部署类
     alias(projectLibs.plugins.gradle.git.properties) // com.gorylenko.gradle-git-properties
@@ -42,8 +40,6 @@ plugins {
     // ⚠️ graalvm-native 需要 GraalVM JDK，普通 JDK 25 环境不可用
     // alias(projectLibs.plugins.graalvm.native)
 
-    // ⚠️ bmuschko-docker 需要本地 Docker 守护进程
-    // alias(projectLibs.plugins.bmuschko.docker)
 }
 
 description = 'Gradle 插件调用示例 —— 演示 gradle/ 目录下所有可复用脚本的接入方式'
@@ -60,12 +56,7 @@ dependencyManagement {
 apply from: rootProject.file('gradle/springboot.gradle')
 
 // ============================================================
-//  ② 测试：JUnit Platform + JVM 参数
-// ============================================================
-apply from: rootProject.file('gradle/test.gradle')
-
-// ============================================================
-//  ③ Git 属性注入：将 git commit/branch 写入 application.properties
+//  ② Git 属性注入：将 git commit/branch 写入 application.properties
 //     生成 git.properties 后可通过 /actuator/info 暴露
 // ============================================================
 apply from: rootProject.file('gradle/git.gradle')
@@ -123,13 +114,7 @@ apply from: rootProject.file('gradle/smart-doc.gradle')
 // apply from: rootProject.file('gradle/springdoc-openapi.gradle')
 
 // ============================================================
-//  ⑫ API 文档：Swagger —— 生成 swagger.json（与 ⑪ 二选一）
-//     任务：resolve
-// ============================================================
-// apply from: rootProject.file('gradle/swagger.gradle')
-
-// ============================================================
-//  ⑬ 项目报告：依赖关系 HTML 报告
+//  ⑫ 项目报告：依赖关系 HTML 报告
 //     任务：htmlDependencyReport
 // ============================================================
 apply from: rootProject.file('gradle/project-report.gradle')
@@ -148,14 +133,7 @@ apply from: rootProject.file('gradle/project-report.gradle')
 apply from: rootProject.file('gradle/google-tools-jib.gradle')
 
 // ============================================================
-//  ⑯ 容器镜像：Docker Spring Boot Application（需本地 Docker）
-//     ⚠️ 与 JIB 二选一；需本地 Docker 守护进程
-//     任务：dockerBuildImage / dockerPushImage
-// ============================================================
-// apply from: rootProject.file('gradle/docker.gradle')
-
-// ============================================================
-//  ⑰ Fat Jar（Shadow）：将所有依赖打进单个 jar
+//  ⑯ Fat Jar（Shadow）：将所有依赖打进单个 jar
 //     ⚠️ 与 springboot.gradle 互斥；去掉 springboot.gradle 再启用
 //     任务：shadowJar
 // ============================================================
