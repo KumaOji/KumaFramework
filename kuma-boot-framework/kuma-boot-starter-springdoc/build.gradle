@@ -5,6 +5,7 @@ plugins {
 description = 'Kumaframework springdoc模块'
 
 dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api projectLibs.spring.cloud.context
     api projectLibs.hutool.core

@@ -6,6 +6,7 @@ description = 'Kumaframework metrics模块'
 
 dependencies {
     // 基础公共工具（LogUtils / 公共注解等）
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     // spring-boot-starter-actuator + micrometer-core + ObservationRegistry
     api project(':kuma-boot-framework:kuma-boot-starter-actuator')

@@ -6,7 +6,7 @@ description = 'Kumaframework client模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
     // Forest HTTP Client（@ForestScan / @BaseRequest / @Get / @Post / ForestInterceptor 等）
     api projectLibs.forest.spring.boot3.starter

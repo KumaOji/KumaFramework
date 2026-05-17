@@ -5,6 +5,7 @@ plugins {
 description = 'Kumaframework office模块'
 
 dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     // 本地 lib 目录 jar（aspose、spire、html2image）
     api fileTree(dir: 'src/main/resources/lib', include: ['*.jar'])

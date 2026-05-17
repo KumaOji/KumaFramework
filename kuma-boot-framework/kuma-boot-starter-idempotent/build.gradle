@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework 幂等模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.boot.starter.web

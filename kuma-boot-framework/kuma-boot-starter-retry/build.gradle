@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework 重试模块 — 基于 Guava Retrying 的注解式重试'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.cloud.context
     api projectLibs.guava.retrying3        // io.github.itning:guava-retrying3，提供 RetryerBuilder / StopStrategies 等

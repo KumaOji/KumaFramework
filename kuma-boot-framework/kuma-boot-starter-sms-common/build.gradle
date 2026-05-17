@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework sms-common模块'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
 
     // spring boot

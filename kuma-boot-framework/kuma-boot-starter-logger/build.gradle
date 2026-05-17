@@ -5,6 +5,7 @@ plugins {
 description = 'Kumaframework logger模块'
 
 dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties 等）

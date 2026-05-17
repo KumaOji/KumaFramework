@@ -6,7 +6,7 @@ description = 'Kumaframework apollo模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
     // Apollo（Config / ConfigService / ConfigChangeListener / @ApolloConfig /
     // @EnableApolloConfig / @ApolloConfigChangeListener / DefaultMetaServerProvider）

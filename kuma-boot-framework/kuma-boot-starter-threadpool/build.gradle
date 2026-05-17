@@ -5,7 +5,7 @@ plugins {
 description = 'Kumaframework 动态线程池模块（基于 DynamicTP）'
 
 dependencies {
-    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
 
     // Spring Boot AutoConfiguration
     api projectLibs.spring.boot.autoconfigure

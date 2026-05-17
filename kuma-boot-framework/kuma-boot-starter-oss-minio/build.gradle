@@ -6,6 +6,7 @@ description = 'Kumaframework oss-minio模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // minio
     api projectLibs.minio

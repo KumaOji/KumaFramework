@@ -5,6 +5,7 @@ plugins {
 description = 'Kumaframework WebSocket模块（Spring WebSocket + STOMP + 原生JSR-356）'
 
 dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // Spring Boot AutoConfiguration

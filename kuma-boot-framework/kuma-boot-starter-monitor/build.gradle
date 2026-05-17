@@ -12,6 +12,7 @@ dependencies {
     // spring-boot-starter-actuator + micrometer-core + ObservationRegistry
     api project(':kuma-boot-framework:kuma-boot-starter-actuator')
     // hutool / guava / fastjson2 / commons / logback / slf4j 等公共工具
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // @ConditionalOnProperty / @ConditionalOnBean 等条件注解

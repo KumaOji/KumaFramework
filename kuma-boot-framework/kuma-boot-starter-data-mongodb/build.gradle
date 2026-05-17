@@ -6,6 +6,7 @@ description = 'Kumaframework data-mongodb模块'
 
 dependencies {
     // 基础公共工具（LogUtils / JacksonUtils 等）
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
     // Spring Data MongoDB（MongoTemplate / MongoRepository / MongoDatabaseFactory 等核心类）
