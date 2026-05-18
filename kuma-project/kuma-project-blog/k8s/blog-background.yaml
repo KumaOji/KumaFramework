@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-background
+  namespace: blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-background
+  template:
+    metadata:
+      labels:
+        app: blog-background
+    spec:
+      containers:
+        - name: blog-background
+          image: blog:2026.05.01
+          ports:
+            - containerPort: 9000
+          env:
+            - name: ADMIN_INITIAL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: admin-initial-password
+            - name: MYSQL_URL
+              value: "jdbc:mysql://blog-mysql:3306/base?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true"
+            - name: MYSQL_USERNAME
+              value: root
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: mysql-root-password
+            - name: REDIS_HOST
+              value: blog-redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DATABASE
+              value: "0"
+          volumeMounts:
+            - name: music
+              mountPath: /data/music
+            - name: logs
+              mountPath: /data/blog/logs
+      volumes:
+        - name: music
+          hostPath:
+            path: /data/blog/background/music
+            type: DirectoryOrCreate
+        - name: logs
+          hostPath:
+            path: /data/blog/background/logs
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-background
+  namespace: blog
+spec:
+  selector:
+    app: blog-background
+  ports:
+    - port: 9000
+      targetPort: 9000

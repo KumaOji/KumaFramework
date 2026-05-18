@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data
+  namespace: blog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: blog-mysql
+  namespace: blog
+spec:
+  selector:
+    matchLabels:
+      app: blog-mysql
+  serviceName: blog-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: blog-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: mysql-root-password
+            - name: MYSQL_DATABASE
+              value: base
+          ports:
+            - containerPort: 3306
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-mysql
+  namespace: blog
+spec:
+  selector:
+    app: blog-mysql
+  ports:
+    - port: 3306
+      targetPort: 3306

@@ -100,6 +100,8 @@ services:
       HF_ENDPOINT: "https://hf-mirror.com"
       HF_HUB_OFFLINE: "1"
       RAG_EMBEDDING_ENGINE: "ollama"
+      VECTOR_DB: "qdrant"
+      QDRANT_URI: "http://blog-qdrant:6333"
     networks:
       - blog-net
 

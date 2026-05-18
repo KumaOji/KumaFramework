@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-ai-ui
+  namespace: blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-ai-ui
+  template:
+    metadata:
+      labels:
+        app: blog-ai-ui
+    spec:
+      containers:
+        - name: open-webui
+          image: ghcr.m.daocloud.io/open-webui/open-webui:main
+          ports:
+            - containerPort: 8080
+          env:
+            - name: HF_ENDPOINT
+              value: "https://hf-mirror.com"
+            - name: HF_HUB_OFFLINE
+              value: "1"
+            - name: RAG_EMBEDDING_ENGINE
+              value: "ollama"
+            - name: VECTOR_DB
+              value: "qdrant"
+            - name: QDRANT_URI
+              value: "http://blog-qdrant:6333"
+          volumeMounts:
+            - name: open-webui-data
+              mountPath: /app/backend/data
+      volumes:
+        - name: open-webui-data
+          hostPath:
+            path: /data/open-webui
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-ai-ui
+  namespace: blog
+spec:
+  selector:
+    app: blog-ai-ui
+  ports:
+    - port: 8080
+      targetPort: 8080
