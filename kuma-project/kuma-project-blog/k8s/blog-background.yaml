@@ -39,6 +39,11 @@ spec:
               value: "6379"
             - name: REDIS_DATABASE
               value: "0"
+            - name: OPENWEBUI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: openwebui-api-key
           volumeMounts:
             - name: music
               mountPath: /data/music
