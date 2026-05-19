@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: kuma-cloud-project2
+  autoconfigure:
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfigurationV4
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
+
+server:
+  port: 8081
+
+kuma:
+  boot:
+    security:
+      oauth2:
+        endpoint:
+          uaa-service-uri: http://localhost:8080

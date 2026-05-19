@@ -23,6 +23,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -31,6 +32,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Aspect
 @Order(value=0)
 @Component
+@ConditionalOnBean(RedissonClient.class)
 public class PreventDuplicateSubmitAspect {
     private final RedissonClient redissonClient;
 

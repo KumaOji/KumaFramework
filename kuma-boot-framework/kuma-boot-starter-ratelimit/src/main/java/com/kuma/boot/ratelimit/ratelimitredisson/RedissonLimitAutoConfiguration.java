@@ -23,6 +23,7 @@ import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Role;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -52,6 +53,7 @@ public class RedissonLimitAutoConfiguration {
      * The type Redisson limit configuration.
      */
     @ConditionalOnClass(RedissonClient.class)
+    @ConditionalOnBean(RedissonClient.class)
     @AutoConfiguration(
             after = {RedissonAutoConfigurationV2.class},
             afterName = {"org.redisson.spring.starter.RedissonAutoConfigurationV2"})

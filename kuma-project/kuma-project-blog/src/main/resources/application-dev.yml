@@ -59,6 +59,10 @@ springdoc:
 knife4j:
   enable: true
 
+openwebui:
+  base-url: http://localhost:8081
+  api-key: ""
+
 python:
   libreTranslate:
     enabled: false
@@ -117,6 +121,7 @@ kuma:
           - /swagger-ui/**
           - /doc.html
           - /**/music/*/stream
+          - /**/openwebui/chat/stream
       filter:
         version: true
         trace: true

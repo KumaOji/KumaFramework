@@ -1,1 +1,27 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
 description = '最简骨架 Demo —— 无任何业务依赖，仅验证框架项目结构与启动流程是否正常'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+
+    api projectLibs.spring.boot.starter.web
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
+
+bootJar {
+    archiveBaseName = 'project2'
+}
