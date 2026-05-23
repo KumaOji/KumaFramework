@@ -2,9 +2,9 @@ package com.kuma.boot.ddd.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 
-@TableName("ttc_domain_event")
+@TableName("kmc_domain_event")
 public class DomainEventDO {
-   protected static final String BOOT_DOMAIN_EVENT = "ttc_domain_event";
+   protected static final String BOOT_DOMAIN_EVENT = "kmc_domain_event";
    private String eventType;
    private String sourceName;
    private String topic;
