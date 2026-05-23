@@ -63,21 +63,7 @@ openwebui:
   base-url: ${OPENWEBUI_BASE_URL:http://blog-ai-ui:8080}
   api-key: ${OPENWEBUI_API_KEY:}
 
-python:
-  libreTranslate:
-    enabled: false
-    path: E:\python\Python39\Scripts\libretranslate.exe
-    host: 0.0.0.0
-    port: 5000
-    load-only: en,zh
-    threads: 2
-    update-models: false
-
 blog:
-  tool:
-    repkg:
-      tool-dir: E:\blog-resource\tool
-      output-dir: E:\blog-resource\tool\output
   token-expire-seconds: 604800
   cookie-secure: false
   reset-admin-password: true
