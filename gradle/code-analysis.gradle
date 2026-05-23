@@ -1,0 +1,38 @@
+/**
+ * 代码质量聚合脚本
+ *
+ * 一键引入：checkstyle / pmd / spotbugs / spotless / jacoco
+ * 用法：在子模块的 build.gradle 中追加
+ *     apply from: rootProject.file('gradle/code-analysis.gradle')
+ *
+ * 聚合任务：
+ *     ./gradlew qualityCheck       —— 跑全部静态分析（不含 sonar）
+ *     ./gradlew qualityFix         —— 自动修复格式（spotlessApply）
+ *     ./gradlew qualityReport      —— 打开报告目录
+ */
+
+apply from: rootProject.file('gradle/spotless.gradle')
+apply from: rootProject.file('gradle/checkstyle.gradle')
+apply from: rootProject.file('gradle/pmd.gradle')
+apply from: rootProject.file('gradle/spotbugs.gradle')
+apply from: rootProject.file('gradle/jacoco.gradle')
+
+tasks.register('qualityCheck') {
+    group       = 'verification'
+    description = '执行 Checkstyle / PMD / SpotBugs / Spotless / JaCoCo 全部静态分析'
+    dependsOn   tasks.named('spotlessCheck'),
+                tasks.named('checkstyleMain'),
+                tasks.named('pmdMain'),
+                tasks.named('spotbugsMain'),
+                tasks.named('jacocoTestReport')
+
+    doLast {
+        logger.lifecycle("✅  qualityCheck 完成，报告位于：${project.layout.buildDirectory.get()}/code-analysis/")
+    }
+}
+
+tasks.register('qualityFix') {
+    group       = 'formatting'
+    description = '使用 Spotless 自动修复代码格式'
+    dependsOn   tasks.named('spotlessApply')
+}

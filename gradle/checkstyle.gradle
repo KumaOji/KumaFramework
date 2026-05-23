@@ -1,17 +1,27 @@
 apply plugin: 'checkstyle'
 
 checkstyle {
-    toolVersion  = "13.0.0"
-    configFile   = rootProject.file('code-analysis/checkstyle/google_checks.xml')
-    ignoreFailures  = true
+    toolVersion     = "13.0.0"
+    configFile      = rootProject.file('code-analysis/checkstyle/google_checks.xml')
+    ignoreFailures  = true                     // 与其他工具一致：开发期只警告
     showViolations  = true
+    maxWarnings     = Integer.MAX_VALUE
     reportsDir      = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/checkstyleReportsDir")
+
+    configProperties = [
+        'org.checkstyle.google.suppressionfilter.config':
+            rootProject.file('code-analysis/checkstyle/checkstyle-suppressions.xml').absolutePath
+    ]
 }
 
 tasks.withType(Checkstyle).configureEach {
+    // 排除生成代码与模块描述符
+    exclude '**/generated/**'
+    exclude '**/module-info.java'
+
     reports {
-        xml.required  = false
-        html.required = true
+        xml.required    = false
+        html.required   = true
         html.stylesheet = resources.text.fromFile("${rootDir}/code-analysis/checkstyle/reports/checkstyle-noframes.xsl")
     }
 }

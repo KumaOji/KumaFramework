@@ -1,12 +1,20 @@
 apply plugin: 'pmd'
 
 pmd {
-    consoleOutput       = true
-    threads             = 4
-    ignoreFailures      = true
-    incrementalAnalysis = true
-    reportsDir          = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/pmdReportsDir")
-    toolVersion         = "7.20.0"
-    ruleSetFiles        = files(rootProject.file('code-analysis/pmd/pmd.xml'))
-    rulesMinimumPriority = 5
+    toolVersion          = "7.20.0"
+    consoleOutput        = true
+    threads              = 4
+    ignoreFailures       = true                // 与其他工具一致：开发期只警告
+    incrementalAnalysis  = true
+    reportsDir           = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/pmdReportsDir")
+    ruleSetFiles         = files(rootProject.file('code-analysis/pmd/pmd.xml'))
+    ruleSets             = []                  // 清空默认规则集，仅使用 ruleSetFiles 指定的规则
+    rulesMinimumPriority = 3                   // 1=最高, 5=最低；3=只报中高优先级，减少噪音
+}
+
+tasks.withType(Pmd).configureEach {
+    reports {
+        xml.required  = false
+        html.required = true
+    }
 }

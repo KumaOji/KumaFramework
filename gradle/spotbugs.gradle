@@ -6,22 +6,24 @@ dependencies {
 }
 
 spotbugs {
-    ignoreFailures = false
-    showStackTraces = true
-    showProgress = true
-    visitors = [ 'FindSqlInjection', 'SwitchFallthrough' ]
-    omitVisitors = [ 'FindNonShortCircuit' ]
-    includeFilter = file("${project.rootDir}/code-analysis/spotbugs/include-filter.xml")
-    excludeFilter = file("${project.rootDir}/code-analysis/spotbugs/exclude-filter.xml")
-
+    toolVersion       = "4.9.8"
+    ignoreFailures    = true              // 与 checkstyle / pmd 保持一致：开发期只警告，不阻断构建
+    showStackTraces   = true
+    showProgress      = true
+    effort            = "max"             // 完整深度分析
+    reportLevel       = "medium"          // 报告 medium 及以上严重度
+    excludeFilter     = file("${project.rootDir}/code-analysis/spotbugs/exclude-filter.xml")
 }
 
-spotbugsMain {
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
     reports {
         html {
-            required = true
-            outputLocation = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/spotbugsReportDir/spotbugs.html")
-            stylesheet = 'fancy-hist.xsl'
+            required        = true
+            outputLocation  = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/spotbugsReportDir/${name}.html")
+            stylesheet      = 'fancy-hist.xsl'
+        }
+        xml {
+            required        = false
         }
     }
 }

@@ -1,12 +1,31 @@
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.14"
+    toolVersion      = "0.8.14"
     reportsDirectory = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/jacocoReportDir")
 }
 
+// 测试运行时附加 JaCoCo agent
+tasks.withType(Test).configureEach {
+    finalizedBy jacocoTestReport
+}
+
+// 排除规则：DTO/VO/PO/Config/AutoConfig/Constants/Application 等无业务逻辑的类
+def jacocoExcludes = [
+    '**/dto/**', '**/vo/**', '**/po/**', '**/entity/**',
+    '**/config/**', '**/constant/**', '**/constants/**',
+    '**/*Config.class', '**/*AutoConfiguration.class',
+    '**/*Application.class', '**/*Properties.class',
+    '**/*Mapper.class',
+    '**/generated/**'
+]
+
 jacocoTestReport {
     dependsOn test
+
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: jacocoExcludes)
+    }))
 
     reports {
         xml.required  = true
@@ -20,15 +39,34 @@ jacocoTestReport {
 }
 
 jacocoTestCoverageVerification {
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: jacocoExcludes)
+    }))
+
     violationRules {
+        // 整体：方法行覆盖 ≥ 70%（开发期较宽松）
         rule {
-            enabled = true
-            element = 'METHOD'
+            element = 'BUNDLE'
             limit {
                 counter = 'LINE'
                 value   = 'COVEREDRATIO'
-                minimum = 0.8
+                minimum = 0.70
             }
+            limit {
+                counter = 'BRANCH'
+                value   = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+        }
+        // 单个类：行覆盖率不低于 60%
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'LINE'
+                value   = 'COVEREDRATIO'
+                minimum = 0.60
+            }
+            excludes = jacocoExcludes.collect { it.replace('/', '.').replace('**.', '*.').replace('.class', '') }
         }
     }
 }

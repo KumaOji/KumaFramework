@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<!--
+    项目级 Checkstyle 抑制规则
+    https://checkstyle.org/filters/suppressionfilter.html
+-->
+<suppressions>
+
+    <!-- 1. 生成代码与模块描述符 -->
+    <suppress files="[\\/]generated[\\/]" checks=".*"/>
+    <suppress files="module-info\.java" checks=".*"/>
+
+    <!-- 2. 测试代码：放宽 Javadoc、命名、行长度 -->
+    <suppress files="[\\/]src[\\/]test[\\/]" checks="Javadoc.*"/>
+    <suppress files="[\\/]src[\\/]test[\\/]" checks="LineLength"/>
+    <suppress files="[\\/]src[\\/]test[\\/]" checks="MagicNumber"/>
+    <suppress files="[\\/]src[\\/]test[\\/]" checks="MethodName"/>
+
+    <!-- 3. MyBatis Mapper 接口：豁免抽象类约定 -->
+    <suppress files=".*Mapper\.java" checks="AbbreviationAsWordInName"/>
+
+    <!-- 4. 启动类：豁免 HideUtilityClassConstructor -->
+    <suppress files=".*Application\.java" checks="HideUtilityClassConstructor"/>
+
+</suppressions>

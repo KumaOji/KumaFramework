@@ -1,46 +1,80 @@
 <?xml version="1.0"?>
-<!-- My preferred PMD configuration. -->
-<ruleset name="Custom ruleset"
-		 xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
-	<description>
-		PMD configuration.
-	</description>
+<!--
+    Kuma Framework 项目级 PMD 规则集
+    在基础规则集之上进行项目偏好的微调与抑制
+-->
+<ruleset name="Kuma PMD Custom Ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+                             https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
-	<rule ref="category/java/codestyle.xml/ClassNamingConventions">
-		<properties>
-			<!-- I don't like forcing certain classes to be name Factory or Util. The pattern is useful -->
-			<!-- for other types of classes as well. -->
-			<property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*" />
-		</properties>
-	</rule>
-	<rule ref="category/java/codestyle.xml/ShortMethodName">
-		<properties>
-			<!-- "of" is a ver common function name. -->
-			<property name="minimum" value="4" />
-		</properties>
-	</rule>
-	<rule ref="category/java/codestyle.xml/LinguisticNaming" >
-		<properties>
-			<!-- I prefer the builder pattern for setters. This rule requires you to return void. -->
-			<property name="checkSetters" value="false" />
-			<!--The way I like to name tests breaks this rule, so ignore anything annotated as @Test. -->
-			<property name="violationSuppressXPath" value="//ClassOrInterfaceBodyDeclaration/Annotation/MarkerAnnotation//Name[@Image='Test']" />
-		</properties>
-	</rule>
-	<rule ref="category/java/codestyle.xml/MethodNamingConventions" >
-		<properties>
-			<!-- I like have underscores in my test names. This allows for that. -->
-			<property name="junit4TestPattern" value="[a-z][a-zA-Z0-9_]*" />
-		</properties>
-	</rule>
-	<rule ref="category/java/documentation.xml/CommentSize">
-		<properties>
-			<!-- 6 lines is too restrictive for comment length as it includes the Javadoc comments. -->
-			<property name="maxLines" value="30" />
-			<!-- I want the line size to match the code requirement. -->
-			<property name="maxLineLength" value="150" />
-		</properties>
-	</rule>
+    <description>Kuma Framework 项目级 PMD 配置</description>
+
+    <!-- ===== 引入基础规则集 ===== -->
+    <rule ref="category/java/bestpractices.xml"/>
+    <rule ref="category/java/codestyle.xml">
+        <!-- 项目偏好：允许较短的 lambda / 工厂方法名 -->
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <!-- Spring Boot 注解风格冲突 -->
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="OnlyOneReturn"/>
+        <!-- 与 Spotless 的 import 顺序冲突 -->
+        <exclude name="UseExplicitTypes"/>
+    </rule>
+    <rule ref="category/java/design.xml">
+        <!-- 框架场景下普遍存在大量公共 API -->
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+    </rule>
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentRequired"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="MissingSerialVersionUID"/>
+    </rule>
+    <rule ref="category/java/multithreading.xml"/>
+    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/security.xml"/>
+
+    <!-- ===== 项目级规则微调 ===== -->
+
+    <!-- 工具类命名：不强制后缀必须是 Util / Utils / Factory -->
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*"/>
+        </properties>
+    </rule>
+
+    <!-- Linguistic 命名：允许 Builder 模式 / 测试方法 -->
+    <rule ref="category/java/codestyle.xml/LinguisticNaming">
+        <properties>
+            <property name="checkSetters" value="false"/>
+            <property name="violationSuppressXPath"
+                      value="//ClassOrInterfaceBodyDeclaration/Annotation/MarkerAnnotation//Name[@Image='Test']"/>
+        </properties>
+    </rule>
+
+    <!-- 测试方法命名：允许下划线 -->
+    <rule ref="category/java/codestyle.xml/MethodNamingConventions">
+        <properties>
+            <property name="methodPattern"           value="[a-z][a-zA-Z0-9]*"/>
+            <property name="staticPattern"           value="[a-z][a-zA-Z0-9]*"/>
+            <property name="nativePattern"           value="[a-z][a-zA-Z0-9]*"/>
+            <property name="junit4TestPattern"       value="[a-z][a-zA-Z0-9_]*"/>
+            <property name="junit5TestPattern"       value="[a-z][a-zA-Z0-9_]*"/>
+        </properties>
+    </rule>
+
+    <!-- 注释尺寸放宽 -->
+    <rule ref="category/java/documentation.xml/CommentSize">
+        <properties>
+            <property name="maxLines"      value="30"/>
+            <property name="maxLineLength" value="150"/>
+        </properties>
+    </rule>
+
 </ruleset>

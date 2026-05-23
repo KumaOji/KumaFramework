@@ -1,30 +1,33 @@
 <?xml version="1.0"?>
-<!-- A Sample PMD configuration file that turns on a set of rules -->
-<!-- but has no special configuration of the rules. -->
-<ruleset name="Custom ruleset"
-		 xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
-	<description>
-		PMD Basic Configuration
-	</description>
+<!--
+    PMD 7 全规则集（基础版）
+    https://pmd.github.io/pmd/pmd_rules_java.html
 
-	<rule ref="category/java/bestpractices.xml" />
+    所有 8 个 Java 类别启用：
+      - bestpractices   最佳实践
+      - codestyle       代码风格
+      - design          设计
+      - documentation   文档
+      - errorprone      错误倾向
+      - multithreading  并发
+      - performance     性能
+      - security        安全
+-->
+<ruleset name="Kuma PMD Base Ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+                             https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
-	<rule ref="category/java/codestyle.xml" />
+    <description>Kuma Framework 基础 PMD 规则集（全部启用）</description>
 
-	<rule ref="category/java/design.xml" deprecated="true"/>
-
-	<rule ref="category/java/documentation.xml"/>
-
-	<rule ref="category/java/multithreading.xml" deprecated="true"/>
-
-	<rule ref="category/java/performance.xml" deprecated="true"/>
-
-	<rule ref="category/java/security.xml" deprecated="true"/>
-
-	<rule ref="rulesets/java/quickstart.xml" deprecated="true"/>
-
-	<rule ref="category/java/errorprone.xml" deprecated="true"/>
+    <rule ref="category/java/bestpractices.xml"/>
+    <rule ref="category/java/codestyle.xml"/>
+    <rule ref="category/java/design.xml"/>
+    <rule ref="category/java/documentation.xml"/>
+    <rule ref="category/java/errorprone.xml"/>
+    <rule ref="category/java/multithreading.xml"/>
+    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/security.xml"/>
 
 </ruleset>

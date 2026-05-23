@@ -1,10 +1,18 @@
 apply plugin: 'com.diffplug.spotless'
 
 spotless {
-    java {
-        formatAnnotations()
+    // 仅检查变更文件，加速本地构建
+    ratchetFrom 'origin/master'
 
+    java {
+        target 'src/**/*.java'
+        targetExclude '**/generated/**', '**/generated-sources/**'
+
+        formatAnnotations()
+        removeUnusedImports()
         leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
 
         googleJavaFormat('1.32.0')
                 .aosp()
@@ -13,7 +21,21 @@ spotless {
                 .reorderImports(false)
                 .groupArtifact('com.google.googlejavaformat:google-java-format')
 
+        // $YEAR 由 Spotless 在格式化时替换为当前年份
         licenseHeaderFile rootProject.file('code-analysis/spotless/license-header')
+                .updateYearWithLatest(true)
     }
 
+    groovyGradle {
+        target '*.gradle', 'gradle/**/*.gradle'
+        greclipse()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    format 'misc', {
+        target '*.md', '.gitignore', '*.yml', '*.yaml'
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
