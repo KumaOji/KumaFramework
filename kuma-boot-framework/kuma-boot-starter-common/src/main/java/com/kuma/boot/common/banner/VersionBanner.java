@@ -1,4 +1,4 @@
-package com.kuma.boot.core.banner;
+package com.kuma.boot.common.banner;
 
 
 /**

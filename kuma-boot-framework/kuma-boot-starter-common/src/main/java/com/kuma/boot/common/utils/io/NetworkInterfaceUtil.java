@@ -1,9 +1,7 @@
-package com.kuma.boot.core.utils.io;
+package com.kuma.boot.common.utils.io;
 
 import java.net.*;
 import java.util.*;
-
-import org.springframework.stereotype.Component;
 
 /**
  * NetworkInterfaceUtil

@@ -1,8 +1,5 @@
-package com.kuma.boot.core.banner;
+package com.kuma.boot.common.banner;
 
-
-import com.kuma.boot.common.banner.BannerConstants;
-import com.kuma.boot.common.banner.Description;
 
 import java.util.ArrayList;
 import java.util.List;

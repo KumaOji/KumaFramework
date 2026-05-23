@@ -21,7 +21,7 @@ import com.taobao.text.ui.TableElement;
 import com.taobao.text.util.RenderUtil;
 import com.kuma.boot.common.banner.BannerConstants;
 import com.kuma.boot.common.banner.Description;
-import com.kuma.boot.core.banner.LogoBanner;
+import com.kuma.boot.common.banner.LogoBanner;
 import com.kuma.boot.common.version.SpringCloudAlibabaVersion;
 import com.kuma.boot.common.version.SpringCloudDependenciesVersion;
 import com.kuma.boot.common.version.SpringCloudVersion;

@@ -1,7 +1,6 @@
-package com.kuma.boot.core.banner;
+package com.kuma.boot.common.banner;
 
 
-import com.kuma.boot.common.banner.Description;
 import com.taobao.text.ui.TableElement;
 import com.taobao.text.util.RenderUtil;
 
