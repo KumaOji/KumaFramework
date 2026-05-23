@@ -30,3 +30,4 @@ kuma-project/kuma-project-blog/src/main/resources/sql/
 
 # intellijPlatform
 .intellijPlatform/
+/gradle/wrapper/gradle-9.3.1-bin.zip
