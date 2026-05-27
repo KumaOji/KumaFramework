@@ -4,6 +4,7 @@ import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
 import com.kuma.boot.core.startup.StartupSpringApplication;
 import com.kuma.boot.web.annotation.KumaBootApplication;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -18,11 +19,11 @@ import org.springframework.context.annotation.ComponentScan;
 public class BlogApplication extends SpringBootServletInitializer {
 
     @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+    protected @NonNull SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(BlogApplication.class);
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         new StartupSpringApplication(BlogApplication.class)
                 .setKmcBanner()
                 .setKmcProfileIfNotExists("dev")
