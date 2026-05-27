@@ -28,6 +28,8 @@ dependencies {
     }
     api project(':kuma-boot-framework:kuma-boot-starter-frp')
 
+    api projectLibs.langchain4j
+    api projectLibs.langchain4jopenai
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.websocket
