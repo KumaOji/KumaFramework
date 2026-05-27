@@ -3,9 +3,17 @@ kind: Ingress
 metadata:
   name: blog-fronted
   namespace: blog
+  annotations:
+    # 使用 letsencrypt certResolver 自动签发证书
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
 spec:
+  tls:
+    - hosts:
+        - your-domain.com   # ← 换成你的域名
   rules:
-    - http:
+    - host: your-domain.com   # ← 换成你的域名
+      http:
         paths:
           - path: /
             pathType: Prefix

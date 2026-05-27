@@ -25,13 +25,6 @@ public class AiChatController {
     private final AiChatService aiChatService;
     private final RagComponent ragComponent;
 
-    @Operation(summary = "获取可用模型列表")
-    @GetMapping("/models")
-    @Authorize(BlogPermissions.AI_CHAT_READ)
-    public Result<Map<String, Object>> listModels() {
-        return Result.success(aiChatService.listModels());
-    }
-
     @Operation(summary = "非流式对话")
     @PostMapping("/chat")
     @Authorize(BlogPermissions.AI_CHAT_SEND)

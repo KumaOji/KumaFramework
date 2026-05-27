@@ -73,8 +73,6 @@ public final class BlogPermissions {
 
     /** AI 对话模块所有权限（用于管理员角色关联） */
     public static final String AI_CHAT_ALL  = "ai_chat:*";
-    /** 查询可用模型列表 */
-    public static final String AI_CHAT_READ = "ai_chat:read";
     /** 发起对话（含流式推理） */
     public static final String AI_CHAT_SEND = "ai_chat:send";
     /** 向知识库写入文档（仅管理员） */

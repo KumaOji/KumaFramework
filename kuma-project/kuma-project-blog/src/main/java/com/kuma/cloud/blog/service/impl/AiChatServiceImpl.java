@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Instant;
@@ -36,8 +34,6 @@ public class AiChatServiceImpl implements AiChatService {
 
     private final ChatModel chatModel;
     private final StreamingChatModel streamingModel;
-    /** 保留 RestClient 仅用于 /api/models —— LangChain4j 不抽象模型列表接口 */
-    private final RestClient restClient;
     private final String defaultModel;
     private final Executor asyncExecutor;
     private final RagComponent ragComponent;
@@ -56,11 +52,6 @@ public class AiChatServiceImpl implements AiChatService {
         String chatBaseUrl = baseUrl.endsWith("/") ? baseUrl + "api" : baseUrl + "/api";
         String effectiveKey = apiKey.isBlank() ? "no-key" : apiKey;
 
-        this.restClient = RestClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                .build();
-
         this.chatModel = OpenAiChatModel.builder()
                 .baseUrl(chatBaseUrl)
                 .apiKey(effectiveKey)
@@ -76,15 +67,6 @@ public class AiChatServiceImpl implements AiChatService {
                 .logRequests(false)
                 .logResponses(false)
                 .build();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> listModels() {
-        return restClient.get()
-                .uri("/api/models")
-                .retrieve()
-                .body(Map.class);
     }
 
     @Override

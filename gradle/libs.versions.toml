@@ -160,6 +160,7 @@ spring-cloud-gateway = "5.0.0"
 rocketmq-spring = "2.3.3"
 seata = "2.5.0"
 langchain4j = "1.15.0"
+langchain4j-qdrant = "1.15.0-beta25"
 grpc = "1.76.0"
 spring-grpc = "1.0.0-RC1"
 logstash-logback-encoder = "8.0"
@@ -206,7 +207,7 @@ bmuschko-docker           = "9.4.0"
 [libraries]
 langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
 langchain4jopenai = { module = "dev.langchain4j:langchain4j-open-ai", version.ref = "langchain4j" }
-langchain4jqdrant = { module = "dev.langchain4j:langchain4j-qdrant", version.ref = "langchain4j" }
+langchain4jqdrant = { module = "dev.langchain4j:langchain4j-qdrant", version.ref = "langchain4j-qdrant" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 lombok-mapstruct-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "mapstruct-lombok" }
 mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot4-starter", version.ref = "mybatis-plus" }

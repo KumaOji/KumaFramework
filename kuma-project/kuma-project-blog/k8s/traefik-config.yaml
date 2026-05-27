@@ -5,10 +5,44 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
+    # ── 端口 ────────────────────────────────────────────────────────
     ports:
+      web:
+        port: 8000
+        exposedPort: 80
+        protocol: TCP
+        expose:
+          default: true
+        # HTTP 全部重定向到 HTTPS
+        redirectTo:
+          port: websecure
+      websecure:
+        port: 8443
+        exposedPort: 443
+        protocol: TCP
+        expose:
+          default: true
+        tls:
+          enabled: true
       aiui:
         port: 8081
         exposedPort: 8081
         protocol: TCP
         expose:
           default: true
+
+    # ── Let's Encrypt ACME ──────────────────────────────────────────
+    certResolvers:
+      letsencrypt:
+        email: "your-email@example.com"   # ← 换成你的邮箱
+        httpChallenge:
+          entryPoint: web
+        storage: /data/acme.json
+
+    # ── 持久化 acme.json（证书存储） ─────────────────────────────────
+    persistence:
+      enabled: true
+      storageClass: "local-path"   # k3s 默认 StorageClass
+      accessMode: ReadWriteOnce
+      size: 128Mi
+      path: /data

@@ -7,8 +7,6 @@ import java.util.Map;
 
 public interface AiChatService {
 
-    Map<String, Object> listModels();
-
     Map<String, Object> chat(AiChatRequest request);
 
     SseEmitter streamChat(AiChatRequest request);
