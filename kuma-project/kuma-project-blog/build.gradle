@@ -30,6 +30,7 @@ dependencies {
 
     api projectLibs.langchain4j
     api projectLibs.langchain4jopenai
+    api projectLibs.langchain4jqdrant
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.websocket

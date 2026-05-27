@@ -12,4 +12,8 @@ public interface AiChatService {
     Map<String, Object> chat(AiChatRequest request);
 
     SseEmitter streamChat(AiChatRequest request);
+
+    Map<String, Object> ragChat(AiChatRequest request);
+
+    SseEmitter ragStreamChat(AiChatRequest request);
 }

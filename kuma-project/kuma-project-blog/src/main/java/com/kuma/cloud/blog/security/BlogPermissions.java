@@ -77,6 +77,8 @@ public final class BlogPermissions {
     public static final String AI_CHAT_READ = "ai_chat:read";
     /** 发起对话（含流式推理） */
     public static final String AI_CHAT_SEND = "ai_chat:send";
+    /** 向知识库写入文档（仅管理员） */
+    public static final String AI_CHAT_INGEST = "ai_chat:ingest";
 
     // ── 聊天室模块 ───────────────────────────────────────────────
 

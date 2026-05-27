@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 @Service
 public class AiChatServiceImpl implements AiChatService {
@@ -39,15 +40,18 @@ public class AiChatServiceImpl implements AiChatService {
     private final RestClient restClient;
     private final String defaultModel;
     private final Executor asyncExecutor;
+    private final RagComponent ragComponent;
 
     public AiChatServiceImpl(
             @Value("${ai-chat.base-url:http://blog-ai-ui:8080}") String baseUrl,
             @Value("${ai-chat.api-key:}") String apiKey,
             @Value("${ai-chat.model:llama3}") String defaultModel,
-            @Qualifier("asyncThreadPoolTaskExecutor") Executor asyncExecutor) {
+            @Qualifier("asyncThreadPoolTaskExecutor") Executor asyncExecutor,
+            RagComponent ragComponent) {
 
         this.defaultModel = defaultModel;
         this.asyncExecutor = asyncExecutor;
+        this.ragComponent = ragComponent;
 
         String chatBaseUrl = baseUrl.endsWith("/") ? baseUrl + "api" : baseUrl + "/api";
         String effectiveKey = apiKey.isBlank() ? "no-key" : apiKey;
@@ -129,6 +133,53 @@ public class AiChatServiceImpl implements AiChatService {
         return emitter;
     }
 
+    @Override
+    public Map<String, Object> ragChat(AiChatRequest request) {
+        String model = resolveModel(request.getModel());
+        String context = ragComponent.retrieveContext(extractLastUserMessage(request.getMessages()), 3);
+        ChatRequest chatRequest = buildChatRequest(request.getMessages(), model, context);
+        ChatResponse response = chatModel.chat(chatRequest);
+        return buildCompletionResponse(model, response.aiMessage().text());
+    }
+
+    @Override
+    public SseEmitter ragStreamChat(AiChatRequest request) {
+        String model = resolveModel(request.getModel());
+        String context = ragComponent.retrieveContext(extractLastUserMessage(request.getMessages()), 3);
+        ChatRequest chatRequest = buildChatRequest(request.getMessages(), model, context);
+        SseEmitter emitter = new SseEmitter(600_000L);
+
+        asyncExecutor.execute(() -> streamingModel.chat(chatRequest, new StreamingChatResponseHandler() {
+
+            @Override
+            public void onPartialResponse(String token) {
+                try {
+                    emitter.send(SseEmitter.event().data(buildStreamChunk(model, token)));
+                } catch (Exception e) {
+                    emitter.completeWithError(e);
+                }
+            }
+
+            @Override
+            public void onCompleteResponse(ChatResponse ignored) {
+                try {
+                    emitter.send(SseEmitter.event().data("[DONE]"));
+                    emitter.complete();
+                } catch (Exception e) {
+                    emitter.completeWithError(e);
+                }
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                log.error("RAG 流式推理异常: {}", error.getMessage(), error);
+                emitter.completeWithError(error);
+            }
+        }));
+
+        return emitter;
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private String resolveModel(String requested) {
@@ -136,10 +187,28 @@ public class AiChatServiceImpl implements AiChatService {
     }
 
     private ChatRequest buildChatRequest(List<AiChatRequest.Message> raw, String model) {
+        return buildChatRequest(raw, model, "");
+    }
+
+    private ChatRequest buildChatRequest(List<AiChatRequest.Message> raw, String model, String context) {
+        List<ChatMessage> messages = new ArrayList<>(toMessages(raw));
+        if (!context.isBlank()) {
+            messages.add(0, SystemMessage.from("参考以下内容回答问题：\n\n" + context));
+        }
         return ChatRequest.builder()
-                .messages(toMessages(raw))
+                .messages(messages)
                 .parameters(ChatRequestParameters.builder().modelName(model).build())
                 .build();
+    }
+
+    private String extractLastUserMessage(List<AiChatRequest.Message> messages) {
+        if (messages == null) return "";
+        return Stream.iterate(messages.size() - 1, i -> i >= 0, i -> i - 1)
+                .map(messages::get)
+                .filter(m -> "user".equals(m.getRole()))
+                .map(AiChatRequest.Message::getContent)
+                .findFirst()
+                .orElse("");
     }
 
     private List<ChatMessage> toMessages(List<AiChatRequest.Message> raw) {
