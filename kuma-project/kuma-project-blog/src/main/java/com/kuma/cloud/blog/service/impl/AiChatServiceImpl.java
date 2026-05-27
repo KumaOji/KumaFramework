@@ -1,18 +1,18 @@
 package com.kuma.cloud.blog.service.impl;
 
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import com.kuma.cloud.blog.domain.vo.OpenWebUiChatRequest;
-import com.kuma.cloud.blog.service.OpenWebUiService;
+import com.kuma.cloud.blog.domain.vo.AiChatRequest;
+import com.kuma.cloud.blog.service.AiChatService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.slf4j.Logger;
@@ -29,9 +29,9 @@ import java.util.*;
 import java.util.concurrent.Executor;
 
 @Service
-public class OpenWebUiServiceImpl implements OpenWebUiService {
+public class AiChatServiceImpl implements AiChatService {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenWebUiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AiChatServiceImpl.class);
 
     private final ChatModel chatModel;
     private final StreamingChatModel streamingModel;
@@ -40,18 +40,16 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
     private final String defaultModel;
     private final Executor asyncExecutor;
 
-    public OpenWebUiServiceImpl(
-            @Value("${openwebui.base-url:http://blog-ai-ui:8080}") String baseUrl,
-            @Value("${openwebui.api-key:}") String apiKey,
-            @Value("${openwebui.model:llama3}") String defaultModel,
+    public AiChatServiceImpl(
+            @Value("${ai-chat.base-url:http://blog-ai-ui:8080}") String baseUrl,
+            @Value("${ai-chat.api-key:}") String apiKey,
+            @Value("${ai-chat.model:llama3}") String defaultModel,
             @Qualifier("asyncThreadPoolTaskExecutor") Executor asyncExecutor) {
 
         this.defaultModel = defaultModel;
         this.asyncExecutor = asyncExecutor;
 
-        // OpenWebUI 的 OpenAI 兼容 Chat 接口在 /api 路径下
         String chatBaseUrl = baseUrl.endsWith("/") ? baseUrl + "api" : baseUrl + "/api";
-        // LangChain4j 要求 apiKey 非空
         String effectiveKey = apiKey.isBlank() ? "no-key" : apiKey;
 
         this.restClient = RestClient.builder()
@@ -86,7 +84,7 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
     }
 
     @Override
-    public Map<String, Object> chat(OpenWebUiChatRequest request) {
+    public Map<String, Object> chat(AiChatRequest request) {
         String model = resolveModel(request.getModel());
         ChatRequest chatRequest = buildChatRequest(request.getMessages(), model);
 
@@ -95,7 +93,7 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
     }
 
     @Override
-    public SseEmitter streamChat(OpenWebUiChatRequest request) {
+    public SseEmitter streamChat(AiChatRequest request) {
         String model = resolveModel(request.getModel());
         ChatRequest chatRequest = buildChatRequest(request.getMessages(), model);
         SseEmitter emitter = new SseEmitter(600_000L);
@@ -123,7 +121,7 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
 
             @Override
             public void onError(Throwable error) {
-                log.error("LangChain4j 流式推理异常: {}", error.getMessage(), error);
+                log.error("流式推理异常: {}", error.getMessage(), error);
                 emitter.completeWithError(error);
             }
         }));
@@ -137,14 +135,14 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
         return (requested != null && !requested.isBlank()) ? requested : defaultModel;
     }
 
-    private ChatRequest buildChatRequest(List<OpenWebUiChatRequest.Message> raw, String model) {
+    private ChatRequest buildChatRequest(List<AiChatRequest.Message> raw, String model) {
         return ChatRequest.builder()
                 .messages(toMessages(raw))
                 .parameters(ChatRequestParameters.builder().modelName(model).build())
                 .build();
     }
 
-    private List<ChatMessage> toMessages(List<OpenWebUiChatRequest.Message> raw) {
+    private List<ChatMessage> toMessages(List<AiChatRequest.Message> raw) {
         if (raw == null) return List.of();
         return raw.stream().<ChatMessage>map(m -> switch (m.getRole()) {
             case "system"    -> SystemMessage.from(m.getContent());
@@ -153,7 +151,6 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
         }).toList();
     }
 
-    /** 构造 OpenAI chat.completion 格式响应，保持与旧代理接口的兼容性 */
     private Map<String, Object> buildCompletionResponse(String model, String content) {
         Map<String, Object> message = Map.of("role", "assistant", "content", content);
         Map<String, Object> choice  = Map.of("index", 0, "message", message, "finish_reason", "stop");
@@ -166,7 +163,6 @@ public class OpenWebUiServiceImpl implements OpenWebUiService {
         return result;
     }
 
-    /** 构造 OpenAI chat.completion.chunk 格式（SSE 每帧数据） */
     private String buildStreamChunk(String model, String token) {
         Map<String, Object> delta  = Map.of("content", token);
         Map<String, Object> choice = Map.of("index", 0, "delta", delta);

@@ -69,14 +69,14 @@ public final class BlogPermissions {
     /** 审核友链申请（通过） */
     public static final String FRIEND_LINK_AUDIT  = "friend_link:audit";
 
-    // ── AI / OpenWebUI 模块 ──────────────────────────────────────
+    // ── AI 对话模块 ──────────────────────────────────────────────
 
-    /** OpenWebUI 模块所有权限（用于管理员角色关联） */
-    public static final String OPENWEBUI_ALL  = "openwebui:*";
+    /** AI 对话模块所有权限（用于管理员角色关联） */
+    public static final String AI_CHAT_ALL  = "ai_chat:*";
     /** 查询可用模型列表 */
-    public static final String OPENWEBUI_READ = "openwebui:read";
+    public static final String AI_CHAT_READ = "ai_chat:read";
     /** 发起对话（含流式推理） */
-    public static final String OPENWEBUI_CHAT = "openwebui:chat";
+    public static final String AI_CHAT_SEND = "ai_chat:send";
 
     // ── 聊天室模块 ───────────────────────────────────────────────
 

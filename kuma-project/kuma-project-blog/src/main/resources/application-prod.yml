@@ -59,7 +59,7 @@ springdoc:
 knife4j:
   enable: true
 
-openwebui:
+ai-chat:
   base-url: ${OPENWEBUI_BASE_URL:http://blog-ai-ui:8080}
   api-key: ${OPENWEBUI_API_KEY:}
 
@@ -107,7 +107,7 @@ kuma:
           - /swagger-ui/**
           - /doc.html
           - /**/music/*/stream
-          - /**/openwebui/chat/stream
+          - /**/ai-chat/chat/stream
       filter:
         version: true
         trace: true
