@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kuma.cloud.blog.mapper.ChatHistoryMapper">
+
+    <select id="selectRecentByRoomId" resultType="com.kuma.cloud.blog.domain.entity.ChatHistory">
+        SELECT id, room_id, user_id, nickname, avatar, content, message_type, create_time
+        FROM chat_history
+        WHERE room_id = #{roomId}
+        ORDER BY create_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

@@ -30,6 +30,7 @@ dependencies {
 
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.websocket
     api projectLibs.spring.boot.starter.security
     api projectLibs.spring.doc.webmvc
 

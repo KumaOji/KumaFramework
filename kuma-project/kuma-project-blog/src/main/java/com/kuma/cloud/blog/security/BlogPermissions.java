@@ -77,4 +77,12 @@ public final class BlogPermissions {
     public static final String OPENWEBUI_READ = "openwebui:read";
     /** 发起对话（含流式推理） */
     public static final String OPENWEBUI_CHAT = "openwebui:chat";
+
+    // ── 聊天室模块 ───────────────────────────────────────────────
+
+    /** 聊天室模块所有权限（用于管理员角色关联） */
+    public static final String CHAT_ALL    = "chat:*";
+    public static final String CHAT_CREATE = "chat:create";
+    public static final String CHAT_UPDATE = "chat:update";
+    public static final String CHAT_DELETE = "chat:delete";
 }
