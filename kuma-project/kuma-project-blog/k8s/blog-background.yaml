@@ -39,11 +39,16 @@ spec:
               value: "6379"
             - name: REDIS_DATABASE
               value: "0"
+            - name: AI_CHAT_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: ai-chat-base-url
             - name: AI_CHAT_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: blog-secret
-                  key: openwebui-api-key
+                  key: ai-chat-api-key
           volumeMounts:
             - name: music
               mountPath: /data/music

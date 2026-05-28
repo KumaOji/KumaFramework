@@ -60,8 +60,8 @@ knife4j:
   enable: true
 
 ai-chat:
-  base-url: ${AI_CHAT_BASE_URL:http://blog-ai-ui:8080}
-  api-key: ${AI_CHAT_API_KEY:}
+  base-url: ${AI_CHAT_BASE_URL}
+  api-key: ${AI_CHAT_API_KEY}
   embedding-model: nomic-embed-text
   qdrant:
     host: blog-qdrant
