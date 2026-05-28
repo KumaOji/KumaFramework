@@ -34,9 +34,8 @@ spec:
     # ── Let's Encrypt ACME ──────────────────────────────────────────
     certResolvers:
       letsencrypt:
-        email: "your-email@example.com"   # ← 换成你的邮箱
-        httpChallenge:
-          entryPoint: web
+        email: "15346602014@163.com"
+        tlsChallenge: true
         storage: /data/acme.json
 
     # ── 持久化 acme.json（证书存储） ─────────────────────────────────
@@ -46,3 +45,9 @@ spec:
       accessMode: ReadWriteOnce
       size: 128Mi
       path: /data
+
+    # ── 兜底：用 CLI 参数强制注入 certResolver ────────────────────────
+    additionalArguments:
+      - "--certificatesResolvers.letsencrypt.acme.email=15346602014@163.com"
+      - "--certificatesResolvers.letsencrypt.acme.storage=/data/acme.json"
+      - "--certificatesResolvers.letsencrypt.acme.tlsChallenge=true"

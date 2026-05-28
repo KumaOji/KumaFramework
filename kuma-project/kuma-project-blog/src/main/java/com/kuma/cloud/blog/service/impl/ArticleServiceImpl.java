@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Article;
+import com.kuma.cloud.blog.domain.entity.Category;
 import com.kuma.cloud.blog.domain.vo.*;
 import com.kuma.cloud.blog.mapper.ArticleMapper;
+import com.kuma.cloud.blog.mapper.CategoryMapper;
 import com.kuma.cloud.blog.service.ArticleService;
 import com.kuma.cloud.blog.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleMapper articleMapper;
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -160,15 +164,17 @@ public class ArticleServiceImpl implements ArticleService {
         return categoryService.getCategoryList();
     }
 
+    @Cacheable(cacheNames = "category", key = "'counts'")
     @Override
     public List<CategoryArticleCountVO> getCategoryArticleCounts() {
         List<CategoryArticleCountVO> dbList = articleMapper.selectCategoryArticleCounts();
         Map<Long, Long> countMap = dbList.stream()
                 .collect(Collectors.toMap(CategoryArticleCountVO::getCategoryId, CategoryArticleCountVO::getCount, (a, b) -> a));
+        List<Category> allCategories = categoryMapper.selectList(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>());
         List<CategoryVO> categories = categoryService.getCategoryList();
         List<CategoryArticleCountVO> result = new ArrayList<>();
         for (CategoryVO cat : categories) {
-            List<Long> ids = categoryService.getSelfAndDescendantIds(cat.getId());
+            List<Long> ids = categoryService.getSelfAndDescendantIds(cat.getId(), allCategories);
             long count = ids.stream().mapToLong(cid -> countMap.getOrDefault(cid, 0L)).sum();
             CategoryArticleCountVO vo = new CategoryArticleCountVO();
             vo.setCategoryId(cat.getId());

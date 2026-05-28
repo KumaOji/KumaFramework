@@ -72,7 +72,7 @@ ai-chat:
 
 blog:
   token-expire-seconds: 604800
-  cookie-secure: false
+  cookie-secure: true
   reset-admin-password: true
   admin-initial-password: admin123
   music:

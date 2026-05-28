@@ -7,6 +7,7 @@ import com.kuma.cloud.blog.mapper.CategoryMapper;
 import com.kuma.cloud.blog.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,6 +19,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
 
+    @Cacheable(cacheNames = "category", key = "'list'")
     @Override
     public List<CategoryVO> getCategoryList() {
         List<Category> categories = categoryMapper.selectList(
@@ -44,6 +46,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Long> getSelfAndDescendantIds(Long categoryId) {
         List<Category> allCategories = categoryMapper.selectList(new LambdaQueryWrapper<>());
+        List<Long> result = new ArrayList<>();
+        result.add(categoryId);
+        collectDescendantIds(categoryId, allCategories, result);
+        return result;
+    }
+
+    @Override
+    public List<Long> getSelfAndDescendantIds(Long categoryId, List<Category> allCategories) {
         List<Long> result = new ArrayList<>();
         result.add(categoryId);
         collectDescendantIds(categoryId, allCategories, result);

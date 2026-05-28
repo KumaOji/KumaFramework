@@ -10,9 +10,9 @@ metadata:
 spec:
   tls:
     - hosts:
-        - your-domain.com   # ← 换成你的域名
+        - blog.kumacloud.top
   rules:
-    - host: your-domain.com   # ← 换成你的域名
+    - host: blog.kumacloud.top
       http:
         paths:
           - path: /
