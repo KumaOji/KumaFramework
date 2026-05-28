@@ -2,8 +2,6 @@ package com.kuma.boot.web.validation.spel.test.util;
 
 import com.kuma.boot.web.validation.spel.core.SpelValidContext;
 import com.kuma.boot.web.validation.spel.core.SpelValidExecutor;
-import org.intellij.lang.annotations.Language;
-
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -71,7 +69,6 @@ public class VerifyObject {
      * <p>
      * 当待验证的对象未使用 @SpelValid 注解时，会使用执行器 {@link SpelValidExecutor} 直接进行校验，此时该参数生效
      */
-    @Language("SpEL")
     private String[] spelGroups;
 
     /**
@@ -158,7 +155,7 @@ public class VerifyObject {
         return verifyObject;
     }
 
-    public VerifyObject setGroups(@Language("SpEL") String... spelGroups) {
+    public VerifyObject setGroups(String... spelGroups) {
         this.spelGroups = spelGroups;
         return this;
     }

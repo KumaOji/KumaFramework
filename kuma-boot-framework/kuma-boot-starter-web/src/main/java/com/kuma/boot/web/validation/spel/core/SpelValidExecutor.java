@@ -9,7 +9,6 @@ import com.kuma.boot.web.validation.spel.core.message.ValidatorMessageInterpolat
 import com.kuma.boot.web.validation.spel.core.parse.SpelParser;
 import com.kuma.boot.web.validation.spel.core.result.FieldValidResult;
 import com.kuma.boot.web.validation.spel.core.result.ObjectValidResult;
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -216,7 +215,7 @@ public class SpelValidExecutor {
         }
 
         // 判断condition条件是否成立
-        @Language("SpEL") String condition = getAnnotationValue(annotation, CONDITION);
+        String condition = getAnnotationValue(annotation, CONDITION);
         if (!condition.isEmpty() && !SpelParser.parse(condition, verifiedObject, Boolean.class)) {
             LogUtils.debug("===> Condition not valid, skip validate. condition [{}]", condition);
             return null;
@@ -310,7 +309,7 @@ public class SpelValidExecutor {
         Objects.requireNonNull(object);
         Objects.requireNonNull(groups);
         Set<Object> parsedGroups = new HashSet<>();
-        for (@Language("SpEL") String group : groups) {
+        for (String group : groups) {
             parsedGroups.add(SpelParser.parse(group, object));
         }
         return parsedGroups;
