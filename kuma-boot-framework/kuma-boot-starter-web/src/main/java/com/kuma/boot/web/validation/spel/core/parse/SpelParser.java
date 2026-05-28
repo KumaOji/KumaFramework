@@ -2,7 +2,6 @@ package com.kuma.boot.web.validation.spel.core.parse;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.validation.spel.core.exception.SpelParserException;
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -59,7 +58,7 @@ public class SpelParser {
      * @return 表达式计算结果。若为基本数据类型，则会自动转为包装类型。
      */
     @Nullable
-    public static Object parse(@Language("spel") String expression, Object rootObject) {
+    public static Object parse(String expression, Object rootObject) {
         try {
             LogUtils.debug("======> Parse expression [{}]", expression);
             Expression parsed = expressionCache.computeIfAbsent(expression, parser::parseExpression);
@@ -83,7 +82,7 @@ public class SpelParser {
      */
     @NotNull
     @SuppressWarnings("unchecked")
-    public static <T> T parse(@Language("spel") String expression, Object rootObject, Class<T> requiredType) {
+    public static <T> T parse(String expression, Object rootObject, Class<T> requiredType) {
         Object any = parse(expression, rootObject);
         if (any == null) {
             throw new SpelParserException("Expression [" + expression + "] calculate result can not be null");

@@ -216,7 +216,7 @@ public class SpelValidExecutor {
         }
 
         // 判断condition条件是否成立
-        @Language("spel") String condition = getAnnotationValue(annotation, CONDITION);
+        @Language("SpEL") String condition = getAnnotationValue(annotation, CONDITION);
         if (!condition.isEmpty() && !SpelParser.parse(condition, verifiedObject, Boolean.class)) {
             LogUtils.debug("===> Condition not valid, skip validate. condition [{}]", condition);
             return null;
@@ -310,7 +310,7 @@ public class SpelValidExecutor {
         Objects.requireNonNull(object);
         Objects.requireNonNull(groups);
         Set<Object> parsedGroups = new HashSet<>();
-        for (@Language("spel") String group : groups) {
+        for (@Language("SpEL") String group : groups) {
             parsedGroups.add(SpelParser.parse(group, object));
         }
         return parsedGroups;

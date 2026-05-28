@@ -71,7 +71,7 @@ public class VerifyObject {
      * <p>
      * 当待验证的对象未使用 @SpelValid 注解时，会使用执行器 {@link SpelValidExecutor} 直接进行校验，此时该参数生效
      */
-    @Language("spel")
+    @Language("SpEL")
     private String[] spelGroups;
 
     /**
@@ -158,7 +158,7 @@ public class VerifyObject {
         return verifyObject;
     }
 
-    public VerifyObject setGroups(@Language("spel") String... spelGroups) {
+    public VerifyObject setGroups(@Language("SpEL") String... spelGroups) {
         this.spelGroups = spelGroups;
         return this;
     }
