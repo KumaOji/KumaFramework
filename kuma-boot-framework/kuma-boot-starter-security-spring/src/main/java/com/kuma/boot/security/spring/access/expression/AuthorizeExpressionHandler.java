@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.security.spring.access.expression;
 
 import java.util.Objects;
@@ -25,9 +20,10 @@ public class AuthorizeExpressionHandler extends DefaultMethodSecurityExpressionH
     }
 
     protected MethodSecurityExpressionOperations createSecurityExpressionRoot(Authentication authentication, MethodInvocation invocation) {
-        return this.createSecurityExpressionRoot((Supplier)(() -> authentication), (MethodInvocation)invocation);
+        return this.createSecurityExpressionRoot((Supplier<Authentication>) (() -> authentication), invocation);
     }
 
+    @SuppressWarnings("deprecation")
     private MethodSecurityExpressionOperations createSecurityExpressionRoot(Supplier<Authentication> authentication, MethodInvocation invocation) {
         RootObject root = new RootObject(authentication);
         root.setMethodInvocation(invocation);

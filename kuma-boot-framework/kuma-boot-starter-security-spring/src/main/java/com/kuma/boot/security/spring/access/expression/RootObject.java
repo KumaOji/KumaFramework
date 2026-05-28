@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.kuma.boot.security.spring.access.expression;
 
 import java.util.function.Supplier;
@@ -17,10 +12,12 @@ public class RootObject extends SecurityExpressionRoot implements MethodSecurity
     private Object target;
     private MethodInvocation methodInvocation;
 
+    @SuppressWarnings("deprecation")
     public RootObject(Authentication authentication) {
         super(authentication);
     }
 
+    @SuppressWarnings("deprecation")
     public RootObject(Supplier<Authentication> authentication) {
         super(authentication);
     }

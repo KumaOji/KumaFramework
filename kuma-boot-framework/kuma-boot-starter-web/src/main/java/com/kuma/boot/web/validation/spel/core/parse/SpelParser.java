@@ -82,6 +82,7 @@ public class SpelParser {
      * @throws SpelParserException 当表达式计算结果为null或者不是指定类型时抛出
      */
     @NotNull
+    @SuppressWarnings("unchecked")
     public static <T> T parse(@Language("spel") String expression, Object rootObject, Class<T> requiredType) {
         Object any = parse(expression, rootObject);
         if (any == null) {
@@ -90,7 +91,6 @@ public class SpelParser {
         if (!requiredType.isInstance(any)) {
             throw new SpelParserException("Expression [" + expression + "] calculate result must be [" + requiredType.getName() + "]");
         }
-        //noinspection unchecked
         return (T) any;
     }
 

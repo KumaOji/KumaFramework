@@ -19,6 +19,7 @@ package com.kuma.boot.security.spring.authentication.login.extension.mfa.userdet
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -131,16 +132,11 @@ public class MfaUserDetails implements UserDetails, CredentialsContainer {
     private static SortedSet<GrantedAuthority> sortAuthorities(
             Collection<? extends GrantedAuthority> authorities) {
         Assert.notNull(authorities, "Cannot pass a null GrantedAuthority collection");
-        SortedSet<GrantedAuthority> sortedAuthorities = new TreeSet(new AuthorityComparator());
-        Iterator var2 = authorities.iterator();
-
-        while (var2.hasNext()) {
-            GrantedAuthority grantedAuthority = (GrantedAuthority) var2.next();
-            Assert.notNull(
-                    grantedAuthority, "GrantedAuthority list cannot contain any null elements");
+        SortedSet<GrantedAuthority> sortedAuthorities = new TreeSet<>(new AuthorityComparator());
+        for (GrantedAuthority grantedAuthority : authorities) {
+            Assert.notNull(grantedAuthority, "GrantedAuthority list cannot contain any null elements");
             sortedAuthorities.add(grantedAuthority);
         }
-
         return sortedAuthorities;
     }
 
@@ -195,20 +191,12 @@ public class MfaUserDetails implements UserDetails, CredentialsContainer {
         }
 
         public UserBuilder roles(String... roles) {
-            List<GrantedAuthority> authorities = new ArrayList(roles.length);
-            String[] var3 = roles;
-            int var4 = roles.length;
-
-            for (int var5 = 0; var5 < var4; ++var5) {
-                String role = var3[var5];
-                Assert.isTrue(
-                        !role.startsWith("ROLE_"),
-                        () -> {
-                            return role + " cannot start with ROLE_ (it is automatically added)";
-                        });
+            List<GrantedAuthority> authorities = new ArrayList<>(roles.length);
+            for (String role : roles) {
+                Assert.isTrue(!role.startsWith("ROLE_"),
+                        () -> role + " cannot start with ROLE_ (it is automatically added)");
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
             }
-
             return this.authorities(authorities);
         }
 
@@ -217,7 +205,7 @@ public class MfaUserDetails implements UserDetails, CredentialsContainer {
         }
 
         public UserBuilder authorities(Collection<? extends GrantedAuthority> authorities) {
-            this.authorities = new ArrayList(authorities);
+            this.authorities = new ArrayList<>(authorities);
             return this;
         }
 

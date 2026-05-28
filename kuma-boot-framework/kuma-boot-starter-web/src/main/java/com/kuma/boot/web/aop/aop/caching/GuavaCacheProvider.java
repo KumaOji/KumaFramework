@@ -47,6 +47,7 @@ public class GuavaCacheProvider implements com.kuma.boot.web.aop.aop.caching.Cac
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T get(String key, long expireMillis) {
         Cache<String, Optional<Object>> cache = expireMillisToCache.get(expireMillis);
         if (cache == null) {

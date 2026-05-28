@@ -76,14 +76,14 @@ public class UserDeserializer extends StdDeserializer<User> {
         User result =
                 new User(
                         this.readJsonNode(jsonNode, "username").asString(),
-                        password.asText(""),
+                        password.asString(""),
                         this.readJsonNode(jsonNode, "enabled").asBoolean(),
                         this.readJsonNode(jsonNode, "accountNonExpired").asBoolean(),
                         this.readJsonNode(jsonNode, "credentialsNonExpired").asBoolean(),
                         this.readJsonNode(jsonNode, "accountNonLocked").asBoolean(),
                         authorities);
 
-        if (password.asText(null) == null) {
+        if (password.asString(null) == null) {
             result.eraseCredentials();
         }
 

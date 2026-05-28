@@ -38,8 +38,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
             Object httpLog = annotationAttributes.get("httpLog");
             logger.debug("httpLog attribute: {}", httpLog);
             logger.debug("httpLog type: {}", httpLog != null ? httpLog.getClass() : "null");
-            if (httpLog instanceof Map) {
-                Map<String, Object> httpLogMap = (Map<String, Object>) httpLog;
+            if (httpLog instanceof Map<?, ?> httpLogMap) {
                 logger.debug("httpLog map keys: {}", httpLogMap.keySet());
                 Object urlFormat = httpLogMap.get("urlFormat");
                 logger.debug("urlFormat from httpLog: '{}'", urlFormat);
@@ -156,6 +155,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
     /**
      * 解析链路追踪配置
      */
+    @SuppressWarnings("unchecked")
     private void parseTraceConfig( LogConfigProperties config) {
         Map<String, Object> traceAttrs = getAttributeValue("trace", Map.class, null);
         if (traceAttrs != null) {
@@ -171,6 +171,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
     /**
      * 解析性能监控配置
      */
+    @SuppressWarnings("unchecked")
     private void parsePerformanceConfig( LogConfigProperties config) {
         Map<String, Object> perfAttrs = getAttributeValue("performance", Map.class, null);
         if (perfAttrs != null) {
@@ -186,6 +187,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
     /**
      * 解析条件评估配置
      */
+    @SuppressWarnings("unchecked")
     private void parseConditionConfig( LogConfigProperties config) {
         Map<String, Object> conditionAttrs = getAttributeValue("condition", Map.class, null);
         if (conditionAttrs != null) {
@@ -201,6 +203,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
     /**
      * 解析敏感数据配置
      */
+    @SuppressWarnings("unchecked")
     private void parseSensitiveConfig( LogConfigProperties config) {
         Map<String, Object> sensitiveAttrs = getAttributeValue("sensitive", Map.class, null);
         if (sensitiveAttrs != null) {
@@ -219,6 +222,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
     /**
      * 解析HTTP日志配置
      */
+    @SuppressWarnings("unchecked")
     private void parseHttpLogConfig( LogConfigProperties config) {
         Map<String, Object> httpLogAttrs = getAttributeValue("httpLog", Map.class, null);
         logger.debug("parseHttpLogConfig - httpLogAttrs: {}", httpLogAttrs);
@@ -250,6 +254,7 @@ public class AtlasLogAnnotationConfigBeanPostProcessor implements BeanPostProces
     /**
      * 解析返回值记录配置
      */
+    @SuppressWarnings("unchecked")
     private void parseResultLogConfig( LogConfigProperties config) {
         Map<String, Object> resultLogAttrs = getAttributeValue("resultLog", Map.class, null);
         if (resultLogAttrs != null) {

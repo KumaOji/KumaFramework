@@ -66,7 +66,7 @@ public class AnonymousAuthenticationTokenJsonDeserializer
         final JsonNode detailsNode = jsonNode.get("details");
 
         final Integer key = jsonNode.get("keyHash").asInt();
-        final String principal = jsonNode.get("principal").asText("anonymousUser");
+        final String principal = jsonNode.get("principal").asString("anonymousUser");
 
         // 创建 AnonymousAuthenticationToken 对象
         AnonymousAuthenticationToken token;

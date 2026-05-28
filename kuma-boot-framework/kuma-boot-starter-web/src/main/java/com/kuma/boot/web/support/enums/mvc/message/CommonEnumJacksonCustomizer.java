@@ -45,17 +45,18 @@ public class CommonEnumJacksonCustomizer {
     public JsonMapperBuilderCustomizer commonEnumBuilderCustomizer() {
         return builder -> {
             SimpleModule module = new SimpleModule();
-
-            Map<Class<?>, List<CommonEnum>> classDict = enumRegistry.getClassDict();
-            classDict.forEach(
-                    ( aClass, commonEnums ) -> {
-                        Class<CommonEnum> clazz = (Class<CommonEnum>)aClass;
-                        module.addDeserializer(clazz, new CommonEnumJsonDeserializer(commonEnums));
-                        module.addSerializer(clazz, new CommonEnumJsonSerializer());
-                    });
-
+            enumRegistry.getClassDict().forEach(
+                    (aClass, commonEnums) -> registerEnum(module, aClass, commonEnums));
             builder.addModule(module);
         };
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends CommonEnum> void registerEnum(
+            SimpleModule module, Class<?> rawClass, List<CommonEnum> commonEnums) {
+        Class<T> clazz = (Class<T>) rawClass;
+        module.addDeserializer(clazz, (ValueDeserializer<T>) new CommonEnumJsonDeserializer(commonEnums));
+        module.addSerializer(clazz, (ValueSerializer<T>) new CommonEnumJsonSerializer());
     }
 
     static class CommonEnumJsonSerializer extends ValueSerializer<CommonEnum> {

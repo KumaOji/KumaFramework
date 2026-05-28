@@ -460,6 +460,7 @@ public final class JustAuthRequestHolder implements InitializingBean, Applicatio
      * @return 返回 source 相对应的默认 {@link AuthScope} 数组
      */
     @Nullable
+    @SuppressWarnings("deprecation")
     private AuthScope[] getDefaultScopeBySource(@NonNull AuthSource source) {
         if (source instanceof AuthCustomizeSource) {
             return ((AuthCustomizeSource) source).getDefaultScopes();

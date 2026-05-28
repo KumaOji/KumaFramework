@@ -41,7 +41,7 @@ public class JsonNodeUtils {
             return null;
         }
         JsonNode value = jsonNode.findValue(fieldName);
-        return (value != null && value.isTextual()) ? value.asString() : null;
+        return (value != null && value.isString()) ? value.asString() : null;
     }
 
     public static Boolean findBooleanValue(JsonNode jsonNode, String fieldName) {

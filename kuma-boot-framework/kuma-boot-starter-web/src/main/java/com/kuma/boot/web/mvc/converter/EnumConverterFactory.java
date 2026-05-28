@@ -18,7 +18,7 @@ public class EnumConverterFactory implements ConverterFactory<String, Enum<?>> {
     private static final Map<Class<?>, Converter<String, ? extends Enum<?>>> CONVERTER_MAP = new ConcurrentHashMap<>();
 
     @Override
-    @SuppressWarnings("unchecked cast")
+    @SuppressWarnings("unchecked")
     public <T extends Enum<?>> Converter<String, T> getConverter(Class<T> targetType) {
         // 缓存转换器
         Converter<String, T> converter = (Converter<String, T>) CONVERTER_MAP.get(targetType);

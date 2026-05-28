@@ -27,10 +27,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.SignatureException;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
@@ -105,40 +103,26 @@ public final class JwtUtil {
      * @return jwt
      */
     public static Token createJwt(Map<String, String> user, long expire) {
-        SecretKey key = Jwts.SIG.HS256.key().build();
-        String jws = Jwts.builder().subject("Joe").signWith(key).compact();
-
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
 
-        // 生成签名密钥
         byte[] apiKeySecretBytes = Base64.getDecoder().decode(BASE64_SECURITY);
-        Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
+        SecretKey signingKey = new SecretKeySpec(apiKeySecretBytes, "HmacSHA256");
 
-        // 添加构成JWT的类
-        JwtBuilder builder =
-                Jwts.builder()
-                        .setHeaderParam("typ", "JsonWebToken")
-                        .signWith(signatureAlgorithm, signingKey);
-
-        // 设置JWT参数
-        user.forEach(builder::claim);
-
-        // 添加Token过期时间
-        // allowedClockSkewMillis
         long expMillis = nowMillis + expire * 1000;
         Date exp = new Date(expMillis);
-        builder
-                // 发布时间
-                .setIssuedAt(now)
-                // token从时间什么开始生效
-                .setNotBefore(now)
-                // token从什么时间截止生效
-                .setExpiration(exp);
 
-        // 组装Token信息
+        JwtBuilder builder =
+                Jwts.builder()
+                        .header().add("typ", "JsonWebToken").and()
+                        .signWith(signingKey, Jwts.SIG.HS256);
+
+        user.forEach(builder::claim);
+
+        builder.issuedAt(now)
+               .notBefore(now)
+               .expiration(exp);
+
         Token tokenInfo = new Token();
         tokenInfo.setToken(builder.compact());
         tokenInfo.setExpire(expire);

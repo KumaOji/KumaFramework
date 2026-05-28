@@ -61,8 +61,8 @@ public class WebAuthenticationDetailsDeserializer
             final Constructor<WebAuthenticationDetails> privateConstructor =
                     detailsClass.getDeclaredConstructor(stringClass, stringClass);
             privateConstructor.setAccessible(true);
-            final String remoteAddress = jsonNode.get("remoteAddress").asText(null);
-            final String sessionId = jsonNode.get("sessionId").asText(null);
+            final String remoteAddress = jsonNode.get("remoteAddress").asString(null);
+            final String sessionId = jsonNode.get("sessionId").asString(null);
             return privateConstructor.newInstance(remoteAddress, sessionId);
         } catch (NoSuchMethodException
                  | InstantiationException

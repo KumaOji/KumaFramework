@@ -111,6 +111,7 @@ public class ExtensionBeanInterceptor
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private String getIdentity(MethodInvocation methodInvocation) {
         try {
             Object[] objects = methodInvocation.getArguments();

@@ -52,16 +52,16 @@ public class AuthUserJsonDeserializer extends StdDeserializer<AuthUser> {
 
         final String uuid = jsonNode.get("uuid").asString();
         final String username = jsonNode.get("username").asString();
-        final String nickname = jsonNode.get("nickname").asText(null);
-        final String avatar = jsonNode.get("avatar").asText(null);
-        final String blog = jsonNode.get("blog").asText(null);
-        final String company = jsonNode.get("company").asText(null);
-        final String location = jsonNode.get("location").asText(null);
-        final String email = jsonNode.get("email").asText(null);
-        final String remark = jsonNode.get("remark").asText(null);
+        final String nickname = jsonNode.get("nickname").asString(null);
+        final String avatar = jsonNode.get("avatar").asString(null);
+        final String blog = jsonNode.get("blog").asString(null);
+        final String company = jsonNode.get("company").asString(null);
+        final String location = jsonNode.get("location").asString(null);
+        final String email = jsonNode.get("email").asString(null);
+        final String remark = jsonNode.get("remark").asString(null);
         final AuthUserGender gender =
                 mapper.convertValue(jsonNode.get("gender"), new TypeReference<AuthUserGender>() {});
-        final String source = jsonNode.get("source").asText(null);
+        final String source = jsonNode.get("source").asString(null);
 
         final AuthToken token =
                 mapper.convertValue(jsonNode.get("token"), new TypeReference<AuthToken>() {});

@@ -61,7 +61,7 @@ public class TemporaryUserDeserializer extends StdDeserializer<TemporaryUser> {
         TemporaryUser result =
                 new TemporaryUser(
                         this.readJsonNode(jsonNode, "username").asString(),
-                        password.asText(""),
+                        password.asString(""),
                         this.readJsonNode(jsonNode, "enabled").asBoolean(),
                         this.readJsonNode(jsonNode, "accountNonExpired").asBoolean(),
                         this.readJsonNode(jsonNode, "credentialsNonExpired").asBoolean(),
@@ -71,7 +71,7 @@ public class TemporaryUserDeserializer extends StdDeserializer<TemporaryUser> {
                                 jsonNode.get("authUser"), new TypeReference<AuthUser>() {}),
                         jsonNode.get("encodeState").asString());
 
-        if (password.asText(null) == null) {
+        if (password.asString(null) == null) {
             result.eraseCredentials();
         }
 

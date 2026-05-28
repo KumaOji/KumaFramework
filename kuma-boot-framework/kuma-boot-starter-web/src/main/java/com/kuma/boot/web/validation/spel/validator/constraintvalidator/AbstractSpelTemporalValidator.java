@@ -77,6 +77,7 @@ public abstract class AbstractSpelTemporalValidator<T extends Annotation> implem
      * @param now      当前时间
      * @return 比较结果：负数表示temporal在now之前，0表示相等，正数表示temporal在now之后
      */
+    @SuppressWarnings("unchecked")
     protected int compareTemporal(Object temporal, Object now) {
         // 这个类型下面有不同的实现类，特殊处理下
         if (temporal instanceof ChronoLocalDate) {
@@ -92,7 +93,6 @@ public abstract class AbstractSpelTemporalValidator<T extends Annotation> implem
         if (temporal instanceof Comparable) {
             // 因为前面已经检查了 temporal.getClass() == now.getClass()，
             // 所以这里的 a.compareTo(b) 是类型安全的。
-            //noinspection unchecked
             return ((Comparable<Object>) temporal).compareTo(now);
         }
 

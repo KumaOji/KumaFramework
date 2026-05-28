@@ -93,7 +93,7 @@ public class JustAuthDefaultRequestAdapter extends AuthDefaultRequest
      * @return AuthResponse
      * @see AuthDefaultRequest#login(AuthCallback)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public AuthResponse login(AuthCallback authCallback) {
         try {

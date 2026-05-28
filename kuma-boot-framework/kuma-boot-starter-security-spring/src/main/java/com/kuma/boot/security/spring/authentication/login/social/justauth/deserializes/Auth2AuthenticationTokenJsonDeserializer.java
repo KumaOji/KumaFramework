@@ -63,7 +63,7 @@ public class Auth2AuthenticationTokenJsonDeserializer
                         jsonNode.get("authorities"),
                         new TypeReference<Collection<SimpleGrantedAuthority>>() {});
 
-        final String providerId = jsonNode.get("providerId").asText(null);
+        final String providerId = jsonNode.get("providerId").asString(null);
         final JsonNode detailsNode = jsonNode.get("details");
         final JsonNode principalNode = jsonNode.get("principal");
 

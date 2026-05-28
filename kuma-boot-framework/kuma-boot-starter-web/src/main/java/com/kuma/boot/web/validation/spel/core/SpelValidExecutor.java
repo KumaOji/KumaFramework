@@ -164,8 +164,8 @@ public class SpelValidExecutor {
                 String annoName = originalAnno.annotationType().getName();
                 if (annoName.endsWith("$List") || annoName.endsWith("Container")) {
                     // 容器注解，需要获取容器内部的注解类型，其声明类为真实的注解类
-                    //noinspection unchecked
-                    Class<? extends Annotation> clazz = (Class<? extends Annotation>) originalAnno.annotationType().getDeclaringClass();
+                    Class<? extends Annotation> clazz = originalAnno.annotationType()
+                            .getDeclaringClass().asSubclass(Annotation.class);
                     Annotation[] originalAnnoArray = f.getAnnotationsByType(clazz);
                     tempList.addAll(Arrays.asList(originalAnnoArray));
                 } else {
@@ -238,6 +238,7 @@ public class SpelValidExecutor {
      * @param verifiedField  被校验的字段，必须存在于被校验的对象中
      */
     @NotNull
+    @SuppressWarnings("unchecked")
     private static <A extends Annotation> FieldValidResult doValidate(
             @NotNull com.kuma.boot.web.validation.spel.core.SpelConstraintValidator<?> validator,
             @NotNull A annotation,
@@ -245,7 +246,6 @@ public class SpelValidExecutor {
             @NotNull Field verifiedField
     ) {
         try {
-            // noinspection unchecked
             return ((com.kuma.boot.web.validation.spel.core.SpelConstraintValidator<A>) validator).isValid(annotation, verifiedObject, verifiedField);
         } catch (SpelValidatorException e) {
             LogUtils.error("Spel validate error: {}; Located in the annotation [{}] of class [{}] field [{}]",
@@ -340,10 +340,10 @@ public class SpelValidExecutor {
      * @param <T>        返回值类型
      * @return 属性值
      */
+    @SuppressWarnings("unchecked")
     private static <T> T getAnnotationValue(@NotNull Annotation annotation, @NotNull String methodName) {
         Method method = AnnotationMethodManager.get(annotation.annotationType(), methodName);
         try {
-            //noinspection unchecked
             return (T) method.invoke(annotation);
         } catch (Exception e) {
             throw new SpelValidatorException("Get method [" + annotation.annotationType().getName() + "." + methodName + "] error: " + e.getMessage(), e);

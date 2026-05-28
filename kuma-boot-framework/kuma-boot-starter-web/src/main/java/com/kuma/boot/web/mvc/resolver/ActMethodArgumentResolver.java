@@ -28,7 +28,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 
 public class ActMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -101,32 +100,9 @@ public class ActMethodArgumentResolver implements HandlerMethodArgumentResolver 
                 result = paramType.cast(object.get(paramName));
             }
         } else if (paramType.isArray()) {
-            /** 入参是数组 */
-            // result = JsonHelper.fromJson(value, paramType);
-            if (result != null) {
-                Object[] targets = (Object[]) result;
-                for (int i = 0; i < targets.length; i++) {
-                    WebDataBinder binder =
-                            binderFactory.createBinder(
-                                    webRequest, targets[i], paramName + "[" + i + "]");
-                    // validateIfApplicable(binder, parameter, annotations);
-                }
-            }
+            // TODO: result = JsonHelper.fromJson(value, paramType);
         } else if (Collection.class.isAssignableFrom(paramType)) {
-            /** 这里要特别注意！！！，集合参数由于范型获取不到集合元素类型，所以指定类型就非常关键了 */
-            Class recordClass =
-                    attribute.recordClass() == null ? LinkedHashMap.class : attribute.recordClass();
-            // result = JsonHelper.fromJsonArrayBy(value, recordClass, paramType);
-            if (result != null) {
-                Collection<Object> targets = (Collection<Object>) result;
-                int index = 0;
-                for (Object targetObj : targets) {
-                    WebDataBinder binder =
-                            binderFactory.createBinder(
-                                    webRequest, targetObj, paramName + "[" + (index++) + "]");
-                    // validateIfApplicable(binder, parameter, annotations);
-                }
-            }
+            // TODO: result = JsonHelper.fromJsonArrayBy(value, attribute.recordClass(), paramType);
         } else {
             result = JSON.parseObject(value, paramType);
         }

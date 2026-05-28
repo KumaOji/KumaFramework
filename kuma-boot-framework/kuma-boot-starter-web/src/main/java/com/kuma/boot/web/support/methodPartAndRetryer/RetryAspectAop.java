@@ -41,6 +41,7 @@ import java.util.concurrent.Callable;
  */
 public class RetryAspectAop {
 
+    @SuppressWarnings("unchecked")
     public Object around(final ProceedingJoinPoint point) throws Throwable {
         Object result = null;
         final Object[] args = point.getArgs();
@@ -89,7 +90,7 @@ public class RetryAspectAop {
                         if (result == null) {
                             result = Lists.newArrayList();
                         }
-                        ((List) result).addAll((List) tempResult);
+                        ((List<Object>) result).addAll((List<Object>) tempResult);
                     } else {
                         //						log.error(String.format("分片执行返回的类型不支持,类%s-方法%s", className,
                         // methodName));
@@ -111,7 +112,7 @@ public class RetryAspectAop {
         if (null != args && args.length > 0) {
             Object firstArg = args[0];
             // 如果第一个参数是list 并且数量大于1
-            if (firstArg != null && firstArg instanceof List && ((List) firstArg).size() > 1) {
+            if (firstArg instanceof List<?> list && list.size() > 1) {
                 isHandler = true;
             }
         }

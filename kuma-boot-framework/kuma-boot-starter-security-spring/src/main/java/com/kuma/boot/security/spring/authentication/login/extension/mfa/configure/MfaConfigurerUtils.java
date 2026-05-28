@@ -67,6 +67,7 @@ public class MfaConfigurerUtils {
                 new JwtGenerator(jwtEncoder), userDetailsManager);
     }
 
+    @SuppressWarnings("unchecked")
     static <B extends HttpSecurityBuilder<B>> JWKSource<SecurityContext> getJwkSource(B builder) {
         JWKSource<SecurityContext> jwkSource = builder.getSharedObject(JWKSource.class);
         if (jwkSource == null) {
@@ -98,6 +99,7 @@ public class MfaConfigurerUtils {
         return (!beansMap.isEmpty() ? beansMap.values().iterator().next() : null);
     }
 
+    @SuppressWarnings("unchecked")
     static <B extends HttpSecurityBuilder<B>, T> T getOptionalBean(B builder, ResolvableType type) {
         ApplicationContext context = builder.getSharedObject(ApplicationContext.class);
         String[] names = context.getBeanNamesForType(type);

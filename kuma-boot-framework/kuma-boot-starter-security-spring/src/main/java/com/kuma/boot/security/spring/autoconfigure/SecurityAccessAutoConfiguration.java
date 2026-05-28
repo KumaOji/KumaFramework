@@ -85,6 +85,7 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
     }
 
     @Bean
+    @SuppressWarnings("deprecation")
     public MethodSecurityExpressionHandler methodSecurityExpressionHandler(
             RoleHierarchy roleHierarchy, StandardPermissionEvaluator standardPermissionEvaluator) {
         AuthorizeExpressionHandler expressionHandler = new AuthorizeExpressionHandler();
