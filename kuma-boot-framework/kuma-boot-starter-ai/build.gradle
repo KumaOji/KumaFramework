@@ -9,6 +9,7 @@ dependencies {
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.boot.web.server
     api projectLibs.spring.web
+    api projectLibs.spring.webmvc
     api projectLibs.spring.context
     api projectLibs.spring.beans
     api projectLibs.slf4j.api

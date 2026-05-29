@@ -4,7 +4,6 @@ import com.kuma.boot.ai.autoconfigure.properties.AiChatProperties;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.qdrant.QdrantEmbeddingStore;
@@ -29,21 +28,12 @@ public class RagComponent {
     private final String collectionName;
     private final int dimension;
 
-    public RagComponent(AiChatProperties properties) {
-        AiChatProperties.Embedding emb = properties.getEmbedding();
+    public RagComponent(EmbeddingModel embeddingModel, AiChatProperties properties) {
         AiChatProperties.Qdrant qdrant = properties.getQdrant();
 
+        this.embeddingModel = embeddingModel;
         this.collectionName = qdrant.getCollection();
         this.dimension = qdrant.getDimension();
-
-        String embBaseUrl = emb.getBaseUrl();
-        if (embBaseUrl.endsWith("/")) embBaseUrl = embBaseUrl.substring(0, embBaseUrl.length() - 1);
-
-        this.embeddingModel = OpenAiEmbeddingModel.builder()
-                .baseUrl(embBaseUrl)
-                .apiKey("no-key")
-                .modelName(emb.getModel())
-                .build();
 
         this.embeddingStore = QdrantEmbeddingStore.builder()
                 .host(qdrant.getHost())
@@ -65,18 +55,18 @@ public class RagComponent {
                     .body(Map.of("vectors", Map.of("size", dimension, "distance", "Cosine")))
                     .retrieve()
                     .toBodilessEntity();
-            log.info("Qdrant collection '{}' created (dimension={})", collectionName, dimension);
+            log.info("Qdrant collection '{}' ready (dimension={})", collectionName, dimension);
         } catch (Exception e) {
             log.debug("Qdrant collection '{}': {}", collectionName, e.getMessage());
         }
     }
 
     public void ingest(String text) {
-        List<TextSegment> segments = splitIntoSegments(text);
+        List<TextSegment> segments = split(text);
         if (segments.isEmpty()) return;
         List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
         embeddingStore.addAll(embeddings, segments);
-        log.info("Ingested {} segments into collection '{}'", segments.size(), collectionName);
+        log.info("Ingested {} segments into '{}'", segments.size(), collectionName);
     }
 
     public String retrieveContext(String query, int maxResults) {
@@ -90,7 +80,7 @@ public class RagComponent {
                 .collect(Collectors.joining("\n\n"));
     }
 
-    private List<TextSegment> splitIntoSegments(String text) {
+    private List<TextSegment> split(String text) {
         return Arrays.stream(text.split("\n\n+"))
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
