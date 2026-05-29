@@ -59,20 +59,6 @@ springdoc:
 knife4j:
   enable: true
 
-ai-chat:
-  base-url: https://api.openai.com
-  api-key: ""
-  model: gpt-4o-mini
-  embedding:
-    base-url: http://localhost:11434
-    model: nomic-embed-text
-  qdrant:
-    host: localhost
-    grpc-port: 6334
-    http-port: 6333
-    collection: blog-docs
-    dimension: 768
-
 blog:
   token-expire-seconds: 604800
   cookie-secure: false
@@ -90,6 +76,19 @@ jetcache:
 
 kuma:
   boot:
+    ai:
+      base-url: https://api.openai.com
+      api-key: ""
+      model: gpt-4o-mini
+      embedding:
+        base-url: http://localhost:11434
+        model: nomic-embed-text
+      qdrant:
+        host: localhost
+        grpc-port: 6334
+        http-port: 6333
+        collection: blog-docs
+        dimension: 768
     frp:
       enabled: false
       server-addr: 8.134.147.122

@@ -1,5 +1,6 @@
-package com.kuma.cloud.blog.service.impl;
+package com.kuma.boot.ai.service.impl;
 
+import com.kuma.boot.ai.autoconfigure.properties.AiChatProperties;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -10,9 +11,7 @@ import dev.langchain4j.store.embedding.qdrant.QdrantEmbeddingStore;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.Arrays;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
 public class RagComponent {
 
     private static final Logger log = LoggerFactory.getLogger(RagComponent.class);
@@ -31,34 +29,30 @@ public class RagComponent {
     private final String collectionName;
     private final int dimension;
 
-    public RagComponent(
-            @Value("${ai-chat.embedding.base-url:http://blog-ollama:11434}") String embeddingBaseUrl,
-            @Value("${ai-chat.embedding.model:nomic-embed-text}") String embeddingModelName,
-            @Value("${ai-chat.qdrant.host:localhost}") String qdrantHost,
-            @Value("${ai-chat.qdrant.grpc-port:6334}") int grpcPort,
-            @Value("${ai-chat.qdrant.http-port:6333}") int httpPort,
-            @Value("${ai-chat.qdrant.collection:blog-docs}") String collectionName,
-            @Value("${ai-chat.qdrant.dimension:768}") int dimension) {
+    public RagComponent(AiChatProperties properties) {
+        AiChatProperties.Embedding emb = properties.getEmbedding();
+        AiChatProperties.Qdrant qdrant = properties.getQdrant();
 
-        this.collectionName = collectionName;
-        this.dimension = dimension;
+        this.collectionName = qdrant.getCollection();
+        this.dimension = qdrant.getDimension();
 
-        String baseUrl = embeddingBaseUrl.endsWith("/") ? embeddingBaseUrl.substring(0, embeddingBaseUrl.length() - 1) : embeddingBaseUrl;
+        String embBaseUrl = emb.getBaseUrl();
+        if (embBaseUrl.endsWith("/")) embBaseUrl = embBaseUrl.substring(0, embBaseUrl.length() - 1);
 
         this.embeddingModel = OpenAiEmbeddingModel.builder()
-                .baseUrl(baseUrl)
+                .baseUrl(embBaseUrl)
                 .apiKey("no-key")
-                .modelName(embeddingModelName)
+                .modelName(emb.getModel())
                 .build();
 
         this.embeddingStore = QdrantEmbeddingStore.builder()
-                .host(qdrantHost)
-                .port(grpcPort)
+                .host(qdrant.getHost())
+                .port(qdrant.getGrpcPort())
                 .collectionName(collectionName)
                 .build();
 
         this.qdrantHttpClient = RestClient.builder()
-                .baseUrl("http://" + qdrantHost + ":" + httpPort)
+                .baseUrl("http://" + qdrant.getHost() + ":" + qdrant.getHttpPort())
                 .build();
     }
 

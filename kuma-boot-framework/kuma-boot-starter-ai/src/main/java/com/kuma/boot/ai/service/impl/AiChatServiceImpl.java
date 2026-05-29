@@ -1,8 +1,9 @@
-package com.kuma.cloud.blog.service.impl;
+package com.kuma.boot.ai.service.impl;
 
+import com.kuma.boot.ai.autoconfigure.properties.AiChatProperties;
+import com.kuma.boot.ai.model.AiChatRequest;
+import com.kuma.boot.ai.service.AiChatService;
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import com.kuma.cloud.blog.domain.vo.AiChatRequest;
-import com.kuma.cloud.blog.service.AiChatService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -17,9 +18,6 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Instant;
@@ -27,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
-@Service
 public class AiChatServiceImpl implements AiChatService {
 
     private static final Logger log = LoggerFactory.getLogger(AiChatServiceImpl.class);
@@ -38,22 +35,17 @@ public class AiChatServiceImpl implements AiChatService {
     private final Executor asyncExecutor;
     private final RagComponent ragComponent;
 
-    public AiChatServiceImpl(
-            @Value("${ai-chat.base-url:http://blog-ai-ui:8080}") String baseUrl,
-            @Value("${ai-chat.api-key:}") String apiKey,
-            @Value("${ai-chat.model:llama3}") String defaultModel,
-            @Qualifier("asyncThreadPoolTaskExecutor") Executor asyncExecutor,
-            RagComponent ragComponent) {
-
-        this.defaultModel = defaultModel;
+    public AiChatServiceImpl(AiChatProperties properties, Executor asyncExecutor, RagComponent ragComponent) {
+        this.defaultModel = properties.getModel();
         this.asyncExecutor = asyncExecutor;
         this.ragComponent = ragComponent;
 
-        String chatBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-        String effectiveKey = apiKey.isBlank() ? "no-key" : apiKey;
+        String baseUrl = properties.getBaseUrl();
+        if (baseUrl.endsWith("/")) baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        String effectiveKey = properties.getApiKey().isBlank() ? "no-key" : properties.getApiKey();
 
         this.chatModel = OpenAiChatModel.builder()
-                .baseUrl(chatBaseUrl)
+                .baseUrl(baseUrl)
                 .apiKey(effectiveKey)
                 .modelName(defaultModel)
                 .logRequests(false)
@@ -61,7 +53,7 @@ public class AiChatServiceImpl implements AiChatService {
                 .build();
 
         this.streamingModel = OpenAiStreamingChatModel.builder()
-                .baseUrl(chatBaseUrl)
+                .baseUrl(baseUrl)
                 .apiKey(effectiveKey)
                 .modelName(defaultModel)
                 .logRequests(false)
@@ -73,7 +65,6 @@ public class AiChatServiceImpl implements AiChatService {
     public Map<String, Object> chat(AiChatRequest request) {
         String model = resolveModel(request.getModel());
         ChatRequest chatRequest = buildChatRequest(request.getMessages(), model);
-
         ChatResponse response = chatModel.chat(chatRequest);
         return buildCompletionResponse(model, response.aiMessage().text());
     }

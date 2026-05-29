@@ -1,12 +1,12 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.ai.model.AiChatRequest;
+import com.kuma.boot.ai.model.RagIngestRequest;
+import com.kuma.boot.ai.service.AiChatService;
+import com.kuma.boot.ai.service.impl.RagComponent;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
-import com.kuma.cloud.blog.domain.vo.AiChatRequest;
-import com.kuma.cloud.blog.domain.vo.RagIngestRequest;
 import com.kuma.cloud.blog.security.BlogPermissions;
-import com.kuma.cloud.blog.service.AiChatService;
-import com.kuma.cloud.blog.service.impl.RagComponent;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

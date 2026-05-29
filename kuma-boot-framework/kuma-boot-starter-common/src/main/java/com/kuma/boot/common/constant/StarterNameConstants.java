@@ -29,6 +29,8 @@ public final class StarterNameConstants {
 
     public static final String STARTED = "started";
 
+    public static final String AI_STARTER = "kuma-boot-starter-ai";
+
     public static final String ACTUATOR_STARTER = "kuma-boot-starter-actuator";
 
     public static final String AGENT_STARTER = "kuma-boot-starter-agent";

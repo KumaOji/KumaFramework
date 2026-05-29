@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework AI 对话与 RAG 快速启动模块（基于 LangChain4j + Qdrant）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.web.server
+    api projectLibs.spring.web
+    api projectLibs.spring.context
+    api projectLibs.spring.beans
+    api projectLibs.slf4j.api
+    api projectLibs.langchain4j
+    api projectLibs.langchain4jopenai
+    api projectLibs.langchain4jqdrant
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

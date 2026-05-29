@@ -59,19 +59,6 @@ springdoc:
 knife4j:
   enable: true
 
-ai-chat:
-  base-url: ${AI_CHAT_BASE_URL}
-  api-key: ${AI_CHAT_API_KEY}
-  embedding:
-    base-url: http://blog-ollama:11434
-    model: nomic-embed-text
-  qdrant:
-    host: blog-qdrant
-    grpc-port: 6334
-    http-port: 6333
-    collection: blog-docs
-    dimension: 768
-
 blog:
   token-expire-seconds: 604800
   cookie-secure: true
@@ -89,6 +76,18 @@ jetcache:
 
 kuma:
   boot:
+    ai:
+      base-url: ${AI_CHAT_BASE_URL}
+      api-key: ${AI_CHAT_API_KEY}
+      embedding:
+        base-url: http://blog-ollama:11434
+        model: nomic-embed-text
+      qdrant:
+        host: blog-qdrant
+        grpc-port: 6334
+        http-port: 6333
+        collection: blog-docs
+        dimension: 768
     frp:
       enabled: false
       server-addr: 8.134.147.122

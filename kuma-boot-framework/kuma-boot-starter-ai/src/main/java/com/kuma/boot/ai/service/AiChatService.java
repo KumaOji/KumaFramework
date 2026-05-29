@@ -1,6 +1,6 @@
-package com.kuma.cloud.blog.service;
+package com.kuma.boot.ai.service;
 
-import com.kuma.cloud.blog.domain.vo.AiChatRequest;
+import com.kuma.boot.ai.model.AiChatRequest;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;

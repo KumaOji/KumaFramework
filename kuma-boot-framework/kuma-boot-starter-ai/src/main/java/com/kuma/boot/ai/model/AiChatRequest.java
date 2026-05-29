@@ -1,4 +1,4 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.boot.ai.model;
 
 import lombok.Data;
 
