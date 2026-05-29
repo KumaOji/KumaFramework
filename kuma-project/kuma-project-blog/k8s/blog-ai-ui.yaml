@@ -23,6 +23,8 @@ spec:
               value: "https://hf-mirror.com"
             - name: HF_HUB_OFFLINE
               value: "1"
+            - name: OLLAMA_BASE_URL
+              value: "http://blog-ollama:11434"
             - name: RAG_EMBEDDING_ENGINE
               value: "ollama"
             - name: VECTOR_DB

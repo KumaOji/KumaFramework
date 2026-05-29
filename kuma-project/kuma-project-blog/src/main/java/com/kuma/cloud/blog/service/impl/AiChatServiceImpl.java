@@ -49,7 +49,7 @@ public class AiChatServiceImpl implements AiChatService {
         this.asyncExecutor = asyncExecutor;
         this.ragComponent = ragComponent;
 
-        String chatBaseUrl = baseUrl.endsWith("/") ? baseUrl + "api" : baseUrl + "/api";
+        String chatBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         String effectiveKey = apiKey.isBlank() ? "no-key" : apiKey;
 
         this.chatModel = OpenAiChatModel.builder()

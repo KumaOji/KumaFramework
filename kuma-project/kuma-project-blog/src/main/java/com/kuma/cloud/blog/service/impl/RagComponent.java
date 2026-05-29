@@ -32,9 +32,8 @@ public class RagComponent {
     private final int dimension;
 
     public RagComponent(
-            @Value("${ai-chat.base-url:http://blog-ai-ui:8080}") String aiBaseUrl,
-            @Value("${ai-chat.api-key:}") String apiKey,
-            @Value("${ai-chat.embedding-model:nomic-embed-text}") String embeddingModelName,
+            @Value("${ai-chat.embedding.base-url:http://blog-ollama:11434}") String embeddingBaseUrl,
+            @Value("${ai-chat.embedding.model:nomic-embed-text}") String embeddingModelName,
             @Value("${ai-chat.qdrant.host:localhost}") String qdrantHost,
             @Value("${ai-chat.qdrant.grpc-port:6334}") int grpcPort,
             @Value("${ai-chat.qdrant.http-port:6333}") int httpPort,
@@ -44,12 +43,11 @@ public class RagComponent {
         this.collectionName = collectionName;
         this.dimension = dimension;
 
-        String chatBaseUrl = aiBaseUrl.endsWith("/") ? aiBaseUrl + "api" : aiBaseUrl + "/api";
-        String effectiveKey = apiKey.isBlank() ? "no-key" : apiKey;
+        String baseUrl = embeddingBaseUrl.endsWith("/") ? embeddingBaseUrl.substring(0, embeddingBaseUrl.length() - 1) : embeddingBaseUrl;
 
         this.embeddingModel = OpenAiEmbeddingModel.builder()
-                .baseUrl(chatBaseUrl)
-                .apiKey(effectiveKey)
+                .baseUrl(baseUrl)
+                .apiKey("no-key")
                 .modelName(embeddingModelName)
                 .build();
 

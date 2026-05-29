@@ -62,7 +62,9 @@ knife4j:
 ai-chat:
   base-url: ${AI_CHAT_BASE_URL}
   api-key: ${AI_CHAT_API_KEY}
-  embedding-model: nomic-embed-text
+  embedding:
+    base-url: http://blog-ollama:11434
+    model: nomic-embed-text
   qdrant:
     host: blog-qdrant
     grpc-port: 6334
@@ -77,6 +79,13 @@ blog:
   admin-initial-password: admin123
   music:
     base-path: /data/music
+
+jetcache:
+  local:
+    default:
+      type: linkedhashmap
+      keyConvertor: fastjson2
+      limit: 100
 
 kuma:
   boot:

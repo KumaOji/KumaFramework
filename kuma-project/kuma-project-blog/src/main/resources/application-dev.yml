@@ -60,9 +60,12 @@ knife4j:
   enable: true
 
 ai-chat:
-  base-url: http://localhost:8081
+  base-url: https://api.openai.com
   api-key: ""
-  embedding-model: nomic-embed-text
+  model: gpt-4o-mini
+  embedding:
+    base-url: http://localhost:11434
+    model: nomic-embed-text
   qdrant:
     host: localhost
     grpc-port: 6334
@@ -77,6 +80,13 @@ blog:
   admin-initial-password: admin123
   music:
     base-path: E:\blog-resource\music
+
+jetcache:
+  local:
+    default:
+      type: linkedhashmap
+      keyConvertor: fastjson2
+      limit: 100
 
 kuma:
   boot:
