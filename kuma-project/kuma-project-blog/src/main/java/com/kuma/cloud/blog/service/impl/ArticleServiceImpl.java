@@ -31,7 +31,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createArticle(Article article) {
         LocalDateTime now = LocalDateTime.now();
         article.setCreateTime(now);
@@ -61,13 +60,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticle(Long id) {
         return articleMapper.deleteByIdLogic(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticlePhysical(Long id) {
         return articleMapper.deleteByIdPhysical(id) > 0;
     }
@@ -121,25 +118,21 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementViewCount(Long id) {
         return articleMapper.incrementViewCount(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementLikeCount(Long id) {
         return articleMapper.incrementLikeCount(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementCommentCount(Long id) {
         return articleMapper.incrementCommentCount(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean publishArticle(Long id) {
         Article article = new Article();
         article.setId(id);
@@ -150,7 +143,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean unpublishArticle(Long id) {
         Article article = new Article();
         article.setId(id);

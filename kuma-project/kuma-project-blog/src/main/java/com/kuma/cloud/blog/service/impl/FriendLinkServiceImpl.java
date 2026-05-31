@@ -13,7 +13,6 @@ import com.kuma.cloud.blog.service.FriendLinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +24,6 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     private final FriendLinkMapper friendLinkMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long apply(FriendLink friendLink) {
         LocalDateTime now = LocalDateTime.now();
         friendLink.setCreateTime(now);
@@ -38,7 +36,6 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long create(FriendLink friendLink) {
         LocalDateTime now = LocalDateTime.now();
         friendLink.setCreateTime(now);
@@ -51,14 +48,12 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean update(FriendLink friendLink) {
         friendLink.setUpdateTime(LocalDateTime.now());
         return friendLinkMapper.updateById(friendLink) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean delete(Long id) {
         FriendLink fl = new FriendLink();
         fl.setId(id);
@@ -68,7 +63,6 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean approve(Long id) {
         FriendLink fl = new FriendLink();
         fl.setId(id);
@@ -78,7 +72,6 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementViewCount(Long id) {
         return friendLinkMapper.incrementViewCount(id) > 0;
     }

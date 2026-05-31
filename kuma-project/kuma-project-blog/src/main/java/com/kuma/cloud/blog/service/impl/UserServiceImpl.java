@@ -56,7 +56,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createUser(User user) {
         LocalDateTime now = LocalDateTime.now();
         user.setCreateTime(now);
@@ -71,7 +70,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void updateLastLoginTime(Long userId) {
         User user = new User();
         user.setId(userId);

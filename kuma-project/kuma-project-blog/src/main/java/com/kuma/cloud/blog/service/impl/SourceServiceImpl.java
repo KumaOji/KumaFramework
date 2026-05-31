@@ -9,7 +9,6 @@ import com.kuma.cloud.blog.mapper.SourceMapper;
 import com.kuma.cloud.blog.service.SourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +20,6 @@ public class SourceServiceImpl implements SourceService {
     private final SourceMapper sourceMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createSource(Source source) {
         LocalDateTime now = LocalDateTime.now();
         source.setCreateTime(now);
@@ -31,14 +29,12 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateSource(Source source) {
         source.setUpdateTime(LocalDateTime.now());
         return sourceMapper.updateById(source) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteSource(Long id) {
         return sourceMapper.deleteById(id) > 0;
     }

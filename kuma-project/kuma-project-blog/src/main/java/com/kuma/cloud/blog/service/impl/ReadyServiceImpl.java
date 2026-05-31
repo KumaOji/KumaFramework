@@ -24,7 +24,6 @@ public class ReadyServiceImpl implements ReadyService {
     private final ReadyMapper readyMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createReady(ReadyItem item) {
         LocalDateTime now = LocalDateTime.now();
         item.setCreateTime(now);
@@ -36,20 +35,17 @@ public class ReadyServiceImpl implements ReadyService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateReady(ReadyItem item) {
         item.setUpdateTime(LocalDateTime.now());
         return readyMapper.updateById(item) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteReady(Long id) {
         return readyMapper.deleteByIdLogic(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteReadyPhysical(Long id) {
         return readyMapper.deleteByIdPhysical(id) > 0;
     }

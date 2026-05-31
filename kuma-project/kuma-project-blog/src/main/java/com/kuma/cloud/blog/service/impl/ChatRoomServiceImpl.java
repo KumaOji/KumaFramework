@@ -10,7 +10,6 @@ import com.kuma.cloud.blog.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -41,7 +40,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long create(ChatRoom chatRoom) {
         LocalDateTime now = LocalDateTime.now();
         chatRoom.setCreateTime(now);
@@ -53,14 +51,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean update(ChatRoom chatRoom) {
         chatRoom.setUpdateTime(LocalDateTime.now());
         return chatRoomMapper.updateById(chatRoom) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean delete(Long id) {
         ChatRoom room = new ChatRoom();
         room.setId(id);
@@ -77,7 +73,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void saveHistory(ChatHistory history) {
         history.setCreateTime(LocalDateTime.now());
         chatHistoryMapper.insert(history);

@@ -13,7 +13,6 @@ import com.kuma.cloud.blog.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ public class MessageServiceImpl implements MessageService {
     private final MessageMapper messageMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long postMessage(Message message, String ip) {
         LocalDateTime now = LocalDateTime.now();
         message.setCreateTime(now);
@@ -42,19 +40,16 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageVO> getApprovedList() {
-        // 查询所有已通过的顶级留言
         QueryWrapper<Message> qw = new QueryWrapper<>();
         qw.eq("status", 1).isNull("parent_id").orderByDesc("create_time");
         List<Message> tops = messageMapper.selectList(qw);
         if (tops.isEmpty()) return new ArrayList<>();
 
-        // 批量查询所有顶级留言的回复
         List<Long> topIds = tops.stream().map(Message::getId).toList();
         List<Message> replies = messageMapper.selectApprovedRepliesByParentIds(topIds);
         Map<Long, List<Message>> replyMap = replies.stream()
                 .collect(Collectors.groupingBy(Message::getParentId));
 
-        // 组装 VO
         return tops.stream().map(m -> {
             MessageVO vo = toVO(m);
             List<Message> children = replyMap.getOrDefault(m.getId(), List.of());
@@ -80,7 +75,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean approve(Long id) {
         Message msg = new Message();
         msg.setId(id);
@@ -90,7 +84,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean delete(Long id) {
         Message msg = new Message();
         msg.setId(id);
@@ -100,7 +93,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementLike(Long id) {
         return messageMapper.incrementLikeCount(id) > 0;
     }

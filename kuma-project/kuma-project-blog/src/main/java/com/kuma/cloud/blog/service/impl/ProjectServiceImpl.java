@@ -13,7 +13,6 @@ import com.kuma.cloud.blog.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +23,6 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createProject(Project project) {
         LocalDateTime now = LocalDateTime.now();
         project.setCreateTime(now);
@@ -39,20 +37,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateProject(Project project) {
         project.setUpdateTime(LocalDateTime.now());
         return projectMapper.updateById(project) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteProject(Long id) {
         return projectMapper.deleteByIdLogic(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteProjectPhysical(Long id) {
         return projectMapper.deleteById(id) > 0;
     }
@@ -88,13 +83,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementViewCount(Long id) {
         return projectMapper.incrementViewCount(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean setFeatured(Long id, boolean featured) {
         Project project = new Project();
         project.setId(id);

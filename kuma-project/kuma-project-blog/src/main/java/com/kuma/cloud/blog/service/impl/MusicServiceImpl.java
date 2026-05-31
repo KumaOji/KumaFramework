@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -42,7 +41,6 @@ public class MusicServiceImpl implements MusicService {
     private String musicBasePath;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createMusic(Music music) {
         LocalDateTime now = LocalDateTime.now();
         music.setCreateTime(now);
@@ -56,14 +54,12 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateMusic(Music music) {
         music.setUpdateTime(LocalDateTime.now());
         return musicMapper.updateById(music) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteMusic(Long id) {
         Music music = new Music();
         music.setId(id);
@@ -110,13 +106,11 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementPlayCount(Long id) {
         return musicMapper.incrementPlayCount(id) > 0;
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean incrementLikeCount(Long id) {
         return musicMapper.incrementLikeCount(id) > 0;
     }
