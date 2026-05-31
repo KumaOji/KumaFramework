@@ -5,7 +5,7 @@ metadata:
   namespace: blog
 spec:
   replicas: 1
-  revisionHistoryLimit: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: blog-fronted
@@ -15,24 +15,10 @@ spec:
         app: blog-fronted
     spec:
       containers:
-        - name: nginx
-          image: nginx:1.26.2
+        - name: blog-fronted
+          image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/blog-fronted:placeholder
           ports:
             - containerPort: 80
-          volumeMounts:
-            - name: dist
-              mountPath: /usr/share/nginx/html
-            - name: nginx-conf
-              mountPath: /etc/nginx/conf.d/default.conf
-      volumes:
-        - name: dist
-          hostPath:
-            path: /data/blog/fronted/dist
-            type: DirectoryOrCreate
-        - name: nginx-conf
-          hostPath:
-            path: /data/blog/fronted/nginx/default.conf
-            type: File
 ---
 apiVersion: v1
 kind: Service
