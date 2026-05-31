@@ -21,8 +21,8 @@ public class UpLoadCheckPoint implements Serializable {
    private String bucket;
    private String checkpointFile;
    private String uploadId;
-   private List uploadParts = Collections.synchronizedList(new ArrayList());
-   private List partEntityTags = Collections.synchronizedList(new ArrayList());
+   private List<UploadPart> uploadParts = Collections.synchronizedList(new ArrayList<>());
+   private List<UpLoadPartEntityTag> partEntityTags = Collections.synchronizedList(new ArrayList<>());
    private long originPartSize;
 
    public synchronized void load(String checkpointFile) {

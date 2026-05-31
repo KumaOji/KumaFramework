@@ -34,8 +34,9 @@ public class KmcSerializer implements Serializer {
       return this.versionSeataSerializer.serialize(t);
    }
 
-   public Object deserialize(byte[] bytes) {
-      return this.versionSeataSerializer.deserialize(bytes);
+   @SuppressWarnings("unchecked")
+   public <T> T deserialize(byte[] bytes) {
+      return (T) this.versionSeataSerializer.deserialize(bytes);
    }
 
    private static Object deserializeByVersion(byte[] bytes, byte version) {
@@ -94,8 +95,9 @@ public class KmcSerializer implements Serializer {
          }
       }
 
-      public Object deserialize(byte[] bytes) {
-         return KmcSerializer.deserializeByVersion(bytes, (byte)1);
+      @SuppressWarnings("unchecked")
+      public <T> T deserialize(byte[] bytes) {
+         return (T) KmcSerializer.deserializeByVersion(bytes, (byte)1);
       }
    }
 
@@ -136,8 +138,9 @@ public class KmcSerializer implements Serializer {
          }
       }
 
-      public Object deserialize(byte[] bytes) {
-         return KmcSerializer.deserializeByVersion(bytes, (byte)0);
+      @SuppressWarnings("unchecked")
+      public <T> T deserialize(byte[] bytes) {
+         return (T) KmcSerializer.deserializeByVersion(bytes, (byte)0);
       }
    }
 }

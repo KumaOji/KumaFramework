@@ -88,7 +88,7 @@ public class NosGenerator implements Nos {
 
    public Map<String, Object> parseNo(String id) {
       if (id != null && id.length() == 30) {
-         Map<String, Object> map = new HashMap(6);
+         Map<String, Object> map = new HashMap<>(6);
          map.put("systemCode", UidParser.parse(id, UidParser.ID_SYSTEM_CODE));
          map.put("envCode", UidParser.parse(id, UidParser.ID_ENV_CODE));
          map.put("dataCenterCode", UidParser.parse(id, UidParser.ID_DATA_CENTER_CODE));

@@ -59,7 +59,7 @@ public class CachedUidGenerator extends DefaultUidGenerator implements Disposabl
 
    protected List<Long> nextIdsForOneSecond(long currentSecond) {
       int listSize = (int)this.bitsAllocator.getMaxSequence() + 1;
-      List<Long> uidList = new ArrayList(listSize);
+      List<Long> uidList = new ArrayList<>(listSize);
       long firstSeqUid = this.bitsAllocator.allocate(currentSecond - this.epochSeconds, this.workerId, 0L);
 
       for(int offset = 0; offset < listSize; ++offset) {

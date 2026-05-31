@@ -18,8 +18,8 @@ public enum WebSocketChannel {
       title = "\u8bf4\u660e"
    )
    private final String description;
-   private static final Map<String, WebSocketChannel> INDEX_MAP = new HashMap();
-   private static final List<Map<String, Object>> JSON_STRUCT = new ArrayList();
+   private static final Map<String, WebSocketChannel> INDEX_MAP = new HashMap<>();
+   private static final List<Map<String, Object>> JSON_STRUCT = new ArrayList<>();
 
    private WebSocketChannel(String destination, String description) {
       this.destination = destination;

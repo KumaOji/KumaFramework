@@ -20,7 +20,7 @@ public class CreateTimeShardingTableAlgorithmBak implements StandardShardingAlgo
    }
 
    public Collection<String> doSharding(Collection collection, RangeShardingValue rangeShardingValue) {
-      Collection<String> collect = new ArrayList();
+      Collection<String> collect = new ArrayList<>();
 
       for(int i = 1; i <= 12; ++i) {
          collect.add("t_order_" + i);

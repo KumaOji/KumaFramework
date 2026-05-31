@@ -146,11 +146,12 @@ public class ElasticUtil {
       List<Hit<HashMap>> hits = response.hits().hits();
       response.hits().maxScore();
       Iterator<Hit<HashMap>> iterator = hits.iterator();
-      List<Map<String, Object>> data = new ArrayList();
+      List<Map<String, Object>> data = new ArrayList<>();
 
       while(iterator.hasNext()) {
-         Hit<HashMap> decodeBeanHit = (Hit)iterator.next();
-         Map<String, Object> map = (Map)decodeBeanHit.source();
+         Hit<HashMap> decodeBeanHit = iterator.next();
+         @SuppressWarnings("unchecked")
+         Map<String, Object> map = (Map<String, Object>) decodeBeanHit.source();
          data.add(map);
       }
 
@@ -172,8 +173,8 @@ public class ElasticUtil {
 
    public BoolQuery handleCondition(List<EsMatch> match) {
       BoolQuery.Builder bool = new BoolQuery.Builder();
-      List<Query> termQueryList = new ArrayList();
-      List<Query> matchQueryList = new ArrayList();
+      List<Query> termQueryList = new ArrayList<>();
+      List<Query> matchQueryList = new ArrayList<>();
       match.forEach((item) -> {
          if (StringUtils.hasLength(item.getWord())) {
             if (!"term".equals(item.getMode()) && !"range".equals(item.getMode())) {
@@ -197,6 +198,7 @@ public class ElasticUtil {
       return TermQuery.of((t) -> t.field(match.getField()).value(match.getWord()))._toQuery();
    }
 
+   @SuppressWarnings("unchecked")
    public Query tremsQuery(EsMatch match) {
       return TermsQuery.of((t) -> t.field(match.getField()).terms((w) -> w.value(match.getWords())))._toQuery();
    }
@@ -214,7 +216,7 @@ public class ElasticUtil {
    }
 
    public List<SortOptions> sort(List<EsSort> sorts) {
-      List<SortOptions> sortOptions = new ArrayList();
+      List<SortOptions> sortOptions = new ArrayList<>();
       sorts.forEach((item) -> {
          SortOptions.Builder sb = new SortOptions.Builder();
          sb.field((f) -> {
@@ -228,7 +230,8 @@ public class ElasticUtil {
    }
 
    public void bulkIndex(List<Map<String, Object>> data, String indexName) throws Exception {
-      List<BulkOperation> list = new ArrayList();
+      @SuppressWarnings("unchecked")
+      List<BulkOperation> list = new ArrayList<>();
       data.forEach((d) -> list.add(BulkOperation.of((o) -> o.index((i) -> (ObjectBuilder)i.document(d).id(d.get("ID").toString())))));
       this.client.bulk((b) -> b.index(indexName).operations(list));
    }
@@ -243,7 +246,7 @@ public class ElasticUtil {
    }
 
    public Map<String, Property> handleProperties(Field[] field) {
-      Map<String, Property> map = new HashMap();
+      Map<String, Property> map = new HashMap<>();
 
       for(Field declaredField : field) {
          declaredField.setAccessible(true);

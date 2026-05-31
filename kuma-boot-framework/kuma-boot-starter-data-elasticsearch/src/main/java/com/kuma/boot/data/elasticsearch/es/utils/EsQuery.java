@@ -5,7 +5,7 @@ import java.util.List;
 
 public class EsQuery {
    private String indexName;
-   private List<EsMatch> match = new ArrayList();
+   private List<EsMatch> match = new ArrayList<>();
    private Integer from;
    private Integer size = 10;
    private List<String> column;

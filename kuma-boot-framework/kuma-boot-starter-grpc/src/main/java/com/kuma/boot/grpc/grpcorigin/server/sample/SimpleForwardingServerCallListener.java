@@ -3,7 +3,8 @@ package com.kuma.boot.grpc.grpcorigin.server.sample;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.ServerCall;
 
-public class SimpleForwardingServerCallListener extends ForwardingServerCallListener.SimpleForwardingServerCallListener {
+public class SimpleForwardingServerCallListener extends ForwardingServerCallListener.SimpleForwardingServerCallListener<Object> {
+   @SuppressWarnings("unchecked")
    protected SimpleForwardingServerCallListener(ServerCall.Listener delegate) {
       super(delegate);
    }

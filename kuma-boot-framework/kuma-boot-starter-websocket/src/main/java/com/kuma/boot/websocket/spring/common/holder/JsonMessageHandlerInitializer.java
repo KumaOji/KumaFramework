@@ -12,11 +12,11 @@ public class JsonMessageHandlerInitializer {
       this.jsonMessageHandlerList = jsonMessageHandlerList;
    }
 
+   @SuppressWarnings("unchecked")
    @PostConstruct
    public void initJsonMessageHandlerHolder() {
-      for(JsonMessageHandler<? extends JsonWebSocketMessage> jsonMessageHandler : this.jsonMessageHandlerList) {
+      for (JsonMessageHandler<? extends JsonWebSocketMessage> jsonMessageHandler : this.jsonMessageHandlerList) {
          JsonMessageHandlerHolder.addHandler((JsonMessageHandler<JsonWebSocketMessage>) jsonMessageHandler);
       }
-
    }
 }

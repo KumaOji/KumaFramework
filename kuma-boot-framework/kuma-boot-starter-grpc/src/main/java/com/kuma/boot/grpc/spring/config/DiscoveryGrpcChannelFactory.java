@@ -9,7 +9,7 @@ import org.springframework.grpc.client.GrpcChannelBuilderCustomizer;
 import org.springframework.grpc.client.NettyGrpcChannelFactory;
 
 final class DiscoveryGrpcChannelFactory extends NettyGrpcChannelFactory {
-   public DiscoveryGrpcChannelFactory(List globalCustomizers, ClientInterceptorsConfigurer interceptorsConfigurer) {
+   public DiscoveryGrpcChannelFactory(List<GrpcChannelBuilderCustomizer<NettyChannelBuilder>> globalCustomizers, ClientInterceptorsConfigurer interceptorsConfigurer) {
       super(globalCustomizers, interceptorsConfigurer);
       this.setVirtualTargets((p) -> p.substring(12));
    }

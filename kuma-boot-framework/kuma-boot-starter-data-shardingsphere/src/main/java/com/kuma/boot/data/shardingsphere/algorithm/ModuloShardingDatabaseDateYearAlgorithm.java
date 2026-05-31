@@ -19,6 +19,7 @@ public class ModuloShardingDatabaseDateYearAlgorithm implements StandardSharding
    public ModuloShardingDatabaseDateYearAlgorithm() {
    }
 
+   @SuppressWarnings("deprecation")
    private int getYearFromString(String value) throws ParseException {
       int nYear = -1;
 
@@ -70,7 +71,7 @@ public class ModuloShardingDatabaseDateYearAlgorithm implements StandardSharding
    }
 
    public Collection<String> doSharding(Collection<String> databaseNamescollection, RangeShardingValue<String> rangeShardingValue) {
-      Collection<String> collect = new ArrayList();
+      Collection<String> collect = new ArrayList<>();
       if (rangeShardingValue != null) {
          Range<String> valueRange = rangeShardingValue.getValueRange();
          String slowerEndpointDate = String.valueOf(valueRange.hasLowerBound() ? valueRange.lowerEndpoint() : "");

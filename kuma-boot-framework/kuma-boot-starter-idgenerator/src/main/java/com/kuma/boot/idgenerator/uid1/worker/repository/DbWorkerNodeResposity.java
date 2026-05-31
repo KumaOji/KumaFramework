@@ -28,7 +28,7 @@ public class DbWorkerNodeResposity implements WorkerNodeResposity {
          entity.setModified(rs.getTimestamp("MODIFIED"));
          entity.setCreated(rs.getTime("CREATED"));
          return entity;
-      }, new String[]{host, port});
+      }, new Object[]{host, port});
    }
 
    public void addWorkerNode(WorkerNodeEntity entity) {

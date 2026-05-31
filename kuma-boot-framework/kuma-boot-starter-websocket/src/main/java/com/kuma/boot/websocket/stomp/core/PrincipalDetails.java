@@ -57,7 +57,7 @@ public class PrincipalDetails {
    }
 
    public Map<String, Object> toMap() {
-      Map<String, Object> map = new HashMap();
+      Map<String, Object> map = new HashMap<>();
       map.put("openid", this.openId);
       map.put("username", this.userName);
       map.put("roles", this.roles);

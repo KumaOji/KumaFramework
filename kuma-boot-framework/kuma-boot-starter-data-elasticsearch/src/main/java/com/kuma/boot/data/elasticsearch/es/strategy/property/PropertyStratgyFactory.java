@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PropertyStratgyFactory implements InitializingBean, ApplicationContextAware {
-   private final Map<String, PropertyStratgy> factory = new HashMap();
+   private final Map<String, PropertyStratgy> factory = new HashMap<>();
    private ApplicationContext appContext;
 
    public PropertyStratgyFactory() {

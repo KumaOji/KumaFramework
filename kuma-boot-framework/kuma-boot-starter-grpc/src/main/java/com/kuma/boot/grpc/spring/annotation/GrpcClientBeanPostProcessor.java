@@ -46,8 +46,9 @@ public record GrpcClientBeanPostProcessor(GrpcClientFactory grpcClientFactory, D
 
    }
 
-   private Object getClient(Class type, @NonNull GrpcClient grpcClient) {
+   @SuppressWarnings("unchecked")
+   private Object getClient(Class<?> type, @NonNull GrpcClient grpcClient) {
       String target = String.format("discovery://%s", grpcClient.serviceId());
-      return this.grpcClientFactory.getClient(target, type, (Class)null);
+      return this.grpcClientFactory.getClient(target, type, (Class<?>) null);
    }
 }

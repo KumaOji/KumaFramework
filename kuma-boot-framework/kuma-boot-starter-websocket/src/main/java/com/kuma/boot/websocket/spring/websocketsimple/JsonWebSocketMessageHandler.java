@@ -14,10 +14,11 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 public class JsonWebSocketMessageHandler extends TextWebSocketHandler {
-   private final Map<String, WebSocketMessageListener<Object>> listeners = new HashMap();
+   private final Map<String, WebSocketMessageListener<Object>> listeners = new HashMap<>();
 
+   @SuppressWarnings("unchecked")
    public JsonWebSocketMessageHandler(List<? extends WebSocketMessageListener> listenersList) {
-      listenersList.forEach((listener) -> this.listeners.put(listener.getType(), listener));
+      listenersList.forEach((listener) -> this.listeners.put(listener.getType(), (WebSocketMessageListener<Object>) listener));
    }
 
    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -37,7 +38,7 @@ public class JsonWebSocketMessageHandler extends TextWebSocketHandler {
                   return;
                }
 
-               WebSocketMessageListener<Object> messageListener = (WebSocketMessageListener)this.listeners.get(jsonMessage.getType());
+               WebSocketMessageListener<Object> messageListener = this.listeners.get(jsonMessage.getType());
                if (messageListener == null) {
                   LogUtils.error("[handleTextMessage][session({}) message({}) \u76d1\u542c\u5668\u4e3a\u7a7a]", new Object[]{session.getId(), message.getPayload()});
                   return;

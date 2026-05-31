@@ -32,7 +32,7 @@ public class GrpcServerTraceIdInterceptor implements ServerInterceptor {
       String traceId = this.traceId(headers);
       MDC.put("TRACE_ID", traceId);
 
-      ServerCall.Listener var5;
+      ServerCall.Listener<ReqT> var5;
       try {
          headers.put(this.traceIdKey, traceId);
          var5 = next.startCall(call, headers);

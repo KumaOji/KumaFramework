@@ -39,6 +39,7 @@ public class OrderTableAlgorithm implements StandardShardingAlgorithm<LocalDateT
       }
    }
 
+   @SuppressWarnings("unchecked")
    public Collection<String> doSharding(Collection collection, RangeShardingValue rangeShardingValue) {
       String logicTableName = rangeShardingValue.getLogicTableName();
       Range<LocalDateTime> valueRange = rangeShardingValue.getValueRange();
@@ -47,7 +48,7 @@ public class OrderTableAlgorithm implements StandardShardingAlgorithm<LocalDateT
    }
 
    private Set<String> extracted(String logicTableName, LocalDateTime lowerEndpoint, LocalDateTime upperEndpoint) {
-      Set<String> rangeTable = new HashSet();
+      Set<String> rangeTable = new HashSet<>();
       LocalDateTime minBaseDate = LocalDateTime.parse(StaticValue.userBaseTableMinDate, dateFormatter);
       LocalDateTime maxBaseDate = LocalDateTime.parse(StaticValue.userBaseTableMaxDate, dateFormatter);
       if (lowerEndpoint.isBefore(minBaseDate)) {

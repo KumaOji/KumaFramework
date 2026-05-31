@@ -43,7 +43,7 @@ public class PrometheusHealthAutoConfiguration implements InitializingBean, Disp
    private final HealthCheckProvider healthCheckProvider;
    private final PrometheusMeterRegistry prometheusMeterRegistry;
    public final ThreadPoolTaskScheduler prometheusThreadPoolTaskScheduler;
-   private final Map<String, Gauge> gaugeMap = new ConcurrentHashMap();
+   private final Map<String, Gauge> gaugeMap = new ConcurrentHashMap<>();
 
    public PrometheusHealthAutoConfiguration(@Autowired(required = false) HealthCheckProvider healthCheckProvider, PrometheusMeterRegistry prometheusMeterRegistry, @Autowired @Qualifier("prometheusThreadPoolTaskScheduler") ThreadPoolTaskScheduler prometheusThreadPoolTaskScheduler) {
       this.healthCheckProvider = healthCheckProvider;

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
    since = "2_0_0"
 )
 public class PerfConfigContext implements TestTemplateInvocationContext {
-   private static final ConcurrentHashMap<Class, List<EvaluationContext>> ACTIVE_CONTEXTS = new ConcurrentHashMap();
+   private static final ConcurrentHashMap<Class<?>, List<EvaluationContext>> ACTIVE_CONTEXTS = new ConcurrentHashMap<>();
    private final Method method;
    private KmcTest perfConfig;
    private KmcTestRequire perfRequire;
@@ -42,17 +42,17 @@ public class PerfConfigContext implements TestTemplateInvocationContext {
 
    public List<Extension> getAdditionalExtensions() {
       return Collections.singletonList((TestInstancePostProcessor)(testInstance, context) -> {
-         Class clazz = testInstance.getClass();
-         ACTIVE_CONTEXTS.putIfAbsent(clazz, new ArrayList());
+         Class<?> clazz = testInstance.getClass();
+         ACTIVE_CONTEXTS.putIfAbsent(clazz, new ArrayList<>());
          EvaluationContext evaluationContext = new EvaluationContext(testInstance, this.method, DateUtil.now().toString());
          evaluationContext.loadConfig(this.perfConfig);
          evaluationContext.loadRequire(this.perfRequire);
          StatisticsCalculator statisticsCalculator = (StatisticsCalculator)this.perfConfig.statistics().getDeclaredConstructor().newInstance();
          Set<Reporter> reporterSet = this.getReporterSet();
-         ((List)ACTIVE_CONTEXTS.get(clazz)).add(evaluationContext);
+         ACTIVE_CONTEXTS.get(clazz).add(evaluationContext);
 
          try {
-            (new PerformanceEvaluationStatement(evaluationContext, statisticsCalculator, reporterSet, (Collection)ACTIVE_CONTEXTS.get(clazz), clazz)).evaluate();
+            (new PerformanceEvaluationStatement(evaluationContext, statisticsCalculator, reporterSet, ACTIVE_CONTEXTS.get(clazz), clazz)).evaluate();
          } catch (Throwable throwable) {
             throw new JunitPerfRuntimeException(throwable);
          }
@@ -60,12 +60,12 @@ public class PerfConfigContext implements TestTemplateInvocationContext {
    }
 
    private Set<Reporter> getReporterSet() {
-      Set<Reporter> reporterSet = new HashSet();
+      Set<Reporter> reporterSet = new HashSet<>();
       Class<? extends Reporter>[] reporters = this.perfConfig.reporter();
 
-      for(Class clazz : reporters) {
+      for(Class<? extends Reporter> clazz : reporters) {
          try {
-            Reporter reporter = (Reporter)clazz.getDeclaredConstructor().newInstance();
+            Reporter reporter = clazz.getDeclaredConstructor().newInstance();
             reporterSet.add(reporter);
          } catch (IllegalAccessException | InstantiationException e) {
             throw new JunitPerfRuntimeException(e);

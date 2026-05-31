@@ -32,7 +32,7 @@ public class NamingThreadFactory implements ThreadFactory {
       this.name = name;
       this.daemon = daemon;
       this.uncaughtExceptionHandler = handler;
-      this.sequences = new ConcurrentHashMap();
+      this.sequences = new ConcurrentHashMap<>();
    }
 
    public Thread newThread(Runnable r) {

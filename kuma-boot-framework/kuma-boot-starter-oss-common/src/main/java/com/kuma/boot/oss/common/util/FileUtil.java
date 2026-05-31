@@ -326,7 +326,7 @@ public class FileUtil {
 
          try {
             zos = new ZipOutputStream(out);
-            List<File> sourceFileList = new ArrayList();
+            List<File> sourceFileList = new ArrayList<>();
 
             for(String dir : srcDir) {
                File sourceFile = new File(dir);

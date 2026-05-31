@@ -46,12 +46,14 @@ public class GrpcClientProvide {
       }
    }
 
+   @SuppressWarnings("unchecked")
    public ManagedChannel channel(String target, UnaryOperator operator) {
       ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forTarget(target);
-      ManagedChannelBuilder<?> apply = (ManagedChannelBuilder)operator.apply(builder);
+      ManagedChannelBuilder<?> apply = (ManagedChannelBuilder<?>) operator.apply(builder);
       return this.channel(apply);
    }
 
+   @SuppressWarnings("unchecked")
    public ManagedChannel channel(ManagedChannelBuilder builder) {
       if (this.properties.isEnableKeepAlive()) {
          builder.keepAliveTime(this.properties.getKeepAliveTime(), TimeUnit.MILLISECONDS).keepAliveTimeout(this.properties.getKeepAliveTimeout(), TimeUnit.MILLISECONDS);
@@ -74,8 +76,9 @@ public class GrpcClientProvide {
       return builder.build();
    }
 
+   @SuppressWarnings("unchecked")
    public AbstractStub stub(Channel channel, Function function) {
-      return (AbstractStub)function.apply(channel);
+      return (AbstractStub) function.apply(channel);
    }
 
    public AbstractAsyncStub async(Channel channel, Function function) {

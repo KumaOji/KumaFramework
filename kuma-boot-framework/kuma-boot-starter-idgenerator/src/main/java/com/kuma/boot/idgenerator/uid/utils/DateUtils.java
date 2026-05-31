@@ -11,6 +11,7 @@ public abstract class DateUtils extends org.apache.commons.lang3.time.DateUtils 
    public static final String DATETIME_MS_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
    public static final Date DEFAULT_DATE = parseByDayPattern("1970-01-01");
 
+   @SuppressWarnings("deprecation")
    public DateUtils() {
    }
 

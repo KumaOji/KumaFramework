@@ -19,8 +19,9 @@ public class CreateTimeShardingDatabaseAlgorithm implements StandardShardingAlgo
       return "data" + value;
    }
 
+   @SuppressWarnings("unchecked")
    public Collection<String> doSharding(Collection collection, RangeShardingValue rangeShardingValue) {
-      Collection<String> collect = new ArrayList();
+      Collection<String> collect = new ArrayList<>();
       Range<Integer> valueRange = rangeShardingValue.getValueRange();
       String start = DateUtils.toString(((Integer)valueRange.lowerEndpoint()).longValue(), "yyyy");
       String end = DateUtils.toString(((Integer)valueRange.upperEndpoint()).longValue(), "yyyy");

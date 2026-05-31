@@ -22,7 +22,7 @@ public class DownloadCheckPoint implements Serializable {
    private String key;
    private String checkPointFile;
    private DownloadObjectStat objectStat;
-   private List downloadParts = Collections.synchronizedList(new ArrayList());
+   private List<DownloadPart> downloadParts = Collections.synchronizedList(new ArrayList<>());
    private long originPartSize;
 
    public synchronized void load(String checkPointFile) throws IOException, ClassNotFoundException {

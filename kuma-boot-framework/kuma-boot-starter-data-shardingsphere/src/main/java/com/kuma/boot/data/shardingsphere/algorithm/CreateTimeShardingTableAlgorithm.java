@@ -23,8 +23,9 @@ public class CreateTimeShardingTableAlgorithm implements StandardShardingAlgorit
       return "tt_order_" + year + "_" + month;
    }
 
+   @SuppressWarnings("unchecked")
    public Collection<String> doSharding(Collection collection, RangeShardingValue rangeShardingValue) {
-      Collection<String> collect = new ArrayList();
+      Collection<String> collect = new ArrayList<>();
       Range<Integer> valueRange = rangeShardingValue.getValueRange();
       Integer startMonth = Convert.toInt(DateUtils.toString(((Integer)valueRange.lowerEndpoint()).longValue(), "MM"));
       Integer endMonth = Convert.toInt(DateUtils.toString(((Integer)valueRange.upperEndpoint()).longValue(), "MM"));

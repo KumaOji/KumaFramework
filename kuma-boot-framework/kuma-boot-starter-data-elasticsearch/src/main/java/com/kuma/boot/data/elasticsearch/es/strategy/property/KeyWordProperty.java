@@ -16,6 +16,7 @@ public class KeyWordProperty implements PropertyStratgy {
       return "keyword";
    }
 
+   @SuppressWarnings("unchecked")
    public Property handleProperty(EsField annotation, Field field, ElasticUtil elasticUtil) {
       return Property.of((p) -> p.keyword((k) -> (ObjectBuilder)k.ignoreAbove(256)));
    }

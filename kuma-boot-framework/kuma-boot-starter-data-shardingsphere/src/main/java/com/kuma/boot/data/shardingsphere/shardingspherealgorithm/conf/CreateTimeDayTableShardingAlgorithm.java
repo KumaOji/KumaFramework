@@ -40,7 +40,7 @@ public class CreateTimeDayTableShardingAlgorithm implements StandardShardingAlgo
          end = LocalDateTime.now();
       }
 
-      Set<String> suffixList = new HashSet();
+      Set<String> suffixList = new HashSet<>();
       Iterator<String> iterator = availableTargetNames.iterator();
       String tableName = (String)iterator.next();
       String name = tableName.substring(0, tableName.lastIndexOf("_"));

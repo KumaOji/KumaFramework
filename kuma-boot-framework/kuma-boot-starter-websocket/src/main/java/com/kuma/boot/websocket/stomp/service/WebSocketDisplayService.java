@@ -11,7 +11,7 @@ public class WebSocketDisplayService {
    }
 
    public Map<String, Object> findAllStat() {
-      Map<String, Object> data = new HashMap();
+      Map<String, Object> data = new HashMap<>();
       data.put("onlineCount", WebSocketUtils.getOnlineCount());
       return data;
    }

@@ -13,7 +13,7 @@ public class SeataSqlScripter extends StandardDatabaseScript {
       return "seata";
    }
 
-   public List getInitSqlFile() {
+   public List<String> getInitSqlFile() {
       return Lists.newArrayList(new String[]{"seata.ddl"});
    }
 }

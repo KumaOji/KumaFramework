@@ -17,7 +17,7 @@ public interface CreateTimeShardingAlgorithm {
    LocalDate buildNodesBeforeDate(LocalDate date);
 
    default String buildNodes(String tableName, Integer count) {
-      List<String> tableNameList = new ArrayList();
+      List<String> tableNameList = new ArrayList<>();
       LocalDate today = LocalDate.now();
 
       for(int i = 0; i < count; ++i) {

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class WebsocketEndpointImpl implements WebsocketEndpoint {
    private static Logger log = LoggerFactory.getLogger(WebsocketEndpointImpl.class);
    private static final int MAX_ERROR_NUM = 3;
-   private static Map<String, Map<String, WebSocketBean>> webSocketInfo = new ConcurrentHashMap();
+   private static Map<String, Map<String, WebSocketBean>> webSocketInfo = new ConcurrentHashMap<>();
 
    public WebsocketEndpointImpl() {
    }
@@ -30,7 +30,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
    public void onOpen(Session session, EndpointConfig config, @PathParam("userId") String userId, @PathParam("projectId") String projectId) {
       WebSocketBean bean = new WebSocketBean();
       bean.setSession(session);
-      Map<String, WebSocketBean> concurrentHashMap = new ConcurrentHashMap();
+      Map<String, WebSocketBean> concurrentHashMap = new ConcurrentHashMap<>();
       concurrentHashMap.put(userId, bean);
       webSocketInfo.put(projectId, concurrentHashMap);
       log.info("ws\u9879\u76ee:" + projectId + ",\u5ba2\u6237\u7aef\u8fde\u63a5\u670d\u52a1\u5668userId :" + userId + "\u5f53\u524d\u8fde\u63a5\u6570\uff1a" + this.countUser(projectId));
@@ -38,7 +38,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
 
    @OnClose
    public void onClose(Session session, @PathParam("userId") String userId, @PathParam("projectId") String projectId) {
-      Map<String, WebSocketBean> concurrentHashMap = (Map)webSocketInfo.get(projectId);
+      Map<String, WebSocketBean> concurrentHashMap = webSocketInfo.get(projectId);
       if (concurrentHashMap != null) {
          concurrentHashMap.remove(userId);
       }
@@ -80,7 +80,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
    }
 
    public void batchSendMessage(String projectId, String message) {
-      Map<String, WebSocketBean> concurrentHashMap = (Map)webSocketInfo.get(projectId);
+      Map<String, WebSocketBean> concurrentHashMap = webSocketInfo.get(projectId);
       if (concurrentHashMap != null) {
          for(Map.Entry<String, WebSocketBean> map : concurrentHashMap.entrySet()) {
             this.sendMessage(((WebSocketBean)map.getValue()).getSession(), message, projectId, (String)map.getKey());
@@ -90,7 +90,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
    }
 
    public void sendMessageById(String projectId, String userId, String message) {
-      Map<String, WebSocketBean> concurrentHashMap = (Map)webSocketInfo.get(projectId);
+      Map<String, WebSocketBean> concurrentHashMap = webSocketInfo.get(projectId);
       if (concurrentHashMap != null) {
          WebSocketBean webSocketBean = (WebSocketBean)concurrentHashMap.get(userId);
          if (webSocketBean != null) {
@@ -101,7 +101,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
    }
 
    private void cleanErrorNum(String projectId, String userId) {
-      Map<String, WebSocketBean> concurrentHashMap = (Map)webSocketInfo.get(projectId);
+      Map<String, WebSocketBean> concurrentHashMap = webSocketInfo.get(projectId);
       if (concurrentHashMap != null) {
          WebSocketBean webSocketBean = (WebSocketBean)concurrentHashMap.get(userId);
          if (webSocketBean != null) {
@@ -113,7 +113,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
 
    private int getErroerLinkCount(String projectId, String userId) {
       int errorNum = 0;
-      Map<String, WebSocketBean> concurrentHashMap = (Map)webSocketInfo.get(projectId);
+      Map<String, WebSocketBean> concurrentHashMap = webSocketInfo.get(projectId);
       if (concurrentHashMap != null) {
          WebSocketBean webSocketBean = (WebSocketBean)concurrentHashMap.get(userId);
          if (webSocketBean != null) {
@@ -126,7 +126,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
 
    private Integer countUser(String projectId) {
       int size = 0;
-      Map<String, WebSocketBean> concurrentHashMap = (Map)webSocketInfo.get(projectId);
+      Map<String, WebSocketBean> concurrentHashMap = webSocketInfo.get(projectId);
       if (concurrentHashMap != null) {
          size = concurrentHashMap.size();
       }

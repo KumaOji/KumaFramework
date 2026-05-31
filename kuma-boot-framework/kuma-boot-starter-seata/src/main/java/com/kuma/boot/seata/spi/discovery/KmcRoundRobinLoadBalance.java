@@ -11,7 +11,7 @@ import org.apache.seata.discovery.loadbalance.LoadBalance;
 public class KmcRoundRobinLoadBalance implements LoadBalance {
    private final AtomicInteger sequence = new AtomicInteger();
 
-   public Object select(List invokers, String xid) {
+   public <T> T select(List<T> invokers, String xid) {
       int length = invokers.size();
       return invokers.get(this.getPositiveSequence() % length);
    }

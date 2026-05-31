@@ -28,7 +28,7 @@ public class SoaElasticConfig extends ElasticsearchConfigurationSupport {
 
    @Bean
    public ElasticsearchCustomConversions elasticsearchCustomConversions() {
-      List<Converter<?, ?>> converters = new ArrayList();
+      List<Converter<?, ?>> converters = new ArrayList<>();
       converters.add(SoaElasticConfig.LongToLocalDateTimeConverter.INSTANCE);
       converters.add(SoaElasticConfig.StringToLocalDateTimeConverter.INSTANCE);
       converters.add(SoaElasticConfig.DateToLocalDateTimeConverter.INSTANCE);

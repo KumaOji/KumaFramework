@@ -37,17 +37,17 @@ public class PrometheusApi {
    public List<TargetGroup> getList() {
       List<String> serviceIdList = this.discoveryClient.getServices();
       if (serviceIdList != null && !serviceIdList.isEmpty()) {
-         List<TargetGroup> targetGroupList = new ArrayList();
+         List<TargetGroup> targetGroupList = new ArrayList<>();
 
          for(String serviceId : serviceIdList) {
             List<ServiceInstance> instanceList = this.discoveryClient.getInstances(serviceId);
-            List<String> targets = new ArrayList();
+            List<String> targets = new ArrayList<>();
 
             for(ServiceInstance instance : instanceList) {
                targets.add(String.format("%s:%d", instance.getHost(), instance.getPort()));
             }
 
-            Map<String, String> labels = new HashMap(4);
+            Map<String, String> labels = new HashMap<>(4);
             if (StringUtils.hasText(this.activeProfile)) {
                labels.put("profile", this.activeProfile);
             }

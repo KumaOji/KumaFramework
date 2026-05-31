@@ -24,7 +24,7 @@ public class GrpcServerAutoConfiguration {
 
    @Bean
    @ConditionalOnMissingBean
-   public GrpcServer grpcServer(List interceptors, List services) {
+   public GrpcServer grpcServer(List<ServerInterceptor> interceptors, List<BindableService> services) {
       return new GrpcServer(this.properties, interceptors, services);
    }
 

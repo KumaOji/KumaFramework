@@ -174,6 +174,7 @@ public class ElasticsearchTemplate {
       return this.elasticsearchAsyncClient.indices().exists(this.getExists(names)).thenApplyAsync(BooleanResponse::value);
    }
 
+   @SuppressWarnings("unchecked")
    private List<BulkOperation> getBulkOperations(Map<String, Object> map) {
       return map.entrySet().stream().map((entry) -> BulkOperation.of((idx) -> idx.index((fn) -> ((IndexOperation.Builder)fn.id((String)entry.getKey())).document(entry.getValue())))).toList();
    }
@@ -232,9 +233,10 @@ public class ElasticsearchTemplate {
 
    private TokenFilter getFilter(List<Document.Option> options) {
       TokenFilter.Builder filterBuilder = new TokenFilter.Builder();
-      Map<String, String> map = (Map)options.stream().collect(Collectors.toMap(Document.Option::getKey, Document.Option::getValue));
-      filterBuilder.definition((fn) -> (ObjectBuilder)fn.withJson(new ByteArrayInputStream(JSONUtil.toJsonStr(map).getBytes(StandardCharsets.UTF_8))));
-      return filterBuilder.build();
+      Map<String, String> map = options.stream().collect(Collectors.toMap(Document.Option::getKey, Document.Option::getValue));
+      @SuppressWarnings("unchecked")
+      TokenFilter result = filterBuilder.definition((fn) -> (ObjectBuilder)fn.withJson(new ByteArrayInputStream(JSONUtil.toJsonStr(map).getBytes(StandardCharsets.UTF_8)))).build();
+      return result;
    }
 
    private Analyzer getAnalyzer(Document.Args args) {

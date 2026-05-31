@@ -75,7 +75,7 @@ public class DefaultUidGenerator implements UidGenerator, InitializingBean {
       long deltaSeconds = uid >>> (int)(workerIdBits + sequenceBits);
       Date thatTime = new Date(TimeUnit.SECONDS.toMillis(this.epochSeconds + deltaSeconds));
       String thatTimeStr = DateUtils.formatByDateTimePattern(thatTime);
-      Map<String, Object> map = new HashMap(3);
+      Map<String, Object> map = new HashMap<>(3);
       map.put("timestamp", thatTimeStr);
       map.put("workerId", workerId);
       map.put("sequence", sequence);

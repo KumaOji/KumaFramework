@@ -100,7 +100,8 @@ public interface StandardOssClient {
       }
 
       ExecutorService executorService = Executors.newFixedThreadPool(slice.getTaskNum());
-      List<Future<UpLoadPartResult>> futures = new ArrayList();
+      @SuppressWarnings("unchecked")
+      List<Future<UpLoadPartResult>> futures = new ArrayList<>();
 
       for(int i = 0; i < upLoadCheckPoint.getUploadParts().size(); ++i) {
          if (!((UploadPart)upLoadCheckPoint.getUploadParts().get(i)).isCompleted()) {
@@ -143,7 +144,7 @@ public interface StandardOssClient {
    }
 
    default ArrayList splitUploadFile(long fileSize, long partSize) {
-      ArrayList<UploadPart> parts = new ArrayList();
+      ArrayList<UploadPart> parts = new ArrayList<>();
       long partNum = fileSize / partSize;
       if (partNum >= OssConstant.DEFAULT_PART_NUM) {
          partSize = fileSize / (OssConstant.DEFAULT_PART_NUM - 1L);
@@ -205,7 +206,8 @@ public interface StandardOssClient {
       }
 
       ExecutorService executorService = Executors.newFixedThreadPool(slice.getTaskNum());
-      List<Future<DownloadPartResult>> futures = new ArrayList();
+      @SuppressWarnings("unchecked")
+      List<Future<DownloadPartResult>> futures = new ArrayList<>();
 
       for(int i = 0; i < downloadCheckPoint.getDownloadParts().size(); ++i) {
          if (!((DownloadPart)downloadCheckPoint.getDownloadParts().get(i)).isCompleted()) {
@@ -247,7 +249,7 @@ public interface StandardOssClient {
    }
 
    default ArrayList splitDownloadFile(long start, long objectSize, long partSize) {
-      ArrayList<DownloadPart> parts = new ArrayList();
+      ArrayList<DownloadPart> parts = new ArrayList<>();
       long partNum = objectSize / partSize;
       if (partNum >= OssConstant.DEFAULT_PART_NUM) {
          partSize = objectSize / (OssConstant.DEFAULT_PART_NUM - 1L);
@@ -273,7 +275,7 @@ public interface StandardOssClient {
    }
 
    default ArrayList splitDownloadOneFile() {
-      ArrayList<DownloadPart> parts = new ArrayList();
+      ArrayList<DownloadPart> parts = new ArrayList<>();
       DownloadPart part = new DownloadPart();
       part.setIndex(0);
       part.setStart(0L);

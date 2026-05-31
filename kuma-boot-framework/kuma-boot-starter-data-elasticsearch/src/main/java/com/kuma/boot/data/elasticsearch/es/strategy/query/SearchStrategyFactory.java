@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SearchStrategyFactory implements InitializingBean, ApplicationContextAware {
-   private final Map<String, SearchStrategy> factory = new HashMap();
+   private final Map<String, SearchStrategy> factory = new HashMap<>();
    private ApplicationContext appContext;
 
    public SearchStrategyFactory() {

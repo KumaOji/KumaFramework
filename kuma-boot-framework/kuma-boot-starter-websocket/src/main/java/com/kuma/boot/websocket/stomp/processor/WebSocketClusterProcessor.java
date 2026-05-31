@@ -43,6 +43,7 @@ public class WebSocketClusterProcessor implements InitializingBean {
 
    }
 
+   @SuppressWarnings("unchecked")
    public void afterPropertiesSet() throws Exception {
       RTopic topic = this.redissonClient.getTopic(this.webSocketStompProperties.getTopic());
       topic.addListener(WebSocketMessage.class, (charSequence, webSocketMessage) -> {

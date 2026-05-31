@@ -45,7 +45,7 @@ public class PerformanceEvaluationStatement {
    }
 
    public void evaluate() throws Throwable {
-      List<PerformanceEvaluationTask> taskList = new LinkedList();
+      List<PerformanceEvaluationTask> taskList = new LinkedList<>();
 
       try {
          EvaluationConfig evaluationConfig = this.evaluationContext.getEvaluationConfig();
@@ -81,7 +81,7 @@ public class PerformanceEvaluationStatement {
          reporter.report(this.testClass, this.evaluationContextList);
       } else {
          ExecutorService executorService = Executors.newFixedThreadPool(bestThreadNum);
-         List<Future<Void>> futureTasks = new ArrayList();
+         List<Future<Void>> futureTasks = new ArrayList<>();
 
          for(Reporter reporter : this.reporterSet) {
             Callable<Void> tocGenCallable = () -> {

@@ -46,8 +46,8 @@ public class KmcConfiguration extends AbstractConfiguration {
    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
    }
 
-   public Set getConfigListeners(String dataId) {
-      return new HashSet();
+   public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
+      return new HashSet<>();
    }
 
    public String getTypeName() {

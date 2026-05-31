@@ -9,6 +9,7 @@ public class DataSourceShardingAlgorithm implements HintShardingAlgorithm {
    public DataSourceShardingAlgorithm() {
    }
 
+   @SuppressWarnings("unchecked")
    public Collection<String> doSharding(Collection collection, HintShardingValue hintShardingValue) {
       return hintShardingValue.getValues();
    }

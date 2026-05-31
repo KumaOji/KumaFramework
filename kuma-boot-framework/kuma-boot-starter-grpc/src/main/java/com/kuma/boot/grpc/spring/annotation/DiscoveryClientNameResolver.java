@@ -42,7 +42,7 @@ public class DiscoveryClientNameResolver extends NameResolver {
    private boolean resolving;
    private List<ServiceInstance> instanceList = Lists.newArrayList();
 
-   public DiscoveryClientNameResolver(final String name, final DiscoveryClient client, final NameResolver.Args args, final SharedResourceHolder.Resource executorResource, final Consumer shutdownHook) {
+   public DiscoveryClientNameResolver(final String name, final DiscoveryClient client, final NameResolver.Args args, final SharedResourceHolder.Resource<Executor> executorResource, final Consumer<DiscoveryClientNameResolver> shutdownHook) {
       this.name = name;
       this.client = client;
       this.syncContext = (SynchronizationContext)Objects.requireNonNull(args.getSynchronizationContext(), "syncContext");
@@ -128,7 +128,8 @@ public class DiscoveryClientNameResolver extends NameResolver {
          }
 
          try {
-            Map<String, ?> parsedServiceConfig = (Map)GSON.fromJson(serviceConfig, Map.class);
+            @SuppressWarnings("unchecked")
+            Map<String, ?> parsedServiceConfig = (Map<String, ?>) GSON.fromJson(serviceConfig, Map.class);
             return this.serviceConfigParser.parseServiceConfig(parsedServiceConfig);
          } catch (JsonSyntaxException e) {
             return ConfigOrError.fromError(Status.UNKNOWN.withDescription("Failed to parse grpc service config").withCause(e));
@@ -226,7 +227,7 @@ public class DiscoveryClientNameResolver extends NameResolver {
          } finally {
             DiscoveryClientNameResolver.this.syncContext.execute(() -> {
                DiscoveryClientNameResolver.this.resolving = false;
-               List<ServiceInstance> result = (List)resultContainer.get();
+               List<ServiceInstance> result = resultContainer.get();
                if (result != DiscoveryClientNameResolver.KEEP_PREVIOUS && DiscoveryClientNameResolver.this.isActive()) {
                   DiscoveryClientNameResolver.this.instanceList = result;
                }
@@ -249,7 +250,9 @@ public class DiscoveryClientNameResolver extends NameResolver {
                return DiscoveryClientNameResolver.KEEP_PREVIOUS;
             } else {
                LogUtils.debug("Ready to update server list for {}", new Object[]{DiscoveryClientNameResolver.this.getName()});
-               this.savedListener.onResult(ResolutionResult.newBuilder().setAddresses(this.toTargets(newInstanceList)).setServiceConfig(DiscoveryClientNameResolver.this.resolveServiceConfig(newInstanceList)).build());
+               @SuppressWarnings("deprecation")
+               ResolutionResult resolutionResult = ResolutionResult.newBuilder().setAddresses(this.toTargets(newInstanceList)).setServiceConfig(DiscoveryClientNameResolver.this.resolveServiceConfig(newInstanceList)).build();
+               this.savedListener.onResult(resolutionResult);
                LogUtils.info("Done updating server list for {}", new Object[]{DiscoveryClientNameResolver.this.getName()});
                return newInstanceList;
             }

@@ -28,8 +28,8 @@ public enum NotificationCategory {
       title = "\u8bf4\u660e"
    )
    private final String description;
-   private static final Map<Integer, NotificationCategory> INDEX_MAP = new HashMap();
-   private static final List<Map<String, Object>> JSON_STRUCTURE = new ArrayList();
+   private static final Map<Integer, NotificationCategory> INDEX_MAP = new HashMap<>();
+   private static final List<Map<String, Object>> JSON_STRUCTURE = new ArrayList<>();
 
    private NotificationCategory(Integer value, String description) {
       this.value = value;

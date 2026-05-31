@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class JsonMessageHandlerHolder {
-   private static final Map<String, JsonMessageHandler<JsonWebSocketMessage>> MESSAGE_HANDLER_MAP = new ConcurrentHashMap();
+   private static final Map<String, JsonMessageHandler<JsonWebSocketMessage>> MESSAGE_HANDLER_MAP = new ConcurrentHashMap<>();
 
    private JsonMessageHandlerHolder() {
    }
 
    public static JsonMessageHandler<JsonWebSocketMessage> getHandler(String type) {
-      return (JsonMessageHandler)MESSAGE_HANDLER_MAP.get(type);
+      return MESSAGE_HANDLER_MAP.get(type);
    }
 
    public static void addHandler(JsonMessageHandler<JsonWebSocketMessage> jsonMessageHandler) {

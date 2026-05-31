@@ -38,7 +38,7 @@ public class HtmlReporter implements Reporter {
          Template template = configuration.getTemplate("report.ftl");
          Files.createDirectories(outputPath.getParent());
          ConsoleUtils.info("Rendering report to: " + String.valueOf(outputPath), new Object[0]);
-         Map<String, Object> root = new HashMap();
+         Map<String, Object> root = new HashMap<>();
          root.put("className", testClass.getSimpleName());
          root.put("contextData", evaluationContextSet);
          root.put("milliseconds", TimeUnit.MILLISECONDS);
