@@ -14,6 +14,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,8 +42,10 @@ jobs:
         run: |
           JAR_VERSION=$(date +%Y.%m.%d)
           GIT_SHA=$(git rev-parse --short HEAD)
-          echo "JAR_VERSION=${JAR_VERSION}"              >> $GITHUB_OUTPUT
-          echo "IMAGE_TAG=${JAR_VERSION}-${GIT_SHA}"    >> $GITHUB_OUTPUT
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "JAR_VERSION=${JAR_VERSION}"                          >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${JAR_VERSION}-${GIT_SHA}"                 >> $GITHUB_OUTPUT
+          echo "IMAGE=ghcr.io/${OWNER}/blog:${JAR_VERSION}-${GIT_SHA}" >> $GITHUB_OUTPUT
 
       - name: Create gradle.properties
         run: |
@@ -57,18 +63,27 @@ jobs:
           chmod +x gradlew
           make -C kuma-project/kuma-project-blog build
 
-      - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
+      - name: Copy jar to Docker context
+        run: |
+          cp kuma-project/kuma-project-blog/build/libs/blog-${{ steps.ver.outputs.JAR_VERSION }}.jar \
+             kuma-project/kuma-project-blog/
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.BLOG_SERVER_HOST }}
-          username: ${{ secrets.BLOG_SERVER_USER }}
-          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: >-
-            kuma-project/kuma-project-blog/build/libs/blog-${{ steps.ver.outputs.JAR_VERSION }}.jar,
-            kuma-project/kuma-project-blog/Dockerfile,
-            kuma-project/kuma-project-blog/Makefile
-          target: /data/blog/background/
-          strip_components: 3
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: kuma-project/kuma-project-blog
+          push: true
+          tags: ${{ steps.ver.outputs.IMAGE }}
+          build-args: JAR_VERSION=${{ steps.ver.outputs.JAR_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1
@@ -77,6 +92,7 @@ jobs:
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           script: |
-            make -C /data/blog/background all \
-              JAR_VERSION=${{ steps.ver.outputs.JAR_VERSION }} \
-              IMAGE_TAG=${{ steps.ver.outputs.IMAGE_TAG }}
+            kubectl set image deployment/blog-background \
+              blog-background=${{ steps.ver.outputs.IMAGE }} \
+              -n blog
+            kubectl rollout status deployment/blog-background -n blog --timeout=120s

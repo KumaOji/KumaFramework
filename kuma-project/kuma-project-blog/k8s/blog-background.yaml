@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: blog-background
-          image: blog:2026.05.01
+          image: ghcr.io/kumaoji/blog:latest
           ports:
             - containerPort: 9000
           env:
