@@ -13,8 +13,8 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 public class CaptchaServiceFactory {
-    public static volatile Map<String, CaptchaService> instances = new HashMap();
-    public static volatile Map<String, CaptchaCacheService> cacheService = new HashMap();
+    public static volatile Map<String, CaptchaService> instances = new HashMap<>();
+    public static volatile Map<String, CaptchaCacheService> cacheService = new HashMap<>();
 
     public static CaptchaService getInstance(Properties config) {
         String captchaType = config.getProperty("captcha.type", "default");

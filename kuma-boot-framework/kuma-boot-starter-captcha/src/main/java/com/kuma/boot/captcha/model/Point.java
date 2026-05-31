@@ -58,7 +58,7 @@ public class Point {
     }
 
     public Point parse(String jsonStr) {
-        Map<String, Object> m = new HashMap();
+        Map<String, Object> m = new HashMap<>();
         Arrays.stream(jsonStr.replaceFirst(",\\{", "\\{").replaceFirst("\\{", "").replaceFirst("\\}", "").replaceAll("\"", "").split(",")).forEach((item) -> m.put(item.split(":")[0], item.split(":")[1]));
         this.setX(Double.valueOf("" + String.valueOf(m.get("x"))).intValue());
         this.setY(Double.valueOf("" + String.valueOf(m.get("y"))).intValue());

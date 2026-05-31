@@ -25,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
 
 public class ImageUtils {
-    private static Map<String, String> originalCacheMap = new ConcurrentHashMap();
-    private static Map<String, String> slidingBlockCacheMap = new ConcurrentHashMap();
-    private static Map<String, String> picClickCacheMap = new ConcurrentHashMap();
-    private static Map<String, String[]> fileNameMap = new ConcurrentHashMap();
+    private static Map<String, String> originalCacheMap = new ConcurrentHashMap<>();
+    private static Map<String, String> slidingBlockCacheMap = new ConcurrentHashMap<>();
+    private static Map<String, String> picClickCacheMap = new ConcurrentHashMap<>();
+    private static Map<String, String[]> fileNameMap = new ConcurrentHashMap<>();
 
     public static void cacheImage(String captchaOriginalPathJigsaw, String captchaOriginalPathClick) {
         if (StrUtil.isBlank(captchaOriginalPathJigsaw)) {
@@ -120,7 +120,7 @@ public class ImageUtils {
     }
 
     private static Map<String, String> getResourcesImagesFile(String path) {
-        Map<String, String> imgMap = new HashMap();
+        Map<String, String> imgMap = new HashMap<>();
         ClassLoader classLoader = ImageUtils.class.getClassLoader();
 
         for(int i = 1; i <= 6; ++i) {
@@ -142,10 +142,10 @@ public class ImageUtils {
     }
 
     private static Map<String, String> getImagesFile(String path) {
-        Map<String, String> imgMap = new HashMap();
+        Map<String, String> imgMap = new HashMap<>();
         File file = new File(path);
         if (!file.exists()) {
-            return new HashMap();
+            return new HashMap<>();
         } else {
             File[] files = file.listFiles();
 

@@ -45,7 +45,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Aspect
 public class IdempotentAspect {
-    private final ThreadLocal<String> PER_FIX_KEY = new ThreadLocal();
+    private final ThreadLocal<String> PER_FIX_KEY = new ThreadLocal<>();
     private final boolean enable = true;
     private static final String HEADER_RID_KEY = "RID";
     private static final String REDIS_KEY_PREFIX = "RID:";

@@ -33,7 +33,7 @@ import javax.imageio.ImageIO;
 
 public class ZXINGParser implements QRParser {
     public boolean generate(String text, String filePath, String fileName) throws WriterException, IOException {
-        Hashtable<EncodeHintType, Object> hintMap = new Hashtable();
+        Hashtable<EncodeHintType, Object> hintMap = new Hashtable<>();
         hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -70,7 +70,7 @@ public class ZXINGParser implements QRParser {
             BufferedImage image = ImageIO.read(new File(filePath));
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-            HashMap<DecodeHintType, Object> hints = new HashMap();
+            HashMap<DecodeHintType, Object> hints = new HashMap<>();
             hints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
             hints.put(DecodeHintType.CHARACTER_SET, "utf-8");
             MultiFormatReader reader = new MultiFormatReader();
@@ -88,7 +88,7 @@ public class ZXINGParser implements QRParser {
             bufferedImage = ParserUtils.swapColors(bufferedImage);
             LuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
             BinaryBitmap bitmap = new BinaryBitmap(new GlobalHistogramBinarizer(source));
-            HashMap<DecodeHintType, Object> hints = new HashMap();
+            HashMap<DecodeHintType, Object> hints = new HashMap<>();
             hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
             hints.put(DecodeHintType.CHARACTER_SET, "utf-8");
             MultiFormatReader reader = new MultiFormatReader();

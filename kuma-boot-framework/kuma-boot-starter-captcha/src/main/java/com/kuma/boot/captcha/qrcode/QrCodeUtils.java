@@ -63,7 +63,7 @@ public final class QrCodeUtils {
         this.backGroundColor = Color.WHITE;
         this.imageFormat = "png";
         this.deleteMargin = true;
-        this.hints = new Hashtable();
+        this.hints = new Hashtable<>();
     }
 
     public static QrCodeUtils form(final String content) {
@@ -258,7 +258,7 @@ public final class QrCodeUtils {
     }
 
     public static String read(BufferedImage qrCodeImage) {
-        return read(qrCodeImage, (Map)null);
+        return read(qrCodeImage, (Map<DecodeHintType, ?>)null);
     }
 
     public static String read(String qrCodeFile, Charset encode) {
@@ -274,7 +274,7 @@ public final class QrCodeUtils {
     }
 
     public static String read(BufferedImage qrCodeImage, Charset encode) {
-        Map<DecodeHintType, Object> hints = new Hashtable();
+        Map<DecodeHintType, Object> hints = new Hashtable<>();
         hints.put(DecodeHintType.CHARACTER_SET, encode);
         return read(qrCodeImage, hints);
     }

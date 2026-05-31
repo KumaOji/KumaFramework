@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public final class CacheUtil {
     private static final Logger logger = LoggerFactory.getLogger(CacheUtil.class);
-    private static final Map<String, Object> CACHE_MAP = new ConcurrentHashMap();
+    private static final Map<String, Object> CACHE_MAP = new ConcurrentHashMap<>();
     private static Integer CACHE_MAX_NUMBER = 1000;
     private static ScheduledExecutorService scheduledExecutor;
 

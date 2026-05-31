@@ -80,7 +80,7 @@ public class CaptchaAutoConfiguration implements InitializingBean {
     }
 
     public static Map<String, String> getResourcesImagesFile(String path) {
-        Map<String, String> imgMap = new HashMap();
+        Map<String, String> imgMap = new HashMap<>();
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         try {

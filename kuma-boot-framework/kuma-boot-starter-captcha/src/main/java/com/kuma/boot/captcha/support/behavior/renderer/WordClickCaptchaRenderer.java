@@ -72,9 +72,10 @@ public class WordClickCaptchaRenderer extends AbstractBehaviorRenderer {
         return this.wordClickCaptcha;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean verify(Verification verification) {
         if (!ObjectUtils.isEmpty(verification) && !CollectionUtils.isEmpty(verification.getCoordinates())) {
-            List<Coordinate> store = (List)this.get(verification.getIdentity());
+            List<Coordinate> store = (List<Coordinate>)this.get(verification.getIdentity());
             if (CollectionUtils.isEmpty(store)) {
                 throw new CaptchaHasExpiredException("Stamp is invalid!");
             } else {
@@ -101,7 +102,8 @@ public class WordClickCaptchaRenderer extends AbstractBehaviorRenderer {
         Graphics backgroundGraphics = backgroundImage.getGraphics();
         int backgroundImageWidth = backgroundImage.getWidth();
         int backgroundImageHeight = backgroundImage.getHeight();
-        List<Coordinate> coordinates = (List)IntStream.range(0, words.size()).mapToObj((index) -> this.drawWord(backgroundGraphics, backgroundImageWidth, backgroundImageHeight, index, wordCount, (String)words.get(index))).collect(Collectors.toList());
+        @SuppressWarnings("unchecked")
+        List<Coordinate> coordinates = (List<Coordinate>)IntStream.range(0, words.size()).mapToObj((index) -> this.drawWord(backgroundGraphics, backgroundImageWidth, backgroundImageHeight, index, wordCount, (String)words.get(index))).collect(Collectors.toList());
         this.addWatermark(backgroundGraphics, backgroundImageWidth, backgroundImageHeight);
         BufferedImage combinedImage = new BufferedImage(backgroundImageWidth, backgroundImageHeight, 1);
         Graphics combinedGraphics = combinedImage.getGraphics();

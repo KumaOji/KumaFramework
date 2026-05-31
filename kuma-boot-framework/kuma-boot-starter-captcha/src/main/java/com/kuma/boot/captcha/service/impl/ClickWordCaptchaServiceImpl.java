@@ -164,8 +164,8 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
 
     private Captcha getImageData(BufferedImage backgroundImage) {
         Captcha dataVO = new Captcha();
-        List<String> wordList = new ArrayList();
-        List<Point> pointList = new ArrayList();
+        List<String> wordList = new ArrayList<>();
+        List<Point> pointList = new ArrayList<>();
         Graphics backgroundGraphics = backgroundImage.getGraphics();
         int width = backgroundImage.getWidth();
         int height = backgroundImage.getHeight();
@@ -217,7 +217,7 @@ public class ClickWordCaptchaServiceImpl extends AbstractCaptchaService {
     }
 
     private Set<String> getRandomWords(int wordCount) {
-        Set<String> words = new HashSet();
+        Set<String> words = new HashSet<>();
         int size = HAN_ZI.length();
 
         do {

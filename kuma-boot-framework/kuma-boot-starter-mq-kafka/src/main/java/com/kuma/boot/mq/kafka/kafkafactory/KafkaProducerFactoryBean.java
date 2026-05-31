@@ -21,6 +21,7 @@ public class KafkaProducerFactoryBean<T> implements FactoryBean<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T getObject() throws Exception {
         InvocationHandler handler = ((proxy, method, args) -> {
             String name = method.getName();

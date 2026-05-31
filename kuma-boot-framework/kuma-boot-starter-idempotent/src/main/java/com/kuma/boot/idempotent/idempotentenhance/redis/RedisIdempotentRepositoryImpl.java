@@ -41,7 +41,7 @@ implements IdempotentRepository {
     private static final String CREATE_LUA = "script/lua/create.lua";
     private static final String STATE_FLOW_LUA = "script/lua/state-flow.lua";
     private static final String DELETE_LUA = "script/lua/delete.lua";
-    private static final DefaultRedisScript<Boolean> CREATE_SCRIPT = new DefaultRedisScript();
+    private static final DefaultRedisScript<Boolean> CREATE_SCRIPT = new DefaultRedisScript<>();
     private static final DefaultRedisScript<Boolean> STATE_FLOW_SCRIPT;
     private static final DefaultRedisScript<Boolean> DELETE_SCRIPT;
     private final StringRedisTemplate redisTemplate;
@@ -96,6 +96,7 @@ implements IdempotentRepository {
         if (StringUtils.isAllBlank((CharSequence[])new CharSequence[]{uniqueKey, uniqueDataKey})) {
             return true;
         }
+        @SuppressWarnings("unchecked")
         Boolean execute = (Boolean)this.redisTemplate.execute(DELETE_SCRIPT, (List)Lists.newArrayList((Object[])new String[]{uniqueKey, uniqueDataKey}), new Object[0]);
         return Boolean.TRUE.equals(execute);
     }
@@ -119,16 +120,18 @@ implements IdempotentRepository {
         String jsonStr = JSONObject.toJSONString((Object)idempotentEntity, (JSONWriter.Feature[])new JSONWriter.Feature[0]);
         ArrayList keys = Lists.newArrayList((Object[])new String[]{uniqueKey, uniqueDataKey});
         ArrayList argv = Lists.newArrayList((Object[])new String[]{String.valueOf(expectVersion), expireTime, jsonStr});
-        return (Boolean)this.redisTemplate.execute(script, (List)keys, argv.toArray());
+        @SuppressWarnings("unchecked")
+        Boolean result = (Boolean)this.redisTemplate.execute(script, (List)keys, argv.toArray());
+        return result;
     }
 
     static {
         CREATE_SCRIPT.setScriptSource((ScriptSource)new ResourceScriptSource((Resource)new ClassPathResource(CREATE_LUA)));
         CREATE_SCRIPT.setResultType(Boolean.class);
-        STATE_FLOW_SCRIPT = new DefaultRedisScript();
+        STATE_FLOW_SCRIPT = new DefaultRedisScript<>();
         STATE_FLOW_SCRIPT.setScriptSource((ScriptSource)new ResourceScriptSource((Resource)new ClassPathResource(STATE_FLOW_LUA)));
         STATE_FLOW_SCRIPT.setResultType(Boolean.class);
-        DELETE_SCRIPT = new DefaultRedisScript();
+        DELETE_SCRIPT = new DefaultRedisScript<>();
         DELETE_SCRIPT.setScriptSource((ScriptSource)new ResourceScriptSource((Resource)new ClassPathResource(DELETE_LUA)));
         DELETE_SCRIPT.setResultType(Boolean.class);
     }
