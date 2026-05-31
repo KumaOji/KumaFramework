@@ -7,6 +7,9 @@ on:
       - 'kuma-project/kuma-project-blog/**'
       - 'kuma-boot-framework/**'
       - 'gradle.properties'
+      - 'build.gradle'
+      - 'settings.gradle'
+  workflow_dispatch:
 
 jobs:
   deploy:
