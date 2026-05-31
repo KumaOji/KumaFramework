@@ -28,6 +28,9 @@ doc/
 #**/kuma*/
 kuma-project/kuma-project-blog/src/main/resources/sql/
 
+# k8s secrets
+kuma-project/kuma-project-blog/k8s/secret.yaml
+
 # intellijPlatform
 .intellijPlatform/
 /gradle/wrapper/gradle-9.3.1-bin.zip

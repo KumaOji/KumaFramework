@@ -1,0 +1,32 @@
+name: Apply Blog K8s Configs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'kuma-project/kuma-project-blog/k8s/**'
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy k8s files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: kuma-project/kuma-project-blog/k8s/
+          target: /data/blog/k8s/
+          strip_components: 4
+
+      - name: Apply k8s configs
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          script: kubectl apply -f /data/blog/k8s/
