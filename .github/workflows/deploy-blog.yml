@@ -11,12 +11,13 @@ on:
       - 'settings.gradle'
   workflow_dispatch:
 
+env:
+  REGISTRY: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com
+  IMAGE: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/blog
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout
@@ -42,10 +43,11 @@ jobs:
         run: |
           JAR_VERSION=$(date +%Y.%m.%d)
           GIT_SHA=$(git rev-parse --short HEAD)
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          echo "JAR_VERSION=${JAR_VERSION}"                          >> $GITHUB_OUTPUT
-          echo "IMAGE_TAG=${JAR_VERSION}-${GIT_SHA}"                 >> $GITHUB_OUTPUT
-          echo "IMAGE=ghcr.io/${OWNER}/blog:${JAR_VERSION}-${GIT_SHA}" >> $GITHUB_OUTPUT
+          echo "JAR_VERSION=${JAR_VERSION}"                                               >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${JAR_VERSION}-${GIT_SHA}"                                     >> $GITHUB_OUTPUT
+          echo "FULL_IMAGE=${IMAGE}:${JAR_VERSION}-${GIT_SHA}" >> $GITHUB_OUTPUT
+        env:
+          IMAGE: ${{ env.IMAGE }}
 
       - name: Create gradle.properties
         run: |
@@ -71,19 +73,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to ghcr.io
+      - name: Login to ACR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
+          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: kuma-project/kuma-project-blog
           push: true
-          tags: ${{ steps.ver.outputs.IMAGE }}
+          tags: ${{ steps.ver.outputs.FULL_IMAGE }}
           build-args: JAR_VERSION=${{ steps.ver.outputs.JAR_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -96,6 +98,7 @@ jobs:
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           script: |
             kubectl set image deployment/blog-background \
-              blog-background=${{ steps.ver.outputs.IMAGE }} \
+              blog-background=${{ steps.ver.outputs.FULL_IMAGE }} \
               -n blog
-            kubectl rollout status deployment/blog-background -n blog --timeout=120s
+            kubectl scale deployment/blog-background -n blog --replicas=1
+            kubectl rollout status deployment/blog-background -n blog --timeout=300s

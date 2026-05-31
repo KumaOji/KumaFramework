@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: blog-background
-          image: ghcr.io/kumaoji/blog:latest
+          image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/blog:latest
           ports:
             - containerPort: 9000
           env:
