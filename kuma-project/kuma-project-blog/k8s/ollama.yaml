@@ -15,9 +15,38 @@ spec:
     spec:
       containers:
         - name: ollama
-          image: ollama/ollama:latest
+          image: ollama/ollama:0.6.7
+          # 启动后自动拉取 embedding 模型（已有则秒过），LLM 不在本地运行
+          command: ["sh", "-c"]
+          args: ["ollama serve & sleep 5 && ollama pull nomic-embed-text && wait"]
           ports:
             - containerPort: 11434
+          env:
+            - name: OLLAMA_NUM_PARALLEL
+              value: "2"
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "1"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "3Gi"
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: 11434
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: 11434
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 6
           volumeMounts:
             - name: ollama-data
               mountPath: /root/.ollama

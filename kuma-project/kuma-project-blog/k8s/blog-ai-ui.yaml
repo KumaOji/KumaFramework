@@ -15,22 +15,51 @@ spec:
     spec:
       containers:
         - name: open-webui
-          image: ghcr.m.daocloud.io/open-webui/open-webui:main
+          image: ghcr.m.daocloud.io/open-webui/open-webui:v0.6.5
           ports:
             - containerPort: 8080
           env:
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: blog-secret
+                  key: openwebui-secret-key
+            # Ollama 仅提供 embedding，LLM 通过 UI 内的 OpenAI 连接配置
+            - name: OLLAMA_BASE_URL
+              value: "http://blog-ollama:11434"
             - name: HF_ENDPOINT
               value: "https://hf-mirror.com"
             - name: HF_HUB_OFFLINE
               value: "1"
-            - name: OLLAMA_BASE_URL
-              value: "http://blog-ollama:11434"
-            - name: RAG_EMBEDDING_ENGINE
-              value: "ollama"
             - name: VECTOR_DB
               value: "qdrant"
             - name: QDRANT_URI
               value: "http://blog-qdrant:6333"
+            - name: RAG_EMBEDDING_ENGINE
+              value: "ollama"
+            - name: RAG_OLLAMA_BASE_URL
+              value: "http://blog-ollama:11434"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
           volumeMounts:
             - name: open-webui-data
               mountPath: /app/backend/data

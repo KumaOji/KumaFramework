@@ -13,13 +13,6 @@ spring:
   sql:
     init:
       mode: never
-  kafka:
-    producer:
-      bootstrap-servers: localhost:9092
-      acks: "1"
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
   autoconfigure:
     exclude:
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
@@ -79,6 +72,7 @@ kuma:
     ai:
       base-url: ${AI_CHAT_BASE_URL}
       api-key: ${AI_CHAT_API_KEY}
+      model: ${AI_CHAT_MODEL:gpt-4o-mini}
       embedding:
         base-url: http://blog-ollama:11434
         model: nomic-embed-text

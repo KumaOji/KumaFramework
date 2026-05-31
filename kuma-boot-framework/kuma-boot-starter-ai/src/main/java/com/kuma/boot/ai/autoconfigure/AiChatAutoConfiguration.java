@@ -38,7 +38,7 @@ public class AiChatAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(ChatModel.class)
     public ChatModel chatModel(AiChatProperties props) {
-        String baseUrl = normalize(props.getBaseUrl());
+        String baseUrl = chatBaseUrl(props);
         String key = blank(props.getApiKey()) ? "no-key" : props.getApiKey();
         return OpenAiChatModel.builder()
                 .baseUrl(baseUrl)
@@ -52,7 +52,7 @@ public class AiChatAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(StreamingChatModel.class)
     public StreamingChatModel streamingChatModel(AiChatProperties props) {
-        String baseUrl = normalize(props.getBaseUrl());
+        String baseUrl = chatBaseUrl(props);
         String key = blank(props.getApiKey()) ? "no-key" : props.getApiKey();
         return OpenAiStreamingChatModel.builder()
                 .baseUrl(baseUrl)
@@ -121,6 +121,11 @@ public class AiChatAutoConfiguration implements InitializingBean {
     }
 
     // ── 工具方法 ─────────────────────────────────────────────────────────────
+
+    private static String chatBaseUrl(AiChatProperties props) {
+        String url = normalize(props.getBaseUrl());
+        return blank(url) ? "http://localhost:11434" : url;
+    }
 
     private static String normalize(String url) {
         return (url != null && url.endsWith("/")) ? url.substring(0, url.length() - 1) : url;
