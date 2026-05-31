@@ -27,19 +27,32 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('**/*.gradle*', 'gradle.properties', 'gradle/libs.versions.toml') }}
+          key: gradle-${{ hashFiles('**/*.gradle*', 'gradle/libs.versions.toml') }}
           restore-keys: gradle-
 
       - name: Compute versions
         id: ver
         run: |
-          JAR_VERSION=$(grep '^version=' gradle.properties | cut -d= -f2)
+          JAR_VERSION=$(date +%Y.%m.%d)
           GIT_SHA=$(git rev-parse --short HEAD)
-          echo "JAR_VERSION=${JAR_VERSION}"       >> $GITHUB_OUTPUT
-          echo "IMAGE_TAG=${JAR_VERSION}-${GIT_SHA}" >> $GITHUB_OUTPUT
+          echo "JAR_VERSION=${JAR_VERSION}"              >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${JAR_VERSION}-${GIT_SHA}"    >> $GITHUB_OUTPUT
+
+      - name: Create gradle.properties
+        run: |
+          cat > gradle.properties << EOF
+          org.gradle.jvmargs=-Xms512m -Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+          org.gradle.caching=true
+          org.gradle.parallel=true
+          org.gradle.configuration-cache=false
+          version=${{ steps.ver.outputs.JAR_VERSION }}
+          group=io.github.kumaoji
+          EOF
 
       - name: Build jar
-        run: make -C kuma-project/kuma-project-blog build
+        run: |
+          chmod +x gradlew
+          make -C kuma-project/kuma-project-blog build
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7

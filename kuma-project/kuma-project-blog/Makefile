@@ -1,5 +1,5 @@
 # ── Variables (overridable by CI: make deploy JAR_VERSION=x IMAGE_TAG=y) ──────
-JAR_VERSION ?= $(shell grep '^version=' ../../gradle.properties | cut -d= -f2)
+JAR_VERSION ?= $(shell grep '^version=' ../../gradle.properties 2>/dev/null | cut -d= -f2)
 GIT_SHA     ?= $(shell git rev-parse --short HEAD)
 IMAGE_TAG   ?= $(JAR_VERSION)-$(GIT_SHA)
 
