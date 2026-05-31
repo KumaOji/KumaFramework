@@ -58,6 +58,15 @@ jobs:
           org.gradle.configuration-cache=false
           version=${{ steps.ver.outputs.JAR_VERSION }}
           group=io.github.kumaoji
+          mysql.url=jdbc:mysql://localhost:3306/base
+          mysql.username=root
+          mysql.password=placeholder
+          redis.host=localhost
+          redis.port=6379
+          redis.database=0
+          redis.jedis.pool.max-active=8
+          redis.jedis.pool.max-idle=8
+          redis.jedis.pool.min-idle=0
           EOF
 
       - name: Build jar
@@ -101,4 +110,4 @@ jobs:
               blog-background=${{ steps.ver.outputs.FULL_IMAGE }} \
               -n blog
             kubectl scale deployment/blog-background -n blog --replicas=1
-            kubectl rollout status deployment/blog-background -n blog --timeout=300s
+            kubectl rollout status deployment/blog-background -n blog --timeout=600s
