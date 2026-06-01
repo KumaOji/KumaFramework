@@ -96,8 +96,8 @@ jobs:
           push: true
           tags: ${{ steps.ver.outputs.FULL_IMAGE }}
           build-args: JAR_VERSION=${{ steps.ver.outputs.JAR_VERSION }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1
