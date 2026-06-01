@@ -198,7 +198,72 @@ public class AiChatController {
         return Result.success(aiEmbeddingService.cosineSimilarity(request.getText1(), request.getText2()));
     }
 
+    // ── 划词提问 ─────────────────────────────────────────────────────────────
+
+    @Operation(summary = "划词提问（非流式）")
+    @PostMapping("/selection/ask")
+    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    public Result<String> selectionAsk(@RequestBody SelectionAskRequest request) {
+        Map<String, Object> result = aiChatService.chat(buildSelectionChatRequest(request));
+        return Result.success(extractContent(result));
+    }
+
+    @Operation(summary = "划词提问（流式 SSE）")
+    @PostMapping(value = "/selection/ask/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    public SseEmitter selectionAskStream(@RequestBody SelectionAskRequest request) {
+        return aiChatService.streamChat(buildSelectionChatRequest(request));
+    }
+
+    private AiChatRequest buildSelectionChatRequest(SelectionAskRequest req) {
+        AiChatRequest.Message msg = new AiChatRequest.Message();
+        msg.setRole("user");
+        msg.setContent(buildSelectionPrompt(req));
+
+        AiChatRequest chatRequest = new AiChatRequest();
+        chatRequest.setMessages(List.of(msg));
+        chatRequest.setModel(req.getModel());
+        chatRequest.setSessionId(req.getSessionId());
+        return chatRequest;
+    }
+
+    private String buildSelectionPrompt(SelectionAskRequest req) {
+        if (req.getSelectedText() == null || req.getSelectedText().isBlank()) {
+            return req.getQuestion() != null ? req.getQuestion() : "";
+        }
+        String question = (req.getQuestion() != null && !req.getQuestion().isBlank())
+                ? req.getQuestion() : "请解释这段文字的含义";
+        StringBuilder sb = new StringBuilder();
+        if (req.getPageTitle() != null && !req.getPageTitle().isBlank()) {
+            sb.append("以下内容节选自「").append(req.getPageTitle()).append("」：\n\n");
+        }
+        sb.append("```\n").append(req.getSelectedText().strip()).append("\n```\n\n");
+        sb.append(question);
+        return sb.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String extractContent(Map<String, Object> response) {
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+        Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+        return (String) message.get("content");
+    }
+
     // ── 内部请求体 ──────────────────────────────────────────────────────────
+
+    @lombok.Data
+    public static class SelectionAskRequest {
+        /** 用户划选的文字 */
+        private String selectedText;
+        /** 用户的追加提问，留空则默认解释选中内容 */
+        private String question;
+        /** 页面标题（可选，提供上下文） */
+        private String pageTitle;
+        /** 模型名称（可选） */
+        private String model;
+        /** 会话 ID（可选，设置后支持多轮追问） */
+        private String sessionId;
+    }
 
     @lombok.Data
     public static class SimilarityRequest {
