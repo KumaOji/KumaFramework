@@ -1,8 +1,10 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.ai.model.AiAgentRequest;
 import com.kuma.boot.ai.model.AiChatRequest;
 import com.kuma.boot.ai.model.AiTextRequest;
 import com.kuma.boot.ai.model.RagIngestRequest;
+import com.kuma.boot.ai.service.AiAgentService;
 import com.kuma.boot.ai.service.AiChatService;
 import com.kuma.boot.ai.service.AiEmbeddingService;
 import com.kuma.boot.ai.service.AiRagService;
@@ -15,8 +17,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +36,7 @@ public class AiChatController {
     private final AiRagService aiRagService;
     private final AiTextService aiTextService;
     private final AiEmbeddingService aiEmbeddingService;
+    private final AiAgentService aiAgentService;
 
     // ── 基础对话 ─────────────────────────────────────────────────────────────
 
@@ -47,14 +54,86 @@ public class AiChatController {
         return aiChatService.streamChat(request);
     }
 
+    @Operation(summary = "清除会话记忆（sessionId 绑定的历史消息）")
+    @DeleteMapping("/chat/memory/{sessionId}")
+    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    public Result<Void> clearMemory(@PathVariable String sessionId) {
+        aiChatService.clearMemory(sessionId);
+        aiRagService.clearMemory(sessionId);
+        return Result.success();
+    }
+
+    // ── 智能体 Agent（记忆 + RAG + 工具调用）──────────────────────────────────
+
+    @Operation(summary = "智能体对话（自动记忆 + 知识库 + 工具调用）")
+    @PostMapping("/agent/chat")
+    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    public Result<Map<String, Object>> agentChat(@RequestBody AiAgentRequest request) {
+        return Result.success(aiAgentService.chat(request));
+    }
+
+    @Operation(summary = "智能体流式对话（SSE）")
+    @PostMapping(value = "/agent/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    public SseEmitter agentStreamChat(@RequestBody AiAgentRequest request) {
+        return aiAgentService.streamChat(request);
+    }
+
+    @Operation(summary = "清除智能体会话记忆")
+    @DeleteMapping("/agent/memory/{sessionId}")
+    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    public Result<Void> clearAgentMemory(@PathVariable String sessionId) {
+        aiAgentService.clearMemory(sessionId);
+        return Result.success();
+    }
+
     // ── RAG 知识库 ───────────────────────────────────────────────────────────
 
-    @Operation(summary = "写入文档到知识库")
+    @Operation(summary = "写入纯文本到知识库")
     @PostMapping("/rag/ingest")
     @Authorize(BlogPermissions.AI_CHAT_INGEST)
-    public Result<Void> ingest(@RequestBody RagIngestRequest request) {
-        aiRagService.ingest(request.getText());
-        return Result.success();
+    public Result<Map<String, Object>> ingest(@RequestBody RagIngestRequest request) {
+        int count = aiRagService.ingest(request.getText());
+        return Result.success(Map.of("segments", count));
+    }
+
+    @Operation(summary = "批量上传 Markdown 文件到知识库")
+    @PostMapping(value = "/rag/ingest/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<Map<String, Object>> ingestFiles(@RequestParam("files") List<MultipartFile> files) {
+        Map<String, Integer> detail = new LinkedHashMap<>();
+        int total = 0;
+        for (MultipartFile file : files) {
+            String name = file.getOriginalFilename();
+            try {
+                String markdown = new String(file.getBytes(), StandardCharsets.UTF_8);
+                int count = aiRagService.ingestMarkdown(name, markdown);
+                detail.put(name, count);
+                total += count;
+            } catch (IOException e) {
+                detail.put(name, -1);
+            }
+        }
+        return Result.success(Map.of("totalSegments", total, "files", detail));
+    }
+
+    @Operation(summary = "批量上传任意文档到知识库（PDF/Word/PPT/Excel/HTML，经 Tika 解析）")
+    @PostMapping(value = "/rag/ingest/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<Map<String, Object>> ingestDocuments(@RequestParam("files") List<MultipartFile> files) {
+        Map<String, Integer> detail = new LinkedHashMap<>();
+        int total = 0;
+        for (MultipartFile file : files) {
+            String name = file.getOriginalFilename();
+            try {
+                int count = aiRagService.ingestFile(name, file.getInputStream());
+                detail.put(name, count);
+                total += count;
+            } catch (Exception e) {
+                detail.put(name, -1);
+            }
+        }
+        return Result.success(Map.of("totalSegments", total, "files", detail));
     }
 
     @Operation(summary = "RAG 增强对话")

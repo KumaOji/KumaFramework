@@ -10,4 +10,7 @@ public interface AiChatService {
     Map<String, Object> chat(AiChatRequest request);
 
     SseEmitter streamChat(AiChatRequest request);
+
+    /** 清除指定 session 的对话历史 */
+    void clearMemory(String sessionId);
 }

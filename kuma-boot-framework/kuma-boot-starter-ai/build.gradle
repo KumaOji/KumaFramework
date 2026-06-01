@@ -16,6 +16,7 @@ dependencies {
     api projectLibs.langchain4j
     api projectLibs.langchain4jopenai
     api projectLibs.langchain4jqdrant
+    api projectLibs.langchain4jtika
     api projectLibs.jakarta.annotation.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

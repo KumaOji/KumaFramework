@@ -17,19 +17,38 @@ final class AiChatHelper {
 
     private AiChatHelper() {}
 
+    /** 从 DTO 消息列表构造 ChatRequest（无上下文） */
     static ChatRequest buildChatRequest(List<AiChatRequest.Message> raw, String model) {
         return buildChatRequest(raw, model, "");
     }
 
+    /** 从 DTO 消息列表构造 ChatRequest，注入 RAG 上下文作为首条 SystemMessage */
     static ChatRequest buildChatRequest(List<AiChatRequest.Message> raw, String model, String context) {
         List<ChatMessage> messages = new ArrayList<>(toMessages(raw));
         if (context != null && !context.isBlank()) {
             messages.add(0, SystemMessage.from("参考以下内容回答问题：\n\n" + context));
         }
+        return buildFromMessages(messages, model);
+    }
+
+    /** 直接从 ChatMessage 列表构造 ChatRequest（供 Memory 模式使用） */
+    static ChatRequest buildFromMessages(List<ChatMessage> messages, String model) {
         return ChatRequest.builder()
                 .messages(messages)
                 .parameters(ChatRequestParameters.builder().modelName(model).build())
                 .build();
+    }
+
+    /**
+     * 将 RAG 上下文注入为首条 SystemMessage，用于 Memory 模式下的 RAG 增强。
+     * 若 context 为空则原样返回消息列表。
+     */
+    static List<ChatMessage> prependContext(List<ChatMessage> messages, String context) {
+        if (context == null || context.isBlank()) return messages;
+        List<ChatMessage> result = new ArrayList<>();
+        result.add(SystemMessage.from("参考以下内容回答问题：\n\n" + context));
+        result.addAll(messages);
+        return result;
     }
 
     static List<ChatMessage> toMessages(List<AiChatRequest.Message> raw) {

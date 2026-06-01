@@ -208,6 +208,7 @@ bmuschko-docker           = "9.4.0"
 langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
 langchain4jopenai = { module = "dev.langchain4j:langchain4j-open-ai", version.ref = "langchain4j" }
 langchain4jqdrant = { module = "dev.langchain4j:langchain4j-qdrant", version.ref = "langchain4j-qdrant" }
+langchain4jtika = { module = "dev.langchain4j:langchain4j-document-parser-apache-tika", version.ref = "langchain4j-qdrant" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 lombok-mapstruct-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "mapstruct-lombok" }
 mybatis-plus = { module = "com.baomidou:mybatis-plus-spring-boot4-starter", version.ref = "mybatis-plus" }
