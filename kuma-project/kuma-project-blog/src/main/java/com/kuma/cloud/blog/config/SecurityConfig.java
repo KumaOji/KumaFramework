@@ -4,6 +4,7 @@ import com.kuma.cloud.blog.security.JsonAccessDeniedHandler;
 import com.kuma.cloud.blog.security.JsonAuthenticationEntryPoint;
 import com.kuma.cloud.blog.security.TokenAuthenticationFilter;
 import com.kuma.cloud.blog.service.TokenService;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,6 +41,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/auth/login", "/auth/logout", "/auth/current").permitAll()
                         .requestMatchers("/auth/totp/**").authenticated()
                         .requestMatchers("/error").permitAll()

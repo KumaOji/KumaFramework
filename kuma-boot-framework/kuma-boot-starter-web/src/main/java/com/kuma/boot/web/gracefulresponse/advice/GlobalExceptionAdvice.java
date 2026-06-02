@@ -16,6 +16,7 @@
 
 package com.kuma.boot.web.gracefulresponse.advice;
 
+import tools.jackson.databind.ObjectMapper;
 import com.kuma.boot.web.gracefulresponse.ExceptionAliasRegister;
 import com.kuma.boot.web.gracefulresponse.GracefulResponseException;
 import com.kuma.boot.web.gracefulresponse.GracefulResponseProperties;
@@ -28,12 +29,15 @@ import com.kuma.boot.web.gracefulresponse.data.ResponseStatus;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -53,6 +57,8 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
 
     @Resource private ResponseFactory responseFactory;
 
+    @Resource private ObjectMapper objectMapper;
+
     private ExceptionAliasRegister exceptionAliasRegister;
 
     @Resource private GracefulResponseProperties gracefulResponseProperties;
@@ -60,6 +66,28 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
     @Resource private GracefulResponseProperties properties;
 
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
+
+    /**
+     * 权限不足异常处理（@PreAuthorize 方法级鉴权失败）.
+     *
+     * <p>直接写入 HttpServletResponse，绕过 Spring 内容协商，避免 SSE 端点（produces=text/event-stream）
+     * 无法序列化 JSON 响应体导致前端收不到数据的问题。
+     */
+    @ExceptionHandler({AccessDeniedException.class})
+    public void accessDeniedHandler(AccessDeniedException ex, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        if (gracefulResponseProperties.isPrintExceptionInGlobalAdvice()) {
+            logger.debug("Graceful Response:GlobalExceptionAdvice捕获到权限不足异常,message=[{}]",
+                    ex.getMessage());
+        }
+        if (response == null || response.isCommitted()) return;
+        Response errorResponse = responseFactory.newInstance(
+                responseStatusFactory.newInstance("403", "权限不足"));
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        objectMapper.writeValue(response.getWriter(), errorResponse);
+    }
 
     /**
      * 异常处理逻辑.

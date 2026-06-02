@@ -65,19 +65,25 @@ public class AiChatServiceImpl implements AiChatService {
 
         asyncExecutor.execute(() -> streamingModel.chat(chatRequest, new StreamingChatResponseHandler() {
             private final StringBuilder buffer = new StringBuilder();
+            private volatile boolean done = false;
 
             @Override
             public void onPartialResponse(String token) {
+                if (done) return;
                 buffer.append(token);
                 try {
                     emitter.send(SseEmitter.event().data(AiChatHelper.buildStreamChunk(model, token)));
                 } catch (Exception e) {
-                    emitter.completeWithError(e);
+                    done = true;
+                    log.debug("流式发送中断（客户端可能已断开）: {}", e.getMessage());
+                    emitter.complete();
                 }
             }
 
             @Override
             public void onCompleteResponse(ChatResponse response) {
+                if (done) return;
+                done = true;
                 logTokens(response.tokenUsage());
                 if (sessionId != null && !sessionId.isBlank()) {
                     getMemory(sessionId).add(AiMessage.from(buffer.toString()));
@@ -86,18 +92,41 @@ public class AiChatServiceImpl implements AiChatService {
                     emitter.send(SseEmitter.event().data("[DONE]"));
                     emitter.complete();
                 } catch (Exception e) {
-                    emitter.completeWithError(e);
+                    emitter.complete();
                 }
             }
 
             @Override
             public void onError(Throwable error) {
-                log.error("流式推理异常: {}", error.getMessage(), error);
-                emitter.completeWithError(error);
+                if (done) return;
+                done = true;
+                if (isClientDisconnect(error)) {
+                    log.debug("客户端断开连接，流式推理终止");
+                } else {
+                    log.error("流式推理异常: {}", error.getMessage(), error);
+                    try {
+                        emitter.send(SseEmitter.event().name("error").data("[ERROR]"));
+                    } catch (Exception ignored) {
+                    }
+                }
+                emitter.complete();
             }
         }));
 
         return emitter;
+    }
+
+    private static boolean isClientDisconnect(Throwable t) {
+        if (t == null) return false;
+        if (t instanceof java.nio.channels.ClosedChannelException) return true;
+        if (t instanceof java.io.IOException) {
+            String msg = t.getMessage();
+            if (msg != null && (msg.contains("Broken pipe") || msg.contains("Connection reset")
+                    || msg.contains("远程主机强迫关闭") || msg.contains("connection was reset"))) {
+                return true;
+            }
+        }
+        return isClientDisconnect(t.getCause());
     }
 
     @Override
