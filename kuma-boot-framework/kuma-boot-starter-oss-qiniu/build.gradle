@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework oss-qiniu模块（七牛云 OSS，oss-common 的 StandardOssClient 实现）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // 七牛云 SDK
+    api projectLibs.qiniu
+
+    // hutool (http 用于下载分片)
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+    api projectLibs.hutool.http
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring web (MultipartFile)
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // spring cloud context (@RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+}

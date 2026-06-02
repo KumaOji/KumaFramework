@@ -22,3 +22,22 @@ spring:
           max-active: ${redis_jedis_pool_max_active}
           max-idle: ${redis_jedis_pool_max_idle}
           min-idle: ${redis_jedis_pool_min_idle}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# gRPC 客户端配置（blog → Python gRPC Server）
+# Proto 定义：src/main/proto/python_service.proto
+# 启用步骤：
+#   1. 取消下方注释，填写 Python gRPC Server 的实际地址与端口
+#   2. build.gradle 添加 com.google.protobuf 插件后执行 generateProto
+#   3. PythonServiceClient 中取消注释 stub 调用逻辑即可使用
+# ──────────────────────────────────────────────────────────────────────────────
+# kuma:
+#   boot:
+#     grpc:
+#       client:
+#         host: 127.0.0.1     # Python gRPC Server 地址
+#         port: 50051          # Python gRPC Server 端口（Python 默认惯例）
+#         use-plaintext: true  # 内网/本地无需 TLS
+#         enable-retry: true
+#         keep-alive-time: 1800000   # 30min (ms)
+#         keep-alive-timeout: 2000   # 2s (ms)

@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework openfeign声明式调用模块（OpenFeign + LoadBalancer + 请求头透传）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    api platform(projectLibs.spring.cloud.dependencies)
+    api 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    api 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    api 'org.springframework.cloud:spring-cloud-context'
+    api projectLibs.spring.boot.autoconfigure
+
+    // 请求头透传依赖 Servlet 上下文（RequestContextHolder），按需可选
+    compileOnly projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

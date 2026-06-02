@@ -64,25 +64,47 @@ for (name in oneLayerProjects) {
 //}
 
 
-def frameworkBootSubModules = ['common', 'core', 'ai', 'data-datasource',
-                               'data-mybatis', 'office', 'actuator',
-                               'mq-common', 'mq-kafka', 'ip2region',
-                               'data-common', 'springdoc', 'web',
-                               'cache-jetcache', 'cache-caffeine', 'cache-common',
-                               'cache-redis', 'security-common', 'security-spring',
-                               'ratelimit', 'idempotent', 'lock',
-                               'security-jstauth', 'totp', 'captcha',
-                               'dingtalk', 'sentinel', 'frp',
-                               'prometheus', 'grpc', 'encrypt',
-                               'openapi', 'oss-common', 'sms-common',
-                               'retry', 'monitor', 'seata']
+def frameworkBootSubModules = [
+        // 核心
+        'common', 'core',
+        // 数据层
+        'data-common', 'data-datasource', 'data-mybatis', 'data-p6spy', 'data-shardingsphere',
+        'data-elasticsearch', 'data-mongodb', 'data-jpa',
+        // 缓存
+        'cache-common', 'cache-caffeine', 'cache-jetcache', 'cache-redis',
+        // 安全
+        'security-common', 'security-spring', 'security-jstauth',
+        'captcha', 'encrypt', 'idempotent', 'lock', 'ratelimit', 'totp',
+        // 消息队列
+        'mq-common', 'mq-kafka',
+        // 任务调度
+        'job-common', 'job-xxl',
+        // Web
+        'web', 'webagg', 'websocket', 'xss',
+        // AI
+        'ai',
+        // 可观测性
+        'actuator', 'audit-log', 'elk', 'logger', 'metrics', 'prometheus', 'skywalking', 'tracer',
+        // 分布式
+        'client', 'grpc', 'seata', 'sentinel',
+        // 存储 & 通信
+        'mail', 'mqtt', 'oss-common', 'oss-minio', 'sms-common', 'sms-aliyun', 'sms-tencent',
+        // 配置 & 集成
+        'apollo', 'canal', 'dingtalk', 'frp',
+        // 业务能力
+        'ddd', 'eventbus', 'flowengine', 'idgenerator', 'ip2region',
+        'monitor', 'office', 'openapi', 'pinyin', 'retry',
+        'sensitive', 'springdoc', 'statemachine', 'test',
+        'threadpool', 'translation', 'useragent',
+]
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"
 }
 
 def frameworkCloudSubModules = ['bootstrap', 'seata', 'kmc',
                                 'sentinel', 'stream', 'alibaba',
-                                'cache', 'jdbcpool', 'netty', 'gateway']
+                                'cache', 'jdbcpool', 'netty', 'gateway',
+                                'openfeign', 'tracing', 'dubbo']
 //def frameworkCloudSubModules2 = ['tx', 'mq',
 //                                 'ccsr', 'job', 'rpc']
 for (name in frameworkCloudSubModules) {
@@ -165,36 +187,3 @@ gradle.settingsEvaluated {
 }
 
 
-include 'kuma-boot-framework:kuma-boot-starter-data-p6spy'
-include 'kuma-boot-framework:kuma-boot-starter-job-xxl'
-include 'kuma-boot-framework:kuma-boot-starter-job-common'
-include 'kuma-boot-framework:kuma-boot-starter-data-shardingsphere'
-
-include 'kuma-boot-framework:kuma-boot-starter-elk'
-include 'kuma-boot-framework:kuma-boot-starter-logger'
-include 'kuma-boot-framework:kuma-boot-starter-skywalking'
-include 'kuma-boot-framework:kuma-boot-starter-tracer'
-include 'kuma-boot-framework:kuma-boot-starter-test'
-include 'kuma-boot-framework:kuma-boot-starter-pinyin'
-include 'kuma-boot-framework:kuma-boot-starter-oss-minio'
-include 'kuma-boot-framework:kuma-boot-starter-flowengine'
-include 'kuma-boot-framework:kuma-boot-starter-apollo'
-include 'kuma-boot-framework:kuma-boot-starter-canal'
-include 'kuma-boot-framework:kuma-boot-starter-client'
-include 'kuma-boot-framework:kuma-boot-starter-data-elasticsearch'
-include 'kuma-boot-framework:kuma-boot-starter-data-mongodb'
-include 'kuma-boot-framework:kuma-boot-starter-eventbus'
-include 'kuma-boot-framework:kuma-boot-starter-idgenerator'
-include 'kuma-boot-framework:kuma-boot-starter-mail'
-include 'kuma-boot-framework:kuma-boot-starter-metrics'
-include 'kuma-boot-framework:kuma-boot-starter-mqtt'
-include 'kuma-boot-framework:kuma-boot-starter-sensitive'
-include 'kuma-boot-framework:kuma-boot-starter-statemachine'
-include 'kuma-boot-framework:kuma-boot-starter-threadpool'
-include 'kuma-boot-framework:kuma-boot-starter-translation'
-include 'kuma-boot-framework:kuma-boot-starter-useragent'
-include 'kuma-boot-framework:kuma-boot-starter-webagg'
-include 'kuma-boot-framework:kuma-boot-starter-websocket'
-include 'kuma-boot-framework:kuma-boot-starter-xss'
-include 'kuma-boot-framework:kuma-boot-starter-ddd'
-include 'kuma-boot-framework:kuma-boot-starter-data-jpa'

@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework sms-tencent模块（腾讯云短信，sms-common 的 SendHandler 实现）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-sms-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // 腾讯云短信 SDK（sms v20210111）
+    // 如需调整版本，使用 tencentcloud-sdk-java-sms 子包以减小体积
+    api 'com.tencentcloudapi:tencentcloud-sdk-java-sms:3.1.1451'
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring cloud context (@RefreshScope, optional)
+    compileOnly projectLibs.spring.cloud.context
+
+    // annotations
+    compileOnly projectLibs.jspecify
+}

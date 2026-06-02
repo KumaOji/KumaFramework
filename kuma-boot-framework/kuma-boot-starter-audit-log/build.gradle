@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 操作审计日志模块（谁在何时改了什么 —— 业务审计，非通用日志）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.aop
+    api projectLibs.spring.context
+    api projectLibs.spring.expression
+    api projectLibs.aspectjweaver
+    api projectLibs.fastjson2
+    api projectLibs.commons.lang3
+
+    compileOnly projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

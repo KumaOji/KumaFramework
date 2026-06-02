@@ -1,0 +1,69 @@
+// Blog → Python gRPC 接口定义
+//
+// 启用步骤：
+//   1. build.gradle 引入 protobuf 插件：
+//      plugins { id 'com.google.protobuf' version '0.9.4' }
+//      protobuf {
+//          protoc { artifact = "com.google.protobuf:protoc:3.25.1" }
+//          plugins { grpc { artifact = "io.grpc:protoc-gen-grpc-java:1.76.0" } }
+//          generateProtoTasks { all()*.plugins { grpc {} } }
+//      }
+//   2. 执行 ./gradlew generateProto 生成 Java stub
+//   3. PythonServiceClient 注入生成的 BlockingStub 后取消注释调用逻辑
+
+syntax = "proto3";
+
+package python;
+
+option java_package         = "com.kuma.cloud.blog.grpc.proto";
+option java_outer_classname = "PythonServiceProto";
+option java_multiple_files  = true;
+
+// ──────────────────────────────────────────────────────────────────────────────
+// AI 文本分析服务（文章关键词 / 摘要 / 情感倾向）
+// ──────────────────────────────────────────────────────────────────────────────
+service TextAnalysisService {
+    // 提取关键词
+    rpc ExtractKeywords    (TextRequest)      returns (KeywordsReply);
+    // 自动生成摘要
+    rpc SummarizeText      (TextRequest)      returns (SummaryReply);
+    // 情感分析
+    rpc AnalyzeSentiment   (TextRequest)      returns (SentimentReply);
+}
+
+message TextRequest {
+    string text     = 1;
+    string language = 2;  // 可选，默认 "zh"
+}
+
+message KeywordsReply {
+    repeated string keywords = 1;
+    repeated float  scores   = 2;
+}
+
+message SummaryReply {
+    string summary = 1;
+}
+
+message SentimentReply {
+    string label = 1;   // positive / negative / neutral
+    float  score = 2;   // 置信度 0~1
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// 文章推荐服务
+// ──────────────────────────────────────────────────────────────────────────────
+service RecommendService {
+    // 根据文章 ID 推荐相似文章
+    rpc RecommendByArticle (RecommendRequest)  returns (RecommendReply);
+}
+
+message RecommendRequest {
+    int64 article_id = 1;
+    int32 top_n      = 2;  // 推荐数量，默认 5
+}
+
+message RecommendReply {
+    repeated int64 article_ids = 1;
+    repeated float scores      = 2;
+}

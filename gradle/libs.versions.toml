@@ -180,6 +180,9 @@ commons-math3 = "3.6.1"
 lucene = "9.11.1"
 datafaker = "2.4.3"
 minio = "8.5.14"
+aliyun-oss = "3.18.1"
+tencent-cos = "5.6.245"
+qiniu = "7.15.0"
 commons-jexl3 = "3.3"
 janino = "3.1.12"
 joda-time = "2.13.1"
@@ -394,6 +397,7 @@ sentinel-spring-webmvc-v6x-adapter = { module = "com.alibaba.csp:sentinel-spring
 sentinel-cluster-server-default = { module = "com.alibaba.csp:sentinel-cluster-server-default", version.ref = "sentinel" }
 micrometer-tracing-api = { module = "io.micrometer:micrometer-tracing", version.ref = "micrometer-tracing" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer-tracing" }
+micrometer-tracing-bridge-otel = { module = "io.micrometer:micrometer-tracing-bridge-otel", version.ref = "micrometer-tracing" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 micrometer-registry-otlp = { module = "io.micrometer:micrometer-registry-otlp", version.ref = "micrometer" }
 micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
@@ -424,6 +428,9 @@ canal-client = { module = "com.alibaba.otter:canal.client", version.ref = "canal
 canal-protocol = { module = "com.alibaba.otter:canal.protocol", version.ref = "canal" }
 apollo-client = { module = "com.ctrip.framework.apollo:apollo-client", version.ref = "apollo-client" }
 minio = { module = "io.minio:minio", version.ref = "minio" }
+aliyun-oss = { module = "com.aliyun.oss:aliyun-sdk-oss", version.ref = "aliyun-oss" }
+tencent-cos = { module = "com.qcloud:cos_api", version.ref = "tencent-cos" }
+qiniu = { module = "com.qiniu:qiniu-java-sdk", version.ref = "qiniu" }
 commons-jexl3 = { module = "org.apache.commons:commons-jexl3", version.ref = "commons-jexl3" }
 janino = { module = "org.codehaus.janino:janino", version.ref = "janino" }
 commons-compiler = { module = "org.codehaus.janino:commons-compiler", version.ref = "janino" }
@@ -462,7 +469,8 @@ seata-spring-boot-starter = { module = "org.apache.seata:seata-spring-boot-start
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 commons-email = { module = "org.apache.commons:commons-email", version.ref = "commons-email" }
 dubbo-spring-boot-starter = { module = "org.apache.dubbo:dubbo-spring-boot-starter", version.ref = "dubbo" }
-xxl-job-core = { module = "com.xuxueli:xxl-job-core", version.ref = "xxl-job" }
+dubbo-spring-cloud-starter = { module = "org.apache.dubbo:dubbo-spring-cloud-starter", version.ref = "dubbo" }
+xxl-job-core ={ module = "com.xuxueli:xxl-job-core", version.ref = "xxl-job" }
 xxl-tool = { module = "com.xuxueli:xxl-tool", version.ref = "xxl-job" }
 pinyin4j = { module = "com.belerweb:pinyin4j", version.ref = "pinyin4j" }
 hdrhistogram = { module = "org.hdrhistogram:HdrHistogram", version.ref = "hdrhistogram" }
@@ -470,6 +478,7 @@ oshi-core    = { module = "com.github.oshi:oshi-core",        version.ref = "osh
 logback-gelf = { module = "de.siegmar:logback-gelf", version.ref = "logback-gelf" }
 loki-logback-appender = { module = "com.github.loki4j:loki-logback-appender", version.ref = "loki-logback-appender" }
 opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api", version.ref = "opentelemetry" }
+opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
 opentelemetry-logback-appender = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0", version.ref = "opentelemetry-logback" }
 opentelemetry-hikaricp = { module = "io.opentelemetry.instrumentation:opentelemetry-hikaricp-3.0", version.ref = "opentelemetry-logback" }
 logback-kafka-appender = { module = "com.github.rahulsinghai:logback-kafka-appender", version.ref = "logback-kafka-appender" }

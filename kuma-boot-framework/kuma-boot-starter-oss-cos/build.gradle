@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework oss-cos模块（腾讯云 COS，oss-common 的 StandardOssClient 实现）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // 腾讯云 COS SDK
+    api projectLibs.tencent.cos
+
+    // hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring web (MultipartFile)
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // spring cloud context (@RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+}

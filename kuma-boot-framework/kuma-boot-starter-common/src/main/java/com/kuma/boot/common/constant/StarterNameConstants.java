@@ -31,6 +31,8 @@ public final class StarterNameConstants {
 
     public static final String AI_STARTER = "kuma-boot-starter-ai";
 
+    public static final String AUDIT_LOG_STARTER = "kuma-boot-starter-audit-log";
+
     public static final String ACTUATOR_STARTER = "kuma-boot-starter-actuator";
 
     public static final String AGENT_STARTER = "kuma-boot-starter-agent";
@@ -284,6 +286,8 @@ public final class StarterNameConstants {
 
     public static final String OPENFEIGN_CLOUD_STARTER = "kuma-cloud-starter-openfeign";
 
+    public static final String DUBBO_CLOUD_STARTER = "kuma-cloud-starter-dubbo";
+
     public static final String GATEWAY_CLOUD_STARTER = "kuma-cloud-starter-gateway";
 
     public static final String SEATA_CLOUD_STARTER = "kuma-cloud-starter-seata";
@@ -291,6 +295,8 @@ public final class StarterNameConstants {
     public static final String SENTINEL_CLOUD_STARTER = "kuma-cloud-starter-sentinel";
 
     public static final String STREAM_CLOUD_STARTER = "kuma-cloud-starter-stream";
+
+    public static final String TRACING_CLOUD_STARTER = "kuma-cloud-starter-tracing";
 
     public static final String TENCENT_CLOUD_STARTER = "kuma-cloud-starter-tencent";
 

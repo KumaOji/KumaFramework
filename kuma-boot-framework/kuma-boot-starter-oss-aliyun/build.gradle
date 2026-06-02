@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework oss-aliyun模块（阿里云 OSS，oss-common 的 StandardOssClient 实现）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-oss-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // 阿里云 OSS SDK
+    api projectLibs.aliyun.oss
+
+    // hutool
+    api projectLibs.hutool.core
+    api projectLibs.hutool.extra
+
+    // spring boot
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring web (MultipartFile)
+    compileOnly projectLibs.spring.boot.starter.web
+
+    // spring cloud context (@RefreshScope)
+    compileOnly projectLibs.spring.cloud.context
+}

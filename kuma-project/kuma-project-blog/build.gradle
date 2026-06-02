@@ -28,6 +28,7 @@ dependencies {
     }
     api project(':kuma-boot-framework:kuma-boot-starter-frp')
     api project(':kuma-boot-framework:kuma-boot-starter-ai')
+    api project(':kuma-boot-framework:kuma-boot-starter-grpc')
 
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
