@@ -5,6 +5,7 @@ import com.kuma.cloud.blog.domain.entity.Article;
 import com.kuma.cloud.blog.domain.vo.CategoryArticleCountVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -22,4 +23,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
     int incrementCommentCount(@Param("id") Long id);
 
     List<CategoryArticleCountVO> selectCategoryArticleCounts();
+
+    /** 只查 status 字段，避免拉取 content 大字段 */
+    @Select("SELECT status FROM article WHERE id = #{id}")
+    Integer selectStatusById(@Param("id") Long id);
 }

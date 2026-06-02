@@ -16,6 +16,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RequiredArgsConstructor
@@ -50,7 +51,8 @@ public class ChatWebSocketController {
         history.setAvatar(userInfo.getAvatar());
         history.setContent(content);
         history.setMessageType("CHAT");
-        chatRoomService.saveHistory(history);
+        // Persist asynchronously — don't block the broadcast path
+        CompletableFuture.runAsync(() -> chatRoomService.saveHistory(history));
 
         ChatMessageVO msg = buildMessage("CHAT", roomId, userInfo, content);
         broadcast(roomId, msg);

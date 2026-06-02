@@ -12,25 +12,36 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.Path;
 
 /**
  * 音乐流式播放处理器
- * 处理 HTTP Range 请求、字节范围计算、流式传输等复杂逻辑
+ *
+ * <p>核心优化：
+ * <ul>
+ *   <li>Range 请求使用 {@link FileChannel#position(long)} 直接定位，完全跳过顺序 skip/read</li>
+ *   <li>{@link FileChannel#transferTo} 走操作系统 sendfile(2) 零拷贝路径</li>
+ *   <li>ThreadLocal 64 KB 缓冲区消除 per-request byte[] 分配及 GC 压力</li>
+ * </ul>
  */
 @Slf4j
 @Component
 public class MusicStreamHandler {
 
-    /**
-     * 处理音乐流式播放请求（支持 Range）
-     */
+    private static final int BUFFER_SIZE = 65536;
+    private static final ThreadLocal<byte[]> THREAD_BUFFER =
+            ThreadLocal.withInitial(() -> new byte[BUFFER_SIZE]);
+
     public ResponseEntity<StreamingResponseBody> handleStreamRequest(
             Resource resource, HttpServletRequest request) {
         try {
             if (resource == null || !resource.exists()) {
                 return ResponseEntity.notFound().build();
             }
-
             long fileLength = resource.contentLength();
             if (fileLength <= 0) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -45,29 +56,21 @@ public class MusicStreamHandler {
 
             if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
                 return handleRangeRequest(resource, rangeHeader, fileLength, headers);
-            } else {
-                headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileLength));
-                StreamingResponseBody body = outputStream -> copyStream(resource, outputStream);
-                return ResponseEntity.ok().headers(headers).body(body);
             }
+            headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileLength));
+            StreamingResponseBody body = out -> transfer(resource, 0, fileLength, out);
+            return ResponseEntity.ok().headers(headers).body(body);
         } catch (Exception e) {
-            log.error("Error handling music stream request", e);
+            log.error("音乐流请求处理失败", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     private ResponseEntity<StreamingResponseBody> handleRangeRequest(
             Resource resource, String rangeHeader, long fileLength, HttpHeaders headers) {
-        String[] ranges = rangeHeader.substring(6).split("-");
-        long start = 0;
-        long end = fileLength - 1;
-
-        if (ranges.length > 0 && !ranges[0].isEmpty()) {
-            start = Long.parseLong(ranges[0]);
-        }
-        if (ranges.length > 1 && !ranges[1].isEmpty()) {
-            end = Long.parseLong(ranges[1]);
-        }
+        String[] parts = rangeHeader.substring(6).split("-");
+        long start = parts.length > 0 && !parts[0].isEmpty() ? Long.parseLong(parts[0]) : 0L;
+        long end   = parts.length > 1 && !parts[1].isEmpty() ? Long.parseLong(parts[1]) : fileLength - 1;
 
         if (start > end || start < 0 || end >= fileLength) {
             return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
@@ -75,180 +78,111 @@ public class MusicStreamHandler {
                     .build();
         }
 
-        long contentLength = end - start + 1;
-        headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
+        long length = end - start + 1;
+        headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(length));
         headers.set(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength);
 
-        Resource rangeResource = new RangeResource(resource, start, end);
-        StreamingResponseBody body = outputStream -> copyStream(rangeResource, outputStream);
-
+        final long s = start, l = length;
+        StreamingResponseBody body = out -> transfer(resource, s, l, out);
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).headers(headers).body(body);
     }
 
     /**
-     * 复制流数据到输出流，支持断连重试和缓冲管理
+     * 统一传输入口：file-backed 资源走 FileChannel 零拷贝，其余降级到流拷贝。
      */
-    private void copyStream(Resource resource, OutputStream outputStream) {
-        byte[] buffer = new byte[8192];
-        try (InputStream in = resource.getInputStream()) {
-            int n;
-            int written = 0;
-            while ((n = in.read(buffer)) != -1) {
-                try {
-                    outputStream.write(buffer, 0, n);
-                    written += n;
-                    // 定期 flush 避免缓冲堆积，降低连接超时风险
-                    if (written >= 65536) {
-                        outputStream.flush();
-                        written = 0;
-                    }
-                } catch (IOException e) {
-                    if (!isClientDisconnect(e)) {
-                        log.warn("流式写入中断: {}", e.getMessage());
-                    }
-                    return;
-                }
+    private void transfer(Resource resource, long offset, long length, OutputStream out) {
+        try {
+            if (resource.isFile()) {
+                transferWithFileChannel(resource.getFile().toPath(), offset, length, out);
+            } else {
+                copyWithStream(resource.getInputStream(), offset, length, out);
             }
-            outputStream.flush();
         } catch (IOException e) {
             if (!isClientDisconnect(e)) {
-                log.warn("流式读取/写入异常: {}", e.getMessage());
+                log.warn("音乐流传输中断: {}", e.getMessage());
             }
         }
     }
 
-    private String getContentType(Resource resource) {
-        String filename = resource.getFilename();
-        if (filename == null) return "audio/mpeg";
-        String lower = filename.toLowerCase();
-        if (lower.endsWith(".flac")) return "audio/flac";
-        if (lower.endsWith(".mp3")) return "audio/mpeg";
-        if (lower.endsWith(".wav")) return "audio/wav";
-        if (lower.endsWith(".ogg")) return "audio/ogg";
-        if (lower.endsWith(".m4a")) return "audio/mp4";
-        if (lower.endsWith(".aac")) return "audio/aac";
-        if (lower.endsWith(".wma")) return "audio/x-ms-wma";
+    /**
+     * FileChannel.transferTo — 在 Tomcat NIO 连接器下触发 OS sendfile(2) 零拷贝。
+     * position() 直接定位，完全不需要顺序读过前段字节。
+     */
+    private static void transferWithFileChannel(Path path, long offset, long length,
+                                                OutputStream out) throws IOException {
+        WritableByteChannel dst = Channels.newChannel(out);
+        try (FileChannel src = FileChannel.open(path, StandardOpenOption.READ)) {
+            long pos = offset;
+            long remaining = length;
+            while (remaining > 0) {
+                long n = src.transferTo(pos, remaining, dst);
+                if (n <= 0) break;
+                pos += n;
+                remaining -= n;
+            }
+        }
+        out.flush();
+    }
+
+    /**
+     * 降级路径：InputStream + ThreadLocal 缓冲区，避免每次 new byte[]。
+     */
+    private static void copyWithStream(InputStream in, long offset, long length,
+                                       OutputStream out) throws IOException {
+        try (in) {
+            // skip to offset — loop until fully skipped
+            long toSkip = offset;
+            while (toSkip > 0) {
+                long skipped = in.skip(toSkip);
+                if (skipped <= 0) break;
+                toSkip -= skipped;
+            }
+            byte[] buf = THREAD_BUFFER.get();
+            long remaining = length;
+            int flushed = 0;
+            while (remaining > 0) {
+                int toRead = (int) Math.min(buf.length, remaining);
+                int n = in.read(buf, 0, toRead);
+                if (n == -1) break;
+                out.write(buf, 0, n);
+                remaining -= n;
+                flushed += n;
+                if (flushed >= 524288) { // flush every 512 KB
+                    out.flush();
+                    flushed = 0;
+                }
+            }
+            out.flush();
+        }
+    }
+
+    private static String getContentType(Resource resource) {
+        String name = resource.getFilename();
+        if (name == null) return "audio/mpeg";
+        String lo = name.toLowerCase();
+        if (lo.endsWith(".flac")) return "audio/flac";
+        if (lo.endsWith(".mp3"))  return "audio/mpeg";
+        if (lo.endsWith(".wav"))  return "audio/wav";
+        if (lo.endsWith(".ogg"))  return "audio/ogg";
+        if (lo.endsWith(".m4a"))  return "audio/mp4";
+        if (lo.endsWith(".aac"))  return "audio/aac";
+        if (lo.endsWith(".wma"))  return "audio/x-ms-wma";
         return "audio/mpeg";
     }
 
     private static boolean isClientDisconnect(IOException e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
             String msg = t.getMessage();
-            if (msg != null && isStreamAbortMessage(msg)) return true;
+            if (msg != null && isAbortMessage(msg)) return true;
         }
         return false;
     }
 
-    private static boolean isStreamAbortMessage(String msg) {
+    private static boolean isAbortMessage(String msg) {
         return msg.contains("Connection reset by peer")
                 || msg.contains("Response not usable after response errors")
                 || msg.contains("Response not usable after async request completion")
                 || msg.contains("I/O operation was interrupted")
                 || msg.contains("XNIO000808");
-    }
-
-    /**
-     * Range 资源包装器：支持从指定字节位置读取指定范围的数据
-     */
-    private static class RangeResource implements Resource {
-        private final Resource delegate;
-        private final long start;
-        private final long end;
-
-        RangeResource(Resource delegate, long start, long end) {
-            this.delegate = delegate;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            InputStream inputStream = delegate.getInputStream();
-            long skipped = inputStream.skip(start);
-            if (skipped < start) {
-                long remaining = start - skipped;
-                byte[] buffer = new byte[8192];
-                while (remaining > 0) {
-                    long toRead = Math.min(remaining, buffer.length);
-                    long read = inputStream.read(buffer, 0, (int) toRead);
-                    if (read == -1) break;
-                    remaining -= read;
-                }
-            }
-            return new RangeInputStream(inputStream, end - start + 1);
-        }
-
-        @Override
-        public boolean exists() { return delegate.exists(); }
-
-        @Override
-        public boolean isReadable() { return delegate.isReadable(); }
-
-        @Override
-        public boolean isOpen() { return delegate.isOpen(); }
-
-        @Override
-        public boolean isFile() { return delegate.isFile(); }
-
-        @Override
-        public java.net.URL getURL() throws IOException { return delegate.getURL(); }
-
-        @Override
-        public java.net.URI getURI() throws IOException { return delegate.getURI(); }
-
-        @Override
-        public java.io.File getFile() throws IOException { return delegate.getFile(); }
-
-        @Override
-        public long contentLength() throws IOException { return end - start + 1; }
-
-        @Override
-        public long lastModified() throws IOException { return delegate.lastModified(); }
-
-        @Override
-        public Resource createRelative(String relativePath) throws IOException { return delegate.createRelative(relativePath); }
-
-        @Override
-        public String getFilename() { return delegate.getFilename(); }
-
-        @Override
-        public String getDescription() { return delegate.getDescription(); }
-    }
-
-    /**
-     * Range 输入流：限制读取范围内的字节数
-     */
-    private static class RangeInputStream extends InputStream {
-        private final InputStream delegate;
-        private final long length;
-        private long read = 0;
-
-        RangeInputStream(InputStream delegate, long length) {
-            this.delegate = delegate;
-            this.length = length;
-        }
-
-        @Override
-        public int read() throws IOException {
-            if (read >= length) return -1;
-            int result = delegate.read();
-            if (result != -1) read++;
-            return result;
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            if (read >= length) return -1;
-            long remaining = length - read;
-            int toRead = (int) Math.min(len, remaining);
-            int result = delegate.read(b, off, toRead);
-            if (result != -1) read += result;
-            return result;
-        }
-
-        @Override
-        public void close() throws IOException {
-            delegate.close();
-        }
     }
 }

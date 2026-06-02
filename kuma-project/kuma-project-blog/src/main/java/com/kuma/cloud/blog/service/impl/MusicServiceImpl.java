@@ -11,6 +11,9 @@ import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
 import com.kuma.cloud.blog.mapper.MusicMapper;
 import com.kuma.cloud.blog.service.MusicService;
+import com.alicp.jetcache.anno.CacheType;
+import com.alicp.jetcache.anno.Cached;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -39,6 +42,13 @@ public class MusicServiceImpl implements MusicService {
 
     @Value("${blog.music.base-path:./music}")
     private String musicBasePath;
+
+    private Path resolvedBasePath;
+
+    @PostConstruct
+    void init() {
+        resolvedBasePath = Paths.get(musicBasePath).toAbsolutePath().normalize();
+    }
 
     @Override
     public Long createMusic(Music music) {
@@ -115,6 +125,7 @@ public class MusicServiceImpl implements MusicService {
         return musicMapper.incrementLikeCount(id) > 0;
     }
 
+    @Cached(name = "music:recommend:", cacheType = CacheType.LOCAL, expire = 300)
     @Override
     public List<MusicVO> getRecommendMusic(int limit) {
         QueryWrapper<Music> qw = new QueryWrapper<>();
@@ -122,6 +133,7 @@ public class MusicServiceImpl implements MusicService {
         return musicMapper.selectList(qw).stream().map(this::toVO).collect(Collectors.toList());
     }
 
+    @Cached(name = "music:hot:", cacheType = CacheType.LOCAL, expire = 300)
     @Override
     public List<MusicVO> getHotMusic(int limit) {
         QueryWrapper<Music> qw = new QueryWrapper<>();
@@ -129,6 +141,7 @@ public class MusicServiceImpl implements MusicService {
         return musicMapper.selectList(qw).stream().map(this::toVO).collect(Collectors.toList());
     }
 
+    @Cached(name = "music:file:", cacheType = CacheType.LOCAL, expire = 3600)
     @Override
     public Resource getMusicFile(Long id) {
         Music music = musicMapper.selectById(id);
@@ -137,10 +150,8 @@ public class MusicServiceImpl implements MusicService {
         }
 
         try {
-            // 用 normalize() 而非 toRealPath()，避免目录不存在时抛异常
-            Path basePath = Paths.get(musicBasePath).toAbsolutePath().normalize();
-
             String filePath = music.getFilePath();
+            Path basePath = resolvedBasePath;
             // 兼容数据库中存储的 Windows 绝对路径（如 E:\blog-resource\music\xxx.flac）
             // 在 Linux 环境下 isAbsolute() 为 false，会错误拼接成 /data/music/E:\...
             // 处理方式：提取文件名，在 basePath 下查找

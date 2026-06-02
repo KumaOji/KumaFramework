@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.service.impl;
 
+import com.alicp.jetcache.anno.CacheInvalidate;
+import com.alicp.jetcache.anno.CacheType;
+import com.alicp.jetcache.anno.Cached;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -38,6 +41,7 @@ public class MessageServiceImpl implements MessageService {
         return message.getId();
     }
 
+    @Cached(name = "message:approved", cacheType = CacheType.LOCAL, expire = 120)
     @Override
     public List<MessageVO> getApprovedList() {
         QueryWrapper<Message> qw = new QueryWrapper<>();
@@ -74,6 +78,7 @@ public class MessageServiceImpl implements MessageService {
         return page.convert(this::toVO);
     }
 
+    @CacheInvalidate(name = "message:approved")
     @Override
     public boolean approve(Long id) {
         Message msg = new Message();
@@ -83,6 +88,7 @@ public class MessageServiceImpl implements MessageService {
         return messageMapper.updateById(msg) > 0;
     }
 
+    @CacheInvalidate(name = "message:approved")
     @Override
     public boolean delete(Long id) {
         Message msg = new Message();

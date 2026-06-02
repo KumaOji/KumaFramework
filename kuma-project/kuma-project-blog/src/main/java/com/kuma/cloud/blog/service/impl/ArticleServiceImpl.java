@@ -9,12 +9,12 @@ import com.kuma.cloud.blog.domain.entity.Article;
 import com.kuma.cloud.blog.domain.entity.Category;
 import com.kuma.cloud.blog.domain.vo.*;
 import com.kuma.cloud.blog.mapper.ArticleMapper;
-import com.kuma.cloud.blog.mapper.CategoryMapper;
 import com.kuma.cloud.blog.service.ArticleService;
 import com.kuma.cloud.blog.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.cache.annotation.Cacheable;
+import com.alicp.jetcache.anno.CacheType;
+import com.alicp.jetcache.anno.Cached;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleMapper articleMapper;
     private final CategoryService categoryService;
-    private final CategoryMapper categoryMapper;
 
     @Override
     public Long createArticle(Article article) {
@@ -51,10 +50,12 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(rollbackFor = Exception.class)
     public boolean updateArticle(Article article) {
         article.setUpdateTime(LocalDateTime.now());
-        Article old = articleMapper.selectById(article.getId());
-        if (old != null && old.getStatus() != null && old.getStatus() == 0
-                && article.getStatus() != null && article.getStatus() == 1) {
-            article.setPublishTime(LocalDateTime.now());
+        if (article.getStatus() != null && article.getStatus() == 1) {
+            // Only fetch status field — avoid pulling the large content column
+            Integer oldStatus = articleMapper.selectStatusById(article.getId());
+            if (oldStatus != null && oldStatus == 0) {
+                article.setPublishTime(LocalDateTime.now());
+            }
         }
         return articleMapper.updateById(article) > 0;
     }
@@ -69,6 +70,7 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.deleteByIdPhysical(id) > 0;
     }
 
+    @Cached(name = "article:detail:", cacheType = CacheType.LOCAL, expire = 600)
     @Override
     public ArticleVO getArticleById(Long id) {
         Article article = articleMapper.selectById(id);
@@ -83,6 +85,8 @@ public class ArticleServiceImpl implements ArticleService {
         QueryWrapper<Article> qw = new QueryWrapper<>();
         if (queryVO == null) queryVO = new ArticleQueryVO();
         qw.ne("status", 2);
+        // Exclude content (TEXT/LONGTEXT) from list queries — callers set it null anyway
+        qw.select(Article.class, info -> !"content".equals(info.getColumn()));
 
         if (StringUtils.isNotEmpty(queryVO.getTitle())) {
             qw.like("title", queryVO.getTitle());
@@ -110,9 +114,8 @@ public class ArticleServiceImpl implements ArticleService {
         return page.convert(article -> {
             ArticleVO vo = new ArticleVO();
             BeanUtils.copyProperties(article, vo);
-            String content = article.getContent();
-            vo.setContentSize(content == null ? "0" : String.valueOf(content.length()));
-            vo.setContent(null);
+            // content was excluded at SQL level; size is stored separately in the column
+            vo.setContentSize("0");
             return vo;
         });
     }
@@ -156,25 +159,50 @@ public class ArticleServiceImpl implements ArticleService {
         return categoryService.getCategoryList();
     }
 
-    @Cacheable(cacheNames = "category", key = "'counts'")
+    @Cached(name = "category:counts", cacheType = CacheType.LOCAL, expire = 3600)
     @Override
     public List<CategoryArticleCountVO> getCategoryArticleCounts() {
-        List<CategoryArticleCountVO> dbList = articleMapper.selectCategoryArticleCounts();
-        Map<Long, Long> countMap = dbList.stream()
-                .collect(Collectors.toMap(CategoryArticleCountVO::getCategoryId, CategoryArticleCountVO::getCount, (a, b) -> a));
-        List<Category> allCategories = categoryMapper.selectList(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>());
+        // Direct counts from DB (only published articles)
+        Map<Long, Long> directCounts = articleMapper.selectCategoryArticleCounts().stream()
+                .collect(Collectors.toMap(CategoryArticleCountVO::getCategoryId, CategoryArticleCountVO::getCount));
+
+        // Category tree from cache — no extra DB query
         List<CategoryVO> categories = categoryService.getCategoryList();
-        List<CategoryArticleCountVO> result = new ArrayList<>();
+
+        // Build parent→children map: O(N)
+        Map<Long, List<Long>> childrenMap = new HashMap<>(categories.size() * 2);
         for (CategoryVO cat : categories) {
-            List<Long> ids = categoryService.getSelfAndDescendantIds(cat.getId(), allCategories);
-            long count = ids.stream().mapToLong(cid -> countMap.getOrDefault(cid, 0L)).sum();
+            if (cat.getParentId() != null) {
+                childrenMap.computeIfAbsent(cat.getParentId(), k -> new ArrayList<>()).add(cat.getId());
+            }
+        }
+
+        // Memoized DFS accumulation — each node computed exactly once: O(N) total
+        Map<Long, Long> memo = new HashMap<>(categories.size() * 2);
+        List<CategoryArticleCountVO> result = new ArrayList<>(categories.size());
+        for (CategoryVO cat : categories) {
             CategoryArticleCountVO vo = new CategoryArticleCountVO();
             vo.setCategoryId(cat.getId());
             vo.setCategoryName(cat.getName());
-            vo.setCount(count);
+            vo.setCount(accumulateCount(cat.getId(), directCounts, childrenMap, memo));
             result.add(vo);
         }
         result.sort((a, b) -> Long.compare(b.getCount(), a.getCount()));
         return result;
+    }
+
+    private long accumulateCount(Long id, Map<Long, Long> direct,
+                                 Map<Long, List<Long>> children, Map<Long, Long> memo) {
+        Long cached = memo.get(id);
+        if (cached != null) return cached;
+        long count = direct.getOrDefault(id, 0L);
+        List<Long> kids = children.get(id);
+        if (kids != null) {
+            for (Long kid : kids) {
+                count += accumulateCount(kid, direct, children, memo);
+            }
+        }
+        memo.put(id, count);
+        return count;
     }
 }

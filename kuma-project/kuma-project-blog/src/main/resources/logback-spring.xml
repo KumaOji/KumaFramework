@@ -11,7 +11,8 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- Sync rolling appenders — wrapped by async below -->
+    <appender name="FILE_SYNC" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
@@ -24,7 +25,7 @@
         </encoder>
     </appender>
 
-    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="ERROR_FILE_SYNC" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}-error.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
@@ -41,9 +42,23 @@
         </encoder>
     </appender>
 
+    <!-- Async wrappers: business threads hand off log events immediately -->
+    <appender name="FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>2048</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <appender-ref ref="FILE_SYNC"/>
+    </appender>
+
+    <appender name="ERROR_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <appender-ref ref="ERROR_FILE_SYNC"/>
+    </appender>
+
     <springProfile name="dev">
         <logger name="com.kuma.cloud.blog" level="DEBUG"/>
-        <!-- 降低 Tomcat 流式/异步相关 INFO 噪音 -->
         <logger name="org.apache.catalina.connector.CoyoteAdapter" level="WARN"/>
         <logger name="org.apache.tomcat.util.http.parser.Cookie" level="WARN"/>
     </springProfile>

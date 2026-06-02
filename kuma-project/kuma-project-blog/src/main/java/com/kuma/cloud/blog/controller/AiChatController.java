@@ -25,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Tag(name = "AI 对话")
 @RestController
@@ -101,39 +103,42 @@ public class AiChatController {
     @PostMapping(value = "/rag/ingest/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Authorize(BlogPermissions.AI_CHAT_INGEST)
     public Result<Map<String, Object>> ingestFiles(@RequestParam("files") List<MultipartFile> files) {
-        Map<String, Integer> detail = new LinkedHashMap<>();
-        int total = 0;
-        for (MultipartFile file : files) {
+        // Parallel ingest: Tika parse + vectorize are CPU+network bound — overlap them
+        Map<String, Integer> detail = new ConcurrentHashMap<>();
+        List<CompletableFuture<Void>> futures = files.stream().map(file -> {
             String name = file.getOriginalFilename();
-            try {
-                String markdown = new String(file.getBytes(), StandardCharsets.UTF_8);
-                int count = aiRagService.ingestMarkdown(name, markdown);
-                detail.put(name, count);
-                total += count;
-            } catch (IOException e) {
-                detail.put(name, -1);
-            }
-        }
-        return Result.success(Map.of("totalSegments", total, "files", detail));
+            return CompletableFuture.runAsync(() -> {
+                try {
+                    String markdown = new String(file.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    detail.put(name, aiRagService.ingestMarkdown(name, markdown));
+                } catch (Exception e) {
+                    detail.put(name, -1);
+                }
+            });
+        }).toList();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        int total = detail.values().stream().filter(v -> v > 0).mapToInt(Integer::intValue).sum();
+        return Result.success(Map.of("totalSegments", total, "files", new LinkedHashMap<>(detail)));
     }
 
     @Operation(summary = "批量上传任意文档到知识库（PDF/Word/PPT/Excel/HTML，经 Tika 解析）")
     @PostMapping(value = "/rag/ingest/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Authorize(BlogPermissions.AI_CHAT_INGEST)
     public Result<Map<String, Object>> ingestDocuments(@RequestParam("files") List<MultipartFile> files) {
-        Map<String, Integer> detail = new LinkedHashMap<>();
-        int total = 0;
-        for (MultipartFile file : files) {
+        Map<String, Integer> detail = new ConcurrentHashMap<>();
+        List<CompletableFuture<Void>> futures = files.stream().map(file -> {
             String name = file.getOriginalFilename();
-            try {
-                int count = aiRagService.ingestFile(name, file.getInputStream());
-                detail.put(name, count);
-                total += count;
-            } catch (Exception e) {
-                detail.put(name, -1);
-            }
-        }
-        return Result.success(Map.of("totalSegments", total, "files", detail));
+            return CompletableFuture.runAsync(() -> {
+                try (var stream = file.getInputStream()) {
+                    detail.put(name, aiRagService.ingestFile(name, stream));
+                } catch (Exception e) {
+                    detail.put(name, -1);
+                }
+            });
+        }).toList();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        int total = detail.values().stream().filter(v -> v > 0).mapToInt(Integer::intValue).sum();
+        return Result.success(Map.of("totalSegments", total, "files", new LinkedHashMap<>(detail)));
     }
 
     @Operation(summary = "RAG 增强对话")

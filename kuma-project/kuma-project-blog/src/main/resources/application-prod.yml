@@ -2,6 +2,12 @@ server:
   port: 9000
   servlet:
     context-path: /api
+  tomcat:
+    threads:
+      max: 400
+      min-spare: 20
+    accept-count: 200
+    connection-timeout: 20000
 
 spring:
   mvc:
@@ -21,9 +27,11 @@ spring:
       datasource:
         mysql:
           hikari:
-            minimum-idle: 1
-            maximum-pool-size: 10
+            minimum-idle: 5
+            maximum-pool-size: 30
             connection-timeout: 10000
+            idle-timeout: 600000
+            max-lifetime: 1800000
 
 logging:
   config: classpath:logback-spring.xml
@@ -61,11 +69,12 @@ blog:
     base-path: /data/music
 
 jetcache:
+  stat-interval-minutes: 15
   local:
     default:
       type: linkedhashmap
       keyConvertor: fastjson2
-      limit: 100
+      limit: 2000
 
 kuma:
   boot:
@@ -101,8 +110,8 @@ kuma:
       enabled: true
       async:
         enabled: true
-        core-pool-size: 5
-        max-pool-size: 20
+        core-pool-size: 10
+        max-pool-size: 50
         thread-name-prefix: blog-async
     web:
       graceful-response:

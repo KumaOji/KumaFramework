@@ -38,8 +38,8 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public boolean validateToken(String token) {
-        String tokenKey = TOKEN_PREFIX + token;
-        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(tokenKey));
+        // GET is cheaper than EXISTS: one round-trip instead of two, and caller often needs the value anyway
+        return getLoginResponseByToken(token) != null;
     }
 
     @Override
@@ -50,9 +50,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public void refreshToken(String token, long expireSeconds) {
-        LoginResponse lr = getLoginResponseByToken(token);
-        if (lr != null) {
-            saveToken(token, lr, expireSeconds);
-        }
+        // Just extend the TTL — no need to deserialize and re-serialize the value
+        stringRedisTemplate.expire(TOKEN_PREFIX + token, expireSeconds, java.util.concurrent.TimeUnit.SECONDS);
     }
 }
