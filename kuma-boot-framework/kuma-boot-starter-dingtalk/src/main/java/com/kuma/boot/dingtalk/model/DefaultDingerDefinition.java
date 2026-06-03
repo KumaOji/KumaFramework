@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.model;
 
 import com.kuma.boot.dingtalk.entity.MsgType;
@@ -8,8 +21,15 @@ import com.kuma.boot.dingtalk.enums.DingerType;
 import com.kuma.boot.dingtalk.enums.MessageMainType;
 import com.kuma.boot.dingtalk.enums.MessageSubType;
 
-public class DefaultDingerDefinition
-implements DingerDefinition {
+/**
+ * DefaultDingerDefinition
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:22:24
+ */
+public class DefaultDingerDefinition implements DingerDefinition {
+
     private String dingerName;
     private Class<? extends DingerDefinitionGenerator> dingerDefinitionGenerator;
     private MsgType message;
@@ -17,12 +37,14 @@ implements DingerDefinition {
     private DingerType dingerType;
     private MessageMainType messageMainType;
     private MessageSubType messageSubType;
+    /** dinger方法的参数信息 */
     private String[] methodParams;
+    /** dinger方法的泛型信息 */
     private int[] genericIndex;
 
     @Override
     public String dingerName() {
-        return this.dingerName;
+        return dingerName;
     }
 
     @Override
@@ -32,7 +54,7 @@ implements DingerDefinition {
 
     @Override
     public Class<? extends DingerDefinitionGenerator> dingerDefinitionGenerator() {
-        return this.dingerDefinitionGenerator;
+        return dingerDefinitionGenerator;
     }
 
     @Override
@@ -42,7 +64,7 @@ implements DingerDefinition {
 
     @Override
     public MsgType message() {
-        return this.message;
+        return message;
     }
 
     @Override
@@ -52,7 +74,7 @@ implements DingerDefinition {
 
     @Override
     public DingerConfig dingerConfig() {
-        return this.dingerConfig;
+        return dingerConfig;
     }
 
     @Override
@@ -62,7 +84,7 @@ implements DingerDefinition {
 
     @Override
     public DingerType dingerType() {
-        return this.dingerType;
+        return dingerType;
     }
 
     @Override
@@ -72,7 +94,7 @@ implements DingerDefinition {
 
     @Override
     public MessageMainType messageMainType() {
-        return this.messageMainType;
+        return messageMainType;
     }
 
     @Override
@@ -82,7 +104,7 @@ implements DingerDefinition {
 
     @Override
     public MessageSubType messageSubType() {
-        return this.messageSubType;
+        return messageSubType;
     }
 
     @Override
@@ -92,7 +114,7 @@ implements DingerDefinition {
 
     @Override
     public String[] methodParams() {
-        return this.methodParams;
+        return methodParams;
     }
 
     @Override
@@ -106,7 +128,7 @@ implements DingerDefinition {
 
     @Override
     public int[] genericIndex() {
-        return this.genericIndex;
+        return genericIndex;
     }
 
     @Override
@@ -118,4 +140,3 @@ implements DingerDefinition {
         this.genericIndex = genericIndex;
     }
 }
-

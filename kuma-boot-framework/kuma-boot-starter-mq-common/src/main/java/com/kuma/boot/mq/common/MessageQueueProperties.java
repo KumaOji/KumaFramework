@@ -1,14 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- */
 package com.kuma.boot.mq.common;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="kuma.boot.mq")
+@ConfigurationProperties(prefix = "kuma.boot.mq")
 public class MessageQueueProperties {
     public static final String PREFIX = "kuma.boot.mq";
     public static final String ENABLED = "kuma.boot.mq.enabled";
@@ -31,4 +25,3 @@ public class MessageQueueProperties {
         this.type = type;
     }
 }
-

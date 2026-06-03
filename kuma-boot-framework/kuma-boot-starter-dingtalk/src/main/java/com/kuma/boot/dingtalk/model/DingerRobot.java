@@ -1,14 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.BeanUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.model;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.dingtalk.autoconfigure.properties.DingtalkProperties;
 import com.kuma.boot.dingtalk.entity.DingerRequest;
 import com.kuma.boot.dingtalk.entity.DingerResponse;
 import com.kuma.boot.dingtalk.entity.MsgType;
@@ -18,22 +26,31 @@ import com.kuma.boot.dingtalk.enums.MediaTypeEnum;
 import com.kuma.boot.dingtalk.enums.MessageSubType;
 import com.kuma.boot.dingtalk.exception.AsyncCallException;
 import com.kuma.boot.dingtalk.exception.SendMsgException;
+import com.kuma.boot.dingtalk.autoconfigure.properties.DingtalkProperties;
 import com.kuma.boot.dingtalk.support.CustomMessage;
 import com.kuma.boot.dingtalk.support.SignBase;
 import com.kuma.boot.dingtalk.utils.DingerUtils;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.beans.BeanUtils;
 
-public class DingerRobot
-extends AbstractDingerSender {
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * DingTalk Robot
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:23:19
+ */
+public class DingerRobot extends AbstractDingerSender {
+
     public DingerRobot(DingtalkProperties dingtalkProperties, DingerManagerBuilder dingTalkManagerBuilder) {
         super(dingtalkProperties, dingTalkManagerBuilder);
     }
 
     @Override
     public DingerResponse send(MessageSubType messageSubType, DingerRequest request) {
-        return this.send(this.dingtalkProperties.getDefaultDinger(), messageSubType, request);
+        return send(dingtalkProperties.getDefaultDinger(), messageSubType, request);
     }
 
     @Override
@@ -41,62 +58,80 @@ extends AbstractDingerSender {
         if (!messageSubType.isSupport()) {
             return DingerResponse.failed(DingerResponseCodeEnum.MESSAGE_TYPE_UNSUPPORTED);
         }
-        CustomMessage customMessage = this.customMessage(messageSubType);
-        String msgContent = customMessage.message(this.dingtalkProperties.getProjectId(), request);
+        CustomMessage customMessage = customMessage(messageSubType);
+        String msgContent = customMessage.message(dingtalkProperties.getProjectId(), request);
         request.setContent(msgContent);
+
         MsgType msgType = messageSubType.msgType(dingerType, request);
-        return this.send(msgType);
+
+        return send(msgType);
     }
 
+    /**
+     * @param message 消息内容
+     * @param <T> T
+     * @return 响应内容 {@link DingerResponse}
+     */
     protected <T extends MsgType> DingerResponse send(T message) {
         DingerType dingerType = message.getDingerType();
-        String dkid = this.dingTalkManagerBuilder.getDingerIdGenerator().dingerId();
-        Map<DingerType, DingtalkProperties.Dinger> dingers = this.dingtalkProperties.getDingers();
-        if (!this.dingtalkProperties.getEnabled() || !dingers.containsKey((Object)dingerType)) {
+        String dkid = dingTalkManagerBuilder.getDingerIdGenerator().dingerId();
+        Map<DingerType, DingtalkProperties.Dinger> dingers = dingtalkProperties.getDingers();
+        if (!(dingtalkProperties.getEnabled() && dingers.containsKey(dingerType))) {
             return DingerResponse.failed(dkid, DingerResponseCodeEnum.DINGER_DISABLED);
         }
-        DingerConfig localDinger = DingerRobot.getLocalDinger();
+
+        DingerConfig localDinger = getLocalDinger();
+        // dinger is null? use global configuration and check whether dinger send
         boolean dingerConfig = localDinger != null;
         try {
             DingtalkProperties.Dinger dinger;
             if (dingerConfig) {
                 dinger = new DingtalkProperties.Dinger();
-                BeanUtils.copyProperties((Object)localDinger, (Object)dinger);
+                BeanUtils.copyProperties(localDinger, dinger);
                 dinger.setAsync(localDinger.getAsyncExecute());
-                dinger.setRobotUrl(dingers.get((Object)dingerType).getRobotUrl());
+                dinger.setRobotUrl(dingers.get(dingerType).getRobotUrl());
             } else {
-                dinger = dingers.get((Object)dingerType);
+                dinger = dingers.get(dingerType);
             }
+
             StringBuilder webhook = new StringBuilder();
             webhook.append(dinger.getRobotUrl()).append("=").append(dinger.getTokenId());
-            LogUtils.info((String)"dingerId={} send message and use dinger={}, tokenId={}.", (Object[])new Object[]{dkid, dingerType, dinger.getTokenId()});
-            if (dingerType == DingerType.DINGTALK && DingerUtils.isNotEmpty(dinger.getSecret())) {
-                Object sign = this.dingTalkManagerBuilder.getDingerSignAlgorithm().sign(dinger.getSecret().trim());
-                webhook.append(((SignBase)sign).transfer());
+
+            LogUtils.info(
+                    "dingerId={} send message and use dinger={}, tokenId={}.", dkid, dingerType, dinger.getTokenId());
+
+            // 处理签名问题(只支持DingTalk)
+            if (dingerType == DingerType.DINGTALK && DingerUtils.isNotEmpty((dinger.getSecret()))) {
+                SignBase sign = dingTalkManagerBuilder
+                        .getDingerSignAlgorithm()
+                        .sign(dinger.getSecret().trim());
+                webhook.append(sign.transfer());
             }
-            HashMap<String, String> headers = new HashMap<String, String>();
+
+            Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", MediaTypeEnum.JSON.type());
+
+            // 异步处理, 直接返回标识id
             if (dinger.isAsync()) {
-                this.dingTalkManagerBuilder.getDingTalkExecutor().execute(() -> {
+                dingTalkManagerBuilder.getDingTalkExecutor().execute(() -> {
                     try {
-                        String result = this.dingTalkManagerBuilder.getDingerHttpClient().post(webhook.toString(), (Map<String, String>)headers, message);
-                        this.dingTalkManagerBuilder.getDingerAsyncCallback().execute(dkid, result);
-                    }
-                    catch (Exception e) {
-                        this.exceptionCallback(dkid, message, new AsyncCallException(e));
+                        String result =
+                                dingTalkManagerBuilder.getDingerHttpClient().post(webhook.toString(), headers, message);
+                        dingTalkManagerBuilder.getDingerAsyncCallback().execute(dkid, result);
+                    } catch (Exception e) {
+                        exceptionCallback(dkid, message, new AsyncCallException(e));
                     }
                 });
                 return DingerResponse.success(dkid, dkid);
             }
-            String response = this.dingTalkManagerBuilder.getDingerHttpClient().post(webhook.toString(), headers, message);
-            LogUtils.info((String)response, (Object[])new Object[0]);
+
+            String response = dingTalkManagerBuilder.getDingerHttpClient().post(webhook.toString(), headers, message);
+            LogUtils.info(response);
             return DingerResponse.success(dkid, response);
-        }
-        catch (Exception e) {
-            LogUtils.error((Throwable)e);
-            this.exceptionCallback(dkid, message, new SendMsgException(e));
+        } catch (Exception e) {
+            LogUtils.error(e);
+            exceptionCallback(dkid, message, new SendMsgException(e));
             return DingerResponse.failed(dkid, DingerResponseCodeEnum.SEND_MESSAGE_FAILED);
         }
     }
 }
-

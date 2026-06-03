@@ -1,37 +1,64 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.enums.DingTalkMsgType;
+
 import java.io.Serializable;
 
-public class DingSingleActionCard
-extends DingTalkMessage {
+/**
+ * 整体跳转ActionCard类型
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:46
+ */
+public class DingSingleActionCard extends DingTalkMessage {
+
+    /** {@link SingleActionCard} */
     private SingleActionCard actionCard;
 
     public DingSingleActionCard() {
-        this.setMsgtype(DingTalkMsgType.ACTION_CARD.type());
+        setMsgtype(DingTalkMsgType.ACTION_CARD.type());
     }
 
     public SingleActionCard getActionCard() {
-        return this.actionCard;
+        return actionCard;
     }
 
     public void setActionCard(SingleActionCard actionCard) {
         this.actionCard = actionCard;
     }
 
-    public static class SingleActionCard
-    implements Serializable {
+    public static class SingleActionCard implements Serializable {
+
+        /** 首屏会话透出的展示内容 */
         private String title;
+        /** markdown格式的消息 */
         private String text;
+        /** 0-按钮竖直排列，1-按钮横向排列 */
         private String btnOrientation;
+        /** 单个按钮的标题。(设置此项和singleURL后btns无效) */
         private String singleTitle;
+        /** 点击singleTitle按钮触发的URL */
         private String singleURL;
 
         public String getTitle() {
-            return this.title;
+            return title;
         }
 
         public void setTitle(String title) {
@@ -39,7 +66,7 @@ extends DingTalkMessage {
         }
 
         public String getText() {
-            return this.text;
+            return text;
         }
 
         public void setText(String text) {
@@ -47,7 +74,7 @@ extends DingTalkMessage {
         }
 
         public String getBtnOrientation() {
-            return this.btnOrientation;
+            return btnOrientation;
         }
 
         public void setBtnOrientation(String btnOrientation) {
@@ -55,7 +82,7 @@ extends DingTalkMessage {
         }
 
         public String getSingleTitle() {
-            return this.singleTitle;
+            return singleTitle;
         }
 
         public void setSingleTitle(String singleTitle) {
@@ -63,7 +90,7 @@ extends DingTalkMessage {
         }
 
         public String getSingleURL() {
-            return this.singleURL;
+            return singleURL;
         }
 
         public void setSingleURL(String singleURL) {
@@ -71,4 +98,3 @@ extends DingTalkMessage {
         }
     }
 }
-

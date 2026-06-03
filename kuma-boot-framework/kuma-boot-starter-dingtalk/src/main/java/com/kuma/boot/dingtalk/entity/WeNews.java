@@ -1,21 +1,42 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.enums.WeTalkMsgType;
+
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class WeNews
-extends WeTalkMessage {
+/**
+ * 企业微信-消息类型-图文类型
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:20:26
+ */
+public class WeNews extends WeTalkMessage {
+
     private static final int ARTICLE_LIMIT = 8;
+    /** 图文类型 */
     private News news;
 
     public WeNews() {
-        this.setMsgtype(WeTalkMsgType.NEWS.type());
+        setMsgtype(WeTalkMsgType.NEWS.type());
     }
 
     public WeNews(List<News.Article> articles) {
@@ -24,56 +45,44 @@ extends WeTalkMessage {
     }
 
     public News getNews() {
-        return this.news;
+        return news;
     }
 
     public void setNews(News news) {
         this.news = news;
     }
 
-    @Override
-    public void transfer(Map<String, Object> params) {
-        Map.Entry<String, Object> entry;
-        Object value;
-        Iterator<Map.Entry<String, Object>> iterator = params.entrySet().iterator();
-        if (iterator.hasNext() && (value = (entry = iterator.next()).getValue()) instanceof List) {
-            List<?> imageTexts = (List<?>) value;
-            int size = Math.min(imageTexts.size(), 8);
-            for (int i = 0; i < size; i++) {
-                ImageTextDeo imageText = (ImageTextDeo) imageTexts.get(i);
-                this.news.articles.add(new News.Article(imageText.getTitle(), imageText.getDescription(), imageText.getUrl(), imageText.getPicUrl()));
-            }
-        }
-    }
+    public static class News implements Serializable {
 
-    public static class News
-    implements Serializable {
+        /** 图文消息，一个图文消息支持1到8条图文 */
         private List<Article> articles;
 
-        public News() {
-        }
+        public News() {}
 
         public News(List<Article> articles) {
             this.articles = articles;
         }
 
         public List<Article> getArticles() {
-            return this.articles;
+            return articles;
         }
 
         public void setArticles(List<Article> articles) {
             this.articles = articles;
         }
 
-        public static class Article
-        implements Serializable {
+        public static class Article implements Serializable {
+
+            /** 标题，不超过128个字节，超过会自动截断 */
             private String title;
+            /** 描述，不超过512个字节，超过会自动截断 */
             private String description;
+            /** 点击后跳转的链接。 */
             private String url;
+            /** 图文消息的图片链接，支持JPG、PNG格式，较好的效果为大图 1068*455，小图150*150。 */
             private String picurl;
 
-            public Article() {
-            }
+            public Article() {}
 
             public Article(String title, String description, String url, String picurl) {
                 this.title = title;
@@ -83,7 +92,7 @@ extends WeTalkMessage {
             }
 
             public String getTitle() {
-                return this.title;
+                return title;
             }
 
             public void setTitle(String title) {
@@ -91,7 +100,7 @@ extends WeTalkMessage {
             }
 
             public String getDescription() {
-                return this.description;
+                return description;
             }
 
             public void setDescription(String description) {
@@ -99,7 +108,7 @@ extends WeTalkMessage {
             }
 
             public String getUrl() {
-                return this.url;
+                return url;
             }
 
             public void setUrl(String url) {
@@ -107,7 +116,7 @@ extends WeTalkMessage {
             }
 
             public String getPicurl() {
-                return this.picurl;
+                return picurl;
             }
 
             public void setPicurl(String picurl) {
@@ -115,5 +124,26 @@ extends WeTalkMessage {
             }
         }
     }
-}
 
+    @Override
+    public void transfer(Map<String, Object> params) {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof List) {
+				@SuppressWarnings("unchecked")
+                List<ImageTextDeo> imageTexts = (List<ImageTextDeo>) value;
+                int size = imageTexts.size();
+                size = Math.min(size, ARTICLE_LIMIT);
+                for (int i = 0; i < size; i++) {}
+                for (ImageTextDeo imageText : imageTexts) {
+                    this.news.articles.add(new News.Article(
+                            imageText.getTitle(),
+                            imageText.getDescription(),
+                            imageText.getUrl(),
+                            imageText.getPicUrl()));
+                }
+            }
+            break;
+        }
+    }
+}

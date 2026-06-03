@@ -1,38 +1,57 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class Message
-extends DingTalkMessage
-implements Serializable {
+/**
+ * 请求体实体对象
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:20:03
+ */
+public class Message extends DingTalkMessage implements Serializable {
+
     private At at;
 
-    public Message() {
-    }
+    public Message() {}
 
     public Message(At at) {
         this.at = at;
     }
 
     public At getAt() {
-        return this.at;
+        return at;
     }
 
     public void setAt(At at) {
         this.at = at;
     }
 
-    public static class At
-    implements Serializable {
+    public static class At implements Serializable {
+
+        /** 被@人的手机号(在content里添加@人的手机号) */
         private List<String> atMobiles;
+        /** `@所有人`时：true，否则为：false */
         private Boolean isAtAll = false;
 
-        public At() {
-        }
+        public At() {}
 
         public At(List<String> atMobiles) {
             this.atMobiles = atMobiles;
@@ -48,7 +67,7 @@ implements Serializable {
         }
 
         public List<String> getAtMobiles() {
-            return this.atMobiles;
+            return atMobiles;
         }
 
         public void setAtMobiles(List<String> atMobiles) {
@@ -56,12 +75,11 @@ implements Serializable {
         }
 
         public Boolean getIsAtAll() {
-            return this.isAtAll;
+            return isAtAll;
         }
 
         public void setIsAtAll(Boolean atAll) {
-            this.isAtAll = atAll;
+            isAtAll = atAll;
         }
     }
 }
-

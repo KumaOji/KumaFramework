@@ -1,17 +1,40 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.exception.DingerException;
 
+/**
+ * 异常回调信息实体
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:24
+ */
 public class DingerCallback<T> {
+
+    /** 处理唯一id */
     private String dkid;
+    /** 通知信息 */
     private T message;
+    /** 异常对象 */
     private DingerException ex;
 
-    public DingerCallback() {
-    }
+    public DingerCallback() {}
 
     public DingerCallback(String dkid, T message, DingerException ex) {
         this.dkid = dkid;
@@ -20,7 +43,7 @@ public class DingerCallback<T> {
     }
 
     public String getDkid() {
-        return this.dkid;
+        return dkid;
     }
 
     public void setDkid(String dkid) {
@@ -28,7 +51,7 @@ public class DingerCallback<T> {
     }
 
     public T getMessage() {
-        return this.message;
+        return message;
     }
 
     public void setMessage(T message) {
@@ -36,11 +59,10 @@ public class DingerCallback<T> {
     }
 
     public DingerException getEx() {
-        return this.ex;
+        return ex;
     }
 
     public void setEx(DingerException ex) {
         this.ex = ex;
     }
 }
-

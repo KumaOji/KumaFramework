@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.mq.common;
 
 public class Message {
@@ -68,4 +65,3 @@ public class Message {
         this.delayTimeLevel = delayTimeLevel;
     }
 }
-

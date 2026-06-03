@@ -1,15 +1,36 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.support;
 
-public class SignResult
-extends SignBase {
+/**
+ * 签名返回体
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:26:14
+ */
+public class SignResult extends SignBase {
+
+    /** 秘钥 */
     private String sign;
+    /** 时间戳 */
     private Long timestamp;
 
-    public SignResult() {
-    }
+    public SignResult() {}
 
     public SignResult(String sign, Long timestamp) {
         this.sign = sign;
@@ -17,7 +38,7 @@ extends SignBase {
     }
 
     public String getSign() {
-        return this.sign;
+        return sign;
     }
 
     public void setSign(String sign) {
@@ -25,7 +46,7 @@ extends SignBase {
     }
 
     public Long getTimestamp() {
-        return this.timestamp;
+        return timestamp;
     }
 
     public void setTimestamp(Long timestamp) {
@@ -34,9 +55,12 @@ extends SignBase {
 
     @Override
     public String transfer() {
-        StringBuilder signStr = new StringBuilder("&");
-        signStr.append("sign=").append(this.sign).append("&").append("timestamp=").append(this.timestamp);
+        StringBuilder signStr = new StringBuilder(SEPERATOR);
+        signStr.append("sign=")
+                .append(this.sign)
+                .append(SEPERATOR)
+                .append("timestamp=")
+                .append(this.timestamp);
         return signStr.toString();
     }
 }
-

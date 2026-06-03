@@ -1,19 +1,41 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.enums.DingTalkMsgType;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class DingFeedCard
-extends DingTalkMessage {
+/**
+ * FeedCard类型
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:38
+ */
+public class DingFeedCard extends DingTalkMessage {
+
+    /** {@link FeedCard} */
     private FeedCard feedCard;
 
     public DingFeedCard() {
-        this.setMsgtype(DingTalkMsgType.FEED_CARD.type());
+        setMsgtype(DingTalkMsgType.FEED_CARD.type());
     }
 
     public DingFeedCard(List<FeedCard.Link> links) {
@@ -22,53 +44,42 @@ extends DingTalkMessage {
     }
 
     public FeedCard getFeedCard() {
-        return this.feedCard;
+        return feedCard;
     }
 
     public void setFeedCard(FeedCard feedCard) {
         this.feedCard = feedCard;
     }
 
-    @Override
-    public void transfer(Map<String, Object> params) {
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            Object value = entry.getValue();
-            if (!(value instanceof List)) continue;
-            List<?> imageTexts = (List<?>) value;
-            for (Object item : imageTexts) {
-                ImageTextDeo imageText = (ImageTextDeo) item;
-                this.feedCard.links.add(new FeedCard.Link(imageText.getTitle(), imageText.getUrl(), imageText.getPicUrl()));
-            }
-        }
-    }
+    public static class FeedCard implements Serializable {
 
-    public static class FeedCard
-    implements Serializable {
+        /** {@link Link} */
         private List<Link> links;
 
-        public FeedCard() {
-        }
+        public FeedCard() {}
 
         public FeedCard(List<Link> links) {
             this.links = links;
         }
 
         public List<Link> getLinks() {
-            return this.links;
+            return links;
         }
 
         public void setLinks(List<Link> links) {
             this.links = links;
         }
 
-        public static class Link
-        implements Serializable {
+        public static class Link implements Serializable {
+
+            /** 单条信息文本 */
             private String title;
+            /** 点击单条信息到跳转链接 */
             private String messageURL;
+            /** 单条信息后面图片的URL */
             private String picURL;
 
-            public Link() {
-            }
+            public Link() {}
 
             public Link(String title, String messageURL, String picURL) {
                 this.title = title;
@@ -77,7 +88,7 @@ extends DingTalkMessage {
             }
 
             public String getTitle() {
-                return this.title;
+                return title;
             }
 
             public void setTitle(String title) {
@@ -85,7 +96,7 @@ extends DingTalkMessage {
             }
 
             public String getMessageURL() {
-                return this.messageURL;
+                return messageURL;
             }
 
             public void setMessageURL(String messageURL) {
@@ -93,7 +104,7 @@ extends DingTalkMessage {
             }
 
             public String getPicURL() {
-                return this.picURL;
+                return picURL;
             }
 
             public void setPicURL(String picURL) {
@@ -101,5 +112,20 @@ extends DingTalkMessage {
             }
         }
     }
-}
 
+    @Override
+    public void transfer(Map<String, Object> params) {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<ImageTextDeo> imageTexts = (List<ImageTextDeo>) value;
+                for (ImageTextDeo imageText : imageTexts) {
+                    this.feedCard.links.add(
+                            new FeedCard.Link(imageText.getTitle(), imageText.getUrl(), imageText.getPicUrl()));
+                }
+                break;
+            }
+        }
+    }
+}

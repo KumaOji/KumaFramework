@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.mq.common.producer;
 
 public class MessageSendResult {
@@ -41,4 +38,3 @@ public class MessageSendResult {
         this.transactionId = transactionId;
     }
 }
-

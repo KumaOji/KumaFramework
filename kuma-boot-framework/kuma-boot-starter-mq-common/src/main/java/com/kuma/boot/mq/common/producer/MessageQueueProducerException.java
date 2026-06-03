@@ -1,12 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.common.enums.ResultEnum
- *  com.kuma.boot.common.enums.StatusEnum
- *  com.kuma.boot.common.exception.BootException
- *  com.kuma.boot.common.model.Code
- */
 package com.kuma.boot.mq.common.producer;
 
 import com.kuma.boot.common.enums.ResultEnum;
@@ -14,8 +5,7 @@ import com.kuma.boot.common.enums.StatusEnum;
 import com.kuma.boot.common.exception.BootException;
 import com.kuma.boot.common.model.Code;
 
-public class MessageQueueProducerException
-extends BootException {
+public class MessageQueueProducerException extends BootException {
     public MessageQueueProducerException() {
     }
 
@@ -75,4 +65,3 @@ extends BootException {
         super(status, code, e, message);
     }
 }
-

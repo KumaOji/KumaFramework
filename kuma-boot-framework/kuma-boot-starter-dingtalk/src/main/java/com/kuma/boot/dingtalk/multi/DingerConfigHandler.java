@@ -1,17 +1,59 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.multi;
 
+import com.kuma.boot.dingtalk.entity.MultiDinger;
 import com.kuma.boot.dingtalk.model.DingerConfig;
 
 import java.util.List;
 
+/**
+ * DingerConfigHandler
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:23:54
+ */
 public interface DingerConfigHandler {
-    public List<DingerConfig> dingerConfigs();
 
-    default public Class<? extends AlgorithmHandler> algorithmHandler() {
+    /**
+     * 多Dinger机器人配置
+     *
+     * <pre>
+     *     1. DingerConfig中的DingerType统一使用 {@link MultiDinger} 中指定的
+     *     2. dingerConfigs的配置信息必须是 {@link MultiDinger} 指定的机器人配置信息
+     * </pre>
+     *
+     * @return dingerConfigs
+     */
+    List<DingerConfig> dingerConfigs();
+
+    /**
+     * 执行逻辑处理器
+     *
+     * <blockquote>
+     *
+     * default algorithmHandler {@link DefaultHandler}
+     *
+     * </blockquote>
+     *
+     * @return algorithmHandler {@link AlgorithmHandler}
+     */
+    default Class<? extends AlgorithmHandler> algorithmHandler() {
         return DingerHandler.class;
     }
 }
-

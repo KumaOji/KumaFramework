@@ -1,30 +1,51 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.enums;
 
+/**
+ * Dinger响应码
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:20:48
+ */
 public enum DingerResponseCodeEnum {
     SUCCESS("D000", "success"),
-    DINGER_DISABLED("D101", "Dinger\u672a\u542f\u7528"),
-    MESSAGE_TYPE_UNSUPPORTED("D201", "\u65e0\u6cd5\u652f\u6301\u7684\u6d88\u606f\u7c7b\u578b"),
-    SEND_MESSAGE_FAILED("D202", "\u6d88\u606f\u53d1\u9001\u5931\u8d25"),
-    MESSAGE_PROCESSING_FAILED("D203", "\u6d88\u606f\u5904\u7406\u5f02\u5e38"),
+
+    DINGER_DISABLED("D101", "Dinger未启用"),
+
+    MESSAGE_TYPE_UNSUPPORTED("D201", "无法支持的消息类型"),
+    SEND_MESSAGE_FAILED("D202", "消息发送失败"),
+    MESSAGE_PROCESSING_FAILED("D203", "消息处理异常"),
     FAILED("D999", "failed");
 
     private String code;
     private String message;
 
-    private DingerResponseCodeEnum(String code, String message) {
+    DingerResponseCodeEnum(String code, String message) {
         this.code = code;
         this.message = message;
     }
 
     public String code() {
-        return this.code;
+        return code;
     }
 
     public String message() {
-        return this.message;
+        return message;
     }
 }
-

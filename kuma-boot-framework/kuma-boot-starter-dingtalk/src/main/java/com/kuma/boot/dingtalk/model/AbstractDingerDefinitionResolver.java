@@ -1,107 +1,190 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.core.ParameterNameDiscoverer
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.model;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.dingtalk.annatations.AsyncExecute;
 import com.kuma.boot.dingtalk.annatations.DingerConfiguration;
+import com.kuma.boot.dingtalk.constant.DingerConstant;
 import com.kuma.boot.dingtalk.entity.DingerMethod;
 import com.kuma.boot.dingtalk.enums.DingerDefinitionType;
 import com.kuma.boot.dingtalk.enums.DingerType;
-import com.kuma.boot.dingtalk.enums.ExceptionEnum;
 import com.kuma.boot.dingtalk.exception.DingerException;
 import com.kuma.boot.dingtalk.listeners.DingerListenersProperty;
 import com.kuma.boot.dingtalk.utils.DingerUtils;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.core.ParameterNameDiscoverer;
 
-public abstract class AbstractDingerDefinitionResolver<T>
-extends DingerListenersProperty
-implements DingerDefinitionResolver<T> {
-    private Map<String, Class<? extends DingerDefinitionGenerator>> dingerDefinitionGeneratorMap = new HashMap<String, Class<? extends DingerDefinitionGenerator>>();
-    protected ParameterNameDiscoverer parameterNameDiscoverer = new DingerParameterNameDiscoverer();
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.kuma.boot.dingtalk.enums.ExceptionEnum.DINGER_REPEATED_EXCEPTION;
+import static com.kuma.boot.dingtalk.enums.ExceptionEnum.METHOD_DEFINITION_EXCEPTION;
+
+/**
+ * AbsDingerDefinitionResolver
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:21:56
+ */
+public abstract class AbstractDingerDefinitionResolver<T> extends DingerListenersProperty
+        implements DingerDefinitionResolver<T> {
+
+    /** dinger消息类型和对应生成器映射关系 */
+    private Map<String, Class<? extends DingerDefinitionGenerator>> dingerDefinitionGeneratorMap;
+    /** 方法参数名称解析 */
+    protected ParameterNameDiscoverer parameterNameDiscoverer;
 
     public AbstractDingerDefinitionResolver() {
+        this.dingerDefinitionGeneratorMap = new HashMap<>();
+        this.parameterNameDiscoverer = new DingerParameterNameDiscoverer();
+
         for (DingerDefinitionType dingerDefinitionType : DingerDefinitionType.dingerDefinitionTypes) {
-            this.dingerDefinitionGeneratorMap.put(String.valueOf((Object)dingerDefinitionType.dingerType()) + "." + String.valueOf((Object)dingerDefinitionType.messageMainType()) + "." + String.valueOf((Object)dingerDefinitionType.messageSubType()), dingerDefinitionType.dingerDefinitionGenerator());
+            dingerDefinitionGeneratorMap.put(
+                    dingerDefinitionType.dingerType()
+                            + DingerConstant.SPOT_SEPERATOR
+                            + dingerDefinitionType.messageMainType()
+                            + DingerConstant.SPOT_SEPERATOR
+                            + dingerDefinitionType.messageSubType(),
+                    dingerDefinitionType.dingerDefinitionGenerator());
         }
     }
 
     protected DingerConfig dingerConfiguration(Class<?> dingerClass) {
-        DingerConfiguration dingerConfiguration;
-        String tokenId;
         DingerConfig dingerConfig = new DingerConfig();
-        if (dingerClass.isAnnotationPresent(DingerConfiguration.class) && DingerUtils.isNotEmpty(tokenId = (dingerConfiguration = dingerClass.getAnnotation(DingerConfiguration.class)).tokenId())) {
-            dingerConfig.setTokenId(tokenId);
-            dingerConfig.setDecryptKey(dingerConfiguration.decryptKey());
-            dingerConfig.setSecret(dingerConfiguration.secret());
+
+        if (dingerClass.isAnnotationPresent(DingerConfiguration.class)) {
+            DingerConfiguration dingerConfiguration = dingerClass.getAnnotation(DingerConfiguration.class);
+            String tokenId = dingerConfiguration.tokenId();
+            if (DingerUtils.isNotEmpty(tokenId)) {
+                dingerConfig.setTokenId(tokenId);
+                dingerConfig.setDecryptKey(dingerConfiguration.decryptKey());
+                dingerConfig.setSecret(dingerConfiguration.secret());
+            }
         }
+
         if (dingerClass.isAnnotationPresent(AsyncExecute.class)) {
             dingerConfig.setAsyncExecute(true);
         }
         return dingerConfig;
     }
 
-    void registerDingerDefinition(String dingerName, Object source, String dingerDefinitionKey, DingerConfig dingerConfiguration, DingerMethod dingerMethod) {
+    /**
+     * 注册Dinger Definition
+     *
+     * @param dingerName dingerName
+     * @param source source
+     * @param dingerDefinitionKey dingerDefinitionKey
+     * @param dingerConfiguration Dinger层配置DingerConfig
+     * @param dingerMethod 方法参数信息和方法中的泛型信息
+     */
+    void registerDingerDefinition(
+            String dingerName,
+            Object source,
+            String dingerDefinitionKey,
+            DingerConfig dingerConfiguration,
+            DingerMethod dingerMethod) {
         for (DingerType dingerType : enabledDingerTypes) {
-            DingerConfig defaultDingerConfig = (DingerConfig)defaultDingerConfigs.get((Object)dingerType);
+            DingerConfig defaultDingerConfig = defaultDingerConfigs.get(dingerType);
             if (dingerConfiguration == null) {
-                LogUtils.debug((String)"dinger={} not open and skip the corresponding dinger registration.", (Object[])new Object[]{dingerType});
+                LogUtils.debug("dinger={} not open and skip the corresponding dinger registration.", dingerType);
                 continue;
             }
-            String keyName = String.valueOf((Object)dingerType) + "." + dingerName;
-            String key = String.valueOf((Object)dingerType) + "." + dingerDefinitionKey;
-            Class<? extends DingerDefinitionGenerator> dingerDefinitionGeneratorClass = this.dingerDefinitionGeneratorMap.get(key);
+            String keyName = dingerType + DingerConstant.SPOT_SEPERATOR + dingerName;
+            String key = dingerType + DingerConstant.SPOT_SEPERATOR + dingerDefinitionKey;
+            Class<? extends DingerDefinitionGenerator> dingerDefinitionGeneratorClass =
+                    dingerDefinitionGeneratorMap.get(key);
             if (dingerDefinitionGeneratorClass == null) {
-                LogUtils.debug((String)"\u5f53\u524dkey=%s\u5728DingerDefinitionType\u4e2d\u6ca1\u5b9a\u4e49", (Object[])new Object[]{key});
+                //                throw new
+                // DingerException(ExceptionEnum.DINGERDEFINITIONTYPE_UNDEFINED_KEY, key);
+                LogUtils.debug("当前key=%s在DingerDefinitionType中没定义", key);
                 continue;
             }
-            DingerDefinitionGenerator dingerDefinitionGenerator = DingerDefinitionGeneratorFactory.get(dingerDefinitionGeneratorClass.getName());
-            DingerDefinition dingerDefinition = dingerDefinitionGenerator.generator(new DingerDefinitionGeneratorContext<Object>(keyName, source));
+
+            DingerDefinitionGenerator dingerDefinitionGenerator =
+                    DingerDefinitionGeneratorFactory.get(dingerDefinitionGeneratorClass.getName());
+            DingerDefinition dingerDefinition =
+                    dingerDefinitionGenerator.generator(new DingerDefinitionGeneratorContext(keyName, source));
+
             if (dingerDefinition == null) {
-                LogUtils.debug((String)"keyName={} dinger[{}] format is illegal.", (Object[])new Object[]{keyName, dingerDefinitionKey});
+                LogUtils.debug("keyName={} dinger[{}] format is illegal.", keyName, dingerDefinitionKey);
                 continue;
             }
+
             if (Container.INSTANCE.contains(keyName)) {
-                throw new DingerException(ExceptionEnum.DINGER_REPEATED_EXCEPTION, keyName);
+                throw new DingerException(DINGER_REPEATED_EXCEPTION, keyName);
             }
+
             if (dingerMethod.check()) {
-                throw new DingerException(ExceptionEnum.METHOD_DEFINITION_EXCEPTION, dingerMethod.getMethodName());
+                throw new DingerException(METHOD_DEFINITION_EXCEPTION, dingerMethod.getMethodName());
             }
             dingerDefinition.setMethodParams(dingerMethod.getMethodParams());
             dingerDefinition.setGenericIndex(dingerMethod.getParamTypes());
+
+            // DingerConfig Priority： `@DingerText | @DingerMarkdown | XML` > `@DingerConfiguration`
+            // > `***.yml | ***.properties`
             dingerDefinition.dingerConfig().merge(dingerConfiguration).merge(defaultDingerConfig);
+
             Container.INSTANCE.put(keyName, dingerDefinition);
-            LogUtils.debug((String)"dinger definition={} has been registed.", (Object[])new Object[]{keyName});
+            LogUtils.debug("dinger definition={} has been registed.", keyName);
+        }
+    }
+
+    /** Container for DingerDefinition */
+    protected enum Container {
+        INSTANCE;
+        private Map<String, DingerDefinition> container;
+
+        Container() {
+            this.container = new HashMap<>(128);
+        }
+
+        /**
+         * get DingerDefinition
+         *
+         * @param key key
+         * @return
+         */
+        DingerDefinition get(String key) {
+            return container.get(key);
+        }
+
+        /**
+         * set DingerDefinition
+         *
+         * @param key key
+         * @param dingerDefinition dingerDefinition
+         */
+        void put(String key, DingerDefinition dingerDefinition) {
+            container.put(key, dingerDefinition);
+        }
+
+        /**
+         * whether contains key
+         *
+         * @param key key
+         * @return true or false
+         */
+        boolean contains(String key) {
+            return container.containsKey(key);
         }
     }
 
     protected static void clear() {
         Container.INSTANCE.container.clear();
     }
-
-    protected static enum Container {
-        INSTANCE;
-
-        private Map<String, DingerDefinition> container = new HashMap<String, DingerDefinition>(128);
-
-        DingerDefinition get(String key) {
-            return this.container.get(key);
-        }
-
-        void put(String key, DingerDefinition dingerDefinition) {
-            this.container.put(key, dingerDefinition);
-        }
-
-        boolean contains(String key) {
-            return this.container.containsKey(key);
-        }
-    }
 }
-

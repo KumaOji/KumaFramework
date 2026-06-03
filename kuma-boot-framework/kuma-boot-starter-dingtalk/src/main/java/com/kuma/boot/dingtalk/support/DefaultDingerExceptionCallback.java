@@ -1,21 +1,38 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.support;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.dingtalk.entity.DingerCallback;
 import com.kuma.boot.dingtalk.exception.DingerException;
 
-public class DefaultDingerExceptionCallback
-implements DingerExceptionCallback {
+/**
+ * 默认消息通知
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:25:42
+ */
+public class DefaultDingerExceptionCallback implements DingerExceptionCallback {
+
     @Override
     public void execute(DingerCallback dkExCallable) {
         DingerException ex = dkExCallable.getEx();
-        LogUtils.error((String)"\u5f02\u5e38\u9759\u9ed8\u5904\u7406:{}-{}->{}.", (Object[])new Object[]{ex.getPairs().code(), ex.getPairs().desc(), ex.getMessage()});
+
+        LogUtils.error("异常静默处理:{}-{}->{}.", ex.getPairs().code(), ex.getPairs().desc(), ex.getMessage());
     }
 }
-

@@ -1,27 +1,83 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.annatations;
 
 import com.kuma.boot.dingtalk.enums.AsyncExecuteType;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(value=RetentionPolicy.RUNTIME)
-@Target(value={ElementType.METHOD})
+/**
+ * DingerMarkdown
+ *
+ * <pre>
+ *     {@code
+ *      @DingerMarkdown(
+ *               value = "#### 下单失败啦 @13520200906\n - 订单号： ${orderNo}\n - 标识： ${flag}\n - 数量： ${num}",
+ *               title = "下单结果反馈",
+ *               phones = {"13520200906"},
+ *               tokenId = @DingerTokenId(
+ *                       value = "87dbeb7bc28894c3bdcc3d12457228ad590164327b5f427cd85f9025ebb350cf",
+ *                       secret = "SAQ23a9039bb01f2dcd017b90ab8e9dda1355f97c9016f37ff371ec8124327c7f09")
+ *       )
+ *       void method(@Keyword String keyword, String orderNo, int num, boolean flag) {...}
+ *     }
+ * </pre>
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
 @Documented
 public @interface DingerMarkdown {
-    public String value();
 
-    public String title();
+    /**
+     * text(markdown format)
+     *
+     * @return send text
+     */
+    String value();
 
-    public String[] phones() default {};
+    /**
+     * markdown title
+     *
+     * @return title value
+     */
+    String title();
 
-    public DingerTokenId tokenId() default @DingerTokenId(value="");
+    /**
+     * phones. either atAll or phones
+     *
+     * @return &#064; designated members
+     */
+    String[] phones() default {};
 
-    public AsyncExecuteType asyncExecute() default AsyncExecuteType.NONE;
+    /**
+     * tokenId
+     *
+     * @return token info
+     */
+    DingerTokenId tokenId() default @DingerTokenId("");
+
+    /**
+     * asyncExecute
+     *
+     * @return async execute send
+     */
+    AsyncExecuteType asyncExecute() default AsyncExecuteType.NONE;
 }
-

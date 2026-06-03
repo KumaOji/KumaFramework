@@ -1,11 +1,7 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.mq.common.producer;
 
 public interface MessageSendCallback {
-    public void onSuccess(MessageSendResult var1);
+    void onSuccess(MessageSendResult result);
 
-    public void onFailed(Throwable var1);
+    void onFailed(Throwable throwable);
 }
-

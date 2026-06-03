@@ -1,12 +1,37 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
+/**
+ * Dinger图文类型实体
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:57
+ */
 public class ImageTextDeo {
+
+    /** 标题 */
     private String title;
+    /** 描述-仅限Wetalk */
     private String description;
+    /** title点击链接地址 */
     private String url;
+    /** 图片地址 */
     private String picUrl;
 
     private ImageTextDeo(String title, String url, String picUrl) {
@@ -29,7 +54,7 @@ public class ImageTextDeo {
     }
 
     public String getTitle() {
-        return this.title;
+        return title;
     }
 
     public void setTitle(String title) {
@@ -37,7 +62,7 @@ public class ImageTextDeo {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
@@ -45,7 +70,7 @@ public class ImageTextDeo {
     }
 
     public String getUrl() {
-        return this.url;
+        return url;
     }
 
     public void setUrl(String url) {
@@ -53,11 +78,10 @@ public class ImageTextDeo {
     }
 
     public String getPicUrl() {
-        return this.picUrl;
+        return picUrl;
     }
 
     public void setPicUrl(String picUrl) {
         this.picUrl = picUrl;
     }
 }
-

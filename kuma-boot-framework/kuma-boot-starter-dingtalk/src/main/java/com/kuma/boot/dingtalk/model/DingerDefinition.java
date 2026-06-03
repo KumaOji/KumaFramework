@@ -1,6 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.model;
 
 import com.kuma.boot.dingtalk.entity.MsgType;
@@ -8,41 +21,138 @@ import com.kuma.boot.dingtalk.enums.DingerType;
 import com.kuma.boot.dingtalk.enums.MessageMainType;
 import com.kuma.boot.dingtalk.enums.MessageSubType;
 
+/**
+ * DingerDefinition
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:22:35
+ */
 public interface DingerDefinition {
-    public String dingerName();
 
-    public void setDingerName(String var1);
+    /**
+     * dingerName
+     *
+     * @return dingerName
+     */
+    String dingerName();
 
-    public Class<? extends DingerDefinitionGenerator> dingerDefinitionGenerator();
+    /**
+     * setKeyName
+     *
+     * @param dingerName dingerName
+     */
+    void setDingerName(String dingerName);
 
-    public void setDingerDefinitionGenerator(Class<? extends DingerDefinitionGenerator> var1);
+    /**
+     * dingerDefinition生成器
+     *
+     * @return dingerDefinitionGenerator
+     */
+    Class<? extends DingerDefinitionGenerator> dingerDefinitionGenerator();
 
-    public MsgType message();
+    /**
+     * setDingerDefinitionGenerator
+     *
+     * @param dingerDefinitionGenerator dingerDefinitionGenerator
+     */
+    void setDingerDefinitionGenerator(Class<? extends DingerDefinitionGenerator> dingerDefinitionGenerator);
 
-    public void setMessage(MsgType var1);
+    /**
+     * 获取Dinger消息体内容
+     *
+     * @return message
+     */
+    MsgType message();
 
-    public DingerConfig dingerConfig();
+    /**
+     * 设置Dinger消息体内容
+     *
+     * @param message message
+     */
+    void setMessage(MsgType message);
 
-    public void setDingerConfig(DingerConfig var1);
+    /**
+     * 获取Dinger机器人配置
+     *
+     * @return dingerConfig
+     */
+    DingerConfig dingerConfig();
 
-    public DingerType dingerType();
+    /**
+     * 设置Dinger机器人配置
+     *
+     * @param dingerConfig dingerConfig
+     */
+    void setDingerConfig(DingerConfig dingerConfig);
 
-    public void setDingerType(DingerType var1);
+    /**
+     * dingerType
+     *
+     * @return dingerType
+     */
+    DingerType dingerType();
 
-    public MessageMainType messageMainType();
+    /**
+     * setDingerType
+     *
+     * @param dingerType dingerType
+     */
+    void setDingerType(DingerType dingerType);
 
-    public void setMessageMainType(MessageMainType var1);
+    /**
+     * messageMainType
+     *
+     * @return dingerType
+     */
+    MessageMainType messageMainType();
 
-    public MessageSubType messageSubType();
+    /**
+     * setMessageMainType
+     *
+     * @param messageMainType messageMainType
+     */
+    void setMessageMainType(MessageMainType messageMainType);
 
-    public void setMessageSubType(MessageSubType var1);
+    /**
+     * messageSubType
+     *
+     * @return messageSubType
+     */
+    MessageSubType messageSubType();
 
-    public String[] methodParams();
+    /**
+     * setMessageSubType
+     *
+     * @param messageSubType messageSubType
+     */
+    void setMessageSubType(MessageSubType messageSubType);
 
-    public void setMethodParams(String[] var1);
+    /**
+     * methodParams
+     *
+     * @return array
+     */
+    String[] methodParams();
 
-    public int[] genericIndex();
+    /**
+     * setMethodParams
+     *
+     * @param methodParams methodParams
+     */
+    void setMethodParams(String[] methodParams);
 
-    public void setGenericIndex(int[] var1);
+    /**
+     * genericIndex
+     *
+     * @return genericIndex
+     */
+    int[] genericIndex();
+
+    /**
+     * setGenericIndex
+     *
+     * @param genericIndex genericIndex
+     */
+    void setGenericIndex(int[] genericIndex);
 }
-

@@ -1,11 +1,23 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.util.ClassUtils
- *  org.springframework.util.StringUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.spring;
+
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,71 +30,70 @@ import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
+/**
+ * ApplicationHome
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:24:58
+ */
 public class ApplicationHome {
+
     private final File source;
+
     private final File dir;
 
+    /** Create a new {@link org.springframework.boot.system.ApplicationHome} instance. */
     public ApplicationHome() {
         this(null);
     }
 
+    /**
+     * Create a new {@link org.springframework.boot.system.ApplicationHome} instance for the
+     * specified source class.
+     *
+     * @param sourceClass the source class or {@code null}
+     */
     public ApplicationHome(Class<?> sourceClass) {
-        this.source = this.findSource(sourceClass != null ? sourceClass : this.getStartClass());
-        this.dir = this.findHomeDir(this.source);
+        this.source = findSource((sourceClass != null) ? sourceClass : getStartClass());
+        this.dir = findHomeDir(this.source);
     }
 
     private Class<?> getStartClass() {
         try {
-            ClassLoader classLoader = this.getClass().getClassLoader();
-            return this.getStartClass(classLoader.getResources("META-INF/MANIFEST.MF"));
-        }
-        catch (Exception ex) {
+            ClassLoader classLoader = getClass().getClassLoader();
+            return getStartClass(classLoader.getResources("META-INF/MANIFEST.MF"));
+        } catch (Exception ex) {
             return null;
         }
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
     private Class<?> getStartClass(Enumeration<URL> manifestResources) {
         while (manifestResources.hasMoreElements()) {
-            try {
-                InputStream inputStream = manifestResources.nextElement().openStream();
-                try {
-                    Manifest manifest = new Manifest(inputStream);
-                    String startClass = manifest.getMainAttributes().getValue("Start-Class");
-                    if (startClass == null) continue;
-                    Class clazz = ClassUtils.forName((String)startClass, (ClassLoader)this.getClass().getClassLoader());
-                    return clazz;
+            try (InputStream inputStream = manifestResources.nextElement().openStream()) {
+                Manifest manifest = new Manifest(inputStream);
+                String startClass = manifest.getMainAttributes().getValue("Start-Class");
+                if (startClass != null) {
+                    return ClassUtils.forName(startClass, getClass().getClassLoader());
                 }
-                finally {
-                    if (inputStream == null) continue;
-                    inputStream.close();
-                }
+            } catch (Exception ex) {
             }
-            catch (Exception exception) {}
         }
         return null;
     }
 
     private File findSource(Class<?> sourceClass) {
         try {
-            File source;
-            ProtectionDomain domain = sourceClass != null ? sourceClass.getProtectionDomain() : null;
-            CodeSource codeSource = domain != null ? domain.getCodeSource() : null;
-            URL location = codeSource != null ? codeSource.getLocation() : null;
-            File file = source = location != null ? this.findSource(location) : null;
-            if (source != null && source.exists() && !this.isUnitTest()) {
+            ProtectionDomain domain = (sourceClass != null) ? sourceClass.getProtectionDomain() : null;
+            CodeSource codeSource = (domain != null) ? domain.getCodeSource() : null;
+            URL location = (codeSource != null) ? codeSource.getLocation() : null;
+            File source = (location != null) ? findSource(location) : null;
+            if (source != null && source.exists() && !isUnitTest()) {
                 return source.getAbsoluteFile();
             }
             return null;
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }
@@ -90,13 +101,12 @@ public class ApplicationHome {
     private boolean isUnitTest() {
         try {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            for (int i = stackTrace.length - 1; i >= 0; --i) {
-                if (!stackTrace[i].getClassName().startsWith("org.junit.")) continue;
-                return true;
+            for (int i = stackTrace.length - 1; i >= 0; i--) {
+                if (stackTrace[i].getClassName().startsWith("org.junit.")) {
+                    return true;
+                }
             }
-        }
-        catch (Exception exception) {
-            // empty catch block
+        } catch (Exception ex) {
         }
         return false;
     }
@@ -104,7 +114,7 @@ public class ApplicationHome {
     private File findSource(URL location) throws IOException {
         URLConnection connection = location.openConnection();
         if (connection instanceof JarURLConnection) {
-            return this.getRootJarFile(((JarURLConnection)connection).getJarFile());
+            return getRootJarFile(((JarURLConnection) connection).getJarFile());
         }
         return new File(location.getPath());
     }
@@ -120,7 +130,7 @@ public class ApplicationHome {
 
     private File findHomeDir(File source) {
         File homeDir = source;
-        File file = homeDir = homeDir != null ? homeDir : this.findDefaultHomeDir();
+        homeDir = (homeDir != null) ? homeDir : findDefaultHomeDir();
         if (homeDir.isFile()) {
             homeDir = homeDir.getParentFile();
         }
@@ -130,19 +140,30 @@ public class ApplicationHome {
 
     private File findDefaultHomeDir() {
         String userDir = System.getProperty("user.dir");
-        return new File(StringUtils.hasLength((String)userDir) ? userDir : ".");
+        return new File(StringUtils.hasLength(userDir) ? userDir : ".");
     }
 
+    /**
+     * Returns the underlying source used to find the home directory. This is usually the jar file
+     * or a directory. Can return {@code null} if the source cannot be determined.
+     *
+     * @return the underlying source or {@code null}
+     */
     public File getSource() {
         return this.source;
     }
 
+    /**
+     * Returns the application home directory.
+     *
+     * @return the home directory (never {@code null})
+     */
     public File getDir() {
         return this.dir;
     }
 
+    @Override
     public String toString() {
-        return this.getDir().toString();
+        return getDir().toString();
     }
 }
-

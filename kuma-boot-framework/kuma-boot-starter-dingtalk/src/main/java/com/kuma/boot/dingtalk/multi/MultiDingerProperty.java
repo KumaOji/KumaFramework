@@ -1,15 +1,45 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.multi;
 
 import com.kuma.boot.dingtalk.enums.IgnoreMethod;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * MultiDingerProperty
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:24:03
+ */
 public class MultiDingerProperty {
+
+    /** app start at multiDinger */
     static boolean multiDinger = false;
-    protected static Map<String, IgnoreMethod> ignoreMethodMap = new HashMap<String, IgnoreMethod>();
+
+    protected static Map<String, IgnoreMethod> ignoreMethodMap = new HashMap<>();
+
+    static {
+        for (IgnoreMethod ignoreMethod : IgnoreMethod.values()) {
+            ignoreMethodMap.put(ignoreMethod.getMethodName(), ignoreMethod);
+        }
+    }
 
     protected static boolean multiDinger() {
         return multiDinger;
@@ -18,11 +48,5 @@ public class MultiDingerProperty {
     protected static void clear() {
         ignoreMethodMap.clear();
     }
-
-    static {
-        for (IgnoreMethod ignoreMethod : IgnoreMethod.values()) {
-            ignoreMethodMap.put(ignoreMethod.getMethodName(), ignoreMethod);
-        }
-    }
+    ;
 }
-

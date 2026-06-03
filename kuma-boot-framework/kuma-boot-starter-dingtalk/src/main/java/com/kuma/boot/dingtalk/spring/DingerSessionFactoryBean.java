@@ -1,50 +1,69 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.beans.factory.FactoryBean
- *  org.springframework.beans.factory.InitializingBean
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.spring;
 
 import com.kuma.boot.dingtalk.session.DefaultDingerSessionFactory;
 import com.kuma.boot.dingtalk.session.DingerSessionFactory;
 import com.kuma.boot.dingtalk.session.SessionConfiguration;
-import java.io.IOException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-public class DingerSessionFactoryBean
-implements FactoryBean<DingerSessionFactory>,
-InitializingBean {
+import java.io.IOException;
+
+/**
+ * DingerSessionFactoryBean
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:25:24
+ */
+public class DingerSessionFactoryBean implements FactoryBean<DingerSessionFactory>, InitializingBean {
+
     private DingerSessionFactory dingerSessionFactory;
     private SessionConfiguration sessionConfiguration;
 
+    @Override
     public DingerSessionFactory getObject() throws Exception {
         if (this.dingerSessionFactory == null) {
-            this.afterPropertiesSet();
+            afterPropertiesSet();
         }
-        return this.dingerSessionFactory;
+        return dingerSessionFactory;
     }
 
+    @Override
     public Class<?> getObjectType() {
         return this.dingerSessionFactory == null ? DingerSessionFactory.class : this.dingerSessionFactory.getClass();
     }
 
+    @Override
     public boolean isSingleton() {
         return true;
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        this.dingerSessionFactory = this.buildDingerSessionFactory();
+        this.dingerSessionFactory = buildDingerSessionFactory();
     }
 
     protected DingerSessionFactory buildDingerSessionFactory() throws IOException {
-        return new DefaultDingerSessionFactory(this.sessionConfiguration);
+        return new DefaultDingerSessionFactory(sessionConfiguration);
     }
 
     public void setConfiguration(SessionConfiguration sessionConfiguration) {
         this.sessionConfiguration = sessionConfiguration;
     }
 }
-

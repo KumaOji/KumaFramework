@@ -1,19 +1,41 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.annatations.DingerLink;
 import com.kuma.boot.dingtalk.enums.DingTalkMsgType;
+
 import java.io.Serializable;
 import java.util.Map;
 
-public class DingLink
-extends DingTalkMessage {
+/**
+ * Link类型
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:41
+ */
+public class DingLink extends DingTalkMessage {
+
+    /** {@link Link} */
     private Link link;
 
     public DingLink() {
-        this.setMsgtype(DingTalkMsgType.LINK.type());
+        setMsgtype(DingTalkMsgType.LINK.type());
     }
 
     public DingLink(Link link) {
@@ -22,33 +44,25 @@ extends DingTalkMessage {
     }
 
     public Link getLink() {
-        return this.link;
+        return link;
     }
 
     public void setLink(Link link) {
         this.link = link;
     }
 
-    @Override
-    public void transfer(Map<String, Object> params) {
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            Object value = entry.getValue();
-            if (!DingerLink.clazz.isInstance(value)) continue;
-            LinkDeo link = (LinkDeo)value;
-            this.link = new Link(link.getTitle(), link.getText(), link.getMessageUrl(), link.getPicUrl());
-            break;
-        }
-    }
+    public static class Link implements Serializable {
 
-    public static class Link
-    implements Serializable {
+        /** 消息标题 */
         private String title;
+        /** 消息内容。如果太长只会部分展示 */
         private String text;
+        /** 点击消息跳转的URL */
         private String messageUrl;
+        /** 图片URL */
         private String picUrl;
 
-        public Link() {
-        }
+        public Link() {}
 
         public Link(String title, String text, String messageUrl, String picUrl) {
             this.title = title;
@@ -58,7 +72,7 @@ extends DingTalkMessage {
         }
 
         public String getTitle() {
-            return this.title;
+            return title;
         }
 
         public void setTitle(String title) {
@@ -66,7 +80,7 @@ extends DingTalkMessage {
         }
 
         public String getText() {
-            return this.text;
+            return text;
         }
 
         public void setText(String text) {
@@ -74,7 +88,7 @@ extends DingTalkMessage {
         }
 
         public String getMessageUrl() {
-            return this.messageUrl;
+            return messageUrl;
         }
 
         public void setMessageUrl(String messageUrl) {
@@ -82,12 +96,23 @@ extends DingTalkMessage {
         }
 
         public String getPicUrl() {
-            return this.picUrl;
+            return picUrl;
         }
 
         public void setPicUrl(String picUrl) {
             this.picUrl = picUrl;
         }
     }
-}
 
+    @Override
+    public void transfer(Map<String, Object> params) {
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            Object value = entry.getValue();
+            if (DingerLink.clazz.isInstance(value)) {
+                LinkDeo link = (LinkDeo) value;
+                this.link = new Link(link.getTitle(), link.getText(), link.getMessageUrl(), link.getPicUrl());
+                break;
+            }
+        }
+    }
+}

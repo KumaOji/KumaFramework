@@ -1,14 +1,39 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.enums.DingerResponseCodeEnum;
 
+/**
+ * Dinger响应体
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:34
+ */
 public class DingerResponse {
+
+    /** 响应码 */
     private String code;
+    /** 响应消息 */
     private String message;
+    /** 日志id */
     private String logid;
+    /** 响应数据 */
     private String data;
 
     private DingerResponse(DingerResponseCodeEnum resultCode) {
@@ -56,7 +81,7 @@ public class DingerResponse {
     }
 
     public String getCode() {
-        return this.code;
+        return code;
     }
 
     public void setCode(String code) {
@@ -64,7 +89,7 @@ public class DingerResponse {
     }
 
     public String getMessage() {
-        return this.message;
+        return message;
     }
 
     public void setMessage(String message) {
@@ -72,7 +97,7 @@ public class DingerResponse {
     }
 
     public String getLogid() {
-        return this.logid;
+        return logid;
     }
 
     public void setLogid(String logid) {
@@ -80,15 +105,15 @@ public class DingerResponse {
     }
 
     public String getData() {
-        return this.data;
+        return data;
     }
 
     public void setData(String data) {
         this.data = data;
     }
 
+    @Override
     public String toString() {
-        return String.format("[code=%s, message=%s, logid=%s, data=%s]", this.code, this.message, this.logid, this.data);
+        return String.format("[code=%s, message=%s, logid=%s, data=%s]", code, message, logid, data);
     }
 }
-

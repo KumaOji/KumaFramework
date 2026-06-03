@@ -1,78 +1,196 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.model;
 
 import com.kuma.boot.dingtalk.enums.DingerType;
 
+/**
+ * DingerHelper
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:22:56
+ */
 public abstract class DingerHelper {
-    protected static final ThreadLocal<DingerConfig> LOCAL_DINGER = new ThreadLocal();
 
+    protected static final ThreadLocal<DingerConfig> LOCAL_DINGER = new ThreadLocal<>();
+
+    /**
+     * assignDinger
+     *
+     * @param dingerConfig dingerConfig {@link DingerConfig}
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(DingerConfig dingerConfig) {
         dingerConfig.check();
         if (dingerConfig.checkEmpty()) {
+            // use default
             return null;
         }
-        DingerHelper.setLocalDinger(dingerConfig);
+        setLocalDinger(dingerConfig);
+
         return dingerConfig;
     }
 
+    /**
+     * assignDinger for dingtalk(使用原有dingerType)
+     *
+     * @param tokenId dingtalk tokenId
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(String tokenId) {
         DingerConfig dingerConfig = DingerConfig.instance(tokenId);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingerType
+     *
+     * @param dingerType Dinger机器人类型 {@link DingerType}
+     * @param tokenId dinger tokenId
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(DingerType dingerType, String tokenId) {
         DingerConfig dingerConfig = DingerConfig.instance(dingerType, tokenId);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingtalk
+     *
+     * @param tokenId dingtalk tokenId
+     * @param asyncExecute message execute type
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(String tokenId, boolean asyncExecute) {
         DingerConfig dingerConfig = DingerConfig.instance(tokenId, asyncExecute);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingerType
+     *
+     * @param dingerType Dinger机器人类型 {@link DingerType}
+     * @param tokenId dinger tokenId
+     * @param asyncExecute message execute type
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(DingerType dingerType, String tokenId, boolean asyncExecute) {
         DingerConfig dingerConfig = DingerConfig.instance(dingerType, tokenId, asyncExecute);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingtalk
+     *
+     * @param tokenId dingtalk tokenId
+     * @param secret dingtalk secret
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(String tokenId, String secret) {
         DingerConfig dingerConfig = DingerConfig.instance(tokenId, secret);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingtalk
+     *
+     * @param dingerType dingerType
+     * @param tokenId dingtalk tokenId
+     * @param secret dingtalk secret
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(DingerType dingerType, String tokenId, String secret) {
         DingerConfig dingerConfig = DingerConfig.instance(dingerType, tokenId, secret);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingtalk
+     *
+     * @param tokenId dingtalk tokenId
+     * @param decryptKey tokenId decrypt key
+     * @param asyncExecute message execute type
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(String tokenId, String decryptKey, boolean asyncExecute) {
         DingerConfig dingerConfig = DingerConfig.instance(tokenId, asyncExecute);
         dingerConfig.setDecryptKey(decryptKey);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
-    public static DingerConfig assignDinger(DingerType dingerType, String tokenId, String decryptKey, boolean asyncExecute) {
+    /**
+     * assignDinger for dingerType
+     *
+     * @param dingerType Dinger机器人类型 {@link DingerType}
+     * @param tokenId dinger tokenId
+     * @param decryptKey tokenId decrypt key
+     * @param asyncExecute message execute type
+     * @return dingerConfig {@link DingerConfig}
+     */
+    public static DingerConfig assignDinger(
+            DingerType dingerType, String tokenId, String decryptKey, boolean asyncExecute) {
         DingerConfig dingerConfig = DingerConfig.instance(dingerType, tokenId);
         dingerConfig.setDecryptKey(decryptKey);
         dingerConfig.setAsyncExecute(asyncExecute);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingtalk
+     *
+     * @param tokenId dingtalk tokenId
+     * @param decryptKey tokenId decrypt key
+     * @param secret dingtalk secret
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(String tokenId, String decryptKey, String secret) {
         DingerConfig dingerConfig = DingerConfig.instance(tokenId, secret, decryptKey);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
+    /**
+     * assignDinger for dingtalk
+     *
+     * @param dingerType dingerType
+     * @param tokenId dingtalk tokenId
+     * @param decryptKey tokenId decrypt key
+     * @param secret dingtalk secret
+     * @return dingerConfig {@link DingerConfig}
+     */
     public static DingerConfig assignDinger(DingerType dingerType, String tokenId, String decryptKey, String secret) {
         DingerConfig dingerConfig = DingerConfig.instance(dingerType, tokenId, secret, decryptKey);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
-    public static DingerConfig assignDinger(DingerType dingerType, String tokenId, String decryptKey, String secret, boolean asyncExecute) {
+    /**
+     * assignDinger for dingerType
+     *
+     * @param dingerType Dinger机器人类型 {@link DingerType}
+     * @param tokenId dinger tokenId
+     * @param decryptKey tokenId decrypt key
+     * @param secret dinger secret
+     * @param asyncExecute message execute type
+     * @return dingerConfig {@link DingerConfig}
+     */
+    public static DingerConfig assignDinger(
+            DingerType dingerType, String tokenId, String decryptKey, String secret, boolean asyncExecute) {
         DingerConfig dingerConfig = DingerConfig.instance(dingerType, tokenId, decryptKey, secret, asyncExecute);
-        return DingerHelper.assignDinger(dingerConfig);
+        return assignDinger(dingerConfig);
     }
 
     protected static void setLocalDinger(DingerConfig config) {
@@ -87,4 +205,3 @@ public abstract class DingerHelper {
         LOCAL_DINGER.remove();
     }
 }
-

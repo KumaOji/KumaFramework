@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  org.springframework.beans.factory.DisposableBean
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.spring;
 
 import com.kuma.boot.dingtalk.session.DingerSession;
@@ -11,9 +21,15 @@ import com.kuma.boot.dingtalk.session.DingerSessionFactory;
 import com.kuma.boot.dingtalk.session.SessionConfiguration;
 import org.springframework.beans.factory.DisposableBean;
 
-public class DingerSessionTemplate
-implements DingerSession,
-DisposableBean {
+/**
+ * DingerSessionTemplate
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:25:30
+ */
+public class DingerSessionTemplate implements DingerSession, DisposableBean {
+
     private final DingerSessionFactory dingerSessionFactory;
     private final DingerSession dingerSession;
     private final SessionConfiguration sessionConfiguration;
@@ -26,19 +42,18 @@ DisposableBean {
 
     @Override
     public <T> T getDinger(Class<T> type) {
-        return this.dingerSession.getDinger(type);
+        return dingerSession.getDinger(type);
     }
 
     @Override
     public SessionConfiguration configuration() {
-        return this.sessionConfiguration;
+        return sessionConfiguration;
     }
 
-    public void destroy() {
-    }
+    @Override
+    public void destroy() {}
 
     public DingerSessionFactory getDingerSessionFactory() {
-        return this.dingerSessionFactory;
+        return dingerSessionFactory;
     }
 }
-

@@ -1,17 +1,24 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Kuma (2569277704@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.boot.autoconfigure.AutoConfiguration
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.context.annotation.Bean
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.autoconfigure;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
+import com.kuma.boot.dingtalk.autoconfigure.properties.DingtalkProperties;
 import com.kuma.boot.dingtalk.multi.MultiDingerAlgorithmInjectRegister;
 import com.kuma.boot.dingtalk.support.CustomMessage;
 import com.kuma.boot.dingtalk.support.DefaultDingerAsyncCallable;
@@ -29,36 +36,62 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
+import static com.kuma.boot.dingtalk.constant.DingerConstant.MARKDOWN_MESSAGE;
+import static com.kuma.boot.dingtalk.constant.DingerConstant.TEXT_MESSAGE;
+
+/**
+ * 实例化bean配置
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:16:53
+ */
 @AutoConfiguration
-@ConditionalOnProperty(prefix="kuma.boot.dingtalk", value={"enabled"}, havingValue="true")
-public class DingtalkBeanAutoConfiguration
-implements InitializingBean {
+@ConditionalOnProperty(prefix = DingtalkProperties.PREFIX, value = "enabled", havingValue = "true")
+public class DingtalkBeanAutoConfiguration implements InitializingBean {
+
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(DingtalkBeanAutoConfiguration.class, (String)"kuma-boot-starter-dingtalk", (String[])new String[0]);
+        LogUtils.started(DingtalkBeanAutoConfiguration.class, StarterNameConstants.DINGTALK_STARTER);
     }
 
-    @Bean(name={"textMessage"})
-    @ConditionalOnMissingBean(name={"textMessage"})
+    /**
+     * 默认Text消息格式配置
+     */
+    @Bean(name = TEXT_MESSAGE)
+    @ConditionalOnMissingBean(name = TEXT_MESSAGE)
     public CustomMessage textMessage() {
         return new TextMessage();
     }
 
-    @Bean(name={"markDownMessage"})
-    @ConditionalOnMissingBean(name={"markDownMessage"})
+    /**
+     * 默认markdown消息格式配置
+     */
+    @Bean(name = MARKDOWN_MESSAGE)
+    @ConditionalOnMissingBean(name = MARKDOWN_MESSAGE)
     public CustomMessage markDownMessage() {
         return new MarkDownMessage();
     }
 
+    /**
+     * 默认签名算法
+     */
     @Bean
     public DingTalkSignAlgorithm dingerSignAlgorithm() {
         return new DingTalkSignAlgorithm();
     }
 
+    /**
+     * 默认dkid生成配置
+     */
     @Bean
     public DingerIdGenerator dingerIdGenerator() {
         return new DefaultDingerIdGenerator();
     }
 
+    /**
+     * 默认异步执行回调实例
+     */
     @Bean
     public DingerAsyncCallback dingerAsyncCallback() {
         return new DefaultDingerAsyncCallable();
@@ -74,4 +107,3 @@ implements InitializingBean {
         return new MultiDingerAlgorithmInjectRegister();
     }
 }
-

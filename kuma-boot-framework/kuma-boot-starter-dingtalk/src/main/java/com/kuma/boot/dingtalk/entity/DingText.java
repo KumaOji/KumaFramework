@@ -1,52 +1,72 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
 import com.kuma.boot.dingtalk.enums.DingTalkMsgType;
+
 import java.io.Serializable;
 import java.util.Map;
 
-public class DingText
-extends Message {
+/**
+ * Text 消息格式实体
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:19:51
+ */
+public class DingText extends Message {
+
+    /** 消息内容 */
     private Text text;
 
     public DingText(Text text) {
-        this.setMsgtype(DingTalkMsgType.TEXT.type());
+        setMsgtype(DingTalkMsgType.TEXT.type());
         this.text = text;
     }
 
     public Text getText() {
-        return this.text;
+        return text;
     }
 
     public void setText(Text text) {
         this.text = text;
     }
 
-    @Override
-    public void transfer(Map<String, Object> params) {
-        this.text.content = this.replaceContent(this.text.content, params);
-    }
+    public static class Text implements Serializable {
 
-    public static class Text
-    implements Serializable {
         private String content;
 
         public String getContent() {
-            return this.content;
+            return content;
         }
 
         public void setContent(String content) {
             this.content = content;
         }
 
-        public Text() {
-        }
+        public Text() {}
 
         public Text(String content) {
             this.content = content;
         }
     }
-}
 
+    @Override
+    public void transfer(Map<String, Object> params) {
+        this.text.content = replaceContent(this.text.content, params);
+    }
+}

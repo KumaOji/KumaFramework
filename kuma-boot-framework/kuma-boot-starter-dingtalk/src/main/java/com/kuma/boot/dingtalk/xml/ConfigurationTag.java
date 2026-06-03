@@ -1,36 +1,57 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  jakarta.xml.bind.annotation.XmlAttribute
- *  jakarta.xml.bind.annotation.XmlElement
- *  jakarta.xml.bind.annotation.XmlRootElement
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.xml;
 
+import com.kuma.boot.dingtalk.annatations.PriorityColumn;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="configuration")
+/**
+ * ConfigurationTag
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:26:55
+ */
+@XmlRootElement(name = "configuration")
 public class ConfigurationTag {
+
+    @PriorityColumn(column = "asyncExecute", priority = true)
     private Boolean async;
+
     private TokenId tokenId;
+
+    @PriorityColumn(column = "async")
     private boolean asyncExecute;
 
-    @XmlAttribute(name="async")
+    @XmlAttribute(name = "async")
     public Boolean getAsync() {
-        return this.async;
+        return async;
     }
 
-    @XmlElement(name="token-id")
+    @XmlElement(name = "token-id")
     public TokenId getTokenId() {
-        return this.tokenId;
+        return tokenId;
     }
 
-    @XmlElement(name="async-execute", type=Boolean.class)
+    @XmlElement(name = "async-execute", type = Boolean.class)
     public boolean getAsyncExecute() {
-        return this.asyncExecute;
+        return asyncExecute;
     }
 
     public void setAsync(Boolean async) {
@@ -45,4 +66,3 @@ public class ConfigurationTag {
         this.asyncExecute = asyncExecute;
     }
 }
-

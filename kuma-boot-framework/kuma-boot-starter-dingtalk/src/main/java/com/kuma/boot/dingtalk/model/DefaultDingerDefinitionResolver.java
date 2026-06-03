@@ -1,87 +1,132 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.context.EnvironmentAware
- *  org.springframework.core.env.Environment
- *  org.springframework.core.io.Resource
- *  org.springframework.core.io.support.PathMatchingResourcePatternResolver
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.model;
 
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.dingtalk.enums.DingerType;
-import com.kuma.boot.dingtalk.enums.ExceptionEnum;
 import com.kuma.boot.dingtalk.exception.DingerException;
 import com.kuma.boot.dingtalk.listeners.DingerListenersProperty;
 import com.kuma.boot.dingtalk.utils.DingerUtils;
-import java.io.IOException;
-import java.util.List;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
-public class DefaultDingerDefinitionResolver
-extends DingerListenersProperty
-implements EnvironmentAware {
-    private final DingerDefinitionResolver xmlDingerDefinitionResolver = new XmlDingerDefinitionResolver();
-    private final DingerDefinitionResolver annotaDingerDefinitionResolver = new AnnotationDingerDefinitionResolver();
+import java.io.IOException;
+import java.util.List;
+
+import static com.kuma.boot.dingtalk.constant.DingerConstant.DINGER_PROPERTIES_PREFIX;
+import static com.kuma.boot.dingtalk.constant.DingerConstant.SPOT_SEPERATOR;
+import static com.kuma.boot.dingtalk.enums.ExceptionEnum.RESOURCE_CONFIG_EXCEPTION;
+
+/**
+ * Default DingerDefinition Resolver
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:22:27
+ */
+public class DefaultDingerDefinitionResolver extends DingerListenersProperty implements EnvironmentAware {
+
+    private final DingerDefinitionResolver xmlDingerDefinitionResolver;
+    private final DingerDefinitionResolver annotaDingerDefinitionResolver;
     private Environment environment;
 
-    protected void resolver(List<Class<?>> dingerClasses) {
-        this.registerDefaultDingerConfig(this.environment);
-        this.dingerXmlResolver();
-        this.annotaDingerDefinitionResolver.resolver(dingerClasses);
+    public DefaultDingerDefinitionResolver() {
+        xmlDingerDefinitionResolver = new XmlDingerDefinitionResolver();
+        annotaDingerDefinitionResolver = new AnnotationDingerDefinitionResolver();
     }
 
+    /**
+     * 解析处理
+     *
+     * @param dingerClasses Dinger类集合
+     */
+    protected void resolver(List<Class<?>> dingerClasses) {
+        registerDefaultDingerConfig(environment);
+
+        // deal with xml
+        dingerXmlResolver();
+
+        // deal with annotation
+        annotaDingerDefinitionResolver.resolver(dingerClasses);
+    }
+
+    /** Xml定义Dinger解析处理 */
     protected void dingerXmlResolver() {
-        Resource[] resources;
-        String dingerLocationsProp = "kuma.boot.dingtalk.dinger-locations";
-        String dingerLocations = this.environment.getProperty(dingerLocationsProp);
+        String dingerLocationsProp = DINGER_PROPERTIES_PREFIX + "dinger-locations";
+        String dingerLocations = environment.getProperty(dingerLocationsProp);
         if (dingerLocations == null) {
-            LogUtils.debug((String)"dinger xml is not configured.", (Object[])new Object[0]);
+            LogUtils.debug("dinger xml is not configured.");
             return;
         }
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        // 处理xml配置转为dingerDefinition
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] resources;
         try {
             resources = resolver.getResources(dingerLocations);
-        }
-        catch (IOException e) {
-            throw new DingerException(ExceptionEnum.RESOURCE_CONFIG_EXCEPTION, dingerLocations);
+        } catch (IOException e) {
+            throw new DingerException(RESOURCE_CONFIG_EXCEPTION, dingerLocations);
         }
         if (resources.length == 0) {
-            LogUtils.warn((String)"dinger xml is empty under {}.", (Object[])new Object[]{dingerLocations});
+            LogUtils.warn("dinger xml is empty under {}.", dingerLocations);
             return;
         }
-        this.xmlDingerDefinitionResolver.resolver(resources);
+
+        xmlDingerDefinitionResolver.resolver(resources);
     }
 
+    @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
 
+    /**
+     * 注册默认的Dinger机器人信息, 即配置文件内容
+     *
+     * @param environment environment
+     */
     private void registerDefaultDingerConfig(Environment environment) {
         if (environment == null) {
-            LogUtils.warn((String)"environment is null.", (Object[])new Object[0]);
+            LogUtils.warn("environment is null.");
             return;
         }
         for (DingerType dingerType : enabledDingerTypes) {
-            String dingers = "kuma.boot.dingtalk.dingers." + dingerType.name().toLowerCase() + ".";
+            String dingers = DINGER_PROPERTIES_PREFIX
+                    + "dingers"
+                    + SPOT_SEPERATOR
+                    + dingerType.name().toLowerCase()
+                    + SPOT_SEPERATOR;
             String tokenIdProp = dingers + "token-id";
             String secretProp = dingers + "secret";
             String decryptProp = dingers + "decrypt";
             String decryptKeyProp = dingers + "decryptKey";
             String asyncExecuteProp = dingers + "async";
+
             if (DingerUtils.isEmpty(tokenIdProp)) {
-                LogUtils.debug((String)"dinger={} is not open.", (Object[])new Object[]{dingerType});
+                LogUtils.debug("dinger={} is not open.", dingerType);
                 continue;
             }
             String tokenId = environment.getProperty(tokenIdProp);
             String secret = environment.getProperty(secretProp);
-            boolean decrypt = this.getProperty(environment, decryptProp);
-            boolean async = this.getProperty(environment, asyncExecuteProp);
+            boolean decrypt = getProperty(environment, decryptProp);
+            boolean async = getProperty(environment, asyncExecuteProp);
             DingerConfig defaultDingerConfig = DingerConfig.instance(tokenId);
             defaultDingerConfig.setDingerType(dingerType);
             defaultDingerConfig.setSecret(secret);
@@ -89,16 +134,23 @@ implements EnvironmentAware {
                 defaultDingerConfig.setDecryptKey(environment.getProperty(decryptKeyProp));
             }
             defaultDingerConfig.setAsyncExecute(async);
+
             defaultDingerConfig.check();
             defaultDingerConfigs.put(dingerType, defaultDingerConfig);
         }
     }
 
+    /**
+     * getProperty
+     *
+     * @param environment environment
+     * @param prop prop
+     * @return prop value
+     */
     private boolean getProperty(Environment environment, String prop) {
         if (environment.getProperty(prop) != null) {
-            return (Boolean)environment.getProperty(prop, Boolean.TYPE);
+            return environment.getProperty(prop, boolean.class);
         }
         return false;
     }
 }
-

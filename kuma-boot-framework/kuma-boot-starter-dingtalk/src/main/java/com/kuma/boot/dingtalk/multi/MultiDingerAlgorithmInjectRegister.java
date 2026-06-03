@@ -1,19 +1,22 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.BeansException
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.beans.factory.annotation.Qualifier
- *  org.springframework.context.ApplicationContext
- *  org.springframework.context.ApplicationContextAware
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.multi;
 
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.dingtalk.entity.ExceptionPairs;
 import com.kuma.boot.dingtalk.entity.MultiDingerAlgorithmDefinition;
 import com.kuma.boot.dingtalk.entity.MultiDingerConfig;
 import com.kuma.boot.dingtalk.enums.ExceptionEnum;
@@ -22,12 +25,6 @@ import com.kuma.boot.dingtalk.exception.DingerException;
 import com.kuma.boot.dingtalk.exception.MultiDingerRegisterException;
 import com.kuma.boot.dingtalk.model.DingerConfig;
 import com.kuma.boot.dingtalk.utils.DingerUtils;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,84 +32,146 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-public class MultiDingerAlgorithmInjectRegister
-implements ApplicationContextAware,
-InitializingBean {
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import static com.kuma.boot.dingtalk.enums.ExceptionEnum.ALGORITHM_FIELD_INJECT_FAILED;
+
+/**
+ * MultiDingerAlgorithmInjuctRegister
+ *
+ * <p>-------
+ *
+ * <h3>Application InitializingBean</h3>
+ *
+ * <pre>{@code @Component}
+ * {@code @DependsOn(AlgorithmHandler.MULTI_DINGER_PRIORITY_EXECUTE)}
+ * <span style="color:green"> public class ServiceInit implements InitializingBean {</span>
+ * {@code @Override}
+ * public void afterPropertiesSet() throws Exception {
+ * // ...
+ * }
+ * <span style="color:green"> }</span>
+ * </pre>
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:24:00
+ */
+public class MultiDingerAlgorithmInjectRegister implements ApplicationContextAware, InitializingBean {
+
     private static ApplicationContext applicationContext;
 
+    @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         if (MultiDingerAlgorithmInjectRegister.applicationContext == null) {
             MultiDingerAlgorithmInjectRegister.applicationContext = applicationContext;
         } else {
-            LogUtils.warn((String)"applicationContext is not null.", (Object[])new Object[0]);
+            LogUtils.warn("applicationContext is not null.");
         }
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         if (MultiDingerScannerRegistrar.MULTIDINGER_ALGORITHM_DEFINITION_MAP.isEmpty()) {
-            LogUtils.info((String)"AlgorithmHandler Container is Empty.", (Object[])new Object[0]);
+            // 当前算法处理容器为空, MultiDinger失效。 可能由于所有的算法处理器中无注入属性信息
+            LogUtils.info("AlgorithmHandler Container is Empty.");
             return;
         }
+
         try {
-            this.multiDingerWithInjectAttributeHandler();
-        }
-        catch (DingerException ex) {
+            multiDingerWithInjectAttributeHandler();
+        } catch (DingerException ex) {
             throw new MultiDingerRegisterException(ex.getPairs(), ex.getMessage());
-        }
-        catch (Exception ex) {
-            throw new DingerException(ex, (ExceptionPairs)ExceptionEnum.UNKNOWN);
+        } catch (Exception ex) {
+            throw new DingerException(ex, ExceptionEnum.UNKNOWN);
         }
     }
 
+    /** 处理MultiDinger中存在注入字段情况 */
     private void multiDingerWithInjectAttributeHandler() {
-        Set<Map.Entry<String, MultiDingerAlgorithmDefinition>> entries = MultiDingerScannerRegistrar.MULTIDINGER_ALGORITHM_DEFINITION_MAP.entrySet();
+        Set<Map.Entry<String, MultiDingerAlgorithmDefinition>> entries =
+                MultiDingerScannerRegistrar.MULTIDINGER_ALGORITHM_DEFINITION_MAP.entrySet();
+
         for (Map.Entry<String, MultiDingerAlgorithmDefinition> entry : entries) {
+            //  v.key(dinger) + SPOT_SEPERATOR + AlgorithmHandler.getSimpleName
             String beanName = entry.getKey();
             MultiDingerAlgorithmDefinition v = entry.getValue();
             Class<? extends AlgorithmHandler> algorithm = v.getAlgorithm();
-            AlgorithmHandler algorithmHandler = (AlgorithmHandler)applicationContext.getBean(beanName, algorithm);
-            this.algorithmFieldInjection(algorithm, algorithmHandler);
+            // 从spring容器中拿到算法处理对象
+            AlgorithmHandler algorithmHandler = applicationContext.getBean(beanName, algorithm);
+            // 字段对象注入
+            algorithmFieldInjection(algorithm, algorithmHandler);
+
             List<DingerConfig> dingerConfigs = v.getDingerConfigs();
+
+            // v.getKey() is dingerClassName or MultiDingerConfigContainer#GLOABL_KEY
             MultiDingerConfigContainer.INSTANCE.put(v.getKey(), new MultiDingerConfig(algorithmHandler, dingerConfigs));
-            LogUtils.info((String)"dingerClassName={} exist spring inject info and algorithmHandler class={}, dingerConfigs={}.", (Object[])new Object[]{v.getKey(), algorithm.getSimpleName(), dingerConfigs.size()});
+
+            LogUtils.info(
+                    "dingerClassName={} exist spring inject info and algorithmHandler class={}," + " dingerConfigs={}.",
+                    v.getKey(),
+                    algorithm.getSimpleName(),
+                    dingerConfigs.size());
         }
+
         MultiDingerScannerRegistrar.MULTIDINGER_ALGORITHM_DEFINITION_MAP.clear();
     }
 
-    private void algorithmFieldInjection(Class<? extends AlgorithmHandler> algorithm, AlgorithmHandler algorithmHandler) {
+    /**
+     * 处理算法中属性注入
+     *
+     * @param algorithm algorithm
+     * @param algorithmHandler algorithmHandler
+     */
+    private void algorithmFieldInjection(
+            Class<? extends AlgorithmHandler> algorithm, AlgorithmHandler algorithmHandler) {
         String algorithmSimpleName = algorithm.getSimpleName();
+        OK:
         for (Field declaredField : algorithm.getDeclaredFields()) {
-            String[] actualBeanNames;
-            int length;
-            Qualifier qualifier;
-            if (!declaredField.isAnnotationPresent(Autowired.class)) continue;
-            String fieldBeanName = declaredField.getName();
-            if (declaredField.isAnnotationPresent(Qualifier.class) && DingerUtils.isNotEmpty((qualifier = declaredField.getAnnotation(Qualifier.class)).value())) {
-                fieldBeanName = qualifier.value();
-            }
-            if ((length = (actualBeanNames = applicationContext.getBeanNamesForType(declaredField.getType())).length) == 1) {
-                fieldBeanName = actualBeanNames[0];
-            } else if (length > 1) {
-                String fbn = fieldBeanName;
-                long count = Arrays.stream(actualBeanNames).filter(e -> Objects.equals(e, fbn)).count();
-                if (count == 0L) {
-                    throw new DingerException(ExceptionEnum.ALGORITHM_FIELD_INSTANCE_NOT_MATCH, algorithmSimpleName, fieldBeanName);
+            if (declaredField.isAnnotationPresent(Autowired.class)) {
+                String fieldBeanName = declaredField.getName();
+                if (declaredField.isAnnotationPresent(Qualifier.class)) {
+                    Qualifier qualifier = declaredField.getAnnotation(Qualifier.class);
+                    if (DingerUtils.isNotEmpty(qualifier.value())) {
+                        fieldBeanName = qualifier.value();
+                    }
                 }
-            } else {
-                throw new DingerException(ExceptionEnum.ALGORITHM_FIELD_INSTANCE_NOT_EXISTS, algorithmSimpleName, fieldBeanName);
-            }
-            try {
-                declaredField.setAccessible(true);
-                declaredField.set(algorithmHandler, applicationContext.getBean(fieldBeanName));
-            }
-            catch (IllegalAccessException e2) {
-                throw new DingerException(ExceptionEnum.ALGORITHM_FIELD_INJECT_FAILED, algorithmSimpleName, fieldBeanName);
+
+                // 从spring容器上下文中获取属性对应的实例
+                String[] actualBeanNames = applicationContext.getBeanNamesForType(declaredField.getType());
+                int length = actualBeanNames.length;
+                if (length == 1) {
+                    fieldBeanName = actualBeanNames[0];
+                } else if (length > 1) {
+                    final String fbn = fieldBeanName;
+                    long count = Arrays.stream(actualBeanNames)
+                            .filter(e -> Objects.equals(e, fbn))
+                            .count();
+                    if (count == 0) {
+                        throw new DingerException(
+                                ExceptionEnum.ALGORITHM_FIELD_INSTANCE_NOT_MATCH, algorithmSimpleName, fieldBeanName);
+                    }
+                } else {
+                    throw new DingerException(
+                            ExceptionEnum.ALGORITHM_FIELD_INSTANCE_NOT_EXISTS, algorithmSimpleName, fieldBeanName);
+                }
+
+                try {
+                    declaredField.setAccessible(true);
+                    declaredField.set(algorithmHandler, applicationContext.getBean(fieldBeanName));
+                } catch (IllegalAccessException e) {
+                    throw new DingerException(ALGORITHM_FIELD_INJECT_FAILED, algorithmSimpleName, fieldBeanName);
+                }
             }
         }
     }
 
     protected static void clear() {
-        applicationContext = null;
+        MultiDingerAlgorithmInjectRegister.applicationContext = null;
     }
 }
-

@@ -1,19 +1,56 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.entity;
 
+import com.kuma.boot.dingtalk.constant.DingerConstant;
 import com.kuma.boot.dingtalk.model.DingerConfig;
 import com.kuma.boot.dingtalk.multi.AlgorithmHandler;
+
 import java.util.List;
 
+/**
+ * MultiDingerAlgorithmDefinition
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:20:12
+ */
 public class MultiDingerAlgorithmDefinition {
+
+    /** dingerClass + {@link DingerConstant#SPOT_SEPERATOR} + {@link AlgorithmHandler}.simpleName */
     private String key;
+    /**
+     * 算法处理类 {@link AlgorithmHandler} <br>
+     * <code>
+     * // 父类.class.isAssignableFrom(子类.class) <br> AlgorithmHandler.class.isAssignableFrom(algorithm)
+     * = true
+     * </code>
+     */
     private Class<? extends AlgorithmHandler> algorithm;
+    /** 有效的钉钉机器人配置集合 */
     private List<DingerConfig> dingerConfigs;
+    /** handler name */
     private String dingerConfigHandlerClassName;
 
-    public MultiDingerAlgorithmDefinition(String key, Class<? extends AlgorithmHandler> algorithm, List<DingerConfig> dingerConfigs, String dingerConfigHandlerClassName) {
+    public MultiDingerAlgorithmDefinition(
+            String key,
+            Class<? extends AlgorithmHandler> algorithm,
+            List<DingerConfig> dingerConfigs,
+            String dingerConfigHandlerClassName) {
         this.key = key;
         this.algorithm = algorithm;
         this.dingerConfigs = dingerConfigs;
@@ -21,7 +58,7 @@ public class MultiDingerAlgorithmDefinition {
     }
 
     public String getKey() {
-        return this.key;
+        return key;
     }
 
     public void setKey(String key) {
@@ -29,7 +66,7 @@ public class MultiDingerAlgorithmDefinition {
     }
 
     public Class<? extends AlgorithmHandler> getAlgorithm() {
-        return this.algorithm;
+        return algorithm;
     }
 
     public void setAlgorithm(Class<? extends AlgorithmHandler> algorithm) {
@@ -37,7 +74,7 @@ public class MultiDingerAlgorithmDefinition {
     }
 
     public List<DingerConfig> getDingerConfigs() {
-        return this.dingerConfigs;
+        return dingerConfigs;
     }
 
     public void setDingerConfigs(List<DingerConfig> dingerConfigs) {
@@ -45,11 +82,10 @@ public class MultiDingerAlgorithmDefinition {
     }
 
     public String getDingerConfigHandlerClassName() {
-        return this.dingerConfigHandlerClassName;
+        return dingerConfigHandlerClassName;
     }
 
     public void setDingerConfigHandlerClassName(String dingerConfigHandlerClassName) {
         this.dingerConfigHandlerClassName = dingerConfigHandlerClassName;
     }
 }
-

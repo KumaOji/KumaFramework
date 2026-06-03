@@ -1,9 +1,19 @@
 /*
- * Decompiled with CFR 0.152.
+ * Copyright (c) 2020-2030, Shuigedeng (981376577@qq.com & https://blog.kumacloud.top/).
  *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.kuma.boot.dingtalk.multi;
 
 import com.kuma.boot.common.utils.log.LogUtils;
@@ -15,46 +25,105 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DingerHandler
-implements AlgorithmHandler {
+/**
+ * Dinger钉钉机器人算法 <br>
+ *
+ * <blockquote>
+ *
+ * VM options: {@code -Dmulti.dinger.minute.limit.count=2}
+ *
+ * </blockquote>
+ *
+ * <blockquote>
+ *
+ * 机器人发送消息频率限制
+ *
+ * <pre>
+ * https://ding-doc.dingtalk.com/doc#/serverapi3/pghqkk
+ * </pre>
+ *
+ * </blockquote>
+ *
+ * @author kuma
+ * @version 2022.07
+ * @since 2022-07-06 15:23:56
+ */
+public class DingerHandler implements AlgorithmHandler {
+
     public static final String DINGTALK_MULTI_DINGER_COUNT = "multi.dinger.minute.limit.count";
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyMMddHHmm");
     private static final ZoneId ZONE_ID = ZoneId.of("Asia/Shanghai");
-    private static final int COUNT_THRESHOLD = System.getProperty("multi.dinger.minute.limit.count") == null ? 20 : Integer.parseInt(System.getProperty("multi.dinger.minute.limit.count"));
-    private volatile int index = 0;
-    private String currentMinite = null;
-    private AtomicInteger counter = new AtomicInteger(0);
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
+    /** 每分钟内限制发送 COUNT 条 */
+    private static final int COUNT_THRESHOLD;
+
+    static {
+        COUNT_THRESHOLD = System.getProperty(DINGTALK_MULTI_DINGER_COUNT) == null
+                ? 20
+                : Integer.parseInt(System.getProperty(DINGTALK_MULTI_DINGER_COUNT));
+    }
+
+    /** 索引号 */
+    private volatile int index = DEFAULT_INDEX;
+    /** 当前分钟 */
+    private String currentMinite = null;
+    /** 计数器 */
+    private AtomicInteger counter = new AtomicInteger(DEFAULT_INDEX);
+
     @Override
     public DingerConfig handler(List<DingerConfig> dingerConfigs, DingerConfig defaultDingerConfig) {
         int size = dingerConfigs.size();
-        DingerHandler dingerHandler = this;
-        synchronized (dingerHandler) {
-            int count;
-            if (this.currentMinite == null) {
-                this.currentMinite = LocalDateTime.now(ZONE_ID).format(DATETIME_FMT);
+
+        synchronized (this) {
+            if (currentMinite == null) {
+                currentMinite = LocalDateTime.now(ZONE_ID).format(DATETIME_FMT);
             }
-            boolean countBool = (count = this.counter.getAndIncrement()) >= COUNT_THRESHOLD;
+
+            int count = counter.getAndIncrement();
+
+            boolean countBool = count >= COUNT_THRESHOLD;
             String now = LocalDateTime.now(ZONE_ID).format(DATETIME_FMT);
-            boolean inMinute = now.equals(this.currentMinite);
+            boolean inMinute = now.equals(currentMinite);
             if (countBool) {
                 if (inMinute) {
-                    ++this.index;
-                    this.index = this.index >= size ? 0 : this.index;
+                    index++;
+                    index = index >= size ? DEFAULT_INDEX : index;
                 }
-                this.currentMinite = now;
-                this.counter.set(1);
-                LogUtils.debug((String)"#{}-{}# \u5728{}\u5206\u5185\u53d1\u9001\u4e86{}\u6b21, \u5f53\u524d\u5206\u949f={}, \u4e0b\u4e00\u4e2a\u673a\u5668\u4eba={}.", (Object[])new Object[]{this.algorithmId(), COUNT_THRESHOLD, this.currentMinite, count, now, this.index});
+                currentMinite = now;
+                counter.set(1);
+
+                LogUtils.debug(
+                        "#{}-{}# 在{}分内发送了{}次, 当前分钟={}, 下一个机器人={}.",
+                        algorithmId(),
+                        COUNT_THRESHOLD,
+                        currentMinite,
+                        count,
+                        now,
+                        index);
+
+                //                LogUtils.info(String.format("#%s-%d# 在%s分内发送了%d次, 当前分钟=%s,
+                // 下一个机器人=%d.",
+                //                        algorithmId(), COUNT_THRESHOLD, currentMinite, count, now,
+                // index));
             } else if (!countBool && !inMinute) {
-                this.currentMinite = now;
-                this.counter.set(1);
-                LogUtils.debug((String)"#{}-{}# \u5728{}\u5206\u5185\u53d1\u9001\u4e86{}\u6b21, \u5f53\u524d\u5206\u949f={}, \u5f53\u524d\u673a\u5668\u4eba={}.", (Object[])new Object[]{this.algorithmId(), COUNT_THRESHOLD, this.currentMinite, count, now, this.index});
+                currentMinite = now;
+                counter.set(1);
+
+                LogUtils.debug(
+                        "#{}-{}# 在{}分内发送了{}次, 当前分钟={}, 当前机器人={}.",
+                        algorithmId(),
+                        COUNT_THRESHOLD,
+                        currentMinite,
+                        count,
+                        now,
+                        index);
+                //                LogUtils.info(String.format("#%s-%d# 在%s分内发送了%d次, 当前分钟=%s,
+                // 当前机器人=%d.",
+                //                        algorithmId(), COUNT_THRESHOLD, currentMinite, count, now,
+                // index));
             }
         }
-        return dingerConfigs.get(this.index);
+
+        return dingerConfigs.get(index);
     }
 }
-
