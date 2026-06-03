@@ -34,7 +34,7 @@ public class KmcDataSourceAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(KmcDataSourceAutoConfiguration.class, StarterNameConstants.DATASOURCE_STARTER);
+        LogUtils.started(KmcDataSourceAutoConfiguration.class, StarterNameConstants.DATA_DATASOURCE_STARTER);
     }
 
     /**
