@@ -76,6 +76,8 @@ public final class StarterNameConstants {
     public static final String JOB_QUARTZ_STARTER = "kuma-boot-starter-job-quartz";
     public static final String JOB_XXL_STARTER = "kuma-boot-starter-job-xxl";
 
+    public static final String LAYTPL_STARTER = "kuma-boot-starter-web";
+
     public static final String LOCK_STARTER = "kuma-boot-starter-lock";
     public static final String LOGGER_STARTER = "kuma-boot-starter-logger";
 

@@ -18,7 +18,7 @@ package com.kuma.boot.idempotent.aop;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.kuma.boot.common.utils.aop.AopUtils;
+import com.kuma.boot.core.utils.aop.AopUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.idempotent.annotation.Idempotent;
 import com.kuma.boot.idempotent.enums.IdempotentTypeEnum;

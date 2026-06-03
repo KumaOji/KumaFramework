@@ -22,7 +22,7 @@ import org.jspecify.annotations.NonNull;
  * @author wenpan 2023/01/04 21:56
  */
 @Configuration
-@ConditionalOnProperty(prefix = "enhance.idempotent", name = {"enable"}, value = {"true"})
+@ConditionalOnProperty(prefix = "enhance.idempotent", name = "enable", havingValue = "true")
 @EnableConfigurationProperties({IdempotentCoreProperties.class})
 public class IdempotentCoreAutoConfiguration {
 

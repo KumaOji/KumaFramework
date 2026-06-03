@@ -1,7 +1,7 @@
 package com.kuma.boot.idempotent.idempotentenhance.core.config.properties;
 
 import com.google.common.base.Preconditions;
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;

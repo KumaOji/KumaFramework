@@ -1,6 +1,6 @@
 package com.kuma.boot.idempotent.idempotentenhance.core.registry;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.kuma.boot.idempotent.idempotentenhance.core.config.properties.IdempotentCoreProperties;
@@ -31,7 +31,7 @@ public class IdempotentRepositoryRegistrySupport implements ApplicationListener<
     public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         Map<String, IdempotentRepository> repositories;
         try {
-            repositories = ContextUtils.getBeansOfType(IdempotentRepository.class);
+            repositories = ContextUtils.getBeansByType(IdempotentRepository.class);
         } catch (NoSuchBeanDefinitionException ex) {
             throw new RuntimeException("Can not found any IdempotentRepository implements, please check config.");
         }

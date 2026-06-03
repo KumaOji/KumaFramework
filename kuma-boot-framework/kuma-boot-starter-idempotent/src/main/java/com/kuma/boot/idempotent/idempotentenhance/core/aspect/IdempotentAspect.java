@@ -1,6 +1,6 @@
 package com.kuma.boot.idempotent.idempotentenhance.core.aspect;
 
-import com.kuma.boot.common.utils.context.ContextUtils;
+import com.kuma.boot.core.utils.context.ContextUtils;
 import com.kuma.boot.idempotent.idempotentenhance.core.annotation.Idempotent;
 import com.kuma.boot.idempotent.idempotentenhance.core.helper.IdempotentTemplate;
 import org.apache.commons.lang3.ArrayUtils;

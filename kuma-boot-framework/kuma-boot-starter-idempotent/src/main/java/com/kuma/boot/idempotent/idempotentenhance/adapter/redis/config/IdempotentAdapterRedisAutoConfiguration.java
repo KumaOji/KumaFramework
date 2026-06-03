@@ -27,7 +27,7 @@ import org.jspecify.annotations.NonNull;
 @EnableConfigurationProperties({IdempotentRedisAdapterProperties.class})
 @AutoConfigureAfter({IdempotentCoreAutoConfiguration.class})
 @ConditionalOnProperty(prefix = IdempotentCoreProperties.PREFIX,
-        name = {"enable", "adapter.redis.enable"}, value = {"true", "true"})
+        name = {"enable", "adapter.redis.enable"}, havingValue = "true")
 public class IdempotentAdapterRedisAutoConfiguration {
 
     /**
