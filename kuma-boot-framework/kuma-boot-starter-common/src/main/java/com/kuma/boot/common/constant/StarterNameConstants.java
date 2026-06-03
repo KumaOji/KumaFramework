@@ -149,6 +149,8 @@ public final class StarterNameConstants {
 
     public static final String OFFICE_STARTER = "kuma-boot-starter-office";
 
+    public static final String OTEL_STARTER = "kuma-boot-starter-otel";
+
     public static final String OPENAPI_STARTER = "kuma-boot-starter-openapi";
 
     public static final String PAY_COMMON_STARTER = "kuma-boot-starter-pay-common";
@@ -301,8 +303,6 @@ public final class StarterNameConstants {
     public static final String SENTINEL_CLOUD_STARTER = "kuma-cloud-starter-sentinel";
 
     public static final String STREAM_CLOUD_STARTER = "kuma-cloud-starter-stream";
-
-    public static final String TRACING_CLOUD_STARTER = "kuma-cloud-starter-tracing";
 
     public static final String TENCENT_CLOUD_STARTER = "kuma-cloud-starter-tencent";
 

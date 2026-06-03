@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.kuma.cloud.tracing.env;
+package com.kuma.boot.otel.env;
 
-import com.kuma.cloud.tracing.properties.TracingCloudProperties;
+import com.kuma.boot.otel.properties.OtelProperties;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.boot.EnvironmentPostProcessor;
@@ -28,38 +28,40 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
 
 /**
- * 将 {@code kuma.cloud.tracing.*} 中继到 Spring Boot 原生的 {@code management.tracing.*} /
- * {@code management.otlp.tracing.*}，以驱动 Boot 内置的 Micrometer Tracing + OTLP 自动装配。
+ * 将 {@code kuma.boot.otel.*} 中继到 Spring Boot 原生的
+ * {@code management.tracing.*} / {@code management.otlp.tracing.*}，
+ * 以驱动 Boot 内置的 Micrometer Tracing + OTLP 自动装配.
  *
  * <p>中继属性源以最低优先级（addLast）注入，因此用户在 application.yml 中显式声明的
  * {@code management.*} 始终优先，可用于精细化覆盖。
  *
  * @author kuma
- * @since 2026.06
  */
-public class TracingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+public class OtelEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-    private static final String PROPERTY_SOURCE_NAME = "kumaCloudTracing";
+    private static final String PROPERTY_SOURCE_NAME = "kumaBootOtel";
 
     @Override
     public void postProcessEnvironment(
             ConfigurableEnvironment environment, SpringApplication application) {
 
-        boolean enabled =
-                environment.getProperty(TracingCloudProperties.PREFIX + ".enabled", Boolean.class, false);
+        boolean enabled = environment.getProperty(
+                OtelProperties.PREFIX + ".enabled", Boolean.class, false);
         if (!enabled) {
             return;
         }
 
-        TracingCloudProperties props =
-                Binder.get(environment)
-                        .bind(TracingCloudProperties.PREFIX, TracingCloudProperties.class)
-                        .orElseGet(TracingCloudProperties::new);
+        if (environment.getPropertySources().contains(PROPERTY_SOURCE_NAME)) {
+            return;
+        }
+
+        OtelProperties props = Binder.get(environment)
+                .bind(OtelProperties.PREFIX, OtelProperties.class)
+                .orElseGet(OtelProperties::new);
 
         Map<String, Object> relayed = new LinkedHashMap<>();
         relayed.put("management.tracing.enabled", true);
-        relayed.put(
-                "management.tracing.sampling.probability", props.getSampling().getProbability());
+        relayed.put("management.tracing.sampling.probability", props.getSampling().getProbability());
 
         if (StringUtils.hasText(props.getEndpoint())) {
             relayed.put("management.otlp.tracing.endpoint", props.getEndpoint());
@@ -71,23 +73,16 @@ public class TracingEnvironmentPostProcessor implements EnvironmentPostProcessor
             relayed.put("management.otlp.tracing.compression", props.getCompression());
         }
         if (props.getHeaders() != null) {
-            props.getHeaders()
-                    .forEach(
-                            (key, value) ->
-                                    relayed.put("management.otlp.tracing.headers." + key, value));
+            props.getHeaders().forEach((k, v) ->
+                    relayed.put("management.otlp.tracing.headers." + k, v));
         }
 
-        if (environment.getPropertySources().contains(PROPERTY_SOURCE_NAME)) {
-            return;
-        }
-        environment
-                .getPropertySources()
-                .addLast(new MapPropertySource(PROPERTY_SOURCE_NAME, relayed));
+        environment.getPropertySources().addLast(new MapPropertySource(PROPERTY_SOURCE_NAME, relayed));
     }
 
     @Override
     public int getOrder() {
-        // 在 ConfigDataEnvironmentPostProcessor 之后执行，确保已能读取到 application.yml 中的 kuma.cloud.tracing.*
+        // ConfigDataEnvironmentPostProcessor 之后执行，确保已能读取到 application.yml 中的配置
         return Ordered.LOWEST_PRECEDENCE;
     }
 }

@@ -22,9 +22,6 @@ dependencies {
     // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties、EnvironmentPostProcessor 等）
     api projectLibs.spring.boot.autoconfigure
 
-    // Spring Cloud Context（@RefreshScope）
-    api projectLibs.spring.cloud.context
-
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }

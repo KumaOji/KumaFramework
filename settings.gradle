@@ -92,7 +92,7 @@ def frameworkBootSubModules = [
         // 配置 & 集成
         'apollo', 'canal', 'dingtalk', 'frp',
         // 业务能力
-        'ddd', 'eventbus', 'flowengine', 'i18n', 'idgenerator', 'ip2region',
+        'ddd', 'eventbus', 'flowengine', 'i18n', 'idgenerator', 'ip2region', 'otel',
         'monitor', 'multi-tenant', 'office', 'openapi', 'pinyin', 'retry',
         'sensitive', 'springdoc', 'statemachine', 'test',
         'threadpool', 'translation', 'useragent',
@@ -104,7 +104,7 @@ for (name in frameworkBootSubModules) {
 def frameworkCloudSubModules = ['bootstrap', 'seata', 'kmc',
                                 'sentinel', 'stream', 'alibaba',
                                 'cache', 'jdbcpool', 'netty', 'gateway',
-                                'openfeign', 'tracing', 'dubbo']
+                                'openfeign', 'dubbo']
 //def frameworkCloudSubModules2 = ['tx', 'mq',
 //                                 'ccsr', 'job', 'rpc']
 for (name in frameworkCloudSubModules) {
