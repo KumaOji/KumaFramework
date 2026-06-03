@@ -97,7 +97,12 @@ public enum ResultEnum implements CommonEnum {
     USERNAME_OR_PASSWORD_ERROR(systemCode("500"), ""),
     METHOD_NOT_SUPPORTED_ERROR(systemCode("500"), ""),
     MEDIA_TYPE_NOT_SUPPORTED_ERROR(systemCode("500"), ""),
-    METHOD_ARGUMENTS_TYPE_MISMATCH(systemCode("500"), "");
+    METHOD_ARGUMENTS_TYPE_MISMATCH(systemCode("500"), ""),
+
+    /** 请求频次过高 / 重复提交（对应 HTTP 429） */
+    REQUEST_MORE_ERROR(systemCode("429"), "请勿重复提交请求"),
+    /** 当前有其他相同操作正在处理（对应 HTTP 409） */
+    REQUEST_OTHER_OPERATION(systemCode("409"), "当前有其他操作正在处理，请稍后再试");
 
 
     //// **********************其他异常***********************

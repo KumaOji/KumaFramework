@@ -2,7 +2,7 @@ package com.kuma.boot.idempotent.idempotetduplicate;
 
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.common.utils.servlet.RequestUtils;
+import com.kuma.boot.core.utils.servlet.RequestUtils;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;

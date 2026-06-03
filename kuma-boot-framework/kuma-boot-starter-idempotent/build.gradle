@@ -24,6 +24,7 @@ dependencies {
     api projectLibs.aspectjweaver
     api projectLibs.spring.redisson
     api projectLibs.mybatis.spring
+    api projectLibs.mybatis.core
     api projectLibs.jspecify
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
