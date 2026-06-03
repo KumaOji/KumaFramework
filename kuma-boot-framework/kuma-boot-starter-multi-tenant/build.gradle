@@ -8,8 +8,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
 
     api projectLibs.spring.boot.autoconfigure
-    api projectLibs.spring.boot.starter.web
+    // spring-web 提供 OncePerRequestFilter / FilterRegistrationBean，不引入嵌入式 Tomcat
+    api projectLibs.spring.web
 
+    // 运行时由容器提供，仅编译期需要
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.spring.cloud.context
     compileOnly projectLibs.jspecify

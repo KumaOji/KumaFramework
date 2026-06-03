@@ -22,7 +22,6 @@ import com.kuma.boot.i18n.advice.I18nResponseAdvice;
 import com.kuma.boot.i18n.exception.I18nExceptionHandler;
 import com.kuma.boot.i18n.util.I18nUtils;
 import java.time.Duration;
-import java.util.List;
 import java.util.Locale;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -76,29 +75,28 @@ public class I18nAutoConfiguration implements InitializingBean {
     @ConditionalOnWebApplication(type = Type.SERVLET)
     @ConditionalOnMissingBean(LocaleResolver.class)
     public LocaleResolver localeResolver(I18nProperties props) {
-        List<Locale> supported = props.getSupportedLanguages().stream()
-                .map(Locale::forLanguageTag)
-                .toList();
         Locale defaultLocale = Locale.forLanguageTag(props.getDefaultLanguage());
 
         return switch (props.getLocaleResolverType()) {
             case COOKIE -> {
+                // CookieLocaleResolver 继承 AbstractLocaleContextResolver，不支持 setSupportedLocales
                 CookieLocaleResolver r = new CookieLocaleResolver(props.getCookieName());
                 r.setDefaultLocale(defaultLocale);
                 r.setCookieMaxAge(Duration.ofSeconds(props.getCookieMaxAge()));
-                if (!supported.isEmpty()) r.setSupportedLocales(supported);
                 yield r;
             }
             case SESSION -> {
+                // SessionLocaleResolver 继承 AbstractLocaleContextResolver，不支持 setSupportedLocales
                 SessionLocaleResolver r = new SessionLocaleResolver();
                 r.setDefaultLocale(defaultLocale);
-                if (!supported.isEmpty()) r.setSupportedLocales(supported);
                 yield r;
             }
             case FIXED -> new FixedLocaleResolver(defaultLocale);
-            default -> {  // ACCEPT_HEADER
+            default -> {  // ACCEPT_HEADER — AbstractLocaleResolver 支持 setSupportedLocales
                 AcceptHeaderLocaleResolver r = new AcceptHeaderLocaleResolver();
                 r.setDefaultLocale(defaultLocale);
+                var supported = props.getSupportedLanguages().stream()
+                        .map(Locale::forLanguageTag).toList();
                 if (!supported.isEmpty()) r.setSupportedLocales(supported);
                 yield r;
             }

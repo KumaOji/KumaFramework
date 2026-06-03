@@ -9,8 +9,9 @@ dependencies {
 
     api platform(projectLibs.spring.cloud.dependencies)
     api platform(projectLibs.spring.cloud.alibaba.dependencies)
-    // dubbo-spring-cloud-starter 复用 Spring Cloud 服务注册发现（搭配 kuma-cloud-starter-alibaba 的 Nacos）
-    api projectLibs.dubbo.spring.cloud.starter
+    // dubbo-spring-boot-starter 包含 dubbo-rpc-api（Filter 接口等核心类）
+    // dubbo-spring-cloud-starter 在 3.3.x 已不作为独立制品发布
+    api projectLibs.dubbo.spring.boot.starter
     api 'org.springframework.cloud:spring-cloud-context'
     api projectLibs.spring.boot.autoconfigure
 

@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -24,7 +23,6 @@ import org.springframework.session.data.redis.RedisSessionRepository;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
-import org.springframework.session.web.http.HttpSessionEventPublisher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,12 +34,9 @@ import org.springframework.util.StringUtils;
  * <p>该配置在 Spring Boot 自身 {@code SessionAutoConfiguration} 的基础上叠加以下增强：
  * <ul>
  *   <li><b>JSON 序列化</b>：以 Jackson 替换 JDK 序列化，Session 属性存为可读 JSON</li>
- *   <li><b>Cookie 定制</b>：统一设置 Cookie 名称、HttpOnly、Secure、SameSite</li>
- *   <li><b>生命周期事件</b>：注册 {@link HttpSessionEventPublisher}，Session 创建/销毁
- *       以 Spring 事件广播</li>
+ *   <li><b>Cookie 定制</b>：统一设置 Cookie 名称、HttpOnly、Secure、SameSite、Domain</li>
  *   <li><b>并发登录控制</b>（可选）：当 Spring Security 及 indexed Session Repository 均存在时，
- *       自动注册 {@link SpringSessionBackedSessionRegistry}；
- *       配合 {@code kuma.boot.session.max-sessions-per-user} 使用</li>
+ *       自动注册 {@link SpringSessionBackedSessionRegistry}</li>
  * </ul>
  *
  * <p>标准 Session / Redis 配置仍通过 {@code spring.session.*} 和 {@code spring.data.redis.*} 设置：
@@ -52,8 +47,12 @@ import org.springframework.util.StringUtils;
  *     timeout: 1800
  *     redis:
  *       namespace: spring:session
- *       repository-type: indexed   # 开启索引，启用并发登录控制
+ *       repository-type: indexed   # 开启索引以启用并发登录控制
  * </pre>
+ *
+ * <p>如需监听 Session 生命周期事件，可在业务代码中注册
+ * {@code org.springframework.session.events.SessionCreatedEvent} /
+ * {@code SessionExpiredEvent} / {@code SessionDeletedEvent} 的 {@code @EventListener}。
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SessionProperties.class)
@@ -74,7 +73,7 @@ public class SessionAutoConfiguration implements InitializingBean {
 
     /**
      * 以 Jackson JSON 替换 Spring Session 默认的 JDK 序列化器。
-     * 存储的 Session 属性为可读 JSON，方便运维排查；跨 JVM 版本不会出现序列化不兼容问题。
+     * Session 属性以可读 JSON 存入 Redis，跨 JVM 版本无序列化兼容问题。
      */
     @Bean("springSessionDefaultRedisSerializer")
     @ConditionalOnMissingBean(name = "springSessionDefaultRedisSerializer")
@@ -88,8 +87,8 @@ public class SessionAutoConfiguration implements InitializingBean {
 
     /**
      * 定制 Session Cookie：名称、HttpOnly、Secure、SameSite、Path、Domain。
-     * Spring Session 自动注入 {@link CookieSerializer} 类型 Bean 到
-     * {@code CookieHttpSessionIdResolver}，本 Bean 缺失时使用框架默认值。
+     * Spring Session 自动将 {@link CookieSerializer} 类型的 Bean 注入到
+     * {@code CookieHttpSessionIdResolver}。
      */
     @Bean
     @ConditionalOnMissingBean(CookieSerializer.class)
@@ -104,24 +103,9 @@ public class SessionAutoConfiguration implements InitializingBean {
         }
         serializer.setCookiePath(cookie.getPath());
         if (StringUtils.hasText(cookie.getDomain())) {
-            serializer.setCookieDomain(cookie.getDomain());
+            serializer.setDomainName(cookie.getDomain());
         }
         return serializer;
-    }
-
-    // -------------------------------------------------------------------------
-    // Session 生命周期事件发布
-    // -------------------------------------------------------------------------
-
-    /**
-     * 将 Servlet 容器的 {@code HttpSessionListener} 回调转换为 Spring
-     * {@code ApplicationEvent}（{@code HttpSessionCreatedEvent} /
-     * {@code HttpSessionDestroyedEvent}），供业务 {@code @EventListener} 监听。
-     */
-    @Bean
-    @ConditionalOnMissingBean(HttpSessionEventPublisher.class)
-    public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
-        return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
     }
 
     // -------------------------------------------------------------------------
