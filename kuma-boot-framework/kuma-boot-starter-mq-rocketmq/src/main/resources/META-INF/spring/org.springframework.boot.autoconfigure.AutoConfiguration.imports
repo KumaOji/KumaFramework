@@ -1,0 +1,2 @@
+com.kuma.boot.mq.rocketmq.autoconfigure.RocketMQAutoConfiguration
+com.kuma.boot.mq.rocketmq.autoconfigure.RocketMQMessageQueueAutoConfiguration
