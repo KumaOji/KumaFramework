@@ -76,11 +76,12 @@ def frameworkBootSubModules = [
         'security-common', 'security-spring', 'security-jstauth', 'security-satoken',
         'captcha', 'encrypt', 'idempotent', 'lock', 'ratelimit', 'session', 'sign', 'totp',
         // 消息队列
-        'mq-common', 'mq-kafka',
+        'mq-common', 'mq-kafka', 'mq-rabbitmq', 'mq-rocketmq',
         // 任务调度
-        'job-common', 'job-xxl',
+        'job-common', 'job-quartz', 'job-powerjob', 'job-xxl',
         // Web
         'web', 'webagg', 'websocket', 'xss',
+        'graphql', 'mcp', 'sse', 'webflux',
         // AI
         'ai',
         // 可观测性

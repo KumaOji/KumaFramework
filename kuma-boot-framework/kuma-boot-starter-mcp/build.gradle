@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework MCP 模块（Model Context Protocol — AI 工具/资源/提示词注册与服务端实现）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api projectLibs.spring.boot.autoconfigure
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

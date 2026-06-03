@@ -158,6 +158,7 @@ spring-cloud = "2025.1.0"
 spring-cloud-alibaba = "2025.1.0.0"
 spring-cloud-gateway = "5.0.0"
 rocketmq-spring = "2.3.3"
+powerjob = "5.1.1"
 seata = "2.5.0"
 langchain4j = "1.15.0"
 langchain4j-qdrant = "1.15.0-beta25"
@@ -271,6 +272,7 @@ spring-web = { module = "org.springframework:spring-web", version.ref = "spring-
 spring-webmvc = { module = "org.springframework:spring-webmvc", version.ref = "spring-web" }
 spring-webflux = { module = "org.springframework:spring-webflux", version.ref = "spring-webflux" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "springboot" }
+spring-boot-starter-graphql = { module = "org.springframework.boot:spring-boot-starter-graphql", version.ref = "springboot" }
 browscap = { module = "com.blueconic:browscap-java", version.ref = "browscap" }
 yauaa = { module = "nl.basjes.parse.useragent:yauaa", version.ref = "yauaa" }
 libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
@@ -324,6 +326,7 @@ kryo = { module = "com.esotericsoftware:kryo", version.ref = "kryo" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 antisamy = { module = "org.owasp.antisamy:antisamy", version.ref = "antisamy" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
+spring-boot-starter-amqp = { module = "org.springframework.boot:spring-boot-starter-amqp", version.ref = "springboot" }
 spring-boot-starter-quartz = { module = "org.springframework.boot:spring-boot-starter-quartz", version.ref = "springboot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "springboot" }
 spring-boot-starter-websocket = { module = "org.springframework.boot:spring-boot-starter-websocket", version.ref = "springboot" }
@@ -465,6 +468,7 @@ spring-cloud-starter-alibaba-nacos-config = { module = "com.alibaba.cloud:spring
 spring-cloud-starter-alibaba-sentinel = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-sentinel", version.ref = "spring-cloud-alibaba" }
 spring-cloud-starter-alibaba-seata = { module = "com.alibaba.cloud:spring-cloud-starter-alibaba-seata", version.ref = "spring-cloud-alibaba" }
 rocketmq-spring-boot-starter = { module = "org.apache.rocketmq:rocketmq-spring-boot-starter", version.ref = "rocketmq-spring" }
+powerjob-worker-spring-boot-starter = { module = "tech.powerjob:powerjob-worker-spring-boot-starter", version.ref = "powerjob" }
 spring-cloud-starter-stream-rocketmq = { module = "com.alibaba.cloud:spring-cloud-starter-stream-rocketmq", version.ref = "spring-cloud-alibaba" }
 seata-spring-boot-starter = { module = "org.apache.seata:seata-spring-boot-starter", version.ref = "seata" }
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }

@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework mq-rabbitmq 模块（RabbitMQ — AMQP 消息收发、死信队列、延迟队列、消息确认）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-mq-common')
+
+    api projectLibs.spring.boot.starter.amqp
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

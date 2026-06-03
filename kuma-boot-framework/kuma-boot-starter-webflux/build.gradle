@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework WebFlux 模块（响应式编程 — Reactor、R2DBC、响应式安全等增强配置）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.webflux
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

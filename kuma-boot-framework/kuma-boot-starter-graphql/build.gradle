@@ -1,0 +1,17 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework GraphQL 模块（Spring for GraphQL — Schema 注册、异常处理、分页、安全增强）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.graphql
+
+    compileOnly projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

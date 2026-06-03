@@ -63,6 +63,7 @@ public final class StarterNameConstants {
     public static final String FLOWENGINE_STARTER = "kuma-boot-starter-flowengine";
     public static final String FRP_STARTER = "kuma-boot-starter-frp";
 
+    public static final String GRAPHQL_STARTER = "kuma-boot-starter-graphql";
     public static final String GRPC_STARTER = "kuma-boot-starter-grpc";
 
     public static final String I18N_STARTER = "kuma-boot-starter-i18n";
@@ -71,6 +72,8 @@ public final class StarterNameConstants {
     public static final String IP2REGION_STARTER = "kuma-boot-starter-ip2region";
 
     public static final String JOB_COMMON_STARTER = "kuma-boot-starter-job-common";
+    public static final String JOB_POWERJOB_STARTER = "kuma-boot-starter-job-powerjob";
+    public static final String JOB_QUARTZ_STARTER = "kuma-boot-starter-job-quartz";
     public static final String JOB_XXL_STARTER = "kuma-boot-starter-job-xxl";
 
     public static final String LOCK_STARTER = "kuma-boot-starter-lock";
@@ -78,9 +81,12 @@ public final class StarterNameConstants {
 
     public static final String MAIL_STARTER = "kuma-boot-starter-mail";
     public static final String METRICS_STARTER = "kuma-boot-starter-metrics";
+    public static final String MCP_STARTER = "kuma-boot-starter-mcp";
     public static final String MONITOR_STARTER = "kuma-boot-starter-monitor";
     public static final String MQ_COMMON_STARTER = "kuma-boot-starter-mq-common";
     public static final String MQ_KAFKA_STARTER = "kuma-boot-starter-mq-kafka";
+    public static final String MQ_RABBITMQ_STARTER = "kuma-boot-starter-mq-rabbitmq";
+    public static final String MQ_ROCKETMQ_STARTER = "kuma-boot-starter-mq-rocketmq";
     public static final String MQTT_STARTER = "kuma-boot-starter-mqtt";
     public static final String MULTI_TENANT_STARTER = "kuma-boot-starter-multi-tenant";
 
@@ -109,6 +115,7 @@ public final class StarterNameConstants {
     public static final String SESSION_STARTER = "kuma-boot-starter-session";
     public static final String SIGN_STARTER = "kuma-boot-starter-sign";
     public static final String SKYWALKING_STARTER = "kuma-boot-starter-skywalking";
+    public static final String SSE_STARTER = "kuma-boot-starter-sse";
     public static final String SMS_ALIYUN_STARTER = "kuma-boot-starter-sms-aliyun";
     public static final String SMS_COMMON_STARTER = "kuma-boot-starter-sms-common";
     public static final String SMS_TENCENT_STARTER = "kuma-boot-starter-sms-tencent";
@@ -125,6 +132,7 @@ public final class StarterNameConstants {
 
     public static final String WEB_STARTER = "kuma-boot-starter-web";
     public static final String WEBAGG_STARTER = "kuma-boot-starter-webagg";
+    public static final String WEBFLUX_STARTER = "kuma-boot-starter-webflux";
     public static final String WEBSOCKET_STARTER = "kuma-boot-starter-websocket";
 
     public static final String XSS_STARTER = "kuma-boot-starter-xss";

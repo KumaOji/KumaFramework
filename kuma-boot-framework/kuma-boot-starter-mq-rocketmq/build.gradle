@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework mq-rocketmq 模块（Apache RocketMQ — 生产者/消费者封装、顺序消息、延时消息、事务消息）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-mq-common')
+
+    api projectLibs.rocketmq.spring.boot.starter
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
