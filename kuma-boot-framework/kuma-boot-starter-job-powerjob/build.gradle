@@ -13,6 +13,12 @@ dependencies {
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.cloud.context
 
+    // PowerJobMdcInspector 使用 Tracer / ScopedSpan
+    api projectLibs.micrometer.tracing.api
+    // @Aspect / ProceedingJoinPoint
+    api projectLibs.aspectjweaver
+    api projectLibs.spring.aop
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }

@@ -22,6 +22,7 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -71,7 +72,7 @@ public class QuartzManager {
                     .storeDurably();
 
             if (jobDataMap != null && !jobDataMap.isEmpty()) {
-                jobDataMap.forEach(jobBuilder::usingJobData);
+                jobBuilder.usingJobData(new JobDataMap(jobDataMap));
             }
 
             JobDetail jobDetail = jobBuilder.build();

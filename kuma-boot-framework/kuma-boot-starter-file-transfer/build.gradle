@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 文件传输模块（FTP / SFTP — 统一客户端抽象、连接管理、断线重连）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    api projectLibs.spring.boot.autoconfigure
+
+    // FTP — Apache Commons Net（已通过 common 传递，显式声明避免意外排除）
+    api projectLibs.commons.net
+
+    // SFTP — JSch (mwiede actively-maintained fork)
+    api projectLibs.jsch
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

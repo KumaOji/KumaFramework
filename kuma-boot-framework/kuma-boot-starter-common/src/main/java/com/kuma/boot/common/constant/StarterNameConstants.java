@@ -60,6 +60,7 @@ public final class StarterNameConstants {
     public static final String ENCRYPT_STARTER = "kuma-boot-starter-encrypt";
     public static final String EVENTBUS_STARTER = "kuma-boot-starter-eventbus";
 
+    public static final String FILE_TRANSFER_STARTER = "kuma-boot-starter-file-transfer";
     public static final String FLOWENGINE_STARTER = "kuma-boot-starter-flowengine";
     public static final String FRP_STARTER = "kuma-boot-starter-frp";
 

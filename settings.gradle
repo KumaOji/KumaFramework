@@ -82,6 +82,8 @@ def frameworkBootSubModules = [
         // Web
         'web', 'webagg', 'websocket', 'xss',
         'graphql', 'mcp', 'sse', 'webflux',
+        // 文件传输
+        'file-transfer',
         // AI
         'ai',
         // 可观测性
