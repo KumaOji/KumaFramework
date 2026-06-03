@@ -1,9 +1,8 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.totp.secret;
 
 public interface SecretGenerator {
-    public String generate();
+    /**
+     * @return A random base32 encoded string to use as the shared secret/key between the server and the client.
+     */
+    String generate();
 }
-

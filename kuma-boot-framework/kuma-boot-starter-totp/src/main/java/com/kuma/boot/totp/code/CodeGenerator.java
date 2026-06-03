@@ -1,11 +1,13 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.totp.code;
 
 import com.kuma.boot.totp.exceptions.CodeGenerationException;
 
 public interface CodeGenerator {
-    public String generate(String var1, long var2) throws CodeGenerationException;
+    /**
+     * @param secret The shared secret/key to generate the code with.
+     * @param counter The current time bucket number. Number of seconds since epoch / bucket period.
+     * @return The n-digit code for the secret/counter.
+     * @throws CodeGenerationException Thrown if the code generation fails for any reason.
+     */
+    String generate(String secret, long counter) throws CodeGenerationException;
 }
-

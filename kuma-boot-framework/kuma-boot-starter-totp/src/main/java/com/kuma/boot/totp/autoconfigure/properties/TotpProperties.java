@@ -1,40 +1,36 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  org.springframework.boot.context.properties.ConfigurationProperties
- */
 package com.kuma.boot.totp.autoconfigure.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix="kuma.boot.totp")
+@ConfigurationProperties(prefix = "kuma.boot.totp")
 public class TotpProperties {
+
     private static final int DEFAULT_SECRET_LENGTH = 32;
     private static final int DEFAULT_CODE_LENGTH = 6;
     private static final int DEFAULT_TIME_PERIOD = 30;
     private static final int DEFAULT_TIME_DISCREPANCY = 1;
+
     private final Secret secret = new Secret();
     private final Code code = new Code();
     private final Time time = new Time();
 
     public Secret getSecret() {
-        return this.secret;
+        return secret;
     }
 
     public Code getCode() {
-        return this.code;
+        return code;
     }
 
     public Time getTime() {
-        return this.time;
+        return time;
     }
 
     public static class Secret {
-        private int length = 32;
+        private int length = DEFAULT_SECRET_LENGTH;
 
         public int getLength() {
-            return this.length;
+            return length;
         }
 
         public void setLength(int length) {
@@ -43,10 +39,10 @@ public class TotpProperties {
     }
 
     public static class Code {
-        private int length = 6;
+        private int length = DEFAULT_CODE_LENGTH;
 
         public int getLength() {
-            return this.length;
+            return length;
         }
 
         public void setLength(int length) {
@@ -55,11 +51,11 @@ public class TotpProperties {
     }
 
     public static class Time {
-        private int period = 30;
-        private int discrepancy = 1;
+        private int period = DEFAULT_TIME_PERIOD;
+        private int discrepancy = DEFAULT_TIME_DISCREPANCY;
 
         public int getPeriod() {
-            return this.period;
+            return period;
         }
 
         public void setPeriod(int period) {
@@ -67,7 +63,7 @@ public class TotpProperties {
         }
 
         public int getDiscrepancy() {
-            return this.discrepancy;
+            return discrepancy;
         }
 
         public void setDiscrepancy(int discrepancy) {
@@ -75,4 +71,3 @@ public class TotpProperties {
         }
     }
 }
-

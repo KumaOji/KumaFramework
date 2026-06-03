@@ -1,22 +1,10 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.springframework.beans.factory.InitializingBean
- *  org.springframework.beans.factory.annotation.Autowired
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnClass
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
- *  org.springframework.boot.context.properties.EnableConfigurationProperties
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
- */
 package com.kuma.boot.totp.autoconfigure;
 
+import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.totp.TotpInfo;
 import com.kuma.boot.totp.autoconfigure.properties.TotpProperties;
-import com.kuma.boot.totp.code.CodeGenerator;
+import com.kuma.boot.totp.code.*;
 import com.kuma.boot.totp.code.CodeVerifier;
 import com.kuma.boot.totp.code.DefaultCodeGenerator;
 import com.kuma.boot.totp.code.DefaultCodeVerifier;
@@ -38,15 +26,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnClass(value={TotpInfo.class})
-@EnableConfigurationProperties(value={TotpProperties.class})
-public class TotpAutoConfiguration
-implements InitializingBean {
-    private TotpProperties props;
+@ConditionalOnClass(TotpInfo.class)
+@EnableConfigurationProperties(TotpProperties.class)
+public class TotpAutoConfiguration implements InitializingBean {
 
+    @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(TotpAutoConfiguration.class, (String)"kuma-boot-starter-totp", (String[])new String[0]);
+        LogUtils.started(TotpAutoConfiguration.class, StarterNameConstants.TOTP_STARTER);
     }
+
+    private TotpProperties props;
 
     @Autowired
     public TotpAutoConfiguration(TotpProperties props) {
@@ -56,7 +45,7 @@ implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public SecretGenerator secretGenerator() {
-        int length = this.props.getSecret().getLength();
+        int length = props.getSecret().getLength();
         return new DefaultSecretGenerator(length);
     }
 
@@ -75,7 +64,7 @@ implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public QrDataFactory qrDataFactory(HashingAlgorithm hashingAlgorithm) {
-        return new QrDataFactory(hashingAlgorithm, this.getCodeLength(), this.getTimePeriod());
+        return new QrDataFactory(hashingAlgorithm, getCodeLength(), getTimePeriod());
     }
 
     @Bean
@@ -87,15 +76,16 @@ implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public CodeGenerator codeGenerator(HashingAlgorithm algorithm) {
-        return new DefaultCodeGenerator(algorithm, this.getCodeLength());
+        return new DefaultCodeGenerator(algorithm, getCodeLength());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public CodeVerifier codeVerifier(CodeGenerator codeGenerator, TimeProvider timeProvider) {
         DefaultCodeVerifier verifier = new DefaultCodeVerifier(codeGenerator, timeProvider);
-        verifier.setTimePeriod(this.getTimePeriod());
-        verifier.setAllowedTimePeriodDiscrepancy(this.props.getTime().getDiscrepancy());
+        verifier.setTimePeriod(getTimePeriod());
+        verifier.setAllowedTimePeriodDiscrepancy(props.getTime().getDiscrepancy());
+
         return verifier;
     }
 
@@ -106,11 +96,10 @@ implements InitializingBean {
     }
 
     private int getCodeLength() {
-        return this.props.getCode().getLength();
+        return props.getCode().getLength();
     }
 
     private int getTimePeriod() {
-        return this.props.getTime().getPeriod();
+        return props.getTime().getPeriod();
     }
 }
-

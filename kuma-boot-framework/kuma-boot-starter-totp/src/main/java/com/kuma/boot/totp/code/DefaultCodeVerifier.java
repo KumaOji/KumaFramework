@@ -1,19 +1,16 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.totp.code;
 
 import com.kuma.boot.totp.exceptions.CodeGenerationException;
 import com.kuma.boot.totp.time.TimeProvider;
 
-public class DefaultCodeVerifier
-implements CodeVerifier {
-    private final CodeGenerator codeGenerator;
+public class DefaultCodeVerifier implements com.kuma.boot.totp.code.CodeVerifier {
+
+    private final com.kuma.boot.totp.code.CodeGenerator codeGenerator;
     private final TimeProvider timeProvider;
     private int timePeriod = 30;
     private int allowedTimePeriodDiscrepancy = 1;
 
-    public DefaultCodeVerifier(CodeGenerator codeGenerator, TimeProvider timeProvider) {
+    public DefaultCodeVerifier(com.kuma.boot.totp.code.CodeGenerator codeGenerator, TimeProvider timeProvider) {
         this.codeGenerator = codeGenerator;
         this.timeProvider = timeProvider;
     }
@@ -28,35 +25,48 @@ implements CodeVerifier {
 
     @Override
     public boolean isValidCode(String secret, String code) {
-        long currentBucket = Math.floorDiv(this.timeProvider.getTime(), this.timePeriod);
+        // Get the current number of seconds since the epoch and
+        // calculate the number of time periods passed.
+        long currentBucket = Math.floorDiv(timeProvider.getTime(), timePeriod);
+
+        // Calculate and compare the codes for all the "valid" time periods,
+        // even if we get an early match, to avoid timing attacks
         boolean success = false;
-        for (int i = -this.allowedTimePeriodDiscrepancy; i <= this.allowedTimePeriodDiscrepancy; ++i) {
-            success = this.checkCode(secret, currentBucket + (long)i, code) || success;
+        for (int i = -allowedTimePeriodDiscrepancy; i <= allowedTimePeriodDiscrepancy; i++) {
+            success = checkCode(secret, currentBucket + i, code) || success;
         }
+
         return success;
     }
 
+    /**
+     * Check if a code matches for a given secret and counter.
+     */
     private boolean checkCode(String secret, long counter, String code) {
         try {
-            String actualCode = this.codeGenerator.generate(secret, counter);
-            return this.timeSafeStringComparison(actualCode, code);
-        }
-        catch (CodeGenerationException e) {
+            String actualCode = codeGenerator.generate(secret, counter);
+            return timeSafeStringComparison(actualCode, code);
+        } catch (CodeGenerationException e) {
             return false;
         }
     }
 
+    /**
+     * Compare two strings for equality without leaking timing information.
+     */
     private boolean timeSafeStringComparison(String a, String b) {
-        byte[] bBytes;
         byte[] aBytes = a.getBytes();
-        if (aBytes.length != (bBytes = b.getBytes()).length) {
+        byte[] bBytes = b.getBytes();
+
+        if (aBytes.length != bBytes.length) {
             return false;
         }
+
         int result = 0;
-        for (int i = 0; i < aBytes.length; ++i) {
+        for (int i = 0; i < aBytes.length; i++) {
             result |= aBytes[i] ^ bBytes[i];
         }
+
         return result == 0;
     }
 }
-

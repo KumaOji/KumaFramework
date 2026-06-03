@@ -1,13 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- *
- * Could not load the following classes:
- *  com.google.zxing.BarcodeFormat
- *  com.google.zxing.Writer
- *  com.google.zxing.client.j2se.MatrixToImageWriter
- *  com.google.zxing.common.BitMatrix
- *  com.google.zxing.qrcode.QRCodeWriter
- */
 package com.kuma.boot.totp.qr;
 
 import com.google.zxing.BarcodeFormat;
@@ -16,17 +6,15 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.kuma.boot.totp.exceptions.QrGenerationException;
-
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 
-public class ZxingPngQrGenerator
-implements QrGenerator {
+public class ZxingPngQrGenerator implements com.kuma.boot.totp.qr.QrGenerator {
+
     private final Writer writer;
     private int imageSize = 350;
 
     public ZxingPngQrGenerator() {
-        this((Writer)new QRCodeWriter());
+        this(new QRCodeWriter());
     }
 
     public ZxingPngQrGenerator(Writer writer) {
@@ -38,25 +26,23 @@ implements QrGenerator {
     }
 
     public int getImageSize() {
-        return this.imageSize;
+        return imageSize;
     }
 
-    @Override
     public String getImageMimeType() {
         return "image/png";
     }
 
     @Override
-    public byte[] generate(QrData data) throws QrGenerationException {
+    public byte[] generate(com.kuma.boot.totp.qr.QrData data) throws QrGenerationException {
         try {
-            BitMatrix bitMatrix = this.writer.encode(data.getUri(), BarcodeFormat.QR_CODE, this.imageSize, this.imageSize);
+            BitMatrix bitMatrix = writer.encode(data.getUri(), BarcodeFormat.QR_CODE, imageSize, imageSize);
             ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-            MatrixToImageWriter.writeToStream((BitMatrix)bitMatrix, (String)"PNG", (OutputStream)pngOutputStream);
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+
             return pngOutputStream.toByteArray();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new QrGenerationException("Failed to generate QR code. See nested exception.", e);
         }
     }
 }
-

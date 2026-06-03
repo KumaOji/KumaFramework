@@ -1,14 +1,14 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.totp.qr;
 
 import com.kuma.boot.totp.code.HashingAlgorithm;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@SuppressWarnings("WeakerAccess")
 public class QrData {
+
     private final String type;
     private final String label;
     private final String secret;
@@ -17,6 +17,9 @@ public class QrData {
     private final int digits;
     private final int period;
 
+    /**
+     * Force use of builder to create instances.
+     */
     private QrData(String type, String label, String secret, String issuer, String algorithm, int digits, int period) {
         this.type = type;
         this.label = label;
@@ -28,45 +31,58 @@ public class QrData {
     }
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
     public String getLabel() {
-        return this.label;
+        return label;
     }
 
     public String getSecret() {
-        return this.secret;
+        return secret;
     }
 
     public String getIssuer() {
-        return this.issuer;
+        return issuer;
     }
 
     public String getAlgorithm() {
-        return this.algorithm;
+        return algorithm;
     }
 
     public int getDigits() {
-        return this.digits;
+        return digits;
     }
 
     public int getPeriod() {
-        return this.period;
+        return period;
     }
 
+    /**
+     * @return The URI/message to encode into the QR image, in the format specified here:
+     * https://github.com/google/google-authenticator/wiki/Key-Uri-Format
+     */
     public String getUri() {
-        return "otpauth://" + this.uriEncode(this.type) + "/" + this.uriEncode(this.label) + "?secret=" + this.uriEncode(this.secret) + "&issuer=" + this.uriEncode(this.issuer) + "&algorithm=" + this.uriEncode(this.algorithm) + "&digits=" + this.digits + "&period=" + this.period;
+        return "otpauth://" +
+                uriEncode(type) + "/" +
+                uriEncode(label) + "?" +
+                "secret=" + uriEncode(secret) +
+                "&issuer=" + uriEncode(issuer) +
+                "&algorithm=" + uriEncode(algorithm) +
+                "&digits=" + digits +
+                "&period=" + period;
     }
 
-    private String uriEncode(String text) {
+    private String uriEncode(String text)  {
+        // Null check
         if (text == null) {
             return "";
         }
+
         try {
             return URLEncoder.encode(text, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
+            // This should never throw, as we are certain the charset specified (UTF-8) is valid
             throw new RuntimeException("Could not URI encode QrData.");
         }
     }
@@ -110,8 +126,7 @@ public class QrData {
         }
 
         public QrData build() {
-            return new QrData("totp", this.label, this.secret, this.issuer, this.algorithm.getFriendlyName(), this.digits, this.period);
+            return new QrData("totp", label, secret, issuer, algorithm.getFriendlyName(), digits, period);
         }
     }
 }
-
