@@ -1,0 +1,31 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 分布式 Session 模块（Spring Session + Redis，JSON 序列化/Cookie 定制/并发登录控制）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // spring boot autoconfigure
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring session core + redis store
+    api projectLibs.spring.session.core
+    api projectLibs.spring.session.data.redis
+
+    // spring data redis（Lettuce 连接池）
+    api projectLibs.spring.boot.starter.data.redis
+
+    // servlet api（运行期由容器提供）
+    compileOnly projectLibs.jakarta.servlet.api
+
+    // spring cloud context（@RefreshScope，可选）
+    compileOnly projectLibs.spring.cloud.context
+
+    // spring security（SpringSessionBackedSessionRegistry，可选）
+    compileOnly projectLibs.spring.boot.starter.security
+
+    // annotations
+    compileOnly projectLibs.jspecify
+}

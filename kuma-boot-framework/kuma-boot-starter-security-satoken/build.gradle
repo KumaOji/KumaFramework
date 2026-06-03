@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework security-satoken 模块（Sa-Token 轻量级鉴权，国内企业级高频方案）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Sa-Token Spring Boot 3 整合（含 core）
+    api projectLibs.satoken.web
+    api projectLibs.spring.boot.autoconfigure
+
+    // @RefreshScope 动态刷新
+    compileOnly projectLibs.spring.cloud.context
+
+    compileOnly projectLibs.spring.boot.starter.web
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

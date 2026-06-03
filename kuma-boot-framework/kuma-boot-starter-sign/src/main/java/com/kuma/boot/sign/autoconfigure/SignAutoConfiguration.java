@@ -11,13 +11,16 @@ import com.kuma.boot.sign.provider.PropertiesAppSecretProvider;
 import com.kuma.boot.sign.store.InMemoryNonceStore;
 import com.kuma.boot.sign.store.NonceStore;
 import com.kuma.boot.sign.web.ApiSignatureInterceptor;
+import com.kuma.boot.sign.web.SignBodyCachingFilter;
 import java.util.List;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 
 /**
  * API 签名验签自动配置
@@ -71,5 +74,20 @@ public class SignAutoConfiguration implements InitializingBean {
     @ConditionalOnMissingBean
     public ApiSignatureInterceptor apiSignatureInterceptor(SignatureValidator validator) {
         return new ApiSignatureInterceptor(validator);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SignBodyCachingFilter signBodyCachingFilter() {
+        return new SignBodyCachingFilter();
+    }
+
+    @Bean
+    public FilterRegistrationBean<SignBodyCachingFilter> signBodyCachingFilterRegistration(
+            SignBodyCachingFilter filter) {
+        FilterRegistrationBean<SignBodyCachingFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+        return registration;
     }
 }

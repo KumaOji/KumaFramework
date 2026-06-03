@@ -9,7 +9,9 @@ import com.kuma.boot.sign.exception.SignatureException;
 import com.kuma.boot.sign.properties.SignProperties;
 import com.kuma.boot.sign.provider.AppSecretProvider;
 import com.kuma.boot.sign.store.NonceStore;
+import com.kuma.boot.sign.web.BodyCachingRequestWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+import java.security.MessageDigest;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,8 @@ import java.util.TreeMap;
  * <p>签名原文规范（客户端需保持一致）：
  * <pre>
  *   sortedParams = 业务参数按 key 字典序拼接：k1=v1&amp;k2=v2 （多值取第一个）
- *   content      = sortedParams[&amp;]appId={appId}&amp;nonce={nonce}&amp;timestamp={timestamp}
+ *   bodyHash     = MD5(requestBody) → hex（仅 Content-Type=application/json 且 body 非空时包含）
+ *   content      = sortedParams[&amp;][body={bodyHash}&amp;]appId={appId}&amp;nonce={nonce}&amp;timestamp={timestamp}
  *   HMAC_SHA256  : signature = HmacSHA256(content, appSecret) → hex
  *   MD5          : signature = MD5(content + "&amp;key=" + appSecret) → hex
  * </pre>
@@ -101,7 +104,7 @@ public class SignatureValidator {
         }
     }
 
-    /** 业务参数按字典序拼接，追加 appId/nonce/timestamp 形成签名原文 */
+    /** 业务参数按字典序拼接，可选追加 body MD5，最后追加 appId/nonce/timestamp 形成签名原文 */
     private String buildContent(HttpServletRequest request, String appId, String nonce, String timestamp) {
         Map<String, String[]> parameterMap = request.getParameterMap();
         TreeMap<String, String[]> sorted = new TreeMap<>(parameterMap);
@@ -114,6 +117,16 @@ public class SignatureValidator {
             }
             sb.append(entry.getKey()).append('=').append(value);
         }
+        // JSON body 纳入签名（由 SignBodyCachingFilter 预先缓存）
+        if (request instanceof BodyCachingRequestWrapper wrapper) {
+            byte[] body = wrapper.getBody();
+            if (body != null && body.length > 0) {
+                if (sb.length() > 0) {
+                    sb.append('&');
+                }
+                sb.append("body=").append(md5Hex(body));
+            }
+        }
         if (sb.length() > 0) {
             sb.append('&');
         }
@@ -121,5 +134,20 @@ public class SignatureValidator {
           .append("&nonce=").append(nonce)
           .append("&timestamp=").append(timestamp);
         return sb.toString();
+    }
+
+    private static String md5Hex(byte[] bytes) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] digest = md.digest(bytes);
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                hex.append(Character.forDigit((b >> 4) & 0xF, 16));
+                hex.append(Character.forDigit(b & 0xF, 16));
+            }
+            return hex.toString();
+        } catch (Exception e) {
+            throw new SignatureException("body MD5 计算失败", e);
+        }
     }
 }

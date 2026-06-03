@@ -95,6 +95,8 @@ public final class StarterNameConstants {
 
     public static final String GRPC_STARTER = "kuma-boot-starter-grpc";
 
+    public static final String I18N_STARTER = "kuma-boot-starter-i18n";
+
     public static final String IDEMPOTENT_STARTER = "kuma-boot-starter-idempotent";
 
     public static final String IDGENERATOR_STARTER = "kuma-boot-starter-idgenerator";
@@ -128,6 +130,8 @@ public final class StarterNameConstants {
     public static final String MICROMETER_STARTER = "kuma-boot-starter-tracer";
 
     public static final String MONITOR_STARTER = "kuma-boot-starter-monitor";
+
+    public static final String MULTI_TENANT_STARTER = "kuma-boot-starter-multi-tenant";
 
     public static final String MQ_COMMON_STARTER = "kuma-boot-starter-mq-common";
 
@@ -175,6 +179,8 @@ public final class StarterNameConstants {
             "kuma-boot-starter-security-spring";
 
     public static final String SEATA_STARTER = "kuma-boot-starter-seata";
+
+    public static final String SESSION_STARTER = "kuma-boot-starter-session";
 
     public static final String SENSITIVE_STARTER = "kuma-boot-starter-sensitive";
 

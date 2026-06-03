@@ -1,0 +1,1 @@
+dubboPropagationFilter=com.kuma.cloud.dubbo.filter.DubboContextPropagationFilter

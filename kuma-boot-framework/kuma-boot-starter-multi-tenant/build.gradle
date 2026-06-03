@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 多租户 SaaS 模块（COLUMN / Schema / 数据源 三模式隔离，MybatisPlus 原生支持）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.boot.starter.web
+
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.spring.cloud.context
+    compileOnly projectLibs.jspecify
+}

@@ -73,8 +73,8 @@ def frameworkBootSubModules = [
         // 缓存
         'cache-common', 'cache-caffeine', 'cache-jetcache', 'cache-redis',
         // 安全
-        'security-common', 'security-spring', 'security-jstauth',
-        'captcha', 'encrypt', 'idempotent', 'lock', 'ratelimit', 'totp',
+        'security-common', 'security-spring', 'security-jstauth', 'security-satoken',
+        'captcha', 'encrypt', 'idempotent', 'lock', 'ratelimit', 'session', 'sign', 'totp',
         // 消息队列
         'mq-common', 'mq-kafka',
         // 任务调度
@@ -88,12 +88,12 @@ def frameworkBootSubModules = [
         // 分布式
         'client', 'grpc', 'seata', 'sentinel',
         // 存储 & 通信
-        'mail', 'mqtt', 'oss-common', 'oss-minio', 'sms-common', 'sms-aliyun', 'sms-tencent',
+        'mail', 'mqtt', 'oss-common', 'oss-minio', 'oss-aliyun', 'oss-cos', 'oss-qiniu', 'sms-common', 'sms-aliyun', 'sms-tencent',
         // 配置 & 集成
         'apollo', 'canal', 'dingtalk', 'frp',
         // 业务能力
-        'ddd', 'eventbus', 'flowengine', 'idgenerator', 'ip2region',
-        'monitor', 'office', 'openapi', 'pinyin', 'retry',
+        'ddd', 'eventbus', 'flowengine', 'i18n', 'idgenerator', 'ip2region',
+        'monitor', 'multi-tenant', 'office', 'openapi', 'pinyin', 'retry',
         'sensitive', 'springdoc', 'statemachine', 'test',
         'threadpool', 'translation', 'useragent',
 ]

@@ -33,11 +33,16 @@ public class InMemoryNonceStore implements NonceStore, DisposableBean {
     public boolean tryAcquire(String key, long ttlSeconds) {
         long now = System.currentTimeMillis();
         long expireAt = now + ttlSeconds * 1000L;
-        // 原子写入：仅当不存在或已过期时才占用成功
-        Long previous = cache.merge(key, expireAt, (oldExpire, newExpire) ->
-                oldExpire <= now ? newExpire : oldExpire);
-        // merge 返回最终值；若最终值等于本次写入的 expireAt，说明占用成功
-        return previous == expireAt;
+        // 第一次写入：key 不存在时原子插入
+        Long existing = cache.putIfAbsent(key, expireAt);
+        if (existing == null) {
+            return true;
+        }
+        // key 已存在但已过期：原子 CAS 替换（只有一个并发线程能成功）
+        if (existing <= now) {
+            return cache.replace(key, existing, expireAt);
+        }
+        return false;
     }
 
     private void evictExpired() {

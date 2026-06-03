@@ -1,0 +1,4 @@
+com.kuma.boot.i18n.config.I18nMessageSourceAutoConfiguration
+com.kuma.boot.i18n.config.I18nDynamicMessageSourceConfiguration
+com.kuma.boot.i18n.config.I18nValidationAutoConfiguration
+com.kuma.boot.i18n.config.I18nAutoConfiguration
