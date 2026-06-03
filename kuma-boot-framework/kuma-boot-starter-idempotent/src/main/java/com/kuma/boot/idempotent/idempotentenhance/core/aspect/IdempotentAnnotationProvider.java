@@ -1,22 +1,5 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.kuma.boot.common.utils.log.LogUtils
- *  org.aspectj.lang.JoinPoint
- *  org.aspectj.lang.ProceedingJoinPoint
- *  org.aspectj.lang.reflect.MethodSignature
- *  org.springframework.core.DefaultParameterNameDiscoverer
- *  org.springframework.core.ParameterNameDiscoverer
- *  org.springframework.expression.EvaluationContext
- *  org.springframework.expression.Expression
- *  org.springframework.expression.ExpressionParser
- *  org.springframework.expression.spel.standard.SpelExpressionParser
- */
 package com.kuma.boot.idempotent.idempotentenhance.core.aspect;
 
-import com.kuma.boot.common.utils.log.LogUtils;
-import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -27,36 +10,72 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-public class IdempotentAnnotationProvider {
-    private static final ParameterNameDiscoverer NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
-    private static final ExpressionParser PARSER = new SpelExpressionParser();
+import java.lang.reflect.Method;
 
+/**
+ * 幂等注解Provider
+ *
+ * @author wenpan 2023/01/06 21:23
+ */
+public class IdempotentAnnotationProvider {
+
+    private final static ParameterNameDiscoverer NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
+
+    private final static ExpressionParser PARSER = new SpelExpressionParser();
+
+    /**
+     * 从连接点中取目标方法参数名称列表
+     *
+     * @param joinPoint 连接点
+     * @return java.lang.String[]
+     */
     public static String[] getParameterNames(ProceedingJoinPoint joinPoint) {
-        Method method = IdempotentAnnotationProvider.getMethod((JoinPoint)joinPoint);
+        Method method = getMethod(joinPoint);
         return NAME_DISCOVERER.getParameterNames(method);
     }
 
+    /**
+     * 获取method的参数名称列表
+     *
+     * @param method method
+     * @return java.lang.String[]
+     */
     public static String[] getParameterNames(Method method) {
         return NAME_DISCOVERER.getParameterNames(method);
     }
 
+    /**
+     * 解析表达式
+     *
+     * @param expressionStr 待解析的表达式字符串
+     * @param context       context
+     * @return java.lang.String
+     */
     public static String parse(String expressionStr, EvaluationContext context) {
+        // 解析过后的Spring表达式对象
         Expression expression = PARSER.parseExpression(expressionStr);
-        return (String)expression.getValue(context, String.class);
+        // 表达式从上下文中计算出实际参数值
+        return expression.getValue(context, String.class);
     }
 
+    /**
+     * 从连接点中获取拦截的方法
+     *
+     * @param joinPoint joinPoint
+     * @return java.lang.reflect.Method
+     */
     public static Method getMethod(JoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         if (method.getDeclaringClass().isInterface()) {
             try {
-                method = joinPoint.getTarget().getClass().getDeclaredMethod(signature.getName(), method.getParameterTypes());
-            }
-            catch (Exception e) {
-                LogUtils.error((Throwable)e);
+                method = joinPoint.getTarget().getClass().getDeclaredMethod(signature.getName(),
+                        method.getParameterTypes());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return method;
     }
-}
 
+}

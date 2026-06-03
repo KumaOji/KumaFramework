@@ -1,22 +1,37 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.idempotent.idempotentenhance.core.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.kuma.boot.idempotent.idempotentenhance.core.registry.IdempotentRepositoryRegistry;
 
+import java.lang.annotation.*;
+
+/**
+ * 幂等注解
+ *
+ * @author wenpan 2022/12/31 15:06
+ */
 @Documented
-@Retention(value=RetentionPolicy.RUNTIME)
-@Target(value={ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
 public @interface Idempotent {
-    public String source() default "";
 
-    public String operationType() default "";
+    /**
+     * 数据来源
+     */
+    String source() default "";
 
-    public String businessKey();
+    /**
+     * 操作类型
+     */
+    String operationType() default "";
+
+    /**
+     * 业务key
+     */
+    String businessKey();
+
+    /**
+     * 用于多个幂等repository实现时选择repository的关键key
+     */
+    String determineCurrentLookupKey() default IdempotentRepositoryRegistry.PRIMARY;
+
 }
-

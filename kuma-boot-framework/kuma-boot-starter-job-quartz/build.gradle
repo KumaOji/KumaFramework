@@ -13,6 +13,13 @@ dependencies {
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.cloud.context
 
+    // AOP（@Aspect、ProceedingJoinPoint）
+    api projectLibs.aspectjweaver
+    api projectLibs.spring.aop
+
+    // Micrometer Tracing（Tracer、ScopedSpan）
+    api projectLibs.micrometer.tracing.api
+
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
 }

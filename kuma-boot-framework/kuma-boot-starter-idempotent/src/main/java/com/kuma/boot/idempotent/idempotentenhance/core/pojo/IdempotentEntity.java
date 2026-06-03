@@ -1,35 +1,79 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.google.common.base.Preconditions
- *  com.kuma.boot.common.utils.lang.StringUtils
- */
 package com.kuma.boot.idempotent.idempotentenhance.core.pojo;
 
 import com.google.common.base.Preconditions;
-import com.kuma.boot.common.utils.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.kuma.boot.idempotent.idempotentenhance.core.constants.IdempotentConstant;
 import com.kuma.boot.idempotent.idempotentenhance.core.em.IdempotentStatusEnum;
 import com.kuma.boot.idempotent.idempotentenhance.core.exception.IdempotentException;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class IdempotentEntity
-implements Serializable {
+/**
+ * 幂等实体
+ *
+ * @author wenpan 2022/12/31 15:25
+ */
+public class IdempotentEntity implements Serializable {
+
+    /**
+     * 命名空间（用于应用隔离）
+     */
     private String namespace;
+
+    /**
+     * 来源
+     */
     private String source;
+
+    /**
+     * 操作类型
+     */
     private String operationType;
+
+    /**
+     * 业务号（一般为用于做幂等的业务code）
+     */
     private String businessKey;
+
+    /**
+     * 幂等状态
+     */
     private Integer idempotentStatus;
+
+    /**
+     * 请求响应
+     */
     private String response;
+
+    /**
+     * 版本号
+     */
     private Long objectVersionNumber;
+
+    /**
+     * 创建日期
+     */
     private LocalDateTime createDate;
+
+    /**
+     * 最近修改时间
+     */
     private LocalDateTime lastModifiedDate;
+
+    /**
+     * 唯一key
+     */
     private String uniqueKey;
 
-    public static IdempotentEntity create(String businessKey, String operationType, String source, String namespace) {
-        Preconditions.checkArgument((boolean)StringUtils.isNotBlank((String)businessKey), (Object)"businessKey can not be null.");
+    public IdempotentEntity() {
+    }
+
+    public static IdempotentEntity create(String businessKey,
+                                          String operationType,
+                                          String source,
+                                          String namespace) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(businessKey), "businessKey can not be null.");
         IdempotentEntity entity = new IdempotentEntity();
         entity.setBusinessKey(businessKey);
         entity.setOperationType(operationType);
@@ -40,105 +84,112 @@ implements Serializable {
         LocalDateTime now = LocalDateTime.now();
         entity.setCreateDate(now);
         entity.setLastModifiedDate(now);
-        entity.setUniqueKey(IdempotentEntity.buildUniqueKey(businessKey, operationType, source, namespace));
+        entity.setUniqueKey(buildUniqueKey(businessKey, operationType, source, namespace));
         return entity;
     }
 
+    /**
+     * <p>
+     * 构建唯一键，由四元组拼接而来
+     * </p>
+     *
+     * @return java.lang.String 唯一键
+     * @author wenpan 2023/1/3 9:35 下午
+     */
     public static String buildUniqueKey(String businessKey, String operationType, String source, String namespace) {
-        if (StringUtils.isBlank((String)businessKey)) {
+        if (StringUtils.isBlank(businessKey)) {
             throw new IdempotentException("can not build unique key, because businessKey is null.");
         }
         StringBuilder builder = new StringBuilder(businessKey);
-        if (StringUtils.isNotBlank((String)operationType)) {
-            builder.append("_").append(operationType);
+        if (StringUtils.isNotBlank(operationType)) {
+            builder.append(IdempotentConstant.Symbol.UNDERLINE).append(operationType);
         }
-        if (StringUtils.isNotBlank((String)source)) {
-            builder.append("_").append(source);
+        if (StringUtils.isNotBlank(source)) {
+            builder.append(IdempotentConstant.Symbol.UNDERLINE).append(source);
         }
-        if (StringUtils.isNotBlank((String)namespace)) {
-            builder.append("_").append(namespace);
+        if (StringUtils.isNotBlank(namespace)) {
+            builder.append(IdempotentConstant.Symbol.UNDERLINE).append(namespace);
         }
         return builder.toString();
     }
 
     public String getNamespace() {
-        return this.namespace;
+        return namespace;
     }
 
-    public void setNamespace(String namespace) {
+    public void setNamespace( String namespace ) {
         this.namespace = namespace;
     }
 
     public String getSource() {
-        return this.source;
+        return source;
     }
 
-    public void setSource(String source) {
+    public void setSource( String source ) {
         this.source = source;
     }
 
     public String getOperationType() {
-        return this.operationType;
+        return operationType;
     }
 
-    public void setOperationType(String operationType) {
+    public void setOperationType( String operationType ) {
         this.operationType = operationType;
     }
 
     public String getBusinessKey() {
-        return this.businessKey;
+        return businessKey;
     }
 
-    public void setBusinessKey(String businessKey) {
+    public void setBusinessKey( String businessKey ) {
         this.businessKey = businessKey;
     }
 
     public Integer getIdempotentStatus() {
-        return this.idempotentStatus;
+        return idempotentStatus;
     }
 
-    public void setIdempotentStatus(Integer idempotentStatus) {
+    public void setIdempotentStatus( Integer idempotentStatus ) {
         this.idempotentStatus = idempotentStatus;
     }
 
     public String getResponse() {
-        return this.response;
+        return response;
     }
 
-    public void setResponse(String response) {
+    public void setResponse( String response ) {
         this.response = response;
     }
 
     public Long getObjectVersionNumber() {
-        return this.objectVersionNumber;
+        return objectVersionNumber;
     }
 
-    public void setObjectVersionNumber(Long objectVersionNumber) {
+    public void setObjectVersionNumber( Long objectVersionNumber ) {
         this.objectVersionNumber = objectVersionNumber;
     }
 
     public LocalDateTime getCreateDate() {
-        return this.createDate;
+        return createDate;
     }
 
-    public void setCreateDate(LocalDateTime createDate) {
+    public void setCreateDate( LocalDateTime createDate ) {
         this.createDate = createDate;
     }
 
     public LocalDateTime getLastModifiedDate() {
-        return this.lastModifiedDate;
+        return lastModifiedDate;
     }
 
-    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+    public void setLastModifiedDate( LocalDateTime lastModifiedDate ) {
         this.lastModifiedDate = lastModifiedDate;
     }
 
     public String getUniqueKey() {
-        return this.uniqueKey;
+        return uniqueKey;
     }
 
-    public void setUniqueKey(String uniqueKey) {
+    public void setUniqueKey( String uniqueKey ) {
         this.uniqueKey = uniqueKey;
     }
 }
-

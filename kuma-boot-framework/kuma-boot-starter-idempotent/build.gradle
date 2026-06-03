@@ -7,6 +7,10 @@ description = 'Kumaframework 幂等模块'
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    // StandardDatabaseScript（IdempotentSqlScripter extends）
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    // SecurityUtils（PreventDuplicateSubmitAspect，USER_ID / USER_NAME 模式依赖）
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-security-spring')
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.boot.starter.data.redis

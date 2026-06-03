@@ -14,36 +14,21 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.idempotent.enums;
+package com.kuma.boot.idempotent.idempotentenhance.adapter.mysql.config;
 
-/**
- * 幂等枚举类
- *
- * @author kuma
- * @version 2021.9
- * @since 2021-09-02 22:20:28
- */
-public enum IdempotentTypeEnum {
-    /** 0+1 */
-    ALL(0, "ALL"),
-    /** ruid 是针对每一次请求的 */
-    RID(1, "RID"),
-    /** key+val 是针对相同参数请求 */
-    KEY(2, "KEY");
+import com.kuma.boot.common.utils.lang.StringUtils;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-    private final Integer index;
-    private final String title;
+import java.util.concurrent.TimeUnit;
 
-    IdempotentTypeEnum(Integer index, String title) {
-        this.index = index;
-        this.title = title;
-    }
+/** properties */
+@ConfigurationProperties(prefix = IdempotentMysqlAdapterProperties.PREFIX)
+public class IdempotentMysqlAdapterProperties {
 
-    public Integer getIndex() {
-        return index;
-    }
+    public static final String PREFIX = "kuma.boot.idempotent.enhance.adapter.mysql";
+	private Boolean enabled = true;
 
-    public String getTitle() {
-        return title;
-    }
+	public Boolean getEnabled() {
+		return enabled;
+	}
 }

@@ -1,25 +1,36 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.kuma.boot.idempotent.idempotentenhance.core.constants;
 
+/**
+ * 幂等相关常量
+ *
+ * @author wenpan 2022/12/31 15:40
+ */
 public interface IdempotentConstant {
-    public static final String PRIMARY = "primary";
 
-    public static interface Executor {
-        public static final String IDEMPOTENT_EXCEPTION_EVENT_EXECUTOR = "idempotentExceptionEventExecutor";
+    String PRIMARY = "primary";
+
+    /**
+     * 常用数字
+     */
+    interface Digit {
+        Integer ONE = 1;
+        Long ZERO_LONG = 0L;
+        Long ONE_LONG = 1L;
+        Long NEGATIVE_ONE_LONG = -1L;
     }
 
-    public static interface Symbol {
-        public static final String UNDERLINE = "_";
-        public static final String MIDLINE = "-";
+    /**
+     * 常用符号
+     */
+    interface Symbol {
+        String UNDERLINE = "_";
+        String MIDLINE = "-";
     }
 
-    public static interface Digit {
-        public static final Integer ONE = 1;
-        public static final Long ZERO_LONG = 0L;
-        public static final Long ONE_LONG = 1L;
-        public static final Long NEGATIVE_ONE_LONG = -1L;
+    interface Executor {
+        /**
+         * 幂等异常事件线程池
+         */
+        String IDEMPOTENT_EXCEPTION_EVENT_EXECUTOR = "idempotentExceptionEventExecutor";
     }
 }
-

@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.idempotent.autoconfigure;
+package com.kuma.boot.idempotent.idempotetduplicate;
 
+import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.idempotent.aop.IdempotentAspect;
-import com.kuma.boot.idempotent.autoconfigure.properties.IdempotentProperties;
-import com.kuma.boot.lock.support.DistributedLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -36,22 +34,17 @@ import org.springframework.context.annotation.Bean;
  * @since 2021-09-02 22:13:17
  */
 @AutoConfiguration
-@EnableConfigurationProperties({IdempotentProperties.class})
-@ConditionalOnProperty(
-        prefix = IdempotentProperties.PREFIX,
-        name = "enabled",
-        havingValue = "true",
-        matchIfMissing = true)
-public class IdempotentAutoConfiguration implements InitializingBean {
+@ConditionalOnClass(RedissonClient.class)
+public class PreventDuplicateSubmitAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        LogUtils.started(IdempotentAutoConfiguration.class, StarterNameConstants.IDEMPOTENT_STARTER);
+        LogUtils.started(PreventDuplicateSubmitAutoConfiguration.class, StarterNameConstants.IDEMPOTENT_STARTER);
     }
 
     @Bean
-    @ConditionalOnBean
-    public IdempotentAspect idempotentAspect(DistributedLock distributedLock) {
-        return new IdempotentAspect(distributedLock);
+    @ConditionalOnMissingBean
+    public PreventDuplicateSubmitAspect preventDuplicateSubmitAspect( RedissonClient redissonClient) {
+        return new PreventDuplicateSubmitAspect(redissonClient);
     }
 }
