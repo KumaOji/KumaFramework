@@ -15,8 +15,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
@@ -86,6 +88,20 @@ public class MusicController {
     @PostMapping("/{id}/like")
     public Result<Boolean> incrementLike(@PathVariable Long id) {
         return Result.success(musicService.incrementLikeCount(id));
+    }
+
+    @Operation(summary = "上传音乐文件", description = "支持 mp3/flac/ogg/wav/aac/m4a/opus，返回存储文件名，再通过创建/更新接口写入 filePath")
+    @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Authorize(BlogPermissions.MUSIC_UPLOAD)
+    public Result<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        return Result.success(musicService.uploadMusicFile(file));
+    }
+
+    @Operation(summary = "删除音乐物理文件（不删除数据库记录）")
+    @DeleteMapping("/{id}/file")
+    @Authorize(BlogPermissions.MUSIC_DELETE)
+    public Result<Boolean> deleteFile(@PathVariable Long id) {
+        return Result.success(musicService.deleteMusicFile(id));
     }
 
     /**

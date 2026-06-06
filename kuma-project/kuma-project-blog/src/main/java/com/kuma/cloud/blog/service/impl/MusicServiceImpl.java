@@ -22,12 +22,17 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -180,6 +185,57 @@ public class MusicServiceImpl implements MusicService {
         } catch (Exception e) {
             log.error("Failed to resolve music file path for music id: {}", id, e);
             return null;
+        }
+    }
+
+    private static final Set<String> ALLOWED_AUDIO_EXTENSIONS =
+            Set.of("mp3", "flac", "ogg", "wav", "aac", "m4a", "opus");
+
+    @Override
+    public String uploadMusicFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("上传文件不能为空");
+        }
+        String original = file.getOriginalFilename();
+        String ext = (original != null && original.contains("."))
+                ? original.substring(original.lastIndexOf('.') + 1).toLowerCase()
+                : "";
+        if (!ALLOWED_AUDIO_EXTENSIONS.contains(ext)) {
+            throw new BusinessException("不支持的音频格式：" + ext);
+        }
+        String filename = UUID.randomUUID().toString().replace("-", "") + "." + ext;
+        Path target = resolvedBasePath.resolve(filename);
+        try {
+            Files.createDirectories(resolvedBasePath);
+            file.transferTo(target.toFile());
+        } catch (IOException e) {
+            throw new BusinessException("文件保存失败：" + e.getMessage());
+        }
+        return filename;
+    }
+
+    @Override
+    public boolean deleteMusicFile(Long id) {
+        Music music = musicMapper.selectById(id);
+        if (music == null || StringUtils.isBlank(music.getFilePath())) {
+            return false;
+        }
+        String filePath = music.getFilePath();
+        if (filePath.matches("^[A-Za-z]:[/\\\\].*")) {
+            filePath = Paths.get(filePath.replace('\\', '/')).getFileName().toString();
+        }
+        Path resolved = (Paths.get(filePath).isAbsolute())
+                ? Paths.get(filePath).normalize()
+                : resolvedBasePath.resolve(filePath).normalize();
+        if (!resolved.startsWith(resolvedBasePath)) {
+            log.warn("Security: Path traversal attempt on delete. path={}", resolved);
+            return false;
+        }
+        try {
+            return Files.deleteIfExists(resolved);
+        } catch (IOException e) {
+            log.error("Failed to delete music file, id={}, path={}", id, resolved, e);
+            return false;
         }
     }
 
