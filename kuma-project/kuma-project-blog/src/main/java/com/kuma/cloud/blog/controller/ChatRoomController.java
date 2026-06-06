@@ -2,12 +2,14 @@ package com.kuma.cloud.blog.controller;
 
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.cloud.blog.domain.entity.ChatBlacklist;
 import com.kuma.cloud.blog.domain.entity.ChatHistory;
 import com.kuma.cloud.blog.domain.entity.ChatRoom;
 import com.kuma.cloud.blog.domain.vo.ChatMessageVO;
 import com.kuma.cloud.blog.domain.vo.ChatOnlineUserVO;
 import com.kuma.cloud.blog.domain.vo.ChatRoomVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
+import com.kuma.cloud.blog.service.ChatBlacklistService;
 import com.kuma.cloud.blog.service.ChatRoomService;
 import com.kuma.cloud.blog.websocket.OnlineUserRegistry;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +27,7 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
     private final OnlineUserRegistry onlineUserRegistry;
+    private final ChatBlacklistService chatBlacklistService;
 
     @Operation(summary = "获取聊天空间列表")
     @GetMapping("/room/list")
@@ -85,5 +88,36 @@ public class ChatRoomController {
     @Authorize(BlogPermissions.CHAT_DELETE)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(chatRoomService.delete(id));
+    }
+
+    // ── 黑名单管理 ──────────────────────────────────────────────────────────
+
+    @Operation(summary = "查询黑名单列表（管理员）")
+    @GetMapping("/blacklist")
+    @Authorize(BlogPermissions.CHAT_BLACKLIST)
+    public Result<List<ChatBlacklist>> blacklistList() {
+        return Result.success(chatBlacklistService.list());
+    }
+
+    @Operation(summary = "添加邮箱到黑名单（管理员）")
+    @PostMapping("/blacklist")
+    @Authorize(BlogPermissions.CHAT_BLACKLIST)
+    public Result<Void> blacklistAdd(@RequestBody BlacklistAddRequest request) {
+        chatBlacklistService.add(request.getEmail(), request.getReason());
+        return Result.success();
+    }
+
+    @Operation(summary = "移除黑名单（管理员）")
+    @DeleteMapping("/blacklist/{id}")
+    @Authorize(BlogPermissions.CHAT_BLACKLIST)
+    public Result<Void> blacklistRemove(@PathVariable Long id) {
+        chatBlacklistService.remove(id);
+        return Result.success();
+    }
+
+    @lombok.Data
+    public static class BlacklistAddRequest {
+        private String email;
+        private String reason;
     }
 }

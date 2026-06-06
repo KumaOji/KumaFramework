@@ -103,6 +103,16 @@ public class MessageServiceImpl implements MessageService {
         return messageMapper.incrementLikeCount(id) > 0;
     }
 
+    @CacheInvalidate(name = "message:approved")
+    @Override
+    public boolean purge(Long id) {
+        Message msg = messageMapper.selectById(id);
+        if (msg == null || msg.getStatus() != 2) {
+            throw new IllegalStateException("只能物理删除 status=2 的留言");
+        }
+        return messageMapper.deleteById(id) > 0;
+    }
+
     private MessageVO toVO(Message m) {
         MessageVO vo = new MessageVO();
         BeanUtils.copyProperties(m, vo);

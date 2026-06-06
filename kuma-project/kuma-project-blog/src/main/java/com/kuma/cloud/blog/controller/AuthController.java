@@ -83,6 +83,7 @@ public class AuthController {
         loginResponse.setUserId(user.getId());
         loginResponse.setUsername(user.getUsername());
         loginResponse.setNickname(user.getNickname());
+        loginResponse.setEmail(user.getEmail());
         loginResponse.setAdmin(user.getIsAdmin() != null && user.getIsAdmin() == 1);
 
         tokenService.saveToken(token, loginResponse, tokenExpireSeconds);

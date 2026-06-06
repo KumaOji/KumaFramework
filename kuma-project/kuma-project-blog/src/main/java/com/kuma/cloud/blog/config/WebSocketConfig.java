@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.config;
 
+import com.kuma.cloud.blog.service.ChatBlacklistService;
 import com.kuma.cloud.blog.service.TokenService;
 import com.kuma.cloud.blog.websocket.ChatHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,12 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final TokenService tokenService;
+    private final ChatBlacklistService chatBlacklistService;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws/chat")
-                .addInterceptors(new ChatHandshakeInterceptor(tokenService))
+                .addInterceptors(new ChatHandshakeInterceptor(tokenService, chatBlacklistService))
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }

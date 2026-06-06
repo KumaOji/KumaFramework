@@ -66,11 +66,18 @@ public class MessageController {
         return Result.success(messageService.approve(id));
     }
 
-    @Operation(summary = "删除留言（逻辑）")
+    @Operation(summary = "删除留言（逻辑，status=2）")
     @DeleteMapping("/{id}")
     @Authorize(BlogPermissions.MESSAGE_DELETE)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(messageService.delete(id));
+    }
+
+    @Operation(summary = "物理删除留言（仅限 status=2 已删除的记录）")
+    @DeleteMapping("/{id}/purge")
+    @Authorize(BlogPermissions.MESSAGE_DELETE)
+    public Result<Boolean> purge(@PathVariable Long id) {
+        return Result.success(messageService.purge(id));
     }
 
     private String resolveClientIp(HttpServletRequest request) {

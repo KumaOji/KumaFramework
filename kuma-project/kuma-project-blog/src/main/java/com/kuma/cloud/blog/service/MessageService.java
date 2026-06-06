@@ -15,4 +15,7 @@ public interface MessageService {
     boolean approve(Long id);
     boolean delete(Long id);
     boolean incrementLike(Long id);
+
+    /** 物理删除，仅允许对 status=2 的记录操作 */
+    boolean purge(Long id);
 }
