@@ -239,11 +239,27 @@ public class AiChatController {
         String question = (req.getQuestion() != null && !req.getQuestion().isBlank())
                 ? req.getQuestion() : "请解释这段文字的含义";
         StringBuilder sb = new StringBuilder();
-        if (req.getPageTitle() != null && !req.getPageTitle().isBlank()) {
-            sb.append("以下内容节选自「").append(req.getPageTitle()).append("」：\n\n");
+
+        sb.append("你正在帮助用户阅读博客文章，请针对【用户选中的内容】回答问题。");
+        sb.append("前后文仅作为理解背景，不需要对它们作出解释。\n\n");
+
+        if (req.getPagePath() != null && !req.getPagePath().isBlank()) {
+            sb.append("【文章位置】").append(req.getPagePath().replace("/", " > ")).append("\n");
         }
-        sb.append("```\n").append(req.getSelectedText().strip()).append("\n```\n\n");
-        sb.append(question);
+        if (req.getPageTitle() != null && !req.getPageTitle().isBlank()) {
+            sb.append("【文章标题】").append(req.getPageTitle()).append("\n");
+        }
+        sb.append("\n");
+
+        if (req.getContextBefore() != null && !req.getContextBefore().isBlank()) {
+            sb.append("【前文（仅供参考）】\n").append(req.getContextBefore().strip()).append("\n\n");
+        }
+        sb.append("【用户选中的内容】\n").append(req.getSelectedText().strip()).append("\n\n");
+        if (req.getContextAfter() != null && !req.getContextAfter().isBlank()) {
+            sb.append("【后文（仅供参考）】\n").append(req.getContextAfter().strip()).append("\n\n");
+        }
+
+        sb.append("【问题】").append(question);
         return sb.toString();
     }
 
@@ -262,8 +278,18 @@ public class AiChatController {
         private String selectedText;
         /** 用户的追加提问，留空则默认解释选中内容 */
         private String question;
-        /** 页面标题（可选，提供上下文） */
+        /** 页面标题 */
         private String pageTitle;
+        /** 面包屑路径，如 "编程语言/Java/构建工具/插件开发" */
+        private String pagePath;
+        /** 当前页面 URL/路由，用于日志溯源 */
+        private String pageUrl;
+        /** 文章 ID，可选，用于 RAG 全文检索 */
+        private Long articleId;
+        /** 选中内容的前文（约 150 字） */
+        private String contextBefore;
+        /** 选中内容的后文（约 150 字） */
+        private String contextAfter;
         /** 模型名称（可选） */
         private String model;
         /** 会话 ID（可选，设置后支持多轮追问） */

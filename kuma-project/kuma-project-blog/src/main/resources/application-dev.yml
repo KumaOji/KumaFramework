@@ -134,6 +134,8 @@ kuma:
           - /**/music/*/stream
           - /**/ai-chat/chat/stream
           - /**/ai-chat/rag/chat/stream
+          - /**/ai-chat/agent/chat/stream
+          - /**/ai-chat/selection/ask/stream
       filter:
         version: true
         trace: true
