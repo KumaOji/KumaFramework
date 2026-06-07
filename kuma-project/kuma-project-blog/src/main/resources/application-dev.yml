@@ -158,6 +158,7 @@ kuma:
         - /doc.html
         - /webjars/**
         - /auth/**
+        - /ws/**
         - /error
       authentication:
         expire: 86400

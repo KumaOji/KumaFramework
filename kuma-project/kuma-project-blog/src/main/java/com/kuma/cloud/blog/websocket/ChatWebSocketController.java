@@ -1,6 +1,7 @@
 package com.kuma.cloud.blog.websocket;
 
 import com.kuma.cloud.blog.domain.entity.ChatHistory;
+import com.kuma.cloud.blog.domain.vo.ChatGuestProfile;
 import com.kuma.cloud.blog.domain.vo.ChatMessageVO;
 import com.kuma.cloud.blog.domain.vo.ChatSendRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
@@ -26,13 +27,26 @@ public class ChatWebSocketController {
     private final OnlineUserRegistry registry;
     private final ChatRoomService chatRoomService;
 
+    private static final String GUEST_NICK_KEY = "guestNickname";
+    private static final String GUEST_AVATAR_KEY = "guestAvatar";
+
     @MessageMapping("/chat.join/{roomId}")
-    public void join(@DestinationVariable Long roomId, SimpMessageHeaderAccessor accessor) {
-        ChatUserInfo userInfo = resolveUser(accessor);
+    public void join(@DestinationVariable Long roomId, ChatGuestProfile profile,
+                     SimpMessageHeaderAccessor accessor) {
+        ChatUserInfo userInfo = resolveUser(accessor, profile);
         registry.join(roomId, userInfo);
 
         ChatMessageVO msg = buildMessage("JOIN", roomId, userInfo, userInfo.getNickname() + " 加入了聊天室");
         broadcast(roomId, msg);
+        broadcastOnlineCount(roomId);
+    }
+
+    /** 静默更新访客资料（不广播系统消息） */
+    @MessageMapping("/chat.profile/{roomId}")
+    public void updateProfile(@DestinationVariable Long roomId, ChatGuestProfile profile,
+                              SimpMessageHeaderAccessor accessor) {
+        ChatUserInfo userInfo = resolveUser(accessor, profile);
+        registry.join(roomId, userInfo);
     }
 
     @MessageMapping("/chat.send/{roomId}")
@@ -42,7 +56,10 @@ public class ChatWebSocketController {
         String content = request.getContent().strip();
         if (content.length() > 500) content = content.substring(0, 500);
 
-        ChatUserInfo userInfo = resolveUser(accessor);
+        ChatGuestProfile profile = new ChatGuestProfile();
+        profile.setNickname(request.getNickname());
+        profile.setAvatar(request.getAvatar());
+        ChatUserInfo userInfo = resolveUser(accessor, profile);
 
         ChatHistory history = new ChatHistory();
         history.setRoomId(roomId);
@@ -66,6 +83,7 @@ public class ChatWebSocketController {
         ChatUserInfo userInfo = resolveUser(accessor);
         ChatMessageVO msg = buildMessage("LEAVE", roomId, userInfo, userInfo.getNickname() + " 离开了聊天室");
         broadcast(roomId, msg);
+        broadcastOnlineCount(roomId);
     }
 
     @EventListener
@@ -75,7 +93,29 @@ public class ChatWebSocketController {
         leftRooms.forEach((roomId, userInfo) -> {
             ChatMessageVO msg = buildMessage("LEAVE", roomId, userInfo, userInfo.getNickname() + " 离开了聊天室");
             broadcast(roomId, msg);
+            broadcastOnlineCount(roomId);
         });
+    }
+
+    private void storeGuestProfile(SimpMessageHeaderAccessor accessor, ChatGuestProfile profile) {
+        if (profile == null) return;
+        Map<String, Object> attrs = accessor.getSessionAttributes();
+        if (attrs == null) return;
+        if (profile.getNickname() != null && !profile.getNickname().isBlank()) {
+            String nick = profile.getNickname().strip();
+            if (nick.length() > 50) nick = nick.substring(0, 50);
+            attrs.put(GUEST_NICK_KEY, nick);
+        }
+        if (profile.getAvatar() != null && !profile.getAvatar().isBlank()) {
+            String av = profile.getAvatar().strip();
+            if (av.length() > 255) av = av.substring(0, 255);
+            attrs.put(GUEST_AVATAR_KEY, av);
+        }
+    }
+
+    private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor, ChatGuestProfile profile) {
+        storeGuestProfile(accessor, profile);
+        return resolveUser(accessor);
     }
 
     private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor) {
@@ -86,8 +126,12 @@ public class ChatWebSocketController {
             String nickname = lr.getNickname() != null ? lr.getNickname() : lr.getUsername();
             return new ChatUserInfo(lr.getUserId(), nickname, null, sessionId);
         }
-        String guestNick = "访客" + sessionId.substring(0, Math.min(4, sessionId.length()));
-        return new ChatUserInfo(null, guestNick, null, sessionId);
+        String guestNick = attrs != null ? (String) attrs.get(GUEST_NICK_KEY) : null;
+        String guestAvatar = attrs != null ? (String) attrs.get(GUEST_AVATAR_KEY) : null;
+        if (guestNick == null || guestNick.isBlank()) {
+            guestNick = "访客" + sessionId.substring(0, Math.min(4, sessionId.length()));
+        }
+        return new ChatUserInfo(null, guestNick, guestAvatar, sessionId);
     }
 
     private ChatMessageVO buildMessage(String type, Long roomId, ChatUserInfo user, String content) {
@@ -104,5 +148,12 @@ public class ChatWebSocketController {
 
     private void broadcast(Long roomId, ChatMessageVO msg) {
         messagingTemplate.convertAndSend("/topic/chat." + roomId, msg);
+    }
+
+    /** 广播房间最新在线人数到 /topic/chat.{roomId}.online，payload: {roomId, onlineCount} */
+    private void broadcastOnlineCount(Long roomId) {
+        int count = registry.getOnlineCount(roomId);
+        Object payload = Map.of("roomId", roomId, "onlineCount", count);
+        messagingTemplate.convertAndSend("/topic/chat." + roomId + ".online", payload);
     }
 }
