@@ -3,6 +3,10 @@ spring:
     active: ${active}
   application:
     name: blog
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   datasource:
     dynamic:
       primary: mysql
