@@ -191,10 +191,15 @@ public class MusicServiceImpl implements MusicService {
     private static final Set<String> ALLOWED_AUDIO_EXTENSIONS =
             Set.of("mp3", "flac", "ogg", "wav", "aac", "m4a", "opus");
 
+    private static final long MAX_AUDIO_SIZE = 100L * 1024 * 1024; // 100MB
+
     @Override
     public String uploadMusicFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("上传文件不能为空");
+        }
+        if (file.getSize() > MAX_AUDIO_SIZE) {
+            throw new BusinessException("音频文件不能超过 100MB");
         }
         String original = file.getOriginalFilename();
         String ext = (original != null && original.contains("."))
