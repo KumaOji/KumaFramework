@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 数据库版本管理模块（Flyway / Liquibase）'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties、EnvironmentPostProcessor）
+    api projectLibs.spring.boot.autoconfigure
+
+    // spring-boot-starter-jdbc（迁移依赖 DataSource，DataSourceAutoConfiguration 位于此模块）
+    api projectLibs.spring.boot.starter.jdbc
+
+    // Spring Cloud Context（@RefreshScope）
+    api projectLibs.spring.cloud.context
+
+    // Flyway：spring-boot-starter-flyway 带来 flyway-core 及其 Spring Boot 自动装配
+    api projectLibs.spring.boot.starter.flyway
+    // 常用数据库方言扩展（与框架 datasource 组保持一致：MySQL + PostgreSQL）
+    api projectLibs.flyway.mysql
+    api projectLibs.flyway.database.postgresql
+
+    // Liquibase：spring-boot-starter-liquibase 带来 liquibase-core 及其 Spring Boot 自动装配
+    api projectLibs.spring.boot.starter.liquibase
+}

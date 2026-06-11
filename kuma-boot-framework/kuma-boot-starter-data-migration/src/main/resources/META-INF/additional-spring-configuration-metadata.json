@@ -1,0 +1,51 @@
+{
+  "groups": [
+    {
+      "name": "kuma.boot.data.migration",
+      "type": "com.kuma.boot.data.migration.autoconfigure.properties.MigrationProperties",
+      "sourceType": "com.kuma.boot.data.migration.autoconfigure.properties.MigrationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "kuma.boot.data.migration.enabled",
+      "type": "java.lang.Boolean",
+      "description": "数据库版本管理总开关；关闭时同时禁用 Flyway 与 Liquibase。",
+      "sourceType": "com.kuma.boot.data.migration.autoconfigure.properties.MigrationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "kuma.boot.data.migration.type",
+      "type": "com.kuma.boot.data.migration.enums.MigrationType",
+      "description": "迁移引擎选择：AUTO 由 Spring Boot 原生条件判断，FLYWAY 仅启用 Flyway，LIQUIBASE 仅启用 Liquibase。",
+      "sourceType": "com.kuma.boot.data.migration.autoconfigure.properties.MigrationProperties",
+      "defaultValue": "auto"
+    },
+    {
+      "name": "kuma.boot.data.migration.banner",
+      "type": "java.lang.Boolean",
+      "description": "是否在启动时打印本模块启动横幅日志。",
+      "sourceType": "com.kuma.boot.data.migration.autoconfigure.properties.MigrationProperties",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "kuma.boot.data.migration.type",
+      "values": [
+        {
+          "value": "auto",
+          "description": "Flyway 与 Liquibase 均交由 Spring Boot 原生条件判断（默认）。"
+        },
+        {
+          "value": "flyway",
+          "description": "仅启用 Flyway，自动关闭 Liquibase。"
+        },
+        {
+          "value": "liquibase",
+          "description": "仅启用 Liquibase，自动关闭 Flyway。"
+        }
+      ]
+    }
+  ]
+}

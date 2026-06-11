@@ -35,6 +35,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    public List<ChatRoom> listAll() {
+        QueryWrapper<ChatRoom> qw = new QueryWrapper<>();
+        qw.orderByAsc("sort_order").orderByDesc("create_time");
+        return chatRoomMapper.selectList(qw);
+    }
+
+    @Override
     public ChatRoom getById(Long id) {
         return chatRoomMapper.selectById(id);
     }
@@ -76,5 +83,25 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public void saveHistory(ChatHistory history) {
         history.setCreateTime(LocalDateTime.now());
         chatHistoryMapper.insert(history);
+    }
+
+    @Override
+    public int clearHistory(Long roomId, LocalDateTime before) {
+        QueryWrapper<ChatHistory> qw = new QueryWrapper<>();
+        qw.eq("room_id", roomId);
+        if (before != null) {
+            qw.lt("create_time", before);
+        }
+        return chatHistoryMapper.delete(qw);
+    }
+
+    @Override
+    public ChatHistory deleteMessage(Long messageId) {
+        ChatHistory history = chatHistoryMapper.selectById(messageId);
+        if (history == null) {
+            return null;
+        }
+        chatHistoryMapper.deleteById(messageId);
+        return history;
     }
 }

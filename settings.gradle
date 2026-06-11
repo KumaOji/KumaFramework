@@ -69,7 +69,7 @@ def frameworkBootSubModules = [
         'common', 'core',
         // 数据层
         'data-common', 'data-datasource', 'data-mybatis', 'data-p6spy', 'data-shardingsphere',
-        'data-elasticsearch', 'data-mongodb', 'data-jpa',
+        'data-elasticsearch', 'data-mongodb', 'data-jpa', 'data-migration',
         // 缓存
         'cache-common', 'cache-caffeine', 'cache-jetcache', 'cache-redis',
         // 安全

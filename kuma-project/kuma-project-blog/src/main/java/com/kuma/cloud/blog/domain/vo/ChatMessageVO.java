@@ -12,7 +12,9 @@ public class ChatMessageVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /** CHAT / JOIN / LEAVE / SYSTEM */
+    /** 消息记录 ID（历史消息 / 删除事件携带，实时广播消息可为空） */
+    private Long id;
+    /** CHAT / JOIN / LEAVE / SYSTEM / CLEAR / DELETE */
     private String type;
     private Long roomId;
     private Long userId;

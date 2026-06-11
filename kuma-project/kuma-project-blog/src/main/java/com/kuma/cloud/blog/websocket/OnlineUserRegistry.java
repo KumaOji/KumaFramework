@@ -2,12 +2,15 @@ package com.kuma.cloud.blog.websocket;
 
 import com.kuma.boot.common.utils.json.JacksonUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +80,36 @@ public class OnlineUserRegistry {
     }
 
     public List<ChatUserInfo> getOnlineUsers(Long roomId) {
-        List<String> values = redis.<String, String>opsForHash().values(roomKey(roomId));
+        return parseUsers(redis.<String, String>opsForHash().values(roomKey(roomId)));
+    }
+
+    public int getOnlineCount(Long roomId) {
+        Long size = redis.opsForHash().size(roomKey(roomId));
+        return size == null ? 0 : size.intValue();
+    }
+
+    /**
+     * 管理员视角：扫描全部房间的在线用户，返回 roomId -&gt; 在线用户列表。
+     *
+     * <p>使用 {@code SCAN} 渐进式遍历房间 Hash key，避免 {@code KEYS} 阻塞 Redis。
+     * 同一用户若同时在多个房间，会在各自房间的列表中分别出现。
+     */
+    public Map<Long, List<ChatUserInfo>> getAllOnlineUsers() {
+        Map<Long, List<ChatUserInfo>> result = new LinkedHashMap<>();
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(ROOM_ONLINE_PREFIX + "*").count(100).build();
+        try (Cursor<String> cursor = redis.scan(options)) {
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                Long roomId = Long.valueOf(key.substring(ROOM_ONLINE_PREFIX.length()));
+                List<ChatUserInfo> users = parseUsers(redis.<String, String>opsForHash().values(key));
+                if (!users.isEmpty()) result.put(roomId, users);
+            }
+        }
+        return result;
+    }
+
+    private List<ChatUserInfo> parseUsers(List<String> values) {
         if (values == null || values.isEmpty()) return List.of();
         List<ChatUserInfo> users = new ArrayList<>(values.size());
         for (String json : values) {
@@ -85,10 +117,5 @@ public class OnlineUserRegistry {
             if (info != null) users.add(info);
         }
         return users;
-    }
-
-    public int getOnlineCount(Long roomId) {
-        Long size = redis.opsForHash().size(roomKey(roomId));
-        return size == null ? 0 : size.intValue();
     }
 }

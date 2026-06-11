@@ -155,6 +155,7 @@ gradle.projectsEvaluated {
         'kuma-boot-starter-core',
         'kuma-boot-starter-lock',
         'kuma-boot-starter-data-common',
+        'kuma-boot-starter-data-migration',
         'kuma-boot-starter-data-p6spy',
         'kuma-boot-starter-data-elasticsearch',
         'kuma-boot-starter-data-mongodb',

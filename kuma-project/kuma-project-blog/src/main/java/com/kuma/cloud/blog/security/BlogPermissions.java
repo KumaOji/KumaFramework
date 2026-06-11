@@ -88,4 +88,6 @@ public final class BlogPermissions {
     public static final String CHAT_UPDATE    = "chat:update";
     public static final String CHAT_DELETE    = "chat:delete";
     public static final String CHAT_BLACKLIST = "chat:blacklist";
+    /** 清理 / 删除聊天历史记录 */
+    public static final String CHAT_HISTORY   = "chat:history";
 }

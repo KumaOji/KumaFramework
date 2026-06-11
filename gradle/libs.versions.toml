@@ -96,6 +96,9 @@ antisamy = "1.7.7"
 snakeyaml = "2.2"
 spring-retry = "2.0.14"
 postgresql = "42.7.4"
+# 数据库版本管理（与 Spring Boot 4.0.3 BOM 对齐）
+flyway = "11.14.1"
+liquibase = "5.0.1"
 jjwt = "0.12.6"
 caffeine = "3.1.8"
 jetcache = "2.7.8"
@@ -244,6 +247,12 @@ spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-st
 spring-boot-starter-tomcat = { module = "org.springframework.boot:spring-boot-starter-tomcat", version.ref = "springboot" }
 spring-boot-starter-kafka = { module = "org.springframework.boot:spring-boot-starter-kafka", version.ref = "springboot" }
 spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc", version.ref = "springboot" }
+spring-boot-starter-flyway = { module = "org.springframework.boot:spring-boot-starter-flyway", version.ref = "springboot" }
+spring-boot-starter-liquibase = { module = "org.springframework.boot:spring-boot-starter-liquibase", version.ref = "springboot" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
 spring-boot-starter-undertow = { module = "org.springframework.boot:spring-boot-starter-undertow", version.ref = "springboot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springboot" }
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "springboot" }

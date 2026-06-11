@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.kuma.boot.data.migration.env.DataMigrationEnvironmentPostProcessor
