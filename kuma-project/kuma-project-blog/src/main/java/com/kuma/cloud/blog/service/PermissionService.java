@@ -1,6 +1,7 @@
 package com.kuma.cloud.blog.service;
 
 import com.kuma.cloud.blog.domain.entity.SysPermission;
+import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 
 import java.util.List;
 
@@ -21,6 +22,12 @@ public interface PermissionService {
 
     /** 查询用户已直接授予的权限列表 */
     List<SysPermission> listUserDirectPermissions(Long userId);
+
+    /**
+     * 查询用户的完整生效权限，按来源分层（角色 / 角色权限 / 直接授权）。
+     * 只读，不写入缓存。
+     */
+    UserAuthoritiesVO getUserAuthorities(Long userId);
 
     /**
      * 加载用户全量权限列表（角色权限 ∪ 直接授权权限），写入 Redis。

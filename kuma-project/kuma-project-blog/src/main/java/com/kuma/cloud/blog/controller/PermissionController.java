@@ -1,12 +1,16 @@
 package com.kuma.cloud.blog.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.exception.BusinessException;
+import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.entity.SysPermission;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.GrantPermissionRequest;
 import com.kuma.cloud.blog.domain.vo.RevokePermissionRequest;
+import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
+import com.kuma.cloud.blog.domain.vo.UserBriefVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.UserService;
@@ -14,6 +18,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,11 +40,33 @@ public class PermissionController {
         return Result.success(permissionService.listAll());
     }
 
+    @Operation(summary = "分页查询用户（管理界面选人，支持关键字/状态过滤）")
+    @GetMapping("/users")
+    @Authorize(BlogPermissions.SYSTEM_USER)
+    public Result<IPage<UserBriefVO>> pageUsers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer status,
+            PageQuery pageQuery) {
+        IPage<UserBriefVO> page = userService.pageUsers(pageQuery, keyword, status).convert(u -> {
+            UserBriefVO vo = new UserBriefVO();
+            BeanUtils.copyProperties(u, vo);
+            return vo;
+        });
+        return Result.success(page);
+    }
+
     @Operation(summary = "查询用户已授予的直接权限")
     @GetMapping("/user/{userId}")
     @Authorize(BlogPermissions.SYSTEM_USER)
     public Result<List<SysPermission>> listUserPermissions(@PathVariable Long userId) {
         return Result.success(permissionService.listUserDirectPermissions(userId));
+    }
+
+    @Operation(summary = "查询用户完整生效权限（角色 / 角色权限 / 直接授权分层）")
+    @GetMapping("/user/{userId}/authorities")
+    @Authorize(BlogPermissions.SYSTEM_USER)
+    public Result<UserAuthoritiesVO> userAuthorities(@PathVariable Long userId) {
+        return Result.success(permissionService.getUserAuthorities(userId));
     }
 
     @Operation(summary = "给用户授权")

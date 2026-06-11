@@ -1,6 +1,10 @@
 package com.kuma.cloud.blog.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.exception.BusinessException;
+import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.security.spring.utils.SecurityUtils;
 import com.kuma.boot.totp.exceptions.QrGenerationException;
 import com.kuma.cloud.blog.domain.entity.User;
@@ -45,6 +49,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getById(Long id) {
         return userMapper.selectById(id);
+    }
+
+    @Override
+    public IPage<User> pageUsers(PageQuery pageQuery, String keyword, Integer status) {
+        int current = pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1;
+        int size = pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 20;
+
+        QueryWrapper<User> qw = new QueryWrapper<>();
+        if (keyword != null && !keyword.isBlank()) {
+            String kw = keyword.strip();
+            qw.and(w -> w.like("username", kw).or().like("nickname", kw).or().like("email", kw));
+        }
+        if (status != null) {
+            qw.eq("status", status);
+        }
+        qw.orderByDesc("create_time");
+        return userMapper.selectPage(new Page<>(current, size), qw);
     }
 
     @Override

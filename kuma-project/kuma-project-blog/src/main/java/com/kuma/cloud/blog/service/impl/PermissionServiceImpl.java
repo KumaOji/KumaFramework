@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
 import com.kuma.cloud.blog.domain.entity.SysPermission;
+import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import com.kuma.cloud.blog.mapper.SysPermissionMapper;
 import com.kuma.cloud.blog.service.PermissionService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,15 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public List<SysPermission> listUserDirectPermissions(Long userId) {
         return permissionMapper.selectDirectPermissionEntitiesByUserId(userId);
+    }
+
+    @Override
+    public UserAuthoritiesVO getUserAuthorities(Long userId) {
+        UserAuthoritiesVO vo = new UserAuthoritiesVO();
+        vo.setRoles(permissionMapper.selectRoleCodesByUserId(userId));
+        vo.setRolePermissions(permissionMapper.selectRolePermissionsByUserId(userId));
+        vo.setDirectPermissions(permissionMapper.selectDirectPermissionsByUserId(userId));
+        return vo;
     }
 
     @Override
