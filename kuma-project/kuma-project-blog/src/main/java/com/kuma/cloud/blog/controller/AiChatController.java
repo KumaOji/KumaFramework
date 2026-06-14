@@ -17,7 +17,9 @@ import com.kuma.boot.ai.service.AiTextService;
 import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.cloud.blog.domain.vo.RagSessionVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
+import com.kuma.cloud.blog.service.RagSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class AiChatController {
     private final AiTextService aiTextService;
     private final AiEmbeddingService aiEmbeddingService;
     private final AiAgentService aiAgentService;
+    private final RagSessionService ragSessionService;
 
     // ── 基础对话 ─────────────────────────────────────────────────────────────
 
@@ -194,17 +197,42 @@ public class AiChatController {
         return Result.success(Map.of("deletedSegments", deleted));
     }
 
-    @Operation(summary = "列出所有活跃 RAG 会话")
-    @GetMapping("/rag/chat/sessions")
+    @Operation(summary = "创建 RAG 会话（支持自定义标题）")
+    @PostMapping("/rag/chat/sessions")
     @Authorize(BlogPermissions.AI_CHAT_RAG)
-    public Result<java.util.Set<String>> listRagSessions() {
-        return Result.success(aiRagService.listSessions());
+    public Result<RagSessionVO> createRagSession(@RequestBody(required = false) Map<String, String> body) {
+        String title = body != null ? body.get("title") : null;
+        return Result.success(ragSessionService.create(title));
     }
 
-    @Operation(summary = "删除指定 RAG 会话的对话历史")
+    @Operation(summary = "列出所有 RAG 会话（DB 记录 + 内存活跃状态）")
+    @GetMapping("/rag/chat/sessions")
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
+    public Result<List<RagSessionVO>> listRagSessions() {
+        return Result.success(ragSessionService.listAll());
+    }
+
+    @Operation(summary = "重命名 RAG 会话标题")
+    @PutMapping("/rag/chat/sessions/{sessionId}/title")
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
+    public Result<Void> renameRagSession(@PathVariable String sessionId,
+                                         @RequestBody Map<String, String> body) {
+        ragSessionService.rename(sessionId, body.get("title"));
+        return Result.success();
+    }
+
+    @Operation(summary = "删除 RAG 会话（DB + 内存）")
     @DeleteMapping("/rag/chat/sessions/{sessionId}")
     @Authorize(BlogPermissions.AI_CHAT_RAG)
     public Result<Void> deleteRagSession(@PathVariable String sessionId) {
+        ragSessionService.delete(sessionId);
+        return Result.success();
+    }
+
+    @Operation(summary = "清除 RAG 会话记忆（保留 DB 记录，仅清除内存中的历史消息）")
+    @DeleteMapping("/rag/chat/memory/{sessionId}")
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
+    public Result<Void> clearRagChatMemory(@PathVariable String sessionId) {
         aiRagService.clearMemory(sessionId);
         return Result.success();
     }
@@ -213,6 +241,9 @@ public class AiChatController {
     @PostMapping("/rag/chat")
     @Authorize(BlogPermissions.AI_CHAT_RAG)
     public Result<Map<String, Object>> ragChat(@RequestBody AiChatRequest request) {
+        if (request.getSessionId() != null && !request.getSessionId().isBlank()) {
+            ragSessionService.ensureExists(request.getSessionId());
+        }
         return Result.success(aiRagService.chat(request));
     }
 
@@ -220,6 +251,9 @@ public class AiChatController {
     @PostMapping(value = "/rag/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Authorize(BlogPermissions.AI_CHAT_RAG)
     public SseEmitter ragStreamChat(@RequestBody AiChatRequest request) {
+        if (request.getSessionId() != null && !request.getSessionId().isBlank()) {
+            ragSessionService.ensureExists(request.getSessionId());
+        }
         return aiRagService.streamChat(request);
     }
 
