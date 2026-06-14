@@ -51,6 +51,11 @@ public class AiRagServiceImpl implements AiRagService {
     }
 
     @Override
+    public int ingest(String text, String source) {
+        return ragComponent.ingest(text, source);
+    }
+
+    @Override
     public int ingestMarkdown(String filename, String markdown) {
         return ragComponent.ingestMarkdown(filename, markdown);
     }
@@ -58,6 +63,37 @@ public class AiRagServiceImpl implements AiRagService {
     @Override
     public int ingestFile(String filename, java.io.InputStream inputStream) {
         return ragComponent.ingestStream(filename, inputStream);
+    }
+
+    @Override
+    public java.util.List<com.kuma.boot.ai.model.RagSource> listSources() {
+        return ragComponent.listSources();
+    }
+
+    @Override
+    public com.kuma.boot.common.model.result.PageResult<com.kuma.boot.ai.model.RagSegment> listSegments(
+            String source, int page, int size) {
+        return ragComponent.listSegments(source, page, size);
+    }
+
+    @Override
+    public java.util.List<com.kuma.boot.ai.model.RagMatch> retrieve(String query, Integer topK, Double minScore) {
+        return ragComponent.retrieve(query, topK, minScore);
+    }
+
+    @Override
+    public com.kuma.boot.ai.model.RagStats stats() {
+        return ragComponent.stats();
+    }
+
+    @Override
+    public int deleteSource(String source) {
+        return ragComponent.deleteBySource(source);
+    }
+
+    @Override
+    public int clearAll() {
+        return ragComponent.clearAll();
     }
 
     @Override

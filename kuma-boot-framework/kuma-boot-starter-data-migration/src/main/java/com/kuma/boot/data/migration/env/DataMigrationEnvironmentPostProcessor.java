@@ -4,9 +4,9 @@ import com.kuma.boot.data.migration.autoconfigure.properties.MigrationProperties
 import com.kuma.boot.data.migration.enums.MigrationType;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -30,11 +30,8 @@ import org.springframework.core.env.MapPropertySource;
  * @author kuma
  * @since 2026-06-09
  */
-public class DataMigrationEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+public class DataMigrationEnvironmentPostProcessor implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
-    /**
-     * 派生属性源名称。
-     */
     private static final String PROPERTY_SOURCE_NAME = "kumaDataMigration";
 
     private static final String FLYWAY_ENABLED = "spring.flyway.enabled";
@@ -42,7 +39,8 @@ public class DataMigrationEnvironmentPostProcessor implements EnvironmentPostPro
     private static final String LIQUIBASE_ENABLED = "spring.liquibase.enabled";
 
     @Override
-    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+    public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+        ConfigurableEnvironment environment = event.getEnvironment();
         MigrationProperties properties = Binder.get(environment)
                 .bind(MigrationProperties.PREFIX, MigrationProperties.class)
                 .orElseGet(MigrationProperties::new);
@@ -64,7 +62,6 @@ public class DataMigrationEnvironmentPostProcessor implements EnvironmentPostPro
 
     @Override
     public int getOrder() {
-        // 在 ConfigData（application.yml）加载之后、自动装配之前执行
         return Ordered.LOWEST_PRECEDENCE;
     }
 }

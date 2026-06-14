@@ -4,11 +4,17 @@ import com.kuma.boot.ai.model.AiAgentRequest;
 import com.kuma.boot.ai.model.AiChatRequest;
 import com.kuma.boot.ai.model.AiTextRequest;
 import com.kuma.boot.ai.model.RagIngestRequest;
+import com.kuma.boot.ai.model.RagMatch;
+import com.kuma.boot.ai.model.RagRetrieveRequest;
+import com.kuma.boot.ai.model.RagSegment;
+import com.kuma.boot.ai.model.RagSource;
+import com.kuma.boot.ai.model.RagStats;
 import com.kuma.boot.ai.service.AiAgentService;
 import com.kuma.boot.ai.service.AiChatService;
 import com.kuma.boot.ai.service.AiEmbeddingService;
 import com.kuma.boot.ai.service.AiRagService;
 import com.kuma.boot.ai.service.AiTextService;
+import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.security.BlogPermissions;
@@ -95,7 +101,7 @@ public class AiChatController {
     @PostMapping("/rag/ingest")
     @Authorize(BlogPermissions.AI_CHAT_INGEST)
     public Result<Map<String, Object>> ingest(@RequestBody RagIngestRequest request) {
-        int count = aiRagService.ingest(request.getText());
+        int count = aiRagService.ingest(request.getText(), request.getSource());
         return Result.success(Map.of("segments", count));
     }
 
@@ -139,6 +145,53 @@ public class AiChatController {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         int total = detail.values().stream().filter(v -> v > 0).mapToInt(Integer::intValue).sum();
         return Result.success(Map.of("totalSegments", total, "files", new LinkedHashMap<>(detail)));
+    }
+
+    @Operation(summary = "知识库概览统计（来源数 / 段落数 / 维度 / 状态）")
+    @GetMapping("/rag/stats")
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<RagStats> ragStats() {
+        return Result.success(aiRagService.stats());
+    }
+
+    @Operation(summary = "列出知识库已上传文档（按来源聚合，含段落数 / 上传时间 / 大小）")
+    @GetMapping("/rag/sources")
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<List<RagSource>> listSources() {
+        return Result.success(aiRagService.listSources());
+    }
+
+    @Operation(summary = "分页查看指定来源的段落（下钻预览切分结果），page 从 0 开始")
+    @GetMapping("/rag/segments")
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<PageResult<RagSegment>> listSegments(
+            @RequestParam("source") String source,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "50") int size) {
+        return Result.success(aiRagService.listSegments(source, page, size));
+    }
+
+    @Operation(summary = "检索测试（返回命中段落及相似度，用于调参）")
+    @PostMapping("/rag/retrieve")
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<List<RagMatch>> ragRetrieve(@RequestBody RagRetrieveRequest request) {
+        return Result.success(aiRagService.retrieve(request.getQuery(), request.getTopK(), request.getMinScore()));
+    }
+
+    @Operation(summary = "删除知识库中指定来源的全部段落")
+    @DeleteMapping("/rag/sources")
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<Map<String, Object>> deleteSource(@RequestParam("source") String source) {
+        int deleted = aiRagService.deleteSource(source);
+        return Result.success(Map.of("source", source, "deletedSegments", deleted));
+    }
+
+    @Operation(summary = "清空整个知识库")
+    @DeleteMapping("/rag/sources/all")
+    @Authorize(BlogPermissions.AI_CHAT_INGEST)
+    public Result<Map<String, Object>> clearKnowledgeBase() {
+        int deleted = aiRagService.clearAll();
+        return Result.success(Map.of("deletedSegments", deleted));
     }
 
     @Operation(summary = "RAG 增强对话")
