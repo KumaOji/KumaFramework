@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface AiRagService {
 
@@ -49,6 +50,9 @@ public interface AiRagService {
 
     /** RAG 增强的流式对话（SSE） */
     SseEmitter streamChat(AiChatRequest request);
+
+    /** 列出所有活跃 RAG 会话的 sessionId */
+    Set<String> listSessions();
 
     /** 清除指定 session 的对话历史 */
     void clearMemory(String sessionId);

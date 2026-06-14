@@ -125,13 +125,13 @@ public class RagComponent {
     }
 
     /**
-     * 写入 Markdown，按 H1~H3 标题边界预分节后再分块写入。
-     * 保证同一节（标题 + 正文 + 表格）不会被跨节截断。
+     * 写入 Markdown，按 H2/H3 标题边界预分节后再分块写入。
+     * 自动剥离 YAML frontmatter、Obsidian 内部链接、相关链接节，减少检索噪音。
      */
     public int ingestMarkdown(String filename, String markdown) {
+        String cleaned = cleanMarkdown(markdown);
         Metadata meta = metadata(filename, byteLength(markdown));
-        List<String> sections = splitMarkdownBySections(markdown);
-        // 先删除旧向量，再统一写入
+        List<String> sections = splitMarkdownBySections(cleaned);
         deleteBySource(filename);
         int total = 0;
         for (String section : sections) {
@@ -146,20 +146,37 @@ public class RagComponent {
         return total;
     }
 
-    /** 按 H1/H2/H3 标题行拆分 Markdown，每节包含标题及其后续内容 */
+    /** 剥离 YAML frontmatter、Obsidian [[wiki]] 链接、导航箭头行 */
+    private static String cleanMarkdown(String markdown) {
+        // 去掉 YAML frontmatter (--- ... ---)
+        String text = markdown.replaceFirst("(?s)^---\\s*\\n.*?\\n---\\s*\\n", "");
+        // 去掉 Obsidian [[链接|显示文字]] 或 [[链接]]，保留显示文字
+        text = text.replaceAll("\\[\\[([^|\\]]+)\\|([^\\]]+)]]", "$2");
+        text = text.replaceAll("\\[\\[([^\\]]+)]]", "$1");
+        // 去掉导航箭头行（如 → 返回计算机基础）
+        text = text.replaceAll("(?m)^→.*$\\n?", "");
+        return text;
+    }
+
+    /**
+     * 仅按 H2（##）边界拆分 Markdown，H3 及以下视为当前节的正文。
+     * 保证「## 标题 + ### 子节 + 表格 + 代码块」始终在同一节内，不跨节截断。
+     * 跳过「相关链接 / 参考 / References」节。
+     */
     private static List<String> splitMarkdownBySections(String markdown) {
         List<String> sections = new ArrayList<>();
         StringBuilder current = new StringBuilder();
+        boolean skip = false;
         for (String line : markdown.split("\n", -1)) {
-            if (line.matches("^#{1,3} .+") && !current.isEmpty()) {
-                sections.add(current.toString());
+            boolean isH2 = line.matches("^## .+");
+            if (isH2) {
+                if (!current.isEmpty() && !skip) sections.add(current.toString());
                 current = new StringBuilder();
+                skip = line.matches("^## .*(?:相关链接|参考|References?).*");
             }
-            current.append(line).append("\n");
+            if (!skip) current.append(line).append("\n");
         }
-        if (!current.isEmpty()) {
-            sections.add(current.toString());
-        }
+        if (!current.isEmpty() && !skip) sections.add(current.toString());
         return sections.isEmpty() ? List.of(markdown) : sections;
     }
 

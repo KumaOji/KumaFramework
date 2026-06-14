@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -175,6 +176,11 @@ public class AiRagServiceImpl implements AiRagService {
         }));
 
         return emitter;
+    }
+
+    @Override
+    public Set<String> listSessions() {
+        return memories.keySet();
     }
 
     @Override

@@ -194,6 +194,21 @@ public class AiChatController {
         return Result.success(Map.of("deletedSegments", deleted));
     }
 
+    @Operation(summary = "列出所有活跃 RAG 会话")
+    @GetMapping("/rag/chat/sessions")
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
+    public Result<java.util.Set<String>> listRagSessions() {
+        return Result.success(aiRagService.listSessions());
+    }
+
+    @Operation(summary = "删除指定 RAG 会话的对话历史")
+    @DeleteMapping("/rag/chat/sessions/{sessionId}")
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
+    public Result<Void> deleteRagSession(@PathVariable String sessionId) {
+        aiRagService.clearMemory(sessionId);
+        return Result.success();
+    }
+
     @Operation(summary = "RAG 增强对话")
     @PostMapping("/rag/chat")
     @Authorize(BlogPermissions.AI_CHAT_RAG)

@@ -99,6 +99,9 @@ kuma:
         http-port: 6333
         collection: blog-docs
         dimension: 1024
+      rag:
+        chunk-size: 800
+        chunk-overlap: 100
     frp:
       enabled: false
       server-addr: 8.134.147.122

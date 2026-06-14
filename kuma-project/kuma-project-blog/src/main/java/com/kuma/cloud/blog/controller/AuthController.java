@@ -6,6 +6,7 @@ import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginRequest;
 import com.kuma.cloud.blog.domain.vo.LoginResponse;
 import com.kuma.cloud.blog.domain.vo.TotpStatusResponse;
+import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import com.kuma.cloud.blog.security.LoginRateLimiter;
 import com.kuma.cloud.blog.security.TotpAttemptLimiter;
 import com.kuma.cloud.blog.service.PermissionService;
@@ -108,6 +109,13 @@ public class AuthController {
     }
 
     // ── TOTP ─────────────────────────────────────────────────────
+
+    @Operation(summary = "获取当前用户的完整生效权限（角色 + 角色权限 + 直接授权）")
+    @GetMapping("/current/authorities")
+    public Result<UserAuthoritiesVO> currentAuthorities(@AuthenticationPrincipal UserDetails principal) {
+        User user = userService.getByUsername(principal.getUsername());
+        return Result.success(permissionService.getUserAuthorities(user.getId()));
+    }
 
     @Operation(summary = "查询当前用户 TOTP 状态")
     @GetMapping("/totp/status")
