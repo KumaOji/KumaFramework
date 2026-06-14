@@ -196,14 +196,14 @@ public class AiChatController {
 
     @Operation(summary = "RAG 增强对话")
     @PostMapping("/rag/chat")
-    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
     public Result<Map<String, Object>> ragChat(@RequestBody AiChatRequest request) {
         return Result.success(aiRagService.chat(request));
     }
 
     @Operation(summary = "RAG 增强流式对话（SSE）")
     @PostMapping(value = "/rag/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Authorize(BlogPermissions.AI_CHAT_SEND)
+    @Authorize(BlogPermissions.AI_CHAT_RAG)
     public SseEmitter ragStreamChat(@RequestBody AiChatRequest request) {
         return aiRagService.streamChat(request);
     }

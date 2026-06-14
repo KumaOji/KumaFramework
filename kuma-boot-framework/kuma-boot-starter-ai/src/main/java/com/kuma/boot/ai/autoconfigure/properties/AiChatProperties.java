@@ -43,6 +43,7 @@ public class AiChatProperties {
     @Data
     public static class Embedding {
         private String baseUrl = "http://localhost:11434";
+        private String apiKey = "";
         private String model = "nomic-embed-text";
     }
 

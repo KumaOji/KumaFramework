@@ -80,9 +80,10 @@ public class AiChatAutoConfiguration implements InitializingBean {
     @ConditionalOnMissingBean(EmbeddingModel.class)
     public EmbeddingModel embeddingModel(AiChatProperties props) {
         AiChatProperties.Embedding emb = props.getEmbedding();
+        String key = blank(emb.getApiKey()) ? "no-key" : emb.getApiKey();
         return OpenAiEmbeddingModel.builder()
                 .baseUrl(normalize(emb.getBaseUrl()))
-                .apiKey("no-key")
+                .apiKey(key)
                 .modelName(emb.getModel())
                 .timeout(props.getTimeout())
                 .build();

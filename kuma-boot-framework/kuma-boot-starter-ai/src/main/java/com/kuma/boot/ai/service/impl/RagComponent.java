@@ -26,6 +26,7 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 import java.io.ByteArrayInputStream;
@@ -91,6 +92,7 @@ public class RagComponent {
 
         this.qdrantHttpClient = RestClient.builder()
                 .baseUrl("http://" + qdrant.getHost() + ":" + qdrant.getHttpPort())
+                .requestFactory(new SimpleClientHttpRequestFactory())
                 .build();
     }
 
@@ -122,9 +124,43 @@ public class RagComponent {
         return ingestDocument(document);
     }
 
-    /** 写入 Markdown，携带 source=filename 元数据 */
+    /**
+     * 写入 Markdown，按 H1~H3 标题边界预分节后再分块写入。
+     * 保证同一节（标题 + 正文 + 表格）不会被跨节截断。
+     */
     public int ingestMarkdown(String filename, String markdown) {
-        return ingestDocument(Document.from(markdown, metadata(filename, byteLength(markdown))));
+        Metadata meta = metadata(filename, byteLength(markdown));
+        List<String> sections = splitMarkdownBySections(markdown);
+        // 先删除旧向量，再统一写入
+        deleteBySource(filename);
+        int total = 0;
+        for (String section : sections) {
+            if (section.isBlank()) continue;
+            List<TextSegment> segments = splitter.split(Document.from(section, meta));
+            if (segments.isEmpty()) continue;
+            List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
+            embeddingStore.addAll(embeddings, segments);
+            total += segments.size();
+        }
+        log.info("Ingested {} segments from '{}' into '{}'", total, filename, collectionName);
+        return total;
+    }
+
+    /** 按 H1/H2/H3 标题行拆分 Markdown，每节包含标题及其后续内容 */
+    private static List<String> splitMarkdownBySections(String markdown) {
+        List<String> sections = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (String line : markdown.split("\n", -1)) {
+            if (line.matches("^#{1,3} .+") && !current.isEmpty()) {
+                sections.add(current.toString());
+                current = new StringBuilder();
+            }
+            current.append(line).append("\n");
+        }
+        if (!current.isEmpty()) {
+            sections.add(current.toString());
+        }
+        return sections.isEmpty() ? List.of(markdown) : sections;
     }
 
     /**
@@ -187,12 +223,18 @@ public class RagComponent {
             body.put("with_vector", false);
             if (offset != null) body.put("offset", offset);
 
-            Map<String, Object> resp = qdrantHttpClient.post()
-                    .uri("/collections/" + collectionName + "/points/scroll")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(body)
-                    .retrieve()
-                    .body(Map.class);
+            Map<String, Object> resp;
+            try {
+                resp = qdrantHttpClient.post()
+                        .uri("/collections/" + collectionName + "/points/scroll")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(body)
+                        .retrieve()
+                        .body(Map.class);
+            } catch (Exception e) {
+                log.warn("Qdrant scroll failed for collection '{}': {}", collectionName, e.getMessage());
+                break;
+            }
 
             Map<String, Object> result = resp == null ? null : (Map<String, Object>) resp.get("result");
             if (result == null) break;
@@ -385,17 +427,22 @@ public class RagComponent {
         body.put("exact", true);
         if (filter != null) body.put("filter", filter);
 
-        Map<String, Object> resp = qdrantHttpClient.post()
-                .uri("/collections/" + collectionName + "/points/count")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(Map.class);
+        try {
+            Map<String, Object> resp = qdrantHttpClient.post()
+                    .uri("/collections/" + collectionName + "/points/count")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(Map.class);
 
-        Map<String, Object> result = resp == null ? null : (Map<String, Object>) resp.get("result");
-        if (result == null) return 0;
-        Number count = (Number) result.get("count");
-        return count == null ? 0 : count.intValue();
+            Map<String, Object> result = resp == null ? null : (Map<String, Object>) resp.get("result");
+            if (result == null) return 0;
+            Number count = (Number) result.get("count");
+            return count == null ? 0 : count.intValue();
+        } catch (Exception e) {
+            log.warn("Qdrant count failed for collection '{}': {}", collectionName, e.getMessage());
+            return 0;
+        }
     }
 
     private int ingestDocument(Document document) {

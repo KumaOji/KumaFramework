@@ -77,6 +77,8 @@ public final class BlogPermissions {
     public static final String AI_CHAT_SEND = "ai_chat:send";
     /** 向知识库写入文档（仅管理员） */
     public static final String AI_CHAT_INGEST = "ai_chat:ingest";
+    /** RAG 增强问答（仅管理员） */
+    public static final String AI_CHAT_RAG = "ai_chat:rag";
     /** 使用文本工具（摘要、翻译、关键词、情感分析等） */
     public static final String AI_CHAT_TEXT = "ai_chat:text";
 
