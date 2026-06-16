@@ -86,6 +86,9 @@ public class AiChatAutoConfiguration implements InitializingBean {
                 .apiKey(key)
                 .modelName(emb.getModel())
                 .timeout(props.getTimeout())
+                // 诊断用：打印实际发往 embedding 服务的请求与原始响应，定位 0 维向量来源
+                .logRequests(true)
+                .logResponses(true)
                 .build();
     }
 

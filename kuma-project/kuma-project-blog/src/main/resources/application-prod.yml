@@ -36,6 +36,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   level:
+    dev.langchain4j: DEBUG
     root: INFO
     com.kuma.boot: INFO
     com.kuma.cloud.blog: DEBUG

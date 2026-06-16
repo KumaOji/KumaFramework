@@ -139,6 +139,7 @@ public class RagComponent {
             List<TextSegment> segments = splitter.split(Document.from(section, meta));
             if (segments.isEmpty()) continue;
             List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
+            verifyDimensions(embeddings, segments, filename);
             embeddingStore.addAll(embeddings, segments);
             total += segments.size();
         }
@@ -462,6 +463,28 @@ public class RagComponent {
         }
     }
 
+    /**
+     * 写入前校验每个向量维度，任何 0 维 / 维度不符都 fail-fast 并精确定位，
+     * 避免把坏向量静默写入 Qdrant 后只在 upsert 抛出隐晦的 "got 0"。
+     */
+    private void verifyDimensions(List<Embedding> embeddings, List<TextSegment> segments, String source) {
+        if (embeddings.size() != segments.size()) {
+            throw new IllegalStateException(String.format(
+                    "Embedding 数量与段落数不一致 source=%s, embeddings=%d, segments=%d",
+                    source, embeddings.size(), segments.size()));
+        }
+        for (int i = 0; i < embeddings.size(); i++) {
+            int dim = embeddings.get(i).dimension();
+            if (dim != dimension) {
+                String text = segments.get(i).text();
+                String preview = text.length() > 80 ? text.substring(0, 80) : text;
+                throw new IllegalStateException(String.format(
+                        "Embedding 维度异常 source=%s, segment[%d] expected=%d got=%d, text=%s",
+                        source, i, dimension, dim, preview));
+            }
+        }
+    }
+
     private int ingestDocument(Document document) {
         List<TextSegment> segments = splitter.split(document);
         if (segments.isEmpty()) return 0;
@@ -471,6 +494,7 @@ public class RagComponent {
             deleteBySource(source);
         }
         List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
+        verifyDimensions(embeddings, segments, source != null ? source : "text");
         embeddingStore.addAll(embeddings, segments);
         log.info("Ingested {} segments from '{}' into '{}'",
                 segments.size(), source != null ? source : "text", collectionName);
