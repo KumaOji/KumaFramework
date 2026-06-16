@@ -23,6 +23,8 @@ import com.kuma.cloud.blog.service.RagSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +43,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/ai-chat")
 @RequiredArgsConstructor
 public class AiChatController {
+
+    private static final Logger log = LoggerFactory.getLogger(AiChatController.class);
 
     private final AiChatService aiChatService;
     private final AiRagService aiRagService;
@@ -121,6 +125,7 @@ public class AiChatController {
                     String markdown = new String(file.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                     detail.put(name, aiRagService.ingestMarkdown(name, markdown));
                 } catch (Exception e) {
+                    log.error("Markdown ingest failed for '{}': {}", name, e.getMessage(), e);
                     detail.put(name, -1);
                 }
             });
@@ -141,6 +146,7 @@ public class AiChatController {
                 try (var stream = file.getInputStream()) {
                     detail.put(name, aiRagService.ingestFile(name, stream));
                 } catch (Exception e) {
+                    log.error("Document ingest failed for '{}': {}", name, e.getMessage(), e);
                     detail.put(name, -1);
                 }
             });
