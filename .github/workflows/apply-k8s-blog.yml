@@ -21,7 +21,7 @@ jobs:
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           source: kuma-project/kuma-project-blog/k8s/
           target: /data/blog/k8s/
-          strip_components: 4
+          strip_components: 3
 
       - name: Apply k8s configs
         uses: appleboy/ssh-action@v1
