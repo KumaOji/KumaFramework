@@ -8,7 +8,19 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-common')
 
+    // @AutoConfiguration / @ConditionalOnProperty 等自动配置注解
     api projectLibs.spring.boot.autoconfigure
+
+    // 日志门面
+    api projectLibs.slf4j.api
+
+    // @JsonInclude（响应裁剪 null 字段，保证 JSON-RPC 报文合规）
+    api projectLibs.jackson.annotations
+
+    // HTTP 传输层：@RestController / @PostMapping / ResponseEntity（仅 Web 应用需要）
+    compileOnly projectLibs.spring.web
+    // SseEmitter（SSE 通知通道）
+    compileOnly projectLibs.spring.webmvc
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok

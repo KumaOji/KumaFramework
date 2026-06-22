@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 性能测试模块 — 基于 Apache JMeter 的嵌入式压测执行'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context
+
+    // 嵌入式 JMeter 引擎（StandardJMeterEngine / SaveService / JMeterUtils 等）
+    api projectLibs.jmeter.core
+    // 取样器、监听器、断言等组件
+    api projectLibs.jmeter.components
+    // HTTP 取样器（最常用的压测协议）
+    api projectLibs.jmeter.http
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

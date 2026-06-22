@@ -69,7 +69,7 @@ def frameworkBootSubModules = [
         'common', 'core',
         // 数据层
         'data-common', 'data-datasource', 'data-mybatis', 'data-p6spy', 'data-shardingsphere',
-        'data-elasticsearch', 'data-mongodb', 'data-jpa', 'data-migration',
+        'data-elasticsearch', 'data-mongodb', 'data-jpa', 'data-migration', 'data-vector',
         // 缓存
         'cache-common', 'cache-caffeine', 'cache-jetcache', 'cache-redis',
         // 安全
@@ -88,6 +88,8 @@ def frameworkBootSubModules = [
         'ai',
         // 可观测性
         'actuator', 'audit-log', 'elk', 'logger', 'metrics', 'prometheus', 'skywalking', 'tracer',
+        // 诊断 & 性能剖析
+        'arthas', 'jprofiler',
         // 分布式
         'client', 'grpc', 'seata', 'sentinel',
         // 存储 & 通信
@@ -99,6 +101,8 @@ def frameworkBootSubModules = [
         'monitor', 'multi-tenant', 'office', 'openapi', 'pinyin', 'retry',
         'sensitive', 'springdoc', 'statemachine', 'test',
         'threadpool', 'translation', 'useragent',
+        // 质量 & 性能测试
+        'jacoco', 'jmeter',
 ]
 for (name in frameworkBootSubModules) {
     include "kuma-boot-framework:kuma-boot-starter-${name}"

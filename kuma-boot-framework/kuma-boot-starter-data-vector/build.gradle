@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 向量数据库统一抽象模块（VectorStore：内存 / Qdrant，面向 RAG 与向量检索）'
+
+dependencies {
+    // 基础公共工具（LogUtils / StarterNameConstants 等）
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+
+    // @AutoConfiguration / @ConditionalOnProperty 等自动配置注解
+    api projectLibs.spring.boot.autoconfigure
+
+    // RestClient（QdrantVectorStore 通过 HTTP REST API 访问 Qdrant）
+    api projectLibs.spring.web
+
+    // RestClient 请求/响应的 JSON 序列化
+    api projectLibs.jackson.databind
+
+    // 日志门面
+    api projectLibs.slf4j.api
+
+    // @PostConstruct（实现类初始化）
+    api projectLibs.jakarta.annotation.api
+
+    // @Nullable
+    compileOnly projectLibs.jspecify
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

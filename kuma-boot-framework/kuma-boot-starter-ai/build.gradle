@@ -6,6 +6,10 @@ description = 'Kumaframework AI 对话与 RAG 快速启动模块（基于 LangCh
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // MCP 桥接（可选）：将 @Tool 工具暴露为 McpTool。compileOnly + @ConditionalOnClass，保持解耦
+    compileOnly project(':kuma-boot-framework:kuma-boot-starter-mcp')
+
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.boot.web.server
     api projectLibs.spring.web

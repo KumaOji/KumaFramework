@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework 代码覆盖率模块 — 基于 JaCoCo 的运行期覆盖率采集与报告生成'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api projectLibs.spring.boot.autoconfigure
+    api projectLibs.spring.cloud.context
+
+    // JaCoCo 离线分析 / 报告生成（ExecFileLoader / Analyzer / HTMLFormatter 等）
+    api projectLibs.jacoco.core
+    api projectLibs.jacoco.report
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}

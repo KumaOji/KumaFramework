@@ -184,6 +184,9 @@ freemarker = "2.3.33"
 commons-math3 = "3.6.1"
 lucene = "9.11.1"
 datafaker = "2.4.3"
+arthas = "4.3.0"
+jacoco = "0.8.13"
+jmeter = "5.6.3"
 minio = "8.5.14"
 aliyun-oss = "3.18.1"
 tencent-cos = "5.6.245"
@@ -502,6 +505,12 @@ freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" 
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
 lucene-core = { module = "org.apache.lucene:lucene-core", version.ref = "lucene" }
 datafaker = { module = "net.datafaker:datafaker", version.ref = "datafaker" }
+arthas-agent-attach = { module = "com.taobao.arthas:arthas-agent-attach", version.ref = "arthas" }
+jacoco-core = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco" }
+jacoco-report = { module = "org.jacoco:org.jacoco.report", version.ref = "jacoco" }
+jmeter-core = { module = "org.apache.jmeter:ApacheJMeter_core", version.ref = "jmeter" }
+jmeter-components = { module = "org.apache.jmeter:ApacheJMeter_components", version.ref = "jmeter" }
+jmeter-http = { module = "org.apache.jmeter:ApacheJMeter_http", version.ref = "jmeter" }
 
 ## 将多个需要同时引入的依赖定义成一个组，使用时直接引入组
 [bundles]

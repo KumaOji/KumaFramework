@@ -53,6 +53,7 @@ public final class StarterNameConstants {
     public static final String DATA_MYBATIS_STARTER = "kuma-boot-starter-data-mybatis";
     public static final String DATA_P6SPY_STARTER = "kuma-boot-starter-data-p6spy";
     public static final String DATA_SHARDINGSPHERE_STARTER = "kuma-boot-starter-data-shardingsphere";
+    public static final String DATA_VECTOR_STARTER = "kuma-boot-starter-data-vector";
     public static final String DDD_STARTER = "kuma-boot-starter-ddd";
     public static final String DINGTALK_STARTER = "kuma-boot-starter-dingtalk";
 

@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+}
+
+description = 'Kumaframework JProfiler 性能剖析模块 — 通过 JProfiler Controller API 编程式触发快照与录制'
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+
+    // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties、@ConditionalOnProperty 等）
+    api projectLibs.spring.boot.autoconfigure
+
+    // Spring Cloud Context（@RefreshScope）
+    api projectLibs.spring.cloud.context
+
+    // 说明：JProfiler Controller API（com.jprofiler.api.controller.Controller）随 JProfiler 安装目录的
+    // bootstrap.jar 发布，不在 Maven 中央仓库。本模块通过反射调用，仅当 JVM 以
+    // -agentpath:.../libjprofilerti.so 启动且 Controller 在 classpath 时生效，故此处无需编译期依赖。
+
+    compileOnly projectLibs.jspecify
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+}
