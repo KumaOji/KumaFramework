@@ -94,7 +94,9 @@ jobs:
         with:
           context: kuma-project/kuma-project-blog
           push: true
-          tags: ${{ steps.ver.outputs.FULL_IMAGE }}
+          tags: |
+            ${{ steps.ver.outputs.FULL_IMAGE }}
+            ${{ env.IMAGE }}:latest
           build-args: JAR_VERSION=${{ steps.ver.outputs.JAR_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -111,3 +113,10 @@ jobs:
               -n blog
             kubectl scale deployment/blog-background -n blog --replicas=1
             kubectl rollout status deployment/blog-background -n blog --timeout=600s
+
+            # 清理服务器本地缓存的旧版本镜像，只保留本次部署的 tag 和 latest
+            for tag in $(k3s crictl images | awk -v repo="${{ env.IMAGE }}" '$1==repo{print $2}'); do
+              if [ "$tag" != "${{ steps.ver.outputs.IMAGE_TAG }}" ] && [ "$tag" != "latest" ]; then
+                k3s crictl rmi "${{ env.IMAGE }}:${tag}" || true
+              fi
+            done

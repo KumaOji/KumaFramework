@@ -155,6 +155,8 @@ public class RagComponent {
         text = text.replaceAll("\\[\\[([^\\]]+)]]", "$1");
         // 去掉导航箭头行（如 → 返回计算机基础）
         text = text.replaceAll("(?m)^→.*$\\n?", "");
+        // 去掉单独成行的水平分隔线 ---（章节间的视觉分隔，对检索是噪音）
+        text = text.replaceAll("(?m)^---\\s*$\\n?", "");
         return text;
     }
 
@@ -164,20 +166,43 @@ public class RagComponent {
      * 跳过「相关链接 / 参考 / References」节。
      */
     private static List<String> splitMarkdownBySections(String markdown) {
+        String title = null;
         List<String> sections = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         boolean skip = false;
+        boolean inSection = false; // 是否已进入第一个 H2；之前的 H1 标题/前言不单独成段
         for (String line : markdown.split("\n", -1)) {
+            if (title == null && line.matches("^# .+")) {
+                title = line.substring(2).trim();
+            }
             boolean isH2 = line.matches("^## .+");
             if (isH2) {
-                if (!current.isEmpty() && !skip) sections.add(current.toString());
+                if (inSection && !skip) addSection(sections, current);
                 current = new StringBuilder();
+                inSection = true;
                 skip = line.matches("^## .*(?:相关链接|参考|References?).*");
             }
-            if (!skip) current.append(line).append("\n");
+            if (inSection && !skip) current.append(line).append("\n");
         }
-        if (!current.isEmpty() && !skip) sections.add(current.toString());
-        return sections.isEmpty() ? List.of(markdown) : sections;
+        if (inSection && !skip) addSection(sections, current);
+
+        // 没有任何 H2：整篇作为一段（去掉首尾空白）
+        if (sections.isEmpty()) {
+            String whole = markdown.strip();
+            return whole.isEmpty() ? List.of() : List.of(whole);
+        }
+        // 给每段补上文档标题，使每个 chunk 自带文档级上下文，提升检索命中
+        if (title != null && !title.isBlank()) {
+            String prefix = "# " + title + "\n\n";
+            sections.replaceAll(s -> prefix + s);
+        }
+        return sections;
+    }
+
+    /** 去掉首尾空白后加入 sections，跳过空段 */
+    private static void addSection(List<String> sections, StringBuilder current) {
+        String section = current.toString().strip();
+        if (!section.isEmpty()) sections.add(section);
     }
 
     /**

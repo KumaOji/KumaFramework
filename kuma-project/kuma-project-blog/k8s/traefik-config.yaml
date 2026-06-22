@@ -24,12 +24,6 @@ spec:
           default: true
         tls:
           enabled: true
-      aiui:
-        port: 8081
-        exposedPort: 8081
-        protocol: TCP
-        expose:
-          default: true
 
     # ── Let's Encrypt ACME ──────────────────────────────────────────
     certResolvers:
