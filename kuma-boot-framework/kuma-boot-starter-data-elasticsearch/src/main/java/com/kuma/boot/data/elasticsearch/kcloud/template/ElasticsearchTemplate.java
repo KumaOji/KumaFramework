@@ -234,8 +234,7 @@ public class ElasticsearchTemplate {
    private TokenFilter getFilter(List<Document.Option> options) {
       TokenFilter.Builder filterBuilder = new TokenFilter.Builder();
       Map<String, String> map = options.stream().collect(Collectors.toMap(Document.Option::getKey, Document.Option::getValue));
-      @SuppressWarnings("unchecked")
-      TokenFilter result = filterBuilder.definition((fn) -> (ObjectBuilder)fn.withJson(new ByteArrayInputStream(JSONUtil.toJsonStr(map).getBytes(StandardCharsets.UTF_8)))).build();
+      TokenFilter result = filterBuilder.definition((fn) -> fn.withJson(new ByteArrayInputStream(JSONUtil.toJsonStr(map).getBytes(StandardCharsets.UTF_8)))).build();
       return result;
    }
 
