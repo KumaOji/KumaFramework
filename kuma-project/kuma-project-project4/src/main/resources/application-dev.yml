@@ -54,7 +54,8 @@ spring:
       - org.springframework.cloud.gateway.config.GatewayFunctionAutoConfiguration
       - org.springframework.cloud.gateway.config.GatewayClassPathWarningAutoConfiguration
       - org.springframework.cloud.gateway.config.GatewayReactiveLoadBalancerClientAutoConfiguration
-      # knife4j 与 springdoc 3.0 兼容问题，使用 @EnableKnife4j 替代
+      # 框架通过 @EnableKnife4j 装配定制版 Knife4jAutoConfiguration，
+      # 排除官方自动装配以避免重复注册 doc.html / webjars 资源处理器（勿删）
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
       # Druid 多数据源由 dynamic-datasource 管理，排除单数据源自动装配
       - com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure
