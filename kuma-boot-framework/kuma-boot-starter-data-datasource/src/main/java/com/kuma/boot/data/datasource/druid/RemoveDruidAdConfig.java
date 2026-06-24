@@ -16,8 +16,8 @@
 
 package com.kuma.boot.data.datasource.druid;
 
-import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
-import com.alibaba.druid.spring.boot3.autoconfigure.properties.DruidStatProperties;
+import com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure;
+import com.alibaba.druid.spring.boot4.autoconfigure.properties.DruidStatProperties;
 import com.alibaba.druid.util.Utils;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

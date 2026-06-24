@@ -56,8 +56,8 @@ spring:
       - org.springframework.cloud.gateway.config.GatewayReactiveLoadBalancerClientAutoConfiguration
       # knife4j 与 springdoc 3.0 兼容问题，使用 @EnableKnife4j 替代
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
-      # Druid的springboot4暂未支持
-      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+      # Druid 多数据源由 dynamic-datasource 管理，排除单数据源自动装配
+      - com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure
       # Nacos 注册/配置中心（无 Nacos Server 时禁用）
       - com.alibaba.cloud.nacos.NacosDiscoveryAutoConfiguration
       - com.alibaba.cloud.nacos.discovery.NacosDiscoveryClientConfiguration

@@ -1,6 +1,6 @@
 package com.kuma.ai.python;
 
-import com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure;
+import com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure;
 import com.kuma.boot.core.startup.StartupSpringApplication;
 import com.kuma.boot.web.annotation.KumaBootApplication;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
