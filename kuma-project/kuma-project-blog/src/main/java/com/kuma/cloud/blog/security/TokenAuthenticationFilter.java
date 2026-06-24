@@ -1,6 +1,6 @@
 package com.kuma.cloud.blog.security;
 
-import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.domain.vo.LoginVO;
 import com.kuma.cloud.blog.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,7 +29,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromRequest(request);
         if (StringUtils.hasText(token)) {
-            LoginResponse lr = tokenService.getLoginResponseByToken(token);
+            LoginVO lr = tokenService.getLoginResponseByToken(token);
             if (lr != null && lr.getUserId() != null) {
                 BlogUserDetails userDetails = new BlogUserDetails(lr);
                 UsernamePasswordAuthenticationToken authentication =

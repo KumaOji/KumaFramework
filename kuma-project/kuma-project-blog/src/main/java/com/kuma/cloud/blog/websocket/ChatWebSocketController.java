@@ -1,10 +1,10 @@
 package com.kuma.cloud.blog.websocket;
 
 import com.kuma.cloud.blog.domain.entity.ChatHistory;
-import com.kuma.cloud.blog.domain.vo.ChatGuestProfile;
+import com.kuma.cloud.blog.domain.dto.ChatGuestProfileDTO;
 import com.kuma.cloud.blog.domain.vo.ChatMessageVO;
-import com.kuma.cloud.blog.domain.vo.ChatSendRequest;
-import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.domain.dto.ChatSendDTO;
+import com.kuma.cloud.blog.domain.vo.LoginVO;
 import com.kuma.cloud.blog.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -31,7 +31,7 @@ public class ChatWebSocketController {
     private static final String GUEST_AVATAR_KEY = "guestAvatar";
 
     @MessageMapping("/chat.join/{roomId}")
-    public void join(@DestinationVariable Long roomId, ChatGuestProfile profile,
+    public void join(@DestinationVariable Long roomId, ChatGuestProfileDTO profile,
                      SimpMessageHeaderAccessor accessor) {
         ChatUserInfo userInfo = resolveUser(accessor, profile);
         registry.join(roomId, userInfo);
@@ -43,20 +43,20 @@ public class ChatWebSocketController {
 
     /** 静默更新访客资料（不广播系统消息） */
     @MessageMapping("/chat.profile/{roomId}")
-    public void updateProfile(@DestinationVariable Long roomId, ChatGuestProfile profile,
+    public void updateProfile(@DestinationVariable Long roomId, ChatGuestProfileDTO profile,
                               SimpMessageHeaderAccessor accessor) {
         ChatUserInfo userInfo = resolveUser(accessor, profile);
         registry.join(roomId, userInfo);
     }
 
     @MessageMapping("/chat.send/{roomId}")
-    public void send(@DestinationVariable Long roomId, ChatSendRequest request,
+    public void send(@DestinationVariable Long roomId, ChatSendDTO request,
                      SimpMessageHeaderAccessor accessor) {
         if (request.getContent() == null || request.getContent().isBlank()) return;
         String content = request.getContent().strip();
         if (content.length() > 500) content = content.substring(0, 500);
 
-        ChatGuestProfile profile = new ChatGuestProfile();
+        ChatGuestProfileDTO profile = new ChatGuestProfileDTO();
         profile.setNickname(request.getNickname());
         profile.setAvatar(request.getAvatar());
         ChatUserInfo userInfo = resolveUser(accessor, profile);
@@ -97,7 +97,7 @@ public class ChatWebSocketController {
         });
     }
 
-    private void storeGuestProfile(SimpMessageHeaderAccessor accessor, ChatGuestProfile profile) {
+    private void storeGuestProfile(SimpMessageHeaderAccessor accessor, ChatGuestProfileDTO profile) {
         if (profile == null) return;
         Map<String, Object> attrs = accessor.getSessionAttributes();
         if (attrs == null) return;
@@ -113,7 +113,7 @@ public class ChatWebSocketController {
         }
     }
 
-    private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor, ChatGuestProfile profile) {
+    private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor, ChatGuestProfileDTO profile) {
         storeGuestProfile(accessor, profile);
         return resolveUser(accessor);
     }
@@ -121,7 +121,7 @@ public class ChatWebSocketController {
     private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor) {
         Map<String, Object> attrs = accessor.getSessionAttributes();
         String sessionId = accessor.getSessionId();
-        LoginResponse lr = attrs != null ? (LoginResponse) attrs.get("loginResponse") : null;
+        LoginVO lr = attrs != null ? (LoginVO) attrs.get("loginResponse") : null;
         if (lr != null) {
             String nickname = lr.getNickname() != null ? lr.getNickname() : lr.getUsername();
             return new ChatUserInfo(lr.getUserId(), nickname, null, sessionId);

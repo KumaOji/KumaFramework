@@ -5,6 +5,7 @@ import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.entity.ChatBlacklist;
 import com.kuma.cloud.blog.domain.entity.ChatHistory;
 import com.kuma.cloud.blog.domain.entity.ChatRoom;
+import com.kuma.cloud.blog.domain.dto.BlacklistAddDTO;
 import com.kuma.cloud.blog.domain.vo.ChatMessageVO;
 import com.kuma.cloud.blog.domain.vo.ChatOnlineUserVO;
 import com.kuma.cloud.blog.domain.vo.ChatRoomOnlineVO;
@@ -187,7 +188,7 @@ public class ChatRoomController {
     @Operation(summary = "添加邮箱到黑名单（管理员）")
     @PostMapping("/blacklist")
     @Authorize(BlogPermissions.CHAT_BLACKLIST)
-    public Result<Void> blacklistAdd(@RequestBody BlacklistAddRequest request) {
+    public Result<Void> blacklistAdd(@RequestBody BlacklistAddDTO request) {
         chatBlacklistService.add(request.getEmail(), request.getReason());
         return Result.success();
     }
@@ -198,11 +199,5 @@ public class ChatRoomController {
     public Result<Void> blacklistRemove(@PathVariable Long id) {
         chatBlacklistService.remove(id);
         return Result.success();
-    }
-
-    @lombok.Data
-    public static class BlacklistAddRequest {
-        private String email;
-        private String reason;
     }
 }

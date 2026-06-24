@@ -1,4 +1,4 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.cloud.blog.domain.dto;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /** 访客聊天资料（join / send / profile 时由前端传入） */
 @Data
-public class ChatGuestProfile implements Serializable {
+public class ChatGuestProfileDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Music;
-import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
+import com.kuma.cloud.blog.domain.query.MusicQuery;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
 import com.kuma.cloud.blog.mapper.MusicMapper;
 import com.kuma.cloud.blog.service.MusicService;
@@ -91,7 +91,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public IPage<MusicVO> getMusicList(PageQuery pageQuery, MusicQueryVO queryVO) {
+    public IPage<MusicVO> getMusicList(PageQuery pageQuery, MusicQuery queryVO) {
         QueryWrapper<Music> qw = new QueryWrapper<>();
         qw.ne("status", 2);
 

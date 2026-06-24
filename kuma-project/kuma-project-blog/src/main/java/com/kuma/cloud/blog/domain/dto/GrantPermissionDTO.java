@@ -1,10 +1,10 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.cloud.blog.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class GrantPermissionRequest {
+public class GrantPermissionDTO {
 
     @NotNull(message = "用户ID不能为空")
     private Long userId;

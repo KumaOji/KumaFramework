@@ -1,7 +1,7 @@
 package com.kuma.cloud.blog.service.impl;
 
 import com.kuma.boot.common.utils.json.JacksonUtils;
-import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.domain.vo.LoginVO;
 import com.kuma.cloud.blog.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,19 +18,19 @@ public class TokenServiceImpl implements TokenService {
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
-    public void saveToken(String token, LoginResponse loginResponse, long expireSeconds) {
+    public void saveToken(String token, LoginVO loginResponse, long expireSeconds) {
         String tokenKey = TOKEN_PREFIX + token;
         String json = JacksonUtils.toJSONString(loginResponse);
         stringRedisTemplate.opsForValue().set(tokenKey, json, expireSeconds, TimeUnit.SECONDS);
     }
 
     @Override
-    public LoginResponse getLoginResponseByToken(String token) {
+    public LoginVO getLoginResponseByToken(String token) {
         String tokenKey = TOKEN_PREFIX + token;
         String json = stringRedisTemplate.opsForValue().get(tokenKey);
         if (json == null || json.isBlank()) return null;
         try {
-            return JacksonUtils.readValue(json, LoginResponse.class);
+            return JacksonUtils.readValue(json, LoginVO.class);
         } catch (Exception e) {
             return null;
         }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.Article;
+import com.kuma.cloud.blog.domain.query.ArticleQuery;
 import com.kuma.cloud.blog.domain.vo.*;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.security.BlogPermissions;
@@ -66,7 +67,7 @@ public class ArticleController {
             @Parameter(description = "每页条数，支持 pageSize 或 size") @RequestParam(required = false) Integer pageSize,
             @RequestParam(required = false) Integer size,
             PageQuery pageQuery,
-            ArticleQueryVO queryVO) {
+            ArticleQuery queryVO) {
         int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
         int pageSizeVal = pageSize != null ? pageSize : (size != null ? size : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 10));
         if (pageQuery == null) pageQuery = new PageQuery();

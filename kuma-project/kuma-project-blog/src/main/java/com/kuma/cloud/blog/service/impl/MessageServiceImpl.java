@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Message;
-import com.kuma.cloud.blog.domain.vo.MessageQueryVO;
+import com.kuma.cloud.blog.domain.query.MessageQuery;
 import com.kuma.cloud.blog.domain.vo.MessageVO;
 import com.kuma.cloud.blog.mapper.MessageMapper;
 import com.kuma.cloud.blog.service.MessageService;
@@ -63,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public IPage<MessageVO> adminList(PageQuery pageQuery, MessageQueryVO queryVO) {
+    public IPage<MessageVO> adminList(PageQuery pageQuery, MessageQuery queryVO) {
         QueryWrapper<Message> qw = new QueryWrapper<>();
         if (queryVO != null) {
             if (StringUtils.isNotEmpty(queryVO.getNickname())) qw.like("nickname", queryVO.getNickname());

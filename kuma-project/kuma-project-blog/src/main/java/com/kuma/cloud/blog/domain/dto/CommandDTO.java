@@ -1,4 +1,4 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.cloud.blog.domain.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Schema(description = "命令执行请求")
 @Data
-public class CommandRequest {
+public class CommandDTO {
 
     @Schema(description = "命令或可执行文件路径")
     private String command;

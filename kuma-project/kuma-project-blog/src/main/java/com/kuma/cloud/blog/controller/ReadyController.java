@@ -6,7 +6,7 @@ import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.ReadyItem;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.boot.security.spring.access.expression.RoleConstants;
-import com.kuma.cloud.blog.domain.vo.ReadyQueryVO;
+import com.kuma.cloud.blog.domain.query.ReadyQuery;
 import com.kuma.cloud.blog.domain.vo.ReadyVO;
 import com.kuma.cloud.blog.service.ReadyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,7 +66,7 @@ public class ReadyController {
 
     @Operation(summary = "分页查询待办列表")
     @GetMapping("/list")
-    public Result<IPage<ReadyVO>> list(PageQuery pageQuery, ReadyQueryVO queryVO) {
+    public Result<IPage<ReadyVO>> list(PageQuery pageQuery, ReadyQuery queryVO) {
         return Result.success(readyService.getReadyList(pageQuery, queryVO));
     }
 }

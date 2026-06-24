@@ -1,4 +1,4 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.cloud.blog.domain.query;
 
 import lombok.Data;
 
@@ -6,12 +6,11 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-public class ReadyQueryVO implements Serializable {
+public class MessageQuery implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String title;
+    private String nickname;
     private Integer status;
-    private Integer priority;
 }

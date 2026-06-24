@@ -1,6 +1,6 @@
 package com.kuma.cloud.blog.websocket;
 
-import com.kuma.cloud.blog.domain.vo.LoginResponse;
+import com.kuma.cloud.blog.domain.vo.LoginVO;
 import com.kuma.cloud.blog.service.ChatBlacklistService;
 import com.kuma.cloud.blog.service.TokenService;
 import jakarta.servlet.http.Cookie;
@@ -32,7 +32,7 @@ public class ChatHandshakeInterceptor implements HandshakeInterceptor {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
             String token = extractCookie(httpRequest, TOKEN_COOKIE);
             if (token != null) {
-                LoginResponse lr = tokenService.getLoginResponseByToken(token);
+                LoginVO lr = tokenService.getLoginResponseByToken(token);
                 if (lr != null && lr.getUserId() != null) {
                     if (blacklistService.isBlocked(lr.getEmail())) {
                         return false;

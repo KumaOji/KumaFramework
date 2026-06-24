@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.ReadyItem;
-import com.kuma.cloud.blog.domain.vo.ReadyQueryVO;
+import com.kuma.cloud.blog.domain.query.ReadyQuery;
 import com.kuma.cloud.blog.domain.vo.ReadyVO;
 import com.kuma.cloud.blog.mapper.ReadyMapper;
 import com.kuma.cloud.blog.service.ReadyService;
@@ -76,7 +76,7 @@ public class ReadyServiceImpl implements ReadyService {
     }
 
     @Override
-    public IPage<ReadyVO> getReadyList(PageQuery pageQuery, ReadyQueryVO queryVO) {
+    public IPage<ReadyVO> getReadyList(PageQuery pageQuery, ReadyQuery queryVO) {
         QueryWrapper<ReadyItem> qw = new QueryWrapper<>();
         qw.ne("status", 3);
         if (queryVO != null) {

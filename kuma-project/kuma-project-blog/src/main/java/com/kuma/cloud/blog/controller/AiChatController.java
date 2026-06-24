@@ -18,6 +18,8 @@ import com.kuma.boot.common.model.result.PageResult;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.vo.RagSessionVO;
+import com.kuma.cloud.blog.domain.dto.SelectionAskDTO;
+import com.kuma.cloud.blog.domain.dto.SimilarityDTO;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.RagSessionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -307,7 +309,7 @@ public class AiChatController {
     @Operation(summary = "文本相似度（余弦相似度，返回 -1~1）")
     @PostMapping("/embedding/similarity")
     @Authorize(BlogPermissions.AI_CHAT_TEXT)
-    public Result<Double> similarity(@RequestBody SimilarityRequest request) {
+    public Result<Double> similarity(@RequestBody SimilarityDTO request) {
         return Result.success(aiEmbeddingService.cosineSimilarity(request.getText1(), request.getText2()));
     }
 
@@ -316,7 +318,7 @@ public class AiChatController {
     @Operation(summary = "划词提问（非流式）")
     @PostMapping("/selection/ask")
     @Authorize(BlogPermissions.AI_CHAT_SEND)
-    public Result<String> selectionAsk(@RequestBody SelectionAskRequest request) {
+    public Result<String> selectionAsk(@RequestBody SelectionAskDTO request) {
         Map<String, Object> result = aiChatService.chat(buildSelectionChatRequest(request));
         return Result.success(extractContent(result));
     }
@@ -324,11 +326,11 @@ public class AiChatController {
     @Operation(summary = "划词提问（流式 SSE）")
     @PostMapping(value = "/selection/ask/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Authorize(BlogPermissions.AI_CHAT_SEND)
-    public SseEmitter selectionAskStream(@RequestBody SelectionAskRequest request) {
+    public SseEmitter selectionAskStream(@RequestBody SelectionAskDTO request) {
         return aiChatService.streamChat(buildSelectionChatRequest(request));
     }
 
-    private AiChatRequest buildSelectionChatRequest(SelectionAskRequest req) {
+    private AiChatRequest buildSelectionChatRequest(SelectionAskDTO req) {
         AiChatRequest.Message msg = new AiChatRequest.Message();
         msg.setRole("user");
         msg.setContent(buildSelectionPrompt(req));
@@ -340,7 +342,7 @@ public class AiChatController {
         return chatRequest;
     }
 
-    private String buildSelectionPrompt(SelectionAskRequest req) {
+    private String buildSelectionPrompt(SelectionAskDTO req) {
         if (req.getSelectedText() == null || req.getSelectedText().isBlank()) {
             return req.getQuestion() != null ? req.getQuestion() : "";
         }
@@ -376,37 +378,5 @@ public class AiChatController {
         List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
         Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
         return (String) message.get("content");
-    }
-
-    // ── 内部请求体 ──────────────────────────────────────────────────────────
-
-    @lombok.Data
-    public static class SelectionAskRequest {
-        /** 用户划选的文字 */
-        private String selectedText;
-        /** 用户的追加提问，留空则默认解释选中内容 */
-        private String question;
-        /** 页面标题 */
-        private String pageTitle;
-        /** 面包屑路径，如 "编程语言/Java/构建工具/插件开发" */
-        private String pagePath;
-        /** 当前页面 URL/路由，用于日志溯源 */
-        private String pageUrl;
-        /** 文章 ID，可选，用于 RAG 全文检索 */
-        private Long articleId;
-        /** 选中内容的前文（约 150 字） */
-        private String contextBefore;
-        /** 选中内容的后文（约 150 字） */
-        private String contextAfter;
-        /** 模型名称（可选） */
-        private String model;
-        /** 会话 ID（可选，设置后支持多轮追问） */
-        private String sessionId;
-    }
-
-    @lombok.Data
-    public static class SimilarityRequest {
-        private String text1;
-        private String text2;
     }
 }

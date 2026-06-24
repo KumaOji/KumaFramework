@@ -1,4 +1,4 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.cloud.blog.domain.dto;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-public class ChatSendRequest implements Serializable {
+public class ChatSendDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

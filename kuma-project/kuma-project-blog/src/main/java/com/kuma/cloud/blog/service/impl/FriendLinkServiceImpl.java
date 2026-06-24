@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.FriendLink;
-import com.kuma.cloud.blog.domain.vo.FriendLinkQueryVO;
+import com.kuma.cloud.blog.domain.query.FriendLinkQuery;
 import com.kuma.cloud.blog.domain.vo.FriendLinkVO;
 import com.kuma.cloud.blog.mapper.FriendLinkMapper;
 import com.kuma.cloud.blog.service.FriendLinkService;
@@ -84,7 +84,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    public IPage<FriendLinkVO> adminList(PageQuery pageQuery, FriendLinkQueryVO queryVO) {
+    public IPage<FriendLinkVO> adminList(PageQuery pageQuery, FriendLinkQuery queryVO) {
         QueryWrapper<FriendLink> qw = new QueryWrapper<>();
         if (queryVO != null) {
             if (StringUtils.isNotEmpty(queryVO.getName())) qw.like("name", queryVO.getName());

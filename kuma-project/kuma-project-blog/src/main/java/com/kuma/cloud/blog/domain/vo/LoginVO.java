@@ -6,7 +6,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-public class LoginResponse implements Serializable {
+public class LoginVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

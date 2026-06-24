@@ -3,6 +3,7 @@ package com.kuma.cloud.blog.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Article;
+import com.kuma.cloud.blog.domain.query.ArticleQuery;
 import com.kuma.cloud.blog.domain.vo.*;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface ArticleService {
     boolean deleteArticle(Long id);
     boolean deleteArticlePhysical(Long id);
     ArticleVO getArticleById(Long id);
-    IPage<ArticleVO> getArticleList(PageQuery pageQuery, ArticleQueryVO queryVO);
+    IPage<ArticleVO> getArticleList(PageQuery pageQuery, ArticleQuery queryVO);
     boolean incrementViewCount(Long id);
     boolean incrementLikeCount(Long id);
     boolean incrementCommentCount(Long id);

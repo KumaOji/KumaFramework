@@ -1,4 +1,4 @@
-package com.kuma.cloud.blog.domain.vo;
+package com.kuma.cloud.blog.domain.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-public class LoginRequest implements Serializable {
+public class LoginDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

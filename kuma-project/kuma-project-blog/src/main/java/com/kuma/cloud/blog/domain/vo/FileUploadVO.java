@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Schema(description = "文件上传响应")
 @Data
-public class FileUploadResponse {
+public class FileUploadVO {
 
     @Schema(description = "原始文件名")
     private String originalFilename;

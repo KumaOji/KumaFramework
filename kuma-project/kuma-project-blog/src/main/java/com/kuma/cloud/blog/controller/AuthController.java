@@ -3,9 +3,9 @@ package com.kuma.cloud.blog.controller;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.User;
-import com.kuma.cloud.blog.domain.vo.LoginRequest;
-import com.kuma.cloud.blog.domain.vo.LoginResponse;
-import com.kuma.cloud.blog.domain.vo.TotpStatusResponse;
+import com.kuma.cloud.blog.domain.dto.LoginDTO;
+import com.kuma.cloud.blog.domain.vo.LoginVO;
+import com.kuma.cloud.blog.domain.vo.TotpStatusVO;
 import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import com.kuma.cloud.blog.security.LoginRateLimiter;
 import com.kuma.cloud.blog.security.TotpAttemptLimiter;
@@ -50,7 +50,7 @@ public class AuthController {
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request,
+    public Result<LoginVO> login(@Valid @RequestBody LoginDTO request,
                                        HttpServletRequest httpRequest, HttpServletResponse response) {
         String ip = LoginRateLimiter.resolveIp(httpRequest);
         loginRateLimiter.check(ip);
@@ -64,7 +64,7 @@ public class AuthController {
         if (user.getTotpEnabled() != null && user.getTotpEnabled() == 1) {
             if (!StringUtils.hasText(request.getTotpCode())) {
                 // 密码正确但未携带 TOTP，告知前端需要输入动态验证码
-                LoginResponse pending = new LoginResponse();
+                LoginVO pending = new LoginVO();
                 pending.setRequireTotp(true);
                 return Result.success(pending);
             }
@@ -80,7 +80,7 @@ public class AuthController {
         userService.updateLastLoginTime(user.getId());
 
         String token = UUID.randomUUID().toString().replace("-", "");
-        LoginResponse loginResponse = new LoginResponse();
+        LoginVO loginResponse = new LoginVO();
         loginResponse.setUserId(user.getId());
         loginResponse.setUsername(user.getUsername());
         loginResponse.setNickname(user.getNickname());
@@ -96,12 +96,12 @@ public class AuthController {
 
     @Operation(summary = "获取当前用户")
     @GetMapping("/current")
-    public Result<LoginResponse> current(HttpServletRequest request) {
+    public Result<LoginVO> current(HttpServletRequest request) {
         String token = getTokenFromCookie(request);
         if (!StringUtils.hasText(token)) {
             throw new BusinessException("未登录");
         }
-        LoginResponse lr = tokenService.getLoginResponseByToken(token);
+        LoginVO lr = tokenService.getLoginResponseByToken(token);
         if (lr == null) {
             throw new BusinessException("未登录");
         }
@@ -119,9 +119,9 @@ public class AuthController {
 
     @Operation(summary = "查询当前用户 TOTP 状态")
     @GetMapping("/totp/status")
-    public Result<TotpStatusResponse> totpStatus(@AuthenticationPrincipal UserDetails principal) {
+    public Result<TotpStatusVO> totpStatus(@AuthenticationPrincipal UserDetails principal) {
         User user = userService.getByUsername(principal.getUsername());
-        TotpStatusResponse resp = new TotpStatusResponse();
+        TotpStatusVO resp = new TotpStatusVO();
         resp.setEnabled(user.getTotpEnabled() != null && user.getTotpEnabled() == 1);
         resp.setSecretBound(user.getTotpSecret() != null);
         return Result.success(resp);
@@ -170,7 +170,7 @@ public class AuthController {
     public Result<String> logout(HttpServletRequest request, HttpServletResponse response) {
         String token = getTokenFromCookie(request);
         if (StringUtils.hasText(token)) {
-            LoginResponse lr = tokenService.getLoginResponseByToken(token);
+            LoginVO lr = tokenService.getLoginResponseByToken(token);
             if (lr != null && lr.getUsername() != null) {
                 permissionService.evictCache(lr.getUsername());
             }
@@ -187,7 +187,7 @@ public class AuthController {
         if (!StringUtils.hasText(token) || !tokenService.validateToken(token)) {
             throw new BusinessException("Token无效或已过期");
         }
-        LoginResponse lr = tokenService.getLoginResponseByToken(token);
+        LoginVO lr = tokenService.getLoginResponseByToken(token);
         if (lr != null && lr.getUsername() != null) {
             User user = userService.getByUsername(lr.getUsername());
             if (user != null) {

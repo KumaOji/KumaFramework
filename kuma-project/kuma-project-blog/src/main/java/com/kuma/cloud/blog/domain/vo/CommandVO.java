@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Schema(description = "命令执行响应")
 @Data
-public class CommandResponse {
+public class CommandVO {
 
     @Schema(description = "执行是否成功")
     private Boolean success;

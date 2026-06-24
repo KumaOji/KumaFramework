@@ -5,7 +5,7 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.entity.FriendLink;
-import com.kuma.cloud.blog.domain.vo.FriendLinkQueryVO;
+import com.kuma.cloud.blog.domain.query.FriendLinkQuery;
 import com.kuma.cloud.blog.domain.vo.FriendLinkVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.FriendLinkService;
@@ -78,7 +78,7 @@ public class FriendLinkController {
             @RequestParam(required = false) Integer currentPage,
             @RequestParam(required = false) Integer pageSize,
             PageQuery pageQuery,
-            FriendLinkQueryVO queryVO) {
+            FriendLinkQuery queryVO) {
         int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
         int size = pageSize != null ? pageSize : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 20);
         if (pageQuery == null) pageQuery = new PageQuery();

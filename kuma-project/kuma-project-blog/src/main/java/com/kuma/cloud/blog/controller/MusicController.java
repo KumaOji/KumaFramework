@@ -6,7 +6,7 @@ import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.domain.entity.Music;
-import com.kuma.cloud.blog.domain.vo.MusicQueryVO;
+import com.kuma.cloud.blog.domain.query.MusicQuery;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
 import com.kuma.cloud.blog.service.MusicService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,7 +62,7 @@ public class MusicController {
 
     @Operation(summary = "分页查询音乐列表")
     @GetMapping("/list")
-    public Result<IPage<MusicVO>> list(PageQuery pageQuery, MusicQueryVO queryVO) {
+    public Result<IPage<MusicVO>> list(PageQuery pageQuery, MusicQuery queryVO) {
         return Result.success(musicService.getMusicList(pageQuery, queryVO));
     }
 

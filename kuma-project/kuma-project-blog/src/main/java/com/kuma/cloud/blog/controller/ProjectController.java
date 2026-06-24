@@ -5,7 +5,7 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.entity.Project;
-import com.kuma.cloud.blog.domain.vo.ProjectQueryVO;
+import com.kuma.cloud.blog.domain.query.ProjectQuery;
 import com.kuma.cloud.blog.domain.vo.ProjectVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.ProjectService;
@@ -64,7 +64,7 @@ public class ProjectController {
             @Parameter(description = "当前页") @RequestParam(required = false) Integer currentPage,
             @Parameter(description = "每页条数") @RequestParam(required = false) Integer pageSize,
             PageQuery pageQuery,
-            ProjectQueryVO queryVO) {
+            ProjectQuery queryVO) {
         int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
         int size = pageSize != null ? pageSize : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 10);
         if (pageQuery == null) pageQuery = new PageQuery();

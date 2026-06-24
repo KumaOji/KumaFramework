@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Project;
-import com.kuma.cloud.blog.domain.vo.ProjectQueryVO;
+import com.kuma.cloud.blog.domain.query.ProjectQuery;
 import com.kuma.cloud.blog.domain.vo.ProjectVO;
 import com.kuma.cloud.blog.mapper.ProjectMapper;
 import com.kuma.cloud.blog.service.ProjectService;
@@ -60,9 +60,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public IPage<ProjectVO> getProjectList(PageQuery pageQuery, ProjectQueryVO queryVO) {
+    public IPage<ProjectVO> getProjectList(PageQuery pageQuery, ProjectQuery queryVO) {
         QueryWrapper<Project> qw = new QueryWrapper<>();
-        if (queryVO == null) queryVO = new ProjectQueryVO();
+        if (queryVO == null) queryVO = new ProjectQuery();
         qw.ne("status", 2);
 
         if (StringUtils.isNotEmpty(queryVO.getName())) {

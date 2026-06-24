@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.cloud.blog.domain.entity.Article;
 import com.kuma.cloud.blog.domain.entity.Category;
+import com.kuma.cloud.blog.domain.query.ArticleQuery;
 import com.kuma.cloud.blog.domain.vo.*;
 import com.kuma.cloud.blog.mapper.ArticleMapper;
 import com.kuma.cloud.blog.service.ArticleService;
@@ -81,9 +82,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public IPage<ArticleVO> getArticleList(PageQuery pageQuery, ArticleQueryVO queryVO) {
+    public IPage<ArticleVO> getArticleList(PageQuery pageQuery, ArticleQuery queryVO) {
         QueryWrapper<Article> qw = new QueryWrapper<>();
-        if (queryVO == null) queryVO = new ArticleQueryVO();
+        if (queryVO == null) queryVO = new ArticleQuery();
         qw.ne("status", 2);
         // Exclude content (TEXT/LONGTEXT) from list queries — callers set it null anyway
         qw.select(Article.class, info -> !"content".equals(info.getColumn()));

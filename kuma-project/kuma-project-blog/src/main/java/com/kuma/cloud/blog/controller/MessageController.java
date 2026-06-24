@@ -5,7 +5,7 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.entity.Message;
-import com.kuma.cloud.blog.domain.vo.MessageQueryVO;
+import com.kuma.cloud.blog.domain.query.MessageQuery;
 import com.kuma.cloud.blog.domain.vo.MessageVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.MessageService;
@@ -50,7 +50,7 @@ public class MessageController {
             @RequestParam(required = false) Integer currentPage,
             @RequestParam(required = false) Integer pageSize,
             PageQuery pageQuery,
-            MessageQueryVO queryVO) {
+            MessageQuery queryVO) {
         int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
         int size = pageSize != null ? pageSize : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 20);
         if (pageQuery == null) pageQuery = new PageQuery();

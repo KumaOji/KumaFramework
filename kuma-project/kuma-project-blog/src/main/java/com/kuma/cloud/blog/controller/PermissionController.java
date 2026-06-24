@@ -7,8 +7,8 @@ import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.entity.SysPermission;
 import com.kuma.cloud.blog.domain.entity.User;
-import com.kuma.cloud.blog.domain.vo.GrantPermissionRequest;
-import com.kuma.cloud.blog.domain.vo.RevokePermissionRequest;
+import com.kuma.cloud.blog.domain.dto.GrantPermissionDTO;
+import com.kuma.cloud.blog.domain.dto.RevokePermissionDTO;
 import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import com.kuma.cloud.blog.domain.vo.UserBriefVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
@@ -72,7 +72,7 @@ public class PermissionController {
     @Operation(summary = "给用户授权")
     @PostMapping("/grant")
     @Authorize(BlogPermissions.SYSTEM_USER)
-    public Result<Void> grant(@Valid @RequestBody GrantPermissionRequest req) {
+    public Result<Void> grant(@Valid @RequestBody GrantPermissionDTO req) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userService.getByUsername(currentUsername);
         if (currentUser == null) {
@@ -90,7 +90,7 @@ public class PermissionController {
     @Operation(summary = "撤销用户权限")
     @DeleteMapping("/revoke")
     @Authorize(BlogPermissions.SYSTEM_USER)
-    public Result<Void> revoke(@Valid @RequestBody RevokePermissionRequest req) {
+    public Result<Void> revoke(@Valid @RequestBody RevokePermissionDTO req) {
         permissionService.revokePermission(req.getUserId(), req.getPermissionId());
 
         User targetUser = userService.getById(req.getUserId());
