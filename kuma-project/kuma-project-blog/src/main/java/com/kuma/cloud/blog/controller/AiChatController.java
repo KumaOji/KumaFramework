@@ -24,11 +24,20 @@ import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.RagSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -309,7 +318,7 @@ public class AiChatController {
     @Operation(summary = "文本相似度（余弦相似度，返回 -1~1）")
     @PostMapping("/embedding/similarity")
     @Authorize(BlogPermissions.AI_CHAT_TEXT)
-    public Result<Double> similarity(@RequestBody SimilarityDTO request) {
+    public Result<Double> similarity(@Valid @RequestBody SimilarityDTO request) {
         return Result.success(aiEmbeddingService.cosineSimilarity(request.getText1(), request.getText2()));
     }
 
@@ -318,7 +327,7 @@ public class AiChatController {
     @Operation(summary = "划词提问（非流式）")
     @PostMapping("/selection/ask")
     @Authorize(BlogPermissions.AI_CHAT_SEND)
-    public Result<String> selectionAsk(@RequestBody SelectionAskDTO request) {
+    public Result<String> selectionAsk(@Valid @RequestBody SelectionAskDTO request) {
         Map<String, Object> result = aiChatService.chat(buildSelectionChatRequest(request));
         return Result.success(extractContent(result));
     }
@@ -326,7 +335,7 @@ public class AiChatController {
     @Operation(summary = "划词提问（流式 SSE）")
     @PostMapping(value = "/selection/ask/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Authorize(BlogPermissions.AI_CHAT_SEND)
-    public SseEmitter selectionAskStream(@RequestBody SelectionAskDTO request) {
+    public SseEmitter selectionAskStream(@Valid @RequestBody SelectionAskDTO request) {
         return aiChatService.streamChat(buildSelectionChatRequest(request));
     }
 

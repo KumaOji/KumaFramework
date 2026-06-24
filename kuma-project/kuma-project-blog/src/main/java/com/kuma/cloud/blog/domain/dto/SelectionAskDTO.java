@@ -1,10 +1,12 @@
 package com.kuma.cloud.blog.domain.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class SelectionAskDTO {
     /** 用户划选的文字 */
+    @NotBlank(message = "选中内容不能为空")
     private String selectedText;
     /** 用户的追加提问，留空则默认解释选中内容 */
     private String question;
