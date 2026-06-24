@@ -176,10 +176,3 @@ kuma:
       version: 1.0.0
       packages-to-scan:
         - com.kuma.cloud.blog
-
-delay:
-  thread:
-    core: 2
-    max: 10
-    queue: 100
-    keepAlive: 60
