@@ -5,10 +5,10 @@ import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
-import com.kuma.cloud.blog.domain.entity.SysPermission;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.dto.GrantPermissionDTO;
 import com.kuma.cloud.blog.domain.dto.RevokePermissionDTO;
+import com.kuma.cloud.blog.domain.vo.SysPermissionVO;
 import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import com.kuma.cloud.blog.domain.vo.UserBriefVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
@@ -20,7 +20,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -36,8 +43,13 @@ public class PermissionController {
     @Operation(summary = "查询所有权限列表")
     @GetMapping
     @Authorize(BlogPermissions.SYSTEM_USER)
-    public Result<List<SysPermission>> listAll() {
-        return Result.success(permissionService.listAll());
+    public Result<List<SysPermissionVO>> listAll() {
+        List<SysPermissionVO> list = permissionService.listAll().stream().map(p -> {
+            SysPermissionVO vo = new SysPermissionVO();
+            BeanUtils.copyProperties(p, vo);
+            return vo;
+        }).toList();
+        return Result.success(list);
     }
 
     @Operation(summary = "分页查询用户（管理界面选人，支持关键字/状态过滤）")
@@ -58,8 +70,13 @@ public class PermissionController {
     @Operation(summary = "查询用户已授予的直接权限")
     @GetMapping("/user/{userId}")
     @Authorize(BlogPermissions.SYSTEM_USER)
-    public Result<List<SysPermission>> listUserPermissions(@PathVariable Long userId) {
-        return Result.success(permissionService.listUserDirectPermissions(userId));
+    public Result<List<SysPermissionVO>> listUserPermissions(@PathVariable Long userId) {
+        List<SysPermissionVO> list = permissionService.listUserDirectPermissions(userId).stream().map(p -> {
+            SysPermissionVO vo = new SysPermissionVO();
+            BeanUtils.copyProperties(p, vo);
+            return vo;
+        }).toList();
+        return Result.success(list);
     }
 
     @Operation(summary = "查询用户完整生效权限（角色 / 角色权限 / 直接授权分层）")

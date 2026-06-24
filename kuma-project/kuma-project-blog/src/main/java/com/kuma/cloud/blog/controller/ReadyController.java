@@ -3,6 +3,7 @@ package com.kuma.cloud.blog.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
+import com.kuma.cloud.blog.domain.dto.ReadySaveDTO;
 import com.kuma.cloud.blog.domain.entity.ReadyItem;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.boot.security.spring.access.expression.RoleConstants;
@@ -11,8 +12,17 @@ import com.kuma.cloud.blog.domain.vo.ReadyVO;
 import com.kuma.cloud.blog.service.ReadyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "待办事项管理")
 @RestController
@@ -25,14 +35,18 @@ public class ReadyController {
     @Operation(summary = "创建待办")
     @PostMapping
     @Authorize(RoleConstants.ADMIN)
-    public Result<Long> create(@RequestBody ReadyItem item) {
+    public Result<Long> create(@Valid @RequestBody ReadySaveDTO dto) {
+        ReadyItem item = new ReadyItem();
+        BeanUtils.copyProperties(dto, item);
         return Result.success(readyService.createReady(item));
     }
 
     @Operation(summary = "更新待办")
     @PutMapping("/{id}")
     @Authorize(RoleConstants.ADMIN)
-    public Result<Boolean> update(@PathVariable Long id, @RequestBody ReadyItem item) {
+    public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ReadySaveDTO dto) {
+        ReadyItem item = new ReadyItem();
+        BeanUtils.copyProperties(dto, item);
         item.setId(id);
         return Result.success(readyService.updateReady(item));
     }

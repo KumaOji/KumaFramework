@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.cloud.blog.domain.dto.ProjectSaveDTO;
 import com.kuma.cloud.blog.domain.entity.Project;
 import com.kuma.cloud.blog.domain.query.ProjectQuery;
 import com.kuma.cloud.blog.domain.vo.ProjectVO;
@@ -12,8 +13,18 @@ import com.kuma.cloud.blog.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "项目管理")
 @RestController
@@ -26,14 +37,18 @@ public class ProjectController {
     @Operation(summary = "创建项目")
     @PostMapping
     @Authorize(BlogPermissions.PROJECT_CREATE)
-    public Result<Long> create(@RequestBody Project project) {
+    public Result<Long> create(@Valid @RequestBody ProjectSaveDTO dto) {
+        Project project = new Project();
+        BeanUtils.copyProperties(dto, project);
         return Result.success(projectService.createProject(project));
     }
 
     @Operation(summary = "更新项目")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.PROJECT_UPDATE)
-    public Result<Boolean> update(@PathVariable Long id, @RequestBody Project project) {
+    public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ProjectSaveDTO dto) {
+        Project project = new Project();
+        BeanUtils.copyProperties(dto, project);
         project.setId(id);
         return Result.success(projectService.updateProject(project));
     }
@@ -60,17 +75,10 @@ public class ProjectController {
 
     @Operation(summary = "分页查询项目列表")
     @GetMapping("/list")
-    public Result<IPage<ProjectVO>> list(
-            @Parameter(description = "当前页") @RequestParam(required = false) Integer currentPage,
-            @Parameter(description = "每页条数") @RequestParam(required = false) Integer pageSize,
-            PageQuery pageQuery,
-            ProjectQuery queryVO) {
-        int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
-        int size = pageSize != null ? pageSize : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 10);
-        if (pageQuery == null) pageQuery = new PageQuery();
-        pageQuery.setCurrentPage(current);
-        pageQuery.setPageSize(size);
-        return Result.success(projectService.getProjectList(pageQuery, queryVO));
+    public Result<IPage<ProjectVO>> list(PageQuery pageQuery, ProjectQuery query) {
+        if (pageQuery.getCurrentPage() == null) pageQuery.setCurrentPage(1);
+        if (pageQuery.getPageSize() == null) pageQuery.setPageSize(10);
+        return Result.success(projectService.getProjectList(pageQuery, query));
     }
 
     @Operation(summary = "增加浏览量")

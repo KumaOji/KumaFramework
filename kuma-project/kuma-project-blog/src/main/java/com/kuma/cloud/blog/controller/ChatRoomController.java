@@ -2,10 +2,11 @@ package com.kuma.cloud.blog.controller;
 
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
-import com.kuma.cloud.blog.domain.entity.ChatBlacklist;
+import com.kuma.cloud.blog.domain.dto.BlacklistAddDTO;
+import com.kuma.cloud.blog.domain.dto.ChatRoomSaveDTO;
 import com.kuma.cloud.blog.domain.entity.ChatHistory;
 import com.kuma.cloud.blog.domain.entity.ChatRoom;
-import com.kuma.cloud.blog.domain.dto.BlacklistAddDTO;
+import com.kuma.cloud.blog.domain.vo.ChatBlacklistVO;
 import com.kuma.cloud.blog.domain.vo.ChatMessageVO;
 import com.kuma.cloud.blog.domain.vo.ChatOnlineUserVO;
 import com.kuma.cloud.blog.domain.vo.ChatRoomOnlineVO;
@@ -16,10 +17,20 @@ import com.kuma.cloud.blog.service.ChatRoomService;
 import com.kuma.cloud.blog.websocket.OnlineUserRegistry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -108,14 +119,18 @@ public class ChatRoomController {
     @Operation(summary = "创建聊天空间（管理员）")
     @PostMapping("/room")
     @Authorize(BlogPermissions.CHAT_CREATE)
-    public Result<Long> create(@RequestBody ChatRoom chatRoom) {
+    public Result<Long> create(@Valid @RequestBody ChatRoomSaveDTO dto) {
+        ChatRoom chatRoom = new ChatRoom();
+        BeanUtils.copyProperties(dto, chatRoom);
         return Result.success(chatRoomService.create(chatRoom));
     }
 
     @Operation(summary = "更新聊天空间（管理员）")
     @PutMapping("/room/{id}")
     @Authorize(BlogPermissions.CHAT_UPDATE)
-    public Result<Boolean> update(@PathVariable Long id, @RequestBody ChatRoom chatRoom) {
+    public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ChatRoomSaveDTO dto) {
+        ChatRoom chatRoom = new ChatRoom();
+        BeanUtils.copyProperties(dto, chatRoom);
         chatRoom.setId(id);
         return Result.success(chatRoomService.update(chatRoom));
     }
@@ -132,8 +147,13 @@ public class ChatRoomController {
     @Operation(summary = "聊天空间列表（管理员，含已停用）")
     @GetMapping("/room/admin/list")
     @Authorize(BlogPermissions.CHAT_UPDATE)
-    public Result<List<ChatRoom>> adminList() {
-        return Result.success(chatRoomService.listAll());
+    public Result<List<ChatRoomVO>> adminList() {
+        List<ChatRoomVO> rooms = chatRoomService.listAll().stream().map(r -> {
+            ChatRoomVO vo = new ChatRoomVO();
+            BeanUtils.copyProperties(r, vo);
+            return vo;
+        }).toList();
+        return Result.success(rooms);
     }
 
     @Operation(summary = "清理聊天空间历史记录（管理员，before 为空则清空全部）")
@@ -181,14 +201,19 @@ public class ChatRoomController {
     @Operation(summary = "查询黑名单列表（管理员）")
     @GetMapping("/blacklist")
     @Authorize(BlogPermissions.CHAT_BLACKLIST)
-    public Result<List<ChatBlacklist>> blacklistList() {
-        return Result.success(chatBlacklistService.list());
+    public Result<List<ChatBlacklistVO>> blacklistList() {
+        List<ChatBlacklistVO> list = chatBlacklistService.list().stream().map(b -> {
+            ChatBlacklistVO vo = new ChatBlacklistVO();
+            BeanUtils.copyProperties(b, vo);
+            return vo;
+        }).toList();
+        return Result.success(list);
     }
 
     @Operation(summary = "添加邮箱到黑名单（管理员）")
     @PostMapping("/blacklist")
     @Authorize(BlogPermissions.CHAT_BLACKLIST)
-    public Result<Void> blacklistAdd(@RequestBody BlacklistAddDTO request) {
+    public Result<Void> blacklistAdd(@Valid @RequestBody BlacklistAddDTO request) {
         chatBlacklistService.add(request.getEmail(), request.getReason());
         return Result.success();
     }

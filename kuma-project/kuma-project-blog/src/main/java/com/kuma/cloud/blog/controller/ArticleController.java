@@ -3,17 +3,28 @@ package com.kuma.cloud.blog.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
+import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.cloud.blog.domain.dto.ArticleSaveDTO;
 import com.kuma.cloud.blog.domain.entity.Article;
 import com.kuma.cloud.blog.domain.query.ArticleQuery;
-import com.kuma.cloud.blog.domain.vo.*;
-import com.kuma.boot.security.spring.access.expression.Authorize;
+import com.kuma.cloud.blog.domain.vo.ArticleVO;
+import com.kuma.cloud.blog.domain.vo.CategoryArticleCountVO;
+import com.kuma.cloud.blog.domain.vo.CategoryVO;
 import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -28,14 +39,18 @@ public class ArticleController {
     @Operation(summary = "创建文章")
     @PostMapping
     @Authorize(BlogPermissions.ARTICLE_CREATE)
-    public Result<Long> create(@RequestBody Article article) {
+    public Result<Long> create(@Valid @RequestBody ArticleSaveDTO dto) {
+        Article article = new Article();
+        BeanUtils.copyProperties(dto, article);
         return Result.success(articleService.createArticle(article));
     }
 
     @Operation(summary = "更新文章")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.ARTICLE_UPDATE)
-    public Result<Boolean> update(@PathVariable Long id, @RequestBody Article article) {
+    public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ArticleSaveDTO dto) {
+        Article article = new Article();
+        BeanUtils.copyProperties(dto, article);
         article.setId(id);
         return Result.success(articleService.updateArticle(article));
     }
@@ -62,18 +77,11 @@ public class ArticleController {
 
     @Operation(summary = "分页查询文章列表")
     @GetMapping("/list")
-    public Result<IPage<ArticleVO>> list(
-            @Parameter(description = "当前页") @RequestParam(required = false) Integer currentPage,
-            @Parameter(description = "每页条数，支持 pageSize 或 size") @RequestParam(required = false) Integer pageSize,
-            @RequestParam(required = false) Integer size,
-            PageQuery pageQuery,
-            ArticleQuery queryVO) {
-        int current = currentPage != null ? currentPage : (pageQuery != null && pageQuery.getCurrentPage() != null ? pageQuery.getCurrentPage() : 1);
-        int pageSizeVal = pageSize != null ? pageSize : (size != null ? size : (pageQuery != null && pageQuery.getPageSize() != null ? pageQuery.getPageSize() : 10));
-        if (pageQuery == null) pageQuery = new PageQuery();
-        pageQuery.setCurrentPage(current);
-        pageQuery.setPageSize(pageSizeVal);
-        return Result.success(articleService.getArticleList(pageQuery, queryVO));
+    public Result<IPage<ArticleVO>> list(PageQuery pageQuery, ArticleQuery query) {
+        // PageQuery 已绑定 currentPage/pageSize（并通过 setSize 兼容 size 参数），此处仅兜底默认值
+        if (pageQuery.getCurrentPage() == null) pageQuery.setCurrentPage(1);
+        if (pageQuery.getPageSize() == null) pageQuery.setPageSize(10);
+        return Result.success(articleService.getArticleList(pageQuery, query));
     }
 
     @Operation(summary = "获取分类列表")

@@ -5,6 +5,7 @@ import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.security.BlogPermissions;
+import com.kuma.cloud.blog.domain.dto.MusicSaveDTO;
 import com.kuma.cloud.blog.domain.entity.Music;
 import com.kuma.cloud.blog.domain.query.MusicQuery;
 import com.kuma.cloud.blog.domain.vo.MusicVO;
@@ -13,11 +14,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -35,14 +46,18 @@ public class MusicController {
     @Operation(summary = "创建音乐")
     @PostMapping
     @Authorize(BlogPermissions.MUSIC_UPLOAD)
-    public Result<Long> create(@RequestBody Music music) {
+    public Result<Long> create(@Valid @RequestBody MusicSaveDTO dto) {
+        Music music = new Music();
+        BeanUtils.copyProperties(dto, music);
         return Result.success(musicService.createMusic(music));
     }
 
     @Operation(summary = "更新音乐")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.MUSIC_UPLOAD)
-    public Result<Boolean> update(@PathVariable Long id, @RequestBody Music music) {
+    public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody MusicSaveDTO dto) {
+        Music music = new Music();
+        BeanUtils.copyProperties(dto, music);
         music.setId(id);
         return Result.success(musicService.updateMusic(music));
     }
