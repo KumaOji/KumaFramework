@@ -1,0 +1,11 @@
+description = '力扣练习 —— 用于 LeetCode 算法题练习，按题型分类组织解题代码与单元测试'
+
+dependencies {
+    testImplementation projectLibs.spring.boot.starter.test
+    // Gradle 9+ 要求显式声明，否则报 "Failed to load JUnit Platform"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

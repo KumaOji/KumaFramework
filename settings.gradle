@@ -178,11 +178,11 @@ for (name in frameworkCloudSubModules) {
 //includeBuild('kuma-other-framework/kuma-cloud-plugin/kuma-cloud-gradle-plugin')
 
 include "kuma-project"
-//def projectBootSubModules = ['engine','project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'project31', 'blog', 'base']
+//def projectBootSubModules = ['engine','project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'project31', 'blog', 'base', 'leetcode']
 //for (name in projectBootSubModules) {
 //    include "kuma-project:kuma-project-${name}"
 //}
-def projectBootSubModules = ['project2', 'project4', 'blog']
+def projectBootSubModules = ['project2', 'project4', 'blog', 'leetcode']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }
