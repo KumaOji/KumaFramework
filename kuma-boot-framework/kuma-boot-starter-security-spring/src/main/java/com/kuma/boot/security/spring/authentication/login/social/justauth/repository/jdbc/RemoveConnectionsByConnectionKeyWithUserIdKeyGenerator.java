@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kuma.boot.security.spring.authentication.login.social.justauth.repository.jdbc.key.generator;
+package com.kuma.boot.security.spring.authentication.login.social.justauth.repository.jdbc;
 
 import com.kuma.boot.security.spring.authentication.login.social.justauth.entity.ConnectionKey;
 import java.lang.reflect.Method;
