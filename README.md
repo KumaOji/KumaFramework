@@ -15,7 +15,7 @@ An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 
 | Attribute | Value |
 |-----------|-------|
 | Group ID | `io.github.kumaoji` |
-| Current Version | `2026.05.01` |
+| Current Version | `2026.07.01` |
 | Build Tool | Gradle 9.3.1 + Gradle Wrapper + Version Catalog |
 | Java Version | JDK 25 (required, all modules enable `--enable-preview`) |
 | Spring Boot | 4.0.3 |
@@ -247,7 +247,7 @@ dependencies {
 <dependency>
     <groupId>io.github.kumaoji</groupId>
     <artifactId>kuma-boot-starter-web</artifactId>
-    <version>2026.05.01</version>
+    <version>2026.07.01</version>
 </dependency>
 ```
 

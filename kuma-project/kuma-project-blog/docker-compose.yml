@@ -39,7 +39,7 @@ services:
       start_period: 10s
 
   blog-background:
-    image: blog:2026.05.01
+    image: blog:2026.07.01
     container_name: blog-background
     restart: unless-stopped
     ports:

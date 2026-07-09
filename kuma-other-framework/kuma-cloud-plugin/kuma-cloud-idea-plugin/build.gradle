@@ -120,7 +120,7 @@ intellijPlatform {
     pluginConfiguration {
         id = 'com.kuma.cloud.idea.plugin'
         name = 'KumaToolKit'
-        version = '2026.02'
+        version = '2026.07'
         description =
                 """
                 <h3>Tool sets commonly used by programmers</h3>
