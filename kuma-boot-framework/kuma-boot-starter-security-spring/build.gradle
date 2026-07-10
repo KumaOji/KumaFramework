@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework security-spring 模块'
+description = 'KumaFramework security-spring 模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-security-common')

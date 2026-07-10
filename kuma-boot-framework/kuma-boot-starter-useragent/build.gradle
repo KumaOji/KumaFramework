@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework UserAgent解析模块（Browscap / YAUAA + 手机号归属地）'
+description = 'KumaFramework UserAgent解析模块（Browscap / YAUAA + 手机号归属地）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

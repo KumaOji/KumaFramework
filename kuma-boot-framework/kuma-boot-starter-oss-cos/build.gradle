@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework oss-cos模块（腾讯云 COS，oss-common 的 StandardOssClient 实现）'
+description = 'KumaFramework oss-cos模块（腾讯云 COS，oss-common 的 StandardOssClient 实现）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-oss-common')

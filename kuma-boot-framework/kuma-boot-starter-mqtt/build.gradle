@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework MQTT模块（Eclipse Paho MQTTv5 + Spring Integration）'
+description = 'KumaFramework MQTT模块（Eclipse Paho MQTTv5 + Spring Integration）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

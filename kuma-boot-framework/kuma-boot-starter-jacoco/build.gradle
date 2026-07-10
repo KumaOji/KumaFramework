@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 代码覆盖率模块 — 基于 JaCoCo 的运行期覆盖率采集与报告生成'
+description = 'KumaFramework 代码覆盖率模块 — 基于 JaCoCo 的运行期覆盖率采集与报告生成'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

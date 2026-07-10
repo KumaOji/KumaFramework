@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework apollo模块'
+description = 'KumaFramework apollo模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）

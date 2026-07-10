@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework client模块'
+description = 'KumaFramework client模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）

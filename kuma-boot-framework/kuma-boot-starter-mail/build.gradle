@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework mail模块'
+description = 'KumaFramework mail模块'
 
 dependencies {
     // 基础公共工具（LogUtils 等）

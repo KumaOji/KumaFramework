@@ -18,7 +18,7 @@ publishing {
 
     publications {
         mavenJava(MavenPublication) {
-            groupId    = rootProject.group
+            groupId    = project.group
             artifactId = project.name
             version    = rootProject.version
 
@@ -27,7 +27,7 @@ publishing {
             pom {
                 name        = project.name
                 description = project.name
-                url         = "https://github.com/kuma-cloud/kuma-cloud-framework"
+                url         = "https://github.com/kumaoji/KumaFramework"
 
                 licenses {
                     license {
@@ -45,9 +45,9 @@ publishing {
                 }
 
                 scm {
-                    connection          = "scm:git:git@github.com:kuma-cloud/kuma-cloud-framework.git"
-                    developerConnection = "scm:git:ssh://git@github.com:kuma-cloud/kuma-cloud-framework.git"
-                    url                 = "https://github.com/kuma-cloud/kuma-cloud-framework"
+                    connection          = "scm:git:git@github.com:kumaoji/KumaFramework.git"
+                    developerConnection = "scm:git:ssh://git@github.com:kumaoji/KumaFramework.git"
+                    url                 = "https://github.com/kumaoji/KumaFramework"
                 }
             }
         }

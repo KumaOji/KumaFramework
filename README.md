@@ -30,7 +30,7 @@ An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 
 ## Module Layout
 
 ```
-Kumaframework/
+KumaFramework/
 ├── kuma-boot-framework/      96 Spring Boot Auto-Configuration Starters
 ├── kuma-cloud-framework/     12 Spring Cloud Starters
 ├── kuma-project/              4 included runnable/sample projects
@@ -264,8 +264,8 @@ Spring Cloud Starter collection, providing distributed microservice capabilities
 ### Clone
 
 ```bash
-git clone https://github.com/kumaoji/Kumaframework.git
-cd Kumaframework
+git clone https://github.com/kumaoji/KumaFramework.git
+cd KumaFramework
 ```
 
 ### Use a Starter (within this project)

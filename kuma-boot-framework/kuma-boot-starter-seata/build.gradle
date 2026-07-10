@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework Seata 分布式事务模块'
+description = 'KumaFramework Seata 分布式事务模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

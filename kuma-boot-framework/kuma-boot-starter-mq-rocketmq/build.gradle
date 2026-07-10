@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework mq-rocketmq 模块（Apache RocketMQ — 生产者/消费者封装、顺序消息、延时消息、事务消息）'
+description = 'KumaFramework mq-rocketmq 模块（Apache RocketMQ — 生产者/消费者封装、顺序消息、延时消息、事务消息）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

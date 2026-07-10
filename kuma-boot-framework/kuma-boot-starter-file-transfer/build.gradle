@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 文件传输模块（FTP / SFTP — 统一客户端抽象、连接管理、断线重连）'
+description = 'KumaFramework 文件传输模块（FTP / SFTP — 统一客户端抽象、连接管理、断线重连）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

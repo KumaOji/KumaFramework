@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework elk模块'
+description = 'KumaFramework elk模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework openfeign声明式调用模块（OpenFeign + LoadBalancer + 请求头透传）'
+description = 'KumaFramework openfeign声明式调用模块（OpenFeign + LoadBalancer + 请求头透传）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

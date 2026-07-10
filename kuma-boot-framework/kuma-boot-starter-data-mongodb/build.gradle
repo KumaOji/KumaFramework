@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework data-mongodb模块'
+description = 'KumaFramework data-mongodb模块'
 
 dependencies {
     // 基础公共工具（LogUtils / JacksonUtils 等）

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework WebFlux 模块（响应式编程 — Reactor、R2DBC、响应式安全等增强配置）'
+description = 'KumaFramework WebFlux 模块（响应式编程 — Reactor、R2DBC、响应式安全等增强配置）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

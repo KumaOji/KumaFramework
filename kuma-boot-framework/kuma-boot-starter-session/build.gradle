@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 分布式 Session 模块（Spring Session + Redis，JSON 序列化/Cookie 定制/并发登录控制）'
+description = 'KumaFramework 分布式 Session 模块（Spring Session + Redis，JSON 序列化/Cookie 定制/并发登录控制）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

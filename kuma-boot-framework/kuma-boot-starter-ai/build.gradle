@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework AI 对话与 RAG 快速启动模块（基于 LangChain4j + Qdrant）'
+description = 'KumaFramework AI 对话与 RAG 快速启动模块（基于 LangChain4j + Qdrant）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

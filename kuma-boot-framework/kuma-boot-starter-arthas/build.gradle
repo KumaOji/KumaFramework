@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework Arthas 诊断模块 — 基于 arthas-agent-attach 的应用内嵌入式 Arthas 诊断'
+description = 'KumaFramework Arthas 诊断模块 — 基于 arthas-agent-attach 的应用内嵌入式 Arthas 诊断'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

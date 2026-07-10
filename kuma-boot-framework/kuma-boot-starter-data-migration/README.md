@@ -1,6 +1,6 @@
 # kuma-boot-starter-data-migration
 
-> Kumaframework 数据库版本管理模块 —— 统一封装 **Flyway** 与 **Liquibase**。
+> KumaFramework 数据库版本管理模块 —— 统一封装 **Flyway** 与 **Liquibase**。
 
 数据库 Schema/数据的版本化迁移是工程化项目的标配能力（与代码一同进入 CI/CD、可追溯、可回滚）。
 本模块在 Spring Boot 4 原生 Flyway / Liquibase 自动装配之上，提供一个**统一开关**与**引擎选择**，

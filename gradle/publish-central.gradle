@@ -10,7 +10,7 @@ tasks.register('generateStubJavadoc') {
         def dir = outputDir.get().asFile
         dir.mkdirs()
         new File(dir, 'README.txt').text =
-            "Javadoc: https://github.com/kumaoji/kuma-boot-framework"
+            "Javadoc: https://github.com/kumaoji/KumaFramework"
     }
 }
 
@@ -30,7 +30,7 @@ tasks.register('javadocJar', Jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId    = rootProject.group
+            groupId    = project.group
             artifactId = project.name
             version    = rootProject.version
 
@@ -40,7 +40,7 @@ publishing {
             pom {
                 name        = project.name
                 description = 'Kuma Boot Framework common utilities and base components'
-                url         = "https://github.com/kumaoji/kuma-boot-framework"
+                url         = "https://github.com/kumaoji/KumaFramework"
 
                 licenses {
                     license {
@@ -59,9 +59,9 @@ publishing {
                 }
 
                 scm {
-                    connection          = "scm:git:git@github.com:kumaoji/kuma-boot-framework.git"
-                    developerConnection = "scm:git:ssh://git@github.com:kumaoji/kuma-boot-framework.git"
-                    url                 = "https://github.com/kumaoji/kuma-boot-framework"
+                    connection          = "scm:git:git@github.com:kumaoji/KumaFramework.git"
+                    developerConnection = "scm:git:ssh://git@github.com:kumaoji/KumaFramework.git"
+                    url                 = "https://github.com/kumaoji/KumaFramework"
                 }
             }
         }
@@ -92,7 +92,7 @@ tasks.register('publishToCentralPortal') {
 
     def usernameProp = (findProperty("MAVEN_CENTRAL_USERNAME") ?: System.getenv("MAVEN_CENTRAL_USERNAME")) as String ?: ""
     def passwordProp = (findProperty("MAVEN_CENTRAL_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PASSWORD")) as String ?: ""
-    def groupPath = rootProject.group.toString().replace('.', '/')
+    def groupPath = project.group.toString().replace('.', '/')
     def artId     = project.name
     def ver       = rootProject.version.toString()
     def buildDir  = layout.buildDirectory

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework security-satoken 模块（Sa-Token 轻量级鉴权，国内企业级高频方案）'
+description = 'KumaFramework security-satoken 模块（Sa-Token 轻量级鉴权，国内企业级高频方案）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

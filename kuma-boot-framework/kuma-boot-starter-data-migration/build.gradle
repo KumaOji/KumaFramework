@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 数据库版本管理模块（Flyway / Liquibase）'
+description = 'KumaFramework 数据库版本管理模块（Flyway / Liquibase）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

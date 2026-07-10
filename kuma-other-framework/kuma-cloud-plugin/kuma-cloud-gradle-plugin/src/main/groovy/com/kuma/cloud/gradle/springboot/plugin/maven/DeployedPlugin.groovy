@@ -70,7 +70,7 @@ abstract class DeployedPlugin implements Plugin<Project> {
             }
             description.set(projectDescription)
             def rootProjectName = project.rootProject.name
-            url.set("https://github.com/kuma/" + rootProjectName + "/")
+            url.set("https://github.com/kumaoji/" + rootProjectName + "/")
             licenses {
                 license {
                     name.set("The Apache License, Version 2.0")
@@ -84,8 +84,8 @@ abstract class DeployedPlugin implements Plugin<Project> {
                 }
             }
             scm {
-                connection.set("git@github.com:kuma/" + rootProjectName + ".git")
-                url.set("https://github.com/kuma/" + rootProjectName + "/")
+                connection.set("git@github.com:kumaoji/" + rootProjectName + ".git")
+                url.set("https://github.com/kumaoji/" + rootProjectName + "/")
             }
         }
     }

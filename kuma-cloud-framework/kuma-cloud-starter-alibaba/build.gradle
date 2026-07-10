@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework alibaba cloud模块（Nacos注册/配置中心）'
+description = 'KumaFramework alibaba cloud模块（Nacos注册/配置中心）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

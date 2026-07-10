@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework job-powerjob 模块（PowerJob — 分布式任务调度、Map/MapReduce 处理器、工作流）'
+description = 'KumaFramework job-powerjob 模块（PowerJob — 分布式任务调度、Map/MapReduce 处理器、工作流）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

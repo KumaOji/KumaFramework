@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 性能测试模块 — 基于 Apache JMeter 的嵌入式压测执行'
+description = 'KumaFramework 性能测试模块 — 基于 Apache JMeter 的嵌入式压测执行'
 
 // JMeter 5.6.3 pins Groovy 3.0.20 (org.codehaus.groovy), which conflicts with
 // the framework's Groovy 4 runtime and cannot process JDK 25 class files.

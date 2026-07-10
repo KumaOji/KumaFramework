@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework mq-rabbitmq 模块（RabbitMQ — AMQP 消息收发、死信队列、延迟队列、消息确认）'
+description = 'KumaFramework mq-rabbitmq 模块（RabbitMQ — AMQP 消息收发、死信队列、延迟队列、消息确认）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

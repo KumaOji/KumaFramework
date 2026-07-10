@@ -30,7 +30,7 @@
 ## 模块体系
 
 ```
-Kumaframework/
+KumaFramework/
 ├── kuma-boot-framework/      96 个 Spring Boot Auto-Configuration Starter
 ├── kuma-cloud-framework/     12 个 Spring Cloud Starter
 ├── kuma-project/              4 个已启用的可运行/示例项目
@@ -264,8 +264,8 @@ Spring Cloud Starter 集合，在 kuma-boot-framework 基础上提供分布式�
 ### 克隆项目
 
 ```bash
-git clone https://github.com/kumaoji/Kumaframework.git
-cd Kumaframework
+git clone https://github.com/kumaoji/KumaFramework.git
+cd KumaFramework
 ```
 
 ### 引入 Starter（项目内）

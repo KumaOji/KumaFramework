@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 重试模块 — 基于 Guava Retrying 的注解式重试'
+description = 'KumaFramework 重试模块 — 基于 Guava Retrying 的注解式重试'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

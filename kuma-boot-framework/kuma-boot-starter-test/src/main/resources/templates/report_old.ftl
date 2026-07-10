@@ -166,7 +166,7 @@
 </#list>
 
     <hr/>
-    <div style='color:#044e9b;'>Report created by <a href='https://github.com/kuma/kuma-cloud-project'>Kuma Cloud</a></div>
+    <div style='color:#044e9b;'>Report created by <a href='https://github.com/kumaoji/KumaFramework'>Kuma Cloud</a></div>
 </center>
 </body>
 </html>

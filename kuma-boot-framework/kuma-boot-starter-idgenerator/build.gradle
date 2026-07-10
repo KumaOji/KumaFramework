@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework idgenerator模块'
+description = 'KumaFramework idgenerator模块'
 
 dependencies {
     // 基础公共工具（LogUtils / ContextUtils 等）

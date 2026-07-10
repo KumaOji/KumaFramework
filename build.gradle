@@ -43,7 +43,6 @@ plugins {
 
 allprojects {
     version = project.kmcVersion ?: '1.0.0'
-    group   = project.kmcGroup   ?: 'io.github.kumaoji'
 
     repositories {
         if (System.getenv('CI')) {
@@ -67,6 +66,8 @@ allprojects {
 }
 
 subprojects {
+    group = rootProject.kmcGroup ?: 'io.github.kumaoji'
+
     apply plugin: 'java-library'
     apply plugin: 'idea'
 

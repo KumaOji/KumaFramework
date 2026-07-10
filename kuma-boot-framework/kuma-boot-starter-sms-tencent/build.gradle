@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework sms-tencent模块（腾讯云短信，sms-common 的 SendHandler 实现）'
+description = 'KumaFramework sms-tencent模块（腾讯云短信，sms-common 的 SendHandler 实现）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-sms-common')

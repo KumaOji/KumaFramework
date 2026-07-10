@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework dubbo RPC模块（Apache Dubbo + Spring Cloud + Nacos注册发现 + 上下文透传）'
+description = 'KumaFramework dubbo RPC模块（Apache Dubbo + Spring Cloud + Nacos注册发现 + 上下文透传）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

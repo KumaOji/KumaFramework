@@ -306,10 +306,10 @@ public class SpringdocAutoConfiguration implements InitializingBean {
         Contact contact = new Contact()
                 .name("kuma")
                 .email("2569277704@qq.com")
-                .url("https://github.com/kuma/kuma-cloud-project");
+                .url("https://github.com/kumaoji/KumaFramework");
         License license = new License()
                 .name("Apache 2.0")
-                .url("https://github.com/kuma/kuma-cloud-project/blob/master/LICENSE.txt");
+                .url("https://github.com/kumaoji/KumaFramework/blob/master/LICENSE.txt");
 
         //基础信息
         Info info = new Info()

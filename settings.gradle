@@ -39,7 +39,7 @@ pluginManagement {
 }
 
 
-rootProject.name = 'Kumaframework'
+rootProject.name = 'KumaFramework'
 
 dependencyResolutionManagement {
     versionCatalogs {

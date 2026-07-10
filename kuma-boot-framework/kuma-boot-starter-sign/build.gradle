@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework API 签名验签模块（开放接口 AppKey + 签名校验，防篡改/防重放）'
+description = 'KumaFramework API 签名验签模块（开放接口 AppKey + 签名校验，防篡改/防重放）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

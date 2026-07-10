@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 分布式链路追踪模块（Micrometer Tracing + OpenTelemetry SDK + OTLP，对接 Tempo / Jaeger / Zipkin）'
+description = 'KumaFramework 分布式链路追踪模块（Micrometer Tracing + OpenTelemetry SDK + OTLP，对接 Tempo / Jaeger / Zipkin）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

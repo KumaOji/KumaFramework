@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework Prometheus 监控集成 —— Micrometer 指标采集、HTTP 拦截器埋点、Alertmanager Webhook 及服务发现 SD 端点'
+description = 'KumaFramework Prometheus 监控集成 —— Micrometer 指标采集、HTTP 拦截器埋点、Alertmanager Webhook 及服务发现 SD 端点'
 
 dependencies {
     // 基础：spring-boot-starter-actuator + micrometer-core + ObservationRegistry

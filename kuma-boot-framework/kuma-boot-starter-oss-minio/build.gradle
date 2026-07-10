@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework oss-minio模块'
+description = 'KumaFramework oss-minio模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-oss-common')

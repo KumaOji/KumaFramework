@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework canal模块'
+description = 'KumaFramework canal模块'
 
 dependencies {
     // 基础公共工具（LogUtils / StringUtils 等）

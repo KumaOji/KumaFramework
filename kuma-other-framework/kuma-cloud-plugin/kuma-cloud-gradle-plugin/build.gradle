@@ -99,8 +99,8 @@ repositories {
 }
 
 gradlePlugin {
-    website = 'https://github.com/kuma/kuma-cloud-project'
-    vcsUrl = 'https://github.com/kuma/kuma-cloud-project.git'
+    website = 'https://github.com/kumaoji/KumaFramework'
+    vcsUrl = 'https://github.com/kumaoji/KumaFramework.git'
     description = 'kuma-cloud-gradle-plugin'
 
     //tags里面不允许有gradle plugin

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework JDBC 连接池模块'
+description = 'KumaFramework JDBC 连接池模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

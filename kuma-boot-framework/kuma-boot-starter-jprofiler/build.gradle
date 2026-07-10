@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework JProfiler 性能剖析模块 — 通过 JProfiler Controller API 编程式触发快照与录制'
+description = 'KumaFramework JProfiler 性能剖析模块 — 通过 JProfiler Controller API 编程式触发快照与录制'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

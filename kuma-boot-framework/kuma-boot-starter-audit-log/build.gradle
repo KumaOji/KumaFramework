@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 操作审计日志模块（谁在何时改了什么 —— 业务审计，非通用日志）'
+description = 'KumaFramework 操作审计日志模块（谁在何时改了什么 —— 业务审计，非通用日志）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

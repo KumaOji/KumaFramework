@@ -218,9 +218,9 @@ jar {
                 'Specification-Title': project.name,
                 'Built-By': 'kuma',
                 'Automatic-Module-Name': project.name.replace("-", "."),
-                'Implementation-URL': "https://github.com/kuma/kuma-cloud-project",
+                'Implementation-URL': "https://github.com/kumaoji/KumaFramework",
                 'Build-Jdk-Spec': JavaVersion.VERSION_25.toString(),
-                'Bundle-DocURL': 'https://github.com/kuma/kuma-cloud-project',
+                'Bundle-DocURL': 'https://github.com/kumaoji/KumaFramework',
                 'Built-Gradle': gradle.gradleVersion,
                 'Build-OS': System.getProperty("os.name"),
                 'Build-Jdk': System.getProperty("java.version"),
@@ -267,7 +267,7 @@ mavenPublishing {
 
             maven {
                 name = "GitHub"
-                url = uri("https://maven.pkg.github.com/kuma/kuma-cloud-project")
+                url = uri("https://maven.pkg.github.com/kumaoji/KumaFramework")
                 credentials {
                     username = findProperty("githubUsername") ?: System.getenv("KUMA_CLOUD_GITHUB_USERNAME")
                     password = findProperty("githubPassword") ?: System.getenv("KUMA_CLOUD_GITHUB_TOKEN")
@@ -286,7 +286,7 @@ mavenPublishing {
         // 项目描述
         description = project.name
         // 项目主页
-        url = "https://github.com/kuma/kuma-cloud-project.git"
+        url = "https://github.com/kumaoji/KumaFramework.git"
 
         properties = [
                 "java.version": JavaVersion.VERSION_25.toString(),
@@ -311,15 +311,15 @@ mavenPublishing {
         developers {
             developer {
                 name = "kuma"
-                url = "https://github.com/kuma"
+                url = "https://github.com/kumaoji/KumaFramework"
                 email = "981376577@qq.com"
             }
         }
         //照着仓库地址填写
         scm {
-            connection = "scm:git:git@github.com:kuma/kuma-cloud-project.git"
-            developerConnection = "scm:git:ssh://git@github.com:kuma/kuma-cloud-project.git"
-            url = "https://github.com/kuma/kuma-cloud-project.git"
+            connection = "scm:git:git@github.com:kumaoji/KumaFramework.git"
+            developerConnection = "scm:git:ssh://git@github.com:kumaoji/KumaFramework.git"
+            url = "https://github.com/kumaoji/KumaFramework.git"
         }
     }
 

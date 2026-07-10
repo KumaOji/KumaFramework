@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework job-quartz 模块（Quartz Scheduler — 动态任务管理、集群模式、JDBC 持久化）'
+description = 'KumaFramework job-quartz 模块（Quartz Scheduler — 动态任务管理、集群模式、JDBC 持久化）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

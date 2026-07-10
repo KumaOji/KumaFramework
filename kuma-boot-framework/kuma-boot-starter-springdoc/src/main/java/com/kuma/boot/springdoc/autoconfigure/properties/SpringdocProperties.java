@@ -124,7 +124,7 @@ public class SpringdocProperties {
     /**
      * externalUrl
      */
-    private String externalUrl = "https://github.com/kuma/kuma-cloud-project/wiki";
+    private String externalUrl = "https://github.com/kumaoji/KumaFramework/wiki";
     /**
      * openapi 版本，须为 3.0.0 以兼容 Swagger UI/Knife4j 的版本校验
      */

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework springdoc模块'
+description = 'KumaFramework springdoc模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')

@@ -221,7 +221,7 @@ public final class CommonConstants {
     public static final String KMC_BANNER_GITHUB = "KMC_GITHUB:";
 
     public static final String KMC_BANNER_GITHUB_URL =
-            "https://github.com/kuma/kuma-cloud-project";
+            "https://github.com/kumaoji/KumaFramework";
 
     public static final String KMC_BANNER_GITEE = "KMC_GITEE:";
 

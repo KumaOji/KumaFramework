@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework SSE 模块（Server-Sent Events — 服务端主动推送、AI 流式响应封装）'
+description = 'KumaFramework SSE 模块（Server-Sent Events — 服务端主动推送、AI 流式响应封装）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

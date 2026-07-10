@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework GraphQL 模块（Spring for GraphQL — Schema 注册、异常处理、分页、安全增强）'
+description = 'KumaFramework GraphQL 模块（Spring for GraphQL — Schema 注册、异常处理、分页、安全增强）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')

@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description = 'Kumaframework 幂等模块'
+description = 'KumaFramework 幂等模块'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
