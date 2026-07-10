@@ -16,13 +16,13 @@ buildscript {
             maven { url = 'https://repo.spring.io/release'   }
             maven { url = 'https://repo.spring.io/milestone' }
         } else {
-            mavenLocal()
+            gradlePluginPortal()
             maven { url = 'https://maven.aliyun.com/repository/public' }
             maven { url = 'https://maven.aliyun.com/repository/central' }
+            mavenCentral()
             maven { url = 'https://repo.spring.io/release'   }
             maven { url = 'https://repo.spring.io/milestone' }
-            mavenCentral()
-            gradlePluginPortal()
+            mavenLocal()
         }
     }
     dependencies {
@@ -52,16 +52,16 @@ allprojects {
             maven { url = 'https://repo.spring.io/milestone' }
             maven { url = 'https://jitpack.io' }
         } else {
-            mavenLocal()
             maven { url = 'https://maven.aliyun.com/repository/public'  }
             maven { url = 'https://maven.aliyun.com/repository/central' }
             maven { url = 'https://maven.aliyun.com/repository/google'  }
+            mavenCentral()
             maven { url = 'https://repo.spring.io/release'   }
             maven { url = 'https://repo.spring.io/milestone' }
+            maven { url = 'https://jitpack.io' }
             maven { url = 'https://repo.e-iceblue.com/nexus/content/groups/public/' }
             maven { url = 'https://releases.aspose.com/java/repo/' }
-            maven { url = 'https://jitpack.io' }
-            mavenCentral()
+            mavenLocal()
         }
     }
 }
