@@ -1,12 +1,14 @@
 # Kuma Framework
 
+**English** | [简体中文](README_ZH.md)
+
 [![Java](https://img.shields.io/badge/Java-25-blue?logo=openjdk)](https://openjdk.org/projects/jdk/25/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen?logo=spring)](https://spring.io/projects/spring-cloud)
-[![Gradle](https://img.shields.io/badge/Gradle-9.3.1-blue?logo=gradle)](https://gradle.org/)
+[![Gradle](https://img.shields.io/badge/Gradle-9.6.1-blue?logo=gradle)](https://gradle.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE.txt)
 
-An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 2025**, organized as a Monorepo providing **65+ ready-to-use Auto-Configuration Starters** that cover data access, caching, security, messaging, observability, distributed capabilities, and more.
+An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 2025**, organized as a monorepo with **96 Spring Boot starters** and **12 Spring Cloud starters** for data access, caching, security, messaging, observability, distributed systems, testing, and more.
 
 ---
 
@@ -16,7 +18,7 @@ An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 
 |-----------|-------|
 | Group ID | `io.github.kumaoji` |
 | Current Version | `2026.07.01` |
-| Build Tool | Gradle 9.3.1 + Gradle Wrapper + Version Catalog |
+| Build Tool | Gradle 9.6.1 + Gradle Wrapper + Version Catalog |
 | Java Version | JDK 25 (required, all modules enable `--enable-preview`) |
 | Spring Boot | 4.0.3 |
 | Spring Framework | 7.0.3 |
@@ -29,11 +31,12 @@ An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 
 
 ```
 Kumaframework/
-├── kuma-boot-framework/      65+ Spring Boot Auto-Configuration Starters
-├── kuma-cloud-framework/     10  Spring Cloud Starters
-├── kuma-project/             Runnable demo applications
-├── kuma-bigdata-framework/   Big-data integrations (planned)
-└── kuma-other-framework/     Design patterns / plugins (planned)
+├── kuma-boot-framework/      96 Spring Boot Auto-Configuration Starters
+├── kuma-cloud-framework/     12 Spring Cloud Starters
+├── kuma-project/              4 included runnable/sample projects
+├── kuma-ai-framework/         AI integrations (incubating)
+├── kuma-bigdata-framework/    Big-data integrations (incubating)
+└── kuma-other-framework/      Design patterns and build/IDE plugins (incubating)
 ```
 
 ---
@@ -56,6 +59,10 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-web` | Web aggregation: Spring MVC, global exceptions, parameter validation, unified responses; bundles security/rate-limit/idempotency/cache capabilities |
 | `kuma-boot-starter-webagg` | Web aggregation enhancements: request aggregation, protocol conversion |
 | `kuma-boot-starter-websocket` | WebSocket support |
+| `kuma-boot-starter-webflux` | Reactive WebFlux support |
+| `kuma-boot-starter-graphql` | Spring GraphQL integration |
+| `kuma-boot-starter-mcp` | Model Context Protocol integration |
+| `kuma-boot-starter-sse` | Server-Sent Events support |
 | `kuma-boot-starter-xss` | XSS filtering (AntiSamy + Jsoup) |
 | `kuma-boot-starter-sensitive` | Data masking (phone, ID card, bank card, etc.) |
 | `kuma-boot-starter-encrypt` | API encryption/decryption (RSA / AES) |
@@ -72,6 +79,8 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-data-elasticsearch` | Elasticsearch auto-configuration (Easy-ES) |
 | `kuma-boot-starter-data-shardingsphere` | ShardingSphere JDBC sharding |
 | `kuma-boot-starter-data-p6spy` | SQL execution profiling (p6spy) |
+| `kuma-boot-starter-data-migration` | Database migration support |
+| `kuma-boot-starter-data-vector` | Vector database integration |
 
 ### Cache
 
@@ -89,8 +98,11 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-security-common` | Security common components: permission model, token abstraction |
 | `kuma-boot-starter-security-spring` | Deep Spring Security integration |
 | `kuma-boot-starter-security-jstauth` | Sa-Token integration (stateless JWT authentication) |
+| `kuma-boot-starter-security-satoken` | Sa-Token security auto-configuration |
 | `kuma-boot-starter-totp` | TOTP two-factor authentication (Google Authenticator compatible) |
 | `kuma-boot-starter-captcha` | CAPTCHA (image, slider, click-based) |
+| `kuma-boot-starter-session` | Distributed session support |
+| `kuma-boot-starter-sign` | Request signing and signature verification |
 
 ### Messaging
 
@@ -98,6 +110,8 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 |---------|-------------|
 | `kuma-boot-starter-mq-common` | Messaging common abstraction |
 | `kuma-boot-starter-mq-kafka` | Kafka producer/consumer wrappers |
+| `kuma-boot-starter-mq-rabbitmq` | RabbitMQ integration |
+| `kuma-boot-starter-mq-rocketmq` | RocketMQ integration |
 | `kuma-boot-starter-mqtt` | MQTT v5 integration (Eclipse Paho) |
 | `kuma-boot-starter-eventbus` | In-process event bus (Guava EventBus / Disruptor) |
 
@@ -125,6 +139,8 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-skywalking` | SkyWalking agent toolkit integration |
 | `kuma-boot-starter-elk` | ELK logging (Logstash + GELF) |
 | `kuma-boot-starter-logger` | Logging enhancements (structured logs / Loki / Kafka appender) |
+| `kuma-boot-starter-audit-log` | Application audit logging |
+| `kuma-boot-starter-otel` | OpenTelemetry integration |
 
 ### Remote Invocation
 
@@ -133,14 +149,29 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-grpc` | gRPC Server/Client auto-configuration |
 | `kuma-boot-starter-client` | HTTP clients (Forest / Retrofit) |
 
+### Diagnostics & Performance
+
+| Starter | Description |
+|---------|-------------|
+| `kuma-boot-starter-arthas` | Arthas diagnostics integration |
+| `kuma-boot-starter-jprofiler` | JProfiler integration helpers |
+| `kuma-boot-starter-jmeter` | Embedded Apache JMeter performance testing |
+| `kuma-boot-starter-jacoco` | JaCoCo coverage tooling |
+
 ### Scheduling & Storage
 
 | Starter | Description |
 |---------|-------------|
 | `kuma-boot-starter-job-common` | Job scheduling common interfaces |
+| `kuma-boot-starter-job-quartz` | Quartz scheduling integration |
+| `kuma-boot-starter-job-powerjob` | PowerJob worker integration |
 | `kuma-boot-starter-job-xxl` | XXL-Job executor auto-configuration |
 | `kuma-boot-starter-oss-common` | Object storage abstraction interface |
 | `kuma-boot-starter-oss-minio` | MinIO storage implementation |
+| `kuma-boot-starter-oss-aliyun` | Alibaba Cloud OSS implementation |
+| `kuma-boot-starter-oss-cos` | Tencent Cloud COS implementation |
+| `kuma-boot-starter-oss-qiniu` | Qiniu object storage implementation |
+| `kuma-boot-starter-file-transfer` | File-transfer capabilities |
 
 ### API Documentation
 
@@ -155,6 +186,9 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 |---------|-------------|
 | `kuma-boot-starter-mail` | Email delivery (Spring Mail + Commons Email) |
 | `kuma-boot-starter-sms-common` | SMS delivery abstraction |
+| `kuma-boot-starter-sms-aliyun` | Alibaba Cloud SMS implementation |
+| `kuma-boot-starter-sms-tencent` | Tencent Cloud SMS implementation |
+| `kuma-boot-starter-ai` | Spring AI integration |
 | `kuma-boot-starter-office` | Office document processing (POI / EasyExcel / Aspose) |
 | `kuma-boot-starter-translation` | Multilingual i18n translation |
 | `kuma-boot-starter-threadpool` | Dynamic thread pools (DynamicTp + TTL) |
@@ -168,6 +202,8 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-apollo` | Apollo configuration center integration |
 | `kuma-boot-starter-canal` | Canal database change-log subscription |
 | `kuma-boot-starter-frp` | FRP intranet penetration toolkit |
+| `kuma-boot-starter-i18n` | Internationalization auto-configuration |
+| `kuma-boot-starter-multi-tenant` | Multi-tenant application support |
 | `kuma-boot-starter-test` | Testing toolkit (TestContainers / DataFaker) |
 
 ### Core Dependency Chain
@@ -209,6 +245,8 @@ Spring Cloud Starter collection, providing distributed microservice capabilities
 | `kuma-cloud-starter-jdbcpool` | Multi-datasource JDBC connection pool Cloud extensions |
 | `kuma-cloud-starter-netty` | Netty server Cloud extensions |
 | `kuma-cloud-starter-kmc` | KMC (Chinese SM-series) cryptography module |
+| `kuma-cloud-starter-openfeign` | Declarative HTTP clients with Spring Cloud OpenFeign |
+| `kuma-cloud-starter-dubbo` | Apache Dubbo RPC integration |
 
 ---
 
@@ -219,7 +257,7 @@ Spring Cloud Starter collection, providing distributed microservice capabilities
 | Tool | Version |
 |------|---------|
 | JDK | 25 (required) |
-| Gradle | 9.3.1 (downloaded automatically by Wrapper — no manual install needed) |
+| Gradle | 9.6.1 (downloaded automatically by Wrapper — no manual install needed) |
 | MySQL | 8.0+ |
 | Redis | 7.x |
 
@@ -265,6 +303,9 @@ dependencies {
 
 # Launch the demo application
 ./gradlew :kuma-project:kuma-project-project4:bootRun
+
+# Run the blog example
+./gradlew :kuma-project:kuma-project-blog:bootRun
 ```
 
 ---
