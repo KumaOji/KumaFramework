@@ -64,7 +64,6 @@ knife4j:
 blog:
   token-expire-seconds: 604800
   cookie-secure: true
-  reset-admin-password: true
   admin-initial-password: admin123
   music:
     base-path: /data/music
@@ -92,21 +91,6 @@ kuma:
         http-port: 6333
         collection: blog-docs
         dimension: 768
-    frp:
-      enabled: false
-      server-addr: 8.134.147.122
-      server-port: 7000
-      token: 159841
-      auto-restart: true
-      restart-delay-ms: 3000
-      max-restart-attempts: 5
-      proxies:
-        - name: blog-web
-          type: tcp
-          local-ip: 127.0.0.1
-          local-port: 9000       # 与 server.port 一致
-          remote-port: 9000
-
     core:
       enabled: true
       async:
@@ -142,7 +126,6 @@ kuma:
     security:
       oauth2:
         endpoint:
-          # 博客使用本地 Token 认证，不依赖 UAA；此处为占位配置，避免框架初始化时报错
           uaa-service-uri: http://127.0.0.1:33336
       ignore-url:
         - /actuator/**
