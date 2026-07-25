@@ -37,14 +37,9 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.time.Duration;
-import java.util.Locale;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for {@link MessageSource}.
@@ -89,14 +84,6 @@ public class CustomMessageSourceAutoConfiguration {
         messageSource.setAlwaysUseMessageFormat(properties.isAlwaysUseMessageFormat());
         messageSource.setUseCodeAsDefaultMessage(properties.isUseCodeAsDefaultMessage());
         return messageSource;
-    }
-
-    @Bean
-    public LocaleResolver localeResolver() {
-        AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
-        resolver.setSupportedLocales(asList(Locale.CHINA, Locale.US));
-        resolver.setDefaultLocale(Locale.CHINA);
-        return resolver;
     }
 
     protected static class ResourceBundleCondition extends SpringBootCondition {

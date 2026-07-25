@@ -23,6 +23,7 @@ import com.kuma.boot.dingtalk.constant.DingerConstant;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -37,6 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @since 2022-07-06 15:16:41
  */
 @AutoConfiguration
+@ConditionalOnProperty(prefix = DingtalkProperties.PREFIX, value = "enabled", havingValue = "true")
 @ConditionalOnMissingBean(name = DingerConstant.DINGER_EXECUTOR)
 public class DingtalkThreadPoolAutoConfiguration implements InitializingBean {
 

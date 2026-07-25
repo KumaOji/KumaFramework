@@ -16,12 +16,12 @@
 
 package com.kuma.boot.idempotent.idempotetduplicate;
 
-import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @ConditionalOnClass(RedissonClient.class)
+@ConditionalOnBean(RedissonClient.class)
 public class PreventDuplicateSubmitAutoConfiguration implements InitializingBean {
 
     @Override

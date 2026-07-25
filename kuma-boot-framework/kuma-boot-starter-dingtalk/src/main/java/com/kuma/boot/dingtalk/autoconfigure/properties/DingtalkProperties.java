@@ -214,6 +214,10 @@ public class DingtalkProperties implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (!enabled) {
+            return;
+        }
+
         if (dingers.isEmpty()) {
             throw new InvalidPropertiesFormatException("spring.dinger.dingers is empty.");
         }

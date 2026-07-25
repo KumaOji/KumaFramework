@@ -26,6 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -39,6 +40,7 @@ import org.springframework.web.client.RestTemplate;
  * @since 2022-07-06 15:16:45
  */
 @AutoConfiguration
+@ConditionalOnProperty(prefix = DingtalkProperties.PREFIX, value = "enabled", havingValue = "true")
 public class DingtalkHttpClientAutoConfiguration implements InitializingBean {
 
     @Override

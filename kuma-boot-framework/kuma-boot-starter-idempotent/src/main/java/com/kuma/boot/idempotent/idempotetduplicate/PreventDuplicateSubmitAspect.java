@@ -11,7 +11,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -30,7 +29,6 @@ import static com.kuma.boot.common.enums.ResultEnum.REQUEST_OTHER_OPERATION;
  */
 @Aspect
 @Order(0)
-@Component
 public class PreventDuplicateSubmitAspect {
 
 	private final RedissonClient redissonClient;
