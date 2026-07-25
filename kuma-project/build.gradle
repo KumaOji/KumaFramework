@@ -11,6 +11,7 @@ description = '''KumaFramework project参考 —— 一组渐进式 Demo 应用�
   project20: gRPC 客户端 Demo，通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）
   project21: Office Doc 生成 Demo，使用 kuma-boot-starter-office（Aspose.Words）将 HTML 转换为 Word 文档并下载
   blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
+  lab      : 测试实验场，用于集中记录事务、缓存、消息队列、锁等各类验证代码
   base     : 基础练习 Demo，用于 Java / Spring Boot 基础知识练习，涵盖常用数据结构、算法、设计模式及 Spring 核心特性
   leetcode : 力扣练习，按题型分类组织 LeetCode 解题代码与单元测试
 '''

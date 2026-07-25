@@ -1,0 +1,47 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = 'KumaFramework 测试实验场 —— 集中记录事务、缓存、消息队列、锁等各类验证代码'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.doc.webmvc
+
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    runtimeOnly projectLibs.mysql
+}
+
+def labMysqlUrl      = project.findProperty('mysql.url')      ?: ''
+def labMysqlUsername = project.findProperty('mysql.username') ?: ''
+def labMysqlPassword = project.findProperty('mysql.password') ?: ''
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(
+                active        : 'dev',
+                mysql_url     : labMysqlUrl,
+                mysql_username: labMysqlUsername,
+                mysql_password: labMysqlPassword
+        )
+    }
+}
+
+bootJar {
+    archiveBaseName = 'lab'
+}

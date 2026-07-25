@@ -182,7 +182,8 @@ include "kuma-project"
 //for (name in projectBootSubModules) {
 //    include "kuma-project:kuma-project-${name}"
 //}
-def projectBootSubModules = ['project2', 'project4', 'blog', 'leetcode']
+
+def projectBootSubModules = ['project2', 'project4', 'blog', 'lab', 'leetcode']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }

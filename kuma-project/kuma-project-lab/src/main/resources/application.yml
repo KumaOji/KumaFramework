@@ -1,0 +1,37 @@
+server:
+  port: 9090
+  servlet:
+    context-path: /api
+
+spring:
+  profiles:
+    active: ${active}
+  application:
+    name: kuma-cloud-lab
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          type: com.zaxxer.hikari.HikariDataSource
+          url: ${mysql_url}
+          username: ${mysql_username}
+          password: ${mysql_password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+kuma:
+  boot:
+    web:
+      graceful-response:
+        response-style: 0
+    data:
+      datasource:
+        enabled: true
+    springdoc:
+      enabled: true
+      type: SERVICE
+      title: Kuma Test Lab API
+      description: KumaFramework 测试实验项目接口文档
+      version: 1.0.0
+      packages-to-scan:
+        - com.kuma.cloud.lab
