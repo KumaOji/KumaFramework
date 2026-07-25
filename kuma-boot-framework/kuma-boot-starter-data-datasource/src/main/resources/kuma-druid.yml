@@ -86,5 +86,5 @@ spring:
         login-password: 123456   # 登录密码
         allow: 127.0.0.1 # IP白名单(没有配置或者为空，则允许所有访问)
         deny: 192.168.0.1  # IP黑名单 (存在共同时，deny优先于allow)
-      #Spring监控配置，说明请参考Druid Github Wiki，配置_Druid和Spring关联监控配置
-      aop-patterns: "com.springboot.template.dao.*" # Spring监控AOP切入点,多个时用英文逗号分隔
+      # Spring 监控 AOP 切入点按业务项目需要配置。
+      # 不提供框架默认值，避免无意义地创建 Druid Advisor 并提前实例化 AOP 基础设施。

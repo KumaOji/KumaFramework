@@ -172,5 +172,5 @@ bootJar {
 }
 
 bootRun {
-    jvmArgs += ['--sun-misc-Unsafe-memory-access=allow']
+    jvmArgs += ['--sun-misc-unsafe-memory-access=allow']
 }

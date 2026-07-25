@@ -3,10 +3,12 @@ package com.kuma.boot.eventbus.atlas.config;
 import com.kuma.boot.eventbus.atlas.core.DefaultEventBus;
 import com.kuma.boot.eventbus.atlas.core.EventBus;
 import com.kuma.boot.eventbus.atlas.processor.EventAnnotationProcessor;
+import com.kuma.boot.eventbus.autoconfigure.properties.EventBusProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -17,14 +19,18 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @ConditionalOnClass({EventBus.class})
+@ConditionalOnProperty(
+        prefix = EventBusProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true")
 @EnableConfigurationProperties({EventProperties.class})
 public class EventAutoConfiguration {
    public EventAutoConfiguration() {
    }
 
-   @Bean
+   @Bean("atlasEventBus")
    @ConditionalOnMissingBean(EventBus.class)
-   public EventBus eventBus() {
+   public EventBus atlasEventBus() {
       return new DefaultEventBus();
    }
 

@@ -3,6 +3,10 @@ server:
   servlet:
     context-path: /api
 
+logging:
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS
+
 spring:
   profiles:
     active: ${active}

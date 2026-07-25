@@ -21,6 +21,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -28,6 +29,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 
 @AutoConfiguration
+@ConditionalOnProperty(
+        prefix = EventBusProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true")
 @EnableConfigurationProperties({EventBusProperties.class, GuavaEventBusExecutorProperties.class, GreenrobotEventBusExecutorProperties.class})
 public class EventBusAutoConfiguration implements ApplicationContextAware, InitializingBean {
    private ApplicationContext applicationContext;

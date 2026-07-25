@@ -20,7 +20,9 @@ import com.alibaba.ttl.threadpool.TtlExecutors;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.kuma.boot.eventbus.autoconfigure.properties.EventBusProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
@@ -30,6 +32,10 @@ import java.util.concurrent.*;
  * 线程池配置
  */
 @AutoConfiguration
+@ConditionalOnProperty(
+        prefix = EventBusProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true")
 public class TaskExecuterConfig {
 
    /**

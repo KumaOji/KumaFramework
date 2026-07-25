@@ -259,6 +259,8 @@ management:
     prometheus:
       enabled: true
   health:
+    elasticsearch:
+      enabled: false
     kmc:
       enabled: false
   info:

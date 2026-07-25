@@ -19,9 +19,6 @@ spring:
   sql:
     init:
       mode: never
-  autoconfigure:
-    exclude:
-      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
   datasource:
     dynamic:
       datasource:

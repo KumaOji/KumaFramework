@@ -19,8 +19,10 @@ package com.kuma.boot.eventbus.event.config;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.kuma.boot.core.utils.context.ContextUtils;
+import com.kuma.boot.eventbus.autoconfigure.properties.EventBusProperties;
 import com.kuma.boot.eventbus.event.annotation.MessageEventBus;
 import jakarta.annotation.PostConstruct;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,6 +31,10 @@ import java.util.List;
  * 基于google的eventBus总线执行器
  */
 @Component
+@ConditionalOnProperty(
+        prefix = EventBusProperties.PREFIX,
+        name = "enabled",
+        havingValue = "true")
 public class EventBusTemplate {
 
    /**

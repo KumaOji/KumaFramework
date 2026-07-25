@@ -38,7 +38,7 @@ public class TranslationAutoConfiguration implements InitializingBean {
             TranslationType annotation = (TranslationType)trans.getClass().getAnnotation(TranslationType.class);
             map.put(annotation.type(), trans);
          } else {
-            LogUtils.warn(trans.getClass().getName() + " \u7ffb\u8bd1\u5b9e\u73b0\u7c7b\u672a\u6807\u6ce8 TranslationType \u6ce8\u89e3!", new Object[0]);
+            LogUtils.warn(trans.getClass().getName() + " 翻译实现类未标注 TranslationType 注解!", new Object[0]);
          }
       }
 

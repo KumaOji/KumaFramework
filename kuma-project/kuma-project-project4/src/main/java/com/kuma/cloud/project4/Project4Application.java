@@ -48,7 +48,6 @@ public class Project4Application extends SpringBootServletInitializer {
                 .setKmcBanner()
                 .setKmcProfileIfNotExists("dev")
                 .setKmcApplicationProperty("kuma-cloud-project4")
-                .setKmcAllowBeanDefinitionOverriding(true)
                 .run(args);
     }
 }
