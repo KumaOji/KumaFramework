@@ -1,6 +1,7 @@
 package com.kuma.cloud.lab.binlog.service;
 
 import com.kuma.cloud.lab.binlog.config.MysqlBinlogProperties;
+import com.kuma.cloud.lab.binlog.config.MysqlJdbcEndpoint;
 import com.kuma.cloud.lab.binlog.domain.MysqlBinlogChangeEvent;
 import io.debezium.engine.ChangeEvent;
 import io.debezium.engine.DebeziumEngine;
