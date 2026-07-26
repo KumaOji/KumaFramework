@@ -49,6 +49,7 @@ def blogMysqlPassword           = project.findProperty('mysql.password')        
 def blogRedisHost               = project.findProperty('redis.host')                  ?: ''
 def blogRedisPort               = project.findProperty('redis.port')                  ?: ''
 def blogRedisDatabase           = project.findProperty('redis.database')              ?: ''
+def blogRedisPassword           = project.findProperty('redis.password')              ?: ''
 def blogRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
 def blogRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
 def blogRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
@@ -63,6 +64,7 @@ processResources {
                 redis_host                 : blogRedisHost,
                 redis_port                 : blogRedisPort,
                 redis_database             : blogRedisDatabase,
+                redis_password             : blogRedisPassword,
                 redis_jedis_pool_max_active: blogRedisJedisPoolMaxActive,
                 redis_jedis_pool_max_idle  : blogRedisJedisPoolMaxIdle,
                 redis_jedis_pool_min_idle  : blogRedisJedisPoolMinIdle
