@@ -26,7 +26,27 @@ spring:
           password: ${mysql_password}
           driver-class-name: com.mysql.cj.jdbc.Driver
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 kuma:
+  lab:
+    mysql-binlog:
+      # Explicit opt-in: the configured user must have MySQL replication privileges.
+      enabled: false
+      jdbc-url: ${mysql_url}
+      username: ${mysql_username}
+      password: ${mysql_password}
+      server-id: 184054
+      topic-prefix: kuma-lab-mysql
+      table-include-list: base.tx_demo_account
+      snapshot-mode: no_data
+      offset-file: data/lab-binlog/offsets.dat
+      schema-history-file: data/lab-binlog/schema-history.dat
+      buffer-capacity: 1000
   boot:
     security:
       ignore-url:

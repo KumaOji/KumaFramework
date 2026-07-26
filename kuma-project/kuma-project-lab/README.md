@@ -14,6 +14,27 @@
 3. 启动 `LabApplication`。
 4. 请求 `POST /api/lab/transaction/transfer`。
 
+## MySQL Binlog
+
+黑盒变更捕获需要 MySQL 开启 Row Binlog，MySQL 配置应包含：
+
+```ini
+[mysqld]
+server-id=1
+log-bin=mysql-bin
+binlog-format=ROW
+binlog-row-image=FULL
+```
+
+修改配置后需重启 MySQL。可使用以下 SQL 验证当前实例：
+
+```sql
+SHOW VARIABLES
+WHERE Variable_name IN ('log_bin', 'binlog_format', 'binlog_row_image', 'server_id');
+```
+
+期望值为 `log_bin=ON`、`binlog_format=ROW`、`binlog_row_image=FULL`。
+
 请求示例：
 
 ```json
@@ -27,3 +48,5 @@
 ```
 
 返回结果包含是否回滚、修改行的前后快照，以及按执行顺序记录的 SQL、参数和影响行数。
+
+Controller 不直接依赖 JDBC 实现，转账逻辑通过 `TransactionBlackBox` 黑盒协议执行。
