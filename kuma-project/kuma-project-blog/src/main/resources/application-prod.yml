@@ -15,7 +15,7 @@ spring:
       request-timeout: 600000
   main:
     lazy-initialization: true
-    log-startup-info: false
+    log-startup-info: true
   sql:
     init:
       mode: never
@@ -34,13 +34,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   level:
-    dev.langchain4j: DEBUG
     root: INFO
-    com.kuma.boot: INFO
-    com.kuma.cloud.blog: DEBUG
-    org.springframework.web: INFO
-    org.springframework.security: INFO
-    "org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker": ERROR
 
 mybatis-plus:
   global-config:

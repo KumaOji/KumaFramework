@@ -25,12 +25,18 @@ public class ZBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInitialization( Object bean, String beanName ) throws BeansException {
+        if (isExcluded(bean, beanName)) {
+            return bean;
+        }
         costMap.put(beanName, System.currentTimeMillis());
         return bean;
     }
 
     @Override
     public Object postProcessAfterInitialization( Object bean, String beanName ) throws BeansException {
+        if (isExcluded(bean, beanName)) {
+            return bean;
+        }
         if (costMap.containsKey(beanName)) {
             Long start = costMap.get(beanName);
             long cost = System.currentTimeMillis() - start;
@@ -39,5 +45,11 @@ public class ZBeanPostProcessor implements BeanPostProcessor {
             }
         }
         return bean;
+    }
+
+    private boolean isExcluded(Object bean, String beanName) {
+        String className = bean == null ? "" : bean.getClass().getName();
+        return "wallFilter".equals(beanName)
+                || className.startsWith("com.alibaba.druid.wall.");
     }
 }

@@ -57,13 +57,8 @@
         <appender-ref ref="ERROR_FILE_SYNC"/>
     </appender>
 
-    <!-- Druid WallConfig contains a final init method that cannot be advised by CGLIB. -->
-    <logger name="org.springframework.aop.framework.CglibAopProxy" level="ERROR"/>
-
     <springProfile name="dev">
         <logger name="com.kuma.cloud.blog" level="DEBUG"/>
-        <logger name="org.apache.catalina.connector.CoyoteAdapter" level="WARN"/>
-        <logger name="org.apache.tomcat.util.http.parser.Cookie" level="WARN"/>
     </springProfile>
 
     <springProfile name="prod">
