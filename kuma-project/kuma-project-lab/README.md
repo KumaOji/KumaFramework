@@ -5,7 +5,10 @@
 ## 测试分类
 
 - `transaction`：数据库事务、提交、回滚和变更快照测试
-- 后续测试按能力建立独立包，例如 `cache`、`mq`、`lock`
+- `binlog`：MySQL Row Binlog 变更捕获测试
+- `kafka`：Kafka 消息生产与消费测试
+- `redis`：String / Hash / List / Set 读写与 TTL 验证
+- 后续测试按能力建立独立包，例如 `lock`
 
 ## 事务测试
 
@@ -50,3 +53,45 @@ WHERE Variable_name IN ('log_bin', 'binlog_format', 'binlog_row_image', 'server_
 返回结果包含是否回滚、修改行的前后快照，以及按执行顺序记录的 SQL、参数和影响行数。
 
 Controller 不直接依赖 JDBC 实现，转账逻辑通过 `TransactionBlackBox` 黑盒协议执行。
+
+## Redis 测试
+
+1. 启动本地 Redis，默认连接 `127.0.0.1:6379`。
+2. 在根项目 `gradle.properties` 中配置 `redis.host`、`redis.port`、`redis.database`（可选 `redis.password`）。
+3. 启动 `LabApplication`。
+4. 请求 `POST /api/lab/redis/scenario`，一次性验证 String / Hash / List / Set 与 TTL 行为。
+
+手动测试示例：
+
+```json
+POST /api/lab/redis/string
+{
+  "key": "demo",
+  "value": "hello",
+  "ttlSeconds": 60
+}
+```
+
+实验 key 默认带前缀 `lab:redis:`，避免污染业务数据。
+
+## Kafka 测试
+
+1. 确保 Kafka 集群可访问，并在 `gradle.properties` 中配置 `kafka.bootstrap-servers`。
+2. 预先创建测试 topic（默认 `kuma-lab-test`），或确保 broker 允许自动创建 topic。
+3. 在 `application.yml` 中将 `kuma.lab.kafka.enabled` 设为 `true`。
+4. 启动 `LabApplication`。
+5. 发送测试消息：`POST /api/lab/kafka/send`
+
+请求示例：
+
+```json
+{
+  "key": "demo-1",
+  "message": "hello kafka"
+}
+```
+
+6. 查看监听器状态：`GET /api/lab/kafka/status`
+7. 查看最近消息：`GET /api/lab/kafka/messages?limit=100&direction=CONSUMED`
+
+返回结果包含 topic、partition、offset，以及内存中缓存的最近生产/消费消息。
