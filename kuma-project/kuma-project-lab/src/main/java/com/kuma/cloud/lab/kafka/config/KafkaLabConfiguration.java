@@ -59,6 +59,7 @@ public class KafkaLabConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(kafkaLabConsumerFactory);
+        factory.setMissingTopicsFatal(false);
         return factory;
     }
 }

@@ -12,6 +12,10 @@ spring:
     active: ${active}
   application:
     name: kuma-cloud-lab
+  autoconfigure:
+    exclude:
+      # 框架通过 @EnableKnife4j 装配定制版 Knife4jAutoConfiguration，排除官方自动装配避免 Bean 冲突
+      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
   datasource:
     dynamic:
       primary: mysql
@@ -36,14 +40,17 @@ spring:
 
 springdoc:
   api-docs:
-    enabled: false
+    enabled: true
   swagger-ui:
-    enabled: false
+    enabled: true
+
+knife4j:
+  enable: true
 
 kuma:
   lab:
     redis:
-      key-prefix: lab:redis:
+      key-prefix: "lab:redis:"
     mysql-binlog:
       # Explicit opt-in: the configured user must have MySQL replication privileges.
       enabled: false
@@ -59,7 +66,7 @@ kuma:
       buffer-capacity: 1000
     kafka:
       # Explicit opt-in: requires a reachable Kafka cluster and the test topic.
-      enabled: false
+      enabled: true
       bootstrap-servers: ${kafka_bootstrap_servers}
       topic: kuma-lab-test
       group-id: kuma-lab-test-group

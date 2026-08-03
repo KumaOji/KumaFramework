@@ -36,6 +36,7 @@ import org.springdoc.core.service.OpenAPIService;
 import org.springdoc.core.service.SecurityService;
 import org.springdoc.core.utils.PropertyResolverUtils;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -132,6 +133,7 @@ public class SpringDocAutoConfiguration implements WebMvcConfigurer {
      * 自定义 OpenApi 处理器
      */
     @Bean
+    @ConditionalOnBean(SecurityService.class)
     public OpenAPIService openApiBuilder(Optional<OpenAPI> openAPI,
                                          SecurityService securityParser,
                                          SpringDocConfigProperties springDocConfigProperties,
