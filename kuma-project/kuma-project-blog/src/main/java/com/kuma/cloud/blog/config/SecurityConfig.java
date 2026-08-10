@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/project/list", "/project/*/view").permitAll()
                         .requestMatchers("/project/*").permitAll()
                         .requestMatchers("/message/list", "/message", "/message/*/like").permitAll()
+                        .requestMatchers("/friend-link/list", "/friend-link/apply", "/friend-link/*/view").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/chat/room/list", "/chat/room/*/history", "/chat/room/*/online").permitAll()
                         .anyRequest().authenticated())

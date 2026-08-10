@@ -63,11 +63,23 @@ def portableTccDir = nativeToolsDir.map { it.dir('tcc') }
 def portableTccExe = portableTccDir.map { it.file('tcc/tcc.exe') }
 def portableTccZip = nativeToolsDir.map { it.file('tcc-win64.zip') }
 
+def isGccAvailable = {
+    try {
+        def process = ['gcc', '--version'].execute()
+        process.waitFor()
+        return process.exitValue() == 0
+    } catch (Exception ignored) {
+        return false
+    }
+}
+
 tasks.register('downloadPortableTcc') {
     group = 'build'
     description = 'Download portable TinyCC for Windows when system gcc is unavailable'
     onlyIf {
-        OperatingSystem.current().isWindows() && !portableTccExe.get().asFile.exists()
+        OperatingSystem.current().isWindows()
+                && !isGccAvailable()
+                && !portableTccExe.get().asFile.exists()
     }
 
     doLast {
@@ -86,6 +98,9 @@ tasks.register('downloadPortableTcc') {
 
 def resolveNativeCompiler = {
     if (!OperatingSystem.current().isWindows()) {
+        return ['gcc']
+    }
+    if (isGccAvailable()) {
         return ['gcc']
     }
     def tcc = portableTccExe.get().asFile

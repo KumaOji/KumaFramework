@@ -85,7 +85,7 @@ POST /api/lab/redis/string
 ./gradlew :kuma-project:kuma-project-lab:compileNative
 ```
 
-Windows 若未安装 GCC，构建会自动下载便携版 TinyCC 到 `build/tools/tcc`；Linux / macOS 需本机安装 `gcc`。
+Windows 优先使用本机 `gcc`；仅当系统未安装 GCC 时，构建才会自动下载便携版 TinyCC 到 `build/tools/tcc`。Linux / macOS 需本机安装 `gcc`。
 
 2. 启动 `LabApplication`。
 3. 请求 `POST /api/lab/jni/scenario`，一次性验证 add / multiply / greet / sumArray。
