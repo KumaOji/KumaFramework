@@ -8,6 +8,7 @@
 - `binlog`：MySQL Row Binlog 变更捕获测试
 - `kafka`：Kafka 消息生产与消费测试
 - `redis`：String / Hash / List / Set 读写与 TTL 验证
+- `jni`：通过 JNI 调用 C 实现整数运算、字符串处理与数组求和
 - 后续测试按能力建立独立包，例如 `lock`
 
 ## 事务测试
@@ -73,6 +74,44 @@ POST /api/lab/redis/string
 ```
 
 实验 key 默认带前缀 `lab:redis:`，避免污染业务数据。
+
+## JNI / C 语言测试
+
+通过 JNI 调用 `src/main/c/lab_math.c` 中编译出的动态库，验证 Java 与 C 的互操作。
+
+1. 编译 C 动态库：
+
+```bash
+./gradlew :kuma-project:kuma-project-lab:compileNative
+```
+
+Windows 若未安装 GCC，构建会自动下载便携版 TinyCC 到 `build/tools/tcc`；Linux / macOS 需本机安装 `gcc`。
+
+2. 启动 `LabApplication`。
+3. 请求 `POST /api/lab/jni/scenario`，一次性验证 add / multiply / greet / sumArray。
+
+手动测试示例：
+
+```json
+POST /api/lab/jni/add
+{
+  "left": 21,
+  "right": 21
+}
+```
+
+```json
+POST /api/lab/jni/greet
+{
+  "name": "KumaFramework"
+}
+```
+
+IDE 直启时若提示找不到动态库，可先执行 `compileNative`，或在 VM options 中设置：
+
+```text
+-Djava.library.path=kuma-project/kuma-project-lab/build/native
+```
 
 ## Kafka 测试
 

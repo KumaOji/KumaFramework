@@ -71,6 +71,9 @@ kuma:
       topic: kuma-lab-test
       group-id: kuma-lab-test-group
       buffer-capacity: 1000
+    jni:
+      enabled: true
+      library-name: "lab_math"
   boot:
     security:
       ignore-url:

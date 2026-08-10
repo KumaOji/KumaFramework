@@ -3,6 +3,8 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
+import org.gradle.internal.os.OperatingSystem
+
 description = 'KumaFramework 测试实验场 —— 集中记录事务、缓存、消息队列、锁等各类验证代码'
 
 dependencyManagement {
@@ -46,7 +48,90 @@ def labRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-acti
 def labRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
 def labRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
 
+bootJar {
+    archiveBaseName = 'lab'
+}
+
+def nativeOutputDir = layout.buildDirectory.dir('native')
+def nativeToolsDir = layout.buildDirectory.dir('tools')
+def nativeSourceFile = file('src/main/c/lab_math.c')
+def nativeLibBaseName = 'lab_math'
+def nativeLibFileName = OperatingSystem.current().isWindows() ? "${nativeLibBaseName}.dll"
+        : OperatingSystem.current().isMacOsX() ? "lib${nativeLibBaseName}.dylib"
+        : "lib${nativeLibBaseName}.so"
+def portableTccDir = nativeToolsDir.map { it.dir('tcc') }
+def portableTccExe = portableTccDir.map { it.file('tcc/tcc.exe') }
+def portableTccZip = nativeToolsDir.map { it.file('tcc-win64.zip') }
+
+tasks.register('downloadPortableTcc') {
+    group = 'build'
+    description = 'Download portable TinyCC for Windows when system gcc is unavailable'
+    onlyIf {
+        OperatingSystem.current().isWindows() && !portableTccExe.get().asFile.exists()
+    }
+
+    doLast {
+        def zipFile = portableTccZip.get().asFile
+        zipFile.parentFile.mkdirs()
+        def zipUrl = 'https://download.savannah.gnu.org/releases/tinycc/tcc-0.9.27-win64-bin.zip'
+        new URI(zipUrl).toURL().withInputStream { input ->
+            zipFile.withOutputStream { output -> output << input }
+        }
+        copy {
+            from zipTree(zipFile)
+            into portableTccDir.get().asFile
+        }
+    }
+}
+
+def resolveNativeCompiler = {
+    if (!OperatingSystem.current().isWindows()) {
+        return ['gcc']
+    }
+    def tcc = portableTccExe.get().asFile
+    if (tcc.exists()) {
+        return [tcc.absolutePath]
+    }
+    return ['gcc']
+}
+
+tasks.register('compileNative', Exec) {
+    group = 'build'
+    description = 'Compile JNI C library for the current platform'
+
+    dependsOn tasks.named('downloadPortableTcc')
+
+    def outputFile = nativeOutputDir.get().file(nativeLibFileName).asFile
+    outputs.file(outputFile)
+    inputs.file(nativeSourceFile)
+
+    def javaHome = org.gradle.internal.jvm.Jvm.current().javaHome.absolutePath
+    def includeDir = "${javaHome}/include"
+    def sourcePath = nativeSourceFile.absolutePath
+
+    doFirst {
+        outputFile.parentFile.mkdirs()
+        def compiler = resolveNativeCompiler()[0]
+        if (OperatingSystem.current().isWindows()) {
+            commandLine compiler, '-shared',
+                    "-I${includeDir}", "-I${includeDir}/win32",
+                    sourcePath, '-o', outputFile.absolutePath
+        } else if (OperatingSystem.current().isMacOsX()) {
+            commandLine compiler, '-shared', '-fPIC',
+                    "-I${includeDir}", "-I${includeDir}/darwin",
+                    sourcePath, '-o', outputFile.absolutePath
+        } else {
+            commandLine compiler, '-shared', '-fPIC',
+                    "-I${includeDir}", "-I${includeDir}/linux",
+                    sourcePath, '-o', outputFile.absolutePath
+        }
+    }
+}
+
+classes.dependsOn tasks.named('compileNative')
+
 processResources {
+    dependsOn tasks.named('compileNative')
     filesMatching('**/application.yml') {
         expand(
                 active                     : 'dev',
@@ -63,8 +148,12 @@ processResources {
                 redis_jedis_pool_min_idle  : labRedisJedisPoolMinIdle
         )
     }
+    from(nativeOutputDir) {
+        into 'native'
+    }
 }
 
-bootJar {
-    archiveBaseName = 'lab'
+bootRun {
+    dependsOn tasks.named('compileNative')
+    systemProperty 'java.library.path', nativeOutputDir.get().asFile.absolutePath
 }
