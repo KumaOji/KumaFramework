@@ -17,8 +17,9 @@ logs/
 # jar
 *.jar
 
-# claude
-.claude/
+# claude (keep settings.json for attribution policy)
+.claude/*
+!.claude/settings.json
 CLAUDE.md
 
 # doc

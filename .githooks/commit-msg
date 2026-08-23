@@ -1,0 +1,5 @@
+#!/bin/sh
+# Strip AI co-author trailers (Claude Code / Cursor) before commit is finalized.
+msg_file="$1"
+tmp="${msg_file}.tmp"
+grep -viE 'co-authored-by:.*(claude|cursor|cursoragent|anthropic)|generated with.*claude' "$msg_file" > "$tmp" && mv "$tmp" "$msg_file"
