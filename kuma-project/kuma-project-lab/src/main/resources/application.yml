@@ -74,6 +74,14 @@ kuma:
     jni:
       enabled: true
       library-name: "lab_math"
+    vector:
+      collection: lab-vectors
+      dimension: 4
+    leetcode:
+      enabled: true
+    starter:
+      key-prefix: "lab:starter:"
+      smoke-test-enabled: true
   boot:
     security:
       ignore-url:
@@ -87,6 +95,13 @@ kuma:
     data:
       datasource:
         enabled: true
+      vector:
+        enabled: true
+        type: memory
+        collection: lab-vectors
+        dimension: 4
+        distance: COSINE
+        auto-create-collection: true
     springdoc:
       enabled: true
       type: SERVICE

@@ -19,6 +19,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-web')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-vector')
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
 
     api projectLibs.spring.boot.starter.web
@@ -29,6 +30,9 @@ dependencies {
     implementation 'io.debezium:debezium-embedded'
     implementation 'io.debezium:debezium-connector-mysql'
     implementation projectLibs.spring.boot.starter.kafka
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
@@ -171,4 +175,8 @@ processResources {
 bootRun {
     dependsOn tasks.named('compileNative')
     systemProperty 'java.library.path', nativeOutputDir.get().asFile.absolutePath
+}
+
+test {
+    useJUnitPlatform()
 }
