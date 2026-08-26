@@ -12,6 +12,10 @@
 - `leetcode`：算法练习题在线运行与内置用例验证
 - `starter`：统一探测与冒烟测试各 `kuma-boot-starter-*` 依赖
 - `jni`：通过 JNI 调用 C 实现整数运算、字符串处理与数组求和
+- `bloom`：布隆过滤器插入、查询与假阳性演示
+- `snowflake`：雪花算法 ID 生成、解析与唯一性验证
+- `spring`：IOC、事件监听、ApplicationContext 与分层架构学习
+- `javacore`：类加载、Mark Word、HashMap 结构、Socket 通信、文件处理等 Java 基础
 - 后续测试按能力建立独立包，例如 `lock`
 
 ## 事务测试
@@ -269,3 +273,128 @@ IDE 直启时若提示找不到动态库，可先执行 `compileNative`，或在
 7. 查看最近消息：`GET /api/lab/kafka/messages?limit=100&direction=CONSUMED`
 
 返回结果包含 topic、partition、offset，以及内存中缓存的最近生产/消费消息。
+
+## 布隆过滤器测试
+
+演示布隆过滤器的核心特性：无假阴性、允许假阳性、以极小内存做存在性预判。
+
+1. 启动 `LabApplication`。
+2. 请求 `POST /api/lab/bloom/scenario`，一次性验证插入、命中与假阳性行为。
+
+手动测试示例：
+
+```json
+POST /api/lab/bloom/add/user:1001
+```
+
+```json
+POST /api/lab/bloom/contains
+{
+  "value": "user:1001"
+}
+```
+
+场景测试会返回位数组大小、哈希函数数量、已置位数等元信息。
+
+## 雪花算法测试
+
+基于框架内置 `SequenceUtils`（Twitter Snowflake 变体）演示分布式 ID 生成与位段解析。
+
+1. 启动 `LabApplication`。
+2. 请求 `POST /api/lab/snowflake/scenario`，批量生成 ID 并验证唯一性与递增趋势。
+
+手动测试示例：
+
+```json
+POST /api/lab/snowflake/generate
+{
+  "count": 5
+}
+```
+
+```text
+GET /api/lab/snowflake/parse/1234567890123456789
+```
+
+返回结果包含时间戳、数据中心 ID、工作机器 ID 与毫秒内序列号。可在 `application.yml` 中调整 `kuma.lab.snowflake.worker-id` 与 `datacenter-id`。
+
+## Java 基础知识学习
+
+演示类加载、对象头 Mark Word、HashMap 内部结构、TCP Socket 通信与 NIO 文件处理。
+
+1. 启动 `LabApplication`。
+2. 请求 `POST /api/lab/javacore/scenario`，一次性跑通全部子场景。
+
+分项接口：
+
+| 主题 | 方法 | 路径 |
+|------|------|------|
+| 类加载器 | GET | `/api/lab/javacore/classloader` |
+| Mark Word | GET | `/api/lab/javacore/markword` |
+| HashMap 碰撞 | GET | `/api/lab/javacore/hashmap/collision` |
+| HashMap 自定义 key | POST | `/api/lab/javacore/hashmap/inspect` |
+| Socket 回显 | POST | `/api/lab/javacore/socket/send` |
+| 文件综合 | POST | `/api/lab/javacore/file/scenario` |
+| 写文件 | POST | `/api/lab/javacore/file/write` |
+| 读文件 | POST | `/api/lab/javacore/file/read` |
+
+手动测试示例：
+
+```json
+POST /api/lab/javacore/hashmap/inspect
+{
+  "keys": ["user:1", "user:2", "order:100"]
+}
+```
+
+```json
+POST /api/lab/javacore/socket/send
+{
+  "message": "hello tcp"
+}
+```
+
+```json
+POST /api/lab/javacore/file/write
+{
+  "relativePath": "notes/jvm.txt",
+  "content": "类加载双亲委派\n",
+  "append": false
+}
+```
+
+Mark Word 观察依赖 [JOL](https://github.com/openjdk/jol)（`jol-core`）。Socket 默认监听 `127.0.0.1:19091`，文件实验目录默认为 `data/lab-javacore`，可在 `application.yml` 的 `kuma.lab.javacore` 下调整。
+
+## Spring 核心机制学习
+
+覆盖 IOC、事件监听、ApplicationContext 与经典分层架构，适合对照源码理解 Spring 容器工作原理。
+
+1. 启动 `LabApplication`。
+2. 请求 `POST /api/lab/spring/scenario`，一次性体验四大主题。
+
+分主题接口：
+
+| 接口 | 主题 | 说明 |
+|------|------|------|
+| `GET /api/lab/spring/ioc` | IOC | `@Primary`、`@Qualifier`、prototype 作用域 |
+| `GET /api/lab/spring/context` | 上下文 | Bean 数量、Profile、`ApplicationContextAware` |
+| `POST /api/lab/spring/events/publish` | 事件 | `ApplicationEventPublisher` + `@EventListener` |
+| `POST /api/lab/spring/architecture` | 架构 | Controller → Service → Repository + 领域事件 |
+
+事件发布示例：
+
+```json
+POST /api/lab/spring/events/publish
+{
+  "username": "kuma",
+  "source": "lab-api"
+}
+```
+
+源码阅读建议路径：
+
+1. `spring/ioc` — 接口多实现与依赖注入
+2. `spring/context` — `ApplicationContextAware` 回调
+3. `spring/listener` — `@EventListener` 监听自定义事件与 `ContextRefreshedEvent`
+4. `spring/architecture` — 分层职责与事件驱动解耦
+5. `spring/lifecycle` — `@PostConstruct` / prototype 作用域

@@ -38,6 +38,8 @@ dependencies {
     annotationProcessor projectLibs.lombok
 
     runtimeOnly projectLibs.mysql
+
+    implementation 'org.openjdk.jol:jol-core:0.17'
 }
 
 def labMysqlUrl               = project.findProperty('mysql.url')                  ?: ''

@@ -7,6 +7,7 @@ import com.kuma.cloud.lab.leetcode.support.LeetCodeStructureUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,7 +27,7 @@ public class LeetCodeStructureProblemRunnersConfiguration {
                 runner(104, "二叉树的最大深度", "EASY", List.of("tree", "dfs"),
                         input -> new com.kuma.cloud.leetcode.p0104.Solution().maxDepth(
                                 LeetCodeStructureUtils.buildTree104(LeetCodeInputUtils.integerList(input, "root"))),
-                        tc("example1", Map.of("root", List.of(3, 9, 20, null, null, 15, 7)), 3)
+                        tc("example1", Map.of("root", levelOrder(3, 9, 20, null, null, 15, 7)), 3)
                 ),
                 runner(124, "二叉树中的最大路径和", "HARD", List.of("tree", "dfs"),
                         input -> new com.kuma.cloud.leetcode.p0124.Solution().maxPathSum(
@@ -70,7 +71,7 @@ public class LeetCodeStructureProblemRunnersConfiguration {
                             );
                             return LeetCodeStructureUtils.nodeValue236(ancestor);
                         },
-                        tc("example1", Map.of("root", List.of(3, 5, 1, 6, 2, 0, 8, null, null, 7, 4), "p", 5, "q", 1), 3)
+                        tc("example1", Map.of("root", levelOrder(3, 5, 1, 6, 2, 0, 8, null, null, 7, 4), "p", 5, "q", 1), 3)
                 )
         );
     }
@@ -89,6 +90,11 @@ public class LeetCodeStructureProblemRunnersConfiguration {
 
     private static LeetCodeTestCase tc(String name, Map<String, Object> input, Object expected) {
         return new LeetCodeTestCase(name, input, expected);
+    }
+
+    @SafeVarargs
+    private static List<Integer> levelOrder(Integer... values) {
+        return Arrays.asList(values);
     }
 
 }

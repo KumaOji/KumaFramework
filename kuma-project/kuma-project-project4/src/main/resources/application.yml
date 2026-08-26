@@ -32,6 +32,7 @@ spring:
       host: ${redis_host}
       port: ${redis_port}
       database: ${redis_database}
+      password: ${redis_password}
       jedis:
         pool:
           max-active: ${redis_jedis_pool_max_active}

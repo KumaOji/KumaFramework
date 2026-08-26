@@ -82,6 +82,20 @@ kuma:
     starter:
       key-prefix: "lab:starter:"
       smoke-test-enabled: true
+    bloom:
+      expected-insertions: 10000
+      false-positive-probability: 0.01
+    snowflake:
+      worker-id: 1
+      datacenter-id: 1
+      batch-size: 10
+    javacore:
+      socket-port: 19091
+      socket-timeout-millis: 3000
+      file-workspace: data/lab-javacore
+    spring:
+      demo-username: kuma
+      demo-order-id: ORD-2026-001
   boot:
     security:
       ignore-url:

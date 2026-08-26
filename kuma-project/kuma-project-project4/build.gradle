@@ -143,6 +143,7 @@ def p4PostgresqlPassword         = project.findProperty('postgresql.password')  
 def p4RedisHost                  = project.findProperty('redis.host')                  ?: ''
 def p4RedisPort                  = project.findProperty('redis.port')                  ?: ''
 def p4RedisDatabase              = project.findProperty('redis.database')              ?: ''
+def p4RedisPassword              = project.findProperty('redis.password')              ?: ''
 def p4RedisJedisPoolMaxActive    = project.findProperty('redis.jedis.pool.max-active') ?: ''
 def p4RedisJedisPoolMaxIdle      = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
 def p4RedisJedisPoolMinIdle      = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
@@ -160,6 +161,7 @@ processResources {
                 redis_host                 : p4RedisHost,
                 redis_port                 : p4RedisPort,
                 redis_database             : p4RedisDatabase,
+                redis_password             : p4RedisPassword,
                 redis_jedis_pool_max_active: p4RedisJedisPoolMaxActive,
                 redis_jedis_pool_max_idle  : p4RedisJedisPoolMaxIdle,
                 redis_jedis_pool_min_idle  : p4RedisJedisPoolMinIdle
