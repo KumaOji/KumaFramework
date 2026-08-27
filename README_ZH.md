@@ -240,7 +240,6 @@ Spring Cloud Starter 集合，在 kuma-boot-framework 基础上提供分布式�
 | `kuma-cloud-starter-sentinel` | Spring Cloud Sentinel：流量控制、熔断降级 |
 | `kuma-cloud-starter-seata` | Spring Cloud Seata：分布式事务（AT/TCC）|
 | `kuma-cloud-starter-stream` | Spring Cloud Stream + RocketMQ：声明式消息驱动 |
-| `kuma-cloud-starter-gateway` | Spring Cloud Gateway：网关路由、过滤器配置 |
 | `kuma-cloud-starter-cache` | 分布式缓存 Cloud 扩展 |
 | `kuma-cloud-starter-jdbcpool` | 多数据源 JDBC 连接池 Cloud 扩展 |
 | `kuma-cloud-starter-netty` | Netty 服务端 Cloud 扩展 |

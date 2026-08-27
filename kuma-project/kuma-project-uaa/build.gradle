@@ -1,0 +1,90 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+    alias(projectLibs.plugins.gradle.git.properties)   // com.gorylenko.gradle-git-properties
+}
+
+description = 'Kuma 体系统一认证授权中心（UAA）—— 基于 Spring Authorization Server 的 OAuth2.1 / OIDC 授权服务器，统一签发 JWT 并管理用户、角色、权限与接入客户端'
+
+def springBootVersion = projectLibs.versions.springboot.get()
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+dependencies {
+    api project(':kuma-boot-framework:kuma-boot-starter-common')
+    api project(':kuma-boot-framework:kuma-boot-starter-core')
+    api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
+    api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
+    api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+    api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
+    api project(':kuma-boot-framework:kuma-boot-starter-totp')
+    api project(':kuma-boot-framework:kuma-boot-starter-captcha')
+    api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
+    }
+
+    api projectLibs.hutool.core
+    api projectLibs.spring.boot.starter.web
+    api projectLibs.spring.boot.starter.security
+    api projectLibs.spring.boot.starter.oauth2.authorization.server
+    api projectLibs.spring.boot.starter.thymeleaf
+    api projectLibs.spring.boot.starter.jdbc
+    api projectLibs.spring.doc.webmvc
+
+    compileOnly projectLibs.jakarta.servlet.api
+    compileOnly projectLibs.lombok
+    annotationProcessor projectLibs.lombok
+
+    runtimeOnly projectLibs.mysql
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+def uaaMysqlUrl                = project.findProperty('mysql.url')                   ?: ''
+def uaaMysqlUsername           = project.findProperty('mysql.username')              ?: ''
+def uaaMysqlPassword           = project.findProperty('mysql.password')              ?: ''
+def uaaRedisHost               = project.findProperty('redis.host')                  ?: ''
+def uaaRedisPort               = project.findProperty('redis.port')                  ?: ''
+def uaaRedisDatabase           = project.findProperty('redis.database')              ?: ''
+def uaaRedisPassword           = project.findProperty('redis.password')              ?: ''
+def uaaRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
+def uaaRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
+def uaaRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(
+                active                     : 'dev',
+                mysql_url                  : uaaMysqlUrl,
+                mysql_username             : uaaMysqlUsername,
+                mysql_password             : uaaMysqlPassword,
+                redis_host                 : uaaRedisHost,
+                redis_port                 : uaaRedisPort,
+                redis_database             : uaaRedisDatabase,
+                redis_password             : uaaRedisPassword,
+                redis_jedis_pool_max_active: uaaRedisJedisPoolMaxActive,
+                redis_jedis_pool_max_idle  : uaaRedisJedisPoolMaxIdle,
+                redis_jedis_pool_min_idle  : uaaRedisJedisPoolMinIdle
+        )
+    }
+}
+
+// Git 属性注入：将 branch / commit id / 构建时间写入 git.properties
+// 启动后可通过 GET /actuator/info 查看当前部署的 commit 信息
+apply from: rootProject.file('gradle/git.gradle')
+
+tasks.named('generateGitProperties') { enabled = false }
+
+bootJar {
+    archiveBaseName = 'uaa'
+}

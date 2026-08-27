@@ -147,7 +147,6 @@ public final class StarterNameConstants {
     public static final String BOOTSTRAP_CLOUD_STARTER = "kuma-cloud-starter-bootstrap";
     public static final String CACHE_CLOUD_STARTER = "kuma-cloud-starter-cache";
     public static final String DUBBO_CLOUD_STARTER = "kuma-cloud-starter-dubbo";
-    public static final String GATEWAY_CLOUD_STARTER = "kuma-cloud-starter-gateway";
     public static final String JDBCPOOL_CLOUD_STARTER = "kuma-cloud-starter-jdbcpool";
     public static final String KMC_CLOUD_STARTER = "kuma-cloud-starter-kmc";
     public static final String NETTY_CLOUD_STARTER = "kuma-cloud-starter-netty";

@@ -11,6 +11,8 @@ description = '''KumaFramework project参考 —— 一组渐进式 Demo 应用�
   project20: gRPC 客户端 Demo，通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）
   project21: Office Doc 生成 Demo，使用 kuma-boot-starter-office（Aspose.Words）将 HTML 转换为 Word 文档并下载
   blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
+  uaa      : Kuma 体系统一认证授权中心（OAuth2.1 + OIDC 授权服务器），为 blog 等业务应用签发 JWT，含用户/角色/权限/客户端管理、图形验证码、TOTP 二次校验、登录锁定
+  gateway  : Kuma 体系统一网关（Spring Cloud Gateway / WebFlux），统一流量入口，提供路由转发、CORS、令牌校验与请求日志
   lab      : 测试实验场，用于集中记录事务、缓存、消息队列、锁、LeetCode 算法练习等各类验证代码
   base     : 基础练习 Demo，用于 Java / Spring Boot 基础知识练习，涵盖常用数据结构、算法、设计模式及 Spring 核心特性
 '''

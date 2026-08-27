@@ -117,7 +117,6 @@ dependencies {
     api project(':kuma-cloud-framework:kuma-cloud-starter-sentinel')
     api project(':kuma-cloud-framework:kuma-cloud-starter-seata')
     api project(':kuma-cloud-framework:kuma-cloud-starter-stream')
-    api project(':kuma-cloud-framework:kuma-cloud-starter-gateway')
 
     // ── 第三方 ────────────────────────────────────────────────────────────
     api projectLibs.hutool.core

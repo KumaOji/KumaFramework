@@ -110,7 +110,7 @@ for (name in frameworkBootSubModules) {
 
 def frameworkCloudSubModules = ['bootstrap', 'seata', 'kmc',
                                 'sentinel', 'stream', 'alibaba',
-                                'cache', 'jdbcpool', 'netty', 'gateway',
+                                'cache', 'jdbcpool', 'netty',
                                 'openfeign', 'dubbo']
 //def frameworkCloudSubModules2 = ['tx', 'mq',
 //                                 'ccsr', 'job', 'rpc']
@@ -181,7 +181,7 @@ include "kuma-project"
 //    include "kuma-project:kuma-project-${name}"
 //}
 
-def projectBootSubModules = ['project2', 'project4', 'blog', 'lab']
+def projectBootSubModules = ['project2', 'project4', 'blog', 'uaa', 'gateway', 'lab']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }

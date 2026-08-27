@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kuma UAA · 统一登录</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --card: #181b24;
+            --border: #262a36;
+            --text: #e6e8ee;
+            --muted: #8b90a0;
+            --accent: #5b8cff;
+            --danger: #ff6b6b;
+            --success: #4ade80;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(1200px 600px at 50% -10%, #1b2030 0%, var(--bg) 60%);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                "Microsoft YaHei", sans-serif;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 380px;
+            padding: 36px 32px 28px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+        }
+
+        .brand { text-align: center; margin-bottom: 28px; }
+        .brand h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+        .brand p { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+
+        label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 11px 12px;
+            margin-bottom: 16px;
+            background: #11141c;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .captcha-row { display: flex; gap: 10px; align-items: flex-start; }
+        .captcha-row input { flex: 1; }
+
+        .captcha-row img {
+            height: 42px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 4px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter .15s;
+        }
+
+        button:hover { filter: brightness(1.1); }
+
+        .alert {
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        .alert-error {
+            color: var(--danger);
+            background: rgba(255, 107, 107, .1);
+            border-color: rgba(255, 107, 107, .3);
+        }
+
+        .alert-success {
+            color: var(--success);
+            background: rgba(74, 222, 128, .1);
+            border-color: rgba(74, 222, 128, .3);
+        }
+
+        .hint { margin-top: 18px; font-size: 12px; color: var(--muted); text-align: center; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="brand">
+        <h1>Kuma UAA</h1>
+        <p>统一认证授权中心</p>
+    </div>
+
+    <div class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="alert alert-success" th:if="${logoutMessage}" th:text="${logoutMessage}"></div>
+
+    <form method="post" th:action="@{/login}">
+        <label for="username">登录名</label>
+        <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+        <div th:if="${captchaEnabled}">
+            <label for="captchaCode">图形验证码</label>
+            <div class="captcha-row">
+                <input type="text" id="captchaCode" name="captchaCode" autocomplete="off" required>
+                <img id="captchaImage" alt="点击刷新验证码" title="点击刷新">
+            </div>
+            <input type="hidden" id="captchaKey" name="captchaKey">
+        </div>
+
+        <label for="totpCode">动态码（未开启二次校验可留空）</label>
+        <input type="text" id="totpCode" name="totpCode" autocomplete="one-time-code"
+               inputmode="numeric" maxlength="6">
+
+        <button type="submit">登录</button>
+    </form>
+
+    <p class="hint">登录后将返回发起授权的应用</p>
+</div>
+
+<script th:inline="javascript">
+    const captchaEnabled = [[${captchaEnabled}]];
+
+    async function refreshCaptcha() {
+        const response = await fetch('captcha', {headers: {'Accept': 'application/json'}});
+        const body = await response.json();
+        const payload = body.data || body;
+        document.getElementById('captchaImage').src = payload.image;
+        document.getElementById('captchaKey').value = payload.captchaKey;
+        document.getElementById('captchaCode').value = '';
+    }
+
+    if (captchaEnabled) {
+        document.getElementById('captchaImage').addEventListener('click', refreshCaptcha);
+        refreshCaptcha();
+    }
+</script>
+</body>
+</html>

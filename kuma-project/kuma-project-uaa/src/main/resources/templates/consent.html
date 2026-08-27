@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kuma UAA · 授权确认</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --card: #181b24;
+            --border: #262a36;
+            --text: #e6e8ee;
+            --muted: #8b90a0;
+            --accent: #5b8cff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(1200px 600px at 50% -10%, #1b2030 0%, var(--bg) 60%);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                "Microsoft YaHei", sans-serif;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 440px;
+            padding: 32px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+        }
+
+        h1 { margin: 0 0 8px; font-size: 20px; }
+        .subtitle { margin: 0 0 24px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+        .subtitle strong { color: var(--text); }
+
+        .scope {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #11141c;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .scope input { width: 16px; height: 16px; accent-color: var(--accent); }
+        .scope span.code { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+        .approved { opacity: .6; }
+
+        .actions { display: flex; gap: 12px; margin-top: 24px; }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .primary { background: var(--accent); color: #fff; }
+        .secondary { background: #262a36; color: var(--text); }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>授权确认</h1>
+    <p class="subtitle">
+        应用 <strong th:text="${clientName}">应用</strong> 请求访问你的
+        <strong th:text="${principalName}">账号</strong>，
+        请确认允许其获取以下权限。
+    </p>
+
+    <form method="post" th:action="@{/oauth2/authorize}">
+        <input type="hidden" name="client_id" th:value="${clientId}">
+        <input type="hidden" name="state" th:value="${state}">
+        <input type="hidden" name="user_code" th:if="${userCode}" th:value="${userCode}">
+
+        <label class="scope" th:each="scope : ${scopes}">
+            <input type="checkbox" name="scope" th:value="${scope}" checked>
+            <span th:text="${scope}">scope</span>
+        </label>
+
+        <label class="scope approved" th:each="scope : ${previouslyApprovedScopes}">
+            <input type="checkbox" checked disabled>
+            <span th:text="${scope}">scope</span>
+            <span class="code">已授权</span>
+        </label>
+
+        <div class="actions">
+            <button type="submit" class="primary">同意授权</button>
+            <button type="submit" class="secondary" formnovalidate
+                    th:formaction="@{/oauth2/authorize}" name="scope" value="">拒绝</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

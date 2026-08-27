@@ -1,0 +1,40 @@
+package com.kuma.cloud.uaa;
+
+import com.kuma.boot.core.startup.StartupSpringApplication;
+import com.kuma.boot.web.annotation.KumaBootApplication;
+import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
+import org.jspecify.annotations.NonNull;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
+
+/**
+ * Kuma 体系统一认证授权中心（UAA）启动类。
+ *
+ * <p>对外提供 OAuth2.1 / OIDC 协议端点，为 blog 等业务应用统一签发 RS256 JWT。
+ *
+ * @author kuma
+ */
+@KumaBootApplication
+@KumaCloudApplication
+@ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"})
+@EnableAutoConfiguration
+@ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"})
+public class UaaApplication extends SpringBootServletInitializer {
+
+    @Override
+    protected @NonNull SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(UaaApplication.class);
+    }
+
+    static void main(String[] args) {
+        new StartupSpringApplication(UaaApplication.class)
+                .setKmcBanner()
+                .setKmcProfileIfNotExists("dev")
+                .setKmcApplicationProperty("kuma-cloud-uaa")
+                .setKmcAllowBeanDefinitionOverriding(true)
+                .run(args);
+    }
+}

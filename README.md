@@ -240,7 +240,6 @@ Spring Cloud Starter collection, providing distributed microservice capabilities
 | `kuma-cloud-starter-sentinel` | Spring Cloud Sentinel: traffic control, circuit breaking |
 | `kuma-cloud-starter-seata` | Spring Cloud Seata: distributed transactions (AT/TCC) |
 | `kuma-cloud-starter-stream` | Spring Cloud Stream + RocketMQ: declarative message-driven model |
-| `kuma-cloud-starter-gateway` | Spring Cloud Gateway: route and filter configuration |
 | `kuma-cloud-starter-cache` | Distributed cache Cloud extensions |
 | `kuma-cloud-starter-jdbcpool` | Multi-datasource JDBC connection pool Cloud extensions |
 | `kuma-cloud-starter-netty` | Netty server Cloud extensions |
