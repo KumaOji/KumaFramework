@@ -41,6 +41,13 @@ dependencies {
     annotationProcessor projectLibs.lombok
 
     runtimeOnly projectLibs.mysql
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 def blogMysqlUrl                = project.findProperty('mysql.url')                   ?: ''

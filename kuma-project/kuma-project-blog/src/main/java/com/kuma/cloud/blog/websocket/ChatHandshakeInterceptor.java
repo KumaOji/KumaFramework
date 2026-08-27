@@ -1,12 +1,14 @@
 package com.kuma.cloud.blog.websocket;
 
-import com.kuma.cloud.blog.domain.vo.LoginVO;
+import com.kuma.cloud.blog.security.BlogJwtAuthenticationConverter;
+import com.kuma.cloud.blog.security.BlogUserDetails;
+import com.kuma.cloud.blog.security.OAuth2CookieService;
 import com.kuma.cloud.blog.service.ChatBlacklistService;
-import com.kuma.cloud.blog.service.TokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -15,13 +17,16 @@ import java.util.Map;
 
 public class ChatHandshakeInterceptor implements HandshakeInterceptor {
 
-    private static final String TOKEN_COOKIE = "blog_token";
-
-    private final TokenService tokenService;
+    private final JwtDecoder jwtDecoder;
+    private final BlogJwtAuthenticationConverter authenticationConverter;
     private final ChatBlacklistService blacklistService;
 
-    public ChatHandshakeInterceptor(TokenService tokenService, ChatBlacklistService blacklistService) {
-        this.tokenService = tokenService;
+    public ChatHandshakeInterceptor(
+            JwtDecoder jwtDecoder,
+            BlogJwtAuthenticationConverter authenticationConverter,
+            ChatBlacklistService blacklistService) {
+        this.jwtDecoder = jwtDecoder;
+        this.authenticationConverter = authenticationConverter;
         this.blacklistService = blacklistService;
     }
 
@@ -30,14 +35,18 @@ public class ChatHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
-            String token = extractCookie(httpRequest, TOKEN_COOKIE);
+            String token = extractCookie(httpRequest, OAuth2CookieService.ACCESS_TOKEN_COOKIE);
             if (token != null) {
-                LoginVO lr = tokenService.getLoginResponseByToken(token);
-                if (lr != null && lr.getUserId() != null) {
-                    if (blacklistService.isBlocked(lr.getEmail())) {
+                try {
+                    BlogUserDetails principal = (BlogUserDetails) authenticationConverter
+                            .convert(jwtDecoder.decode(token))
+                            .getPrincipal();
+                    if (blacklistService.isBlocked(principal.getLoginResponse().getEmail())) {
                         return false;
                     }
-                    attributes.put("loginResponse", lr);
+                    attributes.put("loginResponse", principal.getLoginResponse());
+                } catch (RuntimeException ignored) {
+                    // 匿名用户仍可加入公开聊天室；无效 Token 不建立登录身份。
                 }
             }
         }

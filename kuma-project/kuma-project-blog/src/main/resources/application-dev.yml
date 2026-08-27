@@ -10,6 +10,31 @@ server:
     connection-timeout: 20000
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          blog:
+            provider: blog-uaa
+            client-id: ${BLOG_OAUTH2_CLIENT_ID:blog}
+            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+              - offline_access
+        provider:
+          blog-uaa:
+            authorization-uri: ${BLOG_OAUTH2_AUTHORIZATION_URI:http://127.0.0.1:33336/oauth2/authorize}
+            token-uri: ${BLOG_OAUTH2_TOKEN_URI:http://127.0.0.1:33336/oauth2/token}
+            jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI:http://127.0.0.1:33336/oauth2/jwks}
+            user-info-uri: ${BLOG_OAUTH2_USER_INFO_URI:http://127.0.0.1:33336/userinfo}
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI:http://127.0.0.1:33336/oauth2/jwks}
   mvc:
     async:
       request-timeout: 600000
@@ -55,6 +80,13 @@ knife4j:
 blog:
   token-expire-seconds: 604800
   cookie-secure: false
+  oauth2:
+    registration-id: blog
+    username-claim: preferred_username
+    issuer-uri: ${BLOG_OAUTH2_ISSUER_URI:http://127.0.0.1:33336}
+    audience: ${BLOG_OAUTH2_AUDIENCE:blog}
+    login-success-url: ${BLOG_LOGIN_SUCCESS_URL:http://127.0.0.1:3000}
+    refresh-token-max-age: 30d
   admin-initial-password: admin123
   music:
     base-path: E:\blog-resource\music
@@ -121,7 +153,7 @@ kuma:
     security:
       oauth2:
         endpoint:
-          uaa-service-uri: http://127.0.0.1:33336
+          uaa-service-uri: ${BLOG_OAUTH2_UAA_URI:http://127.0.0.1:33336}
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**

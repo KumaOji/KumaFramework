@@ -2,9 +2,13 @@ package com.kuma.cloud.blog.config;
 
 import com.kuma.cloud.blog.security.JsonAccessDeniedHandler;
 import com.kuma.cloud.blog.security.JsonAuthenticationEntryPoint;
-import com.kuma.cloud.blog.security.TokenAuthenticationFilter;
-import com.kuma.cloud.blog.service.TokenService;
+import com.kuma.cloud.blog.security.BlogJwtAuthenticationConverter;
+import com.kuma.cloud.blog.security.CookieBearerTokenResolver;
+import com.kuma.cloud.blog.security.OAuth2CookieService;
+import com.kuma.cloud.blog.security.OAuth2LoginSuccessHandler;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,20 +17,31 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS", "TRACE");
 
-    public SecurityConfig(TokenService tokenService) {
-        this.tokenAuthenticationFilter = new TokenAuthenticationFilter(tokenService);
+    private final JwtDecoder jwtDecoder;
+    private final BlogJwtAuthenticationConverter jwtAuthenticationConverter;
+    private final OAuth2LoginSuccessHandler loginSuccessHandler;
+
+    public SecurityConfig(
+            JwtDecoder jwtDecoder,
+            BlogJwtAuthenticationConverter jwtAuthenticationConverter,
+            OAuth2LoginSuccessHandler loginSuccessHandler) {
+        this.jwtDecoder = jwtDecoder;
+        this.jwtAuthenticationConverter = jwtAuthenticationConverter;
+        this.loginSuccessHandler = loginSuccessHandler;
     }
 
     @Bean
@@ -38,11 +53,15 @@ public class SecurityConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain blogSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/**")
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .requireCsrfProtectionMatcher(SecurityConfig::requiresCookieCsrfProtection))
+                // Authorization Code 的 state 在回调前临时使用 Session，成功后立即销毁。
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(a -> a
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
-                        .requestMatchers("/auth/login", "/auth/logout", "/auth/current").permitAll()
+                        .requestMatchers("/auth/login", "/auth/logout", "/auth/refresh", "/auth/csrf").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/auth/totp/**").authenticated()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/actuator/health").permitAll()  // 供负载均衡健康检查
@@ -65,7 +84,35 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new JsonAuthenticationEntryPoint())
                         .accessDeniedHandler(new JsonAccessDeniedHandler()))
-                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(loginSuccessHandler)
+                        .failureHandler((request, response, exception) ->
+                                response.sendError(401, "OAuth2 登录失败")))
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .bearerTokenResolver(new CookieBearerTokenResolver(
+                                OAuth2CookieService.ACCESS_TOKEN_COOKIE))
+                        .jwt(jwt -> jwt
+                                .decoder(jwtDecoder)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        .authenticationEntryPoint(new JsonAuthenticationEntryPoint())
+                        .accessDeniedHandler(new JsonAccessDeniedHandler()));
         return http.build();
+    }
+
+    private static boolean requiresCookieCsrfProtection(HttpServletRequest request) {
+        if (SAFE_METHODS.contains(request.getMethod())) {
+            return false;
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return false;
+        }
+        for (Cookie cookie : cookies) {
+            if (OAuth2CookieService.ACCESS_TOKEN_COOKIE.equals(cookie.getName())
+                    || OAuth2CookieService.REFRESH_TOKEN_COOKIE.equals(cookie.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
