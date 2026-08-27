@@ -1,5 +1,9 @@
 package com.kuma.cloud.uaa.config;
 
+import com.kuma.boot.security.spring.authentication.response.denied.JsonAccessDeniedHandler;
+import com.kuma.boot.security.spring.authentication.response.entrypoint.JsonAuthenticationEntryPoint;
+import com.kuma.boot.security.spring.autoconfigure.properties.SecurityProperties;
+import com.kuma.boot.security.spring.oauth2.authentication.SecurityJwtGrantedAuthoritiesConverter;
 import com.kuma.cloud.uaa.security.LoginPreCheckFilter;
 import com.kuma.cloud.uaa.security.UaaAuthenticationFailureHandler;
 import com.kuma.cloud.uaa.security.UaaAuthenticationSuccessHandler;
@@ -11,59 +15,49 @@ import com.kuma.cloud.uaa.support.LoginCaptchaService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletRequest;
+
+import static com.kuma.boot.security.spring.utils.SecurityUtils.toRequestMatchers;
 
 /**
  * 登录页与管理 API 的安全配置。
  *
- * <p>管理 API 同时接受两种身份：浏览器控制台走表单登录后的 Session，外部系统走 UAA 自己签发的
- * Access Token；两者最终都归一为 GrantedAuthority，由方法级 {@code @PreAuthorize} 做鉴权。
- *
- * @author kuma
+ * <p>白名单走框架 {@link SecurityProperties#getIgnoreUrl()}；管理 API 鉴权走
+ * {@link com.kuma.boot.security.spring.access.expression.Authorize}；JWT 声明解析复用
+ * {@link SecurityJwtGrantedAuthoritiesConverter}。
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
 public class DefaultSecurityConfig {
 
     public static final String LOGIN_PAGE = "/login";
 
     public static final String LOGIN_PROCESSING_URL = "/login";
 
-    private static final String[] PUBLIC_ENDPOINTS = {
-        LOGIN_PAGE,
-        "/captcha",
-        "/error",
-        "/favicon.ico",
-        "/css/**",
-        "/js/**",
-        "/actuator/health",
-        "/actuator/info",
-        "/v3/api-docs/**",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
-        "/doc.html",
-        "/webjars/**"
-    };
-
     @Bean
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(
             HttpSecurity http,
             JwtDecoder jwtDecoder,
+            SecurityProperties securityProperties,
             UaaUserService userService,
             MfaService mfaService,
             LoginCaptchaService captchaService,
@@ -80,14 +74,41 @@ public class DefaultSecurityConfig {
                 userService,
                 failureHandler);
 
+        CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
+        csrfHandler.setCsrfRequestAttributeName(null);
+
+        JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint = new JsonAuthenticationEntryPoint();
+        JsonAccessDeniedHandler jsonAccessDeniedHandler = new JsonAccessDeniedHandler();
+        MediaTypeRequestMatcher jsonApiMatcher = new MediaTypeRequestMatcher(
+                org.springframework.http.MediaType.APPLICATION_JSON,
+                org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON);
+
         http.csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        // Bearer Token 调用不依赖 Cookie，不存在 CSRF 面
-                        .ignoringRequestMatchers("/api/**"))
+                        .csrfTokenRequestHandler(csrfHandler)
+                        .ignoringRequestMatchers(DefaultSecurityConfig::isBearerTokenRequest))
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31_536_000)))
                 .authorizeHttpRequests(authorize -> authorize
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(toRequestMatchers(securityProperties.getIgnoreUrl())).permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exceptions -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                jsonAuthenticationEntryPoint,
+                                new OrRequestMatcher(
+                                        new NegatedRequestMatcher(new MediaTypeRequestMatcher(
+                                                org.springframework.http.MediaType.TEXT_HTML)),
+                                        jsonApiMatcher))
+                        .defaultAccessDeniedHandlerFor(
+                                jsonAccessDeniedHandler,
+                                new OrRequestMatcher(
+                                        new NegatedRequestMatcher(new MediaTypeRequestMatcher(
+                                                org.springframework.http.MediaType.TEXT_HTML)),
+                                        jsonApiMatcher)))
                 .formLogin(form -> form
                         .loginPage(LOGIN_PAGE)
                         .loginProcessingUrl(LOGIN_PROCESSING_URL)
@@ -99,7 +120,7 @@ public class DefaultSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl(LOGIN_PAGE + "?logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"))
+                        .deleteCookies("UAA_SESSION", "JSESSIONID"))
                 .oauth2ResourceServer(resourceServer -> resourceServer
                         .bearerTokenResolver(new DefaultBearerTokenResolver())
                         .jwt(jwt -> jwt
@@ -109,20 +130,19 @@ public class DefaultSecurityConfig {
         return http.build();
     }
 
-    /**
-     * 使用 DelegatingPasswordEncoder：密文自带 {bcrypt} 前缀，后续切换算法时旧密码仍可校验。
-     */
+    private static boolean isBearerTokenRequest(HttpServletRequest request) {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        return authorization != null && authorization.regionMatches(true, 0, "Bearer ", 0, 7);
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    /**
-     * 把 Access Token 的 authorities 声明还原为 GrantedAuthority，
-     * 声明中已含 ROLE_ 前缀，故不再追加前缀。
-     */
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        SecurityJwtGrantedAuthoritiesConverter authoritiesConverter =
+                new SecurityJwtGrantedAuthoritiesConverter();
         authoritiesConverter.setAuthoritiesClaimName("authorities");
         authoritiesConverter.setAuthorityPrefix("");
 

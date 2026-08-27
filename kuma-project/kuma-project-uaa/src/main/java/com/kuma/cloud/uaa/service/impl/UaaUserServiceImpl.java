@@ -16,6 +16,7 @@ import com.kuma.cloud.uaa.mapper.UaaRoleMapper;
 import com.kuma.cloud.uaa.mapper.UaaUserMapper;
 import com.kuma.cloud.uaa.mapper.UaaUserRoleMapper;
 import com.kuma.cloud.uaa.service.UaaUserService;
+import com.kuma.cloud.uaa.support.UaaTokenRevocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +40,7 @@ public class UaaUserServiceImpl implements UaaUserService {
     private final UaaPermissionMapper permissionMapper;
     private final UaaUserRoleMapper userRoleMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UaaTokenRevocationService tokenRevocationService;
 
     @Override
     public UaaUser getByUsername(String username) {
@@ -145,16 +147,28 @@ public class UaaUserServiceImpl implements UaaUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long userId) {
+        UaaUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+        tokenRevocationService.revokeByUsername(user.getUsername());
         userRoleMapper.delete(new LambdaQueryWrapper<UaaUserRole>().eq(UaaUserRole::getUserId, userId));
         userMapper.deleteById(userId);
     }
 
     @Override
     public void changeStatus(Long userId, boolean enabled) {
+        UaaUser existing = userMapper.selectById(userId);
+        if (existing == null) {
+            throw new BusinessException("用户不存在");
+        }
         UaaUser user = new UaaUser();
         user.setId(userId);
         user.setStatus(enabled ? 1 : 0);
         userMapper.updateById(user);
+        if (!enabled) {
+            tokenRevocationService.revokeByUsername(existing.getUsername());
+        }
     }
 
     @Override
@@ -171,10 +185,15 @@ public class UaaUserServiceImpl implements UaaUserService {
 
     @Override
     public void resetPassword(Long userId, String rawPassword) {
+        UaaUser existing = userMapper.selectById(userId);
+        if (existing == null) {
+            throw new BusinessException("用户不存在");
+        }
         UaaUser user = new UaaUser();
         user.setId(userId);
         user.setPassword(passwordEncoder.encode(rawPassword));
         userMapper.updateById(user);
+        tokenRevocationService.revokeByUsername(existing.getUsername());
     }
 
     @Override
@@ -219,6 +238,15 @@ public class UaaUserServiceImpl implements UaaUserService {
     @Override
     public void recordLoginSuccess(Long userId, String clientIp) {
         userMapper.updateLastLogin(userId, LocalDateTime.now(), clientIp);
+    }
+
+    @Override
+    public void revokeSessions(Long userId) {
+        UaaUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+        tokenRevocationService.revokeByUsername(user.getUsername());
     }
 
     private UserVO toVO(UaaUser user) {

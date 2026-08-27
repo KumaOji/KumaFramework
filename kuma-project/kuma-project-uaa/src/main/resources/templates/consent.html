@@ -85,6 +85,7 @@
     </p>
 
     <form method="post" th:action="@{/oauth2/authorize}">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" name="client_id" th:value="${clientId}">
         <input type="hidden" name="state" th:value="${state}">
         <input type="hidden" name="user_code" th:if="${userCode}" th:value="${userCode}">

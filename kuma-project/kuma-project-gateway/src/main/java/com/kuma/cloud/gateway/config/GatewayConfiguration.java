@@ -26,7 +26,7 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
- * GatewayConfiguration
+ * 网关 CORS 统一配置。
  *
  * @author kuma
  * @since 2026-04-23
@@ -47,9 +47,10 @@ public class GatewayConfiguration {
     public CorsWebFilter corsWebFilter() {
         GatewayCloudProperties.Cors cors = properties.getCors();
         CorsConfiguration config = new CorsConfiguration();
-        cors.getAllowedOrigins().forEach(config::addAllowedOrigin);
+        cors.getAllowedOriginPatterns().forEach(config::addAllowedOriginPattern);
         cors.getAllowedMethods().forEach(config::addAllowedMethod);
         cors.getAllowedHeaders().forEach(config::addAllowedHeader);
+        cors.getExposedHeaders().forEach(config::addExposedHeader);
         config.setAllowCredentials(cors.isAllowCredentials());
         config.setMaxAge(cors.getMaxAge());
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

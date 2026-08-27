@@ -8,8 +8,11 @@ import com.kuma.cloud.uaa.domain.vo.UserVO;
 import com.kuma.cloud.uaa.service.UaaUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,11 +35,15 @@ public class MeController {
         return Result.success(userService.getDetail(currentUser(principal).getId()));
     }
 
-    @Operation(summary = "修改当前用户密码")
+    @Operation(summary = "修改当前用户密码，成功后吊销全部令牌并销毁当前会话")
     @PostMapping("/password")
     public Result<String> changePassword(
-            Principal principal, @Valid @RequestBody PasswordChangeDTO dto) {
-        userService.changePassword(currentUser(principal).getId(), dto);
+            Principal principal,
+            HttpServletRequest request,
+            @Valid @RequestBody PasswordChangeDTO dto) {
+        UaaUser user = currentUser(principal);
+        userService.changePassword(user.getId(), dto);
+        invalidateCurrentSession(request);
         return Result.success("密码修改成功，请重新登录");
     }
 
@@ -45,5 +52,13 @@ public class MeController {
             throw new BusinessException("未登录");
         }
         return userService.requireByUsername(principal.getName());
+    }
+
+    private void invalidateCurrentSession(HttpServletRequest request) {
+        SecurityContextHolder.clearContext();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
     }
 }

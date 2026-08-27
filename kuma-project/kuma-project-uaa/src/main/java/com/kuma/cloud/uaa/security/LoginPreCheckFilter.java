@@ -82,6 +82,9 @@ public class LoginPreCheckFilter extends OncePerRequestFilter {
 
         // 用户不存在时不在此处报错，交由密码校验统一返回"用户名或密码错误"，避免账号枚举
         UaaUser user = userService.getByUsername(username);
+        if (user != null && user.isLocked()) {
+            throw new UaaLoginException("locked", "账号已被锁定，请联系管理员");
+        }
         if (user != null
                 && user.isMfaEnabled()
                 && !mfaService.verify(user, request.getParameter(PARAM_TOTP_CODE))) {

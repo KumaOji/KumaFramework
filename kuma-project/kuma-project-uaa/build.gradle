@@ -24,6 +24,9 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-security-spring')
     api project(':kuma-boot-framework:kuma-boot-starter-totp')
     api project(':kuma-boot-framework:kuma-boot-starter-captcha')
+    api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
+    api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
+    api project(':kuma-boot-framework:kuma-boot-starter-actuator')
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
     }

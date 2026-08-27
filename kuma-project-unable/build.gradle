@@ -1,0 +1,13 @@
+description = '''KumaFramework project 未启用模块 —— 暂未纳入构建的 Demo / 实验项目，按需单独启用：
+  engine   : Fernflower 反编译引擎（IntelliJ 独立子项目）
+  project1 : 最简骨架，无任何依赖，仅验证项目能否正常启动
+  project3 : Gradle 插件调用示例，演示 gradle/ 目录下可复用脚本的接入方式
+  project5 : 任务 Demo，接入 kuma-cloud-job-worker，演示任务注册与执行
+  project6 : RPC Demo，演示 kuma-cloud-rpc 的服务注册与远程调用
+  project7 : CCSR Demo，演示 kuma-cloud-ccsr-client-starter 的接入
+  project8 : 分布式事务 Demo，演示 kuma-cloud-tx-rm 的接入
+  project9 : 消息队列 Demo，演示 kuma-cloud-mq-client 的接入
+  project30: 可观测性 Demo
+  project31: kuma-cloud-gradle-plugin 使用演示
+  base     : 基础练习 Demo，用于 Java / Spring Boot 基础知识练习
+'''

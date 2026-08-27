@@ -49,4 +49,9 @@ public interface UaaUserService {
     void updateMfa(Long userId, String secret, boolean enabled);
 
     void recordLoginSuccess(Long userId, String clientIp);
+
+    /**
+     * 吊销指定用户的全部 OAuth2 授权，强制其下线。
+     */
+    void revokeSessions(Long userId);
 }

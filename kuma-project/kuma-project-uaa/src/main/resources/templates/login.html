@@ -122,6 +122,7 @@
     <div class="alert alert-success" th:if="${logoutMessage}" th:text="${logoutMessage}"></div>
 
     <form method="post" th:action="@{/login}">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <label for="username">登录名</label>
         <input type="text" id="username" name="username" autocomplete="username" autofocus required>
 

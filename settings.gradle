@@ -176,15 +176,20 @@ for (name in frameworkBigdataSubModules) {
 //includeBuild('kuma-other-framework/kuma-cloud-plugin/kuma-cloud-gradle-plugin')
 
 include "kuma-project"
-//def projectBootSubModules = ['engine','project1', 'project2', 'project3', 'project4', 'project5', 'project6', 'project7', 'project8', 'project9', 'project20', 'project30', 'project31', 'blog', 'base', 'leetcode']
-//for (name in projectBootSubModules) {
-//    include "kuma-project:kuma-project-${name}"
-//}
-
 def projectBootSubModules = ['project2', 'project4', 'blog', 'uaa', 'gateway', 'lab']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }
+
+include "kuma-project-unable"
+// 未启用的 Demo 子模块，按需取消注释：
+//include "kuma-project-unable:engine"
+//def projectUnableSubModules = ['base', 'project1', 'project3', 'project5', 'project6', 'project7', 'project8', 'project9', 'project30']
+// project31 依赖 includeBuild('kuma-cloud-gradle-plugin')，插件未启用时勿纳入构建
+// def projectUnableSubModules = [..., 'project31']
+//for (name in projectUnableSubModules) {
+//    include "kuma-project-unable:kuma-project-${name}"
+//}
 
 gradle.settingsEvaluated {
     if (JavaVersion.current() < JavaVersion.VERSION_25) {

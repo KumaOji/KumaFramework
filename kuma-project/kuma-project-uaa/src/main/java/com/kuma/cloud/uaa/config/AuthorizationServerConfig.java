@@ -1,8 +1,10 @@
 package com.kuma.cloud.uaa.config;
 
+import com.kuma.boot.security.spring.constants.DefaultConstants;
 import com.kuma.cloud.uaa.security.UaaOidcUserInfoMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,8 +14,8 @@ import org.springframework.security.oauth2.server.authorization.JdbcOAuth2Author
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.consent.JdbcOAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.consent.OAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,12 +36,12 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 public class AuthorizationServerConfig {
 
     /**
-     * 授权确认页路径。第三方客户端开启 requireAuthorizationConsent 后由 SAS 重定向至此。
+     * 授权确认页路径，与框架 {@link DefaultConstants#AUTHORIZATION_CONSENT_URI} 保持一致。
      */
-    public static final String CONSENT_PAGE = "/oauth2/consent";
+    public static final String CONSENT_PAGE = DefaultConstants.AUTHORIZATION_CONSENT_URI;
 
     @Bean
-    @Order(1)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(
             HttpSecurity http, JwtDecoder jwtDecoder, UaaOidcUserInfoMapper userInfoMapper)
             throws Exception {

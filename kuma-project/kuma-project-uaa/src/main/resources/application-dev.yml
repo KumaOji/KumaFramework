@@ -1,0 +1,137 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,startup
+  endpoint:
+    health:
+      show-details: when_authorized
+
+spring:
+  main:
+    lazy-initialization: false
+    log-startup-info: true
+  sql:
+    init:
+      mode: never
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.nacos.NacosDiscoveryAutoConfiguration
+      - com.alibaba.cloud.nacos.discovery.NacosDiscoveryClientConfiguration
+      - com.alibaba.cloud.nacos.NacosConfigAutoConfiguration
+      - com.alibaba.cloud.nacos.discovery.NacosServiceDiscoveryAutoConfiguration
+      - com.alibaba.cloud.nacos.registry.NacosServiceRegistryAutoConfiguration
+      - com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure
+      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+
+logging:
+  level:
+    root: INFO
+    com.kuma.cloud.uaa: DEBUG
+    org.springframework.security: INFO
+
+mybatis-plus:
+  global-config:
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+
+kuma:
+  uaa:
+    issuer: ${UAA_ISSUER:http://127.0.0.1:33336}
+    jwk:
+      private-key-location: ${UAA_JWK_PRIVATE_KEY:./data/uaa-jwt-rsa-private.pem}
+    admin:
+      username: ${UAA_ADMIN_USERNAME:admin}
+      password: ${UAA_ADMIN_PASSWORD:admin123}
+    clients:
+      - client-id: blog
+        client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
+        client-name: Kuma Blog
+        grant-types:
+          - authorization_code
+          - refresh_token
+        authentication-method: client_secret_basic
+        redirect-uris:
+          - http://127.0.0.1:9000/api/login/oauth2/code/blog
+          - http://localhost:9000/api/login/oauth2/code/blog
+        scopes:
+          - openid
+          - profile
+          - offline_access
+        require-authorization-consent: false
+        require-proof-key: false
+      - client-id: gateway
+        client-secret: ${GATEWAY_OAUTH2_CLIENT_SECRET:gateway-secret}
+        client-name: Kuma Gateway
+        grant-types:
+          - client_credentials
+        authentication-method: client_secret_basic
+        scopes:
+          - gateway
+        require-authorization-consent: false
+        require-proof-key: false
+  boot:
+    ratelimit:
+      enabled: true
+    idempotent:
+      enabled: true
+    security:
+      oauth2:
+        endpoint:
+          issuer-uri: ${kuma.uaa.issuer}
+          uaa-service-uri: ${kuma.uaa.issuer}
+      ignore-url:
+        - /login
+        - /logout
+        - /captcha
+        - /oauth2/**
+        - /userinfo
+        - /.well-known/**
+        - /connect/**
+    cache:
+      redis:
+        enabled: true
+    data:
+      datasource:
+        enabled: true
+      mybatis:
+        mybatis-plus:
+          enabled: true
+          interceptor:
+            enabled: true
+            pagination:
+              enabled: true
+    springdoc:
+      enabled: true
+      type: SERVICE
+      title: Kuma UAA API
+      description: 统一认证授权中心管理接口
+      version: 1.0.0
+      packages-to-scan:
+        - com.kuma.cloud.uaa
+    web:
+      graceful-response:
+        print-exception-in-global-advice: true
+        response-style: 0
+        exclude-paths:
+          - /v3/api-docs/**
+          - /swagger-ui/**
+          - /doc.html
+          - /login
+          - /oauth2/**
+          - /userinfo
+          - /captcha
+      global-exception:
+        enabled: true

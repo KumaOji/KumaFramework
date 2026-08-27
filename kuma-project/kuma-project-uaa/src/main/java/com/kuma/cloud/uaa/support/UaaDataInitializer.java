@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -30,6 +31,7 @@ public class UaaDataInitializer implements ApplicationRunner {
     private final UaaProperties properties;
     private final UaaUserService userService;
     private final UaaClientService clientService;
+    private final RegisteredClientRepository registeredClientRepository;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -61,6 +63,9 @@ public class UaaDataInitializer implements ApplicationRunner {
 
     private void initClients() {
         for (UaaProperties.Client client : properties.getClients()) {
+            if (registeredClientRepository.findByClientId(client.getClientId()) != null) {
+                continue;
+            }
             ClientSaveDTO dto = new ClientSaveDTO();
             dto.setClientId(client.getClientId());
             dto.setClientSecret(client.getClientSecret());
@@ -74,6 +79,7 @@ public class UaaDataInitializer implements ApplicationRunner {
             dto.setRequireAuthorizationConsent(client.isRequireAuthorizationConsent());
             dto.setRequireProofKey(client.isRequireProofKey());
             clientService.save(dto);
+            log.info("已注册 OAuth2 客户端: clientId={}", client.getClientId());
         }
     }
 }

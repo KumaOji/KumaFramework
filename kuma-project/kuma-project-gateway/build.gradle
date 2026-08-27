@@ -14,12 +14,19 @@ dependencyManagement {
 }
 
 dependencies {
-    // ── Kuma 框架 ─────────────────────────────────────────────────────────
-    // 说明：网关不引入 kuma-boot-starter-web / kuma-boot-starter-webflux。
-    // 前者是 Servlet 栈；后者的自动装配面向业务 API 服务（静态资源、Jackson2 Codec、
-    // @RestControllerAdvice），对纯转发型网关既无用又会覆盖 Gateway 自身的编解码配置。
+    // ── Kuma 框架（栈无关能力） ───────────────────────────────────────────
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
+    // Actuator 扩展（/actuator/kmc、KmcInfoContributor、KmcHealthIndicator 等）
+    api project(':kuma-boot-framework:kuma-boot-starter-prometheus')
+    // 统一 Logback 输出（控制台 / Logstash / Loki），不引入 Servlet 栈
+    api(project(':kuma-boot-framework:kuma-boot-starter-logger')) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+    }
+    // IP 归属地解析（访问日志 geo=），不引入 Servlet 栈
+    api(project(':kuma-boot-framework:kuma-boot-starter-ip2region')) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+    }
     api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
 
     // ── Spring Cloud Gateway（WebFlux 响应式网关） ─────────────────────────
@@ -43,17 +50,12 @@ dependencies {
     // ── 分布式限流：RequestRateLimiter + RedisRateLimiter 依赖反应式 Redis ──
     api projectLibs.spring.boot.starter.data.redis.reactive
 
-    // ── 可观测性 ──────────────────────────────────────────────────────────
-    api projectLibs.spring.boot.starter.actuator
-    api projectLibs.micrometer.registry.prometheus
-
     api projectLibs.spring.boot.starter.validation
-    // 文档聚合（默认关闭，见 application.yml 中 knife4j.gateway）
+    // 文档聚合（见 application-dev.yml 中 knife4j.gateway）
     api projectLibs.knife4j.gateway
 
-    // Result / TraceUtils 等框架工具类的方法签名引用了 Servlet API，
-    // 网关运行在 Netty 上不使用 Servlet 容器，仅为类加载提供符号
-    runtimeOnly projectLibs.jakarta.servlet.api
+    // Result / TraceUtils / IpAddressMatcher 等方法签名引用了 Servlet API
+    compileOnly projectLibs.jakarta.servlet.api
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
@@ -67,8 +69,24 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// Git 属性注入：将 branch / commit id / 构建时间写入 git.properties
-// 启动后可通过 GET /actuator/info 查看当前部署的 commit 信息
+def gwRedisHost     = project.findProperty('redis.host')     ?: ''
+def gwRedisPort     = project.findProperty('redis.port')     ?: ''
+def gwRedisDatabase = project.findProperty('redis.database') ?: ''
+def gwRedisPassword = project.findProperty('redis.password') ?: ''
+
+processResources {
+    filesMatching('**/application.yml') {
+        expand(
+                active         : 'dev',
+                redis_host     : gwRedisHost,
+                redis_port     : gwRedisPort,
+                redis_database : gwRedisDatabase,
+                redis_password : gwRedisPassword
+        )
+    }
+}
+
+// Git 属性注入：启动后可通过 GET /actuator/info 查看当前部署的 commit 信息
 apply from: rootProject.file('gradle/git.gradle')
 
 tasks.named('generateGitProperties') { enabled = false }

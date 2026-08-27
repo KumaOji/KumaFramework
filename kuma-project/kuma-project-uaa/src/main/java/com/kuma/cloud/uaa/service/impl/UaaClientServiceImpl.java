@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import com.kuma.boot.security.spring.utils.OAuth2AuthorizationUtils;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -63,7 +63,7 @@ public class UaaClientServiceImpl implements UaaClientService {
     public void save(ClientSaveDTO dto) {
         RegisteredClient existing = registeredClientRepository.findByClientId(dto.getClientId());
         ClientAuthenticationMethod authenticationMethod =
-                new ClientAuthenticationMethod(dto.getAuthenticationMethod());
+                OAuth2AuthorizationUtils.resolveClientAuthenticationMethod(dto.getAuthenticationMethod());
         boolean publicClient = ClientAuthenticationMethod.NONE.equals(authenticationMethod);
 
         if (existing == null && !publicClient && !StringUtils.hasText(dto.getClientSecret())) {
@@ -83,7 +83,7 @@ public class UaaClientServiceImpl implements UaaClientService {
                 .authorizationGrantTypes(grantTypes -> {
                     grantTypes.clear();
                     for (String grantType : dto.getGrantTypes()) {
-                        grantTypes.add(new AuthorizationGrantType(grantType));
+                        grantTypes.add(OAuth2AuthorizationUtils.resolveAuthorizationGrantType(grantType));
                     }
                 })
                 .redirectUris(uris -> {

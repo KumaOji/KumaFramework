@@ -1,18 +1,10 @@
-description = '''KumaFramework project参考 —— 一组渐进式 Demo 应用，演示框架各能力的用法：
-  project1 : 最简骨架，无任何依赖，仅验证项目能否正常启动
+description = '''KumaFramework project参考 —— 当前启用的渐进式 Demo 应用，演示框架各能力的用法：
   project2 : 最简骨架，无任何依赖，仅验证项目能否正常启动
-  project3 : Gradle 插件调用示例，演示 gradle/ 目录下所有可复用脚本（springboot / jacoco / spotbugs / checkstyle / pmd / sonar / smart-doc / jib 等）的接入方式
   project4 : 全量 Demo，涵盖 kuma-boot-framework 全部 starter（安全 / 双数据源 MySQL+PostgreSQL / Redis+Caffeine+JetCache / Kafka / 分布式锁 / IP归属 / Office导出 / 验证码 / TOTP / 钉钉 / Sentinel）及 kuma-cloud-framework 各 starter
-  project5 : 任务 Demo，接入 kuma-cloud-job-worker，演示任务注册与执行
-  project6 : RPC Demo，演示 kuma-cloud-rpc 的服务注册（ServiceBs）与远程调用（ClientBs 直连）
-  project7 : CCSR Demo，演示 kuma-cloud-ccsr-client-starter 的接入，通过 CcsrService 向 CCSR 集群进行配置读写
-  project8 : 分布式事务 Demo，演示 kuma-cloud-tx-rm 的接入，通过 @DistributedTransactional 完成多步分布式事务协调
-  project9 : 消息队列 Demo，演示 kuma-cloud-mq-client 的接入，通过 MqProducer / MqConsumerPush 完成消息收发
-  project20: gRPC 客户端 Demo，通过 gRPC 调用 kuma-ai-agent Python 服务（Chat / ChatStream / Threads / Config / Health）
-  project21: Office Doc 生成 Demo，使用 kuma-boot-starter-office（Aspose.Words）将 HTML 转换为 Word 文档并下载
   blog     : 博客系统 Demo，完整业务场景，含 Spring Security OAuth2 / MySQL / Redis / MyBatis / SpringDoc
   uaa      : Kuma 体系统一认证授权中心（OAuth2.1 + OIDC 授权服务器），为 blog 等业务应用签发 JWT，含用户/角色/权限/客户端管理、图形验证码、TOTP 二次校验、登录锁定
-  gateway  : Kuma 体系统一网关（Spring Cloud Gateway / WebFlux），统一流量入口，提供路由转发、CORS、令牌校验与请求日志
+  gateway  : Kuma 体系统一网关（Spring Cloud Gateway / WebFlux），统一流量入口；集成框架 Prometheus/Logger/IP2region/Actuator 能力
   lab      : 测试实验场，用于集中记录事务、缓存、消息队列、锁、LeetCode 算法练习等各类验证代码
-  base     : 基础练习 Demo，用于 Java / Spring Boot 基础知识练习，涵盖常用数据结构、算法、设计模式及 Spring 核心特性
+
+  未启用的 Demo 见 kuma-project-unable 模块。
 '''

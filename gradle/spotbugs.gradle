@@ -15,8 +15,9 @@ spotbugs {
     excludeFilter     = file("${project.rootDir}/code-analysis/spotbugs/exclude-filter.xml")
 }
 
-tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
-    reports {
+plugins.withId('com.github.spotbugs') {
+    tasks.matching { it.name.startsWith('spotbugs') }.configureEach { task ->
+        task.reports {
         html {
             required        = true
             outputLocation  = file("${project.layout.buildDirectory.asFile.get()}/code-analysis/spotbugsReportDir/${name}.html")
@@ -25,5 +26,6 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
         xml {
             required        = false
         }
+    }
     }
 }

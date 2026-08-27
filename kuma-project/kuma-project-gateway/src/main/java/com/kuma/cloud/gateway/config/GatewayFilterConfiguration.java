@@ -16,34 +16,58 @@
 
 package com.kuma.cloud.gateway.config;
 
-import com.kuma.cloud.gateway.filter.AuthGlobalFilter;
+import com.kuma.cloud.gateway.filter.ClientAccessGlobalFilter;
+import com.kuma.cloud.gateway.filter.GatewayTraceGlobalFilter;
+import com.kuma.cloud.gateway.filter.IdentityRelayGlobalFilter;
 import com.kuma.cloud.gateway.filter.RequestLogGlobalFilter;
+import com.kuma.cloud.gateway.filter.StripIdentityHeadersGlobalFilter;
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * GatewayFilterConfiguration
+ * 网关全局过滤器注册。
  *
  * @author kuma
  * @since 2026-04-23
  */
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GatewayFilterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".log", name = "enabled", havingValue = "true", matchIfMissing = true)
-    public RequestLogGlobalFilter requestLogGlobalFilter() {
-        return new RequestLogGlobalFilter();
+    public StripIdentityHeadersGlobalFilter stripIdentityHeadersGlobalFilter() {
+        return new StripIdentityHeadersGlobalFilter();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".auth", name = "enabled", havingValue = "true")
-    public AuthGlobalFilter authGlobalFilter(GatewayCloudProperties properties) {
-        return new AuthGlobalFilter(properties);
+    public GatewayTraceGlobalFilter gatewayTraceGlobalFilter() {
+        return new GatewayTraceGlobalFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".access", name = "enabled", havingValue = "true")
+    public ClientAccessGlobalFilter clientAccessGlobalFilter(GatewayCloudProperties properties) {
+        return new ClientAccessGlobalFilter(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IdentityRelayGlobalFilter identityRelayGlobalFilter(GatewayCloudProperties properties) {
+        return new IdentityRelayGlobalFilter(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".log", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public RequestLogGlobalFilter requestLogGlobalFilter(
+            GatewayCloudProperties properties, ObjectProvider<com.kuma.boot.ip2region.model.Ip2regionSearcher> ip2regionSearcher) {
+        return new RequestLogGlobalFilter(properties, ip2regionSearcher);
     }
 }

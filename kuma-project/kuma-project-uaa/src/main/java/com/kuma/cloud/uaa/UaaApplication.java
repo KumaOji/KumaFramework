@@ -1,7 +1,6 @@
 package com.kuma.cloud.uaa;
 
-import com.kuma.boot.core.startup.StartupSpringApplication;
-import com.kuma.boot.web.annotation.KumaBootApplication;
+import com.kuma.cloud.uaa.annotation.EnableUaaBootApplication;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -17,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
  *
  * @author kuma
  */
-@KumaBootApplication
+@EnableUaaBootApplication
 @KumaCloudApplication
 @ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"})
 @EnableAutoConfiguration
@@ -30,7 +29,7 @@ public class UaaApplication extends SpringBootServletInitializer {
     }
 
     static void main(String[] args) {
-        new StartupSpringApplication(UaaApplication.class)
+        new com.kuma.boot.core.startup.StartupSpringApplication(UaaApplication.class)
                 .setKmcBanner()
                 .setKmcProfileIfNotExists("dev")
                 .setKmcApplicationProperty("kuma-cloud-uaa")
