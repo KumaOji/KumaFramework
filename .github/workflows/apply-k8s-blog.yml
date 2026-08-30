@@ -27,7 +27,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: kuma-project/kuma-project-blog/k8s/*.{yaml,yml}
+          source: kuma-project/kuma-project-blog/k8s/*.yaml
           target: /data/blog/k8s/
 
       - name: Apply k8s configs
@@ -36,4 +36,8 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: kubectl apply -R -f /data/blog/k8s/
+          command_timeout: 10m
+          script: |
+            kubectl apply -R -f /data/blog/k8s/
+            kubectl rollout status deployment/blog-nacos -n blog --timeout=300s || \
+              echo "WARN: blog-nacos not ready yet (check: kubectl get pods -n blog -l app=blog-nacos)"
