@@ -118,7 +118,7 @@ jobs:
               blog-background=${{ steps.ver.outputs.FULL_IMAGE }} \
               -n blog
             kubectl scale deployment/blog-background -n blog --replicas=1
-            kubectl rollout status deployment/blog-background -n blog --timeout=600s
+            kubectl rollout status deployment/blog-background -n blog --timeout=900s
 
             # 清理服务器本地缓存的旧版本镜像，只保留本次部署的 tag 和 latest
             for tag in $(k3s crictl images | awk -v repo="${{ env.IMAGE }}" '$1==repo{print $2}'); do
