@@ -62,6 +62,15 @@ spring:
                   args:
                     name: blog
                     fallbackUri: forward:/fallback/blog
+            - id: blog-api
+              uri: lb://kuma-cloud-blog
+              predicates:
+                - Path=/api/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: blog
+                    fallbackUri: forward:/fallback/blog
 
 resilience4j:
   circuitbreaker:
@@ -75,6 +84,9 @@ resilience4j:
     instances:
       blog:
         base-config: default
+        failure-rate-threshold: 80
+        minimum-number-of-calls: 20
+        wait-duration-in-open-state: 5s
       uaa:
         base-config: default
 

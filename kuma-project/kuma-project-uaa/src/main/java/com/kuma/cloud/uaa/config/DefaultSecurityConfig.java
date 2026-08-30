@@ -58,16 +58,18 @@ public class DefaultSecurityConfig {
             HttpSecurity http,
             JwtDecoder jwtDecoder,
             SecurityProperties securityProperties,
+            UaaProperties properties,
             UaaUserService userService,
             MfaService mfaService,
             LoginCaptchaService captchaService,
             LoginAttemptService attemptService,
             LoginAuditService auditService)
             throws Exception {
-        UaaAuthenticationFailureHandler failureHandler =
+            UaaAuthenticationFailureHandler failureHandler =
                 new UaaAuthenticationFailureHandler(LOGIN_PAGE, attemptService, auditService);
         LoginPreCheckFilter preCheckFilter = new LoginPreCheckFilter(
                 LOGIN_PROCESSING_URL,
+                properties,
                 captchaService,
                 attemptService,
                 mfaService,

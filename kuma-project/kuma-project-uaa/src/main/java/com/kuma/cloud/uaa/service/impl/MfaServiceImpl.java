@@ -37,6 +37,7 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     public MfaBindVO startBind(String username) {
+        requireMfaEnabled();
         UaaUser user = userService.requireByUsername(username);
         if (user.isMfaEnabled()) {
             throw new BusinessException("已绑定二次校验，请先解绑");
@@ -61,6 +62,7 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     public void confirmBind(String username, String code) {
+        requireMfaEnabled();
         UaaUser user = userService.requireByUsername(username);
         Object pending = redisRepository.get(pendingKey(username));
         if (pending == null) {
@@ -78,6 +80,7 @@ public class MfaServiceImpl implements MfaService {
 
     @Override
     public void unbind(String username, String code) {
+        requireMfaEnabled();
         UaaUser user = userService.requireByUsername(username);
         if (!user.isMfaEnabled()) {
             throw new BusinessException("未绑定二次校验");
@@ -106,6 +109,12 @@ public class MfaServiceImpl implements MfaService {
                     + Base64.getEncoder().encodeToString(image);
         } catch (QrGenerationException exception) {
             throw new BusinessException("二维码生成失败: " + exception.getMessage());
+        }
+    }
+
+    private void requireMfaEnabled() {
+        if (!properties.getMfa().isEnabled()) {
+            throw new BusinessException("二次校验功能未开启");
         }
     }
 

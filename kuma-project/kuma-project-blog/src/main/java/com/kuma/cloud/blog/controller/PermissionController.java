@@ -101,7 +101,7 @@ public class PermissionController {
         if (targetUser != null) {
             permissionService.evictCache(targetUser.getUsername());
         }
-        return Result.success(null);
+        return Result.success();
     }
 
     @Operation(summary = "撤销用户权限")
@@ -114,7 +114,7 @@ public class PermissionController {
         if (targetUser != null) {
             permissionService.evictCache(targetUser.getUsername());
         }
-        return Result.success(null);
+        return Result.success();
     }
 
     @Operation(summary = "刷新用户权限缓存")
@@ -122,6 +122,6 @@ public class PermissionController {
     @Authorize(BlogPermissions.SYSTEM_USER)
     public Result<Void> evictCache(@PathVariable String username) {
         permissionService.evictCache(username);
-        return Result.success(null);
+        return Result.success();
     }
 }

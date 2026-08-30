@@ -5,6 +5,9 @@ import lombok.Data;
 @Data
 public class TotpStatusVO {
 
+    /** UAA 全局 TOTP 开关 */
+    private boolean featureEnabled;
+
     /** totp_enabled = 1，登录时强制验证动态码 */
     private boolean enabled;
 

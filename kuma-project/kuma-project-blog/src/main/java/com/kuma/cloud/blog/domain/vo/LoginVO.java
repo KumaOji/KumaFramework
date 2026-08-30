@@ -19,4 +19,7 @@ public class LoginVO implements Serializable {
 
     /** 密码验证通过但需要继续输入 TOTP 动态码时为 true，前端据此展示验证码输入框 */
     private boolean requireTotp;
+
+    /** UAA 全局 TOTP 开关，前端据此决定是否展示绑定/解绑入口 */
+    private boolean totpFeatureEnabled;
 }

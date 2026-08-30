@@ -10,6 +10,7 @@ import com.kuma.cloud.blog.security.BlogUserDetails;
 import com.kuma.cloud.blog.security.JwtDenylistService;
 import com.kuma.cloud.blog.security.OAuth2CookieService;
 import com.kuma.cloud.blog.security.OAuth2TokenClient;
+import com.kuma.cloud.blog.integration.uaa.UaaAuthSettingsService;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +49,7 @@ public class AuthController {
     private final JwtDecoder jwtDecoder;
     private final BlogJwtAuthenticationConverter jwtAuthenticationConverter;
     private final JwtDenylistService denylistService;
+    private final UaaAuthSettingsService uaaAuthSettingsService;
 
     @Value("${blog.oauth2.registration-id:blog}")
     private String registrationId;
@@ -162,6 +164,7 @@ public class AuthController {
         response.setNickname(user.getNickname());
         response.setEmail(user.getEmail());
         response.setAdmin(user.getIsAdmin() != null && user.getIsAdmin() == 1);
+        response.setTotpFeatureEnabled(uaaAuthSettingsService.isMfaEnabled());
         return response;
     }
 }

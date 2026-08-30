@@ -1,5 +1,6 @@
 package com.kuma.cloud.uaa.security;
 
+import com.kuma.cloud.uaa.config.UaaProperties;
 import com.kuma.cloud.uaa.domain.entity.UaaUser;
 import com.kuma.cloud.uaa.service.MfaService;
 import com.kuma.cloud.uaa.service.UaaUserService;
@@ -36,6 +37,7 @@ public class LoginPreCheckFilter extends OncePerRequestFilter {
     public static final String PARAM_TOTP_CODE = "totpCode";
 
     private final String loginProcessingUrl;
+    private final UaaProperties properties;
     private final LoginCaptchaService captchaService;
     private final LoginAttemptService attemptService;
     private final MfaService mfaService;
@@ -85,7 +87,8 @@ public class LoginPreCheckFilter extends OncePerRequestFilter {
         if (user != null && user.isLocked()) {
             throw new UaaLoginException("locked", "账号已被锁定，请联系管理员");
         }
-        if (user != null
+        if (properties.getMfa().isEnabled()
+                && user != null
                 && user.isMfaEnabled()
                 && !mfaService.verify(user, request.getParameter(PARAM_TOTP_CODE))) {
             throw new UaaLoginException("mfa", "动态码不正确");

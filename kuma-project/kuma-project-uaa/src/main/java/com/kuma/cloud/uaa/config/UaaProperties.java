@@ -99,6 +99,11 @@ public class UaaProperties {
     public static class Mfa {
 
         /**
+         * 全局开关。关闭后登录不再校验 TOTP，且绑定/解绑接口不可用。
+         */
+        private boolean enabled = false;
+
+        /**
          * 展示在身份验证器 App 中的发行方名称。
          */
         private String issuer = "KumaCloud";

@@ -111,6 +111,7 @@ kuma:
       max-fail-count: 5
       lock-duration: 15m
     mfa:
+      enabled: true
       issuer: KumaCloud
       bind-ttl: 10m
     admin:
@@ -161,6 +162,7 @@ kuma:
         - /login
         - /logout
         - /captcha
+        - /api/public/auth-settings
         - /favicon.ico
         - /oauth2/**
         - /userinfo
@@ -199,5 +201,6 @@ kuma:
           - /oauth2/**
           - /userinfo
           - /captcha
+        - /api/public/auth-settings
       global-exception:
         enabled: true

@@ -54,7 +54,7 @@ spring:
     async:
       request-timeout: 600000
   main:
-    lazy-initialization: true
+    lazy-initialization: false
     log-startup-info: true
   cache:
     type: redis
@@ -123,7 +123,7 @@ blog:
     username-claim: preferred_username
     issuer-uri: http://localhost:33336
     audience: blog
-    login-success-url: http://localhost:3000
+    login-success-url: http://localhost:4321
     refresh-token-max-age: 30d
   admin-initial-password: admin123
   music:

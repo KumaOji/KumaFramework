@@ -139,9 +139,11 @@
             <input type="hidden" id="captchaKey" name="captchaKey">
         </div>
 
-        <label for="totpCode">动态码（未开启二次校验可留空）</label>
-        <input type="text" id="totpCode" name="totpCode" autocomplete="one-time-code"
-               inputmode="numeric" maxlength="6">
+        <div th:if="${mfaEnabled}">
+            <label for="totpCode">动态码</label>
+            <input type="text" id="totpCode" name="totpCode" autocomplete="one-time-code"
+                   inputmode="numeric" maxlength="6">
+        </div>
 
         <button type="submit">登录</button>
     </form>
@@ -149,56 +151,34 @@
     <p class="hint">登录后将返回发起授权的应用</p>
 </div>
 
-<script th:inline="javascript">
-    const captchaEnabled = [[${captchaEnabled}]];
+<script th:if="${captchaEnabled}" th:inline="javascript">
     const captchaUrl = /*[[@{/captcha}]]*/ '/captcha';
-
-    function resolveCaptchaPayload(body) {
-        if (!body) {
-            return null;
-        }
-        if (body.image && body.captchaKey) {
-            return body;
-        }
-        if (body.data && body.data.image) {
-            return body.data;
-        }
-        if (body.payload) {
-            if (body.payload.data && body.payload.data.image) {
-                return body.payload.data;
-            }
-            if (body.payload.image) {
-                return body.payload;
-            }
-        }
-        return null;
-    }
+    const captchaImage = document.getElementById('captchaImage');
+    const captchaKey = document.getElementById('captchaKey');
+    const captchaCode = document.getElementById('captchaCode');
 
     async function refreshCaptcha() {
         try {
-            const response = await fetch(captchaUrl, {headers: {'Accept': 'application/json'}});
+            const response = await fetch(captchaUrl, { headers: { 'Accept': 'application/json' } });
             if (!response.ok) {
                 throw new Error('HTTP ' + response.status);
             }
-            const body = await response.json();
-            const payload = resolveCaptchaPayload(body);
-            if (!payload) {
+            const payload = (await response.json())?.data;
+            if (!payload?.image || !payload?.captchaKey) {
                 throw new Error('invalid captcha payload');
             }
-            document.getElementById('captchaImage').src = payload.image;
-            document.getElementById('captchaKey').value = payload.captchaKey;
-            document.getElementById('captchaCode').value = '';
-            document.getElementById('captchaImage').alt = '点击刷新验证码';
+            captchaImage.src = payload.image;
+            captchaKey.value = payload.captchaKey;
+            captchaCode.value = '';
+            captchaImage.alt = '点击刷新验证码';
         } catch (error) {
             console.error('验证码加载失败', error);
-            document.getElementById('captchaImage').alt = '验证码加载失败，点击重试';
+            captchaImage.alt = '验证码加载失败，点击重试';
         }
     }
 
-    if (captchaEnabled) {
-        document.getElementById('captchaImage').addEventListener('click', refreshCaptcha);
-        refreshCaptcha();
-    }
+    captchaImage.addEventListener('click', refreshCaptcha);
+    refreshCaptcha();
 </script>
 </body>
 </html>

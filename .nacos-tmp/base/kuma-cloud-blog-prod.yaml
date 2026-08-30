@@ -43,7 +43,7 @@ spring:
     async:
       request-timeout: 600000
   main:
-    lazy-initialization: true
+    lazy-initialization: false
     log-startup-info: true
   cache:
     type: redis

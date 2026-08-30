@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/auth/login", "/auth/logout", "/auth/refresh", "/auth/csrf").permitAll()
+                        .requestMatchers("/auth/totp/feature").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/auth/totp/**").authenticated()
                         .requestMatchers("/error").permitAll()

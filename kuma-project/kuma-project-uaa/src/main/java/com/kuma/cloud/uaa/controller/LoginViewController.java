@@ -26,6 +26,7 @@ public class LoginViewController {
             @RequestParam(value = "logout", required = false) String logout,
             Model model) {
         model.addAttribute("captchaEnabled", properties.getCaptcha().isEnabled());
+        model.addAttribute("mfaEnabled", properties.getMfa().isEnabled());
         model.addAttribute("errorMessage", resolveErrorMessage(error));
         model.addAttribute("logoutMessage", logout == null ? null : "已安全退出");
         return "login";

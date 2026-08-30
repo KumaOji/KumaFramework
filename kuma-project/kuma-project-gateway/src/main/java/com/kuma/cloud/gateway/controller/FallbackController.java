@@ -18,9 +18,10 @@ package com.kuma.cloud.gateway.controller;
 
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.model.result.Result;
+import com.kuma.boot.common.utils.json.JacksonUtils;
 import com.kuma.cloud.gateway.support.GatewayResults;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,14 +39,20 @@ import reactor.core.publisher.Mono;
 public class FallbackController {
 
     @GetMapping("/blog")
-    public Mono<ResponseEntity<Result<Void>>> blogFallback(ServerWebExchange exchange) {
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(GatewayResults.fail(exchange, ResultEnum.TIMEOUT_ERROR)));
+    public Mono<Void> blogFallback(ServerWebExchange exchange) {
+        return writeFallback(exchange, ResultEnum.TIMEOUT_ERROR);
     }
 
     @GetMapping("/uaa")
-    public Mono<ResponseEntity<Result<Void>>> uaaFallback(ServerWebExchange exchange) {
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(GatewayResults.fail(exchange, ResultEnum.TIMEOUT_ERROR)));
+    public Mono<Void> uaaFallback(ServerWebExchange exchange) {
+        return writeFallback(exchange, ResultEnum.TIMEOUT_ERROR);
+    }
+
+    private static Mono<Void> writeFallback(ServerWebExchange exchange, ResultEnum resultEnum) {
+        Result<Void> body = GatewayResults.fail(exchange, resultEnum);
+        exchange.getResponse().setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return exchange.getResponse().writeWith(
+                Mono.just(exchange.getResponse().bufferFactory().wrap(JacksonUtils.toJsonAsBytes(body))));
     }
 }
