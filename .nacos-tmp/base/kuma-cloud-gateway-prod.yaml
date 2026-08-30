@@ -62,11 +62,6 @@ spring:
                   args:
                     name: blog
                     fallbackUri: forward:/fallback/blog
-                - name: RequestRateLimiter
-                  args:
-                    redis-rate-limiter.replenishRate: 50
-                    redis-rate-limiter.burstCapacity: 100
-                    key-resolver: "#{@userOrIpKeyResolver}"
 
 resilience4j:
   circuitbreaker:

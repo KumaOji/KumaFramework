@@ -27,6 +27,12 @@ spec:
               value: "PRO"
             - name: SERVER_ADDRESS
               value: "0.0.0.0"
+            - name: MANAGEMENT_HEALTH_REDIS_ENABLED
+              value: "false"
+            - name: SPRING_DATA_REDIS_HOST
+              value: "blog-redis"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR
               value: "blog-nacos:8848"
             - name: SPRING_CLOUD_NACOS_USERNAME
