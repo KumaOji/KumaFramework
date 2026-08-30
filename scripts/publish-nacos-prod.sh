@@ -6,7 +6,7 @@ NACOS_USERNAME="${NACOS_USERNAME:-nacos}"
 NACOS_PASSWORD="${NACOS_PASSWORD:-}"
 NACOS_SERVER="127.0.0.1:8848"
 K8S_NAMESPACE="${K8S_NAMESPACE:-base}"
-CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config}"
+CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config/base}"
 
 echo "=== blog-nacos status ==="
 NACOS_SVC="${NACOS_SVC:-blog-nacos}"

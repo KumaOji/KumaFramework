@@ -53,7 +53,7 @@ spring:
                     name: uaa
                     fallbackUri: forward:/fallback/uaa
             - id: blog
-              uri: http://blog-background:9000
+              uri: lb://kuma-cloud-blog
               predicates:
                 - Path=/blog/**
               filters:
