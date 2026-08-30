@@ -111,6 +111,9 @@ jobs:
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           script: |
+            if [ -f /data/blog/k8s/blog-background.yaml ]; then
+              kubectl apply -f /data/blog/k8s/blog-background.yaml
+            fi
             kubectl set image deployment/blog-background \
               blog-background=${{ steps.ver.outputs.FULL_IMAGE }} \
               -n blog

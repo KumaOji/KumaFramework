@@ -16,7 +16,7 @@ import org.springframework.boot.micrometer.metrics.autoconfigure.MeterRegistryCu
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration("meterMonitorConfiguration")
 public class Monitor {
    private static RegistryInstanceManager registryInstanceManager;
    public static final String IP;

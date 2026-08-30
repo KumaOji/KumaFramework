@@ -49,7 +49,6 @@ spring:
       host: blog-redis
       port: 6379
       database: 0
-      password: ${REDIS_PASSWORD}
       jedis:
         pool:
           max-active: ${redis_jedis_pool_max_active:8}

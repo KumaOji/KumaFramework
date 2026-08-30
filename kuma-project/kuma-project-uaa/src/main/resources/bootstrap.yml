@@ -11,15 +11,15 @@ spring:
     nacos:
       username: ${SPRING_CLOUD_NACOS_USERNAME:nacos}
       password: ${SPRING_CLOUD_NACOS_PASSWORD:123456}
-      server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
+      server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:blog-nacos:8848}
       discovery:
         enabled: true
         register-enabled: true
         namespace: base
-        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
+        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:blog-nacos:8848}
       config:
         enabled: true
         namespace: base
-        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
+        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:blog-nacos:8848}
         file-extension: yaml
         group: DEFAULT_GROUP

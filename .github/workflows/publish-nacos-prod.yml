@@ -7,6 +7,7 @@ on:
       - '.nacos-tmp/base/kuma-shared-prod.yaml'
       - '.nacos-tmp/base/kuma-cloud-uaa-prod.yaml'
       - '.nacos-tmp/base/kuma-cloud-gateway-prod.yaml'
+      - '.nacos-tmp/base/kuma-cloud-blog-prod.yaml'
       - 'scripts/publish-nacos-prod.sh'
   workflow_dispatch:
 
@@ -23,7 +24,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: scripts/publish-nacos-prod.sh,.nacos-tmp/base/kuma-shared-prod.yaml,.nacos-tmp/base/kuma-cloud-uaa-prod.yaml,.nacos-tmp/base/kuma-cloud-gateway-prod.yaml
+          source: scripts/publish-nacos-prod.sh,.nacos-tmp/base/kuma-shared-prod.yaml,.nacos-tmp/base/kuma-cloud-uaa-prod.yaml,.nacos-tmp/base/kuma-cloud-gateway-prod.yaml,.nacos-tmp/base/kuma-cloud-blog-prod.yaml
           target: /tmp/nacos-config/
           strip_components: 0
 

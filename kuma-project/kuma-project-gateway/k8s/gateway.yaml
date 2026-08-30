@@ -21,6 +21,12 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+            - name: KUMA_BOOT_MONITOR_ENABLED
+              value: "false"
+            - name: KUMA_BOOT_CORE_ENV
+              value: "PRO"
+            - name: SERVER_ADDRESS
+              value: "0.0.0.0"
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR
               value: "blog-nacos:8848"
             - name: SPRING_CLOUD_NACOS_USERNAME
@@ -30,11 +36,6 @@ spec:
                 secretKeyRef:
                   name: kuma-secret
                   key: nacos-password
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: kuma-secret
-                  key: redis-password
           resources:
             requests:
               cpu: "250m"

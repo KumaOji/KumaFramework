@@ -1,5 +1,6 @@
 server:
   port: 18080
+  address: 0.0.0.0
   shutdown: graceful
 
 spring:
@@ -12,7 +13,6 @@ spring:
       host: blog-redis
       port: 6379
       database: 0
-      password: ${REDIS_PASSWORD}
       timeout: 3s
   cloud:
     inetutils:
@@ -133,7 +133,7 @@ kuma:
           uaa-service-name: kuma-cloud-uaa
     core:
       enabled: true
-      env: PROD
+      env: PRO
       collect-hook-enabled: false
       context-restart-enabled: false
     actuator:

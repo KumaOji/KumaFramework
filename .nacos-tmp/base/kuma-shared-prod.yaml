@@ -8,7 +8,6 @@ mysql_url: jdbc:mysql://blog-mysql:3306/base?useUnicode=true&characterEncoding=u
 redis_host: blog-redis
 redis_port: 6379
 redis_database: 0
-redis_password: ${REDIS_PASSWORD}
 redis_jedis_pool_max_active: 8
 redis_jedis_pool_max_idle: 8
 redis_jedis_pool_min_idle: 0
