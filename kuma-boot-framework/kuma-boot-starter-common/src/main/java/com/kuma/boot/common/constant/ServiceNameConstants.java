@@ -29,6 +29,8 @@ public final class ServiceNameConstants {
 
     public static final String KUMA_CLOUD_AUTH = "kuma-cloud-auth";
 
+    public static final String KUMA_CLOUD_UAA = "kuma-cloud-uaa";
+
     public static final String KUMA_CLOUD_AUTH_SA = "kuma-cloud-auth-sa";
 
     public static final String KUMA_CLOUD_CUSTOMER = "kuma-cloud-customer";

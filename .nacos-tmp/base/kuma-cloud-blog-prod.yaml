@@ -16,8 +16,8 @@ spring:
         registration:
           blog:
             provider: blog-uaa
-            client-id: ${BLOG_OAUTH2_CLIENT_ID:blog}
-            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
+            client-id: ${BLOG_OAUTH2_CLIENT_ID}
+            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET}
             client-authentication-method: client_secret_basic
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
@@ -27,14 +27,14 @@ spring:
               - offline_access
         provider:
           blog-uaa:
-            authorization-uri: ${BLOG_OAUTH2_AUTHORIZATION_URI:http://127.0.0.1:33336/oauth2/authorize}
-            token-uri: ${BLOG_OAUTH2_TOKEN_URI:http://127.0.0.1:33336/oauth2/token}
-            jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI:http://127.0.0.1:33336/oauth2/jwks}
-            user-info-uri: ${BLOG_OAUTH2_USER_INFO_URI:http://127.0.0.1:33336/userinfo}
+            authorization-uri: ${BLOG_OAUTH2_AUTHORIZATION_URI}
+            token-uri: ${BLOG_OAUTH2_TOKEN_URI}
+            jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI}
+            user-info-uri: ${BLOG_OAUTH2_USER_INFO_URI}
             user-name-attribute: preferred_username
       resourceserver:
         jwt:
-          jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI:http://127.0.0.1:33336/oauth2/jwks}
+          jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI}
   mvc:
     async:
       request-timeout: 600000
@@ -74,10 +74,10 @@ mybatis-plus:
 
 springdoc:
   api-docs:
-    enabled: true
+    enabled: false
     path: /v3/api-docs
   swagger-ui:
-    enabled: true
+    enabled: false
     path: /swagger-ui.html
 
 knife4j:
@@ -85,17 +85,17 @@ knife4j:
 
 blog:
   token-expire-seconds: 604800
-  cookie-secure: false
+  cookie-secure: true
   oauth2:
     registration-id: blog
     username-claim: preferred_username
-    issuer-uri: ${BLOG_OAUTH2_ISSUER_URI:http://127.0.0.1:33336}
+    issuer-uri: ${BLOG_OAUTH2_ISSUER_URI}
     audience: ${BLOG_OAUTH2_AUDIENCE:blog}
-    login-success-url: ${BLOG_LOGIN_SUCCESS_URL:http://127.0.0.1:3000}
+    login-success-url: ${BLOG_LOGIN_SUCCESS_URL}
     refresh-token-max-age: 30d
   admin-initial-password: admin123
   music:
-    base-path: E:\blog-resource\music
+    base-path: /data/music
 
 jetcache:
   stat-interval-minutes: 15
@@ -108,22 +108,18 @@ jetcache:
 kuma:
   boot:
     ai:
-      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
-      api-key: ${DASHSCOPE_API_KEY:}
-      model: qwen-turbo
+      base-url: ${AI_CHAT_BASE_URL}
+      api-key: ${AI_CHAT_API_KEY}
+      model: ${AI_CHAT_MODEL:gpt-4o-mini}
       embedding:
-        base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
-        api-key: ${DASHSCOPE_API_KEY:}
-        model: text-embedding-v3
+        base-url: http://blog-ollama:11434/v1
+        model: nomic-embed-text
       qdrant:
-        host: localhost
+        host: blog-qdrant
         grpc-port: 6334
         http-port: 6333
         collection: blog-docs
-        dimension: 1024
-      rag:
-        chunk-size: 800
-        chunk-overlap: 100
+        dimension: 768
     core:
       enabled: true
       async:
@@ -159,7 +155,7 @@ kuma:
     security:
       oauth2:
         endpoint:
-          uaa-service-uri: ${BLOG_OAUTH2_UAA_URI:http://127.0.0.1:33336}
+          uaa-service-uri: ${BLOG_OAUTH2_UAA_URI}
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**
@@ -168,7 +164,6 @@ kuma:
         - /doc.html
         - /webjars/**
         - /auth/**
-        - /ws/**
         - /error
       authentication:
         expire: 86400
@@ -189,7 +184,7 @@ kuma:
             pagination:
               enabled: true
     springdoc:
-      enabled: true
+      enabled: false
       type: SERVICE
       title: Blog API 文档
       description: 博客系统 RESTful API 接口文档

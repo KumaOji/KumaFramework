@@ -16,16 +16,17 @@
 
 package com.kuma.boot.security.spring.autoconfigure.cloud;
 
-// import com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled;
-// import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
-// import com.alibaba.cloud.nacos.NacosServiceManager;
-// import com.alibaba.nacos.api.naming.listener.NamingEvent;
-// import com.alibaba.nacos.api.naming.pojo.Instance;
-
 import com.kuma.boot.common.constant.ServiceNameConstants;
-import com.kuma.boot.security.spring.autoconfigure.cloud.JwtUriFactory;
+import com.kuma.boot.security.spring.autoconfigure.properties.OAuth2EndpointProperties;
+import cn.hutool.core.util.StrUtil;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,74 +34,46 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(DiscoveryClient.class)
 @ConditionalOnBean(DiscoveryClient.class)
+@EnableConfigurationProperties(OAuth2EndpointProperties.class)
 public class JwtCloudAutoConfiguration {
 
+    private static final String JWK_SET_PATH = "/oauth2/jwks";
+
     @Bean
-    public JwtUriFactory jwtUriFactory(DiscoveryClient discoveryClient) {
-        return new JwtUriFactory() {
-            @Override
-            public String jwkSetUri() {
-                return discoveryClient.getServices().stream()
-                        .filter(s -> s.contains(ServiceNameConstants.KUMA_CLOUD_AUTH))
-                        .flatMap(s -> discoveryClient.getInstances(s).stream())
-                        .map(
-                                instance ->
-                                        String.format(
-                                                "http://%s:%s" + "/oauth2/jwks",
-                                                instance.getHost(), instance.getPort()))
-                        .findFirst()
-                        .orElse(null);
-            }
-        };
+    public JwtUriFactory jwtUriFactory(
+            DiscoveryClient discoveryClient, OAuth2EndpointProperties endpointProperties) {
+        return () -> resolveJwkSetUri(discoveryClient, endpointProperties);
     }
 
-    // todo  此类主要是auth服务器ip变化了 通知客户端更新jwtDecoder
-    // @Configuration
-    // @ConditionalOnMissingBean(value = JwtDecoder.class)
-    // @ConditionalOnClass(name = "com.alibaba.cloud.nacos.NacosServiceManager")
-    // @ConditionalOnNacosDiscoveryEnabled
-    // public static class NimbusJwtDecoderNacosServiceListener implements InitializingBean {
-    //
-    //	private final NacosServiceManager nacosServiceManager;
-    //	private final NacosDiscoveryProperties properties;
-    //
-    //	private DiscoveryClient discoveryClient;
-    //
-    //	public NimbusJwtDecoderNacosServiceListener(NacosServiceManager nacosServiceManager,
-    //												NacosDiscoveryProperties properties) {
-    //		this.nacosServiceManager = nacosServiceManager;
-    //		this.properties = properties;
-    //	}
-    //
-    //	@Override
-    //	public void afterPropertiesSet() throws Exception {
-    //
-    //		nacosServiceManager
-    //			.getNamingService()
-    //			.subscribe(
-    //				ServiceName.KUMA_CLOUD_AUTH,
-    //				this.properties.getGroup(),
-    //				List.of(this.properties.getClusterName()),
-    //				event -> {
-    //					if (event instanceof NamingEvent) {
-    //						List<Instance> instances = ((NamingEvent) event).getInstances();
-    //						if (instances.isEmpty()) {
-    //							return;
-    //						}
-    //						Instance instance = instances.get(0);
-    //						String jwkSetUri = String.format(
-    //							"http://%s:%s" + "/oauth2/jwks", instance.getIp(),
-    //							instance.getPort());
-    //
-    //						NimbusJwtDecoder nimbusJwtDecoder =
-    //							NimbusJwtDecoder.withJwkSetUri(jwkSetUri)
-    //								.jwsAlgorithm(SignatureAlgorithm.RS256)
-    //								.build();
-    //						nimbusJwtDecoder.setJwtValidator(JwtValidators.createDefault());
-    //						ContextUtils.destroySingletonBean("jwtDecoder");
-    //						ContextUtils.registerSingletonBean("jwtDecoder", nimbusJwtDecoder);
-    //					}
-    //				});
-    //	}
-    // }
+    private static String resolveJwkSetUri(
+            DiscoveryClient discoveryClient, OAuth2EndpointProperties endpointProperties) {
+        if (endpointProperties != null && StrUtil.isNotBlank(endpointProperties.getJwkSetUri())) {
+            return endpointProperties.getJwkSetUri();
+        }
+
+        for (String serviceName : candidateServiceNames(endpointProperties)) {
+            String jwkSetUri = discoveryClient.getInstances(serviceName).stream()
+                    .findFirst()
+                    .map(JwtCloudAutoConfiguration::toJwkSetUri)
+                    .orElse(null);
+            if (StrUtil.isNotBlank(jwkSetUri)) {
+                return jwkSetUri;
+            }
+        }
+        return null;
+    }
+
+    private static List<String> candidateServiceNames(OAuth2EndpointProperties endpointProperties) {
+        Set<String> names = new LinkedHashSet<>();
+        if (endpointProperties != null && StrUtil.isNotBlank(endpointProperties.getUaaServiceName())) {
+            names.add(endpointProperties.getUaaServiceName());
+        }
+        names.add(ServiceNameConstants.KUMA_CLOUD_UAA);
+        names.add(ServiceNameConstants.KUMA_CLOUD_AUTH);
+        return new ArrayList<>(names);
+    }
+
+    private static String toJwkSetUri(ServiceInstance instance) {
+        return String.format("http://%s:%s%s", instance.getHost(), instance.getPort(), JWK_SET_PATH);
+    }
 }

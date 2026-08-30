@@ -28,6 +28,7 @@ dependencies {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
     }
     api project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')
+    api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
 
     // ── Spring Cloud Gateway（WebFlux 响应式网关） ─────────────────────────
     api platform(projectLibs.spring.cloud.dependencies)
@@ -51,7 +52,7 @@ dependencies {
     api projectLibs.spring.boot.starter.data.redis.reactive
 
     api projectLibs.spring.boot.starter.validation
-    // 文档聚合（见 application-dev.yml 中 knife4j.gateway）
+    // 文档聚合（见 Nacos kuma-cloud-gateway-dev.yaml 中 knife4j.gateway）
     api projectLibs.knife4j.gateway
 
     // Result / TraceUtils / IpAddressMatcher 等方法签名引用了 Servlet API
@@ -67,23 +68,6 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-def gwRedisHost     = project.findProperty('redis.host')     ?: ''
-def gwRedisPort     = project.findProperty('redis.port')     ?: ''
-def gwRedisDatabase = project.findProperty('redis.database') ?: ''
-def gwRedisPassword = project.findProperty('redis.password') ?: ''
-
-processResources {
-    filesMatching('**/application.yml') {
-        expand(
-                active         : 'dev',
-                redis_host     : gwRedisHost,
-                redis_port     : gwRedisPort,
-                redis_database : gwRedisDatabase,
-                redis_password : gwRedisPassword
-        )
-    }
 }
 
 // Git 属性注入：启动后可通过 GET /actuator/info 查看当前部署的 commit 信息

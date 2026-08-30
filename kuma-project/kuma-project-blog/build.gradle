@@ -26,6 +26,7 @@ dependencies {
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
     }
+    api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
     api project(':kuma-boot-framework:kuma-boot-starter-frp')
     api project(':kuma-boot-framework:kuma-boot-starter-ai')
     api project(':kuma-boot-framework:kuma-boot-starter-grpc')
@@ -48,35 +49,6 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-def blogMysqlUrl                = project.findProperty('mysql.url')                   ?: ''
-def blogMysqlUsername           = project.findProperty('mysql.username')              ?: ''
-def blogMysqlPassword           = project.findProperty('mysql.password')              ?: ''
-def blogRedisHost               = project.findProperty('redis.host')                  ?: ''
-def blogRedisPort               = project.findProperty('redis.port')                  ?: ''
-def blogRedisDatabase           = project.findProperty('redis.database')              ?: ''
-def blogRedisPassword           = project.findProperty('redis.password')              ?: ''
-def blogRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
-def blogRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
-def blogRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
-
-processResources {
-    filesMatching('**/application.yml') {
-        expand(
-                active                     : 'dev',
-                mysql_url                  : blogMysqlUrl,
-                mysql_username             : blogMysqlUsername,
-                mysql_password             : blogMysqlPassword,
-                redis_host                 : blogRedisHost,
-                redis_port                 : blogRedisPort,
-                redis_database             : blogRedisDatabase,
-                redis_password             : blogRedisPassword,
-                redis_jedis_pool_max_active: blogRedisJedisPoolMaxActive,
-                redis_jedis_pool_max_idle  : blogRedisJedisPoolMaxIdle,
-                redis_jedis_pool_min_idle  : blogRedisJedisPoolMinIdle
-        )
-    }
 }
 
 // Git 属性注入：将 branch / commit id / 构建时间写入 git.properties

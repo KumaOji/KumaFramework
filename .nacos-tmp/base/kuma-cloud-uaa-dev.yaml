@@ -1,3 +1,13 @@
+server:
+  port: 33336
+  shutdown: graceful
+  servlet:
+    session:
+      cookie:
+        name: UAA_SESSION
+        http-only: true
+        same-site: lax
+
 management:
   endpoints:
     web:
@@ -8,19 +18,52 @@ management:
       show-details: when_authorized
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   main:
     lazy-initialization: false
     log-startup-info: true
   sql:
     init:
       mode: never
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          type: com.zaxxer.hikari.HikariDataSource
+          url: jdbc:mysql://172.23.89.45:3306/kuma_uaa?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+          username: root
+          password: 123456
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          hikari:
+            minimum-idle: 5
+            maximum-pool-size: 30
+            connection-timeout: 10000
+            idle-timeout: 600000
+            max-lifetime: 1800000
+  data:
+    redis:
+      host: 172.23.89.45
+      port: 6379
+      database: 0
+      password: "123456"
+      jedis:
+        pool:
+          max-active: ${redis_jedis_pool_max_active:8}
+          max-idle: ${redis_jedis_pool_max_idle:8}
+          min-idle: ${redis_jedis_pool_min_idle:0}
+  cloud:
+    inetutils:
+      timeout-value: 1000
+      prefer-ip-address: true
+    service-registry:
+      auto-registration:
+        enabled: true
   autoconfigure:
     exclude:
-      - com.alibaba.cloud.nacos.NacosDiscoveryAutoConfiguration
-      - com.alibaba.cloud.nacos.discovery.NacosDiscoveryClientConfiguration
-      - com.alibaba.cloud.nacos.NacosConfigAutoConfiguration
-      - com.alibaba.cloud.nacos.discovery.NacosServiceDiscoveryAutoConfiguration
-      - com.alibaba.cloud.nacos.registry.NacosServiceRegistryAutoConfiguration
       - com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
 
@@ -48,13 +91,35 @@ knife4j:
   enable: true
 
 kuma:
+  cloud:
+    alibaba:
+      nacos:
+        enabled: true
   uaa:
-    issuer: ${UAA_ISSUER:http://127.0.0.1:33336}
+    issuer: http://172.23.89.45:33336
     jwk:
       private-key-location: ${UAA_JWK_PRIVATE_KEY:./data/uaa-jwt-rsa-private.pem}
+    token:
+      access-token-ttl: 30m
+      refresh-token-ttl: 30d
+      authorization-code-ttl: 5m
+      reuse-refresh-tokens: false
+    captcha:
+      enabled: true
+      length: 4
+      ttl: 2m
+    login:
+      max-fail-count: 5
+      lock-duration: 15m
+    mfa:
+      issuer: KumaCloud
+      bind-ttl: 10m
     admin:
+      init-enabled: true
       username: ${UAA_ADMIN_USERNAME:admin}
       password: ${UAA_ADMIN_PASSWORD:admin123}
+      nickname: 超级管理员
+      email: admin@kumacloud.top
     clients:
       - client-id: blog
         client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
@@ -64,7 +129,7 @@ kuma:
           - refresh_token
         authentication-method: client_secret_basic
         redirect-uris:
-          - http://127.0.0.1:9000/api/login/oauth2/code/blog
+          - http://172.23.89.45:9000/api/login/oauth2/code/blog
           - http://localhost:9000/api/login/oauth2/code/blog
         scopes:
           - openid

@@ -10,14 +10,25 @@ server:
     connection-timeout: 20000
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  cloud:
+    inetutils:
+      timeout-value: 1000
+      prefer-ip-address: true
+    service-registry:
+      auto-registration:
+        enabled: true
   security:
     oauth2:
       client:
         registration:
           blog:
             provider: blog-uaa
-            client-id: ${BLOG_OAUTH2_CLIENT_ID}
-            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET}
+            client-id: ${BLOG_OAUTH2_CLIENT_ID:blog}
+            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
             client-authentication-method: client_secret_basic
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
@@ -27,14 +38,14 @@ spring:
               - offline_access
         provider:
           blog-uaa:
-            authorization-uri: ${BLOG_OAUTH2_AUTHORIZATION_URI}
-            token-uri: ${BLOG_OAUTH2_TOKEN_URI}
-            jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI}
-            user-info-uri: ${BLOG_OAUTH2_USER_INFO_URI}
+            authorization-uri: http://172.23.89.45:33336/oauth2/authorize
+            token-uri: http://172.23.89.45:33336/oauth2/token
+            jwk-set-uri: http://172.23.89.45:33336/oauth2/jwks
+            user-info-uri: http://172.23.89.45:33336/userinfo
             user-name-attribute: preferred_username
       resourceserver:
         jwt:
-          jwk-set-uri: ${BLOG_OAUTH2_JWK_SET_URI}
+          jwk-set-uri: http://172.23.89.45:33336/oauth2/jwks
   mvc:
     async:
       request-timeout: 600000
@@ -50,17 +61,33 @@ spring:
   sql:
     init:
       mode: never
-
   datasource:
     dynamic:
+      primary: mysql
       datasource:
         mysql:
+          type: com.zaxxer.hikari.HikariDataSource
+          url: jdbc:mysql://172.23.89.45:3306/base?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+          username: root
+          password: 123456
+          driver-class-name: com.mysql.cj.jdbc.Driver
           hikari:
             minimum-idle: 5
             maximum-pool-size: 30
             connection-timeout: 10000
             idle-timeout: 600000
             max-lifetime: 1800000
+  data:
+    redis:
+      host: 172.23.89.45
+      port: 6379
+      database: 0
+      password: "123456"
+      jedis:
+        pool:
+          max-active: ${redis_jedis_pool_max_active:8}
+          max-idle: ${redis_jedis_pool_max_idle:8}
+          min-idle: ${redis_jedis_pool_min_idle:0}
 
 logging:
   config: classpath:logback-spring.xml
@@ -75,10 +102,10 @@ mybatis-plus:
 
 springdoc:
   api-docs:
-    enabled: false
+    enabled: true
     path: /v3/api-docs
   swagger-ui:
-    enabled: false
+    enabled: true
     path: /swagger-ui.html
 
 knife4j:
@@ -86,17 +113,17 @@ knife4j:
 
 blog:
   token-expire-seconds: 604800
-  cookie-secure: true
+  cookie-secure: false
   oauth2:
     registration-id: blog
     username-claim: preferred_username
-    issuer-uri: ${BLOG_OAUTH2_ISSUER_URI}
-    audience: ${BLOG_OAUTH2_AUDIENCE:blog}
-    login-success-url: ${BLOG_LOGIN_SUCCESS_URL}
+    issuer-uri: http://172.23.89.45:33336
+    audience: blog
+    login-success-url: http://172.23.89.45:3000
     refresh-token-max-age: 30d
   admin-initial-password: admin123
   music:
-    base-path: /data/music
+    base-path: E:\blog-resource\music
 
 jetcache:
   stat-interval-minutes: 15
@@ -107,20 +134,28 @@ jetcache:
       limit: 2000
 
 kuma:
+  cloud:
+    alibaba:
+      nacos:
+        enabled: true
   boot:
     ai:
-      base-url: ${AI_CHAT_BASE_URL}
-      api-key: ${AI_CHAT_API_KEY}
-      model: ${AI_CHAT_MODEL:gpt-4o-mini}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${DASHSCOPE_API_KEY:}
+      model: qwen-turbo
       embedding:
-        base-url: http://blog-ollama:11434/v1
-        model: nomic-embed-text
+        base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+        api-key: ${DASHSCOPE_API_KEY:}
+        model: text-embedding-v3
       qdrant:
-        host: blog-qdrant
+        host: localhost
         grpc-port: 6334
         http-port: 6333
         collection: blog-docs
-        dimension: 768
+        dimension: 1024
+      rag:
+        chunk-size: 800
+        chunk-overlap: 100
     core:
       enabled: true
       async:
@@ -156,7 +191,7 @@ kuma:
     security:
       oauth2:
         endpoint:
-          uaa-service-uri: ${BLOG_OAUTH2_UAA_URI}
+          uaa-service-uri: http://172.23.89.45:33336
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**
@@ -165,6 +200,7 @@ kuma:
         - /doc.html
         - /webjars/**
         - /auth/**
+        - /ws/**
         - /error
       authentication:
         expire: 86400
@@ -185,7 +221,7 @@ kuma:
             pagination:
               enabled: true
     springdoc:
-      enabled: false
+      enabled: true
       type: SERVICE
       title: Blog API 文档
       description: 博客系统 RESTful API 接口文档

@@ -7,20 +7,23 @@ spring:
     timeout-per-shutdown-phase: 30s
   main:
     web-application-type: reactive
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # 与 UAA 的 kuma.uaa.issuer 保持一致；开启鉴权时用于校验 JWT 签名与 iss
-          issuer-uri: ${GATEWAY_JWT_ISSUER_URI:http://127.0.0.1:33336}
   data:
     redis:
+      host: 172.23.89.45
+      port: 6379
+      database: 0
+      password: "123456"
       timeout: 3s
   cloud:
+    inetutils:
+      timeout-value: 1000
+      prefer-ip-address: true
+    service-registry:
+      auto-registration:
+        enabled: true
     gateway:
       server:
         webflux:
-          # SCG 5 路由前缀（旧版 spring.cloud.gateway.routes 已失效）
           httpclient:
             connect-timeout: 3000
             response-timeout: 30s
@@ -39,9 +42,8 @@ spring:
                 statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
           routes:
-            # UAA：/uaa/oauth2/token → 127.0.0.1:33336/oauth2/token
             - id: uaa
-              uri: http://127.0.0.1:33336
+              uri: lb://kuma-cloud-uaa
               predicates:
                 - Path=/uaa/**
               filters:
@@ -50,9 +52,8 @@ spring:
                   args:
                     name: uaa
                     fallbackUri: forward:/fallback/uaa
-            # Blog：/blog/posts → 127.0.0.1:9000/api/posts（blog context-path=/api）
             - id: blog
-              uri: http://127.0.0.1:9000
+              uri: lb://kuma-cloud-blog
               predicates:
                 - Path=/blog/**
               filters:
@@ -120,7 +121,6 @@ logging:
     com.kuma.cloud.gateway: INFO
     org.springframework.cloud.gateway: INFO
 
-# ── Knife4j 文档聚合（手动模式，按路由前缀拉取下游 OpenAPI） ─────────────────
 knife4j:
   gateway:
     enabled: true
@@ -128,12 +128,15 @@ knife4j:
     routes:
       - name: blog
         url: /blog/v3/api-docs
-        service-name: blog
+        service-name: kuma-cloud-blog
         order: 1
 
-# ── Kuma 框架配置（与 project4 / blog 风格对齐） ─────────────────────────────
 kuma:
   boot:
+    security:
+      oauth2:
+        endpoint:
+          uaa-service-name: kuma-cloud-uaa
     core:
       enabled: true
       env: DEV
@@ -144,11 +147,9 @@ kuma:
         enabled: false
     prometheus:
       enabled: true
-    # 网关无 MyBatis / MVC Controller，关闭 monitor 采集器，保留 Prometheus + SCG metrics 即可
     monitor:
       enabled: false
     ip2region:
-      # 需要访问日志 geo= 归属地时置 true，并确保 classpath:ip2region/ip2region.xdb 存在
       enabled: false
     logger:
       enabled: true
@@ -160,11 +161,14 @@ kuma:
           enabled: false
         logstash:
           enabled: false
-          destinations: 127.0.0.1:5000
+          destinations: 172.23.89.45:5000
         loki:
           enabled: false
           http-url: http://localhost:3100/loki/api/v1/push
   cloud:
+    alibaba:
+      nacos:
+        enabled: true
     gateway:
       enabled: true
       trust-proxy-headers: false
@@ -191,7 +195,6 @@ kuma:
         allow-credentials: false
         max-age: 1h
       auth:
-        # 本地开发默认关闭 JWT 校验；生产环境置 true 并确保 UAA 可访问
         enabled: false
         white-list:
           - /actuator/**
@@ -218,7 +221,6 @@ kuma:
         fallback-to-ip: true
         include-path: false
 
-# monitor 组件扫描兜底：无对应框架时勿增强（框架侧已加 @ConditionalOnClass，此处双保险）
 actuator:
   db:
     mybatis:

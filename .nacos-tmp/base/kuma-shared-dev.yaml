@@ -1,0 +1,16 @@
+# 各微服务共享连接信息（bootstrap shared-configs）
+# 中间件均部署在 172.23.89.45
+
+mysql_host: 172.23.89.45
+mysql_port: 3306
+mysql_username: root
+mysql_password: 123456
+mysql_url: jdbc:mysql://172.23.89.45:3306/base?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+
+redis_host: 172.23.89.45
+redis_port: 6379
+redis_database: 0
+redis_password: "123456"
+redis_jedis_pool_max_active: 8
+redis_jedis_pool_max_idle: 8
+redis_jedis_pool_min_idle: 0

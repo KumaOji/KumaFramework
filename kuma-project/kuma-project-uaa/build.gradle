@@ -30,6 +30,7 @@ dependencies {
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
     }
+    api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
 
     api projectLibs.hutool.core
     api projectLibs.spring.boot.starter.web
@@ -51,35 +52,6 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-def uaaMysqlUrl                = project.findProperty('mysql.url')                   ?: ''
-def uaaMysqlUsername           = project.findProperty('mysql.username')              ?: ''
-def uaaMysqlPassword           = project.findProperty('mysql.password')              ?: ''
-def uaaRedisHost               = project.findProperty('redis.host')                  ?: ''
-def uaaRedisPort               = project.findProperty('redis.port')                  ?: ''
-def uaaRedisDatabase           = project.findProperty('redis.database')              ?: ''
-def uaaRedisPassword           = project.findProperty('redis.password')              ?: ''
-def uaaRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
-def uaaRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
-def uaaRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
-
-processResources {
-    filesMatching('**/application.yml') {
-        expand(
-                active                     : 'dev',
-                mysql_url                  : uaaMysqlUrl,
-                mysql_username             : uaaMysqlUsername,
-                mysql_password             : uaaMysqlPassword,
-                redis_host                 : uaaRedisHost,
-                redis_port                 : uaaRedisPort,
-                redis_database             : uaaRedisDatabase,
-                redis_password             : uaaRedisPassword,
-                redis_jedis_pool_max_active: uaaRedisJedisPoolMaxActive,
-                redis_jedis_pool_max_idle  : uaaRedisJedisPoolMaxIdle,
-                redis_jedis_pool_min_idle  : uaaRedisJedisPoolMinIdle
-        )
-    }
 }
 
 // Git 属性注入：将 branch / commit id / 构建时间写入 git.properties

@@ -94,8 +94,8 @@ public class GatewayCloudProperties {
     public static class Auth {
 
         /**
-         * 关闭时所有请求放行（本地联调用），开启时需配置
-         * {@code spring.security.oauth2.resourceserver.jwt.issuer-uri}。
+         * 关闭时所有请求放行（本地联调用），开启后通过 Nacos 服务发现解析 UAA 的
+         * {@code /oauth2/jwks}（见 {@code kuma.boot.security.oauth2.endpoint.uaa-service-name}）。
          */
         private boolean enabled = false;
 
