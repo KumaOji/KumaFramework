@@ -115,9 +115,9 @@ jobs:
           script: |
             kubectl set image deployment/uaa \
               uaa=${{ steps.ver.outputs.FULL_IMAGE }} \
-              -n blog
-            kubectl scale deployment/uaa -n blog --replicas=1
-            kubectl rollout status deployment/uaa -n blog --timeout=600s
+              -n base
+            kubectl scale deployment/uaa -n base --replicas=1
+            kubectl rollout status deployment/uaa -n base --timeout=600s
 
             for tag in $(k3s crictl images | awk -v repo="${{ env.IMAGE }}" '$1==repo{print $2}'); do
               if [ "$tag" != "${{ steps.ver.outputs.IMAGE_TAG }}" ] && [ "$tag" != "latest" ]; then

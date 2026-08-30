@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nacos
-  namespace: blog
+  namespace: base
 spec:
   replicas: 1
   selector:
@@ -66,7 +66,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nacos
-  namespace: blog
+  namespace: base
 spec:
   selector:
     app: nacos
@@ -82,7 +82,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: blog-nacos
-  namespace: blog
+  namespace: base
 spec:
   selector:
     app: nacos

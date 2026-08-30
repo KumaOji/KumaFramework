@@ -5,29 +5,30 @@ set -euo pipefail
 NACOS_USERNAME="${NACOS_USERNAME:-nacos}"
 NACOS_PASSWORD="${NACOS_PASSWORD:-}"
 NACOS_SERVER="127.0.0.1:8848"
+K8S_NAMESPACE="${K8S_NAMESPACE:-base}"
 CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config}"
 
 echo "=== blog-nacos status ==="
 NACOS_SVC="${NACOS_SVC:-blog-nacos}"
-if ! kubectl get svc "${NACOS_SVC}" -n blog >/dev/null 2>&1; then
-  if kubectl get svc nacos -n blog >/dev/null 2>&1; then
+if ! kubectl get svc "${NACOS_SVC}" -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
+  if kubectl get svc nacos -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
     NACOS_SVC="nacos"
     echo "WARN: blog-nacos not found, fallback to svc/nacos"
   else
-    echo "ERROR: No Nacos service in namespace blog."
-    kubectl get deploy,svc -n blog | grep -E 'nacos|NAME' || true
+    echo "ERROR: No Nacos service in namespace ${K8S_NAMESPACE}."
+    kubectl get deploy,svc -n "${K8S_NAMESPACE}" | grep -E 'nacos|NAME' || true
     exit 1
   fi
 fi
 
-if kubectl get deploy "${NACOS_SVC}" -n blog >/dev/null 2>&1; then
-  kubectl rollout status "deployment/${NACOS_SVC}" -n blog --timeout=300s
+if kubectl get deploy "${NACOS_SVC}" -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
+  kubectl rollout status "deployment/${NACOS_SVC}" -n "${K8S_NAMESPACE}" --timeout=300s
 fi
 
 pkill -f "kubectl port-forward.*${NACOS_SVC}.*8848:8848" 2>/dev/null || true
 sleep 1
 
-kubectl port-forward -n blog "svc/${NACOS_SVC}" 8848:8848 >/tmp/nacos-pf.log 2>&1 &
+kubectl port-forward -n "${K8S_NAMESPACE}" "svc/${NACOS_SVC}" 8848:8848 >/tmp/nacos-pf.log 2>&1 &
 PF_PID=$!
 trap 'kill ${PF_PID} 2>/dev/null || true' EXIT
 
@@ -44,7 +45,7 @@ if [ "${READY}" -ne 1 ]; then
   echo "port-forward log:"
   cat /tmp/nacos-pf.log || true
   echo "blog-nacos pod logs:"
-  kubectl logs -n blog -l app=blog-nacos --tail=80 || true
+  kubectl logs -n "${K8S_NAMESPACE}" -l app=blog-nacos --tail=80 || true
   exit 1
 fi
 

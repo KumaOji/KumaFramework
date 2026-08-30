@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: blog-fronted
-  namespace: blog
+  namespace: base
   annotations:
     # 使用 letsencrypt certResolver 自动签发证书
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
