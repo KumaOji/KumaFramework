@@ -38,7 +38,7 @@ jobs:
           envs: NACOS_PASSWORD
           script: |
             chmod +x /tmp/nacos-config/scripts/publish-nacos-prod.sh
-            CONFIG_ROOT=/tmp/nacos-config NACOS_PASSWORD="${NACOS_PASSWORD:-}" \
+            CONFIG_ROOT=/tmp/nacos-config/.nacos-tmp/base NACOS_PASSWORD="${NACOS_PASSWORD:-}" \
               /tmp/nacos-config/scripts/publish-nacos-prod.sh
         env:
           NACOS_PASSWORD: ${{ secrets.NACOS_PASSWORD }}
