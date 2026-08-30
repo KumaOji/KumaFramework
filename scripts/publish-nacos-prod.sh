@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 在 kumacloud 服务器上执行：通过 port-forward 向 blog-nacos 发布 prod 配置
+# 在 kumacloud 服务器上执行：通过 port-forward 向 nacos 发布 prod 配置
 set -euo pipefail
 
 NACOS_USERNAME="${NACOS_USERNAME:-nacos}"
@@ -8,17 +8,12 @@ NACOS_SERVER="127.0.0.1:8848"
 K8S_NAMESPACE="${K8S_NAMESPACE:-base}"
 CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config/base}"
 
-echo "=== blog-nacos status ==="
-NACOS_SVC="${NACOS_SVC:-blog-nacos}"
+echo "=== nacos status ==="
+NACOS_SVC="${NACOS_SVC:-nacos}"
 if ! kubectl get svc "${NACOS_SVC}" -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
-  if kubectl get svc nacos -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
-    NACOS_SVC="nacos"
-    echo "WARN: blog-nacos not found, fallback to svc/nacos"
-  else
-    echo "ERROR: No Nacos service in namespace ${K8S_NAMESPACE}."
-    kubectl get deploy,svc -n "${K8S_NAMESPACE}" | grep -E 'nacos|NAME' || true
-    exit 1
-  fi
+  echo "ERROR: No Nacos service '${NACOS_SVC}' in namespace ${K8S_NAMESPACE}."
+  kubectl get deploy,svc -n "${K8S_NAMESPACE}" | grep -E 'nacos|NAME' || true
+  exit 1
 fi
 
 if kubectl get deploy "${NACOS_SVC}" -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
@@ -44,8 +39,8 @@ if [ "${READY}" -ne 1 ]; then
   echo "ERROR: Nacos health check failed (curl exit 7 = connection refused)."
   echo "port-forward log:"
   cat /tmp/nacos-pf.log || true
-  echo "blog-nacos pod logs:"
-  kubectl logs -n "${K8S_NAMESPACE}" -l app=blog-nacos --tail=80 || true
+  echo "nacos pod logs:"
+  kubectl logs -n "${K8S_NAMESPACE}" -l app=nacos --tail=80 || true
   exit 1
 fi
 
@@ -116,4 +111,4 @@ for file in "${FILES[@]}"; do
   echo "Published ${DATA_ID}"
 done
 
-echo "All prod configs published to blog-nacos (tenant=${TENANT})."
+echo "All prod configs published to nacos (tenant=${TENANT})."

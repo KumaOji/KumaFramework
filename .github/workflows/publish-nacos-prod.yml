@@ -28,7 +28,7 @@ jobs:
           target: /tmp/nacos-config/
           strip_components: 0
 
-      - name: Publish prod configs to blog-nacos
+      - name: Publish prod configs to nacos
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}

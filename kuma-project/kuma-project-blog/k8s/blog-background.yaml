@@ -25,7 +25,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR
-              value: "blog-nacos:8848"
+              value: "nacos:8848"
             - name: SPRING_CLOUD_NACOS_USERNAME
               value: nacos
             - name: SPRING_CLOUD_NACOS_PASSWORD
