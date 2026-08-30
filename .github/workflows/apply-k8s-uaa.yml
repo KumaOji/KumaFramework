@@ -1,0 +1,39 @@
+name: Apply UAA K8s Configs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'kuma-project/kuma-project-uaa/k8s/**'
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clean target dir on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          script: rm -rf /data/blog/k8s/uaa && mkdir -p /data/blog/k8s/uaa
+
+      - name: Copy k8s files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: kuma-project/kuma-project-uaa/k8s/*.yaml
+          target: /data/blog/k8s/uaa/
+
+      - name: Apply k8s configs
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          script: kubectl apply -R -f /data/blog/k8s/uaa/

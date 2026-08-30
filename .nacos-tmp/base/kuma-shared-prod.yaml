@@ -1,0 +1,14 @@
+# 各微服务共享连接信息（prod，blog 命名空间内集群 DNS）
+mysql_host: blog-mysql
+mysql_port: 3306
+mysql_username: root
+mysql_password: ${MYSQL_PASSWORD}
+mysql_url: jdbc:mysql://blog-mysql:3306/base?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+
+redis_host: blog-redis
+redis_port: 6379
+redis_database: 0
+redis_password: ${REDIS_PASSWORD}
+redis_jedis_pool_max_active: 8
+redis_jedis_pool_max_idle: 8
+redis_jedis_pool_min_idle: 0

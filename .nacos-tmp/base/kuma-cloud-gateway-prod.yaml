@@ -1,0 +1,228 @@
+server:
+  port: 18080
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  main:
+    web-application-type: reactive
+  data:
+    redis:
+      host: blog-redis
+      port: 6379
+      database: 0
+      password: ${REDIS_PASSWORD}
+      timeout: 3s
+  cloud:
+    inetutils:
+      timeout-value: 1000
+      prefer-ip-address: true
+    service-registry:
+      auto-registration:
+        enabled: true
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 3000
+            response-timeout: 30s
+            pool:
+              type: elastic
+              max-connections: 500
+          metrics:
+            enabled: true
+          observability:
+            enabled: true
+          default-filters:
+            - name: Retry
+              args:
+                retries: 1
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+          routes:
+            - id: uaa
+              uri: lb://kuma-cloud-uaa
+              predicates:
+                - Path=/uaa/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: uaa
+                    fallbackUri: forward:/fallback/uaa
+            - id: blog
+              uri: http://blog-background:9000
+              predicates:
+                - Path=/blog/**
+              filters:
+                - RewritePath=/blog/(?<segment>.*), /api/${segment}
+                - name: CircuitBreaker
+                  args:
+                    name: blog
+                    fallbackUri: forward:/fallback/blog
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 50
+                    redis-rate-limiter.burstCapacity: 100
+                    key-resolver: "#{@userOrIpKeyResolver}"
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 15s
+        permitted-number-of-calls-in-half-open-state: 5
+    instances:
+      blog:
+        base-config: default
+      uaa:
+        base-config: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,kmc,kmchealth,kmcstartup,prometheus,metrics,gateway
+  endpoint:
+    health:
+      show-details: when_authorized
+    gateway:
+      enabled: true
+    prometheus:
+      enabled: true
+  info:
+    env:
+      enabled: true
+  health:
+    kmc:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    enable:
+      jvm: true
+      process: true
+      system: true
+
+info:
+  app:
+    name: gateway
+    description: Kuma 体系统一网关
+    version: 1.0.0
+
+logging:
+  level:
+    root: INFO
+    com.kuma.cloud.gateway: INFO
+    org.springframework.cloud.gateway: INFO
+
+knife4j:
+  gateway:
+    enabled: false
+
+kuma:
+  boot:
+    security:
+      oauth2:
+        endpoint:
+          uaa-service-name: kuma-cloud-uaa
+    core:
+      enabled: true
+      env: PROD
+      collect-hook-enabled: false
+      context-restart-enabled: false
+    actuator:
+      managedresource:
+        enabled: false
+    prometheus:
+      enabled: true
+    monitor:
+      enabled: false
+    ip2region:
+      enabled: false
+    logger:
+      enabled: true
+      logging:
+        console:
+          enabled: true
+          close-after-start: false
+        files:
+          enabled: false
+        logstash:
+          enabled: false
+        loki:
+          enabled: false
+  cloud:
+    alibaba:
+      nacos:
+        enabled: true
+    gateway:
+      enabled: true
+      trust-proxy-headers: true
+      cors:
+        enabled: true
+        allowed-origin-patterns:
+          - "https://blog.kumacloud.top"
+          - "https://*.kumacloud.top"
+        allowed-methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+          - PATCH
+          - HEAD
+        allowed-headers:
+          - "*"
+        exposed-headers:
+          - kmc-trace-id
+          - X-Response-Time
+          - X-RateLimit-Remaining
+          - X-RateLimit-Burst-Capacity
+          - X-RateLimit-Replenish-Rate
+        allow-credentials: false
+        max-age: 1h
+      auth:
+        enabled: false
+        white-list:
+          - /actuator/**
+          - /fallback/**
+          - /uaa/**
+          - /oauth2/**
+          - /login
+          - /logout
+          - /captcha
+          - /doc.html
+          - /webjars/**
+          - /v3/api-docs/**
+          - /favicon.ico
+        authorities-claim: authorities
+        username-claim: preferred_username
+        relay-identity: true
+      access:
+        enabled: false
+      log:
+        enabled: true
+        slow-threshold: 2s
+        response-time-header: true
+      rate-limit:
+        fallback-to-ip: true
+        include-path: false
+
+actuator:
+  db:
+    mybatis:
+      enhance:
+        enable: false
+  http:
+    enhance:
+      enable: false
+  redis:
+    template:
+      enhance:
+        enable: false

@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uaa
+  namespace: blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uaa
+  template:
+    metadata:
+      labels:
+        app: uaa
+    spec:
+      containers:
+        - name: uaa
+          image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/uaa:placeholder
+          ports:
+            - containerPort: 33336
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: UAA_JWK_PRIVATE_KEY
+              value: /app/data/uaa-jwt-rsa-private.pem
+            - name: KUMA_UAA_ISSUER
+              value: "https://blog.kumacloud.top/uaa"
+            - name: SPRING_CLOUD_NACOS_SERVER_ADDR
+              value: "172.23.89.45:8848"
+            - name: SPRING_CLOUD_NACOS_USERNAME
+              value: nacos
+            - name: SPRING_CLOUD_NACOS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: nacos-password
+            - name: UAA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: uaa-admin-password
+            - name: BLOG_OAUTH2_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: blog-oauth2-client-secret
+            - name: GATEWAY_OAUTH2_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: gateway-oauth2-client-secret
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: mysql-root-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: redis-password
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1024Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 33336
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 33336
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            failureThreshold: 3
+          volumeMounts:
+            - name: uaa-data
+              mountPath: /app/data
+            - name: logs
+              mountPath: /data/uaa/logs
+      volumes:
+        - name: uaa-data
+          hostPath:
+            path: /data/blog/uaa/data
+            type: DirectoryOrCreate
+        - name: logs
+          hostPath:
+            path: /data/blog/uaa/logs
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uaa
+  namespace: blog
+spec:
+  type: ClusterIP
+  selector:
+    app: uaa
+  ports:
+    - port: 33336
+      targetPort: 33336

@@ -3,6 +3,10 @@ spring:
     name: kuma-cloud-blog
   profiles:
     active: dev
+  config:
+    import:
+      - "optional:nacos:kuma-shared-dev.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      - "optional:nacos:kuma-cloud-blog-dev.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
   cloud:
     nacos:
       username: nacos

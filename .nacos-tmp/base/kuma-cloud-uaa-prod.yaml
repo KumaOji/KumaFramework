@@ -1,0 +1,202 @@
+server:
+  port: 33336
+  shutdown: graceful
+  servlet:
+    session:
+      cookie:
+        name: UAA_SESSION
+        http-only: true
+        same-site: lax
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,startup
+  endpoint:
+    health:
+      show-details: when_authorized
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  main:
+    lazy-initialization: false
+    log-startup-info: true
+  sql:
+    init:
+      mode: never
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          type: com.zaxxer.hikari.HikariDataSource
+          url: jdbc:mysql://blog-mysql:3306/kuma_uaa?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+          username: root
+          password: ${MYSQL_PASSWORD}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          hikari:
+            minimum-idle: 5
+            maximum-pool-size: 30
+            connection-timeout: 10000
+            idle-timeout: 600000
+            max-lifetime: 1800000
+  data:
+    redis:
+      host: blog-redis
+      port: 6379
+      database: 0
+      password: ${REDIS_PASSWORD}
+      jedis:
+        pool:
+          max-active: ${redis_jedis_pool_max_active:8}
+          max-idle: ${redis_jedis_pool_max_idle:8}
+          min-idle: ${redis_jedis_pool_min_idle:0}
+  cloud:
+    inetutils:
+      timeout-value: 1000
+      prefer-ip-address: true
+    service-registry:
+      auto-registration:
+        enabled: true
+  autoconfigure:
+    exclude:
+      - com.alibaba.druid.spring.boot4.autoconfigure.DruidDataSourceAutoConfigure
+      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+
+logging:
+  level:
+    root: INFO
+    com.kuma.cloud.uaa: INFO
+    org.springframework.security: INFO
+
+mybatis-plus:
+  global-config:
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    enabled: false
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui.html
+
+knife4j:
+  enable: false
+
+kuma:
+  cloud:
+    alibaba:
+      nacos:
+        enabled: true
+  uaa:
+    issuer: ${KUMA_UAA_ISSUER:https://blog.kumacloud.top/uaa}
+    jwk:
+      private-key-location: ${UAA_JWK_PRIVATE_KEY:/app/data/uaa-jwt-rsa-private.pem}
+    token:
+      access-token-ttl: 30m
+      refresh-token-ttl: 30d
+      authorization-code-ttl: 5m
+      reuse-refresh-tokens: false
+    captcha:
+      enabled: true
+      length: 4
+      ttl: 2m
+    login:
+      max-fail-count: 5
+      lock-duration: 15m
+    mfa:
+      issuer: KumaCloud
+      bind-ttl: 10m
+    admin:
+      init-enabled: true
+      username: ${UAA_ADMIN_USERNAME:admin}
+      password: ${UAA_ADMIN_PASSWORD}
+      nickname: 超级管理员
+      email: admin@kumacloud.top
+    clients:
+      - client-id: blog
+        client-secret: ${BLOG_OAUTH2_CLIENT_SECRET}
+        client-name: Kuma Blog
+        grant-types:
+          - authorization_code
+          - refresh_token
+        authentication-method: client_secret_basic
+        redirect-uris:
+          - https://blog.kumacloud.top/api/login/oauth2/code/blog
+          - http://blog-background:9000/api/login/oauth2/code/blog
+        scopes:
+          - openid
+          - profile
+          - offline_access
+        require-authorization-consent: false
+        require-proof-key: false
+      - client-id: gateway
+        client-secret: ${GATEWAY_OAUTH2_CLIENT_SECRET}
+        client-name: Kuma Gateway
+        grant-types:
+          - client_credentials
+        authentication-method: client_secret_basic
+        scopes:
+          - gateway
+        require-authorization-consent: false
+        require-proof-key: false
+  boot:
+    ratelimit:
+      enabled: true
+    idempotent:
+      enabled: true
+    security:
+      oauth2:
+        endpoint:
+          issuer-uri: ${kuma.uaa.issuer}
+          uaa-service-uri: ${kuma.uaa.issuer}
+      ignore-url:
+        - /login
+        - /logout
+        - /captcha
+        - /oauth2/**
+        - /userinfo
+        - /.well-known/**
+        - /connect/**
+    cache:
+      redis:
+        enabled: true
+    data:
+      datasource:
+        enabled: true
+      mybatis:
+        mybatis-plus:
+          enabled: true
+          interceptor:
+            enabled: true
+            pagination:
+              enabled: true
+    springdoc:
+      enabled: false
+      type: SERVICE
+      title: Kuma UAA API
+      description: 统一认证授权中心管理接口
+      version: 1.0.0
+      packages-to-scan:
+        - com.kuma.cloud.uaa
+    web:
+      graceful-response:
+        print-exception-in-global-advice: true
+        response-style: 0
+        exclude-paths:
+          - /v3/api-docs/**
+          - /swagger-ui/**
+          - /doc.html
+          - /login
+          - /oauth2/**
+          - /userinfo
+          - /captcha
+      global-exception:
+        enabled: true

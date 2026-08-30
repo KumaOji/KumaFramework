@@ -2,23 +2,24 @@ spring:
   application:
     name: kuma-cloud-gateway
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - "optional:nacos:kuma-shared-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      - "optional:nacos:kuma-cloud-gateway-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
   cloud:
     nacos:
-      username: nacos
-      password: 123456
-      server-addr: 172.23.89.45:8848
+      username: ${SPRING_CLOUD_NACOS_USERNAME:nacos}
+      password: ${SPRING_CLOUD_NACOS_PASSWORD:123456}
+      server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
       discovery:
         enabled: true
         register-enabled: true
         namespace: base
-        server-addr: 172.23.89.45:8848
+        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
       config:
         enabled: true
         namespace: base
-        server-addr: 172.23.89.45:8848
+        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
         file-extension: yaml
-        shared-configs:
-          - data-id: kuma-shared-dev.yaml
-            group: DEFAULT_GROUP
-            refresh: true
+        group: DEFAULT_GROUP
