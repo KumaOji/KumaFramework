@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: blog-background
-  namespace: base
+  namespace: blog
 spec:
   replicas: 1
   strategy:
@@ -25,13 +25,13 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR
-              value: "nacos:8848"
+              value: "nacos.base:8848"
             - name: SPRING_CLOUD_NACOS_USERNAME
               value: nacos
             - name: SPRING_CLOUD_NACOS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: kuma-secret
+                  name: blog-secret
                   key: nacos-password
             - name: SPRING_CONFIG_IMPORT
               value: "optional:nacos:kuma-shared-prod.yaml?group=DEFAULT_GROUP&refreshEnabled=true,optional:nacos:kuma-cloud-blog-prod.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
@@ -41,7 +41,7 @@ spec:
                   name: blog-secret
                   key: admin-initial-password
             - name: MYSQL_URL
-              value: "jdbc:mysql://mysql:3306/base?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true"
+              value: "jdbc:mysql://mysql.base:3306/base?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true"
             - name: MYSQL_USERNAME
               value: root
             - name: MYSQL_PASSWORD
@@ -50,7 +50,7 @@ spec:
                   name: blog-secret
                   key: mysql-root-password
             - name: REDIS_HOST
-              value: redis
+              value: redis.base
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_DATABASE
@@ -60,22 +60,22 @@ spec:
             - name: BLOG_OAUTH2_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: kuma-secret
+                  name: blog-secret
                   key: blog-oauth2-client-secret
             - name: BLOG_OAUTH2_AUTHORIZATION_URI
               value: "https://blog.kumacloud.top/uaa/oauth2/authorize"
             - name: BLOG_OAUTH2_TOKEN_URI
-              value: "http://uaa:33336/oauth2/token"
+              value: "http://uaa.base:33336/oauth2/token"
             - name: BLOG_OAUTH2_JWK_SET_URI
-              value: "http://uaa:33336/oauth2/jwks"
+              value: "http://uaa.base:33336/oauth2/jwks"
             - name: BLOG_OAUTH2_USER_INFO_URI
-              value: "http://uaa:33336/userinfo"
+              value: "http://uaa.base:33336/userinfo"
             - name: BLOG_OAUTH2_ISSUER_URI
               value: "https://blog.kumacloud.top/uaa"
             - name: BLOG_OAUTH2_AUDIENCE
               value: blog
             - name: BLOG_OAUTH2_UAA_URI
-              value: "http://uaa:33336"
+              value: "http://uaa.base:33336"
             - name: BLOG_LOGIN_SUCCESS_URL
               value: "https://blog.kumacloud.top/"
             # 外部 LLM API（OpenAI / 兼容接口）
@@ -136,7 +136,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: blog-background
-  namespace: base
+  namespace: blog
 spec:
   selector:
     app: blog-background

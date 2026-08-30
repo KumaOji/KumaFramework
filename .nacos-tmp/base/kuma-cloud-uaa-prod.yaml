@@ -34,7 +34,7 @@ spring:
       datasource:
         mysql:
           type: com.zaxxer.hikari.HikariDataSource
-          url: jdbc:mysql://mysql:3306/kuma_uaa?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+          url: jdbc:mysql://mysql.base:3306/kuma_uaa?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
           username: root
           password: ${MYSQL_PASSWORD}
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -46,7 +46,7 @@ spring:
             max-lifetime: 1800000
   data:
     redis:
-      host: redis
+      host: redis.base
       port: 6379
       database: 0
       jedis:
@@ -129,7 +129,7 @@ kuma:
         authentication-method: client_secret_basic
         redirect-uris:
           - https://blog.kumacloud.top/api/login/oauth2/code/blog
-          - http://blog-background:9000/api/login/oauth2/code/blog
+          - http://blog-background.blog:9000/api/login/oauth2/code/blog
         scopes:
           - openid
           - profile

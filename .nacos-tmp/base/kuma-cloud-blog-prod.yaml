@@ -113,10 +113,10 @@ kuma:
       api-key: ${AI_CHAT_API_KEY}
       model: ${AI_CHAT_MODEL:gpt-4o-mini}
       embedding:
-        base-url: http://ollama:11434/v1
+        base-url: http://ollama.base:11434/v1
         model: nomic-embed-text
       qdrant:
-        host: qdrant
+        host: qdrant.base
         grpc-port: 6334
         http-port: 6333
         collection: blog-docs

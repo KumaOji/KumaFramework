@@ -10,7 +10,7 @@ spring:
     web-application-type: reactive
   data:
     redis:
-      host: redis
+      host: redis.base
       port: 6379
       database: 0
       timeout: 3s
