@@ -1,3 +1,4 @@
+# Blog 后端部署在 blog 命名空间，连接 base 命名空间基础设施。
 apiVersion: apps/v1
 kind: Deployment
 metadata:
