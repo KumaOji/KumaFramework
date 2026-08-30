@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-nacos
+  namespace: blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-nacos
+  template:
+    metadata:
+      labels:
+        app: blog-nacos
+    spec:
+      containers:
+        - name: nacos
+          image: nacos/nacos-server:v2.4.3
+          ports:
+            - containerPort: 8848
+            - containerPort: 9848
+          env:
+            - name: MODE
+              value: standalone
+            - name: NACOS_AUTH_ENABLE
+              value: "true"
+            - name: NACOS_AUTH_TOKEN
+              value: "SecretKey012345678901234567890123456789012345678901234567"
+            - name: NACOS_AUTH_IDENTITY_KEY
+              value: serverIdentity
+            - name: NACOS_AUTH_IDENTITY_VALUE
+              value: security
+            - name: JVM_XMS
+              value: 256m
+            - name: JVM_XMX
+              value: 512m
+          readinessProbe:
+            httpGet:
+              path: /nacos/v1/console/health/readiness
+              port: 8848
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /nacos/v1/console/health/liveness
+              port: 8848
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: nacos-data
+              mountPath: /home/nacos/data
+      volumes:
+        - name: nacos-data
+          hostPath:
+            path: /data/blog/nacos
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-nacos
+  namespace: blog
+spec:
+  selector:
+    app: blog-nacos
+  ports:
+    - name: http
+      port: 8848
+      targetPort: 8848
+    - name: grpc
+      port: 9848
+      targetPort: 9848

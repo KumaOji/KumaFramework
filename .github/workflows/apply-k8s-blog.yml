@@ -27,7 +27,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: kuma-project/kuma-project-blog/k8s/*.yaml
+          source: kuma-project/kuma-project-blog/k8s/*.{yaml,yml}
           target: /data/blog/k8s/
 
       - name: Apply k8s configs

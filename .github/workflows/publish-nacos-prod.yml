@@ -16,30 +16,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Publish prod configs to Nacos
+      - name: Copy configs to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: .nacos-tmp/base/kuma-shared-prod.yaml,.nacos-tmp/base/kuma-cloud-uaa-prod.yaml,.nacos-tmp/base/kuma-cloud-gateway-prod.yaml
+          target: /tmp/nacos-config/
+
+      - name: Publish prod configs to blog-nacos
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          envs: NACOS_PASSWORD
+          script: |
+            set -euo pipefail
+            NACOS_PASSWORD="${NACOS_PASSWORD:-123456}"
+            NACOS_USERNAME="nacos"
+            NACOS_SERVER="127.0.0.1:8848"
+
+            kubectl port-forward -n blog svc/blog-nacos 8848:8848 >/tmp/nacos-pf.log 2>&1 &
+            PF_PID=$!
+            trap 'kill ${PF_PID} 2>/dev/null || true' EXIT
+            for i in $(seq 1 30); do
+              if curl -s -m 2 "http://${NACOS_SERVER}/nacos/v1/console/health/liveness" | grep -q OK; then
+                break
+              fi
+              sleep 2
+            done
+
+            TOKEN=$(curl -s -X POST "http://${NACOS_SERVER}/nacos/v1/auth/login" \
+              -d "username=${NACOS_USERNAME}&password=${NACOS_PASSWORD}" | jq -r '.accessToken')
+            if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+              echo "Nacos login failed"
+              exit 1
+            fi
+
+            TENANT=$(curl -s "http://${NACOS_SERVER}/nacos/v1/console/namespaces" \
+              -H "accessToken: ${TOKEN}" | jq -r '.data[]? | select(.namespaceShowName=="base" or .namespace=="base") | .namespace' | head -n1)
+            if [ -z "$TENANT" ]; then
+              curl -s -X POST "http://${NACOS_SERVER}/nacos/v1/console/namespaces" \
+                -H "accessToken: ${TOKEN}" \
+                -d "customNamespaceId=base&namespaceName=base&namespaceDesc=base"
+              TENANT="base"
+            fi
+
+            for file in /tmp/nacos-config/.nacos-tmp/base/kuma-shared-prod.yaml \
+                        /tmp/nacos-config/.nacos-tmp/base/kuma-cloud-uaa-prod.yaml \
+                        /tmp/nacos-config/.nacos-tmp/base/kuma-cloud-gateway-prod.yaml; do
+              DATA_ID=$(basename "$file")
+              curl -s -X POST "http://${NACOS_SERVER}/nacos/v1/cs/configs" \
+                -H "accessToken: ${TOKEN}" \
+                --data-urlencode "dataId=${DATA_ID}" \
+                --data-urlencode "group=DEFAULT_GROUP" \
+                --data-urlencode "tenant=${TENANT}" \
+                --data-urlencode "type=yaml" \
+                --data-urlencode "content@${file}"
+              echo "Published ${DATA_ID}"
+            done
         env:
-          NACOS_SERVER: 172.23.89.45:8848
-          NACOS_USERNAME: nacos
           NACOS_PASSWORD: ${{ secrets.NACOS_PASSWORD }}
-        run: |
-          set -euo pipefail
-          : "${NACOS_PASSWORD:?Set repository secret NACOS_PASSWORD}"
-          TOKEN=$(curl -s -X POST "http://${NACOS_SERVER}/nacos/v1/auth/login" \
-            -d "username=${NACOS_USERNAME}&password=${NACOS_PASSWORD}" | jq -r '.accessToken')
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Nacos login failed"
-            exit 1
-          fi
-          TENANT=$(curl -s "http://${NACOS_SERVER}/nacos/v1/console/namespaces" \
-            -H "accessToken: ${TOKEN}" | jq -r '.data[] | select(.namespaceShowName=="base" or .namespace=="base") | .namespace' | head -n1)
-          for file in .nacos-tmp/base/kuma-shared-prod.yaml .nacos-tmp/base/kuma-cloud-uaa-prod.yaml .nacos-tmp/base/kuma-cloud-gateway-prod.yaml; do
-            DATA_ID=$(basename "$file")
-            curl -s -X POST "http://${NACOS_SERVER}/nacos/v1/cs/configs" \
-              -H "accessToken: ${TOKEN}" \
-              --data-urlencode "dataId=${DATA_ID}" \
-              --data-urlencode "group=DEFAULT_GROUP" \
-              --data-urlencode "tenant=${TENANT}" \
-              --data-urlencode "type=yaml" \
-              --data-urlencode "content@${file}"
-            echo "Published ${DATA_ID}"
-          done
