@@ -63,12 +63,14 @@ public class UaaDataInitializer implements ApplicationRunner {
 
     private void initClients() {
         for (UaaProperties.Client client : properties.getClients()) {
-            if (registeredClientRepository.findByClientId(client.getClientId()) != null) {
-                continue;
-            }
+            boolean exists =
+                    registeredClientRepository.findByClientId(client.getClientId()) != null;
             ClientSaveDTO dto = new ClientSaveDTO();
             dto.setClientId(client.getClientId());
-            dto.setClientSecret(client.getClientSecret());
+            // 已存在客户端：不传 clientSecret，避免覆盖后台修改过的密钥；其余接入配置按 YAML 同步
+            if (!exists) {
+                dto.setClientSecret(client.getClientSecret());
+            }
             dto.setClientName(
                     client.getClientName() == null ? client.getClientId() : client.getClientName());
             dto.setGrantTypes(client.getGrantTypes());
@@ -79,7 +81,7 @@ public class UaaDataInitializer implements ApplicationRunner {
             dto.setRequireAuthorizationConsent(client.isRequireAuthorizationConsent());
             dto.setRequireProofKey(client.isRequireProofKey());
             clientService.save(dto);
-            log.info("已注册 OAuth2 客户端: clientId={}", client.getClientId());
+            log.info("OAuth2 客户端已同步: clientId={}, 新建={}", client.getClientId(), !exists);
         }
     }
 }

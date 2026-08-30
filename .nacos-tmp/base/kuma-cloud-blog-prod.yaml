@@ -1,7 +1,11 @@
 server:
   port: 9000
+  forward-headers-strategy: framework
   servlet:
     context-path: /api
+    session:
+      cookie:
+        path: /
   tomcat:
     threads:
       max: 400
@@ -165,6 +169,8 @@ kuma:
         - /doc.html
         - /webjars/**
         - /auth/**
+        - /oauth2/**
+        - /login/oauth2/**
         - /error
       authentication:
         expire: 86400

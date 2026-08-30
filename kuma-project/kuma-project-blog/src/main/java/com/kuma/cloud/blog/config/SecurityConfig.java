@@ -5,6 +5,7 @@ import com.kuma.cloud.blog.security.JsonAuthenticationEntryPoint;
 import com.kuma.cloud.blog.security.BlogJwtAuthenticationConverter;
 import com.kuma.cloud.blog.security.CookieBearerTokenResolver;
 import com.kuma.cloud.blog.security.OAuth2CookieService;
+import com.kuma.cloud.blog.security.OAuth2LoginFailureHandler;
 import com.kuma.cloud.blog.security.OAuth2LoginSuccessHandler;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;
@@ -34,14 +35,17 @@ public class SecurityConfig {
     private final JwtDecoder jwtDecoder;
     private final BlogJwtAuthenticationConverter jwtAuthenticationConverter;
     private final OAuth2LoginSuccessHandler loginSuccessHandler;
+    private final OAuth2LoginFailureHandler loginFailureHandler;
 
     public SecurityConfig(
             JwtDecoder jwtDecoder,
             BlogJwtAuthenticationConverter jwtAuthenticationConverter,
-            OAuth2LoginSuccessHandler loginSuccessHandler) {
+            OAuth2LoginSuccessHandler loginSuccessHandler,
+            OAuth2LoginFailureHandler loginFailureHandler) {
         this.jwtDecoder = jwtDecoder;
         this.jwtAuthenticationConverter = jwtAuthenticationConverter;
         this.loginSuccessHandler = loginSuccessHandler;
+        this.loginFailureHandler = loginFailureHandler;
     }
 
     @Bean
@@ -86,8 +90,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(new JsonAccessDeniedHandler()))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(loginSuccessHandler)
-                        .failureHandler((request, response, exception) ->
-                                response.sendError(401, "OAuth2 登录失败")))
+                        .failureHandler(loginFailureHandler))
                 .oauth2ResourceServer(resourceServer -> resourceServer
                         .bearerTokenResolver(new CookieBearerTokenResolver(
                                 OAuth2CookieService.ACCESS_TOKEN_COOKIE))

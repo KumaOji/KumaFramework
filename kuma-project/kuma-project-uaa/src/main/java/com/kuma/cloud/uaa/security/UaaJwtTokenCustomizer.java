@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +20,9 @@ import java.util.List;
  *
  * <p>Access Token 携带 {@code authorities}，业务方无需回查 UAA 即可完成鉴权；
  * ID Token 只携带身份画像，遵循 OIDC 对 profile 范围的约定。
+ *
+ * <p>声明值仅使用 JSON 基础类型（String / boolean / ArrayList），避免 Long 等类型被
+ * {@code JdbcOAuth2AuthorizationService} 持久化后 Jackson 3 无法反序列化。
  *
  * @author kuma
  */
@@ -44,8 +48,10 @@ public class UaaJwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingC
         }
 
         context.getClaims().claim("preferred_username", user.getUsername());
-        context.getClaims().claim("uid", user.getId());
-        context.getClaims().claim("tenant_id", user.getTenantId());
+        context.getClaims().claim("uid", String.valueOf(user.getId()));
+        if (StringUtils.hasText(user.getTenantId())) {
+            context.getClaims().claim("tenant_id", user.getTenantId());
+        }
 
         if (StringUtils.hasText(user.getNickname())) {
             context.getClaims().claim("nickname", user.getNickname());
@@ -59,9 +65,10 @@ public class UaaJwtTokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingC
         }
 
         if (accessToken) {
-            List<String> authorities = context.getPrincipal().getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .toList();
+            List<String> authorities = new ArrayList<>(context.getPrincipal().getAuthorities().size());
+            for (GrantedAuthority authority : context.getPrincipal().getAuthorities()) {
+                authorities.add(authority.getAuthority());
+            }
             context.getClaims().claim("authorities", authorities);
             context.getClaims().claim("mfa", user.isMfaEnabled());
         }

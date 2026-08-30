@@ -129,6 +129,8 @@ kuma:
           - refresh_token
         authentication-method: client_secret_basic
         redirect-uris:
+          - http://localhost:18080/blog/login/oauth2/code/blog
+          - http://127.0.0.1:18080/blog/login/oauth2/code/blog
           - http://localhost:9000/api/login/oauth2/code/blog
           - http://127.0.0.1:9000/api/login/oauth2/code/blog
           - http://172.17.48.1:9000/api/login/oauth2/code/blog

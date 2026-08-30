@@ -196,6 +196,7 @@ kuma:
           - /webjars/**
           - /v3/api-docs/**
           - /favicon.ico
+          - /.well-known/**
         authorities-claim: authorities
         username-claim: preferred_username
         relay-identity: true
