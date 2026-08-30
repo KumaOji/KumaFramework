@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: blog-nacos
+  name: nacos
   namespace: blog
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: blog-nacos
+      app: nacos
   template:
     metadata:
       labels:
-        app: blog-nacos
+        app: nacos
     spec:
       containers:
         - name: nacos
@@ -65,11 +65,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: blog-nacos
+  name: nacos
   namespace: blog
 spec:
   selector:
-    app: blog-nacos
+    app: nacos
   ports:
     - name: http
       port: 8848
@@ -81,11 +81,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nacos
+  name: blog-nacos
   namespace: blog
 spec:
   selector:
-    app: blog-nacos
+    app: nacos
   ports:
     - name: http
       port: 8848
