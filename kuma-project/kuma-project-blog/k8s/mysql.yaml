@@ -13,18 +13,18 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: blog-mysql
+  name: mysql
   namespace: base
 spec:
   selector:
     matchLabels:
-      app: blog-mysql
-  serviceName: blog-mysql
+      app: mysql
+  serviceName: mysql
   replicas: 1
   template:
     metadata:
       labels:
-        app: blog-mysql
+        app: mysql
     spec:
       containers:
         - name: mysql
@@ -60,11 +60,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: blog-mysql
+  name: mysql
   namespace: base
 spec:
   selector:
-    app: blog-mysql
+    app: mysql
   ports:
     - port: 3306
       targetPort: 3306

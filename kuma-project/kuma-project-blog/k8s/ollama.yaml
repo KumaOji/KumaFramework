@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: blog-ollama
+  name: ollama
   namespace: base
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: blog-ollama
+      app: ollama
   template:
     metadata:
       labels:
-        app: blog-ollama
+        app: ollama
     spec:
       containers:
         - name: ollama
@@ -59,11 +59,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: blog-ollama
+  name: ollama
   namespace: base
 spec:
   selector:
-    app: blog-ollama
+    app: ollama
   ports:
     - port: 11434
       targetPort: 11434

@@ -41,7 +41,7 @@ spec:
                   name: blog-secret
                   key: admin-initial-password
             - name: MYSQL_URL
-              value: "jdbc:mysql://blog-mysql:3306/base?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true"
+              value: "jdbc:mysql://mysql:3306/base?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true"
             - name: MYSQL_USERNAME
               value: root
             - name: MYSQL_PASSWORD
@@ -50,7 +50,7 @@ spec:
                   name: blog-secret
                   key: mysql-root-password
             - name: REDIS_HOST
-              value: blog-redis
+              value: redis
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_DATABASE

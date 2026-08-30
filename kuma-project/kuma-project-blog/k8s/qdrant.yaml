@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: blog-qdrant
+  name: qdrant
   namespace: base
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: blog-qdrant
+      app: qdrant
   template:
     metadata:
       labels:
-        app: blog-qdrant
+        app: qdrant
     spec:
       containers:
         - name: qdrant
@@ -32,11 +32,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: blog-qdrant
+  name: qdrant
   namespace: base
 spec:
   selector:
-    app: blog-qdrant
+    app: qdrant
   ports:
     - name: http
       port: 6333
