@@ -30,10 +30,6 @@ spec:
               value: serverIdentity
             - name: NACOS_AUTH_IDENTITY_VALUE
               value: security
-            - name: JVM_XMS
-              value: 256m
-            - name: JVM_XMX
-              value: 512m
           readinessProbe:
             httpGet:
               path: /nacos/v1/console/health/readiness
