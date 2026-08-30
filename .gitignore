@@ -29,8 +29,10 @@ doc/
 #**/kuma*/
 kuma-project/kuma-project-blog/src/main/resources/sql/
 
-# k8s secrets
+# k8s secrets (local only, use *.example.yaml in repo)
 kuma-project/kuma-project-blog/k8s/secret.yaml
+kuma-project/kuma-project-blog/k8s/blog-secret.yaml
+.sync-server/
 
 # intellijPlatform
 .intellijPlatform/

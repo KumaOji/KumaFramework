@@ -39,5 +39,12 @@ jobs:
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           command_timeout: 10m
           script: |
-            kubectl apply -f /data/k8s/base/
+            for f in /data/k8s/base/*.yaml; do
+              b=$(basename "$f")
+              case "$b" in
+                *secret.example.yaml|*secret.yaml) continue ;;
+                blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml) continue ;;
+              esac
+              kubectl apply -f "$f"
+            done
             kubectl rollout status deployment/nacos -n base --timeout=300s || true

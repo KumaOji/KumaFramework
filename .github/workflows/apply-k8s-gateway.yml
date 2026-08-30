@@ -37,4 +37,12 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: kubectl apply -f /data/k8s/base/
+          script: |
+            for f in /data/k8s/base/*.yaml; do
+              b=$(basename "$f")
+              case "$b" in
+                *secret.example.yaml|*secret.yaml) continue ;;
+                blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml) continue ;;
+              esac
+              kubectl apply -f "$f"
+            done
