@@ -153,7 +153,7 @@ public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, In
 
     @Primary
     @Bean
-    @ConditionalOnBean(RedissonConnectionFactory.class)
+    @ConditionalOnBean(RedisConnectionFactory.class)
     @ConditionalOnProperty(
             prefix = CacheManagerProperties.PREFIX,
             name = "type",
@@ -161,8 +161,12 @@ public class RedisCacheManagerAutoConfiguration implements CachingConfigurer, In
             matchIfMissing = true)
     public CacheManager redisCacheManager(
             CacheManagerCustomizers cacheManagerCustomizers,
-            ObjectProvider<RedissonConnectionFactory> connectionFactoryObjectProvider) {
-        RedisConnectionFactory connectionFactory = connectionFactoryObjectProvider.getIfAvailable();
+            ObjectProvider<RedissonConnectionFactory> redissonConnectionFactoryProvider,
+            ObjectProvider<RedisConnectionFactory> redisConnectionFactoryProvider) {
+        RedisConnectionFactory connectionFactory = redissonConnectionFactoryProvider.getIfAvailable();
+        if (connectionFactory == null) {
+            connectionFactory = redisConnectionFactoryProvider.getIfAvailable();
+        }
         Objects.requireNonNull(connectionFactory, "Bean RedisConnectionFactory is null.");
         RedisCacheWriter redisCacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory);
         RedisCacheConfiguration cacheConfiguration = this.determineConfiguration();

@@ -111,8 +111,8 @@ public class UaaUserServiceImpl implements UaaUserService {
         user.setPhone(dto.getPhone());
         user.setAvatar(dto.getAvatar());
         user.setStatus(1);
-        user.setLocked(0);
-        user.setMfaEnabled(0);
+        user.setLockStatus(0);
+        user.setMfaStatus(0);
         user.setTenantId("default");
         userMapper.insert(user);
 
@@ -231,7 +231,7 @@ public class UaaUserServiceImpl implements UaaUserService {
         UaaUser user = new UaaUser();
         user.setId(userId);
         user.setMfaSecret(secret);
-        user.setMfaEnabled(enabled ? 1 : 0);
+        user.setMfaStatus(enabled ? 1 : 0);
         userMapper.updateById(user);
     }
 

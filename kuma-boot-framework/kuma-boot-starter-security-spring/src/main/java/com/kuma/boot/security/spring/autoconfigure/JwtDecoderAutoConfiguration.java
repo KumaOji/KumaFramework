@@ -25,11 +25,13 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import cn.hutool.core.util.StrUtil;
+import com.kuma.boot.cache.redis.autoconfigure.RedisCacheManagerAutoConfiguration;
 import com.kuma.boot.security.spring.autoconfigure.properties.OAuth2AuthorizationProperties;
 import com.kuma.boot.security.spring.autoconfigure.properties.SecurityProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -50,9 +52,11 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder.JwkSetUriJwtDeco
  * @version 2022.03
  * @since 2021/8/25 09:57
  */
-@AutoConfiguration(after = JwtCloudAutoConfiguration.class)
+@AutoConfiguration(after = {JwtCloudAutoConfiguration.class, RedisCacheManagerAutoConfiguration.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class JwtDecoderAutoConfiguration implements InitializingBean {
+
+    private static final String JWT_CACHE_NAME = "jwt";
 
     private final SecurityProperties securityProperties;
     private final CacheManager redisCacheManager;
@@ -61,7 +65,7 @@ public class JwtDecoderAutoConfiguration implements InitializingBean {
 
     public JwtDecoderAutoConfiguration(
             SecurityProperties securityProperties,
-            @Autowired(required = false) CacheManager redisCacheManager,
+            @Autowired(required = false) @Qualifier("redisCacheManager") CacheManager redisCacheManager,
             OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
             OAuth2AuthorizationProperties oAuth2AuthorizationProperties) {
         this.securityProperties = securityProperties;
@@ -185,16 +189,17 @@ public class JwtDecoderAutoConfiguration implements InitializingBean {
                         .jwsAlgorithm(SignatureAlgorithm.RS256);
 
         if (redisCacheManager != null) {
-            try {
-                Cache cache = redisCacheManager.getCache("jwt");
-                if (cache != null) {
-                    jwkSetUriJwtDecoderBuilder.cache(cache);
-                }
-            } catch (Exception e) {
-                // JetCache 等 CacheManager 在未正确配置 local cache 时 getCache 会抛错，
-                // 忽略后不使用缓存，JWT 解码仍可正常工作
-                LogUtils.debug("JWT decoder cache unavailable, proceeding without cache: {}", e.getMessage());
+            Cache cache = redisCacheManager.getCache(JWT_CACHE_NAME);
+            if (cache != null) {
+                jwkSetUriJwtDecoderBuilder.cache(cache);
+                LogUtils.debug("JWT decoder JWK set cache enabled via redisCacheManager [{}]", JWT_CACHE_NAME);
+            } else {
+                LogUtils.debug(
+                        "JWT decoder cache unavailable, proceeding without cache: redisCacheManager has no cache [{}]",
+                        JWT_CACHE_NAME);
             }
+        } else {
+            LogUtils.debug("JWT decoder cache unavailable, proceeding without cache: redisCacheManager bean missing");
         }
 
         NimbusJwtDecoder nimbusJwtDecoder = jwkSetUriJwtDecoderBuilder.build();

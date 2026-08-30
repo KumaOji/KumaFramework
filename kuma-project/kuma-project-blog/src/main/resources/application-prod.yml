@@ -41,6 +41,12 @@ spring:
   main:
     lazy-initialization: true
     log-startup-info: true
+  cache:
+    type: redis
+    redis:
+      time-to-live: 12h
+    cache-names:
+      - jwt
   sql:
     init:
       mode: never
@@ -165,6 +171,9 @@ kuma:
     cache:
       redis:
         enabled: true
+        cache-manager:
+          enabled: true
+          type: redis
     data:
       datasource:
         enabled: true

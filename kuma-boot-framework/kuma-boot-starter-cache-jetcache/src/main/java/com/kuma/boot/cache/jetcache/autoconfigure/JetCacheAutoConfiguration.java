@@ -63,7 +63,7 @@ public class JetCacheAutoConfiguration implements InitializingBean {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "redisCacheManager")
     public HerodotusCacheManager herodotusCacheManager(
             JetCacheCreateCacheFactory jetCacheCreateCacheFactory, JetCacheProperties cacheProperties) {
         HerodotusCacheManager manager = new HerodotusCacheManager(jetCacheCreateCacheFactory, cacheProperties);

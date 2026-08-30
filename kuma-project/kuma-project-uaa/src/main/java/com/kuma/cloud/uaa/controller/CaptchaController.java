@@ -3,6 +3,7 @@ package com.kuma.cloud.uaa.controller;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.ratelimit.ratelimitredis.RateLimiter;
 import com.kuma.boot.security.spring.annotation.NotAuth;
+import com.kuma.boot.web.gracefulresponse.api.ExcludeFromGracefulResponse;
 import com.kuma.cloud.uaa.domain.vo.CaptchaVO;
 import com.kuma.cloud.uaa.support.LoginCaptchaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,7 @@ public class CaptchaController {
     private final LoginCaptchaService captchaService;
 
     @NotAuth
+    @ExcludeFromGracefulResponse
     @Operation(summary = "获取图形验证码，返回 captchaKey 与 base64 图片")
     @RateLimiter(value = "uaa:captcha", max = 30, ttl = 1, timeUnit = TimeUnit.MINUTES)
     @GetMapping("/captcha")

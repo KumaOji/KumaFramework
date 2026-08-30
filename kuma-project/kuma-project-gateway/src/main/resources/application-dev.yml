@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 18080
   shutdown: graceful
 
 spring:
@@ -144,8 +144,9 @@ kuma:
         enabled: false
     prometheus:
       enabled: true
+    # 网关无 MyBatis / MVC Controller，关闭 monitor 采集器，保留 Prometheus + SCG metrics 即可
     monitor:
-      enabled: true
+      enabled: false
     ip2region:
       # 需要访问日志 geo= 归属地时置 true，并确保 classpath:ip2region/ip2region.xdb 存在
       enabled: false
@@ -216,3 +217,17 @@ kuma:
       rate-limit:
         fallback-to-ip: true
         include-path: false
+
+# monitor 组件扫描兜底：无对应框架时勿增强（框架侧已加 @ConditionalOnClass，此处双保险）
+actuator:
+  db:
+    mybatis:
+      enhance:
+        enable: false
+  http:
+    enhance:
+      enable: false
+  redis:
+    template:
+      enhance:
+        enable: false

@@ -150,14 +150,48 @@
 
 <script th:inline="javascript">
     const captchaEnabled = [[${captchaEnabled}]];
+    const captchaUrl = /*[[@{/captcha}]]*/ '/captcha';
+
+    function resolveCaptchaPayload(body) {
+        if (!body) {
+            return null;
+        }
+        if (body.image && body.captchaKey) {
+            return body;
+        }
+        if (body.data && body.data.image) {
+            return body.data;
+        }
+        if (body.payload) {
+            if (body.payload.data && body.payload.data.image) {
+                return body.payload.data;
+            }
+            if (body.payload.image) {
+                return body.payload;
+            }
+        }
+        return null;
+    }
 
     async function refreshCaptcha() {
-        const response = await fetch('captcha', {headers: {'Accept': 'application/json'}});
-        const body = await response.json();
-        const payload = body.data || body;
-        document.getElementById('captchaImage').src = payload.image;
-        document.getElementById('captchaKey').value = payload.captchaKey;
-        document.getElementById('captchaCode').value = '';
+        try {
+            const response = await fetch(captchaUrl, {headers: {'Accept': 'application/json'}});
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            const body = await response.json();
+            const payload = resolveCaptchaPayload(body);
+            if (!payload) {
+                throw new Error('invalid captcha payload');
+            }
+            document.getElementById('captchaImage').src = payload.image;
+            document.getElementById('captchaKey').value = payload.captchaKey;
+            document.getElementById('captchaCode').value = '';
+            document.getElementById('captchaImage').alt = '点击刷新验证码';
+        } catch (error) {
+            console.error('验证码加载失败', error);
+            document.getElementById('captchaImage').alt = '验证码加载失败，点击重试';
+        }
     }
 
     if (captchaEnabled) {

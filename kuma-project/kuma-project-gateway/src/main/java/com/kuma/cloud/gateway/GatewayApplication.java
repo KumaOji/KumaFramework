@@ -27,6 +27,10 @@ import org.springframework.context.annotation.ComponentScan;
  *
  * <p>基于 Spring Cloud Gateway（WebFlux），作为 uaa / blog 等业务应用的统一流量入口。
  *
+ * <p>框架能力：{@code kuma-boot-starter-prometheus}（Actuator / KMC 端点）、
+ * {@code kuma-boot-starter-logger}（统一 Logback）、{@code kuma-boot-starter-ip2region}（访问日志归属地）、
+ * {@code kuma-cloud-starter-bootstrap}（云应用引导）。
+ *
  * @author kuma
  */
 @SpringBootApplication

@@ -19,6 +19,12 @@ import java.lang.annotation.Target;
  * 不引入 {@code Oauth2ResourceAutoConfiguration} 资源服务器 FilterChain，
  * 避免与 Spring Authorization Server 的协议端点链冲突；同时保留框架的方法级
  * {@link com.kuma.boot.security.spring.access.expression.Authorize}、JWT 解码与属性绑定能力。
+ *
+ * <p>注意：UAA 是授权服务器而非资源服务器，启动类 ComponentScan 应排除
+ * {@link com.kuma.boot.security.spring.autoconfigure.Oauth2ResourceAutoConfiguration}
+ * 与 {@link com.kuma.boot.security.spring.autoconfigure.OAuth2ComplianceConfiguration}，
+ * 避免与自有 SecurityFilterChain 冲突；所需框架能力通过 {@link EnableSecurityConfiguration}
+ * 的 {@code @Import} 与 {@code @EnableAutoConfiguration} 按需加载。
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

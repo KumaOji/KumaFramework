@@ -42,10 +42,10 @@ public class UaaUser implements Serializable {
     private Integer status;
 
     @TableField("locked")
-    private Integer locked;
+    private Integer lockStatus;
 
     @TableField("mfa_enabled")
-    private Integer mfaEnabled;
+    private Integer mfaStatus;
 
     @TableField("mfa_secret")
     private String mfaSecret;
@@ -70,10 +70,10 @@ public class UaaUser implements Serializable {
     }
 
     public boolean isLocked() {
-        return locked != null && locked == 1;
+        return lockStatus != null && lockStatus == 1;
     }
 
     public boolean isMfaEnabled() {
-        return mfaEnabled != null && mfaEnabled == 1;
+        return mfaStatus != null && mfaStatus == 1;
     }
 }

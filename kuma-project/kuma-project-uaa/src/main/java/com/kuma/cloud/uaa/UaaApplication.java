@@ -1,5 +1,7 @@
 package com.kuma.cloud.uaa;
 
+import com.kuma.boot.security.spring.autoconfigure.OAuth2ComplianceConfiguration;
+import com.kuma.boot.security.spring.autoconfigure.Oauth2ResourceAutoConfiguration;
 import com.kuma.cloud.uaa.annotation.EnableUaaBootApplication;
 import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.jspecify.annotations.NonNull;
@@ -8,6 +10,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
 /**
  * Kuma 体系统一认证授权中心（UAA）启动类。
@@ -18,7 +21,16 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @EnableUaaBootApplication
 @KumaCloudApplication
-@ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"})
+@ComponentScan(
+        basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"},
+        excludeFilters = {
+            @ComponentScan.Filter(
+                    type = FilterType.ASSIGNABLE_TYPE,
+                    classes = Oauth2ResourceAutoConfiguration.class),
+            @ComponentScan.Filter(
+                    type = FilterType.ASSIGNABLE_TYPE,
+                    classes = OAuth2ComplianceConfiguration.class)
+        })
 @EnableAutoConfiguration
 @ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"})
 public class UaaApplication extends SpringBootServletInitializer {

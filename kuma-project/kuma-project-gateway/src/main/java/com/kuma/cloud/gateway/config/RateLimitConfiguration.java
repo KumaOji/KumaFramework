@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import reactor.core.publisher.Mono;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Mono;
 public class RateLimitConfiguration {
 
     @Bean
+    @Primary
     @ConditionalOnMissingBean(name = "userOrIpKeyResolver")
     public KeyResolver userOrIpKeyResolver(GatewayCloudProperties properties) {
         return exchange -> exchange.getPrincipal()

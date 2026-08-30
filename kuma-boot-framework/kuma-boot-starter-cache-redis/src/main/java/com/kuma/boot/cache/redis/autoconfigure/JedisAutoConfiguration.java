@@ -17,6 +17,8 @@
 package com.kuma.boot.cache.redis.autoconfigure;
 
 import java.util.Objects;
+import org.redisson.api.RedissonClient;
+import org.redisson.spring.starter.RedissonAutoConfigurationV4;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,8 +37,9 @@ import redis.clients.jedis.Jedis;
  * @version 2023.07
  * @since 2023-08-08 13:36:40
  */
-@AutoConfiguration
+@AutoConfiguration(after = RedissonAutoConfigurationV4.class)
 @ConditionalOnClass(Jedis.class)
+@ConditionalOnMissingBean(RedissonClient.class)
 public class JedisAutoConfiguration {
 
     private final DataRedisProperties redisProperties;
