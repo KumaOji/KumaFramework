@@ -89,6 +89,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (session != null) {
             session.invalidate();
         }
-        response.sendRedirect(successUrl);
+        response.setStatus(HttpServletResponse.SC_FOUND);
+        response.setHeader("Location", response.encodeRedirectURL(successUrl));
     }
 }

@@ -38,14 +38,14 @@ spring:
               - offline_access
         provider:
           blog-uaa:
-            authorization-uri: http://172.23.89.45:33336/oauth2/authorize
-            token-uri: http://172.23.89.45:33336/oauth2/token
-            jwk-set-uri: http://172.23.89.45:33336/oauth2/jwks
-            user-info-uri: http://172.23.89.45:33336/userinfo
+            authorization-uri: http://localhost:33336/oauth2/authorize
+            token-uri: http://localhost:33336/oauth2/token
+            jwk-set-uri: http://localhost:33336/oauth2/jwks
+            user-info-uri: http://localhost:33336/userinfo
             user-name-attribute: preferred_username
       resourceserver:
         jwt:
-          jwk-set-uri: http://172.23.89.45:33336/oauth2/jwks
+          jwk-set-uri: http://localhost:33336/oauth2/jwks
   mvc:
     async:
       request-timeout: 600000
@@ -117,9 +117,9 @@ blog:
   oauth2:
     registration-id: blog
     username-claim: preferred_username
-    issuer-uri: http://172.23.89.45:33336
+    issuer-uri: http://localhost:33336
     audience: blog
-    login-success-url: http://172.23.89.45:3000
+    login-success-url: http://localhost:3000
     refresh-token-max-age: 30d
   admin-initial-password: admin123
   music:
@@ -191,7 +191,7 @@ kuma:
     security:
       oauth2:
         endpoint:
-          uaa-service-uri: http://172.23.89.45:33336
+          uaa-service-uri: http://localhost:33336
       ignore-url:
         - /actuator/**
         - /v3/api-docs/**

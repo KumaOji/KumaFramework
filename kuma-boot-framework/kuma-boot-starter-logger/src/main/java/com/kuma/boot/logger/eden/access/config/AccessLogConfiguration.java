@@ -5,6 +5,7 @@ import com.kuma.boot.logger.eden.EnableAccessLog;
 import com.kuma.boot.logger.eden.access.aop.AccessLogAdvisor;
 import com.kuma.boot.logger.eden.access.aop.AccessLogInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
@@ -41,6 +42,7 @@ public class AccessLogConfiguration implements ImportAware {
    }
 
    @Bean
+   @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
    public AccessLogAdvisor accessLogAdvisor(ObjectProvider<AccessLogConfig> configs, AccessLogInterceptor interceptor) {
       AccessLogAdvisor advisor = new AccessLogAdvisor();
       String expression = this.resolvePointcutExpression(this.getAccessLogConfig(configs));
@@ -54,6 +56,7 @@ public class AccessLogConfiguration implements ImportAware {
    }
 
    @Bean
+   @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
    public AccessLogInterceptor accessLogInterceptor(ObjectProvider<AccessLogConfig> configs) {
       return new AccessLogInterceptor(this.getAccessLogConfig(configs));
    }

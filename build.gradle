@@ -41,6 +41,11 @@ plugins {
     id 'com.google.cloud.tools.jib' apply false
 }
 
+ext {
+    servletApiVersion    = "6.1.0"
+    aspectjweaverVersion = "1.9.22.1"
+}
+
 allprojects {
     version = project.kmcVersion ?: '1.0.0'
 
@@ -77,10 +82,12 @@ subprojects {
         toolchain { languageVersion = JavaLanguageVersion.of(25) }
     }
 
-    // aspectjweaver 全局强制版本，避免不同传递依赖带入不一致版本
+    // aspectjweaver / servlet-api 全局强制版本，避免传递依赖版本漂移
+    // Tomcat 版本见 gradle.properties 的 tomcat.version（需 11.0.21+ 以支持 Servlet 6.1）
     configurations.configureEach {
         resolutionStrategy {
-            force "org.aspectj:aspectjweaver:${aspectjweaverVersion}"
+            force "org.aspectj:aspectjweaver:${rootProject.ext.aspectjweaverVersion}"
+            force "jakarta.servlet:jakarta.servlet-api:${rootProject.ext.servletApiVersion}"
         }
     }
 

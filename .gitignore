@@ -29,6 +29,9 @@ doc/
 #**/kuma*/
 kuma-project/kuma-project-blog/src/main/resources/sql/
 
+# local bootstrap overrides (copy from bootstrap-local.yml.example)
+**/bootstrap-local.yml
+
 # k8s secrets (local only, use *.example.yaml in repo)
 kuma-project/kuma-project-blog/k8s/secret.yaml
 kuma-project/kuma-project-blog/k8s/blog-secret.yaml

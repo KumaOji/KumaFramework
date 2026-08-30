@@ -19,6 +19,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,7 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
+import java.net.URI;
 
 @Tag(name = "认证管理")
 @RestController
@@ -55,8 +57,9 @@ public class AuthController {
 
     @Operation(summary = "跳转到 UAA，启动 OAuth2 Authorization Code 登录")
     @GetMapping("/login")
-    public void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.sendRedirect(request.getContextPath() + "/oauth2/authorization/" + registrationId);
+    public ResponseEntity<Void> login(HttpServletRequest request) {
+        String target = request.getContextPath() + "/oauth2/authorization/" + registrationId;
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(target)).build();
     }
 
     @Operation(summary = "获取 Cookie 认证所需的 CSRF Token")
@@ -83,7 +86,8 @@ public class AuthController {
     public Result<String> refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.resolveRefreshToken(request);
         if (!StringUtils.hasText(refreshToken)) {
-            throw new BusinessException("Refresh Token 不存在");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return Result.fail("Refresh Token 不存在");
         }
 
         try {

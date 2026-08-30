@@ -201,7 +201,8 @@ public class GlobalExceptionAdvice implements ApplicationContextAware {
         if (!className.contains("BusinessException")) return false;
         String msg = throwable.getMessage();
         if (msg == null) return false;
-        return msg.contains("未登录") || msg.contains("用户名或密码错误");
+        return msg.contains("未登录") || msg.contains("用户名或密码错误")
+                || msg.contains("Refresh Token");
     }
 
     @Override
