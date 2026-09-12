@@ -64,7 +64,7 @@ spec:
                   name: blog-secret
                   key: blog-oauth2-client-secret
             - name: BLOG_OAUTH2_AUTHORIZATION_URI
-              value: "https://blog.kumacloud.top/uaa/oauth2/authorize"
+              value: "https://uaa.kumacloud.top/oauth2/authorize"
             - name: BLOG_OAUTH2_TOKEN_URI
               value: "http://uaa.base:33336/oauth2/token"
             - name: BLOG_OAUTH2_JWK_SET_URI
@@ -72,7 +72,7 @@ spec:
             - name: BLOG_OAUTH2_USER_INFO_URI
               value: "http://uaa.base:33336/userinfo"
             - name: BLOG_OAUTH2_ISSUER_URI
-              value: "https://blog.kumacloud.top/uaa"
+              value: "https://uaa.kumacloud.top"
             - name: BLOG_OAUTH2_AUDIENCE
               value: blog
             - name: BLOG_OAUTH2_UAA_URI

@@ -57,6 +57,16 @@ spring:
                   args:
                     name: uaa
                     fallbackUri: forward:/fallback/uaa
+            # UAA 独立域名（正式入口）：根路径直达，无需前缀；/uaa/** 路径路由优先于本规则，保持兼容
+            - id: uaa-host
+              uri: lb://kuma-cloud-uaa
+              predicates:
+                - Host=uaa.kumacloud.top
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: uaa
+                    fallbackUri: forward:/fallback/uaa
             - id: blog
               uri: lb://kuma-cloud-blog
               predicates:
@@ -209,6 +219,9 @@ kuma:
           - /login
           - /logout
           - /captcha
+          # uaa.kumacloud.top 独立域名根路径下的公开端点
+          - /userinfo
+          - /connect/**
           - /doc.html
           - /webjars/**
           - /v3/api-docs/**

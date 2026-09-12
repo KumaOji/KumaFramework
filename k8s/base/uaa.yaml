@@ -31,7 +31,7 @@ spec:
                   key: uaa-jwk-private-key
                   optional: true
             - name: KUMA_UAA_ISSUER
-              value: "https://blog.kumacloud.top/uaa"
+              value: "https://uaa.kumacloud.top"
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR
               value: "nacos:8848"
             - name: SPRING_CLOUD_NACOS_USERNAME

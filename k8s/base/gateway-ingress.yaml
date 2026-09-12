@@ -11,6 +11,8 @@ spec:
   tls:
     - hosts:
         - blog.kumacloud.top
+    - hosts:
+        - uaa.kumacloud.top
   rules:
     - host: blog.kumacloud.top
       http:
@@ -23,6 +25,17 @@ spec:
                 port:
                   number: 18080
           - path: /uaa
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 18080
+    # UAA 独立域名（正式入口）：整站根路径转发至网关，由网关 Host 路由到 UAA
+    - host: uaa.kumacloud.top
+      http:
+        paths:
+          - path: /
             pathType: Prefix
             backend:
               service:

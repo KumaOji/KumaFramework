@@ -97,7 +97,7 @@ kuma:
       nacos:
         enabled: true
   uaa:
-    issuer: ${KUMA_UAA_ISSUER:https://blog.kumacloud.top/uaa}
+    issuer: ${KUMA_UAA_ISSUER:https://uaa.kumacloud.top}
     jwk:
       # 私钥内容优先从环境变量/K8s Secret 下发，为空则回退到 private-key-location 文件
       private-key: ${UAA_JWK_PRIVATE_KEY_PEM:}
