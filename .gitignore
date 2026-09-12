@@ -36,6 +36,9 @@ kuma-project/kuma-project-blog/src/main/resources/sql/
 k8s/base/secret.yaml
 k8s/base/kuma-secret.yaml
 k8s/blog/blog-secret.yaml
+
+# UAA JWT 签名私钥（本地开发自动生成，改由 kuma.uaa.jwk.private-key 配置下发）
+data/
 .sync-server/
 
 # intellijPlatform

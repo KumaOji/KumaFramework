@@ -47,6 +47,12 @@ public class UaaProperties {
     public static class Jwk {
 
         /**
+         * RSA 私钥（PKCS#8 PEM）内容，优先于 {@link #privateKeyLocation}。
+         * 用于通过配置中心/环境变量下发（如 K8s Secret），避免私钥文件进入代码库。
+         */
+        private String privateKey;
+
+        /**
          * RSA 私钥（PKCS#8 PEM）存放位置。首次启动若文件不存在则自动生成并落盘，
          * 保证重启后 JWKS 的 kid 与公钥不变，业务方缓存的 JWK 无需失效。
          */

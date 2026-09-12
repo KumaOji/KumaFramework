@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,10 +65,16 @@ public class JwkConfig {
     }
 
     private RSAKey loadOrCreateRsaKey(UaaProperties.Jwk jwk) {
-        Path location = Path.of(jwk.getPrivateKeyLocation()).toAbsolutePath();
-        RSAPrivateCrtKey privateKey = Files.exists(location)
-                ? readPrivateKey(location)
-                : writePrivateKey(location, generateKeyPair(jwk.getKeySize()));
+        RSAPrivateCrtKey privateKey;
+        if (StringUtils.hasText(jwk.getPrivateKey())) {
+            privateKey = parsePrivateKey(jwk.getPrivateKey(), "kuma.uaa.jwk.private-key");
+            log.info("UAA 签名私钥来自配置下发（kuma.uaa.jwk.private-key）");
+        } else {
+            Path location = Path.of(jwk.getPrivateKeyLocation()).toAbsolutePath();
+            privateKey = Files.exists(location)
+                    ? readPrivateKey(location)
+                    : writePrivateKey(location, generateKeyPair(jwk.getKeySize()));
+        }
         try {
             RSAPublicKeySpec publicKeySpec =
                     new RSAPublicKeySpec(privateKey.getModulus(), privateKey.getPublicExponent());
@@ -80,7 +87,7 @@ public class JwkConfig {
                     .keyIDFromThumbprint()
                     .build();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | JOSEException exception) {
-            throw new IllegalStateException("构建 UAA 签名密钥失败: " + location, exception);
+            throw new IllegalStateException("构建 UAA 签名密钥失败", exception);
         }
     }
 
@@ -96,14 +103,21 @@ public class JwkConfig {
 
     private RSAPrivateCrtKey readPrivateKey(Path location) {
         try {
-            String pem = Files.readString(location, StandardCharsets.UTF_8)
-                    .replace(PEM_HEADER, "")
+            return parsePrivateKey(Files.readString(location, StandardCharsets.UTF_8), location.toString());
+        } catch (IOException exception) {
+            throw new IllegalStateException("加载 UAA 签名私钥失败: " + location, exception);
+        }
+    }
+
+    private RSAPrivateCrtKey parsePrivateKey(String pem, String source) {
+        try {
+            String body = pem.replace(PEM_HEADER, "")
                     .replace(PEM_FOOTER, "")
                     .replaceAll("\\s", "");
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(pem));
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(body));
             return (RSAPrivateCrtKey) KeyFactory.getInstance("RSA").generatePrivate(keySpec);
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException exception) {
-            throw new IllegalStateException("加载 UAA 签名私钥失败: " + location, exception);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | IllegalArgumentException exception) {
+            throw new IllegalStateException("解析 UAA 签名私钥失败: " + source, exception);
         }
     }
 

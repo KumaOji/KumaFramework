@@ -23,6 +23,13 @@ spec:
               value: prod
             - name: UAA_JWK_PRIVATE_KEY
               value: /app/data/uaa-jwt-rsa-private.pem
+            # 私钥内容从 Secret 下发，优先于文件；Secret 缺失时回退到 hostPath 文件
+            - name: UAA_JWK_PRIVATE_KEY_PEM
+              valueFrom:
+                secretKeyRef:
+                  name: kuma-secret
+                  key: uaa-jwk-private-key
+                  optional: true
             - name: KUMA_UAA_ISSUER
               value: "https://blog.kumacloud.top/uaa"
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR

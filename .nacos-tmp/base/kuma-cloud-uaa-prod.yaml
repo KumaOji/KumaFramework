@@ -97,6 +97,8 @@ kuma:
   uaa:
     issuer: ${KUMA_UAA_ISSUER:https://blog.kumacloud.top/uaa}
     jwk:
+      # 私钥内容优先从环境变量/K8s Secret 下发，为空则回退到 private-key-location 文件
+      private-key: ${UAA_JWK_PRIVATE_KEY_PEM:}
       private-key-location: ${UAA_JWK_PRIVATE_KEY:/app/data/uaa-jwt-rsa-private.pem}
     token:
       access-token-ttl: 30m
