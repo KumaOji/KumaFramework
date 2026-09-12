@@ -15,6 +15,8 @@ spec:
     spec:
       containers:
         - name: gateway
+          # 注意：image 是占位符，CI 部署时先 apply 本清单再 kubectl set image 覆盖为真实镜像。
+          # 手动 apply 本文件后必须立即 set image，否则 Pod 会因拉取 placeholder 失败而 ImagePullBackOff
           image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/gateway:placeholder
           ports:
             - containerPort: 18080

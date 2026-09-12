@@ -113,6 +113,10 @@ jobs:
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           script: |
+            # 先同步清单（env/探针等），再用真实镜像覆盖 placeholder，避免镜像被重置导致 ImagePullBackOff
+            if [ -f /data/k8s/base/uaa.yaml ]; then
+              kubectl apply -f /data/k8s/base/uaa.yaml
+            fi
             kubectl set image deployment/uaa \
               uaa=${{ steps.ver.outputs.FULL_IMAGE }} \
               -n base
