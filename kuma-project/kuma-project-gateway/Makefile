@@ -4,7 +4,7 @@ GIT_SHA     ?= $(shell git rev-parse --short HEAD)
 IMAGE_TAG   ?= $(JAR_VERSION)-$(GIT_SHA)
 
 IMAGE     := gateway:$(IMAGE_TAG)
-NAMESPACE := blog
+NAMESPACE := base
 
 .PHONY: build image import deploy clean all
 
