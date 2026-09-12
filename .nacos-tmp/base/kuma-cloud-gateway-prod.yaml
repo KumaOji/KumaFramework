@@ -48,6 +48,11 @@ spring:
                 - Path=/uaa/**
               filters:
                 - StripPrefix=1
+                # 告知 UAA 外部路径前缀（SCG5 的 XForwarded 过滤器需 trusted-proxies 才激活，这里显式注入更可控）
+                - name: AddRequestHeader
+                  args:
+                    name: X-Forwarded-Prefix
+                    value: /uaa
                 - name: CircuitBreaker
                   args:
                     name: uaa

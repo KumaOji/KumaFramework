@@ -1,6 +1,8 @@
 server:
   port: 33336
   shutdown: graceful
+  # 网关闭环 /uaa 前缀：处理 X-Forwarded-*（含 Prefix），使登录页跳转、表单 action 等 URL 生成带 /uaa 前缀
+  forward-headers-strategy: framework
   servlet:
     session:
       cookie:
