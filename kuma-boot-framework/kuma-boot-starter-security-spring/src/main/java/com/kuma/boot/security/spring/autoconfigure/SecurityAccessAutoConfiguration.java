@@ -40,6 +40,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 
 /**
  * MethodSecurityConfig
@@ -59,10 +60,21 @@ public class SecurityAccessAutoConfiguration implements ApplicationContextAware,
     @Override
     public void afterPropertiesSet() throws Exception {
         LogUtils.started(SecurityAccessAutoConfiguration.class, StarterNameConstants.SECURITY_SPRINGSECURITY_STARTER);
+    }
 
-        // 修改 SecurityContext 传播策略：允许子线程继承父线程的认证信息。
-        // 等效于 JVM 参数 -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL
+    /**
+     * 修改 SecurityContext 传播策略：允许子线程继承父线程的认证信息。
+     * 等效于 JVM 参数 -Dspring.security.strategy=MODE_INHERITABLETHREADLOCAL。
+     *
+     * <p>必须以 Bean 形式暴露：Spring Security 6+ 的各组件（过滤器、{@code @AuthenticationPrincipal}
+     * 参数解析器等）会优先查找该 Bean，保证全组件使用同一策略实例。若只在 afterPropertiesSet 里
+     * 调用 setStrategyName，会因各组件构造时机不同而策略分裂（过滤器按 InheritableThreadLocal 写入、
+     * MVC 参数解析器按默认 ThreadLocal 读取），导致 Controller 层拿不到已认证的身份。
+     */
+    @Bean
+    static SecurityContextHolderStrategy securityContextHolderStrategy() {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+        return SecurityContextHolder.getContextHolderStrategy();
     }
 
     private ApplicationContext applicationContext;
