@@ -204,6 +204,6 @@ kuma:
           - /oauth2/**
           - /userinfo
           - /captcha
-        - /api/public/auth-settings
+          - /api/public/auth-settings
       global-exception:
         enabled: true
