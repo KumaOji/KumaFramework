@@ -1,10 +1,11 @@
-name: Apply Gateway K8s Configs
+name: Apply K8s Configs
 
 on:
   push:
     branches: [master]
     paths:
-      - 'kuma-project/kuma-project-gateway/k8s/**'
+      - 'k8s/**'
+  workflow_dispatch:
 
 jobs:
   apply:
@@ -13,23 +14,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare k8s dir on server
+      - name: Prepare k8s dirs on server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: mkdir -p /data/k8s/base
+          script: mkdir -p /data/k8s/base /data/k8s/blog
 
-      - name: Copy k8s files to server
+      - name: Copy base k8s files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: kuma-project/kuma-project-gateway/k8s/*
+          source: k8s/base/*
           target: /data/k8s/base/
-          strip_components: 3
+          strip_components: 2
+
+      - name: Copy blog k8s files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: k8s/blog/*
+          target: /data/k8s/blog/
+          strip_components: 2
 
       - name: Apply k8s configs
         uses: appleboy/ssh-action@v1
@@ -37,8 +48,9 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 10m
           script: |
-            for f in /data/k8s/base/*.yaml; do
+            for f in /data/k8s/base/*.yaml /data/k8s/blog/*.yaml; do
               b=$(basename "$f")
               case "$b" in
                 *secret.example.yaml|*secret.yaml) continue ;;
@@ -46,3 +58,4 @@ jobs:
               esac
               kubectl apply -f "$f"
             done
+            kubectl rollout status deployment/nacos -n base --timeout=300s || true
