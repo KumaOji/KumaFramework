@@ -191,6 +191,9 @@ kuma:
         allowed-origin-patterns:
           - "https://blog.kumacloud.top"
           - "https://*.kumacloud.top"
+          # 浏览器顶层表单 POST 导航可能携带 Origin: null（重定向链/隐私策略所致），
+          # 这类请求不是真正的跨域 XHR，不应被 CORS 拦截（403）
+          - "null"
         allowed-methods:
           - GET
           - POST
