@@ -95,19 +95,57 @@ public final class BlogPermissions {
     /** 清理 / 删除聊天历史记录 */
     public static final String CHAT_HISTORY   = "chat:history";
 
+    public record PermissionDef(String code, String name, String module, String description) {}
+
     /**
-     * 全部业务权限码（含模块通配符），管理员权限列表与缓存应包含这些值，
-     * 以便前端按精确码（如 {@code ai_chat:rag}）做菜单/按钮显隐。
+     * 权限清单（含知识库），启动时同步到 {@code sys_permission}，并默认授予 ROLE_ADMIN。
      */
-    public static List<String> allCodes() {
+    public static List<PermissionDef> catalog() {
         return List.of(
-                ARTICLE_ALL, ARTICLE_CREATE, ARTICLE_UPDATE, ARTICLE_DELETE, ARTICLE_READ,
-                MUSIC_ALL, MUSIC_UPLOAD, MUSIC_DELETE, MUSIC_READ,
-                SYSTEM_ALL, SYSTEM_CONFIG, SYSTEM_LOG, SYSTEM_USER,
-                PROJECT_ALL, PROJECT_CREATE, PROJECT_UPDATE, PROJECT_DELETE, PROJECT_READ,
-                MESSAGE_ALL, MESSAGE_AUDIT, MESSAGE_DELETE,
-                FRIEND_LINK_ALL, FRIEND_LINK_CREATE, FRIEND_LINK_UPDATE, FRIEND_LINK_DELETE, FRIEND_LINK_AUDIT,
-                AI_CHAT_ALL, AI_CHAT_SEND, AI_CHAT_INGEST, AI_CHAT_RAG, AI_CHAT_TEXT,
-                CHAT_ALL, CHAT_CREATE, CHAT_UPDATE, CHAT_DELETE, CHAT_BLACKLIST, CHAT_HISTORY);
+                def(ARTICLE_ALL, "文章全部权限", "article", "文章模块所有权限"),
+                def(ARTICLE_CREATE, "创建文章", "article", "发布新文章"),
+                def(ARTICLE_UPDATE, "编辑文章", "article", "修改已有文章"),
+                def(ARTICLE_DELETE, "删除文章", "article", "删除文章"),
+                def(ARTICLE_READ, "查看文章", "article", "查看文章"),
+                def(MUSIC_ALL, "音乐全部权限", "music", "音乐模块所有权限"),
+                def(MUSIC_UPLOAD, "上传音乐", "music", "上传音乐文件"),
+                def(MUSIC_DELETE, "删除音乐", "music", "删除音乐"),
+                def(MUSIC_READ, "播放/查看音乐", "music", "播放与查看音乐"),
+                def(SYSTEM_ALL, "系统全部权限", "system", "系统模块所有权限"),
+                def(SYSTEM_CONFIG, "系统配置", "system", "修改系统配置"),
+                def(SYSTEM_LOG, "查看日志", "system", "查看系统日志"),
+                def(SYSTEM_USER, "用户管理", "system", "管理用户与授权"),
+                def(PROJECT_ALL, "项目全部权限", "project", "项目模块所有权限"),
+                def(PROJECT_CREATE, "创建项目", "project", "新增项目"),
+                def(PROJECT_UPDATE, "编辑项目", "project", "修改项目"),
+                def(PROJECT_DELETE, "删除项目", "project", "删除项目"),
+                def(PROJECT_READ, "查看项目", "project", "浏览项目"),
+                def(MESSAGE_ALL, "留言板全部权限", "message", "留言板所有权限"),
+                def(MESSAGE_AUDIT, "审核留言", "message", "通过或驳回留言"),
+                def(MESSAGE_DELETE, "删除留言", "message", "删除留言"),
+                def(FRIEND_LINK_ALL, "友链全部权限", "friend_link", "友链模块所有权限"),
+                def(FRIEND_LINK_CREATE, "创建友链", "friend_link", "新增友链"),
+                def(FRIEND_LINK_UPDATE, "编辑友链", "friend_link", "修改友链"),
+                def(FRIEND_LINK_DELETE, "删除友链", "friend_link", "删除友链"),
+                def(FRIEND_LINK_AUDIT, "审核友链申请", "friend_link", "通过友链申请"),
+                def(AI_CHAT_ALL, "AI对话全部权限", "ai_chat", "对话、知识库与文本工具全部权限"),
+                def(AI_CHAT_SEND, "发起对话", "ai_chat", "普通对话与流式推理"),
+                def(AI_CHAT_INGEST, "知识库入库", "ai_chat", "上传文档到向量知识库、查看来源、检索测试"),
+                def(AI_CHAT_RAG, "知识库问答", "ai_chat", "RAG 增强对话与会话管理"),
+                def(AI_CHAT_TEXT, "文本工具", "ai_chat", "摘要、翻译、关键词、情感分析"),
+                def(CHAT_ALL, "聊天室全部权限", "chat", "聊天室模块所有权限"),
+                def(CHAT_CREATE, "创建聊天室", "chat", "新建聊天室"),
+                def(CHAT_UPDATE, "编辑聊天室", "chat", "修改聊天室"),
+                def(CHAT_DELETE, "删除聊天室", "chat", "删除聊天室"),
+                def(CHAT_BLACKLIST, "聊天室黑名单", "chat", "管理聊天黑名单"),
+                def(CHAT_HISTORY, "聊天历史", "chat", "清理或删除聊天记录"));
+    }
+
+    public static List<String> allCodes() {
+        return catalog().stream().map(PermissionDef::code).toList();
+    }
+
+    private static PermissionDef def(String code, String name, String module, String description) {
+        return new PermissionDef(code, name, module, description);
     }
 }
