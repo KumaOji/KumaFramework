@@ -21,6 +21,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
     api project(':kuma-boot-framework:kuma-boot-starter-data-vector')
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
+    }
+    api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
 
     api projectLibs.spring.boot.starter.web
     api projectLibs.spring.doc.webmvc
@@ -41,18 +45,6 @@ dependencies {
 
     implementation 'org.openjdk.jol:jol-core:0.17'
 }
-
-def labMysqlUrl               = project.findProperty('mysql.url')                  ?: ''
-def labMysqlUsername          = project.findProperty('mysql.username')             ?: ''
-def labMysqlPassword          = project.findProperty('mysql.password')             ?: ''
-def labKafkaBootstrapServers  = project.findProperty('kafka.bootstrap-servers')    ?: 'localhost:9092'
-def labRedisHost              = project.findProperty('redis.host')                 ?: ''
-def labRedisPort              = project.findProperty('redis.port')                 ?: ''
-def labRedisDatabase          = project.findProperty('redis.database')             ?: ''
-def labRedisPassword          = project.findProperty('redis.password')             ?: ''
-def labRedisJedisPoolMaxActive = project.findProperty('redis.jedis.pool.max-active') ?: ''
-def labRedisJedisPoolMaxIdle   = project.findProperty('redis.jedis.pool.max-idle')   ?: ''
-def labRedisJedisPoolMinIdle   = project.findProperty('redis.jedis.pool.min-idle')   ?: ''
 
 bootJar {
     archiveBaseName = 'lab'
@@ -153,22 +145,6 @@ classes.dependsOn tasks.named('compileNative')
 
 processResources {
     dependsOn tasks.named('compileNative')
-    filesMatching('**/application.yml') {
-        expand(
-                active                     : 'dev',
-                mysql_url                  : labMysqlUrl,
-                mysql_username             : labMysqlUsername,
-                mysql_password             : labMysqlPassword,
-                kafka_bootstrap_servers    : labKafkaBootstrapServers,
-                redis_host                 : labRedisHost,
-                redis_port                 : labRedisPort,
-                redis_database             : labRedisDatabase,
-                redis_password             : labRedisPassword,
-                redis_jedis_pool_max_active: labRedisJedisPoolMaxActive,
-                redis_jedis_pool_max_idle  : labRedisJedisPoolMaxIdle,
-                redis_jedis_pool_min_idle  : labRedisJedisPoolMinIdle
-        )
-    }
     from(nativeOutputDir) {
         into 'native'
     }

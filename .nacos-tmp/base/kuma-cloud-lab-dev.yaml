@@ -1,3 +1,6 @@
+# Lab 开发配置（本地无 application.yml，全部从 Nacos 读取）
+# MySQL / Redis 与 kuma-shared-dev.yaml 一致，走 WSL 172.23.89.45
+
 server:
   port: 9090
   servlet:
@@ -8,35 +11,45 @@ logging:
     dateformat: yyyy-MM-dd HH:mm:ss.SSS
 
 spring:
-  profiles:
-    active: ${active}
   application:
     name: kuma-cloud-lab
   autoconfigure:
     exclude:
-      # 框架通过 @EnableKnife4j 装配定制版 Knife4jAutoConfiguration，排除官方自动装配避免 Bean 冲突
       - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+  cloud:
+    inetutils:
+      timeout-value: 1000
+      prefer-ip-address: true
+    service-registry:
+      auto-registration:
+        enabled: true
   datasource:
     dynamic:
       primary: mysql
       datasource:
         mysql:
           type: com.zaxxer.hikari.HikariDataSource
-          url: ${mysql_url}
-          username: ${mysql_username}
-          password: ${mysql_password}
+          url: jdbc:mysql://172.23.89.45:3306/base?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+          username: root
+          password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
+          hikari:
+            minimum-idle: 5
+            maximum-pool-size: 30
+            connection-timeout: 10000
+            idle-timeout: 600000
+            max-lifetime: 1800000
   data:
     redis:
-      host: ${redis_host}
-      port: ${redis_port}
-      database: ${redis_database}
-      password: ${redis_password}
+      host: 172.23.89.45
+      port: 6379
+      database: 0
+      password: "123456"
       jedis:
         pool:
-          max-active: ${redis_jedis_pool_max_active}
-          max-idle: ${redis_jedis_pool_max_idle}
-          min-idle: ${redis_jedis_pool_min_idle}
+          max-active: ${redis_jedis_pool_max_active:8}
+          max-idle: ${redis_jedis_pool_max_idle:8}
+          min-idle: ${redis_jedis_pool_min_idle:0}
 
 springdoc:
   api-docs:
@@ -48,15 +61,18 @@ knife4j:
   enable: true
 
 kuma:
+  cloud:
+    alibaba:
+      nacos:
+        enabled: true
   lab:
     redis:
       key-prefix: "lab:redis:"
     mysql-binlog:
-      # Explicit opt-in: the configured user must have MySQL replication privileges.
       enabled: false
-      jdbc-url: ${mysql_url}
-      username: ${mysql_username}
-      password: ${mysql_password}
+      jdbc-url: jdbc:mysql://172.23.89.45:3306/base?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password: 123456
       server-id: 184054
       topic-prefix: kuma-lab-mysql
       table-include-list: base.tx_demo_account
@@ -65,9 +81,8 @@ kuma:
       schema-history-file: data/lab-binlog/schema-history.dat
       buffer-capacity: 1000
     kafka:
-      # Explicit opt-in: requires a reachable Kafka cluster and the test topic.
       enabled: true
-      bootstrap-servers: ${kafka_bootstrap_servers}
+      bootstrap-servers: 172.23.89.45:9092
       topic: kuma-lab-test
       group-id: kuma-lab-test-group
       buffer-capacity: 1000

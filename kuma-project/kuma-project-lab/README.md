@@ -2,6 +2,23 @@
 
 这是一个独立的测试实验项目，用于集中保存框架和业务技术验证代码，避免临时测试污染正式业务模块。
 
+## 启动方式
+
+与 Blog / UAA 相同：从 Nacos 拉配置，本机地址写在 `bootstrap-local.yml`。
+
+1. WSL 里 Nacos 已起来（`nacos-external` → `172.23.89.45:8848`）。
+2. 复制 `src/main/resources/bootstrap-local.yml.example` 为 `bootstrap-local.yml`（已被 gitignore）。
+3. 确认其中是 `SPRING_CLOUD_NACOS_SERVER_ADDR: 172.23.89.45:8848`。
+4. 启动 `LabApplication`（profile 默认 `dev`）。
+
+会依次加载：
+
+- `kuma-shared-dev.yaml`（共享中间件变量）
+- `kuma-cloud-lab-dev.yaml`（端口、数据源、Redis、Kafka、Lab 实验项；仓库镜像在 `.nacos-tmp/base/`）
+- `bootstrap-local.yml`（只覆盖 Nacos 地址）
+
+本地没有 `application.yml`。改配置改 Nacos 里的 `kuma-cloud-lab-dev.yaml`，再执行 `scripts/publish-nacos-dev.sh`。
+
 ## 测试分类
 
 - `transaction`：数据库事务、提交、回滚和变更快照测试
@@ -16,14 +33,14 @@
 - `snowflake`：雪花算法 ID 生成、解析与唯一性验证
 - `spring`：IOC、事件监听、ApplicationContext 与分层架构学习
 - `javacore`：类加载、Mark Word、HashMap 结构、Socket 通信、文件处理等 Java 基础
+- `mysql`：建表、加列、GROUP BY、窗口函数等 SQL 基础语法复习
 - 后续测试按能力建立独立包，例如 `lock`
 
 ## 事务测试
 
 1. 在 MySQL 数据库执行 `src/main/resources/sql/transaction-test.sql`。
-2. 配置根项目 `gradle.properties` 中的 `mysql.url`、`mysql.username` 和 `mysql.password`。
-3. 启动 `LabApplication`。
-4. 请求 `POST /api/lab/transaction/transfer`。
+2. 按上文「启动方式」连上 Nacos 后启动 `LabApplication`。
+3. 请求 `POST /api/lab/transaction/transfer`。
 
 ## MySQL Binlog
 
@@ -64,9 +81,8 @@ Controller 不直接依赖 JDBC 实现，转账逻辑通过 `TransactionBlackBox
 
 ## Redis 测试
 
-1. 启动本地 Redis，默认连接 `127.0.0.1:6379`。
-2. 在根项目 `gradle.properties` 中配置 `redis.host`、`redis.port`、`redis.database`（可选 `redis.password`）。
-3. 启动 `LabApplication`。
+1. 按上文「启动方式」连上 Nacos（`kuma-shared-dev.yaml` 已指向 WSL Redis `172.23.89.45:6379`）。
+2. 启动 `LabApplication`。
 4. 请求 `POST /api/lab/redis/scenario`，一次性验证 String / Hash / List / Set 与 TTL 行为。
 
 手动测试示例：
@@ -130,7 +146,7 @@ POST /api/lab/vector/search
 - `DELETE /api/lab/vector/{id}`：按 ID 删除
 - `DELETE /api/lab/vector/collection`：重置实验集合
 
-切换 Qdrant 时，在 `application.yml` 中修改：
+切换 Qdrant 时，在 Nacos `kuma-cloud-lab-dev.yaml` 中修改：
 
 ```yaml
 kuma:
@@ -254,10 +270,9 @@ IDE 直启时若提示找不到动态库，可先执行 `compileNative`，或在
 
 ## Kafka 测试
 
-1. 确保 Kafka 集群可访问，并在 `gradle.properties` 中配置 `kafka.bootstrap-servers`。
+1. 按上文「启动方式」连上 Nacos（`kuma-cloud-lab-dev.yaml` 默认 Kafka `172.23.89.45:9092`）。
 2. 预先创建测试 topic（默认 `kuma-lab-test`），或确保 broker 允许自动创建 topic。
-3. 在 `application.yml` 中将 `kuma.lab.kafka.enabled` 设为 `true`。
-4. 启动 `LabApplication`。
+3. 启动 `LabApplication`。
 5. 发送测试消息：`POST /api/lab/kafka/send`
 
 请求示例：
@@ -316,7 +331,7 @@ POST /api/lab/snowflake/generate
 GET /api/lab/snowflake/parse/1234567890123456789
 ```
 
-返回结果包含时间戳、数据中心 ID、工作机器 ID 与毫秒内序列号。可在 `application.yml` 中调整 `kuma.lab.snowflake.worker-id` 与 `datacenter-id`。
+返回结果包含时间戳、数据中心 ID、工作机器 ID 与毫秒内序列号。可在 Nacos `kuma-cloud-lab-dev.yaml` 中调整 `kuma.lab.snowflake.worker-id` 与 `datacenter-id`。
 
 ## Java 基础知识学习
 
@@ -363,7 +378,7 @@ POST /api/lab/javacore/file/write
 }
 ```
 
-Mark Word 观察依赖 [JOL](https://github.com/openjdk/jol)（`jol-core`）。Socket 默认监听 `127.0.0.1:19091`，文件实验目录默认为 `data/lab-javacore`，可在 `application.yml` 的 `kuma.lab.javacore` 下调整。
+Mark Word 观察依赖 [JOL](https://github.com/openjdk/jol)（`jol-core`）。Socket 默认监听 `127.0.0.1:19091`，文件实验目录默认为 `data/lab-javacore`，可在 Nacos `kuma-cloud-lab-dev.yaml` 的 `kuma.lab.javacore` 下调整。
 
 ## Spring 核心机制学习
 
@@ -398,3 +413,28 @@ POST /api/lab/spring/events/publish
 3. `spring/listener` — `@EventListener` 监听自定义事件与 `ContextRefreshedEvent`
 4. `spring/architecture` — 分层职责与事件驱动解耦
 5. `spring/lifecycle` — `@PostConstruct` / prototype 作用域
+
+## MySQL 基础语法
+
+复习建表、加列、分组、开窗。静态目录不连库也能看；场景接口会在当前 Lab 数据源里重建 `sql_lab_*` 表并跑一遍。
+
+对照稿：`src/main/resources/sql/mysql-basics.sql`（可在 MySQL 客户端按段落执行）。
+
+1. 按上文「启动方式」连上 Nacos 后启动 `LabApplication`。
+2. 看语法目录：`GET /api/lab/mysql/syntax`。
+3. 一键演示：`POST /api/lab/mysql/scenario`。
+
+| 接口 | 主题 | 说明 |
+|------|------|------|
+| `GET /api/lab/mysql/syntax` | 目录 | 建表 / 加列 / SELECT / GROUP BY / 开窗模板 |
+| `POST /api/lab/mysql/scenario` | 综合 | 重建实验表后依次跑四项演示 |
+| `POST /api/lab/mysql/ddl/create-table` | 建表 | 重建 `sql_lab_dept` / `sql_lab_employee` |
+| `POST /api/lab/mysql/ddl/add-column` | 加列 | `ALTER TABLE ... ADD COLUMN title` |
+| `GET /api/lab/mysql/group-by` | 分组 | `GROUP BY` + `HAVING COUNT(*) >= 2` |
+| `GET /api/lab/mysql/window` | 开窗 | `ROW_NUMBER` / `RANK` / `SUM() OVER (PARTITION BY)` |
+
+要点：
+
+- `GROUP BY` 把多行收成一组；窗口函数保留每一行，只是多算一列。
+- `PARTITION BY` 按部门切窗口，部门内再 `ORDER BY`。
+- 研发 Alice / Carol 工资并列：`ROW_NUMBER` 仍是 1、2，`RANK` 都是 1 然后跳到 3。
