@@ -1,6 +1,8 @@
 server:
   port: 33336
   shutdown: graceful
+  # 本地走网关 /uaa 前缀时，登录页跳转与表单 action 需要带前缀
+  forward-headers-strategy: framework
   servlet:
     session:
       cookie:

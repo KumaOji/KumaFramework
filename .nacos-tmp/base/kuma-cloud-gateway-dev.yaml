@@ -48,6 +48,10 @@ spring:
                 - Path=/uaa/**
               filters:
                 - StripPrefix=1
+                - name: AddRequestHeader
+                  args:
+                    name: X-Forwarded-Prefix
+                    value: /uaa
                 - name: CircuitBreaker
                   args:
                     name: uaa
@@ -211,6 +215,8 @@ kuma:
           - /login
           - /logout
           - /captcha
+          - /userinfo
+          - /connect/**
           - /doc.html
           - /webjars/**
           - /v3/api-docs/**

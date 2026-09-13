@@ -152,7 +152,7 @@ kuma:
         api-key: ${DASHSCOPE_API_KEY:}
         model: text-embedding-v3
       qdrant:
-        host: localhost
+        host: 172.23.89.45
         grpc-port: 6334
         http-port: 6333
         collection: blog-docs
