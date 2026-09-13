@@ -54,32 +54,24 @@ public class AuthorizeCheckService {
     }
 
     private List<String> getAuthorities(String name, Authentication auth) {
-        // Try to get from Redis cache first (namespace-aware key)
-        if (redisRepository == null) {
-            return auth.getAuthorities() == null ? List.of() :
-                    auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        Set<String> merged = new HashSet<>();
+        if (auth.getAuthorities() != null) {
+            auth.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .forEach(merged::add);
         }
-        String cacheKey = "user:authorities:" + name;
-        Object cached = redisRepository.get(cacheKey);
-        if (cached instanceof UserEntity userEntity && userEntity.getAuthorities() != null) {
-            return userEntity.getAuthorities();
-        }
-        // Jackson 未配置类型信息时反序列化为 LinkedHashMap，兼容处理
-        if (cached instanceof Map<?, ?> map) {
-            Object authList = map.get("authorities");
-            if (authList instanceof List<?> list) {
-                return list.stream().map(Object::toString).toList();
+        if (redisRepository != null) {
+            Object cached = redisRepository.get("user:authorities:" + name);
+            if (cached instanceof UserEntity userEntity && userEntity.getAuthorities() != null) {
+                merged.addAll(userEntity.getAuthorities());
+            } else if (cached instanceof Map<?, ?> map) {
+                Object authList = map.get("authorities");
+                if (authList instanceof List<?> list) {
+                    list.stream().map(Object::toString).forEach(merged::add);
+                }
             }
         }
-
-        // Fall back to extracting from Authentication (supports Token-based auth)
-        if (auth.getAuthorities() == null) {
-            return List.of();
-        }
-
-        return auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
+        return List.copyOf(merged);
     }
 
     private boolean checkAuthorization(List<String> authorities, Authorize annotation) {
@@ -105,7 +97,7 @@ public class AuthorizeCheckService {
      * <ul>
      *   <li>精确匹配：用户有 {@code article:create} → 通过 {@code article:create}</li>
      *   <li>模块通配符：用户有 {@code article:*} → 通过所有 {@code article:xxx}</li>
-     *   <li>超级权限：用户有 {@code *} → 通过所有校验</li>
+     *   <li>超级权限：用户有 {@code *} 或 {@code ROLE_ADMIN} → 通过所有校验</li>
      * </ul>
      */
     private boolean hasAuthority(Set<String> userAuthorities, String required) {
@@ -113,8 +105,8 @@ public class AuthorizeCheckService {
         if (userAuthorities.contains(required)) {
             return true;
         }
-        // 超级权限
-        if (userAuthorities.contains(Permissions.ALL)) {
+        // 管理员角色视为最高权限，避免 Redis 权限表未同步新模块时出现「权限不足」
+        if (userAuthorities.contains(RoleConstants.ADMIN) || userAuthorities.contains(Permissions.ALL)) {
             return true;
         }
         // 模块通配符：required = "article:create"，检查用户是否有 "article:*"

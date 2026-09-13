@@ -2,6 +2,8 @@ package com.kuma.cloud.blog.security;
 
 import com.kuma.boot.security.spring.access.expression.Authorize;
 
+import java.util.List;
+
 /**
  * 博客业务权限码，格式 {@code module:action}，配合 {@link Authorize} 使用。
  *
@@ -92,4 +94,20 @@ public final class BlogPermissions {
     public static final String CHAT_BLACKLIST = "chat:blacklist";
     /** 清理 / 删除聊天历史记录 */
     public static final String CHAT_HISTORY   = "chat:history";
+
+    /**
+     * 全部业务权限码（含模块通配符），管理员权限列表与缓存应包含这些值，
+     * 以便前端按精确码（如 {@code ai_chat:rag}）做菜单/按钮显隐。
+     */
+    public static List<String> allCodes() {
+        return List.of(
+                ARTICLE_ALL, ARTICLE_CREATE, ARTICLE_UPDATE, ARTICLE_DELETE, ARTICLE_READ,
+                MUSIC_ALL, MUSIC_UPLOAD, MUSIC_DELETE, MUSIC_READ,
+                SYSTEM_ALL, SYSTEM_CONFIG, SYSTEM_LOG, SYSTEM_USER,
+                PROJECT_ALL, PROJECT_CREATE, PROJECT_UPDATE, PROJECT_DELETE, PROJECT_READ,
+                MESSAGE_ALL, MESSAGE_AUDIT, MESSAGE_DELETE,
+                FRIEND_LINK_ALL, FRIEND_LINK_CREATE, FRIEND_LINK_UPDATE, FRIEND_LINK_DELETE, FRIEND_LINK_AUDIT,
+                AI_CHAT_ALL, AI_CHAT_SEND, AI_CHAT_INGEST, AI_CHAT_RAG, AI_CHAT_TEXT,
+                CHAT_ALL, CHAT_CREATE, CHAT_UPDATE, CHAT_DELETE, CHAT_BLACKLIST, CHAT_HISTORY);
+    }
 }

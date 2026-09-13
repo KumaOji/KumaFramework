@@ -3,10 +3,15 @@ package com.kuma.cloud.blog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
+import com.kuma.boot.security.spring.access.expression.Permissions;
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.entity.SysPermission;
+import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import com.kuma.cloud.blog.mapper.SysPermissionMapper;
+import com.kuma.cloud.blog.security.BlogPermissions;
 import com.kuma.cloud.blog.service.PermissionService;
+import com.kuma.cloud.blog.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +33,7 @@ public class PermissionServiceImpl implements PermissionService {
     private final SysPermissionMapper permissionMapper;
     private final RedisRepository redisRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final UserService userService;
 
     private static final String CACHE_KEY_PREFIX = "user:authorities:";
 
@@ -43,9 +50,18 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public UserAuthoritiesVO getUserAuthorities(Long userId) {
+        List<String> roles = new ArrayList<>(permissionMapper.selectRoleCodesByUserId(userId));
+        List<String> rolePermissions = new ArrayList<>(permissionMapper.selectRolePermissionsByUserId(userId));
+        if (isAdmin(userId, roles)) {
+            if (!roles.contains(RoleConstants.ADMIN)) {
+                roles.add(RoleConstants.ADMIN);
+            }
+            rolePermissions.addAll(BlogPermissions.allCodes());
+            rolePermissions = new ArrayList<>(new LinkedHashSet<>(rolePermissions));
+        }
         UserAuthoritiesVO vo = new UserAuthoritiesVO();
-        vo.setRoles(permissionMapper.selectRoleCodesByUserId(userId));
-        vo.setRolePermissions(permissionMapper.selectRolePermissionsByUserId(userId));
+        vo.setRoles(roles);
+        vo.setRolePermissions(rolePermissions);
         vo.setDirectPermissions(permissionMapper.selectDirectPermissionsByUserId(userId));
         return vo;
     }
@@ -66,6 +82,11 @@ public class PermissionServiceImpl implements PermissionService {
         all.addAll(roleCodesFut.join());
         all.addAll(rolePermsFut.join());
         all.addAll(directPermsFut.join());
+        if (isAdmin(userId, all)) {
+            all.add(RoleConstants.ADMIN);
+            all.add(Permissions.ALL);
+            all.addAll(BlogPermissions.allCodes());
+        }
 
         List<String> authorities = new ArrayList<>(all);
 
@@ -101,5 +122,13 @@ public class PermissionServiceImpl implements PermissionService {
     public void evictCache(String username) {
         redisRepository.del(CACHE_KEY_PREFIX + username);
         log.warn("Permission cache evicted for user [{}]", username);
+    }
+
+    private boolean isAdmin(Long userId, Collection<String> codes) {
+        if (codes != null && codes.contains(RoleConstants.ADMIN)) {
+            return true;
+        }
+        User user = userService.getById(userId);
+        return user != null && user.getIsAdmin() != null && user.getIsAdmin() == 1;
     }
 }
