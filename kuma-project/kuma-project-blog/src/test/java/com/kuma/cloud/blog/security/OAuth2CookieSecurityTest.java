@@ -58,4 +58,29 @@ class OAuth2CookieSecurityTest {
         assertThat(cookies.get(0)).contains(OAuth2CookieService.ACCESS_TOKEN_COOKIE + "=access");
         assertThat(cookies.get(1)).contains(OAuth2CookieService.REFRESH_TOKEN_COOKIE + "=refresh");
     }
+
+    @Test
+    void clearIssuesSetCookieForBothTokens() {
+        OAuth2CookieService service = new OAuth2CookieService(true, Duration.ofDays(30));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        service.clear(response);
+
+        List<String> cookies = response.getHeaders("Set-Cookie");
+        assertThat(cookies).hasSize(2);
+        assertThat(cookies.get(0)).contains(
+                OAuth2CookieService.ACCESS_TOKEN_COOKIE + "=",
+                "Max-Age=0",
+                "HttpOnly",
+                "Secure",
+                "SameSite=Strict",
+                "Path=/");
+        assertThat(cookies.get(1)).contains(
+                OAuth2CookieService.REFRESH_TOKEN_COOKIE + "=",
+                "Max-Age=0",
+                "HttpOnly",
+                "Secure",
+                "SameSite=Strict",
+                "Path=/");
+    }
 }

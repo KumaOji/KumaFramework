@@ -22,6 +22,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 import java.util.Set;
 
@@ -56,9 +57,13 @@ public class SecurityConfig {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain blogSecurityFilterChain(HttpSecurity http) throws Exception {
+        CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
+        csrfHandler.setCsrfRequestAttributeName(null);
+
         http.securityMatcher("/**")
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(csrfHandler)
                         .requireCsrfProtectionMatcher(SecurityConfig::requiresCookieCsrfProtection))
                 // Authorization Code 的 state 在回调前临时使用 Session，成功后立即销毁。
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
@@ -105,6 +110,10 @@ public class SecurityConfig {
 
     private static boolean requiresCookieCsrfProtection(HttpServletRequest request) {
         if (SAFE_METHODS.contains(request.getMethod())) {
+            return false;
+        }
+        // 登出必须总能执行：缺 CSRF 时 403 会留下 Cookie，表现为“退出后还能进去”。
+        if (request.getServletPath().endsWith("/auth/logout")) {
             return false;
         }
         Cookie[] cookies = request.getCookies();

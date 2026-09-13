@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +58,9 @@ public class AuthController {
     @Value("${blog.token-expire-seconds:86400}")
     private long permissionCacheSeconds;
 
+    @Value("${blog.oauth2.issuer-uri:}")
+    private String issuerUri;
+
     @Operation(summary = "跳转到 UAA，启动 OAuth2 Authorization Code 登录")
     @GetMapping("/login")
     public ResponseEntity<Void> login(HttpServletRequest request) {
@@ -91,6 +95,11 @@ public class AuthController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return Result.fail("Refresh Token 不存在");
         }
+        if (denylistService.isRefreshTokenRevoked(refreshToken)) {
+            cookieService.clear(response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return Result.fail("Refresh Token 已失效");
+        }
 
         try {
             OAuth2TokenClient.TokenResponse tokens = tokenClient.refresh(refreshToken);
@@ -110,9 +119,21 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "撤销 Refresh Token 并清除认证 Cookie")
+    @Operation(summary = "撤销 Refresh Token、清除认证 Cookie，并返回 UAA 登出地址")
     @PostMapping("/logout")
     public Result<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        performLogout(request, response);
+        return Result.success("登出成功");
+    }
+
+    @Operation(summary = "浏览器登出：清除 Blog Cookie 后跳转 UAA 销毁统一认证会话")
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logoutRedirect(HttpServletRequest request, HttpServletResponse response) {
+        performLogout(request, response);
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(uaaLogoutUrl())).build();
+    }
+
+    private void performLogout(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = cookieService.resolveAccessToken(request);
         String refreshToken = cookieService.resolveRefreshToken(request);
 
@@ -130,11 +151,26 @@ public class AuthController {
             revokeAtUaa(accessToken, "access_token");
         }
         if (StringUtils.hasText(refreshToken)) {
+            denylistService.revokeRefreshToken(refreshToken);
             revokeAtUaa(refreshToken, "refresh_token");
         }
 
         cookieService.clear(response);
-        return Result.success("登出成功");
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        if (StringUtils.hasText(uaaLogoutUrl())) {
+            response.setHeader("X-UAA-Logout-Url", uaaLogoutUrl());
+        }
+    }
+
+    private String uaaLogoutUrl() {
+        if (!StringUtils.hasText(issuerUri)) {
+            return "/logout";
+        }
+        String base = issuerUri.endsWith("/") ? issuerUri.substring(0, issuerUri.length() - 1) : issuerUri;
+        return base + "/logout";
     }
 
     private void revokeAtUaa(String token, String tokenTypeHint) {

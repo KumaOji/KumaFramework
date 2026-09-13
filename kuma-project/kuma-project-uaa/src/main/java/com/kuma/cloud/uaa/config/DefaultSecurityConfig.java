@@ -28,6 +28,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
@@ -119,10 +120,10 @@ public class DefaultSecurityConfig {
                         .failureHandler(failureHandler)
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
+                        .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher("/logout"))
                         .logoutSuccessUrl(LOGIN_PAGE + "?logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("UAA_SESSION", "JSESSIONID"))
+                        .deleteCookies("UAA_SESSION", "JSESSIONID", "XSRF-TOKEN"))
                 .oauth2ResourceServer(resourceServer -> resourceServer
                         .bearerTokenResolver(new DefaultBearerTokenResolver())
                         .jwt(jwt -> jwt
