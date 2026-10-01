@@ -81,7 +81,7 @@ def frameworkBootSubModules = [
         'job-common', 'job-quartz', 'job-powerjob', 'job-xxl',
         // Web
         'web', 'webagg', 'websocket', 'xss',
-        'graphql', 'mcp', 'sse', 'webflux',
+        'graphql', 'sse', 'webflux',
         // 文件传输
         'file-transfer',
         // AI

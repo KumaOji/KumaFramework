@@ -1,6 +1,6 @@
-package com.kuma.boot.mcp.resource;
+package com.kuma.boot.ai.mcp.resource;
 
-import com.kuma.boot.mcp.protocol.McpSchema;
+import com.kuma.boot.ai.mcp.protocol.McpSchema;
 
 /**
  * MCP 资源 SPI。业务侧实现并注册为 Spring Bean，向客户端暴露可读取的上下文资源

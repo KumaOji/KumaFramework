@@ -1,7 +1,7 @@
 package com.kuma.boot.ai.mcp;
 
-import com.kuma.boot.mcp.protocol.McpSchema;
-import com.kuma.boot.mcp.tool.McpTool;
+import com.kuma.boot.ai.mcp.protocol.McpSchema;
+import com.kuma.boot.ai.mcp.tool.McpTool;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import org.slf4j.Logger;

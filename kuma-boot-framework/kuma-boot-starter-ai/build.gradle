@@ -2,13 +2,10 @@ plugins {
     id 'java-library'
 }
 
-description = 'KumaFramework AI 对话与 RAG 快速启动模块（基于 LangChain4j + Qdrant）'
+description = 'KumaFramework AI 对话、RAG 与 MCP 模块（基于 LangChain4j + Qdrant）'
 
 dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
-
-    // MCP 桥接（可选）：将 @Tool 工具暴露为 McpTool。compileOnly + @ConditionalOnClass，保持解耦
-    compileOnly project(':kuma-boot-framework:kuma-boot-starter-mcp')
 
     api projectLibs.spring.boot.autoconfigure
     api projectLibs.spring.boot.web.server
@@ -17,6 +14,7 @@ dependencies {
     api projectLibs.spring.context
     api projectLibs.spring.beans
     api projectLibs.slf4j.api
+    api projectLibs.jackson.annotations
     api projectLibs.langchain4j
     api projectLibs.langchain4jopenai
     api projectLibs.langchain4jqdrant
@@ -24,4 +22,11 @@ dependencies {
     api projectLibs.jakarta.annotation.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }

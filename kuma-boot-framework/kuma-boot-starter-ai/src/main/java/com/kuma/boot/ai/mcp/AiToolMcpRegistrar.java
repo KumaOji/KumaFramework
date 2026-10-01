@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 
 /**
  * 扫描容器内全部 {@link AiToolProvider} Bean,为其中每个 langchain4j {@link Tool} 方法注册一个
- * {@link LangchainToolMcpAdapter} Bean。这些适配器作为 {@code McpTool} 被 MCP 模块的工具注册表
+ * {@link LangchainToolMcpAdapter} Bean。这些适配器作为 {@code McpTool} 被内置 MCP 工具注册表
  * 自动收集,从而让现有 AI 工具「零改动」通过 MCP 协议对外暴露。
  *
  * <p>以 {@link BeanDefinitionRegistryPostProcessor} 实现并置于最低优先级,确保在 {@code @Bean} /

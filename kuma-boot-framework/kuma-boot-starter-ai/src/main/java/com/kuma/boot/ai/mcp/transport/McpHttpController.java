@@ -1,7 +1,7 @@
-package com.kuma.boot.mcp.transport;
+package com.kuma.boot.ai.mcp.transport;
 
-import com.kuma.boot.mcp.protocol.JsonRpc;
-import com.kuma.boot.mcp.server.McpServer;
+import com.kuma.boot.ai.mcp.protocol.JsonRpc;
+import com.kuma.boot.ai.mcp.server.McpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;

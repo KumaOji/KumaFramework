@@ -1,17 +1,17 @@
-package com.kuma.boot.mcp.autoconfigure;
+package com.kuma.boot.ai.mcp.autoconfigure;
 
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.mcp.autoconfigure.properties.McpServerProperties;
-import com.kuma.boot.mcp.prompt.McpPrompt;
-import com.kuma.boot.mcp.prompt.McpPromptRegistry;
-import com.kuma.boot.mcp.protocol.McpSchema;
-import com.kuma.boot.mcp.resource.McpResource;
-import com.kuma.boot.mcp.resource.McpResourceRegistry;
-import com.kuma.boot.mcp.server.McpServer;
-import com.kuma.boot.mcp.tool.McpTool;
-import com.kuma.boot.mcp.tool.McpToolRegistry;
-import com.kuma.boot.mcp.transport.McpHttpController;
+import com.kuma.boot.ai.mcp.autoconfigure.properties.McpServerProperties;
+import com.kuma.boot.ai.mcp.prompt.McpPrompt;
+import com.kuma.boot.ai.mcp.prompt.McpPromptRegistry;
+import com.kuma.boot.ai.mcp.protocol.McpSchema;
+import com.kuma.boot.ai.mcp.resource.McpResource;
+import com.kuma.boot.ai.mcp.resource.McpResourceRegistry;
+import com.kuma.boot.ai.mcp.server.McpServer;
+import com.kuma.boot.ai.mcp.tool.McpTool;
+import com.kuma.boot.ai.mcp.tool.McpToolRegistry;
+import com.kuma.boot.ai.mcp.transport.McpHttpController;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -38,7 +38,7 @@ public class McpServerAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        LogUtils.started(McpServerAutoConfiguration.class, StarterNameConstants.MCP_STARTER);
+        LogUtils.started(McpServerAutoConfiguration.class, StarterNameConstants.AI_STARTER);
     }
 
     @Bean

@@ -61,7 +61,6 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-websocket` | WebSocket support |
 | `kuma-boot-starter-webflux` | Reactive WebFlux support |
 | `kuma-boot-starter-graphql` | Spring GraphQL integration |
-| `kuma-boot-starter-mcp` | Model Context Protocol integration |
 | `kuma-boot-starter-sse` | Server-Sent Events support |
 | `kuma-boot-starter-xss` | XSS filtering (AntiSamy + Jsoup) |
 | `kuma-boot-starter-sensitive` | Data masking (phone, ID card, bank card, etc.) |
@@ -188,7 +187,7 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-sms-common` | SMS delivery abstraction |
 | `kuma-boot-starter-sms-aliyun` | Alibaba Cloud SMS implementation |
 | `kuma-boot-starter-sms-tencent` | Tencent Cloud SMS implementation |
-| `kuma-boot-starter-ai` | Spring AI integration |
+| `kuma-boot-starter-ai` | LangChain4j chat, agents, RAG (Qdrant), and MCP server with AI tool bridging |
 | `kuma-boot-starter-office` | Office document processing (POI / EasyExcel / Aspose) |
 | `kuma-boot-starter-translation` | Multilingual i18n translation |
 | `kuma-boot-starter-threadpool` | Dynamic thread pools (DynamicTp + TTL) |
@@ -205,6 +204,8 @@ A collection of Spring Boot Auto-Configuration Starters, grouped by functional d
 | `kuma-boot-starter-i18n` | Internationalization auto-configuration |
 | `kuma-boot-starter-multi-tenant` | Multi-tenant application support |
 | `kuma-boot-starter-test` | Testing toolkit (TestContainers / DataFaker) |
+
+MCP is included in `kuma-boot-starter-ai`, with Java APIs under `com.kuma.boot.ai.mcp`. Server configuration uses `kuma.boot.mcp.*`; AI tool bridging uses `kuma.boot.ai.mcp.enabled`. Both are enabled by default. Set `kuma.boot.mcp.enabled=false` to disable the MCP server and tool bridging.
 
 ### Core Dependency Chain
 

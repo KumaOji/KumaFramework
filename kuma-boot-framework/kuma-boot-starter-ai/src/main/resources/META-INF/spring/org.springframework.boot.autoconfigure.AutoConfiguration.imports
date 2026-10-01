@@ -1,2 +1,3 @@
 com.kuma.boot.ai.autoconfigure.AiChatAutoConfiguration
 com.kuma.boot.ai.autoconfigure.AiMcpAutoConfiguration
+com.kuma.boot.ai.mcp.autoconfigure.McpServerAutoConfiguration

@@ -1,6 +1,6 @@
-package com.kuma.boot.mcp.autoconfigure.properties;
+package com.kuma.boot.ai.mcp.autoconfigure.properties;
 
-import com.kuma.boot.mcp.protocol.McpSchema;
+import com.kuma.boot.ai.mcp.protocol.McpSchema;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

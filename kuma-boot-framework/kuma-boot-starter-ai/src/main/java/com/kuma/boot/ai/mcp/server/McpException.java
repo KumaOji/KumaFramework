@@ -1,4 +1,4 @@
-package com.kuma.boot.mcp.server;
+package com.kuma.boot.ai.mcp.server;
 
 /**
  * MCP 处理异常，携带 JSON-RPC 错误码，由 {@link McpServer} 转换为标准错误响应。

@@ -1,4 +1,4 @@
-package com.kuma.boot.mcp.protocol;
+package com.kuma.boot.ai.mcp.protocol;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

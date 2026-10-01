@@ -1,13 +1,13 @@
-package com.kuma.boot.mcp.server;
+package com.kuma.boot.ai.mcp.server;
 
-import com.kuma.boot.mcp.prompt.McpPrompt;
-import com.kuma.boot.mcp.prompt.McpPromptRegistry;
-import com.kuma.boot.mcp.protocol.JsonRpc;
-import com.kuma.boot.mcp.protocol.McpSchema;
-import com.kuma.boot.mcp.resource.McpResource;
-import com.kuma.boot.mcp.resource.McpResourceRegistry;
-import com.kuma.boot.mcp.tool.McpTool;
-import com.kuma.boot.mcp.tool.McpToolRegistry;
+import com.kuma.boot.ai.mcp.prompt.McpPrompt;
+import com.kuma.boot.ai.mcp.prompt.McpPromptRegistry;
+import com.kuma.boot.ai.mcp.protocol.JsonRpc;
+import com.kuma.boot.ai.mcp.protocol.McpSchema;
+import com.kuma.boot.ai.mcp.resource.McpResource;
+import com.kuma.boot.ai.mcp.resource.McpResourceRegistry;
+import com.kuma.boot.ai.mcp.tool.McpTool;
+import com.kuma.boot.ai.mcp.tool.McpToolRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

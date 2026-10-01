@@ -1,6 +1,6 @@
-package com.kuma.boot.mcp.tool;
+package com.kuma.boot.ai.mcp.tool;
 
-import com.kuma.boot.mcp.protocol.McpSchema;
+import com.kuma.boot.ai.mcp.protocol.McpSchema;
 
 import java.util.LinkedHashMap;
 import java.util.List;

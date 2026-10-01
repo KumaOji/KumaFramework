@@ -65,7 +65,6 @@ public final class StarterAnchorRegistry {
         register(StarterNameConstants.LOCK_STARTER, "com.kuma.boot.lock.autoconfigure.LockAutoConfiguration");
         register(StarterNameConstants.LOGGER_STARTER, "com.kuma.boot.logger.autoconfigure.LoggerAutoConfiguration");
         register(StarterNameConstants.MAIL_STARTER, "com.kuma.boot.mail.autoconfigure.MailAutoConfiguration");
-        register(StarterNameConstants.MCP_STARTER, "com.kuma.boot.mcp.autoconfigure.McpServerAutoConfiguration");
         register(StarterNameConstants.METRICS_STARTER, "com.kuma.boot.metrics.autoconfigure.MetricsAutoConfiguration");
         register(StarterNameConstants.MONITOR_STARTER, "com.kuma.boot.monitor.autoconfigure.MonitorAutoConfiguration");
         register(StarterNameConstants.MQ_KAFKA_STARTER,

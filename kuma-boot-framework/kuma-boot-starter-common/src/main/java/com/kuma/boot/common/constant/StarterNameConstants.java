@@ -85,7 +85,6 @@ public final class StarterNameConstants {
 
     public static final String MAIL_STARTER = "kuma-boot-starter-mail";
     public static final String METRICS_STARTER = "kuma-boot-starter-metrics";
-    public static final String MCP_STARTER = "kuma-boot-starter-mcp";
     public static final String MONITOR_STARTER = "kuma-boot-starter-monitor";
     public static final String MQ_COMMON_STARTER = "kuma-boot-starter-mq-common";
     public static final String MQ_KAFKA_STARTER = "kuma-boot-starter-mq-kafka";

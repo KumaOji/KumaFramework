@@ -61,7 +61,6 @@ Spring Boot Auto-Configuration Starter 集合，按功能领域分组。
 | `kuma-boot-starter-websocket` | WebSocket 支持 |
 | `kuma-boot-starter-webflux` | 响应式 WebFlux 支持 |
 | `kuma-boot-starter-graphql` | Spring GraphQL 集成 |
-| `kuma-boot-starter-mcp` | Model Context Protocol 集成 |
 | `kuma-boot-starter-sse` | Server-Sent Events 支持 |
 | `kuma-boot-starter-xss` | XSS 过滤（AntiSamy + Jsoup）|
 | `kuma-boot-starter-sensitive` | 数据脱敏（手机号、身份证、银行卡等）|
@@ -188,7 +187,7 @@ Spring Boot Auto-Configuration Starter 集合，按功能领域分组。
 | `kuma-boot-starter-sms-common` | 短信发送抽象 |
 | `kuma-boot-starter-sms-aliyun` | 阿里云短信实现 |
 | `kuma-boot-starter-sms-tencent` | 腾讯云短信实现 |
-| `kuma-boot-starter-ai` | Spring AI 集成 |
+| `kuma-boot-starter-ai` | LangChain4j 对话、Agent、RAG（Qdrant）及 MCP 服务端与 AI 工具桥接 |
 | `kuma-boot-starter-office` | Office 文档处理（POI / EasyExcel / Aspose）|
 | `kuma-boot-starter-translation` | 多语言国际化翻译 |
 | `kuma-boot-starter-threadpool` | 动态线程池（DynamicTp + TTL）|
@@ -205,6 +204,8 @@ Spring Boot Auto-Configuration Starter 集合，按功能领域分组。
 | `kuma-boot-starter-i18n` | 国际化自动配置 |
 | `kuma-boot-starter-multi-tenant` | 多租户应用支持 |
 | `kuma-boot-starter-test` | 测试工具集（TestContainers / DataFaker）|
+
+MCP 已内置于 `kuma-boot-starter-ai`，Java API 位于 `com.kuma.boot.ai.mcp`。服务端沿用 `kuma.boot.mcp.*` 配置，AI 工具桥接使用 `kuma.boot.ai.mcp.enabled`，两者默认开启。设置 `kuma.boot.mcp.enabled=false` 可关闭 MCP 服务端及工具桥接。
 
 ### Starter 核心依赖链
 
