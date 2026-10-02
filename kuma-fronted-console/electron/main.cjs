@@ -32,10 +32,20 @@ async function ensureBackend(){
       path.join(process.resourcesPath,'backend/kuma-console.jar'),'--console.open-browser=false'],
       {cwd:app.getPath('userData'),env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
     ownedBackend=child;
-  }else{
+  }else if(process.platform==='win32'){
     child=spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',
       path.join(workspace,'kuma-project/kuma-project-console/start-console.ps1')],
       {cwd:workspace,env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
+  }else{
+    await new Promise((resolve,reject)=>{
+      const build=spawn('sh',[path.join(workspace,'gradlew'),':kuma-project:kuma-project-console:bootJar','--console=plain'],{cwd:workspace});
+      let output='';build.stdout.on('data',data=>{output=(output+data).slice(-6000);});build.stderr.on('data',data=>{output=(output+data).slice(-6000);});
+      build.on('error',reject);build.on('exit',code=>code===0?resolve():reject(Error(`后端构建失败 (${code})\n${output}`)));
+    });
+    child=spawn('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
+      path.join(workspace,'kuma-project/kuma-project-console/build/libs/kuma-console.jar'),'--console.open-browser=false'],
+      {cwd:workspace,env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'}});
+    ownedBackend=child;
   }
   let lastOutput='',failure;
   const receive=buffer=>{lastOutput=(lastOutput+buffer.toString()).slice(-6000);};

@@ -281,6 +281,58 @@ IDE 直启时若提示找不到动态库，可先执行 `compileNative`，或在
 
 ## Kafka 测试
 
+### 完整流程实验（异步，可逐步查询）
+
+`POST /api/lab/kafka/scenario`，正文如下（需要 `kuma.lab.kafka.enabled=true`）：
+
+```json
+{
+  "partitions": 3,
+  "messageCount": 6,
+  "replicationFactor": 1,
+  "message": "Hello Kafka\n观察生产、消费和 offset 提交",
+  "demonstrateRebalance": true
+}
+```
+
+接口立即返回 `experimentId`、独立 `topic`、消费组和 `RUNNING` 状态；每秒调用
+`GET /api/lab/kafka/experiments/{id}` 可获取实时 `steps`，直到 `SUCCEEDED` / `FAILED`。
+每一步包含 `sequence`、`stage`、`operation`、`explanation`、时间、耗时和实际 `evidence`；
+失败时保留已完成步骤和错误原因。`checks` 是根据实际 broker 返回结果计算的断言。
+
+实验顺序：
+
+1. 发现 cluster / broker / controller，创建独立的多分区 topic，读取 leader / replicas / ISR。
+2. UTF-8 序列化，前两条相同 key 验证同分区，其余显式选择分区；记录真实发送确认的 partition、offset、timestamp 和字节数。
+3. 手动 assign 分区并消费，记录 key / value / headers / partition / offset；对比本地 position 与尚未提交的 committed offset。
+4. 关闭消费者并以相同 group 重新读取，验证未提交消息会再次出现。
+5. 按每个分区最后已处理 offset + 1 执行 commitSync，重新查询 broker 保存的提交位置。
+6. seek 回退并重新读取；不提交回退位置，再创建消费者从已提交位置恢复。
+7. 换独立 group 再读全部消息，验证各组的消费位置独立。
+8. 两个消费者以同一独立 group 使用 subscribe，通过实际 coordinator 分配观察互斥且完整的分区归属。
+9. 读取最终 beginning / end / committed offset 与 lag。
+
+其他接口：
+
+| 方法 / 路径 | 用途 |
+| --- | --- |
+| `GET /api/lab/kafka/cluster` | 集群、broker 地址和 topic 列表 |
+| `GET /api/lab/kafka/topic?topic=…&groupId=…` | 分区 leader、副本、ISR、offset、lag 和 topic 配置 |
+| `GET /api/lab/kafka/experiments` | 最近 20 次实验 |
+| `DELETE /api/lab/kafka/experiments/{id}` | 清理已结束实验创建的独立 topic 和消费组 |
+
+默认保留实验 topic，方便再次查询；实验记录存在当前 Lab 进程内，最多保留 100 次，重启前请清理。
+不会改动日常监听 topic 或 group；运行中不能清理，同时最多执行两个实验。
+这是客户端 API 和 broker 返回结果的观察，不是 broker 磁盘写入或网络包追踪。
+默认单副本适合本机单 broker，不能据此验证多副本故障恢复；`enable.idempotence=true` 是生产配置，不代表本实验验证了 Kafka 事务或重试去重。
+
+**WSL 地址注意**：bootstrap 端口能连通还不够，Kafka 返回的 `advertised.listeners` 也必须可达。
+2026-10-02 检查时 WSL 地址为 `172.23.89.45`，但 external listener 仍公布 `172.17.170.123`，
+需要按实际机器修正 Kafka listener 配置；这里不把环境地址写死在实验代码中。
+
+普通测试：`./gradlew :kuma-project:kuma-project-lab:test --tests '*KafkaScenario*Test'`。
+设置 `KAFKA_LAB_IT_BOOTSTRAP` 后会额外执行真实 broker 的完整生命周期测试，并清理它自己创建的 topic。
+
 1. 按上文「启动方式」连上 Nacos（`kuma-cloud-lab-dev.yaml` 默认 Kafka `172.23.89.45:9092`）。
 2. 预先创建测试 topic（默认 `kuma-lab-test`），或确保 broker 允许自动创建 topic。
 3. 启动 `LabApplication`。

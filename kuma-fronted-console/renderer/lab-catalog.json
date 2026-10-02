@@ -175,6 +175,60 @@
   },
   {
     "group": "Kafka 测试",
+    "name": "启动 Kafka 完整实验：分区、生产、消费、提交、重放与组分配",
+    "method": "POST",
+    "path": "/lab/kafka/scenario",
+    "body": {
+      "partitions": 3,
+      "messageCount": 6,
+      "replicationFactor": 1,
+      "message": "Hello Kafka\n观察生产、消费和 offset 提交",
+      "demonstrateRebalance": true
+    },
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "查询实验进度、逐步证据和验证结果",
+    "method": "GET",
+    "path": "/lab/kafka/experiments/{id}",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "最近 20 次 Kafka 实验",
+    "method": "GET",
+    "path": "/lab/kafka/experiments",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "清理指定已结束实验的独立 topic 与消费组",
+    "method": "DELETE",
+    "path": "/lab/kafka/experiments/{id}",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "Kafka 集群：bootstrap、实际 broker、controller 与 topic 列表",
+    "method": "GET",
+    "path": "/lab/kafka/cluster",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "Topic 详情：leader、replicas、ISR、起止 offset、提交位置与 lag",
+    "method": "GET",
+    "path": "/lab/kafka/topic",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
     "name": "发送一条 Kafka 测试消息",
     "method": "POST",
     "path": "/lab/kafka/send",

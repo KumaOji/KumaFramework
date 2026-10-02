@@ -13,7 +13,7 @@ spring:
         size: 3
 console:
   open-browser: ${KUMA_CONSOLE_OPEN_BROWSER:true}
-  wsl-distribution: ${KUMA_CONSOLE_WSL_DISTRIBUTION:Ubuntu-24.04}
+  wsl-distribution: ${KUMA_CONSOLE_WSL_DISTRIBUTION:auto}
   wsl-user: ${KUMA_CONSOLE_WSL_USER:root}
   projects:
     - name: Blog

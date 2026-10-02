@@ -74,12 +74,22 @@ $('service-search').addEventListener('input',renderWindowsServices);
 function renderEnvironment() {
   const c = state.cluster; const projects = state.projects?.projects || []; const readyPods = (c?.items||[]).filter(x => x.kind==='Pod' && podReady(x));
   $('environment-summary').className = 'environment-items';
-  $('environment-summary').innerHTML = `<div class="environment-row"><span>WSL · ${esc(c?.distribution||'Ubuntu')}</span>${badge(c?.error?'未连接':c?.ready?'运行中':'采集中',c?.ready&&!c?.error?'ok':'warn')}</div><div class="environment-row"><span>k3s 工作负载</span><span>${readyPods.length} 个 Pod 就绪</span></div>`
-    + projects.slice(0,4).map(p => `<div class="environment-row"><span>${esc(p.name)}</span>${projectBadge(p.status)}</div>`).join('');
+  const configured=projects.length, healthy=projects.filter(p=>p.status==='HEALTHY').length;
+  const reachable=projects.filter(p=>['HEALTHY','REACHABLE','UNHEALTHY'].includes(p.status)).length;
+  const running=state.running?.length;
+  const rows=[`<div class="environment-row"><span>系统采集</span>${badge(state.host?.ready?'已连接':'采集中',state.host?.ready?'ok':'')}</div>`];
+  if(typeof projectCatalog!=='undefined'&&projectCatalog)rows.push(`<a href="#projects" class="environment-row"><span>仓库项目</span><span>${projectCatalog.projects.length} 个 →</span></a>`);
+  if(running!=null)rows.push(`<a href="#projects" class="environment-row"><span>发现的项目进程</span><span>${running} 个 →</span></a>`);
+  if(configured)rows.push(`<a href="#projects" class="environment-row"><span>服务探测</span><span>${reachable}/${configured} 可达 · ${healthy} 健康 →</span></a>`);
+  if(c?.supported!==false&&c?.configured!==false&&c?.runningDistributions?.length)rows.push(`<a href="#cluster" class="environment-row"><span>WSL 发行版</span><span>${c.runningDistributions.length} 个运行中 →</span></a>`);
+  if(c?.supported!==false&&c?.configured!==false&&c?.ready&&!c.error)rows.push(`<a href="#cluster" class="environment-row"><span>集群工作负载</span><span>${readyPods.length} 个 Pod 就绪 →</span></a>`);
+  $('environment-summary').innerHTML=rows.join('');
 }
 const podReady = pod => { const statuses = pod.status?.containerStatuses || []; return pod.status?.phase==='Running' && statuses.length>0 && statuses.every(s=>s.ready); };
 function renderCluster() {
-  const c = state.cluster; notice('cluster-warning',state.errors.cluster || c?.error); if(!c?.ready) return;
+  const c = state.cluster; notice('cluster-warning',state.errors.cluster || c?.error || c?.reason);
+  document.querySelector('nav [data-page="cluster"]').hidden=c?.supported===false||c?.configured===false;
+  if(!c?.ready) {if(c?.reason)$('wsl-distributions').textContent=c.reason;return;}
   $('cluster-updated').textContent = time(c.sampledAt); $('wsl-title').textContent = `WSL · ${c.distribution}`;
   $('wsl-distributions').textContent = c.distributions || '暂无发行版'; $('wsl-system').textContent = c.system || '暂无 Linux 采样';
   $('k3s-metrics').textContent = `NODES\n${c.nodeMetrics||'尚无数据'}\n\nPODS\n${c.podMetrics||'尚无数据'}`;
@@ -148,6 +158,7 @@ function renderRuntimeProcesses(){const rows=(state.host?.processes||[]).filter(
 function showProjectDetails(project){$('resource-drawer').hidden=false;$('drawer-backdrop').hidden=false;$('drawer-kind').textContent='PROJECT DIAGNOSTICS';$('drawer-title').textContent=project.name;$('drawer-tools').replaceChildren();const select=document.createElement('select');select.setAttribute('aria-label','项目诊断端点');for(const endpoint of ['health','info','metrics','metrics/jvm.memory.used','metrics/jvm.threads.live','metrics/process.uptime','metrics/system.cpu.usage','threaddump','httpexchanges']){const option=document.createElement('option');option.value=endpoint;option.textContent=endpoint;select.append(option);}const button=document.createElement('button');button.className='button primary';button.textContent='读取诊断';const read=async()=>{button.disabled=true;$('drawer-content').textContent='正在读取项目运行信息…';try{const r=await api(`/api/projects/details?name=${encodeURIComponent(project.name)}&endpoint=${encodeURIComponent(select.value)}`);let body=r.body;try{body=JSON.stringify(JSON.parse(body),null,2);}catch{}$('drawer-content').textContent=`HTTP ${r.status||'未连接'} · ${r.url}\n${r.truncated?'响应已截断为 1 MiB\n':''}\n${body}\n\n401/403 表示需要项目授权；404 表示该端点未开放。`;}catch(e){$('drawer-content').textContent=e.message;}finally{button.disabled=false;}};button.onclick=read;select.onchange=read;$('drawer-tools').append(select,button);read();}
 const presets=[];
 function preset(group,name,method,path,body=''){presets.push({group,name,method,path,body:typeof body==='string'?body:JSON.stringify(body,null,2)});}
+preset('Kafka','完整实验：生产到 offset 提交','POST','/lab/kafka/scenario',{partitions:3,messageCount:6,replicationFactor:1,message:'Hello Kafka\n观察生产、消费和 offset 提交',demonstrateRebalance:true});preset('Kafka','最近完整实验及进度','GET','/lab/kafka/experiments');preset('Kafka','集群与实际 broker 地址','GET','/lab/kafka/cluster');
 preset('Kafka','查看状态','GET','/lab/kafka/status');preset('Kafka','发送测试消息','POST','/lab/kafka/send',{key:'console-demo',message:'Hello from Kuma Console'});preset('Kafka','最近消费消息','GET','/lab/kafka/messages?limit=100&direction=CONSUMED');
 preset('Redis','完整读写实验','POST','/lab/redis/scenario');preset('Redis','写入字符串','POST','/lab/redis/string',{key:'console-demo',value:'hello',ttlSeconds:60});
 preset('向量库','查看状态','GET','/lab/vector/status');preset('向量库','完整检索实验','POST','/lab/vector/scenario');preset('向量库','相似度检索','POST','/lab/vector/search',{query:'KumaFramework',topK:5,minScore:0});

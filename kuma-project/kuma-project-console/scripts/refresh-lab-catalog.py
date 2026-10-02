@@ -14,7 +14,7 @@ def example(kind, depth=0):
         return None
     if kind in ('String', 'CharSequence'):
         return 'demo'
-    if kind in ('int', 'long', 'Integer', 'Long', 'double', 'float', 'Double', 'Float', 'BigDecimal'):
+    if kind in ('int', 'long', 'short', 'Short', 'Integer', 'Long', 'double', 'float', 'Double', 'Float', 'BigDecimal'):
         return 1
     if kind in ('boolean', 'Boolean'):
         return False
@@ -27,6 +27,9 @@ def example(kind, depth=0):
     if kind not in classes:
         return None
     text = classes[kind].read_text(encoding='utf-8-sig')
+    if kind == 'KafkaScenarioDTO':
+        return {'partitions': 3, 'messageCount': 6, 'replicationFactor': 1,
+                'message': 'Hello Kafka\n观察生产、消费和 offset 提交', 'demonstrateRebalance': True}
     fields = re.findall(r'private\s+(?!static\b)([\w<>?,\[\] ]+?)\s+(\w+)\s*(?:=[^;]*)?;', text)
     if not fields:
         record = re.search(r'public record \w+\s*\(([\s\S]*?)\)\s*\{', text)

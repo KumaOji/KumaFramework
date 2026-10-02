@@ -65,9 +65,15 @@ try{
   await waitFor('document.getElementById("drawer-content").textContent.includes("HTTP")');
   await evaluate('document.getElementById("close-drawer").click()');
   await evaluate('location.hash="lab"');await pause(100);
+  const sqlSample='CREATE TABLE t (\n    id BIGINT\n);';
+  await evaluate(`lastLabResponse=${JSON.stringify(JSON.stringify({payload:{data:[{syntax:sqlSample}]}}))};renderLabResponse();`);
+  assert(await evaluate(`document.getElementById("lab-response").textContent.includes(${JSON.stringify(sqlSample)})`),'Response string newlines are not rendered');
+  await evaluate('document.getElementById("response-view").value="json";document.getElementById("response-view").dispatchEvent(new Event("change"));');
+  assert(await evaluate(`JSON.parse(document.getElementById("lab-response").textContent).payload.data[0].syntax.includes(${JSON.stringify('\n')})`));
+  await evaluate('document.getElementById("response-view").value="multiline";document.getElementById("response-view").dispatchEvent(new Event("change"));');
   await evaluate('document.getElementById("lab-body").value="{invalid";document.getElementById("lab-send").click()');
   assert.equal(await evaluate('document.getElementById("lab-request-error").hidden'),false);
-  await evaluate('document.getElementById("lab-body").value="";document.getElementById("lab-send").click()');
+  await evaluate('document.getElementById("lab-method").value="GET";document.getElementById("lab-path").value="/lab/kafka/status";document.getElementById("lab-body").value="";document.getElementById("lab-send").click()');
   await waitFor('!document.getElementById("lab-send").disabled');
   assert(await evaluate('document.getElementById("lab-response-meta").textContent.includes("HTTP")'));
   await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});

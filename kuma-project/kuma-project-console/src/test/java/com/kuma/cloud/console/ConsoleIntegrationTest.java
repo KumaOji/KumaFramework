@@ -181,6 +181,12 @@ class ConsoleIntegrationTest {
     }
 
     @Test
+    void absenceOfLabDoesNotPreventMonitorStartup() {
+        var client=new LabClient(new ConsoleProperties(false,"auto","root",List.of()));
+        assertThatThrownBy(()->client.target("/lab/kafka/status")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("未配置 Lab");
+    }
+
+    @Test
     void commandTimeoutTerminatesChildProcess() {
         String executable = System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java";
         String javaExecutable = java.nio.file.Path.of(System.getProperty("java.home"), "bin", executable).toString();

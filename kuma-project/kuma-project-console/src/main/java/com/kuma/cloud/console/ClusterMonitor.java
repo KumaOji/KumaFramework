@@ -23,6 +23,7 @@ public class ClusterMonitor {
     private final ObjectMapper mapper;
     private volatile Map<String, Object> snapshot = Map.of("ready", false);
     private volatile Set<String> resourceTypes = Set.of();
+    private volatile String selectedDistribution;
 
     public ClusterMonitor(CommandRunner commands, ConsoleProperties properties, ObjectMapper mapper) {
         this.commands = commands; this.properties = properties; this.mapper = mapper;
@@ -37,12 +38,23 @@ public class ClusterMonitor {
         data.put("distribution", properties.wslDistribution());
         data.put("items", List.of()); data.put("resourceTypes", resourceTypes.stream().sorted().toList());
         data.put("error", "");
+        boolean supported=System.getProperty("os.name").startsWith("Windows");
+        boolean configured=properties.wslDistribution()!=null&&!properties.wslDistribution().isBlank();
+        data.put("supported",supported);data.put("configured",configured);
+        if(!supported||!configured) {
+            data.put("ready",false);data.put("runningDistributions",List.of());
+            data.put("reason",supported?"未配置 WSL 监控":"当前系统不支持 WSL；本机监控仍可使用");
+            snapshot=data;return;
+        }
         var distributions = commands.run(List.of("wsl.exe", "--list", "--verbose"), Duration.ofSeconds(5));
         data.put("distributions", distributions.success() ? distributions.output() : distributions.error());
         var running = commands.run(List.of("wsl.exe", "--list", "--running", "--quiet"), Duration.ofSeconds(5));
         data.put("runningDistributions", running.success() ? running.output().lines().filter(s -> !s.isBlank()).toList() : List.of());
-        if (!running.success() || running.output().lines().noneMatch(properties.wslDistribution()::equals)) {
-            data.put("error", "WSL 发行版未运行：" + properties.wslDistribution());
+        selectedDistribution="auto".equalsIgnoreCase(properties.wslDistribution())?
+                running.output().lines().filter(s->!s.isBlank()).findFirst().orElse(""):properties.wslDistribution();
+        data.put("distribution",selectedDistribution);
+        if (!running.success() || running.output().lines().noneMatch(selectedDistribution::equals)) {
+            data.put("error", "WSL 发行版未运行：" + selectedDistribution);
             snapshot = data; return;
         }
         var summary = linux("sh", "-c", "printf 'SYSTEM\\n'; uname -srmo; hostname -I; "
@@ -93,7 +105,7 @@ public class ClusterMonitor {
     }
 
     private CommandRunner.Result linux(String... args) {
-        List<String> command = new ArrayList<>(List.of("wsl.exe", "--distribution", properties.wslDistribution(),
+        List<String> command = new ArrayList<>(List.of("wsl.exe", "--distribution", selectedDistribution==null?properties.wslDistribution():selectedDistribution,
                 "--user", properties.wslUser(), "--exec"));
         command.addAll(List.of(args)); return commands.run(command, Duration.ofSeconds(12));
     }

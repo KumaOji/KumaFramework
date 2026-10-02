@@ -19,7 +19,8 @@ public class LabClient {
 
     public LabClient(ConsoleProperties properties) {
         String url = properties.projects().stream().filter(p -> p.name().equalsIgnoreCase("Lab"))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("缺少 Lab 项目配置")).url();
+                .findFirst().map(ConsoleProperties.Project::url).orElse(null);
+        if(url==null) { base=null;return; }
         base = URI.create(url.replaceAll("/+$", ""));
         if (!Set.of("http", "https").contains(base.getScheme()) || base.getHost() == null)
             throw new IllegalArgumentException("Lab 地址必须是 HTTP(S) 地址");
@@ -55,6 +56,7 @@ public class LabClient {
     }
 
     URI target(String path) {
+        if(base==null)throw new IllegalArgumentException("未配置 Lab 服务，请在 console.projects 中添加名称为 Lab 的地址");
         if (path == null || path.length() > 2048 || !(path.startsWith("/lab/") || path.equals("/v3/api-docs")
                 || path.startsWith("/v3/api-docs/"))) throw new IllegalArgumentException("仅允许 Lab 实验与 OpenAPI 路径");
         URI relative = URI.create(path);
