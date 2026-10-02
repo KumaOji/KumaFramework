@@ -34,7 +34,18 @@
 - `spring`：IOC、事件监听、ApplicationContext 与分层架构学习
 - `javacore`：类加载、Mark Word、HashMap 结构、Socket 通信、文件处理等 Java 基础
 - `mysql`：建表、加列、GROUP BY、窗口函数等 SQL 基础语法复习
-- 后续测试按能力建立独立包，例如 `lock`
+- `lock`：volatile、CAS / ABA、ReentrantLock / Condition、AQS、CountDownLatch 系统学习
+
+## 并发与锁学习
+
+学习代码位于 `src/main/java/com/kuma/cloud/lab/lock/`，系统讲解写在代码注释中。
+先阅读 `package-info.java` 中的学习路线，再直接运行 `LockLearningDemo.main()`。
+示例仅依赖 JDK，无需启动 LabApplication、Nacos 或其他中间件。
+
+按顺序阅读 `VolatileLesson`、`CasLesson`、`ReentrantLockLesson`、`AqsLesson`、
+`CountDownLatchLesson`，每个实验都会检查结果，涵盖可见性、丢失更新、CAS 重试、ABA、
+重入与超时、条件等待、自定义 AQS 独占锁，以及门闩完成通知和结果发布。
+其中 AQS Mutex 是不可重入的教学实现；这些示例用于理解同步语义，不是性能基准。
 
 ## 事务测试
 
