@@ -75,7 +75,7 @@ jobs:
       - name: Build jar
         run: |
           chmod +x gradlew
-          make -C kuma-project/kuma-project-gateway build
+          ./gradlew :kuma-project:kuma-project-gateway:bootJar -PciVersion=${{ steps.ver.outputs.JAR_VERSION }} -x test --console=plain
 
       - name: Copy jar to Docker context
         run: |
@@ -112,7 +112,9 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 20m
           script: |
+            set -eu
             # 先同步清单（env/探针等），再用真实镜像覆盖 placeholder，避免镜像被重置导致 ImagePullBackOff
             if [ -f /data/k8s/base/gateway.yaml ]; then
               kubectl apply -f /data/k8s/base/gateway.yaml

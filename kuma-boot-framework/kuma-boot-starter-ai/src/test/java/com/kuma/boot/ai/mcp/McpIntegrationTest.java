@@ -10,12 +10,42 @@ import com.kuma.boot.ai.service.tool.BuiltinTools;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class McpIntegrationTest {
+
+    @Configuration(proxyBeanMethods = false)
+    @ComponentScan(basePackageClasses = McpHttpController.class)
+    static class ScannedTransport {}
+
+    @Test
+    void componentScanningTransportUsesBoundPropertiesWithoutAStringBean() {
+        runner.withUserConfiguration(ScannedTransport.class)
+                .withPropertyValues("kuma.boot.mcp.endpoint=/custom-mcp")
+                .run(context -> assertThat(context).hasNotFailed().hasSingleBean(McpHttpController.class)
+                        .doesNotHaveBean(String.class));
+    }
+
+    @Test
+    void componentScanningRespectsDisabledHttpTransport() {
+        runner.withUserConfiguration(ScannedTransport.class)
+                .withPropertyValues("kuma.boot.mcp.http-enabled=false")
+                .run(context -> assertThat(context).hasNotFailed().hasSingleBean(McpServer.class)
+                        .doesNotHaveBean(McpHttpController.class));
+    }
+
+    @Test
+    void componentScanningRespectsDisabledServer() {
+        runner.withUserConfiguration(ScannedTransport.class)
+                .withPropertyValues("kuma.boot.mcp.enabled=false")
+                .run(context -> assertThat(context).hasNotFailed().doesNotHaveBean(McpServer.class)
+                        .doesNotHaveBean(McpHttpController.class));
+    }
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiMcpAutoConfiguration.class,

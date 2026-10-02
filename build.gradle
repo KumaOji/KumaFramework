@@ -47,7 +47,7 @@ ext {
 }
 
 allprojects {
-    version = project.kmcVersion ?: '1.0.0'
+    version = providers.gradleProperty('ciVersion').getOrElse(project.kmcVersion ?: '1.0.0')
 
     repositories {
         if (System.getenv('CI')) {

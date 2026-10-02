@@ -80,7 +80,7 @@ public class McpServerAutoConfiguration implements InitializingBean {
         @Bean
         @ConditionalOnMissingBean
         public McpHttpController mcpHttpController(McpServer mcpServer, McpServerProperties props) {
-            return new McpHttpController(mcpServer, props.getEndpoint());
+            return new McpHttpController(mcpServer, props);
         }
     }
 }

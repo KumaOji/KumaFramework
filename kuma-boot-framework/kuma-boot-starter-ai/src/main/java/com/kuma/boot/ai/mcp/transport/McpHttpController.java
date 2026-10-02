@@ -2,6 +2,8 @@ package com.kuma.boot.ai.mcp.transport;
 
 import com.kuma.boot.ai.mcp.protocol.JsonRpc;
 import com.kuma.boot.ai.mcp.server.McpServer;
+import com.kuma.boot.ai.mcp.autoconfigure.properties.McpServerProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -27,6 +29,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * </ul>
  */
 @RestController
+@ConditionalOnProperty(prefix = McpServerProperties.PREFIX, name = {"enabled", "http-enabled"},
+        havingValue = "true", matchIfMissing = true)
 public class McpHttpController {
 
     private static final Logger log = LoggerFactory.getLogger(McpHttpController.class);
@@ -35,9 +39,9 @@ public class McpHttpController {
     private final String messageEndpoint;
     private final List<SseEmitter> sessions = new CopyOnWriteArrayList<>();
 
-    public McpHttpController(McpServer server, String messageEndpoint) {
+    public McpHttpController(McpServer server, McpServerProperties properties) {
         this.server = server;
-        this.messageEndpoint = messageEndpoint;
+        this.messageEndpoint = properties.getEndpoint();
     }
 
     /** Streamable HTTP:同步处理 JSON-RPC 请求 */

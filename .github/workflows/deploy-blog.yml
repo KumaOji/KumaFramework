@@ -72,7 +72,7 @@ jobs:
       - name: Build jar
         run: |
           chmod +x gradlew
-          make -C kuma-project/kuma-project-blog build
+          ./gradlew :kuma-project:kuma-project-blog:bootJar -PciVersion=${{ steps.ver.outputs.JAR_VERSION }} -x test --console=plain
 
       - name: Copy jar to Docker context
         run: |
@@ -110,7 +110,9 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 20m
           script: |
+            set -eu
             if [ -f /data/k8s/blog/blog-background.yaml ]; then
               kubectl apply -f /data/k8s/blog/blog-background.yaml
             fi
