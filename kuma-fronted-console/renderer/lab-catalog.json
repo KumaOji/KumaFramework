@@ -1,0 +1,587 @@
+[
+  {
+    "group": "MySQL Binlog monitor",
+    "name": "Get the embedded binlog monitor status",
+    "method": "GET",
+    "path": "/lab/binlog/status",
+    "body": "",
+    "source": "MysqlBinlogController.java"
+  },
+  {
+    "group": "MySQL Binlog monitor",
+    "name": "Get the newest committed row changes",
+    "method": "GET",
+    "path": "/lab/binlog/events",
+    "body": "",
+    "source": "MysqlBinlogController.java"
+  },
+  {
+    "group": "布隆过滤器测试",
+    "name": "执行布隆过滤器场景测试（插入、命中、假阳性演示）",
+    "method": "POST",
+    "path": "/lab/bloom/scenario",
+    "body": "",
+    "source": "BloomTestController.java"
+  },
+  {
+    "group": "布隆过滤器测试",
+    "name": "向实例布隆过滤器添加元素",
+    "method": "POST",
+    "path": "/lab/bloom/add/{value}",
+    "body": "",
+    "source": "BloomTestController.java"
+  },
+  {
+    "group": "布隆过滤器测试",
+    "name": "查询元素是否可能存在",
+    "method": "POST",
+    "path": "/lab/bloom/contains",
+    "body": {
+      "value": "demo"
+    },
+    "source": "BloomTestController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "综合场景：类加载 + Mark Word + HashMap + Socket + 文件处理",
+    "method": "POST",
+    "path": "/lab/javacore/scenario",
+    "body": "",
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "类加载器层次与加载阶段说明",
+    "method": "GET",
+    "path": "/lab/javacore/classloader",
+    "body": "",
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "Mark Word / 对象头布局观察（基于 JOL）",
+    "method": "GET",
+    "path": "/lab/javacore/markword",
+    "body": "",
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "HashMap 内部桶位与扩容参数观察",
+    "method": "POST",
+    "path": "/lab/javacore/hashmap/inspect",
+    "body": {},
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "HashMap 哈希碰撞演示（相同桶索引的 key）",
+    "method": "GET",
+    "path": "/lab/javacore/hashmap/collision",
+    "body": "",
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "Socket TCP 回显通信演示",
+    "method": "POST",
+    "path": "/lab/javacore/socket/send",
+    "body": {
+      "message": "demo"
+    },
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "文件处理综合演示（写入、读取、复制、列举）",
+    "method": "POST",
+    "path": "/lab/javacore/file/scenario",
+    "body": "",
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "写入文本文件到实验工作目录",
+    "method": "POST",
+    "path": "/lab/javacore/file/write",
+    "body": {
+      "relativePath": "demo",
+      "content": "demo",
+      "append": false
+    },
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "Java 基础知识学习",
+    "name": "读取实验工作目录中的文本文件",
+    "method": "POST",
+    "path": "/lab/javacore/file/read",
+    "body": {
+      "relativePath": "demo"
+    },
+    "source": "JavaCoreLabController.java"
+  },
+  {
+    "group": "JNI 测试",
+    "name": "执行 add / multiply / greet / sumArray 场景测试",
+    "method": "POST",
+    "path": "/lab/jni/scenario",
+    "body": "",
+    "source": "JniTestController.java"
+  },
+  {
+    "group": "JNI 测试",
+    "name": "调用 C 实现整数加法",
+    "method": "POST",
+    "path": "/lab/jni/add",
+    "body": {
+      "left": 1,
+      "right": 1
+    },
+    "source": "JniTestController.java"
+  },
+  {
+    "group": "JNI 测试",
+    "name": "调用 C 实现整数乘法",
+    "method": "POST",
+    "path": "/lab/jni/multiply",
+    "body": {
+      "left": 1,
+      "right": 1
+    },
+    "source": "JniTestController.java"
+  },
+  {
+    "group": "JNI 测试",
+    "name": "调用 C 实现字符串问候",
+    "method": "POST",
+    "path": "/lab/jni/greet",
+    "body": {
+      "name": "demo"
+    },
+    "source": "JniTestController.java"
+  },
+  {
+    "group": "JNI 测试",
+    "name": "调用 C 实现数组求和",
+    "method": "POST",
+    "path": "/lab/jni/sum",
+    "body": {
+      "values": [
+        1
+      ]
+    },
+    "source": "JniTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "发送一条 Kafka 测试消息",
+    "method": "POST",
+    "path": "/lab/kafka/send",
+    "body": {
+      "key": "demo",
+      "message": "demo",
+      "topic": "demo"
+    },
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "获取 Kafka 监听器状态",
+    "method": "GET",
+    "path": "/lab/kafka/status",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "Kafka 测试",
+    "name": "获取最近的生产/消费消息",
+    "method": "GET",
+    "path": "/lab/kafka/messages",
+    "body": "",
+    "source": "KafkaTestController.java"
+  },
+  {
+    "group": "LeetCode 练习",
+    "name": "获取全部练习题列表",
+    "method": "GET",
+    "path": "/lab/leetcode/problems",
+    "body": "",
+    "source": "LeetCodeTestController.java"
+  },
+  {
+    "group": "LeetCode 练习",
+    "name": "获取指定题号题目信息",
+    "method": "GET",
+    "path": "/lab/leetcode/problems/{number}",
+    "body": "",
+    "source": "LeetCodeTestController.java"
+  },
+  {
+    "group": "LeetCode 练习",
+    "name": "运行指定题目",
+    "method": "POST",
+    "path": "/lab/leetcode/run/{number}",
+    "body": {
+      "input": {}
+    },
+    "source": "LeetCodeTestController.java"
+  },
+  {
+    "group": "LeetCode 练习",
+    "name": "运行全部题目内置测试用例",
+    "method": "POST",
+    "path": "/lab/leetcode/scenario",
+    "body": "",
+    "source": "LeetCodeTestController.java"
+  },
+  {
+    "group": "LeetCode 练习",
+    "name": "运行指定题目内置测试用例",
+    "method": "POST",
+    "path": "/lab/leetcode/problems/{number}/test",
+    "body": "",
+    "source": "LeetCodeTestController.java"
+  },
+  {
+    "group": "MySQL 基础语法",
+    "name": "语法目录：建表 / 加列 / 查询 / 分组 / 开窗",
+    "method": "GET",
+    "path": "/lab/mysql/syntax",
+    "body": "",
+    "source": "MysqlLabController.java"
+  },
+  {
+    "group": "MySQL 基础语法",
+    "name": "综合场景：重建实验表后依次演示建表、加列、分组、开窗",
+    "method": "POST",
+    "path": "/lab/mysql/scenario",
+    "body": "",
+    "source": "MysqlLabController.java"
+  },
+  {
+    "group": "MySQL 基础语法",
+    "name": "建表：重建 sql_lab_dept / sql_lab_employee 并返回列信息",
+    "method": "POST",
+    "path": "/lab/mysql/ddl/create-table",
+    "body": "",
+    "source": "MysqlLabController.java"
+  },
+  {
+    "group": "MySQL 基础语法",
+    "name": "加列：ALTER TABLE ADD COLUMN title",
+    "method": "POST",
+    "path": "/lab/mysql/ddl/add-column",
+    "body": "",
+    "source": "MysqlLabController.java"
+  },
+  {
+    "group": "MySQL 基础语法",
+    "name": "分组：GROUP BY + HAVING",
+    "method": "GET",
+    "path": "/lab/mysql/group-by",
+    "body": "",
+    "source": "MysqlLabController.java"
+  },
+  {
+    "group": "MySQL 基础语法",
+    "name": "开窗：ROW_NUMBER / RANK / SUM() OVER (PARTITION BY)",
+    "method": "GET",
+    "path": "/lab/mysql/window",
+    "body": "",
+    "source": "MysqlLabController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "执行 String / Hash / List / Set 场景测试并返回逐步结果",
+    "method": "POST",
+    "path": "/lab/redis/scenario",
+    "body": "",
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "写入 String 值，可选 TTL",
+    "method": "POST",
+    "path": "/lab/redis/string",
+    "body": {
+      "key": "demo",
+      "value": "demo",
+      "ttlSeconds": 1
+    },
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "读取 String 值",
+    "method": "GET",
+    "path": "/lab/redis/string/{key}",
+    "body": "",
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "写入 Hash 字段",
+    "method": "POST",
+    "path": "/lab/redis/hash",
+    "body": {
+      "key": "demo",
+      "field": "demo",
+      "value": "demo"
+    },
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "读取 Hash 全部字段",
+    "method": "GET",
+    "path": "/lab/redis/hash/{key}",
+    "body": "",
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "向 List 追加元素",
+    "method": "POST",
+    "path": "/lab/redis/list",
+    "body": {
+      "key": "demo",
+      "leftPush": false,
+      "values": [
+        "demo"
+      ]
+    },
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "读取 List 全部元素",
+    "method": "GET",
+    "path": "/lab/redis/list/{key}",
+    "body": "",
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "向 Set 添加成员",
+    "method": "POST",
+    "path": "/lab/redis/set",
+    "body": {
+      "key": "demo",
+      "members": [
+        "demo"
+      ]
+    },
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "读取 Set 全部成员",
+    "method": "GET",
+    "path": "/lab/redis/set/{key}",
+    "body": "",
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "Redis 测试",
+    "name": "删除指定 key",
+    "method": "DELETE",
+    "path": "/lab/redis/{key}",
+    "body": "",
+    "source": "RedisTestController.java"
+  },
+  {
+    "group": "雪花算法测试",
+    "name": "执行雪花算法场景测试（批量生成、唯一性、递增性）",
+    "method": "POST",
+    "path": "/lab/snowflake/scenario",
+    "body": "",
+    "source": "SnowflakeTestController.java"
+  },
+  {
+    "group": "雪花算法测试",
+    "name": "批量生成雪花 ID 并解析各字段",
+    "method": "POST",
+    "path": "/lab/snowflake/generate",
+    "body": {
+      "count": 1
+    },
+    "source": "SnowflakeTestController.java"
+  },
+  {
+    "group": "雪花算法测试",
+    "name": "解析已有雪花 ID 的时间戳、机器位与序列号",
+    "method": "GET",
+    "path": "/lab/snowflake/parse/{id}",
+    "body": "",
+    "source": "SnowflakeTestController.java"
+  },
+  {
+    "group": "Spring 核心机制学习",
+    "name": "综合场景：IOC + 上下文 + 事件 + 分层架构",
+    "method": "POST",
+    "path": "/lab/spring/scenario",
+    "body": "",
+    "source": "SpringLabController.java"
+  },
+  {
+    "group": "Spring 核心机制学习",
+    "name": "IOC 演示：@Primary、@Qualifier、prototype 作用域",
+    "method": "GET",
+    "path": "/lab/spring/ioc",
+    "body": "",
+    "source": "SpringLabController.java"
+  },
+  {
+    "group": "Spring 核心机制学习",
+    "name": "ApplicationContext 演示：Bean 数量、Profile、Aware 回调",
+    "method": "GET",
+    "path": "/lab/spring/context",
+    "body": "",
+    "source": "SpringLabController.java"
+  },
+  {
+    "group": "Spring 核心机制学习",
+    "name": "事件演示：发布自定义事件并由 @EventListener 处理",
+    "method": "POST",
+    "path": "/lab/spring/events/publish",
+    "body": {
+      "username": "demo",
+      "source": "demo"
+    },
+    "source": "SpringLabController.java"
+  },
+  {
+    "group": "Spring 核心机制学习",
+    "name": "架构演示：Controller → Service → Repository + 领域事件",
+    "method": "POST",
+    "path": "/lab/spring/architecture",
+    "body": "",
+    "source": "SpringLabController.java"
+  },
+  {
+    "group": "Starter 测试",
+    "name": "获取全部 Starter 目录（含 classpath 探测结果）",
+    "method": "GET",
+    "path": "/lab/starter/catalog",
+    "body": "",
+    "source": "StarterTestController.java"
+  },
+  {
+    "group": "Starter 测试",
+    "name": "获取当前已引入 classpath 的 Starter 列表",
+    "method": "GET",
+    "path": "/lab/starter/catalog/on-classpath",
+    "body": "",
+    "source": "StarterTestController.java"
+  },
+  {
+    "group": "Starter 测试",
+    "name": "获取已注册探测器的诊断结果",
+    "method": "GET",
+    "path": "/lab/starter/probes",
+    "body": "",
+    "source": "StarterTestController.java"
+  },
+  {
+    "group": "Starter 测试",
+    "name": "诊断指定 Starter",
+    "method": "GET",
+    "path": "/lab/starter/{starterName}/diagnose",
+    "body": "",
+    "source": "StarterTestController.java"
+  },
+  {
+    "group": "Starter 测试",
+    "name": "对指定 Starter 执行冒烟测试",
+    "method": "POST",
+    "path": "/lab/starter/{starterName}/smoke-test",
+    "body": "",
+    "source": "StarterTestController.java"
+  },
+  {
+    "group": "Starter 测试",
+    "name": "执行全部已注册 Starter 的场景测试",
+    "method": "POST",
+    "path": "/lab/starter/scenario",
+    "body": "",
+    "source": "StarterTestController.java"
+  },
+  {
+    "group": "数据库事务测试",
+    "name": "执行转账并返回数据变更与 SQL，可选择在执行完成后回滚",
+    "method": "POST",
+    "path": "/lab/transaction/transfer",
+    "body": {
+      "fromAccountId": 1,
+      "toAccountId": 1,
+      "amount": 1,
+      "failAfterDebit": false,
+      "rollbackAfterExecution": false
+    },
+    "source": "TransactionTestController.java"
+  },
+  {
+    "group": "向量数据库测试",
+    "name": "执行向量库场景测试（写入 / 检索 / 过滤 / 删除）",
+    "method": "POST",
+    "path": "/lab/vector/scenario",
+    "body": "",
+    "source": "VectorTestController.java"
+  },
+  {
+    "group": "向量数据库测试",
+    "name": "写入或覆盖一条向量记录",
+    "method": "POST",
+    "path": "/lab/vector/upsert",
+    "body": {
+      "id": "demo",
+      "content": "demo",
+      "vector": [
+        1
+      ],
+      "metadata": {}
+    },
+    "source": "VectorTestController.java"
+  },
+  {
+    "group": "向量数据库测试",
+    "name": "向量相似度检索",
+    "method": "POST",
+    "path": "/lab/vector/search",
+    "body": {
+      "query": "demo",
+      "queryVector": [
+        1
+      ],
+      "topK": 1,
+      "minScore": 1,
+      "filter": {}
+    },
+    "source": "VectorTestController.java"
+  },
+  {
+    "group": "向量数据库测试",
+    "name": "按 ID 删除向量记录",
+    "method": "DELETE",
+    "path": "/lab/vector/{id}",
+    "body": "",
+    "source": "VectorTestController.java"
+  },
+  {
+    "group": "向量数据库测试",
+    "name": "重置实验集合（删除后重建）",
+    "method": "DELETE",
+    "path": "/lab/vector/collection",
+    "body": "",
+    "source": "VectorTestController.java"
+  },
+  {
+    "group": "向量数据库测试",
+    "name": "获取向量库状态",
+    "method": "GET",
+    "path": "/lab/vector/status",
+    "body": "",
+    "source": "VectorTestController.java"
+  }
+]

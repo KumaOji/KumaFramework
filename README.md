@@ -33,11 +33,15 @@ An enterprise-grade framework built on **Java 25 + Spring Boot 4 + Spring Cloud 
 KumaFramework/
 ├── kuma-boot-framework/      96 Spring Boot Auto-Configuration Starters
 ├── kuma-cloud-framework/     12 Spring Cloud Starters
-├── kuma-project/              4 included runnable/sample projects
+├── kuma-project/              7 included runnable/sample projects
 ├── kuma-ai-framework/         AI integrations (incubating)
 ├── kuma-bigdata-framework/    Big-data integrations (incubating)
 └── kuma-other-framework/      Design patterns and build/IDE plugins (incubating)
 ```
+
+[Kuma Console](kuma-project/kuma-project-console/README.md) is a standalone local dashboard for host resources, WSL/k3s, running project services, and Lab API experiments. On Windows, double-click `kuma-project/kuma-project-console/start-console.cmd` to build and open the application window.
+
+[Kuma desktop frontend](kuma-fronted-console/README.md) is a separate Electron module with light/dark themes, native window controls, and starter dependency path cards. Double-click `kuma-fronted-console/start-console.cmd` to connect to or start the local monitoring backend.
 
 ---
 

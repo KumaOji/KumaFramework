@@ -176,7 +176,7 @@ for (name in frameworkBigdataSubModules) {
 //includeBuild('kuma-other-framework/kuma-cloud-plugin/kuma-cloud-gradle-plugin')
 
 include "kuma-project"
-def projectBootSubModules = ['project2', 'project4', 'blog', 'uaa', 'gateway', 'lab']
+def projectBootSubModules = ['project2', 'project4', 'blog', 'uaa', 'gateway', 'lab', 'console']
 for (name in projectBootSubModules) {
     include "kuma-project:kuma-project-${name}"
 }

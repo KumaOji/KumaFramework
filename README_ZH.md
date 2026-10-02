@@ -33,11 +33,15 @@
 KumaFramework/
 ├── kuma-boot-framework/      96 个 Spring Boot Auto-Configuration Starter
 ├── kuma-cloud-framework/     12 个 Spring Cloud Starter
-├── kuma-project/              4 个已启用的可运行/示例项目
+├── kuma-project/              7 个已启用的可运行/示例项目
 ├── kuma-ai-framework/         AI 集成（孵化中）
 ├── kuma-bigdata-framework/    大数据集成（孵化中）
 └── kuma-other-framework/      设计模式与构建/IDE 插件（孵化中）
 ```
+
+[Kuma 本机控制台](kuma-project/kuma-project-console/README.md) 可独立查看本机资源、WSL/k3s、项目运行状态，并提供 Lab 接口实验工作台。Windows 双击 `kuma-project/kuma-project-console/start-console.cmd` 即可构建并打开应用窗口。
+
+[Kuma 桌面前端](kuma-fronted-console/README.md) 是独立的 Electron 模块，提供深浅主题、原生桌面窗口及 starter 依赖路径卡片。双击 `kuma-fronted-console/start-console.cmd` 自动连接或启动监控后端。
 
 ---
 

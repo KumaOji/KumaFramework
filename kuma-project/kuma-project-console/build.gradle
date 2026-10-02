@@ -1,0 +1,38 @@
+plugins {
+    alias(projectLibs.plugins.springboot)
+    alias(projectLibs.plugins.spring.dependency.management)
+}
+
+description = 'Kuma 本机控制台：系统监控、WSL / k3s、项目状态与 Lab 工作台'
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${projectLibs.versions.springboot.get()}"
+    }
+}
+
+dependencies {
+    implementation projectLibs.spring.boot.starter.webmvc
+    implementation projectLibs.oshi.core
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+bootJar {
+    archiveFileName = 'kuma-console.jar'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('bootRun') {
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+}
+
+apply from: rootProject.file('gradle/console-catalog.gradle')
+
+// Share one renderer between the embedded browser UI and the Electron desktop module.
+tasks.named('processResources') {
+    from(rootProject.file('kuma-fronted-console/renderer')) { into 'static' }
+}

@@ -1,0 +1,71 @@
+import groovy.json.JsonOutput
+import org.gradle.api.artifacts.ProjectDependency
+
+// Read Gradle's evaluated dependency declarations; never resolve/download all demo classpaths.
+def catalogDirectory = layout.buildDirectory.dir('generated/console-catalog')
+def catalogTask = tasks.register('generateProjectCatalog') {
+    outputs.dir(catalogDirectory)
+    outputs.upToDateWhen { false }
+    doLast {
+        def nodes = [:]
+        def scopes = ['api', 'implementation', 'runtimeOnly', 'compileOnly']
+        rootProject.allprojects.each { module ->
+            def edges = []
+            scopes.each { scope ->
+                module.configurations.findByName(scope)?.dependencies?.each { dep ->
+                    if (dep instanceof ProjectDependency) {
+                        edges << [target: dep.path, scope: scope, transitive: dep.transitive,
+                                  excludes: dep.excludeRules.collect { [group: it.group, module: it.module] }]
+                    } else if (dep.group && dep.name) {
+                        def id = "${dep.group}:${dep.name}".toString()
+                        nodes.putIfAbsent(id, [id: id, name: dep.name, starter: dep.name.contains('starter'),
+                                              external: true, edges: []])
+                        edges << [target: id, scope: scope, transitive: dep.transitive,
+                                  excludes: dep.excludeRules.collect { [group: it.group, module: it.module] }]
+                    }
+                }
+            }
+            nodes[module.path] = [id: module.path, name: module.name, starter: module.name.contains('starter-'),
+                                  external: false, edges: edges.unique()]
+        }
+        def apps = []
+        ['kuma-project', 'kuma-project-unable'].each { folder ->
+            rootProject.file(folder).listFiles()?.findAll { it.directory && new File(it, 'build.gradle').exists() }
+                ?.sort { it.name }?.each { dir ->
+                def id = ":${folder}:${dir.name}".toString()
+                def module = rootProject.findProject(id)
+                def source = new File(dir, 'build.gradle').getText('UTF-8')
+                if (!module) {
+                    // Disabled demos aren't evaluated by Gradle. Only literal declarations can be inspected.
+                    def edges = []
+                    def stripped = source.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
+                    (stripped =~ /(?m)\b(api|implementation|runtimeOnly|compileOnly)\s+project\s*\(\s*['"]([^'"]+)['"]\s*\)/).each {
+                        edges << [target: it[2], scope: it[1]]
+                    }
+                    nodes[id] = [id: id, name: dir.name, starter: false, external: false, edges: edges.unique()]
+                }
+                def mains = []
+                def javaRoot = new File(dir, 'src/main/java')
+                if (javaRoot.exists()) javaRoot.eachFileRecurse { file ->
+                    if (file.name.endsWith('Application.java')) {
+                        def content = file.getText('UTF-8')
+                        def pkg = content =~ /(?m)^\s*package\s+([\w.]+)\s*;/
+                        if (pkg.find()) mains << "${pkg.group(1)}.${file.name - '.java'}".toString()
+                    }
+                }
+                def jarTask = module?.tasks?.findByName('bootJar')
+                apps << [id: id, name: dir.name, directory: "${folder}/${dir.name}".toString(), enabled: module != null,
+                         description: module?.description ?: '未纳入当前 Gradle 构建的 Demo',
+                         dependencySource: module ? 'gradle' : 'source-literals', mainClasses: mains,
+                         jarName: jarTask?.archiveFileName?.getOrNull() ?: '',
+                         shortName: dir.name.replaceFirst(/^kuma-project-/, '')]
+            }
+        }
+        def output = new File(catalogDirectory.get().asFile, 'project-catalog.json')
+        output.parentFile.mkdirs()
+        output.setText(JsonOutput.prettyPrint(JsonOutput.toJson([generatedAt: java.time.Instant.now().toString(),
+                                                                projects: apps, nodes: nodes])), 'UTF-8')
+    }
+}
+sourceSets.main.resources.srcDir(catalogDirectory)
+tasks.named('processResources') { dependsOn catalogTask }

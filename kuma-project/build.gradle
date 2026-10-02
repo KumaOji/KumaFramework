@@ -5,6 +5,7 @@ description = '''KumaFramework project参考 —— 当前启用的渐进式 Dem
   uaa      : Kuma 体系统一认证授权中心（OAuth2.1 + OIDC 授权服务器），为 blog 等业务应用签发 JWT，含用户/角色/权限/客户端管理、图形验证码、TOTP 二次校验、登录锁定
   gateway  : Kuma 体系统一网关（Spring Cloud Gateway / WebFlux），统一流量入口；集成框架 Prometheus/Logger/IP2region/Actuator 能力
   lab      : 测试实验场，用于集中记录事务、缓存、消息队列、锁、LeetCode 算法练习等各类验证代码
+  console  : 本机控制台，查看 Windows / WSL / k3s / 项目状态，并提供 Lab 接口测试界面
 
   未启用的 Demo 见 kuma-project-unable 模块。
 '''
