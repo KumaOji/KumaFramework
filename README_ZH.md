@@ -17,7 +17,7 @@
 | 属性 | 值                                               |
 |------|-------------------------------------------------|
 | Group ID | `io.github.kumaoji`                             |
-| 当前版本 | `2026.08.01`                                    |
+| 当前版本 | `2026.10`                                       |
 | 构建工具 | Gradle 9.6.1 + Gradle Wrapper + Version Catalog |
 | Java 版本 | JDK 25（强制，所有模块开启 `--enable-preview`）            |
 | Spring Boot | 4.0.3                                           |
@@ -289,7 +289,7 @@ dependencies {
 <dependency>
     <groupId>io.github.kumaoji</groupId>
     <artifactId>kuma-boot-starter-web</artifactId>
-    <version>2026.08.01</version>
+    <version>2026.10</version>
 </dependency>
 ```
 

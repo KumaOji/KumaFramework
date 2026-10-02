@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/console.css">
   <link rel="stylesheet" href="/studio.css">
   <script src="/console.js" defer></script>
+  <script src="/response-format.js" defer></script>
   <script src="/project-catalog.js" defer></script>
   <script src="/desktop.js" defer></script>
 </head>
@@ -60,7 +61,7 @@
         <div class="lab-target"><span class="live-dot"></span><strong>PROJECT LAB</strong><code id="lab-target-url">http://127.0.0.1:9090/api</code><span id="lab-target-status" class="muted">正在探测…</span></div>
         <div class="lab-layout"><aside class="panel lab-catalog"><div class="panel-heading"><h2>实验目录</h2><button id="discover-lab" class="button small" title="从运行中的 Lab 加载全部 OpenAPI 接口">同步接口</button></div><input id="lab-search" type="search" placeholder="搜索实验或接口" aria-label="搜索 Lab 接口"><div id="lab-presets"></div><div id="lab-discovery-status" class="muted catalog-note">内置常用实验；同步接口可加载所有实验。</div></aside>
         <div class="lab-main"><article class="panel"><div class="panel-heading"><div><h2 id="lab-request-title">Kafka · 查看状态</h2><p>选择实验，检查参数后发送请求</p></div><span class="chip">REQUEST</span></div><div class="request-url"><select id="lab-method" aria-label="HTTP 方法"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option><option>PATCH</option></select><input id="lab-path" value="/lab/kafka/status" aria-label="接口相对路径"><button id="lab-send" class="button primary">发送请求 ↗</button></div><label class="field-label" for="lab-auth">Authorization <span>可选 · 仅用于本次请求，不保存</span></label><input id="lab-auth" type="password" placeholder="Bearer …" autocomplete="off"><label class="field-label" for="lab-body">请求正文 <span>JSON</span></label><textarea id="lab-body" spellcheck="false" placeholder="GET 请求可以留空" aria-label="JSON 请求正文"></textarea><div id="lab-request-error" class="notice" hidden></div></article>
-        <article class="panel response-panel"><div class="panel-heading"><div><h2>响应结果</h2><p id="lab-response-meta">尚未发送请求</p></div><button id="copy-response" class="button small">复制结果</button></div><pre id="lab-response" class="response-code">// 实验响应将显示在这里</pre></article>
+        <article class="panel response-panel"><div class="panel-heading"><div><h2>响应结果</h2><p id="lab-response-meta">尚未发送请求</p></div><div class="controls"><select id="response-view" aria-label="响应展示方式"><option value="multiline">自动换行预览</option><option value="json">JSON 格式</option></select><button id="copy-response" class="button small">复制原始响应</button></div></div><pre id="lab-response" class="response-code">// 实验响应将显示在这里</pre></article>
         <article class="panel"><div class="panel-heading"><h2>最近请求</h2><button id="clear-history" class="button small">清空</button></div><div id="lab-history" class="history-list empty">暂无请求记录</div></article></div></div>
       </section>
     </main><footer><span>Kuma Console <i>·</i> 本机开发工作空间</span><span id="footer-status">本机 2s / 项目 10s / 集群 15s</span></footer>
