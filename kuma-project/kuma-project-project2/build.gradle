@@ -15,6 +15,10 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
+        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
+    }
+    api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
 
     api projectLibs.spring.boot.starter.web
 

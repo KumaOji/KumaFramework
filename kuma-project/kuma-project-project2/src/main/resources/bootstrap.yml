@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: kuma-cloud-project2
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - "nacos:kuma-shared-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      - "nacos:kuma-cloud-project2-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+  cloud:
+    nacos:
+      username: ${SPRING_CLOUD_NACOS_USERNAME:nacos}
+      password: ${SPRING_CLOUD_NACOS_PASSWORD:123456}
+      server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
+      discovery:
+        enabled: true
+        register-enabled: true
+        namespace: base
+        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
+      config:
+        enabled: true
+        namespace: base
+        server-addr: ${SPRING_CLOUD_NACOS_SERVER_ADDR:172.23.89.45:8848}
+        file-extension: yaml
+        group: DEFAULT_GROUP

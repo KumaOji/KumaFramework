@@ -4,7 +4,8 @@ if (-not (Test-Path -LiteralPath $pidPath)) { Write-Host 'No launcher-managed Co
 $consoleProcessId = [int](Get-Content -LiteralPath $pidPath)
 $process = Get-CimInstance Win32_Process -Filter "ProcessId=$consoleProcessId"
 $expectedJar = (Join-Path $PSScriptRoot 'build\libs\kuma-console.jar')
-if ($process -and $process.CommandLine.Contains($expectedJar) -and $process.Name -match '^java(w)?\.exe$') {
+$runtimeJarRoot = (Join-Path $PSScriptRoot 'build\runtime\kuma-console-')
+if ($process -and ($process.CommandLine.Contains($expectedJar) -or $process.CommandLine.Contains($runtimeJarRoot)) -and $process.Name -match '^java(w)?\.exe$') {
     Stop-Process -Id $consoleProcessId
     Write-Host 'Kuma Console stopped.'
 } elseif ($process) { throw 'PID belongs to a different process. It was not stopped.' }

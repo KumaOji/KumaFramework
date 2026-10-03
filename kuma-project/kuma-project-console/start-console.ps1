@@ -33,11 +33,16 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Console build failed.' }
     $javaPath = (Get-Command java -ErrorAction Stop).Source
     $jarPath = Join-Path $consoleRoot 'build\libs\kuma-console.jar'
+    # Never run the build output directly: bootJar may replace it while Java is loading classes.
+    $runtimeRoot = Join-Path $consoleRoot 'build\runtime'
+    New-Item -ItemType Directory -Path $runtimeRoot -Force | Out-Null
+    $runtimeJar = Join-Path $runtimeRoot ('kuma-console-' + [guid]::NewGuid().ToString('N') + '.jar')
+    Copy-Item -LiteralPath $jarPath -Destination $runtimeJar
     $stdoutPath = Join-Path $consoleRoot 'build\console-stdout.log'
     $stderrPath = Join-Path $consoleRoot 'build\console-stderr.log'
     # Browser launch is handled once below, after the HTTP endpoint is ready.
     $process = Start-Process -FilePath $javaPath -ArgumentList @('--enable-preview', '--enable-native-access=ALL-UNNAMED',
-        '-jar', ('"' + $jarPath + '"'), '--console.open-browser=false') -WorkingDirectory $workspaceRoot -WindowStyle Hidden `
+        '-jar', ('"' + $runtimeJar + '"'), '--console.open-browser=false') -WorkingDirectory $workspaceRoot -WindowStyle Hidden `
         -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath -PassThru
     $process.Id | Set-Content -LiteralPath (Join-Path $consoleRoot 'build\console.pid')
     for ($attempt = 0; $attempt -lt 60; $attempt++) {

@@ -12,6 +12,9 @@ spring:
       pool:
         size: 3
 console:
+  remote:
+    target: ${KUMA_REMOTE_TARGET:root@117.72.13.197}
+    key: ${KUMA_REMOTE_KEY:C:/Users/Kuma/Desktop/server/Kumakey.pem}
   open-browser: ${KUMA_CONSOLE_OPEN_BROWSER:true}
   wsl-distribution: ${KUMA_CONSOLE_WSL_DISTRIBUTION:auto}
   wsl-user: ${KUMA_CONSOLE_WSL_USER:root}

@@ -9,7 +9,7 @@
   "main": "electron/main.cjs",
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
-    "start": "electron .",
+    "start": "node scripts/start-desktop.cjs",
     "check": "node --check electron/main.cjs && node --check electron/preload.cjs && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js",
     "test": "node --test scripts/response-format.test.cjs",
     "prepare:backend": "node scripts/build-backend.cjs",

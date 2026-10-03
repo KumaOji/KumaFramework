@@ -79,6 +79,8 @@ public class ProjectDiscovery {
         if (jar.find()) {
             String path = jar.group(1).replace('\\', '/');
             String file = path.substring(path.lastIndexOf('/') + 1);
+            // Launchers copy the console JAR so rebuilding cannot overwrite a running JVM's archive.
+            if (file.matches("kuma-console-(?:[a-fA-F0-9]{32}|[0-9]+-[0-9]+)\\.jar")) return "kuma-console.jar";
             if (path.toLowerCase(Locale.ROOT).contains("kumaframework") || file.startsWith("kuma-")) return file;
         }
         return null;

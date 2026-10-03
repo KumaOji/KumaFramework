@@ -8,11 +8,11 @@ if(!Number.isInteger(port)||port<1024||port>65535)throw Error('KUMA_CONSOLE_PORT
 const origin=`http://127.0.0.1:${port}`;
 const workspace=path.resolve(__dirname,'../..');
 const smokeRoot=app.isPackaged?path.join(app.getPath('temp'),'kuma-console-desktop-smoke'):path.resolve(__dirname,'../build');
-let window, ownedBackend, quitting=false;
+let window, ownedBackend, ownedBuild, quitting=false, shutdownComplete=false;
 if(smoke){app.setPath('userData',path.join(smokeRoot,'smoke-profile'));app.commandLine.appendSwitch('disable-gpu');}
 if(!smoke&&!app.requestSingleInstanceLock()){app.quit();}else{
   app.on('second-instance',()=>{if(window){if(window.isMinimized())window.restore();window.show();window.focus();}});
-  app.whenReady().then(start).catch(error=>{dialog.showErrorBox('Kuma Console 启动失败',error.message);app.exit(1);});
+  app.whenReady().then(start).catch(async error=>{dialog.showErrorBox('Kuma Console 启动失败',error.message);await Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]);app.exit(1);});
 }
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function identity(){
@@ -26,25 +26,32 @@ async function identity(){
 }
 async function ensureBackend(){
   if(await identity())return;
+  if(quitting)throw Error('启动已取消');
   let child;
   if(app.isPackaged){
     child=spawn('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
       path.join(process.resourcesPath,'backend/kuma-console.jar'),'--console.open-browser=false'],
       {cwd:app.getPath('userData'),env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
     ownedBackend=child;
-  }else if(process.platform==='win32'){
-    child=spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',
-      path.join(workspace,'kuma-project/kuma-project-console/start-console.ps1')],
-      {cwd:workspace,env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
   }else{
     await new Promise((resolve,reject)=>{
-      const build=spawn('sh',[path.join(workspace,'gradlew'),':kuma-project:kuma-project-console:bootJar','--console=plain'],{cwd:workspace});
+      const windows=process.platform==='win32';
+      const build=spawn(windows?'powershell.exe':'sh',windows?
+        ['-NoProfile','-ExecutionPolicy','Bypass','-File',path.join(workspace,'kuma-fronted-console/scripts/build-backend.ps1')]:
+        [path.join(workspace,'gradlew'),':kuma-project:kuma-project-console:bootJar','--console=plain'],{cwd:workspace,windowsHide:true});
+      ownedBuild=build;
       let output='';build.stdout.on('data',data=>{output=(output+data).slice(-6000);});build.stderr.on('data',data=>{output=(output+data).slice(-6000);});
-      build.on('error',reject);build.on('exit',code=>code===0?resolve():reject(Error(`后端构建失败 (${code})\n${output}`)));
+      build.on('error',reject);build.on('exit',code=>{if(ownedBuild===build)ownedBuild=undefined;code===0?resolve():reject(Error(`后端构建失败 (${code})\n${output}`));});
     });
+    if(quitting)throw Error('启动已取消');
+    const runtimeRoot=path.join(workspace,'kuma-project/kuma-project-console/build/runtime');
+    await fs.mkdir(runtimeRoot,{recursive:true});
+    const runtimeJar=path.join(runtimeRoot,`kuma-console-${process.pid}-${Date.now()}.jar`);
+    await fs.copyFile(path.join(workspace,'kuma-project/kuma-project-console/build/libs/kuma-console.jar'),runtimeJar);
+    if(quitting)throw Error('启动已取消');
     child=spawn('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
-      path.join(workspace,'kuma-project/kuma-project-console/build/libs/kuma-console.jar'),'--console.open-browser=false'],
-      {cwd:workspace,env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'}});
+      runtimeJar,'--console.open-browser=false'],
+      {cwd:workspace,env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
     ownedBackend=child;
   }
   let lastOutput='',failure;
@@ -54,6 +61,7 @@ async function ensureBackend(){
   child.on('exit',code=>{if(code!==0&&!quitting)failure=`后台进程退出 (${code})\n${lastOutput}`;});
   const deadline=Date.now()+180000;
   while(Date.now()<deadline){
+    if(quitting)throw Error('启动已取消');
     if(failure)throw Error(failure);
     if(await identity())return;
     await pause(500);
@@ -78,7 +86,8 @@ async function start(){
     await window.loadURL(origin);
     if(smoke)await verifyDesktop();
   }catch(error){
-    if(smoke){console.error(error);app.exit(1);return;}
+    if(quitting||window.isDestroyed())return;
+    if(smoke){console.error(error);await Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]);app.exit(1);return;}
     await window.webContents.executeJavaScript(`document.getElementById('startup-message').textContent=${JSON.stringify(error.message)};document.body.classList.add('failed');`);
   }
 }
@@ -90,7 +99,14 @@ async function verifyDesktop(){
     if(i===149)throw Error('Desktop data did not become ready');await pause(200);
   }
   if(!await evaluate('window.kumaDesktop?.isDesktop && typeof window.require==="undefined" && document.body.classList.contains("desktop")'))throw Error('Desktop bridge/isolation failed');
-  for(const page of ['overview','cluster','projects','lab']){
+  await evaluate('setTheme("dark");');
+  if(await evaluate('state.remote?.k3s?.ready')){
+    if(!await evaluate('document.querySelectorAll("#server-k3s-table tbody tr").length===state.remote.k3s.items.filter(x=>x.kind==="Pod").length'))throw Error('Server k3s Pod rows did not render');
+    await evaluate('document.querySelector("#server-k3s-tabs [data-kind=Node]").click();');
+    if(!await evaluate('state.remote.k3s.items.filter(x=>x.kind==="Node").every(x=>document.getElementById("server-k3s-table").textContent.includes(x.name))'))throw Error('Server k3s nodes did not render');
+    await evaluate('document.querySelector("#server-k3s-tabs [data-kind=Pod]").click();');
+  }
+  for(const page of ['overview','server','cluster','projects','lab']){
     await evaluate(`location.hash=${JSON.stringify(page)}`);await pause(600);
     if(!await evaluate(`!document.getElementById(${JSON.stringify(page)}).hidden`))throw Error(`Hidden page ${page}`);
     if(!await evaluate('document.documentElement.scrollWidth<=window.innerWidth'))throw Error(`Layout overflows on ${page}`);
@@ -100,12 +116,33 @@ async function verifyDesktop(){
   await evaluate('document.querySelector("[data-dependencies]").click();');
   for(let i=0;i<100;i++){if(await evaluate('document.getElementById("drawer-content").textContent.includes("kuma-boot-starter-mq-kafka")'))break;if(i===99)throw Error('Starter drawer did not load');await pause(100);}
   await fs.writeFile(path.join(output,'dependencies.png'),(await window.webContents.capturePage()).toPNG());
-  await evaluate('document.getElementById("close-drawer").click();document.getElementById("theme-toggle").click();location.hash="overview";');await pause(600);
+  await evaluate('document.getElementById("close-drawer").click();setTheme("light");document.getElementById("theme-toggle").click();location.hash="overview";');await pause(600);
   if(!await evaluate('document.documentElement.dataset.theme==="dark"'))throw Error('Dark theme did not switch');
   await fs.writeFile(path.join(output,'overview-dark.png'),(await window.webContents.capturePage()).toPNG());
   await evaluate('document.getElementById("theme-toggle").click();');
-  await fs.writeFile(path.join(smokeRoot,'desktop-smoke.json'),JSON.stringify({passed:true,pages:4,isolation:true,projects:17,starterDrawer:true},null,2));
-  console.log('Electron smoke passed: four pages, real data, starter drawer, context isolation.');app.quit();
+  await fs.writeFile(path.join(smokeRoot,'desktop-smoke.json'),JSON.stringify({passed:true,pages:5,isolation:true,projects:17,starterDrawer:true},null,2));
+  console.log('Electron smoke passed: five pages, real data, starter drawer, context isolation.');app.quit();
 }
 app.on('window-all-closed',()=>app.quit());
-app.on('before-quit',()=>{quitting=true;if(ownedBackend&&!ownedBackend.killed)ownedBackend.kill();});
+function stopChild(child){
+  if(!child?.pid||child.exitCode!==null||child.signalCode!==null)return Promise.resolve();
+  return new Promise(resolve=>{
+    let timer;
+    const done=()=>{clearTimeout(timer);resolve();};
+    child.once('exit',done);
+    if(process.platform==='win32'){
+      // Stop the owned process and its monitoring helpers; never search for unrelated Java processes.
+      const killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});
+      killer.once('error',()=>{child.kill();});
+    }else child.kill('SIGTERM');
+    timer=setTimeout(()=>{child.kill('SIGKILL');done();},5000);
+  });
+}
+app.on('before-quit',event=>{
+  if(shutdownComplete)return;
+  event.preventDefault();
+  if(quitting)return;
+  quitting=true;
+  Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]).finally(()=>{shutdownComplete=true;app.quit();});
+});
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>app.quit());

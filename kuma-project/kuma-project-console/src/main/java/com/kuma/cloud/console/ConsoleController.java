@@ -19,15 +19,19 @@ public class ConsoleController {
     private final ProjectDiscovery discovery;
     private final ProjectDetails projectDetails;
     private final ProjectCatalog catalog;
+    private final RemoteServerMonitor remote;
 
     public ConsoleController(HostMonitor host, ClusterMonitor cluster, ProjectMonitor projects, LabClient lab,
-                             WslInspector wsl, ProjectDiscovery discovery, ProjectDetails projectDetails, ProjectCatalog catalog) {
+                             WslInspector wsl, ProjectDiscovery discovery, ProjectDetails projectDetails, ProjectCatalog catalog,
+                             RemoteServerMonitor remote) {
         this.host = host; this.cluster = cluster; this.projects = projects; this.lab = lab;
         this.wsl = wsl; this.discovery = discovery; this.projectDetails = projectDetails;
         this.catalog = catalog;
+        this.remote = remote;
     }
 
     @GetMapping("/host") public Object host() { return host.snapshot(); }
+    @GetMapping("/remote") public Object remote() { return remote.snapshot(); }
     @GetMapping("/identity") public Object identity() { return Map.of("application", "kuma-local-console"); }
     @GetMapping("/cluster") public Object cluster() { return cluster.snapshot(); }
     @GetMapping("/projects") public Object projects() { return projects.snapshot(); }

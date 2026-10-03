@@ -99,6 +99,17 @@ class ConsoleIntegrationTest {
     }
 
     @Test
+    void launcherCopiesRetainConsoleProjectIdentity() {
+        for (String file : List.of("kuma-console-56a408c277ed4c9a8c14a0e41380202d.jar",
+                "kuma-console-1234-1790942400000.jar", "kuma-console.jar")) {
+            assertThat(ProjectDiscovery.identify("java -jar \"D:\\IDEA_project\\KumaFramework\\kuma-project\\kuma-project-console\\build\\runtime\\" + file + "\""))
+                    .isEqualTo("kuma-console.jar");
+        }
+        assertThat(ProjectDiscovery.identify("java -jar D:\\KumaFramework\\kuma-console-other.jar"))
+                .isEqualTo("kuma-console-other.jar");
+    }
+
+    @Test
     void discoversApplicationMainClassesWithoutMistakingClasspathDependenciesForApps() {
         assertThat(ProjectDiscovery.identify("java.exe -classpath blog.jar;lab.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon")).isNull();
         assertThat(ProjectDiscovery.identify("java.exe -cp many-jars com.kuma.cloud.blog.BlogApplication --spring.profiles.active=dev"))

@@ -23,8 +23,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -36,8 +34,6 @@ import org.springframework.transaction.TransactionStatus;
  * @version 2022.03
  * @since 2022/03/09 12:16
  */
-@AutoConfiguration(after = TransactionExecutorAutoConfiguration.class)
-@Import({TxWrapper.class})
 // @EnableTransactionManagement
 public class TransactionAutoConfiguration {
 
