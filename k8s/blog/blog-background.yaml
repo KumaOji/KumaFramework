@@ -6,6 +6,8 @@ metadata:
   namespace: blog
 spec:
   replicas: 1
+  # 镜像拉取也计入部署进度期限，与 CI 的 rollout 等待时间保持一致。
+  progressDeadlineSeconds: 900
   strategy:
     type: Recreate
   selector:

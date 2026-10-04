@@ -4,6 +4,8 @@ on:
   push:
     branches: [master]
     paths:
+      - '.github/workflows/deploy-blog.yml'
+      - 'k8s/blog/blog-background.yaml'
       - 'kuma-project/kuma-project-blog/**'
       - 'kuma-boot-framework/**'
       - 'gradle.properties'
@@ -116,11 +118,22 @@ jobs:
             if [ -f /data/k8s/blog/blog-background.yaml ]; then
               kubectl apply -f /data/k8s/blog/blog-background.yaml
             fi
+            # 同步进度期限，即使服务器上的清单尚未更新也不会沿用默认的 600 秒。
+            kubectl patch deployment/blog-background -n blog --type=merge \
+              -p '{"spec":{"progressDeadlineSeconds":900}}'
             kubectl set image deployment/blog-background \
               blog-background=${{ steps.ver.outputs.FULL_IMAGE }} \
               -n blog
             kubectl scale deployment/blog-background -n blog --replicas=1
-            kubectl rollout status deployment/blog-background -n blog --timeout=900s
+            if ! kubectl rollout status deployment/blog-background -n blog --timeout=900s; then
+              kubectl get pods -n blog -l app=blog-background -o wide || true
+              kubectl describe deployment/blog-background -n blog || true
+              kubectl describe pods -n blog -l app=blog-background || true
+              kubectl get events -n blog --sort-by=.metadata.creationTimestamp || true
+              kubectl logs -n blog -l app=blog-background --all-containers=true --prefix=true --tail=100 || true
+              kubectl logs -n blog -l app=blog-background --all-containers=true --prefix=true --previous --tail=100 || true
+              exit 1
+            fi
 
             # 清理服务器本地缓存的旧版本镜像，只保留本次部署的 tag 和 latest
             for tag in $(k3s crictl images | awk -v repo="${{ env.IMAGE }}" '$1==repo{print $2}'); do
