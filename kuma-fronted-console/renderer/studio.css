@@ -47,3 +47,16 @@ pre,.code-content{background:var(--surface-2);color:var(--text);font:12px/1.9 "C
 
 :root[data-theme='dark'] .status.ok,:root[data-theme='dark'] .status.good{background:#263b32;color:#9bc4ac}
 .brand-small{letter-spacing:0;font-size:10px}.metric-icon{color:var(--muted)}.brand-symbol{background:#3d526e}.sidebar-bottom .version{letter-spacing:0}.desktop-caption{color:#929aa5}.button.primary{background:#426892;border-color:#426892}.button.primary:hover{background:#4b759f}
+
+.lab-catalog select{margin:0 16px 12px;width:calc(100% - 32px)}
+.method-tag.learning{color:var(--blue)}
+.learning-panel h2{margin-top:9px}.learning-panel .panel-heading{align-items:flex-start}
+.learning-panel .status{white-space:normal;line-height:1.6}
+.learning-content{padding:0 23px 20px}.learning-instruction{margin-bottom:18px}
+.learning-topics{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0 22px}
+.learning-content h3{font-size:12px;font-weight:600;margin:20px 0 12px;color:var(--text)}
+.learning-content ul{padding-left:20px;font-size:12px;line-height:1.9;color:var(--muted)}
+.learning-content pre{border:1px solid var(--border);border-radius:7px;padding:16px;margin-top:10px}
+.learning-sources,.learning-content .mono{overflow-wrap:anywhere;font-size:11px;line-height:1.8}
+#lab-learning-error{margin:15px 23px 0}
+@media(max-width:520px){.learning-content{padding:0 18px 18px}.learning-content .row-between{align-items:center}}

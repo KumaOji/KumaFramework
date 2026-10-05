@@ -10,8 +10,9 @@
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
     "start": "node scripts/start-desktop.cjs",
-    "check": "node --check electron/main.cjs && node --check electron/preload.cjs && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js",
-    "test": "node --test scripts/response-format.test.cjs",
+    "check": "node --check electron/main.cjs && node --check electron/preload.cjs && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js && node --check renderer/lab-catalog.js",
+    "test": "node --test scripts/response-format.test.cjs scripts/lab-catalog.test.cjs",
+    "test:lab-ui": "electron scripts/lab-ui-smoke.cjs",
     "prepare:backend": "node scripts/build-backend.cjs",
     "pack": "pnpm run prepare:backend && electron-builder --dir",
     "dist": "pnpm run prepare:backend && electron-builder --win portable"

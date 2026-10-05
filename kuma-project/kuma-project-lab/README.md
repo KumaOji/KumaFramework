@@ -35,6 +35,32 @@
 - `javacore`：类加载、Mark Word、HashMap 结构、Socket 通信、文件处理等 Java 基础
 - `mysql`：建表、加列、GROUP BY、窗口函数等 SQL 基础语法复习
 - `lock`：volatile、CAS / ABA、ReentrantLock / Condition、AQS、CountDownLatch 系统学习
+- `memory`：JMM 重排序与发布、JVM 堆/线程栈/堆外内存；配套 Linux 用户态/内核态、系统调用、mmap 与写时复制实验
+- `network`：Webhook 签名、时间窗口、幂等与重试；TCP 分帧、半关闭、读取超时及 UDP 数据报通信
+- `jdk`：按 JDK 8～25 的代表性功能正式版本组织的实验，统一在 JDK25 运行，含独立预览示例
+
+## 各版本 JDK 功能实验
+
+运行 `com.kuma.cloud.lab.jdk.JdkVersionLearningDemo.main()`，或在仓库根目录执行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1
+```
+
+支持 `-Version 21` 等参数只跑指定版本功能，`-Version 25 -IncludePreview` 额外运行25预览示例。
+正式功能无需预览开关、Spring 或中间件；版本地图与历史预览说明见 [JDK 功能实验](docs/jdk-version-labs.md)。
+
+## Webhook 与 Socket 通信实验
+
+直接运行 `com.kuma.cloud.lab.network.NetworkLearningDemo.main()`，或分别运行 `WebhookLesson.main()`、`SocketLesson.main()`。
+仅依赖 JDK 25，使用本机回环地址和临时端口，无需 Spring 或外部服务。
+运行命令、协议、预期结果与实验边界见 [网络通信实验说明](docs/network-labs.md)。
+
+## 内存模型与用户空间 / 内核空间实验
+
+直接运行 `com.kuma.cloud.lab.memory.MemoryLearningDemo.main()`，执行已有锁实验和新增 Java 内存实验，无需 Spring 或中间件。
+Linux 专项实验运行 `bash kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh`（从仓库根目录，需要 gcc；可选 trace 模式需要 strace）。
+实验步骤、预期结果、正确性检查与观察边界见 [内存实验学习说明](docs/memory-labs.md)。
 
 ## 并发与锁学习
 

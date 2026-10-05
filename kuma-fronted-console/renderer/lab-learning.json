@@ -1,0 +1,571 @@
+[
+  {
+    "kind": "learning",
+    "id": "lock",
+    "group": "Java 并发与内存",
+    "name": "并发与锁学习",
+    "description": "可见性、原子性、CAS、锁与任务完成通知。",
+    "runtime": "JDK 25 · 本机",
+    "commands": "$lab = 'kuma-project/kuma-project-lab'\nNew-Item -ItemType Directory -Force \"$lab/build/lock-lab/classes\" | Out-Null\n$sources = Get-ChildItem \"$lab/src/main/java/com/kuma/cloud/lab/lock\" -Filter '*.java' | ForEach-Object FullName\njavac --release 25 -encoding UTF-8 -d \"$lab/build/lock-lab/classes\" $sources\njava -cp \"$lab/build/lock-lab/classes\" com.kuma.cloud.lab.lock.LockLearningDemo",
+    "topics": [
+      "volatile",
+      "CAS / ABA",
+      "ReentrantLock",
+      "AQS",
+      "CountDownLatch"
+    ],
+    "expected": [
+      "全部五组并发检查通过；示例用于验证同步语义。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/lock/LockLearningDemo.java"
+    ],
+    "doc": "/lab-guides/memory-labs.md",
+    "mainClass": "com.kuma.cloud.lab.lock.LockLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "memory",
+    "group": "Java 并发与内存",
+    "name": "JMM 与 JVM 内存区域",
+    "description": "运行锁实验、重排序统计、发布验证与内存区域观察。",
+    "runtime": "JDK 25 · 本机",
+    "commands": "$lab = 'kuma-project/kuma-project-lab'\nNew-Item -ItemType Directory -Force \"$lab/build/memory-lab/classes\" | Out-Null\n$sources = Get-ChildItem \"$lab/src/main/java/com/kuma/cloud/lab/lock\",\"$lab/src/main/java/com/kuma/cloud/lab/memory\" -Filter '*.java' | ForEach-Object FullName\njavac --release 25 -encoding UTF-8 -d \"$lab/build/memory-lab/classes\" $sources\njava -cp \"$lab/build/memory-lab/classes\" com.kuma.cloud.lab.memory.MemoryLearningDemo",
+    "topics": [
+      "happens-before",
+      "Store buffering",
+      "VarHandle",
+      "堆 / 线程栈 / 元空间",
+      "堆外缓冲区"
+    ],
+    "expected": [
+      "volatile 对照中 (0,0) 为零；release/acquire 发布通过。",
+      "线程局部值与直接缓冲区检查通过；普通字段不保证出现 (0,0)。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/memory/MemoryLearningDemo.java",
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/memory/JmmLesson.java",
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/memory/JvmMemoryLesson.java"
+    ],
+    "doc": "/lab-guides/memory-labs.md",
+    "mainClass": "com.kuma.cloud.lab.memory.MemoryLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "linux-memory",
+    "group": "Linux 内存与系统调用",
+    "name": "Linux 用户态与内核空间",
+    "description": "在 Linux 或 WSL 终端运行，从仓库根目录执行。",
+    "runtime": "Linux / WSL · gcc",
+    "commands": "bash kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh",
+    "topics": [
+      "系统调用",
+      "CPU user/system 时间",
+      "mmap",
+      "缺页",
+      "写时复制",
+      "EFAULT"
+    ],
+    "expected": [
+      "映射读写与写时复制通过；PROT_NONE 缓冲区返回 EFAULT，恢复权限后成功。",
+      "CPU 时间和缺页数量为观察值，不断言固定数值。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/c/linux_memory_lab.c",
+      "kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh"
+    ],
+    "doc": "/lab-guides/memory-labs.md",
+    "mainClass": ""
+  },
+  {
+    "kind": "learning",
+    "id": "linux-trace",
+    "group": "Linux 内存与系统调用",
+    "name": "Linux 系统调用跟踪",
+    "description": "在 Linux 或 WSL 终端运行，从仓库根目录执行。",
+    "runtime": "Linux / WSL · gcc · strace",
+    "commands": "bash kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh trace",
+    "topics": [
+      "strace",
+      "getpid",
+      "mprotect",
+      "pread64"
+    ],
+    "expected": [
+      "查看 getpid 汇总和内存系统调用；strace 跟踪耗时不用于性能比较。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/c/linux_memory_lab.c",
+      "kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh"
+    ],
+    "doc": "/lab-guides/memory-labs.md",
+    "mainClass": ""
+  },
+  {
+    "kind": "learning",
+    "id": "network",
+    "group": "网络通信学习",
+    "name": "Webhook 与 Socket 完整实验",
+    "description": "使用回环地址和临时端口，无需 Lab 服务或外部系统。",
+    "runtime": "JDK 25 · 本机",
+    "commands": "$lab = 'kuma-project/kuma-project-lab'\nNew-Item -ItemType Directory -Force \"$lab/build/network-lab/classes\" | Out-Null\n$sources = Get-ChildItem \"$lab/src/main/java/com/kuma/cloud/lab/network\" -Filter '*.java' | ForEach-Object FullName\njavac --release 25 -encoding UTF-8 -d \"$lab/build/network-lab/classes\" $sources\njava -cp \"$lab/build/network-lab/classes\" com.kuma.cloud.lab.network.NetworkLearningDemo",
+    "topics": [
+      "Webhook",
+      "TCP",
+      "UDP"
+    ],
+    "expected": [
+      "Webhook、TCP 和 UDP 全部检查通过。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/network/NetworkLearningDemo.java"
+    ],
+    "doc": "/lab-guides/network-labs.md",
+    "mainClass": "com.kuma.cloud.lab.network.NetworkLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "webhook",
+    "group": "网络通信学习",
+    "name": "Webhook 签名、幂等与重试",
+    "description": "使用回环地址和临时端口，无需 Lab 服务或外部系统。",
+    "runtime": "JDK 25 · 本机",
+    "commands": "$lab = 'kuma-project/kuma-project-lab'\nNew-Item -ItemType Directory -Force \"$lab/build/network-lab/classes\" | Out-Null\n$sources = Get-ChildItem \"$lab/src/main/java/com/kuma/cloud/lab/network\" -Filter '*.java' | ForEach-Object FullName\njavac --release 25 -encoding UTF-8 -d \"$lab/build/network-lab/classes\" $sources\njava -cp \"$lab/build/network-lab/classes\" com.kuma.cloud.lab.network.WebhookLesson",
+    "topics": [
+      "HMAC-SHA256",
+      "篡改与过期拒绝",
+      "并发去重",
+      "503 重试"
+    ],
+    "expected": [
+      "重复事件仅一份模拟业务效果；重试首次503、第二次202。",
+      "本例为自定义教学签名协议，事件表仅在进程内保存。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/network/WebhookLesson.java"
+    ],
+    "doc": "/lab-guides/network-labs.md",
+    "mainClass": "com.kuma.cloud.lab.network.WebhookLesson"
+  },
+  {
+    "kind": "learning",
+    "id": "socket",
+    "group": "网络通信学习",
+    "name": "TCP 分帧与 UDP 通信",
+    "description": "使用回环地址和临时端口，无需 Lab 服务或外部系统。",
+    "runtime": "JDK 25 · 本机",
+    "commands": "$lab = 'kuma-project/kuma-project-lab'\nNew-Item -ItemType Directory -Force \"$lab/build/network-lab/classes\" | Out-Null\n$sources = Get-ChildItem \"$lab/src/main/java/com/kuma/cloud/lab/network\" -Filter '*.java' | ForEach-Object FullName\njavac --release 25 -encoding UTF-8 -d \"$lab/build/network-lab/classes\" $sources\njava -cp \"$lab/build/network-lab/classes\" com.kuma.cloud.lab.network.SocketLesson",
+    "topics": [
+      "长度前缀",
+      "半关闭",
+      "EOF",
+      "读取超时",
+      "UDP 数据报"
+    ],
+    "expected": [
+      "三个 TCP 帧内容正确；非法帧被拒绝；超时后连接仍可用。",
+      "两个 UDP 数据报完整回显；回环成功不代表公网可靠性。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/network/SocketLesson.java"
+    ],
+    "doc": "/lab-guides/network-labs.md",
+    "mainClass": "com.kuma.cloud.lab.network.SocketLesson"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-all",
+    "group": "JDK 版本功能",
+    "name": "JDK 8～25 全部代表性功能",
+    "description": "版本标签表示正式引入版本，统一使用 JDK25 执行。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1",
+    "topics": [
+      "JDK 8",
+      "JDK 9",
+      "JDK 10",
+      "JDK 11",
+      "JDK 12",
+      "JDK 14",
+      "JDK 15",
+      "JDK 16",
+      "JDK 17",
+      "JDK 18",
+      "JDK 21",
+      "JDK 22",
+      "JDK 24",
+      "JDK 25"
+    ],
+    "expected": [
+      "14个版本分组及紧凑源文件检查通过。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/JdkVersionLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-8",
+    "group": "JDK 版本功能",
+    "name": "JDK 8 · Lambda、Stream 与异步任务",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 8",
+    "topics": [
+      "Optional",
+      "java.time",
+      "CompletableFuture"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/EarlyJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "8"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-9",
+    "group": "JDK 版本功能",
+    "name": "JDK 9 · 集合工厂、Stream 前缀与模块",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 9",
+    "topics": [
+      "List.of",
+      "takeWhile / dropWhile",
+      "java.base"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/EarlyJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "9"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-10",
+    "group": "JDK 版本功能",
+    "name": "JDK 10 · var 与集合快照",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 10",
+    "topics": [
+      "类型推断",
+      "List.copyOf"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/EarlyJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "10"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-11",
+    "group": "JDK 版本功能",
+    "name": "JDK 11 · String 与 Files 新 API",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 11",
+    "topics": [
+      "isBlank / strip / repeat / lines",
+      "readString / writeString",
+      "HTTP Client 在18组合验证"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/EarlyJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "11"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-12",
+    "group": "JDK 版本功能",
+    "name": "JDK 12 · teeing 双路收集",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 12",
+    "topics": [
+      "Collectors.teeing",
+      "数量与总和"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/EarlyJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "12"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-14",
+    "group": "JDK 版本功能",
+    "name": "JDK 14 · switch 表达式",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 14",
+    "topics": [
+      "箭头分支",
+      "yield"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/LanguageLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "14"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-15",
+    "group": "JDK 版本功能",
+    "name": "JDK 15 · Text blocks 文本块",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 15",
+    "topics": [
+      "公共缩进",
+      "末尾换行"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/LanguageLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "15"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-16",
+    "group": "JDK 版本功能",
+    "name": "JDK 16 · record 与 instanceof 模式",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 16",
+    "topics": [
+      "值相等",
+      "紧凑构造器",
+      "Stream.toList"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/LanguageLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "16"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-17",
+    "group": "JDK 版本功能",
+    "name": "JDK 17 · sealed 继承边界",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 17",
+    "topics": [
+      "permitted subclasses",
+      "反射元数据"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/LanguageLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "17"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-18",
+    "group": "JDK 版本功能",
+    "name": "JDK 18 · 简单文件服务器",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 18",
+    "topics": [
+      "SimpleFileServer",
+      "HTTP Client",
+      "200 / 404"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/RecentJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "18"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-21",
+    "group": "JDK 版本功能",
+    "name": "JDK 21 · 虚拟线程与模式匹配",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 21",
+    "topics": [
+      "Sequenced Collections",
+      "record patterns",
+      "穷举 switch"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/RecentJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "21"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-22",
+    "group": "JDK 版本功能",
+    "name": "JDK 22 · 外部内存与未命名模式",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 22",
+    "topics": [
+      "Arena",
+      "越界 / 线程 / 生命周期",
+      "FFM",
+      "_"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/RecentJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "22"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-24",
+    "group": "JDK 版本功能",
+    "name": "JDK 24 · Gatherers 与字节码 API",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 24",
+    "topics": [
+      "分窗 / scan",
+      "Class-File 生成与执行"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/RecentJdkLessons.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "24"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk-25",
+    "group": "JDK 版本功能",
+    "name": "JDK 25 · ScopedValue 与新语法",
+    "description": "在 JDK25 上体验该正式版本的代表性功能，并检查结果。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 25",
+    "topics": [
+      "module import",
+      "灵活构造器",
+      "作用域隔离"
+    ],
+    "expected": [
+      "所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/jdk/Jdk25Lesson.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": "com.kuma.cloud.lab.jdk.JdkVersionLearningDemo",
+    "mainArgs": "25"
+  },
+  {
+    "kind": "learning",
+    "id": "jdk25-compact",
+    "group": "JDK 25 独立示例",
+    "name": "紧凑源文件与实例 main",
+    "description": "直接运行不含显式 class 的源文件。",
+    "runtime": "JDK 25 · 正式功能",
+    "commands": "java --source 25 kuma-project/kuma-project-lab/examples/jdk25/CompactMain.java",
+    "topics": [
+      "IO.println",
+      "实例 main",
+      "紧凑源文件"
+    ],
+    "expected": [
+      "sum=6 passed。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/examples/jdk25/CompactMain.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": ""
+  },
+  {
+    "kind": "learning",
+    "id": "jdk25-preview",
+    "group": "JDK 25 独立示例",
+    "name": "原始类型模式与 switch（预览）",
+    "description": "独立编译运行，脚本为编译及运行启用预览开关。",
+    "runtime": "JDK 25 · 预览功能",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-jdk-version-labs.ps1 -Version 25 -IncludePreview",
+    "topics": [
+      "primitive patterns",
+      "精确窄化",
+      "--enable-preview"
+    ],
+    "expected": [
+      "127 匹配 byte、128 不匹配；primitive switch 通过。",
+      "预览编译警告为预期输出。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/examples/jdk25-preview/PrimitivePatterns.java"
+    ],
+    "doc": "/lab-guides/jdk-version-labs.md",
+    "mainClass": ""
+  }
+]
