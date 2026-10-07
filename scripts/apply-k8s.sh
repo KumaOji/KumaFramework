@@ -20,6 +20,14 @@ for file in "${files[@]}"; do
       echo "SKIP ${base}"
       continue
       ;;
+    kustomization.yaml)
+      continue
+      ;;
+    observability.yaml)
+      if [[ -f "${K8S_ROOT}/server/observability/kustomization.yaml" ]]; then
+        continue
+      fi
+      ;;
     blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml)
       echo "SKIP ${base} (image managed by deploy workflow)"
       continue
@@ -33,5 +41,9 @@ for file in "${files[@]}"; do
   echo "APPLY ${base}"
   kubectl apply -f "${file}"
 done
+
+if [[ -f "${K8S_ROOT}/server/observability/kustomization.yaml" ]]; then
+  kubectl apply -k "${K8S_ROOT}/server/observability"
+fi
 
 kubectl rollout status deployment/nacos -n base --timeout=300s || true

@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: docker.io/library/elasticsearch
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-elasticsearch
+    newTag: 8.17.3
+  - name: docker.io/apache/skywalking-oap-server
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-skywalking-oap
+    newTag: 10.2.0
+  - name: docker.io/apache/skywalking-ui
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-skywalking-ui
+    newTag: 10.2.0
+  - name: docker.io/otel/opentelemetry-collector-contrib
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-otel-collector
+    newTag: 0.123.0
+patches:
+  - target:
+      kind: Deployment|StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value:
+          - name: observability-registry

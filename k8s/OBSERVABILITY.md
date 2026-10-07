@@ -1,6 +1,7 @@
 # OTel Collector + SkyWalking
 
 本地 WSL K3s 和服务器共用 `base/observability.yaml`，部署 Collector、SkyWalking OAP/UI 和独立 Elasticsearch 存储。
+服务器通过 `server/observability/kustomization.yaml` 覆盖镜像地址为现有阿里云 ACR，并配置 `observability-registry` 拉取凭据；本地继续使用官方镜像。
 版本固定为 SkyWalking 10.2.0、Collector Contrib 0.123.0、Elasticsearch 8.17.3。
 
 ## 部署和验证
@@ -24,6 +25,7 @@ wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts
 
 `check-observability.py` 上报一条测试 trace，并从 OAP 查询确认 Collector、OAP 和存储整条链路。
 Apply K8s 工作流在 `master` 上的 `k8s/**`、验证脚本或工作流文件变更时触发，使用已有 GitHub Secrets 同步文件、部署、等待组件就绪并运行测试 trace 验证；服务器需要 Python 3。
+流水线先将固定版本的官方镜像同步到 ACR（已有标签则跳过），使用现有 `ALIYUN_REGISTRY_USERNAME/PASSWORD` 创建服务器拉取凭据，再应用服务器覆盖配置。
 也可只复制此文件到服务器并 `kubectl apply -f observability.yaml`，不会重部署业务应用。
 
 ## 访问
@@ -90,6 +92,7 @@ IDE 本地接入时使用转发后的 `localhost:11800`。选择与应用 JDK �
 ## 维护
 
 Collector ConfigMap 修改后执行 `kubectl -n base rollout restart deployment/otel-collector`。
+可手动运行 GitHub Actions 的 `Inspect Observability` 工作流，只读检查服务器 Pod、PVC、资源和事件。
 Collector 的重试队列在内存中，重启会丢失未发送的数据；Elasticsearch 数据持久化。
 此部署未启用遥测接收鉴权，不创建公网 Ingress；对外发布 UI 时需配置访问控制。
 

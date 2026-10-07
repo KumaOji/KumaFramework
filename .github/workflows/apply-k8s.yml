@@ -10,6 +10,13 @@ on:
       - '.github/workflows/apply-k8s.yml'
   workflow_dispatch:
 
+concurrency:
+  group: apply-k8s-configs
+  cancel-in-progress: false
+
+env:
+  REGISTRY: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com
+
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -17,13 +24,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
+          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+
+      - name: Mirror observability images to ACR
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r upstream repository version; do
+            target="${REGISTRY}/kumaoji/observability-${repository}:${version}"
+            if docker manifest inspect "$target" >/dev/null 2>&1; then
+              echo "Image already mirrored: $target"
+              continue
+            fi
+            docker pull --platform linux/amd64 "${upstream}:${version}"
+            docker tag "${upstream}:${version}" "$target"
+            docker push "$target"
+          done <<'IMAGES'
+          docker.io/library/elasticsearch elasticsearch 8.17.3
+          docker.io/apache/skywalking-oap-server skywalking-oap 10.2.0
+          docker.io/apache/skywalking-ui skywalking-ui 10.2.0
+          docker.io/otel/opentelemetry-collector-contrib otel-collector 0.123.0
+          IMAGES
+
       - name: Prepare k8s dirs on server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: mkdir -p /data/k8s/base /data/k8s/blog /data/k8s/scripts
+          script: mkdir -p /data/k8s/base /data/k8s/blog /data/k8s/scripts /data/k8s/server/observability
 
       - name: Copy base k8s files to server
         uses: appleboy/scp-action@v0.1.7
@@ -55,19 +89,43 @@ jobs:
           target: /data/k8s/scripts/
           strip_components: 1
 
+      - name: Copy server observability overlay
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: k8s/server/observability/*
+          target: /data/k8s/server/observability/
+          strip_components: 3
+
       - name: Apply k8s configs and verify observability
         uses: appleboy/ssh-action@v1
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          REGISTRY_USER: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           command_timeout: 30m
+          envs: REGISTRY,REGISTRY_USER,REGISTRY_PASSWORD
           script: |
             set -eu
+            registry_manifest="$(mktemp)"
+            trap 'rm -f "$registry_manifest"' EXIT
+            kubectl create secret docker-registry observability-registry -n base \
+              --docker-server="$REGISTRY" --docker-username="$REGISTRY_USER" \
+              --docker-password="$REGISTRY_PASSWORD" --dry-run=client -o yaml > "$registry_manifest"
+            kubectl apply -f "$registry_manifest"
+            rm -f "$registry_manifest"
+            trap - EXIT
             for f in /data/k8s/base/*.yaml /data/k8s/blog/*.yaml; do
               b=$(basename "$f")
               case "$b" in
                 *secret.example.yaml|*secret.yaml) continue ;;
+                kustomization.yaml|observability.yaml) continue ;;
                 blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml) continue ;;
                 # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
                 mysql.yaml)
@@ -77,6 +135,7 @@ jobs:
               esac
               kubectl apply -f "$f"
             done
+            kubectl apply -k /data/k8s/server/observability
             kubectl rollout status deployment/nacos -n base --timeout=300s || true
             kubectl rollout status statefulset/skywalking-storage -n base --timeout=600s
             for deployment in skywalking-oap skywalking-ui otel-collector; do
