@@ -4,6 +4,7 @@
 set -euo pipefail
 
 K8S_ROOT="${K8S_ROOT:-/data/k8s}"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 shopt -s nullglob
 files=("${K8S_ROOT}"/base/*.yaml "${K8S_ROOT}"/blog/*.yaml)
@@ -25,7 +26,7 @@ for file in "${files[@]}"; do
       ;;
     mysql.yaml)
       # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
-      kubectl apply --server-side --field-manager=kuma-k8s -f "${file}"
+      python3 "${script_dir}/apply-k8s-resource.py" "${file}"
       continue
       ;;
   esac

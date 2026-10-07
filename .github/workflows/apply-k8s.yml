@@ -6,6 +6,7 @@ on:
     paths:
       - 'k8s/**'
       - 'scripts/check-observability.py'
+      - 'scripts/apply-k8s-resource.py'
       - '.github/workflows/apply-k8s.yml'
   workflow_dispatch:
 
@@ -44,13 +45,13 @@ jobs:
           target: /data/k8s/blog/
           strip_components: 2
 
-      - name: Copy observability check to server
+      - name: Copy deployment helpers to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: scripts/check-observability.py
+          source: scripts/check-observability.py,scripts/apply-k8s-resource.py
           target: /data/k8s/scripts/
           strip_components: 1
 
@@ -70,7 +71,7 @@ jobs:
                 blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml) continue ;;
                 # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
                 mysql.yaml)
-                  kubectl apply --server-side --field-manager=kuma-k8s -f "$f"
+                  python3 /data/k8s/scripts/apply-k8s-resource.py "$f"
                   continue
                   ;;
               esac
