@@ -23,6 +23,11 @@ for file in "${files[@]}"; do
       echo "SKIP ${base} (image managed by deploy workflow)"
       continue
       ;;
+    mysql.yaml)
+      # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
+      kubectl apply --server-side --field-manager=kuma-k8s -f "${file}"
+      continue
+      ;;
   esac
   echo "APPLY ${base}"
   kubectl apply -f "${file}"

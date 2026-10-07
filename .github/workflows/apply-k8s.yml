@@ -68,6 +68,11 @@ jobs:
               case "$b" in
                 *secret.example.yaml|*secret.yaml) continue ;;
                 blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml) continue ;;
+                # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
+                mysql.yaml)
+                  kubectl apply --server-side --field-manager=kuma-k8s -f "$f"
+                  continue
+                  ;;
               esac
               kubectl apply -f "$f"
             done
