@@ -82,3 +82,20 @@ jobs:
               kubectl rollout status "deployment/${deployment}" -n base --timeout=300s
             done
             python3 /data/k8s/scripts/check-observability.py
+
+      - name: Report observability diagnostics on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 5m
+          script: |
+            kubectl get pods -n base -l 'app in (skywalking-storage,skywalking-oap,skywalking-ui,otel-collector)' -o wide
+            kubectl get pvc -n base data-skywalking-storage-0
+            kubectl get events -n base --sort-by=.lastTimestamp | tail -40
+            kubectl logs -n base statefulset/skywalking-storage --tail=40 || true
+            for deployment in skywalking-oap skywalking-ui otel-collector; do
+              kubectl logs -n base "deployment/${deployment}" --all-containers --tail=40 || true
+            done
