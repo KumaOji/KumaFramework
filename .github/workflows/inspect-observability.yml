@@ -1,0 +1,27 @@
+name: Inspect Observability
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect server observability resources
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 5m
+          script: |
+            kubectl get nodes -o wide
+            kubectl top nodes || true
+            kubectl get storageclass
+            kubectl get pods -n base -l 'app in (skywalking-storage,skywalking-oap,skywalking-ui,otel-collector)' -o wide
+            kubectl get pvc -n base data-skywalking-storage-0
+            kubectl describe pods -n base -l 'app in (skywalking-storage,skywalking-oap,skywalking-ui,otel-collector)'
+            kubectl get events -n base --sort-by=.lastTimestamp | tail -40
