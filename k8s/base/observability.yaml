@@ -1,0 +1,346 @@
+# Shared by WSL K3s and the server. All endpoints are cluster-internal.
+# Requires a default StorageClass (K3s: local-path).
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-storage
+  namespace: base
+spec:
+  selector:
+    app: skywalking-storage
+  ports:
+    - name: http
+      port: 9200
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: skywalking-storage
+  namespace: base
+spec:
+  serviceName: skywalking-storage
+  replicas: 1
+  selector:
+    matchLabels:
+      app: skywalking-storage
+  template:
+    metadata:
+      labels:
+        app: skywalking-storage
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: elasticsearch
+          image: docker.io/library/elasticsearch:8.17.3
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "false"
+            - name: node.store.allow_mmap
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+          ports:
+            - name: http
+              containerPort: 9200
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /_cluster/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health?wait_for_status=yellow&timeout=1s
+              port: http
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-oap
+  namespace: base
+spec:
+  selector:
+    app: skywalking-oap
+  ports:
+    - name: grpc
+      port: 11800
+    - name: http
+      port: 12800
+    - name: zipkin-query
+      port: 9412
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-oap
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: skywalking-oap
+  template:
+    metadata:
+      labels:
+        app: skywalking-oap
+    spec:
+      initContainers:
+        - name: wait-for-storage
+          image: docker.io/apache/skywalking-oap-server:10.2.0
+          command:
+            - bash
+            - -ec
+            - |
+              until curl --fail --silent --max-time 5 http://skywalking-storage:9200/_cluster/health; do
+                sleep 5
+              done
+      containers:
+        - name: oap
+          image: docker.io/apache/skywalking-oap-server:10.2.0
+          env:
+            - name: SW_STORAGE
+              value: elasticsearch
+            - name: SW_STORAGE_ES_CLUSTER_NODES
+              value: skywalking-storage:9200
+            - name: SW_STORAGE_ES_INDEX_REPLICAS_NUMBER
+              value: "0"
+            - name: SW_OTEL_RECEIVER
+              value: default
+            - name: SW_OTEL_RECEIVER_ENABLED_HANDLERS
+              value: otlp-traces
+            - name: SW_RECEIVER_ZIPKIN
+              value: default
+            - name: SW_QUERY_ZIPKIN
+              value: default
+            - name: SW_HEALTH_CHECKER
+              value: default
+            - name: SW_CORE_RECORD_DATA_TTL
+              value: "3"
+            - name: SW_CORE_METRICS_DATA_TTL
+              value: "7"
+            - name: JAVA_OPTS
+              value: -Xms512m -Xmx1024m
+          ports:
+            - name: grpc
+              containerPort: 11800
+            - name: http
+              containerPort: 12800
+            - name: zipkin-query
+              containerPort: 9412
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-ui
+  namespace: base
+spec:
+  selector:
+    app: skywalking-ui
+  ports:
+    - name: http
+      port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-ui
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: skywalking-ui
+  template:
+    metadata:
+      labels:
+        app: skywalking-ui
+    spec:
+      containers:
+        - name: ui
+          image: docker.io/apache/skywalking-ui:10.2.0
+          env:
+            - name: SW_OAP_ADDRESS
+              value: http://skywalking-oap:12800
+            - name: SW_ZIPKIN_ADDRESS
+              value: http://skywalking-oap:9412
+            - name: JAVA_OPTS
+              value: -Xms128m -Xmx256m
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: base
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 192
+        spike_limit_mib: 48
+      batch:
+        timeout: 5s
+        send_batch_size: 512
+    exporters:
+      otlp/skywalking:
+        endpoint: skywalking-oap:11800
+        tls:
+          insecure: true
+        sending_queue:
+          queue_size: 1000
+        retry_on_failure:
+          enabled: true
+          max_elapsed_time: 300s
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/skywalking]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: base
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+    - name: otlp-http
+      port: 4318
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: collector
+          image: docker.io/otel/opentelemetry-collector-contrib:0.123.0
+          args: [--config=/etc/otelcol/config.yaml]
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+            - name: health
+              containerPort: 13133
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: health
+          livenessProbe:
+            httpGet:
+              path: /
+              port: health
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otelcol
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config

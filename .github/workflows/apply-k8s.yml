@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'k8s/**'
+      - 'scripts/check-observability.py'
+      - '.github/workflows/apply-k8s.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,7 +22,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: mkdir -p /data/k8s/base /data/k8s/blog
+          script: mkdir -p /data/k8s/base /data/k8s/blog /data/k8s/scripts
 
       - name: Copy base k8s files to server
         uses: appleboy/scp-action@v0.1.7
@@ -42,14 +44,25 @@ jobs:
           target: /data/k8s/blog/
           strip_components: 2
 
-      - name: Apply k8s configs
+      - name: Copy observability check to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: scripts/check-observability.py
+          target: /data/k8s/scripts/
+          strip_components: 1
+
+      - name: Apply k8s configs and verify observability
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          command_timeout: 10m
+          command_timeout: 30m
           script: |
+            set -eu
             for f in /data/k8s/base/*.yaml /data/k8s/blog/*.yaml; do
               b=$(basename "$f")
               case "$b" in
@@ -59,3 +72,8 @@ jobs:
               kubectl apply -f "$f"
             done
             kubectl rollout status deployment/nacos -n base --timeout=300s || true
+            kubectl rollout status statefulset/skywalking-storage -n base --timeout=600s
+            for deployment in skywalking-oap skywalking-ui otel-collector; do
+              kubectl rollout status "deployment/${deployment}" -n base --timeout=300s
+            done
+            python3 /data/k8s/scripts/check-observability.py
