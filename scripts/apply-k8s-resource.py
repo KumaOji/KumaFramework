@@ -10,10 +10,18 @@ def main():
     parser.add_argument("manifest")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    document = json.loads(subprocess.check_output([
+    output = subprocess.check_output([
         "kubectl", "create", "--dry-run=client", "-f", args.manifest, "-o", "json"
-    ], text=True))
-    resources = document.get("items", [document])
+    ], text=True)
+    # kubectl versions may emit a List or consecutive JSON objects for multi-doc YAML.
+    decoder = json.JSONDecoder()
+    resources = []
+    remaining = output.strip()
+    while remaining:
+        resource, end = decoder.raw_decode(remaining)
+        resources.extend(resource["items"] if resource.get("kind") == "List" else [resource])
+        remaining = remaining[end:].lstrip()
+    document = {"apiVersion": "v1", "kind": "List", "items": resources}
     for resource in resources:
         if resource.get("kind") != "PersistentVolumeClaim":
             continue
