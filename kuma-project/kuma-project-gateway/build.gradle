@@ -19,6 +19,8 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     // Actuator 扩展（/actuator/kmc、KmcInfoContributor、KmcHealthIndicator 等）
     api project(':kuma-boot-framework:kuma-boot-starter-prometheus')
+    // Boot 4 的 Micrometer Tracing / OpenTelemetry 自动装配及 OTLP 导出。
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
     // 统一 Logback 输出（控制台 / Logstash / Loki），不引入 Servlet 栈
     api(project(':kuma-boot-framework:kuma-boot-starter-logger')) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'

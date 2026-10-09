@@ -17,6 +17,9 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
+    api project(':kuma-boot-framework:kuma-boot-starter-prometheus')
+    api project(':kuma-boot-framework:kuma-boot-starter-logger')
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
     api project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     api project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')

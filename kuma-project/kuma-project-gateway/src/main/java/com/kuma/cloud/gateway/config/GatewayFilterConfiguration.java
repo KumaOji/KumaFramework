@@ -46,8 +46,8 @@ public class GatewayFilterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public GatewayTraceGlobalFilter gatewayTraceGlobalFilter() {
-        return new GatewayTraceGlobalFilter();
+    public GatewayTraceGlobalFilter gatewayTraceGlobalFilter(ObjectProvider<io.micrometer.tracing.Tracer> tracers) {
+        return new GatewayTraceGlobalFilter(tracers);
     }
 
     @Bean

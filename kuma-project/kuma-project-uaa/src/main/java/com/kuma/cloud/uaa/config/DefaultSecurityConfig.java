@@ -1,7 +1,6 @@
 package com.kuma.cloud.uaa.config;
 
-import com.kuma.boot.security.spring.authentication.response.denied.JsonAccessDeniedHandler;
-import com.kuma.boot.security.spring.authentication.response.entrypoint.JsonAuthenticationEntryPoint;
+import com.kuma.cloud.uaa.security.UaaSecurityResponses;
 import com.kuma.boot.security.spring.autoconfigure.properties.SecurityProperties;
 import com.kuma.boot.security.spring.oauth2.authentication.SecurityJwtGrantedAuthoritiesConverter;
 import com.kuma.cloud.uaa.security.LoginPreCheckFilter;
@@ -25,6 +24,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -80,8 +81,8 @@ public class DefaultSecurityConfig {
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
         csrfHandler.setCsrfRequestAttributeName(null);
 
-        JsonAuthenticationEntryPoint jsonAuthenticationEntryPoint = new JsonAuthenticationEntryPoint();
-        JsonAccessDeniedHandler jsonAccessDeniedHandler = new JsonAccessDeniedHandler();
+        AuthenticationEntryPoint jsonAuthenticationEntryPoint = UaaSecurityResponses.UNAUTHORIZED;
+        AccessDeniedHandler jsonAccessDeniedHandler = UaaSecurityResponses.FORBIDDEN;
         MediaTypeRequestMatcher jsonApiMatcher = new MediaTypeRequestMatcher(
                 org.springframework.http.MediaType.APPLICATION_JSON,
                 org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON);

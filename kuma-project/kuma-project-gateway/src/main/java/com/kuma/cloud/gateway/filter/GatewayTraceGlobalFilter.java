@@ -17,57 +17,52 @@
 package com.kuma.cloud.gateway.filter;
 
 import com.kuma.boot.common.constant.CommonConstants;
-import com.kuma.boot.common.holder.TraceContextHolder;
-import com.kuma.boot.common.utils.id.IdGeneratorUtils;
-import com.kuma.boot.common.utils.servlet.TraceUtils;
-import cn.hutool.core.util.StrUtil;
-import org.slf4j.MDC;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
+import com.kuma.cloud.gateway.support.GatewayHeaders;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import java.util.UUID;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 /**
- * 全链路 TraceId 传播：读取或生成 {@code kmc-trace-id}，写入 MDC / {@link TraceContextHolder} 并透传给下游。
+ * 关联 ID 传播：优先采用当前 OTel span 的 traceId，并透传 {@code kmc-trace-id}。
  *
- * <p>与 {@code kuma-boot-starter-web} 的 {@code TraceFilter} 保持同一套 ID 生成与 MDC 键名约定。
+ * <p>使用 WebFilter 覆盖未匹配路由和鉴权失败；ID 保存于 exchange/Reactor context，避免在线程池中泄漏 ThreadLocal。
  *
  * @author kuma
  * @since 2026-04-23
  */
-public class GatewayTraceGlobalFilter implements GlobalFilter, Ordered {
+public class GatewayTraceGlobalFilter implements WebFilter, Ordered {
+
+    private final ObjectProvider<Tracer> tracers;
+
+    public GatewayTraceGlobalFilter(ObjectProvider<Tracer> tracers) {
+        this.tracers = tracers;
+    }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        String traceId = request.getHeaders().getFirst(CommonConstants.KMC_TRACE_ID);
-        if (StrUtil.isBlank(traceId)) {
-            traceId = IdGeneratorUtils.getIdStr();
-        }
-        String finalTraceId = traceId;
-
-        ServerHttpRequest mutatedRequest = request.mutate()
-                .header(CommonConstants.KMC_TRACE_ID, finalTraceId)
-                .build();
-        ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
-        mutatedExchange.getResponse().getHeaders().set(CommonConstants.KMC_TRACE_ID, finalTraceId);
-
-        return chain.filter(mutatedExchange)
-                .doOnSubscribe(subscription -> bindTraceContext(finalTraceId))
-                .doFinally(signal -> clearTraceContext());
-    }
-
-    private static void bindTraceContext(String traceId) {
-        TraceContextHolder.setTraceId(traceId);
-        TraceUtils.setKmcTraceId(traceId);
-    }
-
-    private static void clearTraceContext() {
-        TraceContextHolder.clear();
-        TraceUtils.removeKmcTraceId();
-        MDC.remove(CommonConstants.KMC_TRACE_ID);
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        return Mono.defer(() -> {
+            Tracer tracer = tracers.getIfAvailable();
+            Span span = tracer != null ? tracer.currentSpan() : null;
+            String suppliedId = exchange.getRequest().getHeaders().getFirst(CommonConstants.KMC_TRACE_ID);
+            String traceId = span != null ? span.context().traceId()
+                    : suppliedId != null && suppliedId.matches("[A-Za-z0-9_-]{1,128}")
+                    ? suppliedId : UUID.randomUUID().toString().replace("-", "");
+            String spanId = span != null ? span.context().spanId() : "";
+            exchange.getAttributes().put(GatewayHeaders.TRACE_ID_ATTRIBUTE, traceId);
+            exchange.getAttributes().put(GatewayHeaders.SPAN_ID_ATTRIBUTE, spanId);
+            ServerHttpRequest request = exchange.getRequest().mutate()
+                    .headers(headers -> headers.set(CommonConstants.KMC_TRACE_ID, traceId)).build();
+            exchange.getResponse().getHeaders().set(CommonConstants.KMC_TRACE_ID, traceId);
+            return chain.filter(exchange.mutate().request(request).build())
+                    .contextWrite(context -> context.put(CommonConstants.KMC_TRACE_ID, traceId));
+        });
     }
 
     @Override

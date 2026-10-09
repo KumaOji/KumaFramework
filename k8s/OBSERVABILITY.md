@@ -57,6 +57,9 @@ SkyWalking 10.2 的 OTLP traces 会转换为 Zipkin 格式，在 UI 的 Zipkin T
 
 ## 应用接入
 
+Blog/UAA/Gateway 已使用 Boot 4 原生 OpenTelemetry 接入；服务器四组件监控、
+Lab 发布、UI 隧道与完整验证见 [服务器同步说明](server/monitoring/README.md)。
+
 本清单启用 **traces** 管道。部署成功不代表业务应用已经接入；示例 trace 的服务名为 `kuma-observability-smoke`。
 
 ### 现有 OTel starter

@@ -27,7 +27,18 @@ test('all lesson cards have existing sources, mirrored docs, commands and search
     const doc=fs.readFileSync(path.join(renderer,card.doc),'utf8');
     assert.equal(doc,fs.readFileSync(path.resolve(renderer,'../../kuma-project/kuma-project-lab/docs',path.basename(card.doc)),'utf8'));
   }
-  for(const id of ['memory','webhook','socket','linux-memory','jdk-8','jdk-21','jdk-25','jdk25-preview'])assert.ok(ids.has(id));
+  for(const id of ['memory','webhook','socket','linux-memory','jdk-8','jdk-21','jdk-25','jdk25-preview',
+    'otel-sdk','otel-skywalking','skywalking-agent','database-otel','database-skywalking',
+    'middleware-loki','middleware-prometheus','middleware-alertmanager','middleware-otel','middleware-skywalking','middleware-grafana'])assert.ok(ids.has(id));
   assert.equal(model.groups(cards,'ScopedValue','learning').flatMap(group=>group.items).some(({entry})=>entry.id==='jdk-25'),true);
   assert.equal(model.groups(cards,'','api').length,0);
+});
+
+test('middleware UI links reject executable URLs and embedded credentials and support UI location search',()=>{
+  const card={kind:'learning',id:'middleware',group:'monitoring',name:'Loki',uiLinks:[
+    {name:'Explore',url:'http://localhost:3000/explore',location:'选择 Loki 数据源'},
+    {url:'javascript:alert(1)'},{url:'http://admin:secret@localhost:3000'},{url:'/relative'}]};
+  assert.equal(model.uiLinks(card).length,1);
+  assert.equal(model.groups([card],'Explore','learning').length,1);
+  assert.deepEqual(model.uiLinks({}),[]);
 });

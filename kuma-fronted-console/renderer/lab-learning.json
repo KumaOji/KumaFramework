@@ -567,5 +567,338 @@
     ],
     "doc": "/lab-guides/jdk-version-labs.md",
     "mainClass": ""
+  },
+  {
+    "kind": "learning",
+    "id": "otel-sdk",
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "OTel SDK：信号、传播与采样",
+    "description": "真实 SDK 输出 span 树、异步断链对照、采样、指标和关联日志。",
+    "runtime": "JDK 25 · Gradle · 无需后端",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:otelLab",
+    "topics": [
+      "trace / span",
+      "W3C traceparent",
+      "Context.wrap",
+      "采样",
+      "counter / histogram",
+      "日志关联"
+    ],
+    "expected": [
+      "7个 span，其中6个属于同一 trace；所有 checks 为 true。",
+      "metrics/logs 仅由本地 exporter 捕获。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/OtelLearningDemo.java"
+    ],
+    "doc": "/lab-guides/observability-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.OtelLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "otel-skywalking",
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "OTel → Collector → SkyWalking 查回",
+    "description": "导出真实 OTLP trace，逐个验证同一 trace 的六个 span 已存储。",
+    "runtime": "JDK 25 · Gradle · Collector/OAP",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:otelLab -PotelExport=true",
+    "topics": [
+      "OTLP",
+      "receiver / processor / exporter",
+      "Zipkin / Lens",
+      "存储验证"
+    ],
+    "expected": [
+      "backendStatus=VERIFIED_IN_SKYWALKING。",
+      "UI 使用 Zipkin/Lens 查询报告 traceId；不是原生 Agent 服务页面。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/OtelLearningDemo.java"
+    ],
+    "doc": "/lab-guides/observability-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.OtelLearningDemo",
+    "mainArgs": "--export http://localhost:4318/v1/traces http://localhost:9412"
+  },
+  {
+    "kind": "learning",
+    "id": "skywalking-agent",
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "SkyWalking Agent：正常、慢调用与异常",
+    "description": "先运行无 Agent 对照，再按教程挂载 Agent，查询原生自定义 span。",
+    "runtime": "JDK 25 · Gradle · 可选 Java Agent",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:skywalkingLab",
+    "topics": [
+      "@Trace",
+      "ActiveSpan",
+      "TraceContext",
+      "慢调用定位",
+      "异常标记",
+      "原生 APM"
+    ],
+    "expected": [
+      "无 Agent 时 activeTrace=false；三个业务模拟正常完成。",
+      "挂载兼容 Agent 后产生 native ID；上报与存储需在原生 UI 验证。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/SkyWalkingLearningDemo.java",
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/ObservabilityLabController.java"
+    ],
+    "doc": "/lab-guides/observability-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.SkyWalkingLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "database-otel",
+    "group": "OTel 与 SkyWalking 真实数据库实验",
+    "name": "真实 PostgreSQL/MySQL + OTel SQL trace",
+    "description": "默认使用现有WSL PostgreSQL；独立实验命名空间，每次按runId隔离，不清空历史结果。",
+    "runtime": "JDK 25 · Gradle · WSL真实数据库 · Collector/OAP",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-observability-database-wsl.ps1 -Export",
+    "topics": [
+      "JDBC",
+      "SQL span",
+      "数据库端慢查询",
+      "重复键约束",
+      "事务回滚",
+      "独立 schema"
+    ],
+    "expected": [
+      "正常/慢查询提交后库存9、支付1；约束失败回滚后库存10、支付0。",
+      "所有SQL span从SkyWalking查回；每个runId的数据库行保留供对照。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/DatabaseObservabilityLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-observability-database-wsl.ps1"
+    ],
+    "doc": "/lab-guides/observability-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.DatabaseObservabilityLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "database-skywalking",
+    "group": "OTel 与 SkyWalking 真实数据库实验",
+    "name": "真实 JDBC + SkyWalking Agent",
+    "description": "默认使用现有WSL PostgreSQL；独立实验命名空间，每次按runId隔离，不清空历史结果。",
+    "runtime": "JDK 25 · Gradle · WSL真实数据库 · Collector/OAP",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-observability-database-wsl.ps1 -Telemetry skywalking",
+    "topics": [
+      "JDBC 自动采集",
+      "PreparedStatement",
+      "commit / rollback",
+      "数据库依赖",
+      "慢 SQL",
+      "SQLSTATE"
+    ],
+    "expected": [
+      "真实SQL与事务验证通过，产生native trace ID。",
+      "原生UI查询JDBC span、慢SQL和重复键错误；MySQL可加 -Database mysql。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/DatabaseObservabilityLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-observability-database-wsl.ps1"
+    ],
+    "doc": "/lab-guides/observability-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.DatabaseObservabilityLearningDemo"
+  },
+  {
+    "kind": "learning",
+    "id": "middleware-loki",
+    "group": "可观测性中间件实验",
+    "name": "Loki：日志写入与 LogQL 查回",
+    "description": "连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。",
+    "runtime": "JDK 25 · Gradle · WSL中间件",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1 -Component loki",
+    "topics": [
+      "日志流",
+      "标签",
+      "runId 正文过滤",
+      "Grafana Explore"
+    ],
+    "expected": [
+      "写入返回204；本次runId的日志可查回。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/MonitoringMiddlewareLabs.java",
+      "kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1"
+    ],
+    "doc": "/lab-guides/monitoring-middleware-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs",
+    "mainArgs": "loki",
+    "uiLinks": [
+      {
+        "name": "Grafana Explore / Loki",
+        "url": "http://localhost:3000/explore",
+        "location": "Explore → Loki，粘贴报告中的 logql"
+      }
+    ]
+  },
+  {
+    "kind": "learning",
+    "id": "middleware-prometheus",
+    "group": "可观测性中间件实验",
+    "name": "Prometheus：即时与范围查询",
+    "description": "连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。",
+    "runtime": "JDK 25 · Gradle · WSL中间件",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1 -Component prometheus",
+    "topics": [
+      "PromQL",
+      "up",
+      "vector / matrix",
+      "counter / rate",
+      "Targets"
+    ],
+    "expected": [
+      "返回当前样本与一分钟历史序列；up=0保留为失联证据。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/MonitoringMiddlewareLabs.java",
+      "kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1"
+    ],
+    "doc": "/lab-guides/monitoring-middleware-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs",
+    "mainArgs": "prometheus",
+    "uiLinks": [
+      {
+        "name": "Prometheus",
+        "url": "http://localhost:9090",
+        "location": "查询页输入 up；Targets 查看采集目标"
+      }
+    ]
+  },
+  {
+    "kind": "learning",
+    "id": "middleware-alertmanager",
+    "group": "可观测性中间件实验",
+    "name": "Alertmanager：一分钟实验告警",
+    "description": "连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。",
+    "runtime": "JDK 25 · Gradle · WSL中间件",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1 -Component alertmanager",
+    "topics": [
+      "labels / annotations",
+      "startsAt / endsAt",
+      "告警查回",
+      "接收器边界"
+    ],
+    "expected": [
+      "KumaLabAlert 可按run_id查回，约一分钟后过期；本地不发送外部通知。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/MonitoringMiddlewareLabs.java",
+      "kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1"
+    ],
+    "doc": "/lab-guides/monitoring-middleware-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs",
+    "mainArgs": "alertmanager",
+    "uiLinks": [
+      {
+        "name": "Alertmanager",
+        "url": "http://localhost:9093",
+        "location": "Alerts 筛选 alertname=KumaLabAlert；Silences 查看静默"
+      }
+    ]
+  },
+  {
+    "kind": "learning",
+    "id": "middleware-otel",
+    "group": "可观测性中间件实验",
+    "name": "OTel Collector：导出与存储证据",
+    "description": "连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。",
+    "runtime": "JDK 25 · Gradle · WSL中间件",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1 -Component otel",
+    "topics": [
+      "OTLP",
+      "receiver / processor / exporter",
+      "六个关联 span",
+      "查回验证"
+    ],
+    "expected": [
+      "真实SDK输出7个span，其中6个关联span从SkyWalking逐个查回。",
+      "Collector没有业务UI；metrics/logs仍为SDK内存实验。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/MonitoringMiddlewareLabs.java",
+      "kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1"
+    ],
+    "doc": "/lab-guides/monitoring-middleware-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs",
+    "mainArgs": "otel",
+    "uiLinks": [
+      {
+        "name": "SkyWalking",
+        "url": "http://localhost:12880",
+        "location": "Zipkin Trace / Lens 查报告 traceId；Collector本身无业务UI"
+      }
+    ]
+  },
+  {
+    "kind": "learning",
+    "id": "middleware-skywalking",
+    "group": "可观测性中间件实验",
+    "name": "SkyWalking：traceId 与 span 树",
+    "description": "连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。",
+    "runtime": "JDK 25 · Gradle · WSL中间件",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1 -Component skywalking",
+    "topics": [
+      "Zipkin / Lens",
+      "父子 span",
+      "慢调用",
+      "异常标记",
+      "原生Agent对照"
+    ],
+    "expected": [
+      "报告返回真实traceId与已存储span列表，可在Zipkin/Lens对照父子关系。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/MonitoringMiddlewareLabs.java",
+      "kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1"
+    ],
+    "doc": "/lab-guides/monitoring-middleware-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs",
+    "mainArgs": "skywalking",
+    "uiLinks": [
+      {
+        "name": "SkyWalking",
+        "url": "http://localhost:12880",
+        "location": "Zipkin Trace / Lens 查 OTLP；已有 Agent 实验在原生 Trace 页面"
+      }
+    ]
+  },
+  {
+    "kind": "learning",
+    "id": "middleware-grafana",
+    "group": "可观测性中间件实验",
+    "name": "Grafana：面板与数据源检查",
+    "description": "连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。",
+    "runtime": "JDK 25 · Gradle · WSL中间件",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1 -Component grafana",
+    "topics": [
+      "Dashboards",
+      "Kuma Services",
+      "数据源健康",
+      "日志与调用链关联"
+    ],
+    "expected": [
+      "现有本地凭据验证三服务面板及Prometheus/Loki/SkyWalking数据源。",
+      "报告不输出凭据。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/observability/MonitoringMiddlewareLabs.java",
+      "kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1"
+    ],
+    "doc": "/lab-guides/monitoring-middleware-labs.md",
+    "mainClass": "com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs",
+    "mainArgs": "grafana",
+    "uiLinks": [
+      {
+        "name": "三服务面板",
+        "url": "http://localhost:3000/d/kuma-services",
+        "location": "Dashboards → Kuma → Kuma Services"
+      },
+      {
+        "name": "Grafana Explore",
+        "url": "http://localhost:3000/explore",
+        "location": "选择 Loki / Prometheus / SkyWalking traces 数据源"
+      }
+    ]
   }
 ]

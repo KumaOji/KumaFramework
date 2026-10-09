@@ -9,6 +9,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--image", help="Set application placeholder images atomically with configuration")
     args = parser.parse_args()
     output = subprocess.check_output([
         "kubectl", "create", "--dry-run=client", "-f", args.manifest, "-o", "json"
@@ -22,6 +23,11 @@ def main():
         resources.extend(resource["items"] if resource.get("kind") == "List" else [resource])
         remaining = remaining[end:].lstrip()
     document = {"apiVersion": "v1", "kind": "List", "items": resources}
+    if args.image:
+        for resource in resources:
+            for container in resource.get("spec", {}).get("template", {}).get("spec", {}).get("containers", []):
+                if container.get("image", "").endswith(":placeholder"):
+                    container["image"] = args.image
     for resource in resources:
         if resource.get("kind") != "PersistentVolumeClaim":
             continue

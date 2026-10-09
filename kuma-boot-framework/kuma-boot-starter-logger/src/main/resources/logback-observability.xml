@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="kuma-service"/>
+    <springProperty scope="context" name="ENVIRONMENT" source="observability.environment" defaultValue="local"/>
+    <springProperty scope="context" name="LOKI_URL" source="observability.loki-url" defaultValue="http://localhost:3100/loki/api/v1/push"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service_name":"${APP_NAME}","environment":"${ENVIRONMENT}"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>kmc-trace-id</includeMdcKeyName>
+        </encoder>
+    </appender>
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <batchTimeoutMs>1000</batchTimeoutMs>
+        <batchMaxItems>256</batchMaxItems>
+        <batchMaxBytes>524288</batchMaxBytes>
+        <sendQueueMaxBytes>4194304</sendQueueMaxBytes>
+        <http>
+            <url>${LOKI_URL}</url>
+            <connectionTimeoutMs>1000</connectionTimeoutMs>
+            <requestTimeoutMs>3000</requestTimeoutMs>
+        </http>
+        <format>
+            <label><pattern>service_name=${APP_NAME},environment=${ENVIRONMENT}</pattern></label>
+            <message class="com.kuma.boot.logger.logback.ObservabilityJsonLayout"/>
+        </format>
+    </appender>
+    <root level="INFO"><appender-ref ref="CONSOLE"/></root>
+    <springProfile name="observability &amp; !no-loki">
+        <root level="INFO"><appender-ref ref="LOKI"/></root>
+    </springProfile>
+</configuration>

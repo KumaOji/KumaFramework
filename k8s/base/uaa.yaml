@@ -20,9 +20,52 @@ spec:
           image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/uaa:placeholder
           ports:
             - containerPort: 33336
+            - containerPort: 19002
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: prod
+              value: prod,observability
+            - name: KUMA_CONFIG_PROFILE
+              value: "prod"
+            - name: LOGGING_CONFIG
+              value: "classpath:logback-observability.xml"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "19002"
+            - name: MANAGEMENT_SERVER_ADDRESS
+              value: "0.0.0.0"
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus"
+            - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+              value: "never"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
+            - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+              value: "0.1"
+            - name: MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT
+              value: "http://otel-collector.base:4318/v1/traces"
+            - name: MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED
+              value: "false"
+            - name: MANAGEMENT_METRICS_TAGS_ENVIRONMENT
+              value: "server"
+            - name: KUMA_ENVIRONMENT
+              value: "server"
+            - name: OBSERVABILITY_ENVIRONMENT
+              value: "server"
+            - name: OBSERVABILITY_LOKI_URL
+              value: "http://loki.base:3100/loki/api/v1/push"
+            - name: GATEWAY_ENVIRONMENT
+              value: "server"
+            - name: GATEWAY_LOKI_URL
+              value: "http://loki.base:3100/loki/api/v1/push"
+            - name: KUMA_BOOT_WEB_REQUEST_ENABLED
+              value: "false"
+            - name: KUMA_BOOT_LOGGER_LOGGING_FILES_ENABLED
+              value: "false"
+            - name: ATLAS_LOG_ENABLED
+              value: "false"
+            - name: LOGGING_ACCESS_ENABLED
+              value: "false"
+            - name: KUMA_BOOT_MONITOR_ENABLED
+              value: "false"
             - name: UAA_JWK_PRIVATE_KEY
               value: /app/data/uaa-jwt-rsa-private.pem
             # 私钥内容从 Secret 下发，优先于文件；Secret 缺失时回退到 hostPath 文件
@@ -78,14 +121,14 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 33336
+              port: 19002
             initialDelaySeconds: 40
             periodSeconds: 10
             failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 33336
+              port: 19002
             initialDelaySeconds: 90
             periodSeconds: 30
             failureThreshold: 3
@@ -114,5 +157,9 @@ spec:
   selector:
     app: uaa
   ports:
-    - port: 33336
+    - name: http
+      port: 33336
       targetPort: 33336
+    - name: management
+      port: 19002
+      targetPort: 19002

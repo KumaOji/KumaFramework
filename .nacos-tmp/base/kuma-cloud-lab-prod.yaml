@@ -1,0 +1,69 @@
+# Internal-only server Lab. Experiments use their own database and Redis prefix.
+server:
+  port: 19090
+  servlet:
+    context-path: /api
+spring:
+  application:
+    name: kuma-cloud-lab
+  autoconfigure:
+    exclude:
+      - com.github.xiaoymin.knife4j.spring.configuration.Knife4jAutoConfiguration
+  datasource:
+    dynamic:
+      primary: mysql
+      datasource:
+        mysql:
+          type: com.zaxxer.hikari.HikariDataSource
+          url: jdbc:mysql://mysql.base:3306/kuma_lab?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8
+          username: root
+          password: ${MYSQL_PASSWORD}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: redis.base
+      port: 6379
+  kafka:
+    listener:
+      auto-startup: false
+kuma:
+  lab:
+    redis:
+      key-prefix: "lab:server:redis:"
+    starter:
+      key-prefix: "lab:server:starter:"
+      smoke-test-enabled: false
+    kafka:
+      enabled: false
+    mysql-binlog:
+      enabled: false
+    vector:
+      collection: lab-vectors
+      dimension: 4
+  boot:
+    monitor:
+      enabled: false
+    security:
+      ignore-url:
+        - /lab/**
+      oauth2:
+        endpoint:
+          uaa-service-uri: http://uaa.base:33336
+    data:
+      datasource:
+        enabled: true
+      vector:
+        enabled: true
+        type: memory
+        collection: lab-vectors
+        dimension: 4
+        auto-create-collection: true
+    springdoc:
+      enabled: false
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+knife4j:
+  enable: false

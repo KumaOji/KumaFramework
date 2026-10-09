@@ -1,0 +1,9 @@
+server:
+  port: 18080
+management:
+  tracing:
+    enabled: false
+  otlp:
+    metrics:
+      export:
+        enabled: false

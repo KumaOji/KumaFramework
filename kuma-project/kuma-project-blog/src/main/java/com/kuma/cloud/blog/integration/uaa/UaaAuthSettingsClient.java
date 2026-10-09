@@ -3,7 +3,6 @@ package com.kuma.cloud.blog.integration.uaa;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.autoconfigure.properties.OAuth2EndpointProperties;
 import com.kuma.cloud.blog.domain.vo.UaaAuthSettingsVO;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
@@ -11,15 +10,19 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class UaaAuthSettingsClient {
 
     private static final ParameterizedTypeReference<Result<UaaAuthSettingsVO>> RESPONSE_TYPE =
             new ParameterizedTypeReference<>() {};
 
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
     private final OAuth2EndpointProperties endpointProperties;
+
+    public UaaAuthSettingsClient(RestClient.Builder restClientBuilder, OAuth2EndpointProperties endpointProperties) {
+        this.restClient = restClientBuilder.build();
+        this.endpointProperties = endpointProperties;
+    }
 
     public UaaAuthSettingsVO fetch() {
         String uri = endpointProperties.getUaaServiceUri() + "/api/public/auth-settings";

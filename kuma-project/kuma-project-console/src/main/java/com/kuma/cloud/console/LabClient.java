@@ -34,7 +34,11 @@ public class LabClient {
         URI uri = target(request.path());
         long start = System.nanoTime();
         try {
-            var builder = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(30))
+            // Trace storage is asynchronous; only these explicit experiments need a longer wait.
+            String path = request.path().split("\\?", 2)[0];
+            Duration timeout = Duration.ofSeconds(Set.of("/lab/monitoring/otel", "/lab/monitoring/skywalking")
+                    .contains(path) ? 120 : 30);
+            var builder = HttpRequest.newBuilder(uri).timeout(timeout)
                     .header("Accept", "application/json").header("Content-Type", "application/json");
             if (request.authorization() != null && !request.authorization().isBlank())
                 builder.header("Authorization", request.authorization());

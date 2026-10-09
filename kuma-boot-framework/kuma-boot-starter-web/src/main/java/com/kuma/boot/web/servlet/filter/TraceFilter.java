@@ -91,8 +91,8 @@ public class TraceFilter extends OncePerRequestFilter {
             TraceUtils.setOtlpTraceId(request, otlpTraceId);
             TraceUtils.setOtlpSpanId(request, otlpSpanId);
 
-            ResponseUtils.addResponseHeader(
-                    response, CommonConstants.KMC_TRACE_ID, TraceContextHolder.getTraceId());
+            // The observability filter may already have set this correlation header.
+            response.setHeader(CommonConstants.KMC_TRACE_ID, TraceContextHolder.getTraceId());
             ResponseUtils.addResponseHeader(
                     response, CommonConstants.OTLP_TRACE_ID, TraceUtils.getOtlpTraceId());
             ResponseUtils.addResponseHeader(

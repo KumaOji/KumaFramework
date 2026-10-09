@@ -5,8 +5,8 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
     import:
-      - "optional:nacos:kuma-shared-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
-      - "optional:nacos:kuma-cloud-blog-${spring.profiles.active}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      - "optional:nacos:kuma-shared-${KUMA_CONFIG_PROFILE:${spring.profiles.active}}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      - "optional:nacos:kuma-cloud-blog-${KUMA_CONFIG_PROFILE:${spring.profiles.active}}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       - optional:classpath:bootstrap-local.yml
   cloud:
     nacos:

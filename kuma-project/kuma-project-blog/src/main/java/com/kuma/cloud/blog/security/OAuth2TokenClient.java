@@ -21,15 +21,17 @@ public class OAuth2TokenClient {
     private static final ParameterizedTypeReference<Map<String, Object>> TOKEN_RESPONSE =
             new ParameterizedTypeReference<>() {};
 
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient;
     private final ClientRegistrationRepository registrations;
     private final OAuth2EndpointProperties endpointProperties;
     private final String registrationId;
 
     public OAuth2TokenClient(
+            RestClient.Builder restClientBuilder,
             ClientRegistrationRepository registrations,
             OAuth2EndpointProperties endpointProperties,
             @Value("${blog.oauth2.registration-id:blog}") String registrationId) {
+        this.restClient = restClientBuilder.build();
         this.registrations = registrations;
         this.endpointProperties = endpointProperties;
         this.registrationId = registrationId;

@@ -29,7 +29,7 @@ def catalogTask = tasks.register('generateProjectCatalog') {
                                   external: false, edges: edges.unique()]
         }
         def apps = []
-        ['kuma-project'].each { folder ->
+        ['kuma-project', 'kuma-project-unable'].each { folder ->
             rootProject.file(folder).listFiles()?.findAll { it.directory && new File(it, 'build.gradle').exists() }
                 ?.sort { it.name }?.each { dir ->
                 def id = ":${folder}:${dir.name}".toString()

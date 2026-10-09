@@ -47,6 +47,10 @@ public final class GatewayHeaders {
 
     public static final String RESPONSE_TIME = "X-Response-Time";
 
+    public static final String TRACE_ID_ATTRIBUTE = GatewayHeaders.class.getName() + ".traceId";
+
+    public static final String SPAN_ID_ATTRIBUTE = GatewayHeaders.class.getName() + ".spanId";
+
     public static final List<String> IDENTITY_HEADERS =
             List.of(GATEWAY_SOURCE, USER_ID, USER_NAME, USER_AUTHORITIES, CLIENT_ID, CLIENT_IP);
 

@@ -42,12 +42,22 @@ dependencies {
     annotationProcessor projectLibs.lombok
 
     runtimeOnly projectLibs.mysql
+    runtimeOnly projectLibs.postgresql
 
     implementation 'org.openjdk.jol:jol-core:0.17'
+    // Use the Boot BOM for the entire SDK/exporter family; catalog 1.37 mixed with
+    // Boot-managed exporter internals causes NoSuchMethodError during OTLP export.
+    implementation 'io.opentelemetry:opentelemetry-sdk'
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+    implementation projectLibs.skywalking.apm.toolkit.trace
 }
 
 bootJar {
     archiveBaseName = 'lab'
+}
+
+springBoot {
+    mainClass = 'com.kuma.cloud.lab.LabApplication'
 }
 
 def nativeOutputDir = layout.buildDirectory.dir('native')
@@ -157,4 +167,77 @@ bootRun {
 
 test {
     useJUnitPlatform()
+    inputs.property('observabilityDatabaseIntegrationEnabled',
+            providers.environmentVariable('KUMA_LAB_OBSERVABILITY_JDBC_URL').map { true }.orElse(false))
+    // Live DB checks must run again when selecting another server/engine.
+    outputs.upToDateWhen { !providers.environmentVariable('KUMA_LAB_OBSERVABILITY_JDBC_URL').isPresent() }
+}
+
+tasks.register('otelLab', JavaExec) {
+    group = 'application'
+    description = 'Run OTel SDK lessons; -PotelExport=true also verifies the trace in SkyWalking'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.observability.OtelLearningDemo'
+    if (providers.gradleProperty('otelExport').getOrElse('false').toBoolean()) {
+        args '--export', providers.gradleProperty('otelEndpoint').getOrElse('http://localhost:4318/v1/traces'),
+                providers.gradleProperty('skywalkingQuery').getOrElse('http://localhost:9412')
+    }
+}
+
+tasks.register('monitoringLab', JavaExec) {
+    group = 'application'
+    description = 'Run live Loki/Prometheus/Alertmanager/OTel/SkyWalking/Grafana experiments'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs'
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+    args providers.gradleProperty('monitoringComponent').getOrElse('all')
+}
+
+tasks.register('skywalkingLab', JavaExec) {
+    group = 'application'
+    description = 'Run SkyWalking toolkit lessons; -PskywalkingAgent=<jar> enables native instrumentation'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.observability.SkyWalkingLearningDemo'
+    doFirst {
+        if (providers.gradleProperty('skywalkingAgent').isPresent()) {
+            def agent = file(providers.gradleProperty('skywalkingAgent').get())
+            if (!agent.isFile()) throw new GradleException("SkyWalking agent not found: ${agent}")
+            jvmArgs "-javaagent:${agent.absolutePath}",
+                    '-Dskywalking.agent.service_name=kuma-lab-skywalking',
+                    '-Dskywalking.agent.sample_n_per_3_secs=-1',
+                    '-Dskywalking.agent.keep_tracing=true',
+                    "-Dskywalking.collector.backend_service=${providers.gradleProperty('skywalkingBackend').getOrElse('localhost:11800')}"
+            args '--require-agent'
+        }
+    }
+}
+
+tasks.register('otelDatabaseLab', JavaExec) {
+    group = 'application'
+    description = 'Run real isolated JDBC transactions with OTel; connection credentials come from environment'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.observability.DatabaseObservabilityLearningDemo'
+    if (providers.gradleProperty('otelExport').getOrElse('false').toBoolean()) {
+        args '--export', providers.gradleProperty('otelEndpoint').getOrElse('http://localhost:4318/v1/traces'),
+                providers.gradleProperty('skywalkingQuery').getOrElse('http://localhost:9412')
+    }
+}
+
+tasks.register('skywalkingDatabaseLab', JavaExec) {
+    group = 'application'
+    description = 'Run real JDBC transactions under the SkyWalking Agent'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.observability.DatabaseObservabilityLearningDemo'
+    args '--native'
+    doFirst {
+        def agentPath = providers.gradleProperty('skywalkingAgent')
+        if (!agentPath.isPresent()) throw new GradleException('Specify -PskywalkingAgent=<full agent jar path>')
+        def agent = file(agentPath.get())
+        if (!agent.isFile()) throw new GradleException("SkyWalking agent not found: ${agent}")
+        jvmArgs "-javaagent:${agent.absolutePath}",
+                '-Dskywalking.agent.service_name=kuma-lab-database-native',
+                '-Dskywalking.agent.sample_n_per_3_secs=-1',
+                '-Dskywalking.agent.keep_tracing=true',
+                "-Dskywalking.collector.backend_service=${providers.gradleProperty('skywalkingBackend').getOrElse('localhost:11800')}"
+    }
 }

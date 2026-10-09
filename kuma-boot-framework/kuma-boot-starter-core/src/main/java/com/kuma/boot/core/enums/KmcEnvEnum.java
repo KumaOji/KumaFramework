@@ -78,6 +78,10 @@ public enum KmcEnvEnum {
         if (currEnvStr == null) {
             currEnvStr = System.getProperty(ACTIVE_PROFILES_PROPERTY);
             if (currEnvStr == null) {
+                currEnvStr = System.getenv("SPRING_PROFILES_ACTIVE");
+            }
+            boolean explicitSpringProfiles = currEnvStr != null;
+            if (currEnvStr == null) {
                 currEnvStr = System.getProperty(ENV);
                 if (currEnvStr == null) {
                     currEnvStr = System.getProperty(ACTIVE_PROFILES_ACTIVE);
@@ -89,8 +93,22 @@ public enum KmcEnvEnum {
             }
             if (currEnvStr != null) {
                 try {
-                    PropertyUtils.setProperty(ACTIVE_PROFILES_PROPERTY, currEnvStr, "");
-                    currEnv = KmcEnvEnum.valueOf(currEnvStr.toUpperCase());
+                    // Preserve explicit Spring profile case and additional profiles.
+                    if (!explicitSpringProfiles) {
+                        PropertyUtils.setProperty(ACTIVE_PROFILES_PROPERTY, currEnvStr, "");
+                    }
+                    currEnv = UNKNOWN;
+                    for (String profile : currEnvStr.split(",")) {
+                        String name = profile.trim().toUpperCase(java.util.Locale.ROOT);
+                        if ("PROD".equals(name)) name = "PRO";
+                        for (KmcEnvEnum candidate : values()) {
+                            if (candidate.name().equals(name)) {
+                                currEnv = candidate;
+                                break;
+                            }
+                        }
+                        if (currEnv != UNKNOWN) break;
+                    }
                 }
                 catch (IllegalArgumentException e) {
                     LogUtils.error("环境配置错误");

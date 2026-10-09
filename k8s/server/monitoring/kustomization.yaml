@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../monitoring
+  - management-network-policy.yaml
+patches:
+  - path: prometheus-server.yaml
+  - target:
+      kind: StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value:
+          - name: observability-registry
+images:
+  - name: docker.io/grafana/loki
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-loki
+    newTag: 3.7.8
+  - name: docker.io/grafana/grafana
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-grafana
+    newTag: 13.2.3
+  - name: docker.io/prom/prometheus
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-prometheus
+    newTag: v3.15.0
+  - name: docker.io/prom/alertmanager
+    newName: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-alertmanager
+    newTag: v0.34.1

@@ -4,6 +4,9 @@ on:
   push:
     branches: [master]
     paths:
+      - '.github/workflows/deploy-gateway.yml'
+      - 'k8s/base/gateway.yaml'
+      - 'scripts/apply-k8s-resource.py'
       - 'kuma-project/kuma-project-gateway/**'
       - 'kuma-boot-framework/**'
       - 'kuma-cloud-framework/**'
@@ -106,6 +109,16 @@ jobs:
           provenance: false
           sbom: false
 
+      - name: Copy release deployment manifest and helper
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: k8s/base/gateway.yaml,scripts/apply-k8s-resource.py
+          target: /data/kuma-deploy/
+          strip_components: 0
+
       - name: Deploy on server
         uses: appleboy/ssh-action@v1
         with:
@@ -116,12 +129,8 @@ jobs:
           script: |
             set -eu
             # 先同步清单（env/探针等），再用真实镜像覆盖 placeholder，避免镜像被重置导致 ImagePullBackOff
-            if [ -f /data/k8s/base/gateway.yaml ]; then
-              kubectl apply -f /data/k8s/base/gateway.yaml
-            fi
-            kubectl set image deployment/gateway \
-              gateway=${{ steps.ver.outputs.FULL_IMAGE }} \
-              -n base
+            python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/base/gateway.yaml \
+              --image ${{ steps.ver.outputs.FULL_IMAGE }}
             kubectl scale deployment/gateway -n base --replicas=1
             kubectl rollout status deployment/gateway -n base --timeout=600s
 

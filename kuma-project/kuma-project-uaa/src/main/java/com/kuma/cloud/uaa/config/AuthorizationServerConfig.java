@@ -41,7 +41,7 @@ public class AuthorizationServerConfig {
     public static final String CONSENT_PAGE = DefaultConstants.AUTHORIZATION_CONSENT_URI;
 
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @Order(Ordered.HIGHEST_PRECEDENCE + 10)
     public SecurityFilterChain authorizationServerSecurityFilterChain(
             HttpSecurity http, JwtDecoder jwtDecoder, UaaOidcUserInfoMapper userInfoMapper)
             throws Exception {

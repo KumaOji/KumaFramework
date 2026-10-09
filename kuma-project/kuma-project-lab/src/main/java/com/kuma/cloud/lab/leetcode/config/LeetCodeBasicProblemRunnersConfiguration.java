@@ -31,6 +31,14 @@ public class LeetCodeBasicProblemRunnersConfiguration {
                         tc("example1", Map.of("s", "abcabcbb"), 3),
                         tc("example2", Map.of("s", "bbbbb"), 1)
                 ),
+                runner(11, "盛最多水的容器", "MEDIUM", List.of("array", "two-pointers"),
+                        input -> new com.kuma.cloud.leetcode.p0011.Solution().maxArea(
+                                LeetCodeInputUtils.intArray(input, "height")),
+                        tc("example1", Map.of("height", List.of(1, 8, 6, 2, 5, 4, 8, 3, 7)), 49),
+                        tc("two-bars", Map.of("height", List.of(1, 1)), 1),
+                        tc("equal-height", Map.of("height", List.of(4, 4, 4, 4)), 12),
+                        tc("zero-height", Map.of("height", List.of(0, 0)), 0)
+                ),
                 runner(15, "三数之和", "MEDIUM", List.of("array", "two-pointers"),
                         input -> LeetCodeCompareUtils.sortNestedIntegerLists(
                                 new com.kuma.cloud.leetcode.p0015.Solution().threeSum(
@@ -43,6 +51,15 @@ public class LeetCodeBasicProblemRunnersConfiguration {
                                 LeetCodeInputUtils.stringValue(input, "s")),
                         tc("example1", Map.of("s", "()"), true),
                         tc("invalid", Map.of("s", "(]"), false)
+                ),
+                runner(33, "搜索旋转排序数组", "MEDIUM", List.of("array", "binary-search"),
+                        input -> new com.kuma.cloud.leetcode.p0033.Solution().search(
+                                LeetCodeInputUtils.intArray(input, "nums"),
+                                LeetCodeInputUtils.intValue(input, "target")),
+                        tc("example1", Map.of("nums", List.of(4, 5, 6, 7, 0, 1, 2), "target", 0), 4),
+                        tc("missing", Map.of("nums", List.of(4, 5, 6, 7, 0, 1, 2), "target", 3), -1),
+                        tc("ordered", Map.of("nums", List.of(1, 2, 3, 4), "target", 4), 3),
+                        tc("single", Map.of("nums", List.of(1), "target", 1), 0)
                 ),
                 runner(42, "接雨水", "HARD", List.of("array", "two-pointers"),
                         input -> new com.kuma.cloud.leetcode.p0042.Solution().trap(
@@ -67,6 +84,22 @@ public class LeetCodeBasicProblemRunnersConfiguration {
                                 LeetCodeInputUtils.intValue(input, "n")),
                         tc("example1", Map.of("n", 3), 3),
                         tc("example2", Map.of("n", 5), 8)
+                ),
+                runner(121, "买卖股票的最佳时机", "EASY", List.of("array", "greedy"),
+                        input -> new com.kuma.cloud.leetcode.p0121.Solution().maxProfit(
+                                LeetCodeInputUtils.intArray(input, "prices")),
+                        tc("example1", Map.of("prices", List.of(7, 1, 5, 3, 6, 4)), 5),
+                        tc("descending", Map.of("prices", List.of(7, 6, 4, 3, 1)), 0),
+                        tc("single", Map.of("prices", List.of(5)), 0),
+                        tc("sell-after-buy", Map.of("prices", List.of(2, 4, 1)), 2)
+                ),
+                runner(198, "打家劫舍", "MEDIUM", List.of("array", "dp"),
+                        input -> new com.kuma.cloud.leetcode.p0198.Solution().rob(
+                                LeetCodeInputUtils.intArray(input, "nums")),
+                        tc("example1", Map.of("nums", List.of(1, 2, 3, 1)), 4),
+                        tc("example2", Map.of("nums", List.of(2, 7, 9, 3, 1)), 12),
+                        tc("single", Map.of("nums", List.of(5)), 5),
+                        tc("skip-middle", Map.of("nums", List.of(2, 1, 1, 2)), 4)
                 ),
                 runner(200, "岛屿数量", "MEDIUM", List.of("matrix", "dfs"),
                         input -> new com.kuma.cloud.leetcode.p0200.Solution().numIslands(
@@ -124,6 +157,15 @@ public class LeetCodeBasicProblemRunnersConfiguration {
                         },
                         tc("example1", Map.of("chars", "aabcccccaaa"),
                                 Map.of("length", 9, "chars", "a2b1c5a3"))
+                ),
+                runner(704, "二分查找", "EASY", List.of("array", "binary-search"),
+                        input -> new com.kuma.cloud.leetcode.p0704.Solution().search(
+                                LeetCodeInputUtils.intArray(input, "nums"),
+                                LeetCodeInputUtils.intValue(input, "target")),
+                        tc("example1", Map.of("nums", List.of(-1, 0, 3, 5, 9, 12), "target", 9), 4),
+                        tc("missing", Map.of("nums", List.of(-1, 0, 3, 5, 9, 12), "target", 2), -1),
+                        tc("first", Map.of("nums", List.of(-1, 0, 3, 5, 9, 12), "target", -1), 0),
+                        tc("single", Map.of("nums", List.of(5), "target", 5), 0)
                 ),
                 runner(1679, "K 和数对的最大数目", "MEDIUM", List.of("array", "hash"),
                         input -> new com.kuma.cloud.leetcode.p1679.Solution().maxOperations(

@@ -24,16 +24,18 @@ import com.kuma.cloud.gateway.support.GatewayPathMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.spi.LoggingEventBuilder;
+import java.util.concurrent.atomic.AtomicReference;
 import reactor.core.publisher.Mono;
 
-import java.time.Instant;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
@@ -45,7 +47,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
  * @author kuma
  * @since 2026-04-23
  */
-public class RequestLogGlobalFilter implements GlobalFilter, Ordered {
+public class RequestLogGlobalFilter implements WebFilter, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(RequestLogGlobalFilter.class);
 
@@ -59,7 +61,7 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered {
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         GatewayCloudProperties.Log logConfig = properties.getLog();
         String path = exchange.getRequest().getURI().getPath();
         if (GatewayPathMatcher.matchesAny(path, logConfig.getExcludePaths())) {
@@ -70,28 +72,36 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered {
         String method = request.getMethod().name();
         String clientIp = ClientIpResolver.resolve(request, properties.isTrustProxyHeaders());
         String geo = resolveGeo(clientIp);
-        long start = Instant.now().toEpochMilli();
-        log.info("[Gateway] --> {} {} ip={}{}", method, path, clientIp, formatGeo(geo));
+        long start = System.nanoTime();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        if (logConfig.isResponseTimeHeader()) {
+            exchange.getResponse().beforeCommit(() -> {
+                exchange.getResponse().getHeaders().set(GatewayHeaders.RESPONSE_TIME,
+                        ((System.nanoTime() - start) / 1_000_000) + "ms");
+                return Mono.empty();
+            });
+        }
 
-        return chain.filter(exchange).doFinally(signal -> {
-            long cost = Instant.now().toEpochMilli() - start;
+        return chain.filter(exchange).doOnError(failure::set).doFinally(signal -> {
+            long cost = (System.nanoTime() - start) / 1_000_000;
+            Throwable error = failure.get();
             int status = exchange.getResponse().getStatusCode() != null
-                    ? exchange.getResponse().getStatusCode().value() : 0;
+                    ? exchange.getResponse().getStatusCode().value()
+                    : error instanceof ResponseStatusException responseError ? responseError.getStatusCode().value()
+                    : error != null ? 500 : signal == reactor.core.publisher.SignalType.CANCEL ? 499 : 200;
             Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
             String routeId = route != null ? route.getId() : "-";
 
-            if (logConfig.isResponseTimeHeader()) {
-                exchange.getResponse().getHeaders().set(GatewayHeaders.RESPONSE_TIME, cost + "ms");
-            }
-
-            String message = String.format(
-                    "[Gateway] <-- %s %s %d %dms route=%s ip=%s%s",
-                    method, path, status, cost, routeId, clientIp, formatGeo(geo));
-            if (cost >= logConfig.getSlowThreshold().toMillis()) {
-                log.warn("{} (slow)", message);
-            } else {
-                log.info(message);
-            }
+            LoggingEventBuilder event = status >= 500 ? log.atError()
+                    : cost >= logConfig.getSlowThreshold().toMillis() ? log.atWarn() : log.atInfo();
+            event.addKeyValue("event", "gateway_access")
+                    .addKeyValue("method", method).addKeyValue("path", path)
+                    .addKeyValue("status", status).addKeyValue("duration_ms", cost)
+                    .addKeyValue("route_id", routeId).addKeyValue("client_ip", clientIp)
+                    .addKeyValue("traceId", exchange.getAttributeOrDefault(GatewayHeaders.TRACE_ID_ATTRIBUTE, ""))
+                    .addKeyValue("spanId", exchange.getAttributeOrDefault(GatewayHeaders.SPAN_ID_ATTRIBUTE, ""));
+            if (geo != null) event.addKeyValue("geo", geo);
+            event.log("Gateway request completed");
         });
     }
 
@@ -103,12 +113,8 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered {
         return searcher.getAddressAndIsp(clientIp);
     }
 
-    private static String formatGeo(String geo) {
-        return StringUtils.hasText(geo) ? " geo=" + geo : "";
-    }
-
     @Override
     public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE - 100;
+        return Ordered.HIGHEST_PRECEDENCE + 30;
     }
 }

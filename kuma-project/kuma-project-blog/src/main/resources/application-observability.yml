@@ -1,0 +1,43 @@
+logging:
+  config: classpath:logback-observability.xml
+observability:
+  environment: ${KUMA_ENVIRONMENT:local}
+  loki-url: ${KUMA_LOKI_URL:http://localhost:3100/loki/api/v1/push}
+management:
+  server:
+    port: ${BLOG_MANAGEMENT_PORT:19001}
+    address: ${KUMA_MANAGEMENT_ADDRESS:127.0.0.1}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    enabled: true
+    sampling:
+      probability: ${KUMA_TRACING_SAMPLING:0.1}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${KUMA_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${KUMA_ENVIRONMENT:local}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
+kuma:
+  boot:
+    monitor:
+      enabled: false
+    web:
+      request:
+        enabled: false

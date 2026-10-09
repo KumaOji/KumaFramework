@@ -1,0 +1,11 @@
+# EndpointSlice is filled with the current WSL node address by the local launcher.
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-local
+  namespace: base
+spec:
+  ports:
+    - name: metrics
+      port: 18081
+      targetPort: 18081

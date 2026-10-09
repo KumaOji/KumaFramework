@@ -5,6 +5,8 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const assert=require('node:assert/strict');
 const renderer=path.resolve(__dirname,'../renderer');
+const catalog=require('../renderer/lab-catalog.json');
+const lessons=require('../renderer/lab-learning.json');
 const output=path.resolve(__dirname,'../build/lab-ui-smoke');
 app.setPath('userData',path.join(output,'profile'));
 app.commandLine.appendSwitch('disable-gpu');
@@ -52,17 +54,25 @@ app.whenReady().then(async()=>{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   window=new BrowserWindow({show:false,width:1440,height:1000,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,backgroundThrottling:false}});
   await window.loadURL(`http://127.0.0.1:${server.address().port}/#lab`);
-  await waitFor(`typeof presets!=='undefined' && presets.filter(p=>p.kind==='learning').length===24`);
+  await waitFor(`typeof presets!=='undefined' && presets.filter(p=>p.kind==='learning').length===${lessons.length}`);
   await evaluate(`location.hash='lab';navigate();setTheme('dark');`);
   assert.ok(await evaluate(`!document.getElementById('lab').hidden`));
-  assert.equal(await evaluate('presets.length'),94);
+  assert.equal(await evaluate('presets.length'),catalog.length+lessons.length);
   for(const id of ['memory','linux-memory','webhook','socket','jdk-8','jdk-21','jdk-25','jdk25-preview'])await check(id);
+  for(const component of ['loki','prometheus','alertmanager','otel','skywalking','grafana']){
+    await check('middleware-'+component);
+    assert.ok(await evaluate(`!document.getElementById('lab-learning-links').hidden`));
+    assert.ok(await evaluate(`document.querySelectorAll('#lab-learning-links a').length>=1`));
+    assert.ok(await evaluate(`Array.from(document.querySelectorAll('#lab-learning-links a')).every(link=>link.target==='_blank' && link.rel.includes('noopener') && link.href.startsWith('http://localhost:'))`));
+  }
+  await paint();
+  await fs.writeFile(path.join(output,'monitoring-grafana.png'),(await window.webContents.capturePage()).toPNG());
   await evaluate(`document.getElementById('lab-kind').value='learning';document.getElementById('lab-search').value='ScopedValue';renderPresets();`);
   assert.equal(await evaluate('document.querySelectorAll("#lab-presets [data-preset]").length'),1);
   assert.ok(await evaluate('document.getElementById("lab-presets").textContent.includes("JDK 25")'));
   await evaluate(`document.getElementById('lab-search').value='';renderPresets();document.getElementById('discover-lab').click();`);
   await waitFor(`!document.getElementById('discover-lab').disabled`);
-  assert.ok(await evaluate(`presets.some(p=>p.name==='更新后的状态名称') && presets.filter(p=>p.kind==='learning').length===24`));
+  assert.ok(await evaluate(`presets.some(p=>p.name==='更新后的状态名称') && presets.filter(p=>p.kind==='learning').length===${lessons.length}`));
   await check('jdk-25');
   await paint();
   await fs.writeFile(path.join(output,'jdk25-dark.png'),(await window.webContents.capturePage()).toPNG());
@@ -77,7 +87,7 @@ app.whenReady().then(async()=>{
   await evaluate(`document.getElementById('lab-kind').value='api';renderPresets();selectPreset(presets.findIndex(p=>p.path==='/lab/javacore/socket/send'));`);
   assert.ok(await evaluate(`!document.getElementById('lab-api-workspace').hidden && document.getElementById('lab-learning-workspace').hidden && document.getElementById('lab-method').value==='POST'`));
   assert.equal(requests,1); // only the explicit discovery request; lesson selection must not execute experiments
-  await fs.writeFile(path.join(output,'result.json'),JSON.stringify({passed:true,interfaces:70,lessons:24,discovery:true,narrowLayout:true},null,2));
-  console.log('Lab UI smoke passed: 70 interfaces, 24 lessons, discovery, docs, mode switching and narrow layout.');
+  await fs.writeFile(path.join(output,'result.json'),JSON.stringify({passed:true,interfaces:catalog.length,lessons:lessons.length,middlewareUiLinks:true,discovery:true,narrowLayout:true},null,2));
+  console.log(`Lab UI smoke passed: ${catalog.length} interfaces, ${lessons.length} lessons, middleware UI links, discovery, docs, mode switching and narrow layout.`);
   window.destroy();server.close();app.exit(0);
 }).catch(error=>{console.error(error);window?.destroy();server?.close();app.exit(1);});

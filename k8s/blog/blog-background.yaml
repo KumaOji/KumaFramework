@@ -26,9 +26,52 @@ spec:
           image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/blog:placeholder
           ports:
             - containerPort: 9000
+            - containerPort: 19001
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: prod
+              value: prod,observability
+            - name: KUMA_CONFIG_PROFILE
+              value: "prod"
+            - name: LOGGING_CONFIG
+              value: "classpath:logback-observability.xml"
+            - name: MANAGEMENT_SERVER_PORT
+              value: "19001"
+            - name: MANAGEMENT_SERVER_ADDRESS
+              value: "0.0.0.0"
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus"
+            - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+              value: "never"
+            - name: MANAGEMENT_TRACING_ENABLED
+              value: "true"
+            - name: MANAGEMENT_TRACING_SAMPLING_PROBABILITY
+              value: "0.1"
+            - name: MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT
+              value: "http://otel-collector.base:4318/v1/traces"
+            - name: MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED
+              value: "false"
+            - name: MANAGEMENT_METRICS_TAGS_ENVIRONMENT
+              value: "server"
+            - name: KUMA_ENVIRONMENT
+              value: "server"
+            - name: OBSERVABILITY_ENVIRONMENT
+              value: "server"
+            - name: OBSERVABILITY_LOKI_URL
+              value: "http://loki.base:3100/loki/api/v1/push"
+            - name: GATEWAY_ENVIRONMENT
+              value: "server"
+            - name: GATEWAY_LOKI_URL
+              value: "http://loki.base:3100/loki/api/v1/push"
+            - name: KUMA_BOOT_WEB_REQUEST_ENABLED
+              value: "false"
+            - name: KUMA_BOOT_LOGGER_LOGGING_FILES_ENABLED
+              value: "false"
+            - name: ATLAS_LOG_ENABLED
+              value: "false"
+            - name: LOGGING_ACCESS_ENABLED
+              value: "false"
+            - name: KUMA_BOOT_MONITOR_ENABLED
+              value: "false"
             - name: SPRING_CLOUD_NACOS_SERVER_ADDR
               value: "nacos.base:8848"
             - name: SPRING_CLOUD_NACOS_USERNAME
@@ -107,14 +150,16 @@ spec:
               cpu: "2"
               memory: "1536Mi"
           readinessProbe:
-            tcpSocket:
-              port: 9000
+            httpGet:
+              path: /actuator/health/readiness
+              port: 19001
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 5
           livenessProbe:
-            tcpSocket:
-              port: 9000
+            httpGet:
+              path: /actuator/health/liveness
+              port: 19001
             initialDelaySeconds: 60
             periodSeconds: 30
             failureThreshold: 3
@@ -146,5 +191,9 @@ spec:
   selector:
     app: blog-background
   ports:
-    - port: 9000
+    - name: http
+      port: 9000
       targetPort: 9000
+    - name: management
+      port: 19001
+      targetPort: 19001

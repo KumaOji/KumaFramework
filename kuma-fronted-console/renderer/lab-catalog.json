@@ -346,6 +346,62 @@
     "source": "MysqlLabController.java"
   },
   {
+    "group": "OTel 与 SkyWalking 真实数据库实验",
+    "name": "真实数据库 + OTel：正常提交、数据库慢查询、重复键异常与回滚验证",
+    "method": "POST",
+    "path": "/lab/observability/database/otel",
+    "body": "",
+    "source": "DatabaseObservabilityLabController.java"
+  },
+  {
+    "group": "OTel 与 SkyWalking 真实数据库实验",
+    "name": "真实数据库 + SkyWalking Agent：JDBC 调用、慢 SQL 与事务回滚",
+    "method": "POST",
+    "path": "/lab/observability/database/skywalking",
+    "body": "",
+    "source": "DatabaseObservabilityLabController.java"
+  },
+  {
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "实验路线与现有 Collector 的功能边界",
+    "method": "GET",
+    "path": "/lab/observability/guide",
+    "body": "",
+    "source": "ObservabilityLabController.java"
+  },
+  {
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "OTel SDK：span、W3C 传播、异步断链、采样、指标和日志关联",
+    "method": "POST",
+    "path": "/lab/observability/otel",
+    "body": "",
+    "source": "ObservabilityLabController.java"
+  },
+  {
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "SkyWalking：正常调用与自定义 span",
+    "method": "POST",
+    "path": "/lab/observability/skywalking/normal",
+    "body": "",
+    "source": "ObservabilityLabController.java"
+  },
+  {
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "SkyWalking：200ms 模拟慢调用定位",
+    "method": "POST",
+    "path": "/lab/observability/skywalking/slow",
+    "body": "",
+    "source": "ObservabilityLabController.java"
+  },
+  {
+    "group": "OTel 与 SkyWalking 学习",
+    "name": "SkyWalking：异常事件与错误 span，模拟失败被捕获后返回 HTTP 200",
+    "method": "POST",
+    "path": "/lab/observability/skywalking/error",
+    "body": "",
+    "source": "ObservabilityLabController.java"
+  },
+  {
     "group": "Redis 测试",
     "name": "执行 String / Hash / List / Set 场景测试并返回逐步结果",
     "method": "POST",
@@ -637,5 +693,61 @@
     "path": "/lab/vector/status",
     "body": "",
     "source": "VectorTestController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "查看各组件 UI 地址与页面位置（Collector 无独立业务 UI）",
+    "method": "GET",
+    "path": "/lab/monitoring/guide",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Loki：写入独立日志并用 LogQL 查回",
+    "method": "POST",
+    "path": "/lab/monitoring/loki",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Prometheus：up 即时查询与范围查询对照",
+    "method": "POST",
+    "path": "/lab/monitoring/prometheus",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Alertmanager：发送一分钟实验告警并查回",
+    "method": "POST",
+    "path": "/lab/monitoring/alertmanager",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "OTel：SDK 导出至 Collector 并验证存储证据",
+    "method": "POST",
+    "path": "/lab/monitoring/otel",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "SkyWalking：逐个查回 trace 的六个关联 span",
+    "method": "POST",
+    "path": "/lab/monitoring/skywalking",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Grafana：健康、登录边界、三服务面板和数据源检查",
+    "method": "POST",
+    "path": "/lab/monitoring/grafana",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
   }
 ]

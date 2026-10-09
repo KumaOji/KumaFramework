@@ -1,0 +1,193 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: base
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        environment: wsl
+    rule_files:
+      - /etc/prometheus/rules.yml
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: [alertmanager:9093]
+    scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets: [prometheus:9090]
+      - job_name: alertmanager
+        static_configs:
+          - targets: [alertmanager:9093]
+      - job_name: loki
+        static_configs:
+          - targets: [loki:3100]
+      - job_name: grafana
+        static_configs:
+          - targets: [grafana:3000]
+      - job_name: skywalking-oap
+        static_configs:
+          - targets: [skywalking-oap-metrics:1234]
+      - job_name: gateway
+        metrics_path: /actuator/prometheus
+        static_configs:
+          - targets: [gateway-local:18081]
+      - job_name: blog
+        metrics_path: /actuator/prometheus
+        static_configs:
+          - targets: [blog-local:19001]
+      - job_name: uaa
+        metrics_path: /actuator/prometheus
+        static_configs:
+          - targets: [uaa-local:19002]
+  rules.yml: |
+    groups:
+      - name: local-monitoring
+        rules:
+          - alert: MonitoringTargetDown
+            expr: up == 0
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Monitoring target {{ $labels.job }} is down"
+              description: "Cannot scrape {{ $labels.instance }} for at least two minutes."
+      - name: gateway
+        rules:
+          - alert: GatewayHighErrorRate
+            expr: sum(rate(http_server_requests_seconds_count{application="kuma-cloud-gateway",status=~"5.."}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{application="kuma-cloud-gateway"}[5m])), 0.001) > 0.05
+            for: 5m
+            labels:
+              severity: warning
+              service: kuma-cloud-gateway
+            annotations:
+              summary: Gateway 5xx error rate exceeds 5 percent
+          - alert: GatewayHighLatency
+            expr: histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{application="kuma-cloud-gateway"}[5m]))) > 2
+            for: 5m
+            labels:
+              severity: warning
+              service: kuma-cloud-gateway
+            annotations:
+              summary: Gateway P95 request latency exceeds two seconds
+      - name: servlet-services
+        rules:
+          - alert: ServiceHighErrorRate
+            expr: sum by (application) (rate(http_server_requests_seconds_count{application=~"kuma-cloud-(blog|uaa)",status=~"5.."}[5m])) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~"kuma-cloud-(blog|uaa)"}[5m])), 0.001) > 0.05
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.application }} 5xx error rate exceeds 5 percent"
+          - alert: ServiceHighLatency
+            expr: histogram_quantile(0.95, sum by (application, le) (rate(http_server_requests_seconds_bucket{application=~"kuma-cloud-(blog|uaa)"}[5m]))) > 2
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.application }} P95 latency exceeds two seconds"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-oap-metrics
+  namespace: base
+spec:
+  selector:
+    app: skywalking-oap
+  ports:
+    - name: metrics
+      port: 1234
+      targetPort: 1234
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: base
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+  namespace: base
+spec:
+  serviceName: prometheus
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+      containers:
+        - name: prometheus
+          image: docker.io/prom/prometheus:v3.15.0
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=7d"
+            - "--storage.tsdb.retention.size=8GB"
+            - "--web.enable-lifecycle"
+          ports:
+            - name: http
+              containerPort: 9090
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /prometheus
+            - name: config
+              mountPath: /etc/prometheus
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi

@@ -17,6 +17,7 @@
 package com.kuma.cloud.gateway.config;
 
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +41,9 @@ public class GatewaySecurityConfiguration {
     @Bean
     @Order(0)
     public SecurityWebFilterChain gatewaySecurityWebFilterChain(
-            ServerHttpSecurity http, GatewayCloudProperties properties) {
+            ServerHttpSecurity http, GatewayCloudProperties properties,
+            @Value("${server.port:18080}") int serverPort,
+            @Value("${management.server.port:${server.port:18080}}") int managementPort) {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
@@ -48,12 +51,21 @@ public class GatewaySecurityConfiguration {
 
         if (properties.getAuth().isEnabled()) {
             http.authorizeExchange(exchanges -> {
+                if (managementPort != serverPort) {
+                    exchanges.pathMatchers("/actuator/prometheus", "/actuator/metrics/**", "/actuator/env/**")
+                            .denyAll();
+                }
                 exchanges.pathMatchers(properties.getAuth().getWhiteList().toArray(String[]::new))
                         .permitAll();
                 exchanges.anyExchange().authenticated();
             }).oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         } else {
-            http.authorizeExchange(exchanges -> exchanges.anyExchange().permitAll());
+            http.authorizeExchange(exchanges -> {
+                if (managementPort != serverPort) {
+                    exchanges.pathMatchers("/actuator/prometheus", "/actuator/metrics/**", "/actuator/env/**").denyAll();
+                }
+                exchanges.anyExchange().permitAll();
+            });
         }
         return http.build();
     }

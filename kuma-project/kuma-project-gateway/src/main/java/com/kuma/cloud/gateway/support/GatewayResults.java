@@ -44,6 +44,10 @@ public final class GatewayResults {
     }
 
     public static String resolveTraceId(ServerWebExchange exchange) {
+        String observedTraceId = exchange.getAttribute(GatewayHeaders.TRACE_ID_ATTRIBUTE);
+        if (StrUtil.isNotBlank(observedTraceId)) {
+            return observedTraceId;
+        }
         String traceId = exchange.getRequest().getHeaders().getFirst(CommonConstants.KMC_TRACE_ID);
         return StrUtil.isNotBlank(traceId) ? traceId : IdGeneratorUtils.getIdStr();
     }

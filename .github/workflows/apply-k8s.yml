@@ -49,6 +49,10 @@ jobs:
           docker.io/apache/skywalking-oap-server skywalking-oap 10.2.0
           docker.io/apache/skywalking-ui skywalking-ui 10.2.0
           docker.io/otel/opentelemetry-collector-contrib otel-collector 0.123.0
+          docker.io/grafana/loki loki 3.7.8
+          docker.io/grafana/grafana grafana 13.2.3
+          docker.io/prom/prometheus prometheus v3.15.0
+          docker.io/prom/alertmanager alertmanager v0.34.1
           IMAGES
 
       - name: Prepare k8s dirs on server
@@ -57,7 +61,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: mkdir -p /data/k8s/base /data/k8s/blog /data/k8s/scripts /data/k8s/server/observability
+          script: mkdir -p /data/k8s/base /data/k8s/blog /data/k8s/scripts /data/k8s/server/observability /data/k8s/server/monitoring /data/k8s/monitoring
 
       - name: Copy base k8s files to server
         uses: appleboy/scp-action@v0.1.7
@@ -85,7 +89,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: scripts/check-observability.py,scripts/apply-k8s-resource.py
+          source: scripts/check-observability.py,scripts/apply-k8s-resource.py,scripts/prepare-monitoring-server.sh,scripts/check-monitoring-server.py,scripts/expose-monitoring-server.sh
           target: /data/k8s/scripts/
           strip_components: 1
 
@@ -97,6 +101,26 @@ jobs:
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
           source: k8s/server/observability/*
           target: /data/k8s/server/observability/
+          strip_components: 3
+
+      - name: Copy common monitoring resources
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: k8s/monitoring/*
+          target: /data/k8s/monitoring/
+          strip_components: 2
+
+      - name: Copy server monitoring overlay
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: k8s/server/monitoring/*
+          target: /data/k8s/server/monitoring/
           strip_components: 3
 
       - name: Apply k8s configs and verify observability
@@ -113,6 +137,7 @@ jobs:
           envs: REGISTRY,REGISTRY_USER,REGISTRY_PASSWORD
           script: |
             set -eu
+            bash /data/k8s/scripts/prepare-monitoring-server.sh
             registry_manifest="$(mktemp)"
             trap 'rm -f "$registry_manifest"' EXIT
             kubectl create secret docker-registry observability-registry -n base \
@@ -126,7 +151,7 @@ jobs:
               case "$b" in
                 *secret.example.yaml|*secret.yaml) continue ;;
                 kustomization.yaml|observability.yaml) continue ;;
-                blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml) continue ;;
+                blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml|lab.yaml) continue ;;
                 # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
                 mysql.yaml)
                   python3 /data/k8s/scripts/apply-k8s-resource.py "$f"
@@ -136,12 +161,18 @@ jobs:
               kubectl apply -f "$f"
             done
             kubectl apply -k /data/k8s/server/observability
+            kubectl apply -k /data/k8s/server/monitoring
             kubectl rollout status deployment/nacos -n base --timeout=300s || true
             kubectl rollout status statefulset/skywalking-storage -n base --timeout=600s
             for deployment in skywalking-oap skywalking-ui otel-collector; do
               kubectl rollout status "deployment/${deployment}" -n base --timeout=300s
             done
             python3 /data/k8s/scripts/check-observability.py
+            for component in loki grafana prometheus alertmanager; do
+              kubectl rollout status "statefulset/${component}" -n base --timeout=600s
+            done
+            bash /data/k8s/scripts/expose-monitoring-server.sh
+            python3 /data/k8s/scripts/check-monitoring-server.py --infrastructure-only
 
       - name: Report observability diagnostics on failure
         if: failure()

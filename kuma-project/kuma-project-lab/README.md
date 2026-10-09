@@ -39,6 +39,43 @@
 - `network`：Webhook 签名、时间窗口、幂等与重试；TCP 分帧、半关闭、读取超时及 UDP 数据报通信
 - `jdk`：按 JDK 8～25 的代表性功能正式版本组织的实验，统一在 JDK25 运行，含独立预览示例
 
+## OTel 与 SkyWalking 可观测性实验
+
+新增 Loki、Prometheus、Alertmanager、OTel Collector、SkyWalking、Grafana 六个真实中间件实验：
+学习卡片包含可点击 UI 入口和具体页面位置；Loki 在 Grafana Explore 查看，Collector 没有业务 UI。
+运行方式、证据与边界见 [中间件实验说明](docs/monitoring-middleware-labs.md)。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1
+```
+
+添加 `-Component loki` 等参数可只执行一个实验。Lab HTTP 接口为 `/api/lab/monitoring/*`。
+与 Prometheus 同时运行时，Lab 使用 `--server.port=19090`，控制台设置
+`KUMA_LAB_URL=http://127.0.0.1:19090/api`，避免原有 9090 端口冲突。
+
+按 [实验教程](docs/observability-labs.md) 学习 OTel span、W3C传播、异步断链修复、采样、指标与日志关联，
+再将真实 trace 发到现有 Collector/SkyWalking 查回，最后对比 SkyWalking Agent 的正常、慢调用和异常场景。
+
+```powershell
+./gradlew.bat :kuma-project:kuma-project-lab:otelLab
+./gradlew.bat :kuma-project:kuma-project-lab:otelLab -PotelExport=true
+./gradlew.bat :kuma-project:kuma-project-lab:skywalkingLab
+```
+
+Lab 启动后也可使用 `/api/lab/observability/*` 接口。控制台包含实验入口和学习卡片。
+本地指标/日志实验使用真实 SDK 的内存 exporter；现有后端配置仅接收 traces。
+
+真实数据库实验使用独立 `kuma_observability_lab` PostgreSQL schema / MySQL database，
+支持真实库存查询、数据库端200ms慢查询、重复键异常与事务回滚验证，每次按runId保留结果。
+一键使用现有WSL PostgreSQL并验证OTel上报：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-observability-database-wsl.ps1 -Export
+```
+
+加 `-Database mysql` 切换MySQL；`-Telemetry skywalking` 使用Agent采集真实JDBC。
+配置与查表对照见教程第9节；控制台接口位于 `/api/lab/observability/database/*`。
+
 ## 各版本 JDK 功能实验
 
 运行 `com.kuma.cloud.lab.jdk.JdkVersionLearningDemo.main()`，或在仓库根目录执行：
@@ -206,6 +243,20 @@ kuma:
 1. 启动 `LabApplication`。
 2. 查看题目列表：`GET /api/lab/leetcode/problems`
 3. 运行全部内置测试：`POST /api/lab/leetcode/scenario`
+
+新增练习覆盖双指针、二分查找、贪心和动态规划；各题包含思路与复杂度注释、JUnit 边界测试和在线内置用例：
+
+| 题号 | 题目 | 难度 | 方法 | `input` 示例 |
+| --- | --- | --- | --- | --- |
+| 11 | 盛最多水的容器 | 中等 | 双指针 | `{"height":[1,8,6,2,5,4,8,3,7]}` |
+| 33 | 搜索旋转排序数组 | 中等 | 二分查找 | `{"nums":[4,5,6,7,0,1,2],"target":0}` |
+| 121 | 买卖股票的最佳时机 | 简单 | 历史最低价 | `{"prices":[7,1,5,3,6,4]}` |
+| 198 | 打家劫舍 | 中等 | 滚动动态规划 | `{"nums":[2,7,9,3,1]}` |
+| 704 | 二分查找 | 简单 | 闭区间二分 | `{"nums":[-1,0,3,5,9,12],"target":9}` |
+
+例如运行第 33 题：`POST /api/lab/leetcode/run/33`，正文为
+`{"input":{"nums":[4,5,6,7,0,1,2],"target":0}}`，结果索引为 `4`。
+单题内置验证使用 `POST /api/lab/leetcode/problems/33/test`。
 
 手动运行示例（第 1 题两数之和）：
 

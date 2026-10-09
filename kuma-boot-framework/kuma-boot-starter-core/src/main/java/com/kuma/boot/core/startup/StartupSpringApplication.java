@@ -90,7 +90,8 @@ public class StartupSpringApplication extends SpringApplication {
 
     public StartupSpringApplication setKmcProfileIfNotExists(String profile) {
         if (StrUtil.isBlank(System.getProperty(ACTIVE_PROFILES_PROPERTY)) && StrUtil.isBlank(
-                System.getProperty(ENV)) && !System.getenv().containsKey(ACTIVE_PROFILES_ACTIVE)) {
+                System.getProperty(ENV)) && !System.getenv().containsKey(ACTIVE_PROFILES_ACTIVE)
+                && !System.getenv().containsKey("SPRING_PROFILES_ACTIVE")) {
             System.setProperty(ACTIVE_PROFILES_PROPERTY, profile);
             // 仅在没有激活 profile 时才补充 additional profile，避免与外部传入的 profile 叠加
             super.setAdditionalProfiles(profile);

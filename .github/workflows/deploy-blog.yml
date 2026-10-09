@@ -106,6 +106,16 @@ jobs:
           provenance: false
           sbom: false
 
+      - name: Copy release deployment manifest and helper
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          source: k8s/blog/blog-background.yaml,scripts/apply-k8s-resource.py
+          target: /data/kuma-deploy/
+          strip_components: 0
+
       - name: Deploy on server
         uses: appleboy/ssh-action@v1
         with:
@@ -115,15 +125,11 @@ jobs:
           command_timeout: 20m
           script: |
             set -eu
-            if [ -f /data/k8s/blog/blog-background.yaml ]; then
-              kubectl apply -f /data/k8s/blog/blog-background.yaml
-            fi
+            python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/blog/blog-background.yaml \
+              --image ${{ steps.ver.outputs.FULL_IMAGE }}
             # 同步进度期限，即使服务器上的清单尚未更新也不会沿用默认的 600 秒。
             kubectl patch deployment/blog-background -n blog --type=merge \
               -p '{"spec":{"progressDeadlineSeconds":900}}'
-            kubectl set image deployment/blog-background \
-              blog-background=${{ steps.ver.outputs.FULL_IMAGE }} \
-              -n blog
             kubectl scale deployment/blog-background -n blog --replicas=1
             if ! kubectl rollout status deployment/blog-background -n blog --timeout=900s; then
               kubectl get pods -n blog -l app=blog-background -o wide || true

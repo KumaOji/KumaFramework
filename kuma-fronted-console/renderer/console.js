@@ -234,6 +234,8 @@ async function selectPreset(index){
   $('lab-learning-title').textContent=p.name;$('lab-learning-description').textContent=p.description;
   $('lab-learning-runtime').textContent=p.runtime;$('lab-learning-command').textContent=p.commands;
   $('lab-learning-topics').innerHTML=p.topics.map(topic=>`<span class="status">${esc(topic)}</span>`).join('');
+  const uiLinks=LabCatalog.uiLinks(p);$('lab-learning-links').hidden=!uiLinks.length;
+  $('lab-learning-links').innerHTML=uiLinks.map(link=>`<p><a class="button small" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">${esc(link.name)} ↗</a> ${esc(link.location)}</p>`).join('');
   $('lab-learning-expected').innerHTML=p.expected.map(text=>`<li>${esc(text)}</li>`).join('');
   $('lab-learning-main').textContent=p.mainClass?`${p.mainClass}${p.mainArgs?` · 参数：${p.mainArgs}`:''}`:'脚本 / 源文件入口';
   $('lab-learning-sources').innerHTML=p.sources.map(source=>`<li><code>${esc(source)}</code></li>`).join('');
