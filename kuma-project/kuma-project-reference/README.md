@@ -21,7 +21,7 @@ kuma-project-reference/
     │   │   ├── domain/
     │   │   │   ├── dto/          写入参数 CreateOrderDTO
     │   │   │   ├── qo/           查询参数 OrderPageQO
-    │   │   │   ├── vo/           响应 OrderVO、PageVO、SchemaVO
+    │   │   │   ├── vo/           响应 OrderVO、PageVO
     │   │   │   ├── entity/       数据库行对象 OrderDO
     │   │   │   ├── model/        订单状态、金额计算与商品快照
     │   │   │   └── enums/        数据源范围
@@ -45,7 +45,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | 能力 | 实现与配置 |
 |---|---|
 | Nacos 配置和服务注册 | kuma-cloud-starter-alibaba、bootstrap.yml |
-| PostgreSQL 双 schema | referenceMain / referenceSandbox 两个独立 HikariCP 池 |
+| 多数据源 | PostgreSQL 的 referenceMain 池，以及 WSL MySQL 的 referenceMysql 池 |
 | 动态数据源 | kuma-boot-starter-data-datasource，DataSourceExecutor、@DS 和 #last 参数解析 |
 | Schema 切换 | kuma-boot-starter-data-mybatis 的 SchemaInterceptor，SCHEMA 模式 |
 | Web MVC | kuma-boot-starter-web，MVC 配置、参数转换、异步执行、Trace MDC 和 HTTP 交换记录 |
@@ -54,7 +54,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
 | Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
 
-MAIN 对应 `kuma_reference_main`，SANDBOX 对应 `kuma_reference_sandbox`，共用 PostgreSQL `base` 数据库。DataScope 白名单映射数据源名与 schema 租户后缀；组件的 DataSourceExecutor 使用 @DS 切换数据源，并设置 TenantContextHolder，SchemaInterceptor 将 Mapper SQL 的表名限定到目标 schema。连接池的 currentSchema 同时固定 JDBC 默认 schema，Flyway 分别迁移两个 schema。上下文在调用结束或异常后恢复。
+MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。Flyway 分别迁移两个物理数据源。上下文在调用结束或异常后恢复。
 
 先选择数据源再开启事务，事务内禁止切换到其他数据源。分页 count 与 items 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
 
@@ -84,7 +84,7 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 | Group | DEFAULT_GROUP |
 | Data ID | kuma-reference-dev.yaml |
 
-先确保 Nacos 配置、数据库账户和两个 schema 已准备好。在 IDEA 运行 `ReferenceApplication.main()`，或在仓库根目录执行：
+先确保 Nacos 配置、PostgreSQL schema 和 MySQL database 已准备好。在 IDEA 运行 `ReferenceApplication.main()`，或在仓库根目录执行：
 
 ```powershell
 .\gradlew.bat :kuma-project:kuma-project-reference:bootRun
@@ -92,9 +92,9 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 
 应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`。
 
-使用 `SPRING_CLOUD_NACOS_SERVER_ADDR` 修改 Nacos 地址，使用 `SPRING_PROFILES_ACTIVE` 切换环境；对应的 Nacos Data ID 需提前配置。运行时 Nacos 导入为必需项，连接池等配置修改后需重启。
+使用 `SPRING_CLOUD_NACOS_SERVER_ADDR` 修改 Nacos 地址，使用 `SPRING_PROFILES_ACTIVE` 切换环境；对应的 Nacos Data ID 需提前配置。运行时 Nacos 导入为必需项，连接池等配置修改后需重启；本地模板变更后需发布到对应的 Nacos Data ID。
 
-新机器的 WSL 开发数据库可通过 `scripts/initialize-wsl.ps1` 初始化独立账户和 schema。配置模板仅保留凭据占位变量，真实凭据由部署环境或受控配置中心提供。
+WSL 开发环境可运行 `scripts/initialize-wsl.ps1` 初始化 PostgreSQL schema。MySQL database 与 `kuma-reference-mysql` Kubernetes Secret 需由部署环境预先准备；`scripts/start-wsl.ps1` 会从 Secret 加载两种数据库的环境变量。配置模板仅保留凭据占位变量，真实凭据由部署环境或受控配置中心提供。
 
 ## 接口
 
@@ -104,7 +104,6 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 | GET | /api/orders/{id}?scope=MAIN | 查询订单 |
 | GET | /api/orders?scope=MAIN&page=1&size=10 | 分页查询 |
 | POST | /api/orders/{id}/confirm?scope=MAIN | 确认订单 |
-| GET | /api/datasources/current?scope=SANDBOX | 检查实际连接的 schema |
 
 创建订单由请求直接提供示例商品信息：
 
@@ -125,14 +124,14 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 
 ## 验证
 
-普通测试关闭 Nacos 配置及服务注册，通过 HTTP 调用本机应用并使用两套 H2 数据源。H2 只用于测试，不进入生产 JAR。
+普通测试关闭 Nacos 配置及服务注册，通过 HTTP 调用本机应用并使用两套隔离的 H2 数据源。H2 只用于测试，不进入生产 JAR。
 
 ```powershell
 .\gradlew.bat :kuma-project:kuma-project-reference:test
 .\gradlew.bat :kuma-project:kuma-project-reference:bootJar
 ```
 
-真实 WSL PostgreSQL 验证单独运行，会写入 reference 的两个开发 schema：
+真实 WSL 验证单独运行，会访问 PostgreSQL schema，并启动 MySQL 数据源：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\kuma-project\kuma-project-reference\scripts\start-wsl.ps1 -Action test

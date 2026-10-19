@@ -1,4 +1,4 @@
-"""Run inside WSL. Provision only the reference role, two schemas and its Kubernetes Secret."""
+"""Run inside WSL. Provision only the reference role, schema and its Kubernetes Secret."""
 import base64
 import json
 import secrets
@@ -6,7 +6,7 @@ import subprocess
 
 NAMESPACE, POD, DATABASE = "base", "postgresql-0", "base"
 ROLE, SECRET = "kuma_reference_app", "kuma-reference-db"
-SCHEMAS = ("kuma_reference_main", "kuma_reference_sandbox")
+SCHEMAS = ("kuma_reference_main",)
 
 
 def execute(args, content=None):
@@ -24,7 +24,7 @@ def psql(sql):
 
 if __name__ == "__main__":
     existing = psql("SELECT nspname || ':' || pg_get_userbyid(nspowner) FROM pg_namespace "
-                    "WHERE nspname IN ('kuma_reference_main','kuma_reference_sandbox');")
+                    "WHERE nspname = 'kuma_reference_main';")
     for line in existing.splitlines():
         name, owner = line.split(":", 1)
         if owner != ROLE:

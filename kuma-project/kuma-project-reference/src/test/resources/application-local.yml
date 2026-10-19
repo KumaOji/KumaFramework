@@ -9,9 +9,9 @@ spring:
           url: 'jdbc:h2:mem:reference-main;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS kuma_reference_main\;SET SCHEMA kuma_reference_main'
           username: sa
           password: ''
-        referenceSandbox:
+        referenceMysql:
           type: com.zaxxer.hikari.HikariDataSource
           driver-class-name: org.h2.Driver
-          url: 'jdbc:h2:mem:reference-sandbox;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS kuma_reference_sandbox\;SET SCHEMA kuma_reference_sandbox'
+          url: 'jdbc:h2:mem:reference-mysql;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;INIT=CREATE SCHEMA IF NOT EXISTS kuma_reference_mysql\;SET SCHEMA kuma_reference_mysql'
           username: sa
           password: ''

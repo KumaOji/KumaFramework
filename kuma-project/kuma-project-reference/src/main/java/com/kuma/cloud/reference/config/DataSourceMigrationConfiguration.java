@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
-public class SchemaDataSourceConfiguration {
-    /** 对两个物理池分别迁移，不能只对路由 DataSource 的默认库迁移。 */
+public class DataSourceMigrationConfiguration {
+    /** Migrate every physical datasource instead of only the routing datasource's default. */
     @Bean
-    SmartInitializingSingleton migrateReferenceSchemas(DynamicRoutingDataSource dataSource) {
+    SmartInitializingSingleton migrateReferenceDataSources(DynamicRoutingDataSource dataSource) {
         return () -> {
             for (DataScope scope : DataScope.values()) {
                 Flyway.configure().dataSource(dataSource.getDataSource(scope.dataSource()))

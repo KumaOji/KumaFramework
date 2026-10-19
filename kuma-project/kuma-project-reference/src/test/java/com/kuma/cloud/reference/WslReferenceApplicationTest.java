@@ -3,7 +3,7 @@ package com.kuma.cloud.reference;
 import org.junit.jupiter.api.Tag;
 import org.springframework.test.context.ActiveProfiles;
 
-/** 同一套端到端契约在真实 WSL PostgreSQL 上重复验证。 */
+/** WSL 环境会启动 PostgreSQL 和 MySQL 数据源，再验证 PostgreSQL 路由契约。 */
 @Tag("wsl")
 @ActiveProfiles(value = "wsl", inheritProfiles = false)
 class WslReferenceApplicationTest extends ReferenceApplicationTest {}

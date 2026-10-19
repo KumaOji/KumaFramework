@@ -25,6 +25,7 @@ import com.kuma.boot.data.mybatis.mybatisplus.ReplaceSql;
 import com.kuma.boot.data.mybatis.autoconfigure.properties.MybatisPlusInterceptorProperties;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Locale;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -43,7 +44,7 @@ public class SchemaInterceptor implements InnerInterceptor {
         this.tenantProperties = tenantProperties;
     }
 
-    protected String changeTable(String sql) {
+    protected String changeTable(String sql, Connection connection) {
         // 想要 执行sql时， 不切换到 lamp_base_{TENANT} 库, 请直接返回null
         String tenantCode = TenantContextHolder.getTenant();
         String database = TenantContextHolder.getDatabase();
@@ -62,7 +63,22 @@ public class SchemaInterceptor implements InnerInterceptor {
             schemaName += "." + tenantProperties.getOwner();
         }
         // 想要 执行sql时， 切换到 切换到自己指定的库， 直接修改 setSchemaName
-        return ReplaceSql.replaceSql(tenantProperties.getDbType(), schemaName, sql);
+        return ReplaceSql.replaceSql(resolveDbType(connection), schemaName, sql);
+    }
+
+    private com.baomidou.mybatisplus.annotation.DbType resolveDbType(Connection connection) {
+        try {
+            String product = connection.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT);
+            if (product.contains("postgresql")) {
+                return com.baomidou.mybatisplus.annotation.DbType.POSTGRE_SQL;
+            }
+            if (product.contains("mysql")) {
+                return com.baomidou.mybatisplus.annotation.DbType.MYSQL;
+            }
+        } catch (SQLException ignored) {
+            // Use the configured database type if the driver cannot report its product name.
+        }
+        return tenantProperties.getDbType();
     }
 
     @Override
@@ -92,7 +108,7 @@ public class SchemaInterceptor implements InnerInterceptor {
             }
             PluginUtils.MPBoundSql mpBs = mpSh.mPBoundSql();
             LogUtils.debug("未替换前的sql: {}", mpBs.sql());
-            mpBs.sql(this.changeTable(mpBs.sql()));
+            mpBs.sql(this.changeTable(mpBs.sql(), connection));
         }
         TenantContextHolder.clearDatabase();
     }

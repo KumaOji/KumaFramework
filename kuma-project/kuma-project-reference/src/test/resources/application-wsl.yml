@@ -8,9 +8,9 @@ spring:
           url: jdbc:postgresql://${REFERENCE_PG_HOST}:${REFERENCE_PG_PORT:5432}/${REFERENCE_PG_DATABASE:base}?currentSchema=kuma_reference_main&connectTimeout=3&socketTimeout=5&ApplicationName=kuma-reference-main
           username: ${REFERENCE_PG_USERNAME}
           password: ${REFERENCE_PG_PASSWORD}
-        referenceSandbox:
+        referenceMysql:
           type: com.zaxxer.hikari.HikariDataSource
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://${REFERENCE_PG_HOST}:${REFERENCE_PG_PORT:5432}/${REFERENCE_PG_DATABASE:base}?currentSchema=kuma_reference_sandbox&connectTimeout=3&socketTimeout=5&ApplicationName=kuma-reference-sandbox
-          username: ${REFERENCE_PG_USERNAME}
-          password: ${REFERENCE_PG_PASSWORD}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://${REFERENCE_MYSQL_HOST}:${REFERENCE_MYSQL_PORT:3306}/${REFERENCE_MYSQL_DATABASE:kuma_reference_mysql}?useUnicode=true&characterEncoding=utf-8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&useSSL=false&allowPublicKeyRetrieval=true
+          username: ${REFERENCE_MYSQL_USERNAME}
+          password: ${REFERENCE_MYSQL_PASSWORD}

@@ -22,9 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final OrderMapper orders;
     private final Clock clock;
     private final DataSourceExecutor schemas;
@@ -88,8 +91,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private <T> T inScope(DataScope scope, TransactionTemplate transaction, Supplier<T> operation) {
+        // MAIN -> referenceMain / kuma_reference_main；MYSQL -> referenceMysql / kuma_reference_mysql。
+        // SchemaInterceptor combines tenant-database-prefix=kuma_reference with the tenant segment.
+        log.debug("Routing order operation to datasource '{}' and schema '{}'", scope.dataSource(), scope.schema());
         // 路由先于事务获取连接，分页查询共用同一只读事务。
-        return schemas.execute(scope.dataSource(), scope.name().toLowerCase(java.util.Locale.ROOT), () -> transaction.execute(status -> operation.get()));
+        return schemas.execute(scope.dataSource(), scope.tenant(), () -> transaction.execute(status -> operation.get()));
     }
 
     private static OrderVO toVO(Order order) {

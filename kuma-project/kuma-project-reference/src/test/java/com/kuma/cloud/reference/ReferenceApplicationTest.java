@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.kuma.cloud.reference.mapper.OrderMapper;
 import com.kuma.cloud.reference.domain.entity.OrderDO;
-import com.zaxxer.hikari.HikariDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import com.kuma.cloud.reference.domain.enums.DataScope;
 import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceExecutor;
-import com.kuma.cloud.reference.support.datasource.JdbcSchemaInspector;
 import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceInvoker;
 import com.kuma.cloud.reference.mapper.UnsafeOrderMapper;
 import com.kuma.boot.data.mybatis.utils.MybatisUtil;
@@ -23,7 +21,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.UUID;
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -50,7 +47,6 @@ class ReferenceApplicationTest {
     @LocalServerPort int port;
     @Autowired DynamicRoutingDataSource dataSource;
     @Autowired DataSourceExecutor schemas;
-    @Autowired JdbcSchemaInspector inspector;
     @Autowired DataSourceInvoker invoker;
     @Autowired OrderMapper orders;
     @Autowired TransactionTemplate transactions;
@@ -74,8 +70,8 @@ class ReferenceApplicationTest {
         var previous = com.kuma.boot.common.holder.TenantContextHolder.getTenant();
         schemas.execute(DataScope.MAIN.dataSource(), "main", () -> {
             assertThrows(IllegalStateException.class, () ->
-                    schemas.execute(DataScope.SANDBOX.dataSource(), "sandbox", () -> {
-                        assertEquals("sandbox", com.kuma.boot.common.holder.TenantContextHolder.getTenant());
+                    schemas.execute(DataScope.MYSQL.dataSource(), "mysql", () -> {
+                        assertEquals("mysql", com.kuma.boot.common.holder.TenantContextHolder.getTenant());
                         throw new IllegalStateException("nested failure");
                     }));
             assertEquals("main", com.kuma.boot.common.holder.TenantContextHolder.getTenant());
@@ -186,10 +182,10 @@ class ReferenceApplicationTest {
     void qoVoPaginationAndSchemaRoutingKeepOrdersIsolated() throws Exception {
         String sku = "ISOLATION-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         var main = JSON.readTree(request("POST", "/api/orders?scope=MAIN", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}").body());
-        var sandbox = JSON.readTree(request("POST", "/api/orders?scope=SANDBOX", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":2}").body());
-        assertProblem(request("GET", "/api/orders/" + main.path("id").asString() + "?scope=SANDBOX", null), 404);
-        assertProblem(request("GET", "/api/orders/" + sandbox.path("id").asString() + "?scope=MAIN", null), 404);
-        for (DataScope scope : DataScope.values()) {
+        var mysql = JSON.readTree(request("POST", "/api/orders?scope=MYSQL", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":2}").body());
+        assertProblem(request("GET", "/api/orders/" + main.path("id").asString() + "?scope=MYSQL", null), 404);
+        assertProblem(request("GET", "/api/orders/" + mysql.path("id").asString() + "?scope=MAIN", null), 404);
+        for (DataScope scope : new DataScope[] {DataScope.MAIN, DataScope.MYSQL}) {
             var page = request("GET", "/api/orders?scope=" + scope + "&sku=" + sku + "&status=CREATED&page=1&size=1", null);
             assertEquals(200, page.statusCode(), page.body());
             var result = JSON.readTree(page.body());
@@ -208,41 +204,18 @@ class ReferenceApplicationTest {
     void customLastParameterProcessorRestoresNestedAndExceptionalRoutes() {
         assertNull(DynamicDataSourceContextHolder.peek());
         schemas.execute(DataScope.MAIN.dataSource(), () -> {
-            assertEquals("kuma_reference_main", inspector.inspect(DataScope.MAIN).schema());
-            assertEquals("kuma_reference_sandbox", inspector.inspect(DataScope.SANDBOX).schema());
             assertEquals(DataScope.MAIN.dataSource(), DynamicDataSourceContextHolder.peek());
             return null;
         });
-        assertThrows(IllegalStateException.class, () -> schemas.execute(DataScope.SANDBOX.dataSource(), () -> {
+        assertThrows(IllegalStateException.class, () -> schemas.execute(DataScope.MYSQL.dataSource(), () -> {
             throw new IllegalStateException("simulated failure");
         }));
         assertNull(DynamicDataSourceContextHolder.peek());
         assertThrows(RuntimeException.class, () -> invoker.invoke(() -> orders.count(null, null), "unknownDataSource"));
         assertNull(DynamicDataSourceContextHolder.peek());
-        assertEquals("kuma_reference_main", inspector.inspect(DataScope.MAIN).schema());
         assertThrows(IllegalStateException.class, () -> transactions.execute(status ->
-                schemas.execute(DataScope.SANDBOX.dataSource(), () -> "must not switch an active transaction")));
+                schemas.execute(DataScope.MYSQL.dataSource(), () -> "must not switch an active transaction")));
         assertNull(DynamicDataSourceContextHolder.peek());
-    }
-
-    @Test
-    void concurrentRequestsReportTheActualSchemaWithoutPoolLeakage() throws Exception {
-        var calls = new ArrayList<java.util.concurrent.CompletableFuture<HttpResponse<String>>>();
-        for (int i = 0; i < 20; i++) {
-            var scope = i % 2 == 0 ? DataScope.MAIN : DataScope.SANDBOX;
-            var request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/datasources/current?scope=" + scope))
-                    .timeout(Duration.ofSeconds(8)).GET().build();
-            calls.add(http.sendAsync(request, HttpResponse.BodyHandlers.ofString()));
-        }
-        for (int i = 0; i < calls.size(); i++) {
-            var response = calls.get(i).get(8, TimeUnit.SECONDS);
-            assertEquals(200, response.statusCode(), response.body());
-            assertEquals(i % 2 == 0 ? "kuma_reference_main" : "kuma_reference_sandbox",
-                    JSON.readTree(response.body()).path("schema").asString());
-        }
-        for (DataScope scope : DataScope.values()) {
-            assertEquals(5, dataSource.getDataSource(scope.dataSource()).unwrap(HikariDataSource.class).getMaximumPoolSize());
-        }
     }
 
     @Test

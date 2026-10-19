@@ -3,7 +3,7 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
-description = '标准业务项目模板：常规分层、Nacos、双数据源、MyBatis 与线程池'
+description = '标准业务项目模板：常规分层、Nacos、多数据源、MyBatis 与线程池'
 
 dependencyManagement {
     imports {
@@ -37,7 +37,7 @@ tasks.withType(Test).configureEach {
 tasks.named('test') { useJUnitPlatform() }
 
 tasks.register('wslTest', Test) {
-    description = 'Verify real PostgreSQL schema routing against the isolated WSL reference schemas'
+    description = 'Verify real WSL PostgreSQL schema routing with the MySQL datasource available'
     group = 'verification'
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
