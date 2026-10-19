@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,6 +57,32 @@ class ReferenceApplicationTest {
     @Autowired UnsafeOrderMapper unsafeOrderMapper;
     @Autowired @Qualifier("asyncThreadPoolTaskExecutor") ThreadPoolTaskExecutor executor;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
+
+    @BeforeEach
+    void prepareIsolatedTestTables() throws Exception {
+        for (var scope : DataScope.values()) {
+            try (var connection = dataSource.getDataSource(scope.dataSource()).getConnection();
+                    var statement = connection.createStatement()) {
+                statement.execute("""
+                        CREATE TABLE IF NOT EXISTS purchase_orders (
+                            id VARCHAR(36) NOT NULL PRIMARY KEY,
+                            sku VARCHAR(64) NOT NULL,
+                            product_name VARCHAR(120) NOT NULL,
+                            unit_price DECIMAL(19, 2) NOT NULL,
+                            quantity INT NOT NULL,
+                            order_status VARCHAR(16) NOT NULL,
+                            version BIGINT NOT NULL,
+                            created_at TIMESTAMP(6) NOT NULL,
+                            CONSTRAINT ck_order_price CHECK (unit_price >= 0),
+                            CONSTRAINT ck_order_quantity CHECK (quantity BETWEEN 1 AND 1000),
+                            CONSTRAINT ck_order_status CHECK (order_status IN ('CREATED', 'CONFIRMED')),
+                            CONSTRAINT ck_order_version CHECK (version >= 0)
+                        )
+                        """);
+                statement.executeUpdate("DELETE FROM purchase_orders");
+            }
+        }
+    }
 
     @Test
     void starterRestoresTenantAndDataSourceAfterNestedFailures() {

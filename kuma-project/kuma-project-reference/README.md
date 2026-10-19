@@ -30,7 +30,6 @@ kuma-project-reference/
     │   └── resources/
     │       ├── bootstrap.yml     应用名称、环境和 Nacos 导入
     │       ├── mapper/           SQL XML
-    │       └── db/migration/     Flyway 迁移
     └── test/                     单元测试、集成测试及隔离配置
 ```
 
@@ -51,17 +50,16 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | Web MVC | kuma-boot-starter-web，MVC 配置、参数转换、异步执行、Trace MDC 和 HTTP 交换记录 |
 | 日志 | kuma-boot-starter-logger，统一 Logback 输出；Nacos 模板启用 reference DEBUG 日志以查看数据源/schema 路由 |
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、Mapper XML |
-| Flyway | kuma-boot-starter-data-migration，选择 FLYWAY，分别迁移两个物理数据源 |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
 | Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
 
-MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。Flyway 分别迁移两个物理数据源。上下文在调用结束或异常后恢复。
+MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。数据库、schema 和表由部署流程预先创建，应用启动时不执行数据库初始化。上下文在调用结束或异常后恢复。
 
 先选择数据源再开启事务，事务内禁止切换到其他数据源。分页 count 与 items 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
 
 Redis / JetCache 当前禁用；Kafka、认证、对象存储等尚未在本模块配置。传递依赖不代表已接入。
 
-业务模块通过 Kuma starter 获取 AOP、JDBC 和数据库迁移能力，不重复声明对应的 Spring Boot starter。底层仍由 Kuma starter 组合 Spring Boot 与第三方库。Flyway 按物理数据源分别迁移，关闭默认单数据源迁移及 Liquibase，避免两种引擎同时运行。
+业务模块通过 Kuma starter 获取 AOP、JDBC 等能力，不重复声明对应的 Spring Boot starter。数据库初始化由部署流程负责，应用不在启动时创建或迁移数据库结构。
 
 线程池直接注入框架的 `asyncThreadPoolTaskExecutor`，配置统一使用 `kuma.boot.core.async`。核心参数为 `core-pool-size`、`max-pool-siz`（沿用框架现有拼写）、`queue-capacity`、`rejection-policy` 和 `await-termination-seconds`。reference 使用 `ABORT` 拒绝策略，过载返回 503；框架默认仍为 `CALLER_RUNS`。
 
@@ -120,7 +118,7 @@ WSL 开发环境可运行 `scripts/initialize-wsl.ps1` 初始化 PostgreSQL sche
 2. 修改模块名、根包、启动类、Gradle mainClass 和 JAR 名称；同步更新 XML 中的完整类名。
 3. 在 settings.gradle 注册新模块，更新脚本和请求示例中的模块路径。
 4. 分配应用名、端口、Nacos Data ID、数据库账户和 schema，更新 DataScope 与 JDBC currentSchema。
-5. 根据业务替换订单示例。已有数据库追加 Flyway 迁移，不修改已执行的迁移。
+5. 根据业务替换订单示例，并由部署流程预先创建并维护所需的数据库、schema 和表。
 6. 保留隔离测试配置，验证 test 和 bootJar 后，再检查部署环境的中间件连通性。
 
 ## 验证

@@ -16,7 +16,6 @@ dependencies {
     implementation project(':kuma-boot-framework:kuma-boot-starter-logger')
     implementation project(':kuma-boot-framework:kuma-boot-starter-web')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
-    implementation project(':kuma-boot-framework:kuma-boot-starter-data-migration')
     implementation project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     implementation project(':kuma-boot-framework:kuma-boot-starter-actuator')

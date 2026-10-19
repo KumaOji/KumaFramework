@@ -44,14 +44,6 @@ spring:
       query-timeout: 2s
   transaction:
     default-timeout: 3s
-  liquibase:
-    enabled: false
-  flyway:
-    # 每个物理池由 DataSourceMigrationConfiguration 分别迁移。
-    enabled: false
-    locations: classpath:db/migration
-    clean-disabled: true
-    validate-on-migrate: true
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
@@ -91,9 +83,6 @@ kuma:
         strict-early-shutdown: true
         enable-servlet-async-context: false
     data:
-      migration:
-        enabled: true
-        type: FLYWAY
       mybatis:
         enabled: true
         mybatis-plus:
