@@ -13,6 +13,7 @@ dependencyManagement {
 
 dependencies {
     implementation project(':kuma-boot-framework:kuma-boot-starter-core')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-logger')
     implementation project(':kuma-boot-framework:kuma-boot-starter-web')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-migration')

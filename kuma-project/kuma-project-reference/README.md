@@ -49,6 +49,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | 动态数据源 | kuma-boot-starter-data-datasource，DataSourceExecutor、@DS 和 #last 参数解析 |
 | Schema 切换 | kuma-boot-starter-data-mybatis 的 SchemaInterceptor，SCHEMA 模式 |
 | Web MVC | kuma-boot-starter-web，MVC 配置、参数转换、异步执行、Trace MDC 和 HTTP 交换记录 |
+| 日志 | kuma-boot-starter-logger，统一 Logback 输出；Nacos 模板启用 reference DEBUG 日志以查看数据源/schema 路由 |
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、Mapper XML |
 | Flyway | kuma-boot-starter-data-migration，选择 FLYWAY，分别迁移两个物理数据源 |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |

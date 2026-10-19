@@ -73,8 +73,20 @@ mybatis-plus:
     default-executor-type: SIMPLE
     local-cache-scope: STATEMENT
 
+logging:
+  level:
+    com.kuma.cloud.reference: DEBUG
+  access:
+    enabled: false
+
+logback:
+  access:
+    enabled: false
+
 kuma:
   boot:
+    logger:
+      enabled: true
     web:
       error:
         handling:

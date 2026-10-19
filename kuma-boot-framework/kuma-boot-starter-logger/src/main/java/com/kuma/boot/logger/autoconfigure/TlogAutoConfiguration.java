@@ -1,8 +1,10 @@
 package com.kuma.boot.logger.autoconfigure;
 
 import com.kuma.boot.common.utils.log.LogUtils;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.beans.factory.InitializingBean;
 
+@AutoConfiguration
 public class TlogAutoConfiguration implements InitializingBean {
    public TlogAutoConfiguration() {
    }
