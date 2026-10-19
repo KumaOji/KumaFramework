@@ -42,6 +42,46 @@
     "source": "BloomTestController.java"
   },
   {
+    "group": "Elasticsearch 实验",
+    "name": "ES 学习目录：索引与 CRUD、全文搜索、分组聚合",
+    "method": "GET",
+    "path": "/lab/elasticsearch/topics",
+    "body": "",
+    "source": "ElasticsearchLabController.java"
+  },
+  {
+    "group": "Elasticsearch 实验",
+    "name": "ES 完整实验：Mapping、refresh、CRUD、全文搜索与聚合，自动清理独立索引",
+    "method": "POST",
+    "path": "/lab/elasticsearch/scenario",
+    "body": "",
+    "source": "ElasticsearchLabController.java"
+  },
+  {
+    "group": "Elasticsearch 实验",
+    "name": "ES CRUD：创建索引、批量写入、实时读取、refresh、部分更新与删除",
+    "method": "POST",
+    "path": "/lab/elasticsearch/crud",
+    "body": "",
+    "source": "ElasticsearchLabController.java"
+  },
+  {
+    "group": "Elasticsearch 实验",
+    "name": "ES 搜索：分词、match/term 对照、bool/filter/range、排序与高亮",
+    "method": "POST",
+    "path": "/lab/elasticsearch/search",
+    "body": "",
+    "source": "ElasticsearchLabController.java"
+  },
+  {
+    "group": "Elasticsearch 实验",
+    "name": "ES 聚合：keyword 分桶、每组均价与全局价格统计",
+    "method": "POST",
+    "path": "/lab/elasticsearch/aggregation",
+    "body": "",
+    "source": "ElasticsearchLabController.java"
+  },
+  {
     "group": "Java 基础知识学习",
     "name": "综合场景：类加载 + Mark Word + HashMap + Socket + 文件处理",
     "method": "POST",
@@ -346,6 +386,22 @@
     "source": "MysqlLabController.java"
   },
   {
+    "group": "Socket 连接实验",
+    "name": "Socket 完整实验：分帧、读取超时、UDP、长连接、半关闭与重连",
+    "method": "POST",
+    "path": "/lab/socket/scenario",
+    "body": "",
+    "source": "SocketLabController.java"
+  },
+  {
+    "group": "Socket 连接实验",
+    "name": "Socket 生命周期：连续收发、连接内状态、半关闭、EOF、关闭后状态与重连",
+    "method": "POST",
+    "path": "/lab/socket/lifecycle",
+    "body": "",
+    "source": "SocketLabController.java"
+  },
+  {
     "group": "OTel 与 SkyWalking 真实数据库实验",
     "name": "真实数据库 + OTel：正常提交、数据库慢查询、重复键异常与回滚验证",
     "method": "POST",
@@ -360,6 +416,62 @@
     "path": "/lab/observability/database/skywalking",
     "body": "",
     "source": "DatabaseObservabilityLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "查看各组件 UI 地址与页面位置（Collector 无独立业务 UI）",
+    "method": "GET",
+    "path": "/lab/monitoring/guide",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Loki：写入独立日志并用 LogQL 查回",
+    "method": "POST",
+    "path": "/lab/monitoring/loki",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Prometheus：up 即时查询与范围查询对照",
+    "method": "POST",
+    "path": "/lab/monitoring/prometheus",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Alertmanager：发送一分钟实验告警并查回",
+    "method": "POST",
+    "path": "/lab/monitoring/alertmanager",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "OTel：SDK 导出至 Collector 并验证存储证据",
+    "method": "POST",
+    "path": "/lab/monitoring/otel",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "SkyWalking：逐个查回 trace 的六个关联 span",
+    "method": "POST",
+    "path": "/lab/monitoring/skywalking",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
+  },
+  {
+    "group": "可观测性中间件实验",
+    "name": "Grafana：健康、登录边界、三服务面板和数据源检查",
+    "method": "POST",
+    "path": "/lab/monitoring/grafana",
+    "body": "",
+    "source": "MonitoringMiddlewareLabController.java"
   },
   {
     "group": "OTel 与 SkyWalking 学习",
@@ -499,6 +611,38 @@
     "path": "/lab/redis/{key}",
     "body": "",
     "source": "RedisTestController.java"
+  },
+  {
+    "group": "HTTP Session 实验",
+    "name": "Session 完整实验：Cookie 延续、客户端隔离、TCP连接变化、ID更换、注销与过期",
+    "method": "POST",
+    "path": "/lab/session/scenario",
+    "body": "",
+    "source": "SessionLabController.java"
+  },
+  {
+    "group": "HTTP Session 实验",
+    "name": "Session 隔离：Cookie保存、不同客户端、同Cookie跨TCP连接、缺失Cookie",
+    "method": "POST",
+    "path": "/lab/session/isolation",
+    "body": "",
+    "source": "SessionLabController.java"
+  },
+  {
+    "group": "HTTP Session 实验",
+    "name": "Session 生命周期：更换ID、保留属性、拒绝旧ID、注销与重新创建",
+    "method": "POST",
+    "path": "/lab/session/lifecycle",
+    "body": "",
+    "source": "SessionLabController.java"
+  },
+  {
+    "group": "HTTP Session 实验",
+    "name": "Session 过期：真实Servlet空闲超时与过期后重新创建",
+    "method": "POST",
+    "path": "/lab/session/expiry",
+    "body": "",
+    "source": "SessionLabController.java"
   },
   {
     "group": "雪花算法测试",
@@ -693,61 +837,5 @@
     "path": "/lab/vector/status",
     "body": "",
     "source": "VectorTestController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "查看各组件 UI 地址与页面位置（Collector 无独立业务 UI）",
-    "method": "GET",
-    "path": "/lab/monitoring/guide",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "Loki：写入独立日志并用 LogQL 查回",
-    "method": "POST",
-    "path": "/lab/monitoring/loki",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "Prometheus：up 即时查询与范围查询对照",
-    "method": "POST",
-    "path": "/lab/monitoring/prometheus",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "Alertmanager：发送一分钟实验告警并查回",
-    "method": "POST",
-    "path": "/lab/monitoring/alertmanager",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "OTel：SDK 导出至 Collector 并验证存储证据",
-    "method": "POST",
-    "path": "/lab/monitoring/otel",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "SkyWalking：逐个查回 trace 的六个关联 span",
-    "method": "POST",
-    "path": "/lab/monitoring/skywalking",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
-  },
-  {
-    "group": "可观测性中间件实验",
-    "name": "Grafana：健康、登录边界、三服务面板和数据源检查",
-    "method": "POST",
-    "path": "/lab/monitoring/grafana",
-    "body": "",
-    "source": "MonitoringMiddlewareLabController.java"
   }
 ]

@@ -34,7 +34,11 @@ async function serve(request,response){
   response.end(content);
 }
 const evaluate=script=>window.webContents.executeJavaScript(script);
-const paint=()=>evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+const paint=async()=>{
+  await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+  // Hidden Electron windows can finish DOM layout before committing the captured surface.
+  await new Promise(resolve=>setTimeout(resolve,150));
+};
 async function waitFor(script){
   const deadline=Date.now()+10000;
   while(!await evaluate(script)){
@@ -58,7 +62,26 @@ app.whenReady().then(async()=>{
   await evaluate(`location.hash='lab';navigate();setTheme('dark');`);
   assert.ok(await evaluate(`!document.getElementById('lab').hidden`));
   assert.equal(await evaluate('presets.length'),catalog.length+lessons.length);
+  assert.equal(await evaluate('Number(document.getElementById("lab-total-count").textContent)'),catalog.length+lessons.length);
+  assert.ok(await evaluate('!document.getElementById("lab-kind") && !document.querySelector("[data-lab-kind]")'));
+  assert.equal(await evaluate('document.querySelectorAll("#lab-presets [data-preset]").length'),catalog.length+lessons.length);
+  await evaluate(`document.querySelector('#lab-presets details').open=false;`);
+  await paint();
+  await evaluate('renderPresets();');
+  assert.ok(await evaluate('!document.querySelector("#lab-presets details").open'));
+  await check('elasticsearch-all');
+  assert.ok(await evaluate('document.querySelectorAll("#lab-learning-guide table").length>=2 && document.querySelectorAll("#lab-learning-guide pre code").length>=1'));
+  await paint();
+  await fs.writeFile(path.join(output,'elasticsearch-dark.png'),(await window.webContents.capturePage()).toPNG());
+  await evaluate(`setTheme('light');`);
+  await paint();
+  await fs.writeFile(path.join(output,'elasticsearch-light.png'),(await window.webContents.capturePage()).toPNG());
+  await evaluate(`setTheme('dark');`);
   for(const id of ['memory','linux-memory','webhook','socket','jdk-8','jdk-21','jdk-25','jdk25-preview'])await check(id);
+  for(const id of ['socket-all','socket-lifecycle','session-all','session-isolation','session-lifecycle','session-expiry']){
+    await check(id);
+    assert.ok(await evaluate('document.querySelectorAll("#lab-learning-guide table").length>=2'));
+  }
   for(const component of ['loki','prometheus','alertmanager','otel','skywalking','grafana']){
     await check('middleware-'+component);
     assert.ok(await evaluate(`!document.getElementById('lab-learning-links').hidden`));
@@ -67,7 +90,7 @@ app.whenReady().then(async()=>{
   }
   await paint();
   await fs.writeFile(path.join(output,'monitoring-grafana.png'),(await window.webContents.capturePage()).toPNG());
-  await evaluate(`document.getElementById('lab-kind').value='learning';document.getElementById('lab-search').value='ScopedValue';renderPresets();`);
+  await evaluate(`document.getElementById('lab-search').value='ScopedValue';renderPresets();`);
   assert.equal(await evaluate('document.querySelectorAll("#lab-presets [data-preset]").length'),1);
   assert.ok(await evaluate('document.getElementById("lab-presets").textContent.includes("JDK 25")'));
   await evaluate(`document.getElementById('lab-search').value='';renderPresets();document.getElementById('discover-lab').click();`);
@@ -83,9 +106,18 @@ app.whenReady().then(async()=>{
   await waitFor('window.innerWidth<=480');
   await paint();
   assert.ok(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'));
+  assert.ok(await evaluate('document.querySelector(".lab-catalog").classList.contains("compact") && document.getElementById("toggle-lab-catalog").getAttribute("aria-expanded")==="false"'));
+  await evaluate('document.getElementById("toggle-lab-catalog").click();');
+  assert.ok(await evaluate('!document.querySelector(".lab-catalog").classList.contains("compact")'));
+  await evaluate('document.getElementById("toggle-lab-catalog").click();');
   await fs.writeFile(path.join(output,'jdk25-mobile.png'),(await window.webContents.capturePage()).toPNG());
-  await evaluate(`document.getElementById('lab-kind').value='api';renderPresets();selectPreset(presets.findIndex(p=>p.path==='/lab/javacore/socket/send'));`);
+  await evaluate(`renderPresets();selectPreset(presets.findIndex(p=>p.path==='/lab/javacore/socket/send'));`);
   assert.ok(await evaluate(`!document.getElementById('lab-api-workspace').hidden && document.getElementById('lab-learning-workspace').hidden && document.getElementById('lab-method').value==='POST'`));
+  assert.ok(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'));
+  window.setSize(1440,1000);
+  await evaluate(`renderPresets();selectPreset(presets.findIndex(p=>p.path==='/lab/elasticsearch/scenario'));`);
+  await paint();
+  await fs.writeFile(path.join(output,'elasticsearch-api.png'),(await window.webContents.capturePage()).toPNG());
   assert.equal(requests,1); // only the explicit discovery request; lesson selection must not execute experiments
   await fs.writeFile(path.join(output,'result.json'),JSON.stringify({passed:true,interfaces:catalog.length,lessons:lessons.length,middlewareUiLinks:true,discovery:true,narrowLayout:true},null,2));
   console.log(`Lab UI smoke passed: ${catalog.length} interfaces, ${lessons.length} lessons, middleware UI links, discovery, docs, mode switching and narrow layout.`);

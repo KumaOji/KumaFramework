@@ -3,7 +3,7 @@ plugins {
     alias(projectLibs.plugins.spring.dependency.management)
 }
 
-description = '标准业务项目模板：常规分层、Nacos、双数据源、MyBatis、线程池与 HTTP 连接池'
+description = '标准业务项目模板：常规分层、Nacos、双数据源、MyBatis 与线程池'
 
 dependencyManagement {
     imports {
@@ -14,7 +14,6 @@ dependencyManagement {
 dependencies {
     implementation project(':kuma-boot-framework:kuma-boot-starter-core')
     implementation project(':kuma-boot-framework:kuma-boot-starter-web')
-    implementation project(':kuma-boot-framework:kuma-boot-starter-client')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-datasource')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-migration')
     implementation project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')

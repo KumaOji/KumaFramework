@@ -29,7 +29,9 @@ test('all lesson cards have existing sources, mirrored docs, commands and search
   }
   for(const id of ['memory','webhook','socket','linux-memory','jdk-8','jdk-21','jdk-25','jdk25-preview',
     'otel-sdk','otel-skywalking','skywalking-agent','database-otel','database-skywalking',
-    'middleware-loki','middleware-prometheus','middleware-alertmanager','middleware-otel','middleware-skywalking','middleware-grafana'])assert.ok(ids.has(id));
+    'middleware-loki','middleware-prometheus','middleware-alertmanager','middleware-otel','middleware-skywalking','middleware-grafana',
+    'elasticsearch-all','elasticsearch-crud','elasticsearch-search','elasticsearch-aggregation',
+    'socket-all','socket-lifecycle','session-all','session-isolation','session-lifecycle','session-expiry'])assert.ok(ids.has(id));
   assert.equal(model.groups(cards,'ScopedValue','learning').flatMap(group=>group.items).some(({entry})=>entry.id==='jdk-25'),true);
   assert.equal(model.groups(cards,'','api').length,0);
 });

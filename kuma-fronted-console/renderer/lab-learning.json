@@ -900,5 +900,270 @@
         "location": "选择 Loki / Prometheus / SkyWalking traces 数据源"
       }
     ]
+  },
+  {
+    "kind": "learning",
+    "id": "elasticsearch-all",
+    "group": "Elasticsearch 实验",
+    "name": "Elasticsearch 完整实验",
+    "description": "连接现有 WSL ES，逐步展示请求 DSL、实际响应和 checks；独立索引结束后自动清理。",
+    "runtime": "JDK 25 · Gradle · WSL Elasticsearch 8.17",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1 -Lesson all",
+    "topics": [
+      "Mapping",
+      "CRUD",
+      "refresh",
+      "全文搜索",
+      "聚合"
+    ],
+    "expected": [
+      "所有 checks 为 true，最后 indexCleaned=true。",
+      "每个专项独立建样本，无需启动 Spring 或 Nacos。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/elasticsearch/ElasticsearchLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1",
+      "kuma-project/kuma-project-lab/scripts/forward-elasticsearch-lab.sh"
+    ],
+    "doc": "/lab-guides/elasticsearch-labs.md",
+    "mainClass": "com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "elasticsearch-crud",
+    "group": "Elasticsearch 实验",
+    "name": "Elasticsearch 索引与文档 CRUD",
+    "description": "连接现有 WSL ES，逐步展示请求 DSL、实际响应和 checks；独立索引结束后自动清理。",
+    "runtime": "JDK 25 · Gradle · WSL Elasticsearch 8.17",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1 -Lesson crud",
+    "topics": [
+      "text / keyword",
+      "bulk NDJSON",
+      "实时 GET",
+      "refresh",
+      "部分更新",
+      "删除"
+    ],
+    "expected": [
+      "所有 checks 为 true，最后 indexCleaned=true。",
+      "每个专项独立建样本，无需启动 Spring 或 Nacos。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/elasticsearch/ElasticsearchLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1",
+      "kuma-project/kuma-project-lab/scripts/forward-elasticsearch-lab.sh"
+    ],
+    "doc": "/lab-guides/elasticsearch-labs.md",
+    "mainClass": "com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo",
+    "mainArgs": "crud"
+  },
+  {
+    "kind": "learning",
+    "id": "elasticsearch-search",
+    "group": "Elasticsearch 实验",
+    "name": "Elasticsearch 分词与全文搜索",
+    "description": "连接现有 WSL ES，逐步展示请求 DSL、实际响应和 checks；独立索引结束后自动清理。",
+    "runtime": "JDK 25 · Gradle · WSL Elasticsearch 8.17",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1 -Lesson search",
+    "topics": [
+      "standard analyzer",
+      "match / term",
+      "bool / filter / range",
+      "排序",
+      "高亮"
+    ],
+    "expected": [
+      "所有 checks 为 true，最后 indexCleaned=true。",
+      "每个专项独立建样本，无需启动 Spring 或 Nacos。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/elasticsearch/ElasticsearchLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1",
+      "kuma-project/kuma-project-lab/scripts/forward-elasticsearch-lab.sh"
+    ],
+    "doc": "/lab-guides/elasticsearch-labs.md",
+    "mainClass": "com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo",
+    "mainArgs": "search"
+  },
+  {
+    "kind": "learning",
+    "id": "elasticsearch-aggregation",
+    "group": "Elasticsearch 实验",
+    "name": "Elasticsearch 分组与价格统计",
+    "description": "连接现有 WSL ES，逐步展示请求 DSL、实际响应和 checks；独立索引结束后自动清理。",
+    "runtime": "JDK 25 · Gradle · WSL Elasticsearch 8.17",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1 -Lesson aggregation",
+    "topics": [
+      "keyword",
+      "terms 分桶",
+      "avg",
+      "stats",
+      "size=0"
+    ],
+    "expected": [
+      "所有 checks 为 true，最后 indexCleaned=true。",
+      "每个专项独立建样本，无需启动 Spring 或 Nacos。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/elasticsearch/ElasticsearchLearningDemo.java",
+      "kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1",
+      "kuma-project/kuma-project-lab/scripts/forward-elasticsearch-lab.sh"
+    ],
+    "doc": "/lab-guides/elasticsearch-labs.md",
+    "mainClass": "com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo",
+    "mainArgs": "aggregation"
+  },
+  {
+    "kind": "learning",
+    "id": "socket-all",
+    "group": "Socket 与 HTTP Session",
+    "name": "Socket 完整实验：协议与连接生命周期",
+    "description": "本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。",
+    "runtime": "JDK 25 · Gradle · 本机回环",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:socketLab",
+    "topics": [
+      "TCP 分帧",
+      "UDP",
+      "SO_TIMEOUT",
+      "长连接",
+      "半关闭 / EOF",
+      "重连"
+    ],
+    "expected": [
+      "既有分帧、读取超时和UDP检查通过；两个真实TCP连接的生命周期检查全通过。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/network/SocketLifecycleLesson.java"
+    ],
+    "doc": "/lab-guides/socket-session-labs.md",
+    "mainClass": "com.kuma.cloud.lab.network.SocketLifecycleLesson",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "socket-lifecycle",
+    "group": "Socket 与 HTTP Session",
+    "name": "Socket 长连接、半关闭与重连",
+    "description": "本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。",
+    "runtime": "JDK 25 · Gradle · 本机回环",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:socketLab -PsocketLesson=lifecycle",
+    "topics": [
+      "连接端点",
+      "连续收发",
+      "连接内状态",
+      "shutdownOutput",
+      "isConnected / isClosed"
+    ],
+    "expected": [
+      "首连接三条回复序号1～3，重连后的序号从1开始；关闭后不能复用Socket。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/network/SocketLifecycleLesson.java"
+    ],
+    "doc": "/lab-guides/socket-session-labs.md",
+    "mainClass": "com.kuma.cloud.lab.network.SocketLifecycleLesson",
+    "mainArgs": "lifecycle"
+  },
+  {
+    "kind": "learning",
+    "id": "session-all",
+    "group": "Socket 与 HTTP Session",
+    "name": "HTTP Session 完整实验",
+    "description": "本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。",
+    "runtime": "JDK 25 · Gradle · 本机回环",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:sessionLab",
+    "topics": [
+      "CookieManager",
+      "HttpSession",
+      "TCP连接与会话",
+      "客户端隔离",
+      "changeSessionId",
+      "invalidate",
+      "空闲过期"
+    ],
+    "expected": [
+      "Cookie、隔离、ID更换、注销和空闲过期的checks全为true；容器与临时文件已清理。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/session/SessionLearningDemo.java"
+    ],
+    "doc": "/lab-guides/socket-session-labs.md",
+    "mainClass": "com.kuma.cloud.lab.session.SessionLearningDemo",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "session-isolation",
+    "group": "Socket 与 HTTP Session",
+    "name": "Session Cookie 延续与客户端隔离",
+    "description": "本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。",
+    "runtime": "JDK 25 · Gradle · 本机回环",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:sessionLab -PsessionLesson=isolation",
+    "topics": [
+      "Cookie / Session",
+      "isNew",
+      "getSession(false)",
+      "不同客户端",
+      "同Cookie跨TCP连接"
+    ],
+    "expected": [
+      "A的计数1→2→3，B为1；A换TCP连接仍保留Session，无Cookie的访问产生新Session。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/session/SessionLearningDemo.java"
+    ],
+    "doc": "/lab-guides/socket-session-labs.md",
+    "mainClass": "com.kuma.cloud.lab.session.SessionLearningDemo",
+    "mainArgs": "isolation"
+  },
+  {
+    "kind": "learning",
+    "id": "session-lifecycle",
+    "group": "Socket 与 HTTP Session",
+    "name": "Session ID 更换、注销与重建",
+    "description": "本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。",
+    "runtime": "JDK 25 · Gradle · 本机回环",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:sessionLab -PsessionLesson=lifecycle",
+    "topics": [
+      "changeSessionId",
+      "属性保留",
+      "旧ID重放",
+      "invalidate",
+      "Cookie清除"
+    ],
+    "expected": [
+      "更换ID保留属性，旧ID失效；注销后不能重放恢复，重建计数为1。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/session/SessionLearningDemo.java"
+    ],
+    "doc": "/lab-guides/socket-session-labs.md",
+    "mainClass": "com.kuma.cloud.lab.session.SessionLearningDemo",
+    "mainArgs": "lifecycle"
+  },
+  {
+    "kind": "learning",
+    "id": "session-expiry",
+    "group": "Socket 与 HTTP Session",
+    "name": "Session 空闲超时与过期",
+    "description": "本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。",
+    "runtime": "JDK 25 · Gradle · 本机回环",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:sessionLab -PsessionLesson=expiry",
+    "topics": [
+      "maxInactiveInterval",
+      "空闲有效期",
+      "Cookie有效期",
+      "会话重建"
+    ],
+    "expected": [
+      "无请求等待2.1秒后1秒空闲Session失效，新Session使用新ID和初始计数。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/session/SessionLearningDemo.java"
+    ],
+    "doc": "/lab-guides/socket-session-labs.md",
+    "mainClass": "com.kuma.cloud.lab.session.SessionLearningDemo",
+    "mainArgs": "expiry"
   }
 ]

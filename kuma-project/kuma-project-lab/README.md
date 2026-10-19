@@ -25,6 +25,7 @@
 - `binlog`：MySQL Row Binlog 变更捕获测试
 - `kafka`：Kafka 消息生产与消费测试
 - `redis`：String / Hash / List / Set 读写与 TTL 验证
+- `elasticsearch`：真实 ES 的 Mapping、文档 CRUD、refresh、分词与全文搜索、过滤排序高亮、分组聚合
 - `vector`：向量库写入、相似度检索、元数据过滤与删除验证
 - `leetcode`：算法练习题在线运行与内置用例验证
 - `starter`：统一探测与冒烟测试各 `kuma-boot-starter-*` 依赖
@@ -38,6 +39,19 @@
 - `memory`：JMM 重排序与发布、JVM 堆/线程栈/堆外内存；配套 Linux 用户态/内核态、系统调用、mmap 与写时复制实验
 - `network`：Webhook 签名、时间窗口、幂等与重试；TCP 分帧、半关闭、读取超时及 UDP 数据报通信
 - `jdk`：按 JDK 8～25 的代表性功能正式版本组织的实验，统一在 JDK25 运行，含独立预览示例
+
+## Elasticsearch 实验
+
+使用现有 WSL ES，包含索引与 Mapping、文档 CRUD、refresh 可见性对照、分词与 match/term、过滤排序高亮、terms/avg/stats 聚合。
+每次创建独立索引并自动清理，报告保留实际请求 DSL、响应和检查结果；控制台已提供学习卡片和 HTTP 实验入口。
+详细步骤见 [Elasticsearch 实验教程](docs/elasticsearch-labs.md)。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1
+```
+
+添加 `-Lesson crud`、`search` 或 `aggregation` 单独运行。Lab 接口为 `/api/lab/elasticsearch/*`，
+进程通过 `KUMA_LAB_ES_URL` 配置可达地址。
 
 ## OTel 与 SkyWalking 可观测性实验
 
@@ -88,6 +102,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 正式功能无需预览开关、Spring 或中间件；版本地图与历史预览说明见 [JDK 功能实验](docs/jdk-version-labs.md)。
 
 ## Webhook 与 Socket 通信实验
+
+新增 Socket 长连接、半关闭、连接内状态和重连，以及真实 Servlet HTTP Session 的 Cookie延续、
+客户端隔离、跨TCP连接保持会话、ID更换、注销和空闲过期实验。
+无需启动 Spring、Nacos 或 WSL，教程见 [Socket 与 Session 实验](docs/socket-session-labs.md)：
+
+```powershell
+./gradlew.bat :kuma-project:kuma-project-lab:socketLab
+./gradlew.bat :kuma-project:kuma-project-lab:sessionLab
+```
+
+控制台有学习卡片；Lab 接口为 `/api/lab/socket/*` 和 `/api/lab/session/*`。
 
 直接运行 `com.kuma.cloud.lab.network.NetworkLearningDemo.main()`，或分别运行 `WebhookLesson.main()`、`SocketLesson.main()`。
 仅依赖 JDK 25，使用本机回环地址和临时端口，无需 Spring 或外部服务。

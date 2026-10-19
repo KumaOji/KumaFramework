@@ -60,3 +60,103 @@ pre,.code-content{background:var(--surface-2);color:var(--text);font:12px/1.9 "C
 .learning-sources,.learning-content .mono{overflow-wrap:anywhere;font-size:11px;line-height:1.8}
 #lab-learning-error{margin:15px 23px 0}
 @media(max-width:520px){.learning-content{padding:0 18px 18px}.learning-content .row-between{align-items:center}}
+
+/* Shared console refresh: clearer hierarchy, comfortable density, and a focused Lab workspace. */
+:root {
+  --bg:#f3f5fa; --panel:#fff; --border:#e2e7f0; --text:#25324a;
+  --muted:#63718b; --mint:#415ed2; --blue:#168577;
+  --surface-2:#f7f9fc; --surface-3:#edf0f7; --accent-soft:#edf1ff;
+  --sidebar:220px; --panel-shadow:0 3px 18px #23324d05;
+}
+:root[data-theme="dark"] {
+  --bg:#101722; --panel:#182131; --border:#2a3548; --text:#e6edf7;
+  --muted:#9baac0; --mint:#a8b8ff; --blue:#78d3c3;
+  --surface-2:#131c2a; --surface-3:#263248; --accent-soft:#253352;
+  --panel-shadow:0 4px 20px #0000000c;
+}
+.sidebar{background:#121c2d;border-right-color:#253148;padding:25px 14px}
+.brand{font-size:21px;gap:12px;letter-spacing:-.5px}
+.brand-symbol{width:34px;height:34px;border-radius:11px;background:#586bdc;font-size:23px}
+.brand-small{color:#94a4c0;margin-top:3px;font-size:11px}
+.nav-label{color:#7f91af;margin:32px 13px 12px;font-size:11px}
+nav a{min-height:44px;border-radius:9px;gap:12px;padding:11px 13px;color:#a9b8cf;margin:5px 0}
+nav a:hover{background:#1c2940}nav a.active{background:#293858;color:#e5ebff}
+nav a.active:before{top:13px;bottom:13px;background:#a1b4ff}
+.sidebar-bottom{color:#a9b8cf}.sidebar-bottom small{color:#91a1bd}.version{color:#8c9cb6;border-color:#2a3750}
+header{height:64px;background:var(--panel);padding:0 30px}
+.header-right{gap:10px}.connection{font-size:12px}.breadcrumb{font-size:13px}
+main{padding:28px 30px 12px;max-width:1640px}
+.page-heading{margin-bottom:24px;gap:20px}.page-heading h1{font-size:28px;font-weight:700;letter-spacing:-.7px}
+.page-heading p{font-size:13px;line-height:1.8;margin-top:7px}.eyebrow{font-size:10px;letter-spacing:1.3px;margin-bottom:7px}
+.panel{border-radius:12px;box-shadow:var(--panel-shadow);margin-bottom:20px}
+.panel-heading{padding:20px 22px}.panel-heading h2{font-size:15px}.panel-heading p{font-size:12px}
+.button{border-radius:8px;font-size:12px;min-height:36px;padding:9px 13px}
+.button.primary{background:#4960cc;border-color:#4960cc;color:#fff}.button.primary:hover{background:#3c51b3;border-color:#3c51b3}
+.button:disabled{opacity:.6;cursor:wait}.button.quiet:hover{background:var(--surface-3)}
+input,select,textarea{border-radius:8px;font-size:13px;min-height:40px}
+input::placeholder,textarea::placeholder{opacity:.8}input:focus,select:focus,textarea:focus{border-color:var(--mint)}
+.metric{border-radius:12px;padding:20px;min-height:140px;box-shadow:var(--panel-shadow)}
+.metric-value{font-size:32px;letter-spacing:-1px;font-weight:650;margin-top:12px}.metric-note{font-size:11px}
+.metric-icon{background:var(--accent-soft);color:var(--mint);width:30px;height:30px;border-radius:9px}
+.metrics{gap:16px;margin-bottom:22px}.overview-grid,.two-columns{gap:20px}
+.status{font-size:11px;border-radius:6px}.count{font-variant-numeric:tabular-nums}
+td{font-size:12px;padding:13px 18px}th{font-size:11px;padding:12px 18px}.stack-row{padding:13px 0}
+.tabs button{font-size:13px}.notice,.empty{font-size:13px}.empty p{color:var(--muted);font-size:12px;line-height:1.8}
+.hardware-item{border-radius:10px}.hardware-item strong{font-size:12px}
+.lab-overview{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-bottom:20px}
+.lab-overview-card{display:flex;align-items:center;gap:13px;text-align:left;padding:17px 19px;background:var(--panel);border:1px solid var(--border);border-radius:12px;color:var(--text);min-width:0}
+.lab-overview-card>span:nth-child(2){font-size:13px;font-weight:600}.lab-overview-card small{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:4px}
+.lab-overview-card strong{margin-left:auto;font-size:26px;letter-spacing:-.8px;font-variant-numeric:tabular-nums;font-weight:650;color:var(--mint)}
+.lab-overview-icon{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border:1px solid var(--border);background:var(--surface-2);border-radius:10px;font:21px "Segoe UI",sans-serif;color:var(--mint)}
+.lab-target{padding:12px 18px;background:var(--panel);border-color:var(--border);border-radius:10px;margin-bottom:20px}
+.lab-target strong{color:var(--text)}.lab-target code{font-size:12px}.lab-target .muted{font-size:12px}
+.lab-layout{grid-template-columns:310px minmax(0,1fr);gap:20px}.lab-main{min-width:0}
+.lab-catalog{top:20px;margin-bottom:0}.lab-catalog .panel-heading{padding:17px 16px}.lab-catalog .panel-heading h2{font-size:14px}
+.lab-catalog .count{font-size:10px;margin-left:3px;padding:3px 6px}
+.lab-catalog .button.small{font-size:11px;padding:7px 9px}.lab-catalog select{margin-bottom:10px}
+.catalog-actions{display:flex;gap:7px;align-items:center}#toggle-lab-catalog{display:none}
+.lab-search-wrap{position:relative;margin:0 16px 12px}.lab-catalog .lab-search-wrap input{width:100%;margin:0;padding-right:33px;font-size:12px}
+.lab-search-wrap kbd{position:absolute;right:11px;top:10px;border:1px solid var(--border);border-radius:4px;padding:0 5px;color:var(--muted);font:12px/18px Consolas,monospace;pointer-events:none}
+#lab-presets{max-height:min(620px,calc(100vh - 260px));padding:4px 8px 12px;scrollbar-gutter:stable}
+.preset-category{border:0;margin:0 0 3px}.preset-group{display:flex;align-items:center;gap:9px;margin:0;padding:13px 9px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:0;list-style:none}
+.preset-group::-webkit-details-marker{display:none}.preset-group:before{content:'›';font:17px/1 sans-serif;transform:rotate(0deg)}
+.preset-category[open]>.preset-group:before{transform:rotate(90deg)}.preset-group:hover{color:var(--text);background:var(--surface-2);border-radius:7px}
+.group-count{font-size:10px;font-weight:400;margin-left:auto;background:var(--surface-3);border-radius:5px;padding:2px 6px;min-width:22px;text-align:center}
+.preset{padding:11px 10px;border-radius:7px;gap:9px;font-size:12px;align-items:flex-start;line-height:1.7;margin:2px 0}
+.preset.active{box-shadow:inset 3px 0 var(--mint)}.preset-label{min-width:0;overflow-wrap:anywhere}
+.method-tag{font-size:9px;min-width:38px;padding:1px 4px;border-radius:4px;background:var(--surface-3);text-align:center;margin-top:2px;flex-shrink:0}
+.method-tag.learning{background:var(--accent-soft)}.catalog-note{font-size:11px;padding:13px 16px;line-height:1.7}
+.request-url{padding:0 22px 12px;align-items:stretch}.request-url select{width:95px;font-weight:600}
+#lab-body{min-height:200px;font-size:13px;line-height:1.85;background:var(--surface-2)}
+.response-code{min-height:210px;font-size:12px;line-height:1.9}.field-label{margin-top:18px}
+.learning-panel>.panel-heading{padding:23px 26px 18px;border-bottom:1px solid var(--border);background:var(--panel)}
+.learning-panel .panel-heading h2{font-size:21px;letter-spacing:-.4px;margin-top:6px}.learning-panel .panel-heading p{max-width:650px;line-height:1.8}
+#lab-learning-runtime{max-width:220px;font-size:11px;background:var(--accent-soft);color:var(--mint);padding:7px 10px}
+.learning-content{padding:0 26px 22px}.learning-topics{margin:18px 0 24px;gap:7px}.learning-topics .status{font-size:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--muted);padding:4px 8px}
+.learning-content h3{font-size:14px;font-weight:650;margin:0;color:var(--text)}.learning-section{margin-bottom:25px}
+.lesson-step{font:10px Consolas,monospace;color:var(--mint);padding:4px 6px;background:var(--accent-soft);border-radius:4px;margin-right:5px}
+.learning-instruction{font-size:12px;line-height:1.8;color:var(--muted);margin:12px 0}
+.learning-content pre{font-size:12px;line-height:1.9;border-radius:9px;padding:17px 18px;margin:12px 0 0;max-height:340px;white-space:pre-wrap;overflow-wrap:anywhere}
+.learning-content ul{font-size:13px;margin:12px 0 0;line-height:1.9;color:var(--text)}
+#lab-learning-expected{list-style:none;padding:0}#lab-learning-expected li{position:relative;padding:8px 12px 8px 31px;margin:7px 0;background:var(--surface-2);border-radius:7px}
+#lab-learning-expected li:before{content:'○';position:absolute;left:12px;color:var(--mint)}
+.learning-source-details{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.learning-source-details summary{padding:12px 15px;font-size:12px}.learning-source-details .mono{padding:10px 15px 0}.learning-source-details ul{padding:0 16px 14px 32px;color:var(--muted);font-size:11px}
+.learning-guide-details>summary{font-weight:600;font-size:13px;padding:17px 26px;background:var(--surface-2);color:var(--text)}
+.guide-content{padding:8px 26px 28px;font-size:13px;line-height:1.95;overflow-wrap:anywhere;color:var(--text)}
+.guide-content h2{font-size:21px;letter-spacing:-.4px;margin:20px 0 14px}.guide-content h3{font-size:16px;margin:27px 0 12px}.guide-content h4,.guide-content h5,.guide-content h6{font-size:14px;margin:20px 0 10px}
+.guide-content p{margin:12px 0;color:var(--muted)}.guide-content strong{color:var(--text)}.guide-content ul,.guide-content ol{padding-left:23px;margin:12px 0}.guide-content li{padding:3px 0}
+.guide-content a{color:var(--mint);text-decoration:underline;text-underline-offset:3px}
+.guide-content p code,.guide-content li code,.guide-content td code{font-size:11px;background:var(--surface-3);border-radius:4px;padding:2px 5px;color:var(--text)}
+.guide-code{border:1px solid var(--border);border-radius:9px;overflow:hidden;margin:16px 0;background:var(--surface-2)}
+.guide-code-language{display:block;border-bottom:1px solid var(--border);padding:7px 14px;color:var(--muted);font:10px Consolas,monospace}
+.guide-code pre{padding:14px 16px;font-size:12px;line-height:1.9;max-height:360px}.guide-code pre code{padding:0;background:transparent}
+.guide-table{overflow:auto;border:1px solid var(--border);border-radius:8px;margin:16px 0}.guide-table table{white-space:normal;min-width:360px;line-height:1.7}.guide-table th,.guide-table td{padding:10px 13px;font-size:12px}.guide-table tr:last-child td{border-bottom:0}
+footer{padding:16px 30px 24px;font-size:11px}
+.desktop #desktop-bar{background:#121c2d;border-bottom:1px solid #253148}
+@media(min-width:1550px){.metric{min-height:140px}.metric-value{font-size:34px}}
+@media(max-width:1200px){:root{--sidebar:200px}header{padding:0 22px}main{padding:24px 22px 12px}.lab-layout{grid-template-columns:270px minmax(0,1fr)}.lab-overview-card{padding:15px 14px;gap:10px}.lab-overview-card small{font-size:10px}.metric-value{font-size:29px}}
+@media(max-width:1000px){.lab-overview-card small{display:none}.lab-overview-card strong{font-size:23px}.lab-overview-icon{width:30px;height:30px}.learning-panel>.panel-heading{flex-wrap:wrap}.request-url{flex-wrap:wrap}.request-url input{min-width:120px}}
+@media(max-width:850px){:root{--sidebar:68px}.sidebar{padding:23px 8px}.brand-symbol{width:36px;height:36px}.brand{justify-content:center}nav{margin-top:30px}nav a{padding:14px 5px;font-size:0;justify-content:center}.lab-layout{grid-template-columns:1fr}.lab-catalog{position:static}.lab-overview{gap:9px}#lab-presets{max-height:270px}.lab-catalog .panel-heading{padding:16px}.lab-overview-card{padding:12px}.lab-overview-card .lab-overview-icon{display:none}.lab-overview-card>span:nth-child(2){font-size:12px}}
+@media(max-width:520px){header{padding:0 12px}.breadcrumb{font-size:11px}.header-right .button{padding:7px;min-height:33px}main{padding:22px 14px 10px}.page-heading h1{font-size:25px}.page-heading p{font-size:12px}.page-heading{flex-wrap:wrap;gap:12px}.page-heading>.button{font-size:11px}.lab-overview-card{flex-direction:column;align-items:flex-start;gap:6px;padding:11px}.lab-overview-card strong{margin:0;font-size:25px}.lab-overview-card>span:nth-child(2){font-size:11px}.lab-target{gap:8px;padding:12px}.lab-target code{font-size:11px;max-width:100%}.learning-panel>.panel-heading{padding:19px 18px}.learning-panel .panel-heading h2{font-size:18px}.learning-content{padding:0 18px 18px}.learning-guide-details>summary{padding:16px 18px}.guide-content{padding:6px 18px 22px}.guide-content h2{font-size:19px}.guide-code pre{padding:12px;font-size:11px}.metric{min-height:134px;padding:15px}.metric-value{font-size:26px}.metrics{gap:10px}.panel-heading{padding:18px}.hardware-grid{padding:0 18px 18px}footer{padding:15px 14px}}
+@media(max-width:850px){#toggle-lab-catalog{display:inline-flex}.lab-catalog.compact>:not(.panel-heading){display:none}.lab-catalog .panel-heading{gap:8px}.lab-catalog .catalog-actions{margin-left:auto}}

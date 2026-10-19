@@ -172,8 +172,50 @@ for component, name, topics, expected, ui in [
     cards[-1]['mainArgs'] = component
     cards[-1]['uiLinks'] = [dict(name=name, url=url, location=location) for name, url, location in ui]
 
+es_script = 'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1'
+for lesson, name, topics in [
+    ('all', 'Elasticsearch 完整实验', ['Mapping', 'CRUD', 'refresh', '全文搜索', '聚合']),
+    ('crud', 'Elasticsearch 索引与文档 CRUD', ['text / keyword', 'bulk NDJSON', '实时 GET', 'refresh', '部分更新', '删除']),
+    ('search', 'Elasticsearch 分词与全文搜索', ['standard analyzer', 'match / term', 'bool / filter / range', '排序', '高亮']),
+    ('aggregation', 'Elasticsearch 分组与价格统计', ['keyword', 'terms 分桶', 'avg', 'stats', 'size=0']),
+]:
+    add('elasticsearch-' + lesson, 'Elasticsearch 实验', name,
+        '连接现有 WSL ES，逐步展示请求 DSL、实际响应和 checks；独立索引结束后自动清理。',
+        'JDK 25 · Gradle · WSL Elasticsearch 8.17', es_script + ' -Lesson ' + lesson,
+        topics, ['所有 checks 为 true，最后 indexCleaned=true。', '每个专项独立建样本，无需启动 Spring 或 Nacos。'],
+        [f'{java}/elasticsearch/ElasticsearchLearningDemo.java', 'scripts/run-elasticsearch-labs-wsl.ps1', 'scripts/forward-elasticsearch-lab.sh'],
+        'docs/elasticsearch-labs.md', 'com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
 docs.mkdir(exist_ok=True)
-guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md')
+for identifier, name, task, args, topics, expected, source in [
+    ('socket-all', 'Socket 完整实验：协议与连接生命周期', 'socketLab', '',
+     ['TCP 分帧', 'UDP', 'SO_TIMEOUT', '长连接', '半关闭 / EOF', '重连'],
+     ['既有分帧、读取超时和UDP检查通过；两个真实TCP连接的生命周期检查全通过。'], 'network/SocketLifecycleLesson.java'),
+    ('socket-lifecycle', 'Socket 长连接、半关闭与重连', 'socketLab', ' -PsocketLesson=lifecycle',
+     ['连接端点', '连续收发', '连接内状态', 'shutdownOutput', 'isConnected / isClosed'],
+     ['首连接三条回复序号1～3，重连后的序号从1开始；关闭后不能复用Socket。'], 'network/SocketLifecycleLesson.java'),
+    ('session-all', 'HTTP Session 完整实验', 'sessionLab', '',
+     ['CookieManager', 'HttpSession', 'TCP连接与会话', '客户端隔离', 'changeSessionId', 'invalidate', '空闲过期'],
+     ['Cookie、隔离、ID更换、注销和空闲过期的checks全为true；容器与临时文件已清理。'], 'session/SessionLearningDemo.java'),
+    ('session-isolation', 'Session Cookie 延续与客户端隔离', 'sessionLab', ' -PsessionLesson=isolation',
+     ['Cookie / Session', 'isNew', 'getSession(false)', '不同客户端', '同Cookie跨TCP连接'],
+     ['A的计数1→2→3，B为1；A换TCP连接仍保留Session，无Cookie的访问产生新Session。'], 'session/SessionLearningDemo.java'),
+    ('session-lifecycle', 'Session ID 更换、注销与重建', 'sessionLab', ' -PsessionLesson=lifecycle',
+     ['changeSessionId', '属性保留', '旧ID重放', 'invalidate', 'Cookie清除'],
+     ['更换ID保留属性，旧ID失效；注销后不能重放恢复，重建计数为1。'], 'session/SessionLearningDemo.java'),
+    ('session-expiry', 'Session 空闲超时与过期', 'sessionLab', ' -PsessionLesson=expiry',
+     ['maxInactiveInterval', '空闲有效期', 'Cookie有效期', '会话重建'],
+     ['无请求等待2.1秒后1秒空闲Session失效，新Session使用新ID和初始计数。'], 'session/SessionLearningDemo.java'),
+]:
+    add(identifier, 'Socket 与 HTTP Session', name,
+        '本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。',
+        'JDK 25 · Gradle · 本机回环', './gradlew.bat :kuma-project:kuma-project-lab:' + task + args,
+        topics, expected, [f'{java}/{source}'], 'docs/socket-session-labs.md',
+        'com.kuma.cloud.lab.' + ('network.SocketLifecycleLesson' if task == 'socketLab' else 'session.SessionLearningDemo'))
+    cards[-1]['mainArgs'] = 'lifecycle' if identifier == 'socket-lifecycle' else identifier.removeprefix('session-') if identifier.startswith('session-') else 'all'
+
+guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md', 'elasticsearch-labs.md', 'socket-session-labs.md')
 for name in guides:
     shutil.copyfile(lab / 'docs' / name, docs / name)
 (renderer / 'lab-learning.json').write_text(json.dumps(cards, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

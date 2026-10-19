@@ -24,8 +24,6 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 25s
   mvc:
-    problemdetails:
-      enabled: true
     async:
       request-timeout: 5s
   datasource:
@@ -65,6 +63,18 @@ mybatis-plus:
 
 kuma:
   boot:
+    web:
+      error:
+        handling:
+          enabled: true
+          search-super-class-hierarchy: true
+          http-statuses:
+            java.lang.IllegalArgumentException: BAD_REQUEST
+            org.springframework.dao.DataAccessException: SERVICE_UNAVAILABLE
+            org.springframework.core.task.TaskRejectedException: SERVICE_UNAVAILABLE
+          messages:
+            java.lang.IllegalArgumentException: 请求不符合业务约束
+            java.lang.Exception: 服务内部错误
     core:
       async:
         enabled: true
@@ -104,18 +114,6 @@ kuma:
       jetcache:
         enabled: false
 
-reference:
-  catalog:
-    base-url: ${CATALOG_BASE_URL:http://127.0.0.1:19093}
-    max-connections: 20
-    max-pending-acquires: 40
-    pending-acquire-timeout: 500ms
-    connect-timeout: 1s
-    response-timeout: 2s
-    request-timeout: 3s
-    max-idle-time: 30s
-    max-life-time: 5m
-    max-in-memory-size: 65536
 
 management:
   health:

@@ -68,6 +68,8 @@ UDP connect 只是设置默认对端和过滤来源，不建立 TCP 式连接或
 
 ## 资料
 
+补充学习：[Socket 生命周期与 HTTP Session](socket-session-labs.md)，包含长连接和重连、Cookie与Session隔离、会话ID更换、注销和过期。
+
 - [GitHub Webhook 验签](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries)
 - [GitHub Webhook 实践与重复投递](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)
 - [JDK Socket](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/Socket.html)

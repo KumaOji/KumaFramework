@@ -125,14 +125,15 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          command_timeout: 20m
+          command_timeout: 45m
           script: |
             set -eu
+            bash /data/kuma-deploy/scripts/wait-observability-server.sh
             # 先同步清单（env/探针等），再用真实镜像覆盖 placeholder，避免镜像被重置导致 ImagePullBackOff
             python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/base/gateway.yaml \
               --image ${{ steps.ver.outputs.FULL_IMAGE }}
             kubectl scale deployment/gateway -n base --replicas=1
-            kubectl rollout status deployment/gateway -n base --timeout=600s
+            kubectl rollout status deployment/gateway -n base --timeout=1800s
 
             for tag in $(k3s crictl images | awk -v repo="${{ env.IMAGE }}" '$1==repo{print $2}'); do
               if [ "$tag" != "${{ steps.ver.outputs.IMAGE_TAG }}" ] && [ "$tag" != "latest" ]; then

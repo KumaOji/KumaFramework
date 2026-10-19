@@ -112,7 +112,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/blog/blog-background.yaml,scripts/apply-k8s-resource.py
+          source: k8s/blog/blog-background.yaml,scripts/apply-k8s-resource.py,scripts/wait-observability-server.sh
           target: /data/kuma-deploy/
           strip_components: 0
 
@@ -122,16 +122,17 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          command_timeout: 20m
+          command_timeout: 45m
           script: |
             set -eu
+            bash /data/kuma-deploy/scripts/wait-observability-server.sh
             python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/blog/blog-background.yaml \
               --image ${{ steps.ver.outputs.FULL_IMAGE }}
             # 同步进度期限，即使服务器上的清单尚未更新也不会沿用默认的 600 秒。
             kubectl patch deployment/blog-background -n blog --type=merge \
               -p '{"spec":{"progressDeadlineSeconds":900}}'
             kubectl scale deployment/blog-background -n blog --replicas=1
-            if ! kubectl rollout status deployment/blog-background -n blog --timeout=900s; then
+            if ! kubectl rollout status deployment/blog-background -n blog --timeout=1800s; then
               kubectl get pods -n blog -l app=blog-background -o wide || true
               kubectl describe deployment/blog-background -n blog || true
               kubectl describe pods -n blog -l app=blog-background || true

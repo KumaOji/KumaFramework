@@ -9,7 +9,8 @@ import com.kuma.cloud.reference.domain.vo.OrderVO;
 import com.kuma.cloud.reference.domain.vo.PageVO;
 import com.kuma.cloud.reference.exception.OrderConflictException;
 import com.kuma.cloud.reference.exception.OrderNotFoundException;
-import com.kuma.cloud.reference.integration.catalog.WebClientProductCatalog;
+import com.kuma.cloud.reference.domain.model.Money;
+import com.kuma.cloud.reference.domain.model.ProductSnapshot;
 import com.kuma.cloud.reference.mapper.OrderMapper;
 import com.kuma.cloud.reference.service.OrderService;
 import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceExecutor;
@@ -25,13 +26,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderMapper orders;
-    private final WebClientProductCatalog catalog;
     private final Clock clock;
     private final DataSourceExecutor schemas;
     private final TransactionTemplate writes;
     private final TransactionTemplate reads;
 
-    public OrderServiceImpl(OrderMapper orders, WebClientProductCatalog catalog, Clock clock,
+    public OrderServiceImpl(OrderMapper orders, Clock clock,
                             DataSourceExecutor schemas, TransactionTemplate writes, PlatformTransactionManager manager) {
         this.schemas = schemas;
         this.writes = writes;
@@ -40,14 +40,12 @@ public class OrderServiceImpl implements OrderService {
         this.reads.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
         this.reads.setTimeout(3);
         this.orders = orders;
-        this.catalog = catalog;
         this.clock = clock;
     }
 
     @Override
     public OrderVO create(CreateOrderDTO request, DataScope scope) {
-        // 外部 HTTP 调用先完成，等待网络响应时不占用数据库事务连接。
-        var product = catalog.findBySku(request.sku());
+        var product = new ProductSnapshot(request.sku(), request.productName(), new Money(request.unitPrice()));
         var order = Order.create(product, request.quantity(), clock.instant());
         return inScope(scope, writes, () -> {
             if (orders.insert(OrderDO.from(order)) != 1) {

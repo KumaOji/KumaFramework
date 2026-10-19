@@ -9,7 +9,7 @@ $sandbox = Invoke-RestMethod "$BaseUrl/api/datasources/current?scope=SANDBOX"
 if ($main.schema -ne 'kuma_reference_main' -or $sandbox.schema -ne 'kuma_reference_sandbox') { throw 'Unexpected schema routing.' }
 
 Write-Host '2. Create an order in MAIN'
-$mainOrder = Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=MAIN" -ContentType 'application/json' -Body '{"sku":"BOOK-001","quantity":1}'
+$mainOrder = Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=MAIN" -ContentType 'application/json' -Body '{"sku":"BOOK-001","productName":"Sample product","unitPrice":99.00,"quantity":1}'
 $read = Invoke-RestMethod "$BaseUrl/api/orders/$($mainOrder.id)?scope=MAIN"
 if ($read.id -ne $mainOrder.id) { throw 'MAIN order lookup failed.' }
 
@@ -23,7 +23,7 @@ try {
 }
 
 Write-Host '4. Create and confirm an independent SANDBOX order'
-$sandboxOrder = Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=SANDBOX" -ContentType 'application/json' -Body '{"sku":"BOOK-001","quantity":2}'
+$sandboxOrder = Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=SANDBOX" -ContentType 'application/json' -Body '{"sku":"BOOK-001","productName":"Sample product","unitPrice":99.00,"quantity":2}'
 $confirmed = Invoke-RestMethod -Method Post "$BaseUrl/api/orders/$($sandboxOrder.id)/confirm?scope=SANDBOX"
 if ($confirmed.status -ne 'CONFIRMED') { throw 'SANDBOX confirmation failed.' }
 @($mainOrder, $confirmed) | Format-Table id, sku, quantity, totalAmount, status, version

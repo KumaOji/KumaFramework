@@ -218,18 +218,23 @@ preset('Java Core','类加载器','GET','/lab/javacore/classloader');preset('Jav
 preset('JNI','完整实验','POST','/lab/jni/scenario');preset('布隆过滤器','完整实验','POST','/lab/bloom/scenario');preset('雪花算法','完整实验','POST','/lab/snowflake/scenario');
 preset('LeetCode','题目列表','GET','/lab/leetcode/problems');preset('Starter','查看模块目录','GET','/lab/starter/catalog');preset('Starter','查看探测结果','GET','/lab/starter/probes');
 let selected=0;
+const collapsedLabGroups=new Set();
 function renderPresets(){
-  const groups=LabCatalog.groups(presets,$('lab-search').value,$('lab-kind').value);
+  const groups=LabCatalog.groups(presets,$('lab-search').value);
   const visible=groups.reduce((count,group)=>count+group.items.length,0);
   $('lab-catalog-count').textContent=`${visible} / ${presets.length}`;
-  $('lab-presets').innerHTML=groups.map(group=>`<div class="preset-group">${esc(group.name)}</div>`+group.items.map(({entry:p,index:i})=>{
+  $('lab-total-count').textContent=presets.length;
+  $('lab-presets').innerHTML=groups.map(group=>`<details class="preset-category" data-group="${esc(group.name)}" ${$('lab-search').value.trim()||!collapsedLabGroups.has(group.name)?'open':''}><summary class="preset-group"><span>${esc(group.name)}</span><span class="group-count">${group.items.length}</span></summary>`+group.items.map(({entry:p,index:i})=>{
     const learning=p.kind==='learning', tag=learning?'学习':p.method;
-    return `<button class="preset ${selected===i?'active':''}" data-preset="${i}" aria-pressed="${selected===i}" title="${esc(learning?p.runtime:p.path)}"><span class="method-tag ${learning?'learning':p.method.toLowerCase()}">${esc(tag)}</span><span>${esc(p.name)}</span></button>`;
-  }).join('')).join('')||'<div class="empty">没有匹配的实验</div>';
+    return `<button class="preset ${selected===i?'active':''}" data-preset="${i}" aria-pressed="${selected===i}" title="${esc(learning?p.runtime:p.path)}"><span class="method-tag ${learning?'learning':p.method.toLowerCase()}">${esc(tag)}</span><span class="preset-label">${esc(p.name)}</span></button>`;
+  }).join('')+'</details>').join('')||'<div class="empty"><strong>没有找到相关实验</strong><p>试试 Elasticsearch、Redis 或 JDK 等关键词。</p></div>';
+  $('lab-presets').querySelectorAll('details').forEach(group=>group.addEventListener('toggle',()=>{if(group.isConnected&&!$('lab-search').value.trim()){if(group.open)collapsedLabGroups.delete(group.dataset.group);else collapsedLabGroups.add(group.dataset.group);}}));
 }
 function showLabMode(learning){$('lab-api-workspace').hidden=learning;$('lab-learning-workspace').hidden=!learning;$('lab-target').hidden=learning;$('lab-docs-link').hidden=learning;}
+function setLabCatalogCompact(compact){document.querySelector('.lab-catalog').classList.toggle('compact',compact);$('toggle-lab-catalog').textContent=compact?'浏览目录':'收起目录';$('toggle-lab-catalog').setAttribute('aria-expanded',String(!compact));}
 async function selectPreset(index){
   const p=presets[index];if(!p)return;selected=index;const learning=p.kind==='learning';showLabMode(learning);renderPresets();
+  if(window.matchMedia('(max-width:850px)').matches)setLabCatalogCompact(true);
   if(!learning){$('lab-request-title').textContent=`${p.group} · ${p.name}`;$('lab-method').value=p.method;$('lab-path').value=p.path;$('lab-body').value=typeof p.body==='string'?p.body:JSON.stringify(p.body,null,2);notice('lab-request-error','');return;}
   $('lab-learning-title').textContent=p.name;$('lab-learning-description').textContent=p.description;
   $('lab-learning-runtime').textContent=p.runtime;$('lab-learning-command').textContent=p.commands;
@@ -240,15 +245,18 @@ async function selectPreset(index){
   $('lab-learning-main').textContent=p.mainClass?`${p.mainClass}${p.mainArgs?` · 参数：${p.mainArgs}`:''}`:'脚本 / 源文件入口';
   $('lab-learning-sources').innerHTML=p.sources.map(source=>`<li><code>${esc(source)}</code></li>`).join('');
   $('copy-lab-command').textContent='复制命令';notice('lab-learning-error','');$('lab-learning-guide').textContent='正在加载实验说明…';
-  try{const response=await fetch(p.doc);if(!response.ok)throw Error(`HTTP ${response.status}`);const guide=await response.text();if(selected===index)$('lab-learning-guide').textContent=guide;}
+  try{const response=await fetch(p.doc);if(!response.ok)throw Error(`HTTP ${response.status}`);const guide=await response.text();if(selected===index)$('lab-learning-guide').innerHTML=GuideFormat.render(guide);}
   catch(e){if(selected===index)$('lab-learning-guide').textContent='说明加载失败：'+e.message;}
 }
 $('copy-lab-command').onclick=async()=>{try{await navigator.clipboard.writeText($('lab-learning-command').textContent);$('copy-lab-command').textContent='已复制';notice('lab-learning-error','');}catch{notice('lab-learning-error','复制失败，请手动选择运行命令并复制。');}};
-$('lab-presets').onclick=e=>{const button=e.target.closest('[data-preset]');if(button)selectPreset(Number(button.dataset.preset));};$('lab-search').oninput=renderPresets;$('lab-kind').onchange=renderPresets;selectPreset(0);
+$('lab-presets').onclick=e=>{const button=e.target.closest('[data-preset]');if(button)selectPreset(Number(button.dataset.preset));};$('lab-search').oninput=renderPresets;selectPreset(0);
+$('toggle-lab-catalog').onclick=()=>setLabCatalogCompact(!document.querySelector('.lab-catalog').classList.contains('compact'));
+const labNarrowScreen=window.matchMedia('(max-width:850px)');setLabCatalogCompact(labNarrowScreen.matches);labNarrowScreen.addEventListener('change',event=>setLabCatalogCompact(event.matches));
+document.addEventListener('keydown',event=>{if(event.key==='/'&&state.page==='lab'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.target.closest('input,textarea,select,[contenteditable="true"]')){event.preventDefault();setLabCatalogCompact(false);$('lab-search').focus();}});
 Promise.allSettled([api('/lab-catalog.json'),api('/lab-learning.json')]).then(results=>{
   const failures=[];results.forEach((result,index)=>{if(result.status==='fulfilled')LabCatalog.merge(presets,result.value);else failures.push(`${index?'学习':'接口'}目录加载失败：${result.reason.message}`);});
   renderPresets();if(selected>=0&&presets[selected]?.kind!=='learning')$('lab-request-title').textContent=`${presets[selected].group} · ${presets[selected].name}`;
-  $('lab-discovery-status').textContent=failures.length?failures.join('；'):`已加载 ${presets.filter(p=>p.kind!=='learning').length} 个接口、${presets.filter(p=>p.kind==='learning').length} 个学习实验。接口可同步 OpenAPI；学习实验可离线查看，按说明在终端运行。`;
+  $('lab-discovery-status').textContent=failures.length?failures.join('；'):`已加载 ${presets.length} 个实验，可按知识点浏览或搜索。选择实验后查看运行方式与操作说明。`;
 });
 let requestHistory=[];try{requestHistory=JSON.parse(localStorage.getItem('kuma-console-history')||'[]');if(!Array.isArray(requestHistory))requestHistory=[];}catch{}
 function renderHistory(){$('lab-history').classList.toggle('empty',!requestHistory.length);$('lab-history').innerHTML=requestHistory.map((r,i)=>`<button class="history-row" data-history="${i}"><span>${esc(r.method)}</span><span class="path">${esc(r.path)}</span>${badge(r.status||'失败',r.status>=200&&r.status<300?'ok':'bad')}<span>${r.duration} ms</span><span>${esc(r.time)}</span></button>`).join('')||'暂无请求记录';}

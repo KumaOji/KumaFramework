@@ -5,6 +5,7 @@ metadata:
   namespace: base
 spec:
   replicas: 1
+  progressDeadlineSeconds: 1800
   selector:
     matchLabels:
       app: lab
@@ -43,6 +44,8 @@ spec:
                   key: mysql-root-password
             - name: KUMA_LAB_MONITORING_LOKI_URL
               value: http://loki.base:3100
+            - name: KUMA_LAB_ES_URL
+              value: http://skywalking-storage.base:9200
             - name: KUMA_LAB_MONITORING_PROMETHEUS_URL
               value: http://prometheus.base:9090
             - name: KUMA_LAB_MONITORING_ALERTMANAGER_URL

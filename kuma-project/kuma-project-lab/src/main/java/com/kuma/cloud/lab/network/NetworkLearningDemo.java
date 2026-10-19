@@ -7,6 +7,7 @@ public final class NetworkLearningDemo {
     public static void main(String[] args) throws Exception {
         WebhookLesson.run();
         SocketLesson.run();
+        System.out.println(SocketLifecycleLesson.run());
         System.out.println("全部 Webhook 与 Socket 实验通过。");
     }
 

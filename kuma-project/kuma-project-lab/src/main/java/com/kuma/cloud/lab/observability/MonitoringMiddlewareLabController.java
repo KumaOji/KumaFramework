@@ -21,12 +21,15 @@ public class MonitoringMiddlewareLabController {
     @Operation(summary = "Loki：写入独立日志并用 LogQL 查回")
     @PostMapping("/loki")
     public Result<MonitoringMiddlewareLabs.Report> loki() throws Exception { return run("loki"); }
+
     @Operation(summary = "Prometheus：up 即时查询与范围查询对照")
     @PostMapping("/prometheus")
     public Result<MonitoringMiddlewareLabs.Report> prometheus() throws Exception { return run("prometheus"); }
+
     @Operation(summary = "Alertmanager：发送一分钟实验告警并查回")
     @PostMapping("/alertmanager")
     public Result<MonitoringMiddlewareLabs.Report> alertmanager() throws Exception { return run("alertmanager"); }
+
     @Operation(summary = "OTel：SDK 导出至 Collector 并验证存储证据")
     @PostMapping("/otel")
     public Result<MonitoringMiddlewareLabs.Report> otel() throws Exception { return run("otel"); }

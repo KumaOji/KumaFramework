@@ -25,7 +25,6 @@ kuma-project-reference/
     │   │   │   ├── entity/       数据库行对象 OrderDO
     │   │   │   ├── model/        订单状态、金额计算与商品快照
     │   │   │   └── enums/        数据源范围
-    │   │   ├── integration/      外部商品 HTTP 客户端
     │   │   ├── support/          实际数据库连接检查
     │   │   └── exception/        业务异常及统一异常处理
     │   └── resources/
@@ -39,7 +38,7 @@ kuma-project-reference/
 
 Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；ServiceImpl 处理业务和事务，返回 VO。Mapper 只负责数据库操作，不直接作为 HTTP 入口。订单状态与金额约束保留在 model，数据库行对象不直接对外返回。
 
-单个实现的客户端和数据源支持类直接使用具体类。不额外增加 Repository 转发层、Command/Query、副本输出 DTO、转换层或抽象 Service 基类。
+单个实现的数据源支持类直接使用具体类。不额外增加 Repository 转发层、Command/Query、副本输出 DTO、转换层或抽象 Service 基类。
 
 ## 已配置的能力
 
@@ -53,16 +52,15 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、Mapper XML |
 | Flyway | kuma-boot-starter-data-migration，选择 FLYWAY，分别迁移两个物理数据源 |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
-| HTTP 连接池 | kuma-boot-starter-client 提供 WebClient 依赖，本模块配置商品客户端连接上限、响应及整体超时 |
 | Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
 
 MAIN 对应 `kuma_reference_main`，SANDBOX 对应 `kuma_reference_sandbox`，共用 PostgreSQL `base` 数据库。DataScope 白名单映射数据源名与 schema 租户后缀；组件的 DataSourceExecutor 使用 @DS 切换数据源，并设置 TenantContextHolder，SchemaInterceptor 将 Mapper SQL 的表名限定到目标 schema。连接池的 currentSchema 同时固定 JDBC 默认 schema，Flyway 分别迁移两个 schema。上下文在调用结束或异常后恢复。
 
-先选择数据源再开启事务，事务内禁止切换到其他数据源。HTTP 商品查询先于数据库事务执行；分页 count 与 items 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
+先选择数据源再开启事务，事务内禁止切换到其他数据源。分页 count 与 items 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
 
 Redis / JetCache 当前禁用；Kafka、认证、对象存储等尚未在本模块配置。传递依赖不代表已接入。
 
-业务模块通过 Kuma starter 获取 AOP、HTTP 客户端、JDBC 和数据库迁移能力，不重复声明对应的 Spring Boot starter。底层仍由 Kuma starter 组合 Spring Boot 与第三方库。Flyway 按物理数据源分别迁移，关闭默认单数据源迁移及 Liquibase，避免两种引擎同时运行。
+业务模块通过 Kuma starter 获取 AOP、JDBC 和数据库迁移能力，不重复声明对应的 Spring Boot starter。底层仍由 Kuma starter 组合 Spring Boot 与第三方库。Flyway 按物理数据源分别迁移，关闭默认单数据源迁移及 Liquibase，避免两种引擎同时运行。
 
 线程池直接注入框架的 `asyncThreadPoolTaskExecutor`，配置统一使用 `kuma.boot.core.async`。核心参数为 `core-pool-size`、`max-pool-siz`（沿用框架现有拼写）、`queue-capacity`、`rejection-policy` 和 `await-termination-seconds`。reference 使用 `ABORT` 拒绝策略，过载返回 503；框架默认仍为 `CALLER_RUNS`。
 
@@ -92,11 +90,7 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 .\gradlew.bat :kuma-project:kuma-project-reference:bootRun
 ```
 
-应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`。创建订单需要另启商品 mock：
-
-```powershell
-python .\kuma-project\kuma-project-reference\scripts\mock-catalog.py
-```
+应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`。
 
 使用 `SPRING_CLOUD_NACOS_SERVER_ADDR` 修改 Nacos 地址，使用 `SPRING_PROFILES_ACTIVE` 切换环境；对应的 Nacos Data ID 需提前配置。运行时 Nacos 导入为必需项，连接池等配置修改后需重启。
 
@@ -112,7 +106,13 @@ python .\kuma-project\kuma-project-reference\scripts\mock-catalog.py
 | POST | /api/orders/{id}/confirm?scope=MAIN | 确认订单 |
 | GET | /api/datasources/current?scope=SANDBOX | 检查实际连接的 schema |
 
-响应保持原接口契约。异常统一为 `application/problem+json`：参数 400、不存在 404、状态或版本冲突 409、商品不存在 422、上游故障 502、资源繁忙 503、上游超时 504。创建接口没有幂等键，重复提交会产生新订单。
+创建订单由请求直接提供示例商品信息：
+
+```json
+{"sku":"BOOK-001","productName":"示例商品","unitPrice":99.00,"quantity":2}
+```
+
+这是演示持久化和事务的模板接口，正式业务的价格来源应由业务规则确定。异常统一为 `application/problem+json`：参数 400、不存在 404、状态或版本冲突 409、资源繁忙 503。创建接口没有幂等键，重复提交会产生新订单。
 
 ## 复制为新项目
 
@@ -125,7 +125,7 @@ python .\kuma-project\kuma-project-reference\scripts\mock-catalog.py
 
 ## 验证
 
-普通测试关闭 Nacos 配置及服务注册，使用真实本机 HTTP mock 与两套 H2 数据源。H2 只用于测试，不进入生产 JAR。
+普通测试关闭 Nacos 配置及服务注册，通过 HTTP 调用本机应用并使用两套 H2 数据源。H2 只用于测试，不进入生产 JAR。
 
 ```powershell
 .\gradlew.bat :kuma-project:kuma-project-reference:test

@@ -167,10 +167,39 @@ bootRun {
 
 test {
     useJUnitPlatform()
+    inputs.property('esLabEndpoint', providers.environmentVariable('KUMA_LAB_ES_URL').orElse('offline'))
+    outputs.upToDateWhen { !providers.environmentVariable('KUMA_LAB_ES_URL').isPresent() }
     inputs.property('observabilityDatabaseIntegrationEnabled',
             providers.environmentVariable('KUMA_LAB_OBSERVABILITY_JDBC_URL').map { true }.orElse(false))
     // Live DB checks must run again when selecting another server/engine.
     outputs.upToDateWhen { !providers.environmentVariable('KUMA_LAB_OBSERVABILITY_JDBC_URL').isPresent() }
+}
+
+tasks.register('elasticsearchLab', JavaExec) {
+    group = 'application'
+    description = 'Run isolated live Elasticsearch CRUD, search and aggregation lessons'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo'
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+    args providers.gradleProperty('esLesson').getOrElse('all')
+}
+
+tasks.register('socketLab', JavaExec) {
+    group = 'application'
+    description = 'Run real loopback TCP/UDP and Socket lifecycle lessons'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.network.SocketLifecycleLesson'
+    args providers.gradleProperty('socketLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('sessionLab', JavaExec) {
+    group = 'application'
+    description = 'Run real isolated servlet HTTP Session lessons without Spring or external services'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.session.SessionLearningDemo'
+    args providers.gradleProperty('sessionLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
 }
 
 tasks.register('otelLab', JavaExec) {
