@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'">
+  <title>Kuma 本机概览</title>
+  <link rel="stylesheet" href="floating-overview.css">
+  <script src="floating-overview.js" defer></script>
+</head>
+<body>
+  <button id="orb" aria-label="展开本机概览，可拖动调整位置" aria-expanded="false" aria-controls="overview" title="点击查看本机概览 · 拖动调整位置">
+    <span class="orb-portrait"></span><span id="orb-value">Kuma</span>
+  </button>
+  <section id="overview" hidden aria-label="本机概览">
+    <div class="heading"><div><span class="eyebrow">KUMA / LIVE</span><h1>本机概览</h1></div><button id="collapse" class="icon-button" aria-label="收起本机概览" title="收起">×</button></div>
+    <p id="hostname">正在连接本机…</p>
+    <div class="metrics">
+      <article><span>CPU 使用率</span><strong id="cpu">—</strong><small id="cores">等待采样</small><div class="track"><i id="cpu-track"></i></div></article>
+      <article><span>物理内存</span><strong id="memory">—</strong><small id="memory-detail">等待采样</small><div class="track"><i id="memory-track"></i></div></article>
+      <article><span>存储已用</span><strong id="disk">—</strong><small id="disk-detail">等待采样</small></article>
+      <article><span>运行进程</span><strong id="processes">—</strong><small id="uptime">等待采样</small></article>
+    </div>
+    <div class="network"><span>↓ <b id="download">—</b></span><span>↑ <b id="upload">—</b></span></div>
+    <p id="status" role="status">每 2 秒更新</p>
+    <button id="restore">打开 Kuma Console ↗</button>
+  </section>
+</body>
+</html>

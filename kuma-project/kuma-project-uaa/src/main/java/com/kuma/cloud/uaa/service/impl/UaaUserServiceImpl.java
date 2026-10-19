@@ -1,6 +1,7 @@
 package com.kuma.cloud.uaa.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kuma.boot.common.exception.BusinessException;
@@ -228,11 +229,10 @@ public class UaaUserServiceImpl implements UaaUserService {
 
     @Override
     public void updateMfa(Long userId, String secret, boolean enabled) {
-        UaaUser user = new UaaUser();
-        user.setId(userId);
-        user.setMfaSecret(secret);
-        user.setMfaStatus(enabled ? 1 : 0);
-        userMapper.updateById(user);
+        userMapper.update(null, new LambdaUpdateWrapper<UaaUser>()
+                .eq(UaaUser::getId, userId)
+                .set(UaaUser::getMfaSecret, secret)
+                .set(UaaUser::getMfaStatus, enabled ? 1 : 0));
     }
 
     @Override

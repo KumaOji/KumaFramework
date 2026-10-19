@@ -232,3 +232,11 @@ kuma:
       version: 1.0.0
       packages-to-scan:
         - com.kuma.cloud.blog
+
+management:
+  tracing:
+    enabled: false
+  otlp:
+    metrics:
+      export:
+        enabled: false

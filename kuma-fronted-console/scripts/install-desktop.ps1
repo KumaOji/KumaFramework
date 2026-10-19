@@ -20,7 +20,7 @@ $shortcut.TargetPath = $electronPath
 $shortcut.Arguments = '"' + $frontendRoot + '"'
 $shortcut.WorkingDirectory = $frontendRoot
 $shortcut.Description = 'Kuma Console'
-$shortcut.IconLocation = $electronPath + ',0'
+$shortcut.IconLocation = (Join-Path $frontendRoot 'renderer\assets\kuma-console.ico') + ',0'
 $shortcut.Save()
 
 $runPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'

@@ -7,6 +7,7 @@ NACOS_PASSWORD="${NACOS_PASSWORD:-}"
 NACOS_SERVER="127.0.0.1:8848"
 K8S_NAMESPACE="${K8S_NAMESPACE:-base}"
 CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config/base}"
+CONFIG_PATTERN="${CONFIG_PATTERN:-kuma-*-prod.yaml}"
 
 echo "=== nacos status ==="
 NACOS_SVC="${NACOS_SVC:-nacos}"
@@ -88,7 +89,7 @@ if [ -z "${TENANT}" ]; then
   TENANT="base"
 fi
 
-mapfile -t FILES < <(find "${CONFIG_ROOT}" -name 'kuma-*-prod.yaml' -type f 2>/dev/null | sort)
+mapfile -t FILES < <(find "${CONFIG_ROOT}" -name "${CONFIG_PATTERN}" -type f 2>/dev/null | sort)
 if [ ${#FILES[@]} -eq 0 ]; then
   echo "ERROR: No prod yaml under ${CONFIG_ROOT}"
   find "${CONFIG_ROOT}" -type f 2>/dev/null || true

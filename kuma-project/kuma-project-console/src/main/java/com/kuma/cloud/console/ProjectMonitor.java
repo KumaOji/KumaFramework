@@ -40,7 +40,7 @@ public class ProjectMonitor {
         String base = project.url().replaceAll("/+$", "");
         long start = System.nanoTime();
         try {
-            var response = client.send(HttpRequest.newBuilder(URI.create(base + "/actuator/health"))
+            var response = client.send(HttpRequest.newBuilder(URI.create(project.actuatorUrl() + "/actuator/health"))
                     .timeout(Duration.ofSeconds(3)).GET().build(), HttpResponse.BodyHandlers.ofString());
             int code = response.statusCode();
             String status = code == 200 && response.body().contains("\"UP\"") ? "HEALTHY"

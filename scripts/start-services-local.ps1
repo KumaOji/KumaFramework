@@ -1,12 +1,13 @@
 param(
-    [ValidateSet('blog', 'uaa')][string[]]$Services = @('uaa', 'blog'),
+    [ValidateSet('blog', 'uaa', 'gateway')][string[]]$Services = @('uaa', 'blog'),
     [string]$Distribution = 'Ubuntu-24.04',
     [switch]$Build,
     [switch]$Restart,
     [switch]$WithoutObservability,
     [ValidateRange(0, 1)][double]$Sampling = 0.1,
     [int]$BlogDebugPort = 5005,
-    [int]$UaaDebugPort = 5006
+    [int]$UaaDebugPort = 5006,
+    [int]$GatewayDebugPort = 0
 )
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -24,12 +25,20 @@ $wslAddress = @((@($addressJson | ConvertFrom-Json)[0].addr_info) | Where-Object
 if (!$windowsAddress -or !$wslAddress) { throw 'No WSL NAT addresses found.' }
 
 foreach ($service in $Services) {
-    $port = if ($service -eq 'blog') { 9000 } else { 33336 }
-    $managementPort = if ($service -eq 'blog') { 19001 } else { 19002 }
-    $debugPort = if ($service -eq 'blog') { $BlogDebugPort } else { $UaaDebugPort }
+    $port = switch ($service) { 'blog' { 9000 } 'uaa' { 33336 } 'gateway' { 18080 } }
+    $managementPort = switch ($service) { 'blog' { 19001 } 'uaa' { 19002 } 'gateway' { 18081 } }
+    $debugPort = switch ($service) { 'blog' { $BlogDebugPort } 'uaa' { $UaaDebugPort } 'gateway' { $GatewayDebugPort } }
+    $loggingConfig = if ($service -eq 'gateway') { 'classpath:logback-gateway.xml' } else { 'classpath:logback-observability.xml' }
+    $managementAddress = if ($service -eq 'gateway') { '0.0.0.0' } else { $windowsAddress }
     $database = if ($service -eq 'blog') { 'base' } else { 'kuma_uaa' }
     $serviceRoot = Join-Path $repoRoot "kuma-project/kuma-project-$service"
-    $jarPath = Join-Path $serviceRoot "build/libs/$service-2026.10.jar"
+    $jarDirectory = Join-Path $serviceRoot 'build/libs'
+    $jarFile = if (Test-Path -LiteralPath $jarDirectory) {
+        Get-ChildItem -LiteralPath $jarDirectory -Filter "$service-*.jar" -File |
+            Where-Object { $_.Name -notmatch '-(plain|sources)\.jar$' } |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    } else { $null }
+    $jarPath = if ($jarFile) { $jarFile.FullName } else { Join-Path $jarDirectory "$service.jar" }
     $localConfig = Join-Path $serviceRoot 'src/main/resources/bootstrap-local.yml'
     $logDirectory = Join-Path $repoRoot "logs/$service-local"
     $pidPath = Join-Path $logDirectory 'process-id.txt'
@@ -63,7 +72,7 @@ foreach ($service in $Services) {
     }
     $arguments = @('--enable-preview', '--enable-native-access=ALL-UNNAMED', '-Xmx768m')
     if ($debugPort -gt 0) { $arguments += "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:$debugPort" }
-    if (!$WithoutObservability) { $arguments += '-Dlogging.config=classpath:logback-observability.xml' }
+    if (!$WithoutObservability) { $arguments += "-Dlogging.config=$loggingConfig" }
     $configUri = 'file:' + ($localConfig -replace '\\', '/')
     $profile = if ($WithoutObservability) { 'dev' } else { 'dev,observability' }
     $arguments += @('-jar', ('"' + $runtimeJar + '"'), "--spring.profiles.active=$profile",
@@ -75,8 +84,8 @@ foreach ($service in $Services) {
     if ($service -eq 'blog') { $arguments += "--kuma.boot.ai.qdrant.host=$wslAddress" }
     if (!$WithoutObservability) {
         # CLI takes precedence over Nacos settings, including logging.config and tracing.enabled.
-        $arguments += @('--logging.config=classpath:logback-observability.xml',
-            "--management.server.port=$managementPort", "--management.server.address=$windowsAddress",
+        $arguments += @("--logging.config=$loggingConfig",
+            "--management.server.port=$managementPort", "--management.server.address=$managementAddress",
             '--management.endpoints.web.exposure.include=health,info,prometheus',
             '--management.endpoint.health.show-details=never', '--management.tracing.enabled=true',
             "--management.tracing.sampling.probability=$Sampling",
@@ -86,6 +95,11 @@ foreach ($service in $Services) {
             '--kuma.boot.monitor.enabled=false', '--kuma.boot.web.request.enabled=false',
             '--atlas.log.enabled=false', '--logging.access.enabled=false',
             '--kuma.boot.logger.logging.files.enabled=false')
+    }
+    if ($service -eq 'gateway') {
+        $arguments += @('--kuma.boot.ip2region.enabled=false', '--management.health.redis.enabled=false',
+            '--gateway.environment=local', '--management.metrics.tags.environment=local',
+            '--gateway.loki-url=http://localhost:3100/loki/api/v1/push')
     }
     $process = Start-Process -FilePath (Get-Command java).Source -ArgumentList $arguments `
         -WorkingDirectory $repoRoot -WindowStyle Hidden -PassThru `

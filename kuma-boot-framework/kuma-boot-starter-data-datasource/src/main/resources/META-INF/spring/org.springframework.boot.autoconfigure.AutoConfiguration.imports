@@ -1,4 +1,0 @@
-com.kuma.boot.data.datasource.autoconfigure.TransactionExecutorAutoConfiguration
-com.kuma.boot.data.datasource.autoconfigure.DataSourceRoutingAutoConfiguration
-com.kuma.boot.data.datasource.autoconfigure.DataSourceProcessorAutoConfiguration
-com.kuma.boot.data.datasource.autoconfigure.TransactionSupportAutoConfiguration

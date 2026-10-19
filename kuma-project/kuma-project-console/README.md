@@ -31,6 +31,18 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 
 ## 配置
 
+WSL / k3s 页可选择已安装的发行版进行「启动发行版」「关闭发行版」，也可「关闭全部 WSL」。启动执行 `wsl --distribution … --exec /bin/sh -c "exec sleep infinity"` 并保持后台会话，关闭指定发行版执行 `wsl --terminate …`，关闭全部执行 `wsl --shutdown`；不删除发行版及其文件。关闭会停止其中的 Linux 服务与集群，启动后由发行版自身的 systemd 配置恢复服务。监控会先检查发行版是否运行，避免查询自动拉起已关闭的 WSL。Gateway 日志直接读取 Windows 本机文件。
+
+Lab、Blog 后端、UAA、Gateway 启动时会检查构建缓存：已有 JAR 与源码、资源及 Gradle 配置一致时直接启动，跳过 Gradle；缺少产物或相关输入变化时才执行增量构建。共享 starter 的源码变化也会使缓存失效，其他应用源码变化不会触发该应用构建。缓存标记保存在 `build/startup-cache/`；Lab 按 JAR 内容复用运行副本，Blog/UAA/Gateway 继续使用已有 SHA256 运行副本。前端直接运行 Astro 开发服务，保留其开发缓存；知识仓库同步在内容、代码、配置及依赖锁文件未变化时复用现有页面。可设置 `KNOWLEDGE_FORCE_BUILD=1` 强制重新生成知识仓库。
+
+「本地公共组件」位于 Lab 上方，支持 UAA 与 Gateway 的启动、停止、状态和日志。两者均在 Windows 本机运行，复用 `start-services-local.ps1 -Services uaa` 或 `-Services gateway`，自动读取 WSL 中间件地址，关闭调试端口。UAA 业务端口为 33336，Gateway 业务端口为 18080、管理端口为 18081。WSL 仅承载中间件与监控，不运行 UAA / Gateway 应用。`KUMA_COMPONENTS_DISTRIBUTION` 可指定中间件所在的 WSL 发行版，默认 `Ubuntu-24.04`。已运行的服务可被识别和停止，不会重复启动。
+
+Blog 页面将控制入口收在默认折叠的「配置与服务」中，展开状态会记住。启动 Blog 时，如果本机后端可启动，会同时调用现有 `scripts/start-blog-local.ps1 -Build -DebugPort 0`，自动读取 WSL 中间件地址；也可单独启动、停止后端及查看后端日志。「全部停止」停止前端、知识仓库构建和 Blog 后端。后端默认使用 `Ubuntu-24.04`，可通过 `console.blog.backend-distribution` 指定发行版。折叠区域下方直接显示 Blog 页面，可切换博客和知识仓库，也可在新窗口打开。前端登录仍使用项目现有的 Gateway / UAA 配置。
+
+启动 Blog 会先执行前端项目的 `scripts/sync-knowledge.mjs`，把同级 `KumaKnowledge` 构建到 Blog 的 `public/knowledge/`，成功后才启动前端。「同步知识仓库」按钮可独立更新内容，Blog 运行时也可使用；同步状态及构建日志会显示在 Blog 页面。停止 Blog 会取消进行中的知识仓库构建，并停止前端进程，因此 Blog 与 `/knowledge` 页面一起关闭。已生成的知识仓库文件保留。同步脚本支持通过 `KNOWLEDGE_ROOT` 指定知识仓库路径。
+
+左侧导航的 **Blog** 页面控制仓库上级 `kuma-blog-fronted/KumaBlog` 的 Astro 前端，默认地址为 `http://localhost:4321`。支持启动、停止、打开网页、查看启动日志；也可识别并停止已从该项目启动的 Astro 开发进程。启动使用本机 Node 和项目现有的 Astro 依赖，缺少依赖时先在前端项目执行 `pnpm install`。`KUMA_BLOG_FRONTEND_DIR` 可指定包含 `package.json` 的 `KumaBlog` 目录，`KUMA_BLOG_FRONTEND_PORT` 可覆盖端口。由控制台启动的前端在控制台退出时一并停止；仅被识别的已有进程不会随控制台退出而停止。
+
 补充的监控功能：
 
 - 本机硬件面板支持 GPU 驱动用量、DNS、Windows 全部可读取系统服务及服务搜索。硬件、GPU 和系统服务每 30 秒采样。
@@ -54,11 +66,15 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 | `KUMA_CONSOLE_WSL_DISTRIBUTION` | `auto`（首个运行中的发行版） |
 | `KUMA_CONSOLE_WSL_USER` | `root` |
 | `KUMA_BLOG_URL` | `http://127.0.0.1:9000/api` |
-| `KUMA_LAB_URL` | `http://127.0.0.1:9090/api` |
+| `KUMA_LAB_URL` | `http://127.0.0.1:19090/api` |
 | `KUMA_UAA_URL` | `http://127.0.0.1:33336` |
 | `KUMA_GATEWAY_URL` | `http://127.0.0.1:18080` |
 
 `console.projects` 可添加其他正在运行的项目；Lab 工作台使用名称为 `Lab` 的地址。地址包含应用的 context-path，例如 `/api`。接口路径填写 `/lab/kafka/status`，无需重复 `/api`。
+
+Lab 页面提供 **启动 Lab / 停止 Lab / 查看日志**。启动会先构建当前仓库的 Lab，再用控制台所用的 JDK 启动独立 JVM，使用 `dev` 配置和现有 `bootstrap-local.yml`，端口及 context-path 跟随 `KUMA_LAB_URL`。构建和启动均在后台执行，日志位于 Lab 的 `build/console-runtime/`。构建中也可停止；控制台退出时会停止它启动的 Lab。
+
+停止按钮只控制本控制台启动的进程。已有 IDE 启动的 Lab 或其他程序占用目标端口时，会显示端口占用并禁用启动。仅支持本机 HTTP Lab 地址；WSL 或远程服务继续使用实验请求功能。通常自动从当前目录向上查找仓库；独立安装的桌面程序可设置 `KUMA_CONSOLE_WORKSPACE=D:\KumaProject\KumaFramework` 指定仓库。
 
 WSL 通过 `wsl.exe --distribution … --user … --exec kubectl` 查询，默认 root 能读取 k3s 的 `/etc/rancher/k3s/k3s.yaml`；可以换成已具有 kubeconfig 权限的普通用户。不会启动停止中的发行版。Windows 本机指标不会与 WSL/Linux 指标混合，项目入口可指向 Windows 或 WSL 的实际地址。
 

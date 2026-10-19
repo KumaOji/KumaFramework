@@ -25,7 +25,7 @@ public class ProjectDetails {
         if (!ENDPOINTS.contains(endpoint)) throw new IllegalArgumentException("不支持的项目诊断端点");
         var project = properties.projects().stream().filter(p -> p.name().equals(name)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("请选择已配置的项目"));
-        URI target = URI.create(project.url().replaceAll("/+$", "") + "/actuator/" + endpoint);
+        URI target = URI.create(project.actuatorUrl() + "/actuator/" + endpoint);
         try {
             var response = client.send(HttpRequest.newBuilder(target).timeout(Duration.ofSeconds(8)).GET().build(),
                     HttpResponse.BodyHandlers.ofInputStream());

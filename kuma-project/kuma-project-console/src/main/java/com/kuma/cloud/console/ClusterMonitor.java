@@ -105,7 +105,10 @@ public class ClusterMonitor {
     }
 
     private CommandRunner.Result linux(String... args) {
-        List<String> command = new ArrayList<>(List.of("wsl.exe", "--distribution", selectedDistribution==null?properties.wslDistribution():selectedDistribution,
+        String distribution = selectedDistribution==null?properties.wslDistribution():selectedDistribution;
+        var running = commands.run(List.of("wsl.exe", "--list", "--running", "--quiet"), Duration.ofSeconds(5));
+        if (!running.success() || running.output().lines().map(String::strip).noneMatch(distribution::equals)) return new CommandRunner.Result(false, "", "WSL 发行版已关闭：" + distribution);
+        List<String> command = new ArrayList<>(List.of("wsl.exe", "--distribution", distribution,
                 "--user", properties.wslUser(), "--exec"));
         command.addAll(List.of(args)); return commands.run(command, Duration.ofSeconds(12));
     }

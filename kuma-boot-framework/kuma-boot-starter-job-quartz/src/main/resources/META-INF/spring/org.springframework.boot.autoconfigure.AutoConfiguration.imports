@@ -1,3 +1,0 @@
-com.kuma.boot.job.quartz.autoconfigure.QuartzAutoConfiguration
-com.kuma.boot.job.quartz.autoconfigure.QuartzTraceAutoConfiguration
-com.kuma.boot.job.quartz.autoconfigure.QuartzTimeTaskAutoConfiguration

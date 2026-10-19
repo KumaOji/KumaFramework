@@ -38,3 +38,17 @@ OAuth 登录另需启动 UAA（`localhost:33336`）；健康检查与公开文�
 本脚本默认启用 `dev,observability`，日志进入 Loki，调用链经 OTel Collector
 进入 SkyWalking，Prometheus 从独立管理端口采集指标。传入 `-WithoutObservability`
 可只使用 `dev`。三服务联合启动、面板与验证见 [可观测性说明](../../../k8s/local/monitoring/SERVICES.md)。
+
+## Nacos 配置
+
+Blog 不保留 `application*.yml`。`bootstrap.yml` 负责应用名、运行环境和 Nacos 连接，
+默认开关和业务配置由 `kuma-cloud-blog-dev.yaml` / `kuma-cloud-blog-prod.yaml` 提供。
+启用 `observability` profile 时，`bootstrap-observability.yml` 额外导入
+`kuma-cloud-blog-observability-dev.yaml` / `kuma-cloud-blog-observability-prod.yaml`。
+以上 Data ID 均位于 `base` 命名空间、`DEFAULT_GROUP` 分组。
+
+`KUMA_CONFIG_PROFILE` 指定 Nacos 配置环境，未设置时使用当前 active profile；
+同时启用多个 profile 时必须显式设置为 `dev` 或 `prod`，现有启动脚本和部署清单已设置。
+Nacos 导入为必需项，配置中心连接失败时启动失败。
+配置源文件位于仓库 `.nacos-tmp/base/`，dev 配置通过 `scripts/publish-nacos-dev.sh` 发布，
+prod 配置通过 `Publish Nacos Prod Configs` 工作流发布。先发布配置，再重启 Blog。

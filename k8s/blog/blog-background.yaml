@@ -81,8 +81,6 @@ spec:
                 secretKeyRef:
                   name: blog-secret
                   key: nacos-password
-            - name: SPRING_CONFIG_IMPORT
-              value: "optional:nacos:kuma-shared-prod.yaml?group=DEFAULT_GROUP&refreshEnabled=true,optional:nacos:kuma-cloud-blog-prod.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
             - name: ADMIN_INITIAL_PASSWORD
               valueFrom:
                 secretKeyRef:

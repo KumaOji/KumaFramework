@@ -1,0 +1,4 @@
+spring:
+  config:
+    import:
+      - "nacos:kuma-cloud-blog-observability-${KUMA_CONFIG_PROFILE:${spring.profiles.active}}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"

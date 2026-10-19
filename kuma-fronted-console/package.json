@@ -10,9 +10,12 @@
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
     "start": "node scripts/start-desktop.cjs",
-    "check": "node --check electron/main.cjs && node --check electron/preload.cjs && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js && node --check renderer/lab-catalog.js && node --check renderer/guide-format.js",
-    "test": "node --test scripts/response-format.test.cjs scripts/lab-catalog.test.cjs scripts/guide-format.test.cjs",
+    "check": "node --check electron/main.cjs && node --check electron/preload.cjs && node --check electron/floating-overview.cjs && node --check electron/floating-preload.cjs && node --check electron/floating-overview.js && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js && node --check renderer/lab-catalog.js && node --check renderer/guide-format.js && node --check renderer/lab-explorer.js && node --check renderer/sakura.js && node --check renderer/yuna-workspace.js && node --check renderer/console-settings.js",
+    "test": "node --test scripts/response-format.test.cjs scripts/lab-catalog.test.cjs scripts/guide-format.test.cjs scripts/knowledge-cache.test.cjs",
     "test:lab-ui": "electron scripts/lab-ui-smoke.cjs",
+    "test:floating-overview": "electron scripts/floating-overview-smoke.cjs",
+    "build:icons": "electron scripts/build-icons.cjs",
+    "test:knowledge-graph": "electron scripts/knowledge-graph-smoke.cjs",
     "prepare:backend": "node scripts/build-backend.cjs",
     "pack": "pnpm run prepare:backend && electron-builder --dir",
     "dist": "pnpm run prepare:backend && electron-builder --win portable"
@@ -25,9 +28,9 @@
     "appId": "io.github.kumaoji.console",
     "productName": "Kuma Console",
     "directories": { "output": "dist" },
-    "files": ["electron/**", "package.json"],
+    "files": ["electron/**", "renderer/assets/**", "package.json"],
     "extraResources": [{ "from": "../kuma-project/kuma-project-console/build/libs/kuma-console.jar", "to": "backend/kuma-console.jar" }],
-    "win": { "target": "portable", "signAndEditExecutable": false },
+    "win": { "target": "portable", "icon": "renderer/assets/kuma-console.ico", "signAndEditExecutable": false },
     "portable": { "artifactName": "Kuma-Console-${version}.exe" }
   }
 }

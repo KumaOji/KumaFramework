@@ -13,7 +13,33 @@ spec:
         - blog.kumacloud.top
     - hosts:
         - uaa.kumacloud.top
+    - hosts:
+        - gateway.kumacloud.top
   rules:
+    - host: gateway.kumacloud.top
+      http:
+        paths:
+          - path: /blog
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 18080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 18080
+          - path: /uaa
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port:
+                  number: 18080
     - host: blog.kumacloud.top
       http:
         paths:

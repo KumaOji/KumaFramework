@@ -1,7 +1,0 @@
-management:
-  tracing:
-    enabled: false
-  otlp:
-    metrics:
-      export:
-        enabled: false

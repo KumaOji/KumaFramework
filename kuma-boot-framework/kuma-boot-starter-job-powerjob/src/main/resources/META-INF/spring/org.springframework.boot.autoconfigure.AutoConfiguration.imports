@@ -1,3 +1,0 @@
-com.kuma.boot.job.powerjob.autoconfigure.PowerJobAutoConfiguration
-com.kuma.boot.job.powerjob.autoconfigure.PowerJobTraceAutoConfiguration
-com.kuma.boot.job.powerjob.autoconfigure.PowerJobTimeTaskAutoConfiguration

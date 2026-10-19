@@ -7,6 +7,8 @@ on:
       - '.github/workflows/deploy-blog.yml'
       - 'k8s/blog/blog-background.yaml'
       - 'kuma-project/kuma-project-blog/**'
+      - '.nacos-tmp/base/kuma-cloud-blog*-prod.yaml'
+      - 'scripts/publish-nacos-prod.sh'
       - 'kuma-boot-framework/**'
       - 'gradle.properties'
       - 'build.gradle'
@@ -112,7 +114,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/blog/blog-background.yaml,scripts/apply-k8s-resource.py,scripts/wait-observability-server.sh
+          source: k8s/blog/blog-background.yaml,scripts/apply-k8s-resource.py,scripts/wait-observability-server.sh,scripts/publish-nacos-prod.sh,.nacos-tmp/base/kuma-cloud-blog-prod.yaml,.nacos-tmp/base/kuma-cloud-blog-observability-prod.yaml
           target: /data/kuma-deploy/
           strip_components: 0
 
@@ -125,6 +127,10 @@ jobs:
           command_timeout: 45m
           script: |
             set -eu
+            # Publish the required Blog Data IDs before starting the new image.
+            NACOS_PASSWORD="$(kubectl get secret blog-secret -n blog -o jsonpath='{.data.nacos-password}' | base64 -d)" \
+              CONFIG_ROOT=/data/kuma-deploy/.nacos-tmp/base CONFIG_PATTERN='kuma-cloud-blog*-prod.yaml' \
+              bash /data/kuma-deploy/scripts/publish-nacos-prod.sh
             bash /data/kuma-deploy/scripts/wait-observability-server.sh
             python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/blog/blog-background.yaml \
               --image ${{ steps.ver.outputs.FULL_IMAGE }}

@@ -5,6 +5,16 @@ const path=require('node:path');
 const model=require('../renderer/lab-catalog.js');
 const renderer=path.resolve(__dirname,'../renderer');
 
+test('finder combines keywords and recognizes Chinese topics without matching ES inside unrelated words',()=>{
+  const entries=[{group:'Redis',name:'写入字符串',path:'/lab/redis/string',method:'POST'},
+    {group:'Elasticsearch',name:'全文搜索',path:'/lab/elasticsearch/search',method:'GET'},
+    {kind:'learning',group:'Java',name:'Session lifecycle',sources:['src/session/Lesson.java']}];
+  assert.equal(model.groups(entries,'Redis 写入').flatMap(group=>group.items).length,1);
+  assert.equal(model.groups(entries,'缓存 写入').flatMap(group=>group.items).length,1);
+  assert.deepEqual(model.groups(entries,'ES').map(group=>group.name),['Elasticsearch']);
+  assert.equal(model.groups(entries,'Redis 搜索').length,0);
+});
+
 test('sync refreshes labels while preserving curated request parameters and learning entries',()=>{
   const entries=[{group:'old',name:'old',method:'GET',path:'/lab/test?limit=100',body:'curated'},
     {kind:'learning',id:'jdk-25',group:'JDK',name:'JDK25',runtime:'JDK25'}];
@@ -15,6 +25,18 @@ test('sync refreshes labels while preserving curated request parameters and lear
   assert.equal(entries[1].id,'jdk-25');
   assert.equal(model.merge(entries,[{method:'POST',path:'/lab/other',group:'new',name:'other',body:''}]),1);
   assert.equal(model.groups(entries,'','api').length,1);
+});
+
+test('short English prefixes find real Alertmanager APIs and lessons while avoiding mid-word matches',()=>{
+  const entries=[...require('../renderer/lab-catalog.json'),...require('../renderer/lab-learning.json')];
+  for(const query of ['a','al','AL','alert','Alertmanager']){
+    const matches=model.groups(entries,query).flatMap(group=>group.items.map(item=>item.entry));
+    assert.ok(matches.some(entry=>entry.path==='/lab/monitoring/alertmanager'),query+' must find the API');
+    assert.ok(matches.some(entry=>entry.id==='middleware-alertmanager'),query+' must find the lesson');
+  }
+  assert.equal(model.matches({name:'Session lifecycle',path:'/lab/session'},'es'),false);
+  assert.equal(model.matches({name:'Elasticsearch',path:'/lab/elasticsearch'},'es'),true);
+  assert.equal(model.matches({name:'Redis',path:'/lab/redis'},'re'),true);
 });
 
 test('all lesson cards have existing sources, mirrored docs, commands and searchable runtime/topics',()=>{

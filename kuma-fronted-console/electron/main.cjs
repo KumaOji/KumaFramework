@@ -1,7 +1,8 @@
-const {app, BrowserWindow, shell, dialog, Menu} = require('electron');
+const {app, BrowserWindow, shell, dialog, Menu, ipcMain} = require('electron');
 const {spawn} = require('node:child_process');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const {createFloatingOverview}=require('./floating-overview.cjs');
 const smoke=process.argv.includes('--smoke');
 const port=Number(process.env.KUMA_CONSOLE_PORT||18090);
 if(!Number.isInteger(port)||port<1024||port>65535)throw Error('KUMA_CONSOLE_PORT must be 1024–65535');
@@ -15,6 +16,10 @@ if(!smoke&&!app.requestSingleInstanceLock()){app.quit();}else{
   app.whenReady().then(start).catch(async error=>{dialog.showErrorBox('Kuma Console 启动失败',error.message);await Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]);app.exit(1);});
 }
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function startupStage(stage,message){
+  if(!window||window.isDestroyed())return;
+  await window.webContents.executeJavaScript(`(()=>{const stage=${JSON.stringify(stage)};const message=${JSON.stringify(message)};const steps=['check','build','connect','ready'];document.querySelectorAll('[data-step]').forEach(el=>{el.classList.toggle('active',el.dataset.step===stage);el.classList.toggle('done',steps.indexOf(el.dataset.step)<steps.indexOf(stage));});const label=document.getElementById('startup-label');if(label)label.textContent={check:'检查本机环境',build:'准备控制台服务',connect:'连接你的工作空间',ready:'工作空间已就绪'}[stage];const text=document.getElementById('startup-message');if(text)text.textContent=message;if(stage==='ready')document.body.classList.add('ready');})()`);
+}
 async function identity(){
   try{
     const response=await fetch(`${origin}/api/identity`,{signal:AbortSignal.timeout(1200)});
@@ -25,15 +30,18 @@ async function identity(){
   }catch(error){if(error.message==='port-occupied')throw Error(`端口 ${port} 已被其他程序占用，请设置 KUMA_CONSOLE_PORT。`);return false;}
 }
 async function ensureBackend(){
-  if(await identity())return;
+  await startupStage('check','正在检查本机控制台服务…');
+  if(await identity()){await startupStage('ready','已连接现有服务，正在打开工作空间。');return;}
   if(quitting)throw Error('启动已取消');
   let child;
   if(app.isPackaged){
+    await startupStage('build','正在启动内置监控服务…');
     child=spawn('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
       path.join(process.resourcesPath,'backend/kuma-console.jar'),'--console.open-browser=false'],
       {cwd:app.getPath('userData'),env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
     ownedBackend=child;
   }else{
+    await startupStage('build','正在检查并构建控制台后端，首次启动可能需要一些时间。');
     await new Promise((resolve,reject)=>{
       const windows=process.platform==='win32';
       const build=spawn(windows?'powershell.exe':'sh',windows?
@@ -59,11 +67,12 @@ async function ensureBackend(){
   child.stdout.on('data',receive);child.stderr.on('data',receive);
   child.on('error',error=>{failure=error.message;});
   child.on('exit',code=>{if(code!==0&&!quitting)failure=`后台进程退出 (${code})\n${lastOutput}`;});
+  await startupStage('connect','服务已启动，正在等待健康检查通过…');
   const deadline=Date.now()+180000;
   while(Date.now()<deadline){
     if(quitting)throw Error('启动已取消');
     if(failure)throw Error(failure);
-    if(await identity())return;
+    if(await identity()){await startupStage('ready','连接成功，正在打开工作空间。');return;}
     await pause(500);
   }
   throw Error(`后端未能启动。请确认已安装 JDK 25。\n${lastOutput}`);
@@ -78,7 +87,7 @@ async function start(){
     };
     Menu.setApplicationMenu(Menu.buildFromTemplate([
       {label:'设置',submenu:[{
-        label:'开机自动启动',type:'checkbox',
+        id:'startup-toggle',label:'开机自动启动',type:'checkbox',
         checked:app.getLoginItemSettings(loginOptions).openAtLogin,
         click:item=>{
           try{app.setLoginItemSettings({...loginOptions,openAtLogin:item.checked});}
@@ -88,15 +97,39 @@ async function start(){
       },{type:'separator'},{label:'退出',role:'quit'}]}
     ]));
   }else Menu.setApplicationMenu(null);
+  if(process.platform==='win32'){
+    const loginOptions={path:process.env.PORTABLE_EXECUTABLE_FILE||process.execPath,args:app.isPackaged?[]:[app.getAppPath()]};
+    const authorize=event=>{
+      if(event.sender!==window?.webContents||event.senderFrame!==window.webContents.mainFrame||new URL(event.senderFrame.url).origin!==origin)throw Error('不允许此页面修改桌面设置');
+    };
+    const readStartup=()=>{
+      const settings=app.getLoginItemSettings(loginOptions);
+      const enabled=settings.openAtLogin&&settings.executableWillLaunchAtLogin;
+      const item=Menu.getApplicationMenu()?.getMenuItemById('startup-toggle');
+      if(item)item.checked=enabled;
+      return enabled;
+    };
+    ipcMain.handle('desktop:startup:get',event=>{authorize(event);return readStartup();});
+    ipcMain.handle('desktop:startup:set',(event,enabled)=>{
+      authorize(event);
+      if(typeof enabled!=='boolean')throw Error('无效的开机自启设置');
+      app.setLoginItemSettings({...loginOptions,openAtLogin:enabled});
+      const actual=readStartup();
+      if(actual!==enabled)throw Error('Windows 未应用开机自启设置，请重试');
+      return actual;
+    });
+  }
   window=new BrowserWindow({title:'Kuma Console',width:1520,height:1040,minWidth:1060,minHeight:720,
-    show:!smoke,backgroundColor:'#f5f7fb',titleBarStyle:'hidden',
-    titleBarOverlay:{color:'#101b32',symbolColor:'#cbd5e1',height:36},
+    icon:path.join(__dirname,'../renderer/assets',process.platform==='win32'?'kuma-console.ico':'kuma-console.png'),
+    show:false,backgroundColor:'#13212f',titleBarStyle:'hidden',
+    titleBarOverlay:{color:'#1a2432',symbolColor:'#d6e6f5',height:36},
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,backgroundThrottling:!smoke}});
   window.webContents.session.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
   window.webContents.setWindowOpenHandler(({url})=>{external(url);return {action:'deny'};});
   window.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==origin){event.preventDefault();external(url);}});
+  createFloatingOverview({mainWindow:window,origin});
   await window.loadFile(path.join(__dirname,'splash.html'));
-  if(smoke)window.showInactive();
+  if(smoke)window.showInactive();else window.show();
   try{
     await ensureBackend();
     await window.loadURL(origin);
@@ -104,7 +137,7 @@ async function start(){
   }catch(error){
     if(quitting||window.isDestroyed())return;
     if(smoke){console.error(error);await Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]);app.exit(1);return;}
-    await window.webContents.executeJavaScript(`document.getElementById('startup-message').textContent=${JSON.stringify(error.message)};document.body.classList.add('failed');`);
+    await window.webContents.executeJavaScript(`document.getElementById('startup-message').textContent=${JSON.stringify(error.message)};document.getElementById('startup-label').textContent='启动遇到问题';document.body.classList.add('failed');`);
   }
 }
 async function verifyDesktop(){

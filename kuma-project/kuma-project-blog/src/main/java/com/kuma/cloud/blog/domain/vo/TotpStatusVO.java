@@ -8,9 +8,9 @@ public class TotpStatusVO {
     /** UAA 全局 TOTP 开关 */
     private boolean featureEnabled;
 
-    /** totp_enabled = 1，登录时强制验证动态码 */
+    /** UAA 用户已绑定，登录时强制验证动态码 */
     private boolean enabled;
 
-    /** totp_secret 已写入数据库（setup 已调用，但可能尚未 enable） */
+    /** UAA 用户已绑定或存在尚待确认的绑定会话 */
     private boolean secretBound;
 }

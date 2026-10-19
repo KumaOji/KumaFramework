@@ -7,19 +7,44 @@ const time = value => value ? new Date(value).toLocaleTimeString('zh-CN', {hour1
 const uptime = value => { const n = Number(value) || 0; return n >= 86400 ? `${Math.floor(n/86400)}天 ${Math.floor(n%86400/3600)}时` : n >= 3600 ? `${Math.floor(n/3600)}时 ${Math.floor(n%3600/60)}分` : `${Math.floor(n/60)}分`; };
 const badge = (text, kind = '') => `<span class="status ${kind}">${esc(text)}</span>`;
 const state = {host:null,cluster:null,projects:null,history:[],lastSample:null,page:'overview',kind:'Pod',rows:[],paused:false,busy:false,errors:{}};
+let pageScrollTimer;
 async function api(path, options) {
   const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 35000);
   try { const response = await fetch(path, {...options,signal:controller.signal}); const data = await response.json(); if(!response.ok) throw Error(data.error || `HTTP ${response.status}`); return data; }
   finally { clearTimeout(timer); }
 }
 function navigate() {
-  const page = location.hash.slice(1); state.page = ['overview','server','cluster','projects','lab'].includes(page) ? page : 'overview';
+  const previousPage=state.page;
+  const requested=location.hash.slice(1),page=['cluster','server/wsl'].includes(requested)?'server':['components','projects/components'].includes(requested)?'projects':requested;
+  state.page = ['overview','server','projects','lab','blog','settings'].includes(page) ? page : 'overview';
+  state.infrastructureTab=['cluster','server/wsl'].includes(requested)?'wsl':'remote';
+  $('infrastructure-remote').hidden=state.infrastructureTab!=='remote';$('cluster').hidden=state.infrastructureTab!=='wsl';
+  document.querySelectorAll('[data-environment]').forEach(button=>{const active=button.dataset.environment===state.infrastructureTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
+  state.servicesTab=['components','projects/components'].includes(requested)?'components':'projects';
+  $('project-services').hidden=state.servicesTab!=='projects';$('components').hidden=state.servicesTab!=='components';
+  document.querySelectorAll('[data-service-view]').forEach(button=>{const active=button.dataset.serviceView===state.servicesTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   document.querySelectorAll('.page').forEach(el => el.hidden = el.id !== state.page);
-  document.querySelectorAll('nav a').forEach(el => el.classList.toggle('active',el.dataset.page === state.page));
-  $('page-title').textContent = {overview:'本机概览',server:'服务器状态',cluster:'WSL / k3s',projects:'项目服务',lab:'Lab 实验室'}[state.page];
-  closeDrawer(); window.scrollTo(0,0); setTimeout(()=>window.scrollTo(0,0),0);
+  document.querySelectorAll('.sidebar [data-page]').forEach(el => {const active=el.dataset.page===state.page;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
+  $('page-title').textContent = {overview:'本机概览',server:'服务器与 WSL',projects:'项目与组件',lab:'Lab 实验室',blog:'Blog',settings:'Console 配置'}[state.page];
+  closeDrawer();clearTimeout(pageScrollTimer);
+  if(previousPage!==state.page){window.scrollTo(0,0);pageScrollTimer=setTimeout(()=>window.scrollTo(0,0),0);}
 }
 window.addEventListener('hashchange', navigate); navigate();
+for(const [id,attribute,paths] of [['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',components:'projects/components'}]]){
+  $(id).onclick=event=>{
+    const button=event.target.closest(`[data-${attribute}]`);if(!button)return;
+    const hash='#'+paths[button.getAttribute(`data-${attribute}`)];if(location.hash===hash)return;
+    const oldURL=location.href;
+    // Changing tabs must not trigger the browser's fragment-anchor scrolling.
+    history.pushState(null,'',hash);
+    window.dispatchEvent(new HashChangeEvent('hashchange',{oldURL,newURL:location.href}));
+  };
+  $(id).onkeydown=event=>{
+    const buttons=[...$(id).querySelectorAll('[role="tab"]')];
+    const index=buttons.indexOf(event.target);if(index<0||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    event.preventDefault();const target=buttons[event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length];target.focus({preventScroll:true});target.click();
+  };
+}
 function metric(label,value,unit,note,percent,icon='◈') {
   const paths={'⌁':'<path d="M3 13h5l3-8 4 14 3-7h3"/>','▦':'<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 10v4M12 10v4M16 10v4M8 3v3M16 3v3M8 18v3M16 18v3"/>','▱':'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 13h18M16 16h2"/>','▤':'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/>'};
   icon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[icon]||paths['▤']}</svg>`;
@@ -129,16 +154,15 @@ function renderEnvironment() {
   if(typeof projectCatalog!=='undefined'&&projectCatalog)rows.push(`<a href="#projects" class="environment-row"><span>仓库项目</span><span>${projectCatalog.projects.length} 个 →</span></a>`);
   if(running!=null)rows.push(`<a href="#projects" class="environment-row"><span>发现的项目进程</span><span>${running} 个 →</span></a>`);
   if(configured)rows.push(`<a href="#projects" class="environment-row"><span>服务探测</span><span>${reachable}/${configured} 可达 · ${healthy} 健康 →</span></a>`);
-  if(c?.supported!==false&&c?.configured!==false&&c?.runningDistributions?.length)rows.push(`<a href="#cluster" class="environment-row"><span>WSL 发行版</span><span>${c.runningDistributions.length} 个运行中 →</span></a>`);
-  if(c?.supported!==false&&c?.configured!==false&&c?.ready&&!c.error)rows.push(`<a href="#cluster" class="environment-row"><span>集群工作负载</span><span>${readyPods.length} 个 Pod 就绪 →</span></a>`);
+  if(c?.supported!==false&&c?.configured!==false&&c?.runningDistributions?.length)rows.push(`<a href="#server/wsl" class="environment-row"><span>WSL 发行版</span><span>${c.runningDistributions.length} 个运行中 →</span></a>`);
+  if(c?.supported!==false&&c?.configured!==false&&c?.ready&&!c.error)rows.push(`<a href="#server/wsl" class="environment-row"><span>集群工作负载</span><span>${readyPods.length} 个 Pod 就绪 →</span></a>`);
   $('environment-summary').innerHTML=rows.join('');
 }
 const podReady = pod => { const statuses = pod.status?.containerStatuses || []; return pod.status?.phase==='Running' && statuses.length>0 && statuses.every(s=>s.ready); };
 function renderCluster() {
   const c = state.cluster; notice('cluster-warning',state.errors.cluster || c?.error || c?.reason);
-  document.querySelector('nav [data-page="cluster"]').hidden=c?.supported===false||c?.configured===false;
   if(!c?.ready) {if(c?.reason)$('wsl-distributions').textContent=c.reason;return;}
-  $('cluster-updated').textContent = time(c.sampledAt); $('wsl-title').textContent = `WSL · ${c.distribution}`;
+  $('cluster-updated').textContent = time(c.sampledAt);
   $('wsl-distributions').textContent = c.distributions || '暂无发行版'; $('wsl-system').textContent = c.system || '暂无 Linux 采样';
   $('k3s-metrics').textContent = `NODES\n${c.nodeMetrics||'尚无数据'}\n\nPODS\n${c.podMetrics||'尚无数据'}`;
   const items = c.items||[]; const nodes = items.filter(x=>x.kind==='Node'),pods = items.filter(x=>x.kind==='Pod');
@@ -198,7 +222,13 @@ function renderProjects() {
   const data=state.projects;notice('projects-warning',state.errors.projects||data?.error);if(!data?.ready)return;$('projects-updated').textContent=time(data.sampledAt);
   $('project-cards').innerHTML=(data.projects||[]).map(p=>`<article class="panel project-card"><div class="project-top"><div class="project-name"><span class="project-symbol">${esc(p.name[0])}</span><h2>${esc(p.name)}</h2></div>${projectBadge(p.status)}</div><div class="project-url">${esc(p.url)}</div><div class="project-facts"><span>HTTP<strong>${p.httpStatus||'—'}</strong></span><span>响应<strong>${p.latency} ms</strong></span></div><div class="project-message">${esc(p.message)}</div><div class="project-links"><a href="${esc(p.url)}" target="_blank" rel="noreferrer" class="button small">打开服务 ↗</a><a href="${esc(p.url)}/swagger-ui.html" target="_blank" rel="noreferrer" class="button small">Swagger ↗</a><a href="${esc(p.url)}/actuator/health" target="_blank" rel="noreferrer" class="button small">健康检查 ↗</a>${p.name==='Lab'?'<a href="#lab" class="button small">进入实验室 →</a>':''}</div></article>`).join('')||'<div class="empty">未配置项目服务</div>';
   document.querySelectorAll('.project-card').forEach((card,i)=>{const button=document.createElement('button');button.className='button small';button.textContent='运行诊断';button.onclick=()=>showProjectDetails(data.projects[i]);card.querySelector('.project-links').append(button);});
-  const lab=(data.projects||[]).find(p=>p.name==='Lab');if(lab){$('lab-target-url').textContent=lab.url;$('lab-target-status').textContent={HEALTHY:'服务健康',REACHABLE:'服务可达',UNHEALTHY:'服务健康异常',OFFLINE:'服务未启动或无法连接'}[lab.status];$('lab-docs-link').href=lab.url+'/swagger-ui.html';}
+  const lab=(data.projects||[]).find(p=>p.name==='Lab');
+  const connected=lab&&['HEALTHY','REACHABLE','UNHEALTHY'].includes(lab.status);
+  $('lab-target').dataset.status=connected?(lab.status==='UNHEALTHY'?'warning':'online'):(lab?'offline':'unknown');
+  $('lab-target-status').textContent=lab?({HEALTHY:'服务健康',REACHABLE:'服务可达',UNHEALTHY:'健康检查异常',OFFLINE:'未连接 · 启动 Lab 后重试'}[lab.status]||'连接状态未知'):'等待服务连接信息';
+  if(lab?.url)$('lab-target-url').textContent=lab.url;
+  $('lab-docs-link').setAttribute('aria-disabled',String(!connected));
+  if(connected)$('lab-docs-link').href=lab.url.replace(/\/+$/,'')+'/swagger-ui.html';else $('lab-docs-link').removeAttribute('href');
   $('discovered-projects').innerHTML=`<table><thead><tr><th>主类 / JAR</th><th>PID</th><th>实际监听端口</th><th>进程启动时间</th><th>累计 CPU 时间</th></tr></thead><tbody>${(state.running||[]).map(p=>`<tr><td>${esc(p.name)}</td><td class="mono">${p.pid}</td><td class="mono">${esc(p.ports.join(', ')||'无监听端口')}</td><td>${esc(p.startTime?new Date(p.startTime).toLocaleString('zh-CN'):'—')}</td><td>${p.cpuTime} s</td></tr>`).join('')||'<tr><td colspan="5" class="empty">当前账户未发现运行中的 Kuma 项目 JVM</td></tr>'}</tbody></table>`;
   renderEnvironment();
 }
@@ -220,20 +250,24 @@ preset('LeetCode','题目列表','GET','/lab/leetcode/problems');preset('Starter
 let selected=0;
 const collapsedLabGroups=new Set();
 function renderPresets(){
-  const groups=LabCatalog.groups(presets,$('lab-search').value);
+  const groups=LabCatalog.groups(presets,$('lab-search').value).map(group=>({...group,items:group.items.filter(({entry})=>!window.LabExplorer||LabExplorer.accepts(entry))})).filter(group=>group.items.length);
   const visible=groups.reduce((count,group)=>count+group.items.length,0);
   $('lab-catalog-count').textContent=`${visible} / ${presets.length}`;
   $('lab-total-count').textContent=presets.length;
+  $('lab-api-count').textContent=presets.filter(p=>p.kind!=='learning').length;
+  $('lab-learning-count').textContent=presets.filter(p=>p.kind==='learning').length;
   $('lab-presets').innerHTML=groups.map(group=>`<details class="preset-category" data-group="${esc(group.name)}" ${$('lab-search').value.trim()||!collapsedLabGroups.has(group.name)?'open':''}><summary class="preset-group"><span>${esc(group.name)}</span><span class="group-count">${group.items.length}</span></summary>`+group.items.map(({entry:p,index:i})=>{
     const learning=p.kind==='learning', tag=learning?'学习':p.method;
     return `<button class="preset ${selected===i?'active':''}" data-preset="${i}" aria-pressed="${selected===i}" title="${esc(learning?p.runtime:p.path)}"><span class="method-tag ${learning?'learning':p.method.toLowerCase()}">${esc(tag)}</span><span class="preset-label">${esc(p.name)}</span></button>`;
   }).join('')+'</details>').join('')||'<div class="empty"><strong>没有找到相关实验</strong><p>试试 Elasticsearch、Redis 或 JDK 等关键词。</p></div>';
   $('lab-presets').querySelectorAll('details').forEach(group=>group.addEventListener('toggle',()=>{if(group.isConnected&&!$('lab-search').value.trim()){if(group.open)collapsedLabGroups.delete(group.dataset.group);else collapsedLabGroups.add(group.dataset.group);}}));
+  if(window.LabExplorer)LabExplorer.render(groups);
 }
-function showLabMode(learning){$('lab-api-workspace').hidden=learning;$('lab-learning-workspace').hidden=!learning;$('lab-target').hidden=learning;$('lab-docs-link').hidden=learning;}
-function setLabCatalogCompact(compact){document.querySelector('.lab-catalog').classList.toggle('compact',compact);$('toggle-lab-catalog').textContent=compact?'浏览目录':'收起目录';$('toggle-lab-catalog').setAttribute('aria-expanded',String(!compact));}
+function showLabMode(learning){$('lab-api-workspace').hidden=learning;$('lab-learning-workspace').hidden=!learning;}
+function setLabCatalogCompact(compact){document.querySelector('.lab-catalog').classList.toggle('compact',compact);$('lab-presets').hidden=compact;$('toggle-lab-catalog').textContent=compact?'浏览目录':'收起目录';$('toggle-lab-catalog').setAttribute('aria-expanded',String(!compact));}
 async function selectPreset(index){
   const p=presets[index];if(!p)return;selected=index;const learning=p.kind==='learning';showLabMode(learning);renderPresets();
+  window.dispatchEvent(new CustomEvent('lab:selected',{detail:p}));
   if(window.matchMedia('(max-width:850px)').matches)setLabCatalogCompact(true);
   if(!learning){$('lab-request-title').textContent=`${p.group} · ${p.name}`;$('lab-method').value=p.method;$('lab-path').value=p.path;$('lab-body').value=typeof p.body==='string'?p.body:JSON.stringify(p.body,null,2);notice('lab-request-error','');return;}
   $('lab-learning-title').textContent=p.name;$('lab-learning-description').textContent=p.description;
@@ -251,8 +285,7 @@ async function selectPreset(index){
 $('copy-lab-command').onclick=async()=>{try{await navigator.clipboard.writeText($('lab-learning-command').textContent);$('copy-lab-command').textContent='已复制';notice('lab-learning-error','');}catch{notice('lab-learning-error','复制失败，请手动选择运行命令并复制。');}};
 $('lab-presets').onclick=e=>{const button=e.target.closest('[data-preset]');if(button)selectPreset(Number(button.dataset.preset));};$('lab-search').oninput=renderPresets;selectPreset(0);
 $('toggle-lab-catalog').onclick=()=>setLabCatalogCompact(!document.querySelector('.lab-catalog').classList.contains('compact'));
-const labNarrowScreen=window.matchMedia('(max-width:850px)');setLabCatalogCompact(labNarrowScreen.matches);labNarrowScreen.addEventListener('change',event=>setLabCatalogCompact(event.matches));
-document.addEventListener('keydown',event=>{if(event.key==='/'&&state.page==='lab'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.target.closest('input,textarea,select,[contenteditable="true"]')){event.preventDefault();setLabCatalogCompact(false);$('lab-search').focus();}});
+const labNarrowScreen=window.matchMedia('(max-width:850px)');setLabCatalogCompact(true);labNarrowScreen.addEventListener('change',event=>{if(event.matches)setLabCatalogCompact(true);});
 Promise.allSettled([api('/lab-catalog.json'),api('/lab-learning.json')]).then(results=>{
   const failures=[];results.forEach((result,index)=>{if(result.status==='fulfilled')LabCatalog.merge(presets,result.value);else failures.push(`${index?'学习':'接口'}目录加载失败：${result.reason.message}`);});
   renderPresets();if(selected>=0&&presets[selected]?.kind!=='learning')$('lab-request-title').textContent=`${presets[selected].group} · ${presets[selected].name}`;
@@ -275,8 +308,63 @@ $('lab-send').onclick=async()=>{
   catch(e){notice('lab-request-error',e.message);$('lab-response-meta').textContent='请求失败';}finally{button.disabled=false;button.textContent='发送请求 ↗';}
 };
 $('copy-response').onclick=async()=>{try{await navigator.clipboard.writeText(lastLabResponse ?? $('lab-response').textContent);$('copy-response').textContent='已复制';setTimeout(()=>$('copy-response').textContent='复制原始响应',1500);}catch{$('copy-response').textContent='复制失败';}};
+let labControlBusy=false, labPollBusy=false;
+function renderLabProcess(data){
+  const labels={STOPPED:'已停止',BUILDING:'构建中',STARTING:'启动中',RUNNING:'运行中',STOPPING:'停止中',FAILED:'失败',EXTERNAL:'端口已占用'};
+  $('lab-process-state').textContent=labels[data.state]||data.state;
+  $('lab-process-state').className='status '+(data.state==='RUNNING'?'ok':data.state==='FAILED'?'bad':'');
+  $('lab-process-message').textContent=data.message+(data.pid?` · PID ${data.pid}`:'');
+  $('lab-start').disabled=labControlBusy||!data.canStart;$('lab-stop').disabled=labControlBusy||!data.canStop;
+}
+async function pollLabProcess(){
+  if(labPollBusy||labControlBusy)return;labPollBusy=true;
+  try{renderLabProcess(await api('/api/lab/process'));notice('lab-process-error','');}
+  catch(e){$('lab-start').disabled=true;$('lab-stop').disabled=true;notice('lab-process-error',e.message);}
+  finally{labPollBusy=false;}
+}
+async function controlLab(action){
+  if(labControlBusy)return;labControlBusy=true;$('lab-start').disabled=true;$('lab-stop').disabled=true;
+  try{await api('/api/lab/process/'+action,{method:'POST'});notice('lab-process-error','');}
+  catch(e){notice('lab-process-error',e.message);}
+  finally{labControlBusy=false;await pollLabProcess();}
+}
+$('lab-start').onclick=()=>controlLab('start');$('lab-stop').onclick=()=>controlLab('stop');
+$('lab-logs').onclick=async()=>{
+  const button=$('lab-logs'),output=$('lab-process-log');
+  if(!output.hidden){output.hidden=true;button.textContent='查看日志';button.setAttribute('aria-expanded','false');return;}
+  button.disabled=true;
+  try{const data=await api('/api/lab/process/logs');output.textContent=data.body;output.hidden=false;button.textContent='收起日志';button.setAttribute('aria-expanded','true');}
+  catch(e){notice('lab-process-error',e.message);}
+  finally{button.disabled=false;}
+};
+setInterval(()=>{if(!document.hidden&&state.page==='lab')pollLabProcess();},2000);pollLabProcess();
 function sampleValue(schema,schemas,depth=0){if(!schema||depth>4)return null;if(schema.$ref)return sampleValue(schemas[schema.$ref.split('/').pop()],schemas,depth+1);if(schema.example!==undefined)return schema.example;if(schema.default!==undefined)return schema.default;if(schema.enum)return schema.enum[0];if(schema.type==='object'||schema.properties)return Object.fromEntries(Object.entries(schema.properties||{}).map(([k,v])=>[k,sampleValue(v,schemas,depth+1)]));if(schema.type==='array')return [sampleValue(schema.items,schemas,depth+1)];if(schema.type==='boolean')return false;if(schema.type==='integer'||schema.type==='number')return 1;return '';}
-$('discover-lab').onclick=async()=>{const button=$('discover-lab');button.disabled=true;$('lab-discovery-status').textContent='正在加载 Lab OpenAPI…';try{const r=await api('/api/lab/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'GET',path:'/v3/api-docs',authorization:$('lab-auth').value})});if(r.status!==200)throw Error(`Lab OpenAPI 返回 ${r.status||'连接失败'}`);const doc=JSON.parse(r.body),incoming=[];for(const [path,methods] of Object.entries(doc.paths||{})){if(!path.startsWith('/lab/'))continue;for(const [method,op] of Object.entries(methods)){if(!['get','post','put','delete','patch'].includes(method))continue;const schema=op.requestBody?.content?.['application/json']?.schema;const body=schema?sampleValue(schema,doc.components?.schemas||{}):'';incoming.push({kind:'api',group:op.tags?.[0]||'其他实验',name:op.summary||path,method:method.toUpperCase(),path,body:typeof body==='string'?body:JSON.stringify(body,null,2)});}}const count=LabCatalog.merge(presets,incoming);renderPresets();if(selected>=0&&presets[selected]?.kind!=='learning')$('lab-request-title').textContent=`${presets[selected].group} · ${presets[selected].name}`;$('lab-discovery-status').textContent=`已同步 ${incoming.length} 个接口（新增 ${count} 个），学习目录保留。示例 JSON 请按实际业务填写。`;}catch(e){$('lab-discovery-status').textContent=e.message+'，可继续使用内置实验和手动请求。';}finally{button.disabled=false;}};
+$('discover-lab').onclick=async()=>{
+  const button=$('discover-lab'),status=$('lab-discovery-status');
+  button.disabled=true;button.textContent='同步中…';button.setAttribute('aria-busy','true');
+  status.dataset.state='loading';status.textContent='正在读取 Lab 接口定义…';
+  try{
+    const r=await api('/api/lab/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'GET',path:'/v3/api-docs',authorization:$('lab-auth').value})});
+    if(r.status!==200)throw Error(`Lab OpenAPI 返回 ${r.status||'连接失败'}`);
+    if(r.truncated)throw Error('接口定义过大，响应已截断');
+    const doc=JSON.parse(r.body),incoming=[];
+    if(!doc?.paths||typeof doc.paths!=='object'||Array.isArray(doc.paths))throw Error('接口定义缺少有效的 paths');
+    for(const [path,methods] of Object.entries(doc.paths)){
+      if(!path.startsWith('/lab/')||!methods||typeof methods!=='object')continue;
+      for(const [method,op] of Object.entries(methods)){
+        if(!['get','post','put','delete','patch'].includes(method)||!op||typeof op!=='object')continue;
+        const schema=op.requestBody?.content?.['application/json']?.schema;
+        const body=schema?sampleValue(schema,doc.components?.schemas||{}):'';
+        incoming.push({kind:'api',group:op.tags?.[0]||'其他实验',name:op.summary||path,method:method.toUpperCase(),path,body:typeof body==='string'?body:JSON.stringify(body,null,2)});
+      }
+    }
+    if(!incoming.length)throw Error('未发现可同步的 Lab 实验接口');
+    const count=LabCatalog.merge(presets,incoming);renderPresets();
+    if(selected>=0&&presets[selected]?.kind!=='learning')$('lab-request-title').textContent=`${presets[selected].group} · ${presets[selected].name}`;
+    status.dataset.state='success';status.textContent=`已同步 ${incoming.length} 个接口（新增 ${count} 个），学习目录保留。示例 JSON 请按实际业务填写。`;
+  }catch(e){status.dataset.state='error';status.textContent='同步失败：'+e.message+'。请确认 Lab 已启动；内置实验仍可浏览。';}
+  finally{button.disabled=false;button.textContent='同步接口';button.removeAttribute('aria-busy');}
+};
 async function refresh(){if(state.busy)return;state.busy=true;$('refresh').disabled=true;const keys=['host','cluster','projects','remote'];if(!state.runningAt||Date.now()-state.runningAt>10000){keys.push('running');state.runningAt=Date.now();}const results=await Promise.allSettled(keys.map(async key=>{state[key]=await api(key==='running'?'/api/projects/running':'/api/'+key);delete state.errors[key];}));results.forEach((r,i)=>{if(r.status==='rejected')state.errors[keys[i]]=r.reason.message;});renderHost();renderCluster();renderProjects();renderServer();const failed=Object.keys(state.errors).length;$('connection').innerHTML=`<i class="live-dot" style="${failed?'background:var(--amber)':''}"></i>${failed?'部分连接异常':'本机已连接'}`;state.busy=false;$('refresh').disabled=false;}
 $('refresh').onclick=refresh;$('pause').onclick=()=>{state.paused=!state.paused;$('pause').textContent=state.paused?'恢复刷新':'暂停刷新';$('footer-status').textContent=state.paused?'面板刷新已暂停 · 后台仍在采样':'本机 2s / 项目 10s / 集群与服务器 15s';};
 setInterval(()=>{$('clock').textContent=new Date().toLocaleString('zh-CN',{hour12:false});},1000);setInterval(()=>{if(!state.paused&&!document.hidden)refresh();},2000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!state.paused)refresh();});refresh();

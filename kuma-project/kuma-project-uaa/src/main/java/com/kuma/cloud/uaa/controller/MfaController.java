@@ -5,6 +5,9 @@ import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.uaa.domain.dto.MfaVerifyDTO;
 import com.kuma.cloud.uaa.domain.vo.MfaBindVO;
 import com.kuma.cloud.uaa.service.MfaService;
+import com.kuma.cloud.uaa.service.UaaUserService;
+import com.kuma.cloud.uaa.config.UaaProperties;
+import com.kuma.boot.cache.redis.repository.RedisRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.Map;
 
 @Tag(name = "二次校验（TOTP）")
 @RestController
@@ -24,6 +28,21 @@ import java.security.Principal;
 public class MfaController {
 
     private final MfaService mfaService;
+    private final UaaUserService userService;
+    private final UaaProperties properties;
+    private final RedisRepository redisRepository;
+
+    @Operation(summary = "查询当前用户的二次验证绑定状态，不返回密钥")
+    @GetMapping("/status")
+    public Result<Map<String, Boolean>> status(Principal principal) {
+        String username = requireName(principal);
+        var user = userService.requireByUsername(username);
+        return Result.success(Map.of(
+                "featureEnabled", properties.getMfa().isEnabled(),
+                "enabled", user.isMfaEnabled(),
+                "secretBound", user.isMfaEnabled()
+                        || redisRepository.get("uaa:mfa:pending:" + username) != null));
+    }
 
     @Operation(summary = "获取绑定二维码，密钥在确认前不会落库")
     @GetMapping("/bind")

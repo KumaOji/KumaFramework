@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 /** 固定参数调用本机命令；独立读取两条流，限制输出与执行时间。 */
 @Component
 public class CommandRunner {
+    public Process start(List<String> command) throws java.io.IOException {
+        return new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
+    }
     private static final int OUTPUT_LIMIT = 4 * 1024 * 1024;
 
     public record Result(boolean success, String output, String error) {}

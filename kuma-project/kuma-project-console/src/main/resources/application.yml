@@ -12,6 +12,12 @@ spring:
       pool:
         size: 3
 console:
+  components:
+    distribution: ${KUMA_COMPONENTS_DISTRIBUTION:Ubuntu-24.04}
+  blog:
+    directory: ${KUMA_BLOG_FRONTEND_DIR:}
+    port: ${KUMA_BLOG_FRONTEND_PORT:4321}
+  workspace: ${KUMA_CONSOLE_WORKSPACE:}
   remote:
     target: ${KUMA_REMOTE_TARGET:root@117.72.13.197}
     key: ${KUMA_REMOTE_KEY:C:/Users/Kuma/Desktop/server/Kumakey.pem}
@@ -22,8 +28,9 @@ console:
     - name: Blog
       url: ${KUMA_BLOG_URL:http://127.0.0.1:9000/api}
     - name: Lab
-      url: ${KUMA_LAB_URL:http://127.0.0.1:9090/api}
+      url: ${KUMA_LAB_URL:http://127.0.0.1:19090/api}
     - name: UAA
       url: ${KUMA_UAA_URL:http://127.0.0.1:33336}
     - name: Gateway
       url: ${KUMA_GATEWAY_URL:http://127.0.0.1:18080}
+      management-url: ${KUMA_GATEWAY_MANAGEMENT_URL:http://127.0.0.1:18081}

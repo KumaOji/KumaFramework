@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 address = str(ipaddress.IPv4Address(sys.argv[1]))
-for service, port in (("blog", 19001), ("uaa", 19002)):
+for service, port in (("blog", 19001), ("uaa", 19002), ("gateway", 18081)):
     name = service + "-local"
     resources = [
         {"apiVersion": "v1", "kind": "Service", "metadata": {"name": name, "namespace": "base"},
