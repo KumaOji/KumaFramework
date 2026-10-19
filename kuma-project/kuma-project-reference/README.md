@@ -8,7 +8,6 @@
 kuma-project-reference/
 ├── build.gradle
 ├── config/nacos/                 Nacos 配置模板
-├── requests/reference.http       HTTP 请求示例
 ├── scripts/                      本机初始化、启动和演示
 └── src/
     ├── main/
@@ -27,7 +26,7 @@ kuma-project-reference/
     │   │   │   ├── model/        订单状态、金额计算与商品快照
     │   │   │   └── enums/        数据源范围
     │   │   ├── integration/      外部商品 HTTP 客户端
-    │   │   ├── support/          数据源路由和实际连接检查
+    │   │   ├── support/          实际数据库连接检查
     │   │   └── exception/        业务异常及统一异常处理
     │   └── resources/
     │       ├── bootstrap.yml     应用名称、环境和 Nacos 导入
@@ -48,18 +47,34 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 |---|---|
 | Nacos 配置和服务注册 | kuma-cloud-starter-alibaba、bootstrap.yml |
 | PostgreSQL 双 schema | referenceMain / referenceSandbox 两个独立 HikariCP 池 |
-| 动态数据源 | Kuma 数据源组件，DataScope 白名单路由 |
+| 动态数据源 | kuma-boot-starter-data-datasource，DataSourceExecutor、@DS 和 #last 参数解析 |
+| Schema 切换 | kuma-boot-starter-data-mybatis 的 SchemaInterceptor，SCHEMA 模式 |
+| Web MVC | kuma-boot-starter-web，MVC 配置、参数转换、异步执行、Trace MDC 和 HTTP 交换记录 |
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、Mapper XML |
-| Flyway | 分别迁移两个物理数据源 |
-| 业务线程池 | 有界队列、拒绝策略、MDC 恢复和优雅关闭 |
-| HTTP 连接池 | WebClient、连接上限、响应及整体超时 |
-| Actuator | health / info |
+| Flyway | kuma-boot-starter-data-migration，选择 FLYWAY，分别迁移两个物理数据源 |
+| 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
+| HTTP 连接池 | kuma-boot-starter-client 提供 WebClient 依赖，本模块配置商品客户端连接上限、响应及整体超时 |
+| Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
 
-MAIN 对应 `kuma_reference_main`，SANDBOX 对应 `kuma_reference_sandbox`，共用 PostgreSQL `base` 数据库。先选择数据源再开启事务，事务内禁止切换到其他数据源。HTTP 商品查询先于数据库事务执行；分页 count 与 items 共用 REPEATABLE READ 只读事务。
+MAIN 对应 `kuma_reference_main`，SANDBOX 对应 `kuma_reference_sandbox`，共用 PostgreSQL `base` 数据库。DataScope 白名单映射数据源名与 schema 租户后缀；组件的 DataSourceExecutor 使用 @DS 切换数据源，并设置 TenantContextHolder，SchemaInterceptor 将 Mapper SQL 的表名限定到目标 schema。连接池的 currentSchema 同时固定 JDBC 默认 schema，Flyway 分别迁移两个 schema。上下文在调用结束或异常后恢复。
+
+先选择数据源再开启事务，事务内禁止切换到其他数据源。HTTP 商品查询先于数据库事务执行；分页 count 与 items 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
 
 Redis / JetCache 当前禁用；Kafka、认证、对象存储等尚未在本模块配置。传递依赖不代表已接入。
 
+业务模块通过 Kuma starter 获取 AOP、HTTP 客户端、JDBC 和数据库迁移能力，不重复声明对应的 Spring Boot starter。底层仍由 Kuma starter 组合 Spring Boot 与第三方库。Flyway 按物理数据源分别迁移，关闭默认单数据源迁移及 Liquibase，避免两种引擎同时运行。
+
+线程池直接注入框架的 `asyncThreadPoolTaskExecutor`，配置统一使用 `kuma.boot.core.async`。核心参数为 `core-pool-size`、`max-pool-siz`（沿用框架现有拼写）、`queue-capacity`、`rejection-policy` 和 `await-termination-seconds`。reference 使用 `ABORT` 拒绝策略，过载返回 503；框架默认仍为 `CALLER_RUNS`。
+
+普通异步任务复用 core 的线程池。独立的 `kuma-boot-starter-threadpool` 提供 DynamicTP 能力，当前模板未启用其演示线程池。线程池等运行参数统一由 Nacos 管理，配置模板见 `config/nacos/kuma-reference-dev.yaml`；bootstrap.yml 只保留应用名称、环境和 Nacos 连接、导入及注册配置。已发布的 Nacos 配置需同步使用 `kuma.boot.core.async`。
+
+Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。只有一个构造器时不需要 `@Autowired`；多个同类型 Bean 使用参数上的 `@Qualifier` 区分。
+
 ## 启动
+
+入口使用 `kuma-boot-starter-core` 的 `StartupSpringApplication`，启用 Kuma Banner、应用属性初始化和初始化器耗时记录。环境仍由 bootstrap.yml、环境变量及命令行控制。
+
+启动类使用 core 的启动入口，WebConfiguration 显式导入 web starter 的 MVC 和 HTTP 交换记录配置。现有 `@KumaBootApplication` 同时开启 OAuth2 资源服务；本模板尚未配置认证，保留 `@SpringBootApplication` 并排除传递依赖带来的默认登录与管理端点安全配置。新项目接入认证时应移除这些排除项并配置对应安全组件。
 
 运行配置由 Nacos 加载，本地模板为 `config/nacos/kuma-reference-dev.yaml`：
 
@@ -88,8 +103,6 @@ python .\kuma-project\kuma-project-reference\scripts\mock-catalog.py
 新机器的 WSL 开发数据库可通过 `scripts/initialize-wsl.ps1` 初始化独立账户和 schema。配置模板仅保留凭据占位变量，真实凭据由部署环境或受控配置中心提供。
 
 ## 接口
-
-打开 `requests/reference.http` 运行示例。
 
 | 方法 | 路径 | 用途 |
 |---|---|---|

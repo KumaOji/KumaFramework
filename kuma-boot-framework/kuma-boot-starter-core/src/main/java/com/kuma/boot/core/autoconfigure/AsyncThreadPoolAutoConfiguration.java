@@ -24,6 +24,7 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -39,7 +40,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @since 2021-09-02 20:01:42
  */
 @EnableConfigurationProperties({AsyncProperties.class})
-@AutoConfiguration
+@AutoConfiguration(beforeName = "org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration")
 public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
 
     private final AsyncProperties asyncProperties;
@@ -55,6 +56,7 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
 
     @Primary
     @Bean("asyncThreadPoolTaskExecutor")
+    @ConditionalOnMissingBean(name = "asyncThreadPoolTaskExecutor")
     public ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor() {
         MDCThreadPoolTaskExecutor executor = new MDCThreadPoolTaskExecutor();
 
@@ -75,6 +77,7 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
         executor.setWaitForTasksToCompleteOnShutdown(asyncProperties.isWaitForTasksToCompleteOnShutdown());
         // 应用关闭时-继续等待时间（单位：秒）
         executor.setAwaitTerminationSeconds(asyncProperties.getAwaitTerminationSeconds());
+        executor.setStrictEarlyShutdown(asyncProperties.isStrictEarlyShutdown());
         // ThreadFactory
         executor.setThreadFactory(new ThreadPoolFactory(asyncProperties.getThreadNamePrefix(), executor));
         // 异步线程上下文装饰器
@@ -89,9 +92,10 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
         // DiscardOldestPolicy: 抛弃旧的任务、暂不支持；会导致被丢弃的任务无法再次被执行
         // DiscardPolicy: 抛弃当前任务、暂不支持；会导致被丢弃的任务无法再次被执行
          */
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-
-        executor.initialize();
+        executor.setRejectedExecutionHandler(switch (asyncProperties.getRejectionPolicy()) {
+            case CALLER_RUNS -> new ThreadPoolExecutor.CallerRunsPolicy();
+            case ABORT -> new ThreadPoolExecutor.AbortPolicy();
+        });
 
         // ThreadFactory factory = Thread.ofVirtual().factory();
         // ExecutorService executorService = newThreadPerTaskExecutor(factory);

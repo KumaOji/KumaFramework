@@ -16,14 +16,9 @@
 
 package com.kuma.boot.data.datasource.autoconfigure;
 
-import com.baomidou.dynamic.datasource.processor.DsJakartaHeaderProcessor;
-import com.baomidou.dynamic.datasource.processor.DsJakartaSessionProcessor;
-import com.baomidou.dynamic.datasource.processor.DsProcessor;
-import com.baomidou.dynamic.datasource.processor.DsSpelExpressionProcessor;
 import com.baomidou.dynamic.datasource.provider.DynamicDataSourceProvider;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
-import com.kuma.boot.data.datasource.dynamic.mybatisplus.config.DsLastParamProcessor;
 import com.kuma.boot.data.datasource.dynamic.mybatisplus.config.JdbcDynamicDataSourceProvider;
 import com.kuma.boot.data.datasource.dynamic.mybatisplus.properties.DynamicDataSourceProperties;
 //import org.jasypt.encryption.StringEncryptor;
@@ -35,6 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
  * 动态数据源切换配置
@@ -42,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @EnableConfigurationProperties(DynamicDataSourceProperties.class)
+@Import(DataSourceProcessorAutoConfiguration.class)
 @ConditionalOnProperty(
         prefix = DynamicDataSourceProperties.PREFIX,
         name = "enabled",
@@ -66,19 +63,4 @@ public class DynamicDataSourceAutoConfiguration implements InitializingBean {
                 properties, dynamicDataSourceProperties);
     }
 
-    /**
-     * 动态解析数据源
-     */
-    @Bean
-    public DsProcessor dsProcessor() {
-        DsLastParamProcessor lastParamProcessor = new DsLastParamProcessor();
-        DsJakartaHeaderProcessor headerProcessor = new DsJakartaHeaderProcessor();
-        DsJakartaSessionProcessor sessionProcessor = new DsJakartaSessionProcessor();
-        DsSpelExpressionProcessor spelExpressionProcessor = new DsSpelExpressionProcessor();
-
-        lastParamProcessor.setNextProcessor(headerProcessor);
-        headerProcessor.setNextProcessor(sessionProcessor);
-        sessionProcessor.setNextProcessor(spelExpressionProcessor);
-        return lastParamProcessor;
-    }
 }

@@ -29,7 +29,7 @@ public class OrderController {
     private final AsyncTaskExecutor executor;
 
     public OrderController(OrderService orderService,
-            @Qualifier("businessExecutor") AsyncTaskExecutor executor) {
+            @Qualifier("asyncThreadPoolTaskExecutor") AsyncTaskExecutor executor) {
         this.orderService = orderService;
         this.executor = executor;
     }

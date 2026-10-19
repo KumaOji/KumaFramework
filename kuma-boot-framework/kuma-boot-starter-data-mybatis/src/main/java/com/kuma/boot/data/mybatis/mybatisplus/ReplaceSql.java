@@ -46,6 +46,7 @@ import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.ast.statement.SQLUnionQueryTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
+import com.alibaba.druid.sql.dialect.postgresql.parser.PGSQLStatementParser;
 import com.alibaba.druid.sql.dialect.sqlserver.parser.SQLServerStatementParser;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.baomidou.mybatisplus.annotation.DbType;
@@ -59,6 +60,7 @@ public final class ReplaceSql {
     public static String replaceSql(DbType dbType, String schemaName, String sql) {
         SQLStatementParser parser =
                 switch (dbType) {
+                    case POSTGRE_SQL -> new PGSQLStatementParser(sql);
                     case SQL_SERVER, SQL_SERVER2005 -> new SQLServerStatementParser(sql);
                     default -> new MySqlStatementParser(sql);
                 };

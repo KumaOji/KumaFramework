@@ -94,6 +94,29 @@ public class AsyncProperties {
     /** 是否开启异步 */
     private boolean enabled = true;
 
+    /** 默认保持调用线程执行；接口服务可选择 ABORT，将过载转换为明确的错误响应。 */
+    private RejectionPolicy rejectionPolicy = RejectionPolicy.CALLER_RUNS;
+
+    private boolean strictEarlyShutdown = false;
+
+    public enum RejectionPolicy { CALLER_RUNS, ABORT }
+
+    public RejectionPolicy getRejectionPolicy() {
+        return rejectionPolicy;
+    }
+
+    public void setRejectionPolicy(RejectionPolicy rejectionPolicy) {
+        this.rejectionPolicy = rejectionPolicy;
+    }
+
+    public boolean isStrictEarlyShutdown() {
+        return strictEarlyShutdown;
+    }
+
+    public void setStrictEarlyShutdown(boolean strictEarlyShutdown) {
+        this.strictEarlyShutdown = strictEarlyShutdown;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }

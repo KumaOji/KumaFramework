@@ -12,7 +12,7 @@ import com.kuma.cloud.reference.exception.OrderNotFoundException;
 import com.kuma.cloud.reference.integration.catalog.WebClientProductCatalog;
 import com.kuma.cloud.reference.mapper.OrderMapper;
 import com.kuma.cloud.reference.service.OrderService;
-import com.kuma.cloud.reference.support.datasource.DynamicSchemaExecutor;
+import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceExecutor;
 import java.time.Clock;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -27,12 +27,12 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orders;
     private final WebClientProductCatalog catalog;
     private final Clock clock;
-    private final DynamicSchemaExecutor schemas;
+    private final DataSourceExecutor schemas;
     private final TransactionTemplate writes;
     private final TransactionTemplate reads;
 
     public OrderServiceImpl(OrderMapper orders, WebClientProductCatalog catalog, Clock clock,
-                            DynamicSchemaExecutor schemas, TransactionTemplate writes, PlatformTransactionManager manager) {
+                            DataSourceExecutor schemas, TransactionTemplate writes, PlatformTransactionManager manager) {
         this.schemas = schemas;
         this.writes = writes;
         this.reads = new TransactionTemplate(manager);
@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
 
     private <T> T inScope(DataScope scope, TransactionTemplate transaction, Supplier<T> operation) {
         // 路由先于事务获取连接，分页查询共用同一只读事务。
-        return schemas.execute(scope, () -> transaction.execute(status -> operation.get()));
+        return schemas.execute(scope.dataSource(), scope.name().toLowerCase(java.util.Locale.ROOT), () -> transaction.execute(status -> operation.get()));
     }
 
     private static OrderVO toVO(Order order) {

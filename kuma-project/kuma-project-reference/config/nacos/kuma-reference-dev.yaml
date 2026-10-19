@@ -58,6 +58,8 @@ spring:
       query-timeout: 2s
   transaction:
     default-timeout: 3s
+  liquibase:
+    enabled: false
   flyway:
     # 每个物理池由 SchemaDataSourceConfiguration 分别迁移。
     enabled: false
@@ -75,7 +77,25 @@ mybatis-plus:
 
 kuma:
   boot:
+    core:
+      async:
+        enabled: true
+        virtual-threads: false
+        thread-name-prefix: reference-business-
+        core-pool-size: ${BUSINESS_THREADS_CORE:4}
+        max-pool-siz: ${BUSINESS_THREADS_MAX:8}
+        queue-capacity: ${BUSINESS_QUEUE_CAPACITY:100}
+        keep-alive-seconds: 60
+        allow-core-thread-time-out: true
+        rejection-policy: ABORT
+        wait-for-tasks-to-complete-on-shutdown: true
+        await-termination-seconds: 20
+        strict-early-shutdown: true
+        enable-servlet-async-context: false
     data:
+      migration:
+        enabled: true
+        type: FLYWAY
       mybatis:
         enabled: true
         mybatis-plus:
@@ -87,17 +107,16 @@ kuma:
             enabled: true
             block-attack:
               enabled: true
+            multi-tenant:
+              enabled: true
+              multi-tenant-type: SCHEMA
+              tenant-database-prefix: kuma_reference
+              db-type: POSTGRE_SQL
     cache:
       jetcache:
         enabled: false
 
 reference:
-  executor:
-    core-size: ${BUSINESS_THREADS_CORE:4}
-    max-size: ${BUSINESS_THREADS_MAX:8}
-    queue-capacity: ${BUSINESS_QUEUE_CAPACITY:100}
-    keep-alive-seconds: 60
-    shutdown-seconds: 20
   catalog:
     base-url: ${CATALOG_BASE_URL:http://127.0.0.1:19093}
     max-connections: 20

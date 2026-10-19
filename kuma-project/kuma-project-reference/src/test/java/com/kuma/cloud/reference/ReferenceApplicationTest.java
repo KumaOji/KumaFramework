@@ -9,9 +9,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import com.kuma.cloud.reference.domain.enums.DataScope;
-import com.kuma.cloud.reference.support.datasource.DynamicSchemaExecutor;
+import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceExecutor;
 import com.kuma.cloud.reference.support.datasource.JdbcSchemaInspector;
-import com.kuma.cloud.reference.support.datasource.ScopedDataSourceInvoker;
+import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceInvoker;
 import com.kuma.cloud.reference.mapper.UnsafeOrderMapper;
 import com.kuma.boot.data.mybatis.utils.MybatisUtil;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -52,8 +52,10 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles("local")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "reference.executor.core-size=1", "reference.executor.max-size=1", "reference.executor.queue-capacity=1"
+@SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.ALWAYS,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "spring.config.name=application",
+        "kuma.boot.core.async.core-pool-size=1", "kuma.boot.core.async.max-pool-siz=1", "kuma.boot.core.async.queue-capacity=1"
 })
 class ReferenceApplicationTest {
     private static final ExecutorService MOCK_WORKERS = Executors.newVirtualThreadPerTaskExecutor();
@@ -65,16 +67,16 @@ class ReferenceApplicationTest {
 
     @LocalServerPort int port;
     @Autowired DynamicRoutingDataSource dataSource;
-    @Autowired DynamicSchemaExecutor schemas;
+    @Autowired DataSourceExecutor schemas;
     @Autowired JdbcSchemaInspector inspector;
-    @Autowired ScopedDataSourceInvoker invoker;
+    @Autowired DataSourceInvoker invoker;
     @Autowired OrderMapper orders;
     @Autowired TransactionTemplate transactions;
     @Autowired MybatisUtil kumaMybatisUtil;
     @Autowired SqlSessionFactory sqlSessionFactory;
     @Autowired org.springframework.context.ApplicationContext context;
     @Autowired UnsafeOrderMapper unsafeOrderMapper;
-    @Autowired @Qualifier("businessExecutor") ThreadPoolTaskExecutor executor;
+    @Autowired @Qualifier("asyncThreadPoolTaskExecutor") ThreadPoolTaskExecutor executor;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
 
     @DynamicPropertySource
@@ -100,6 +102,41 @@ class ReferenceApplicationTest {
     static void stopCatalog() {
         CATALOG.stop(0);
         MOCK_WORKERS.shutdownNow();
+    }
+
+    @Test
+    void starterRestoresTenantAndDataSourceAfterNestedFailures() {
+        assertEquals(1, context.getBeansOfType(
+                com.kuma.boot.web.autoconfigure.WebMvcAutoConfiguration.class).size());
+        assertInstanceOf(com.kuma.boot.data.datasource.dynamic.mybatisplus.config.DsLastParamProcessor.class,
+                context.getBean(com.baomidou.dynamic.datasource.processor.DsProcessor.class));
+        assertTrue(sqlSessionFactory.getConfiguration().getInterceptors().stream()
+                .filter(MybatisPlusInterceptor.class::isInstance).map(MybatisPlusInterceptor.class::cast)
+                .flatMap(interceptor -> interceptor.getInterceptors().stream())
+                .anyMatch(com.kuma.boot.data.mybatis.mybatisplus.interceptor.tenant.SchemaInterceptor.class::isInstance));
+        var previous = com.kuma.boot.common.holder.TenantContextHolder.getTenant();
+        schemas.execute(DataScope.MAIN.dataSource(), "main", () -> {
+            assertThrows(IllegalStateException.class, () ->
+                    schemas.execute(DataScope.SANDBOX.dataSource(), "sandbox", () -> {
+                        assertEquals("sandbox", com.kuma.boot.common.holder.TenantContextHolder.getTenant());
+                        throw new IllegalStateException("nested failure");
+                    }));
+            assertEquals("main", com.kuma.boot.common.holder.TenantContextHolder.getTenant());
+            assertEquals(DataScope.MAIN.dataSource(), DynamicDataSourceContextHolder.peek());
+            return null;
+        });
+        assertEquals(previous, com.kuma.boot.common.holder.TenantContextHolder.getTenant());
+        assertNull(DynamicDataSourceContextHolder.peek());
+    }
+
+    @Test
+    void kumaActuatorContributesHealthWithoutExposingExtraEndpoints() throws Exception {
+        assertEquals(1, context.getBeansOfType(
+                com.kuma.boot.actuator.health.KmcHealthIndicator.class).size());
+        var health = request("GET", "/actuator/health", null);
+        assertEquals(200, health.statusCode(), health.body());
+        assertEquals("UP", JSON.readTree(health.body()).path("status").asString());
+        assertEquals(404, request("GET", "/actuator/env", null).statusCode());
     }
 
     @Test
@@ -182,6 +219,12 @@ class ReferenceApplicationTest {
 
     @Test
     void propagatesMdcWithoutLeakingItIntoTheNextTask() throws Exception {
+        assertInstanceOf(com.kuma.boot.core.support.thread.MDCThreadPoolTaskExecutor.class, executor);
+        assertEquals(1, context.getBeansOfType(ThreadPoolTaskExecutor.class).size(),
+                context.getBeansOfType(ThreadPoolTaskExecutor.class).keySet().toString());
+        assertEquals(1, executor.getCorePoolSize());
+        assertEquals(1, executor.getMaxPoolSize());
+        assertEquals(1, executor.getQueueCapacity());
         try {
             MDC.put("requestId", "reference-test");
             assertEquals("reference-test", executor.submitCompletable(() -> MDC.get("requestId")).get(2, TimeUnit.SECONDS));
@@ -214,13 +257,13 @@ class ReferenceApplicationTest {
     @Test
     void customLastParameterProcessorRestoresNestedAndExceptionalRoutes() {
         assertNull(DynamicDataSourceContextHolder.peek());
-        schemas.execute(DataScope.MAIN, () -> {
+        schemas.execute(DataScope.MAIN.dataSource(), () -> {
             assertEquals("kuma_reference_main", inspector.inspect(DataScope.MAIN).schema());
             assertEquals("kuma_reference_sandbox", inspector.inspect(DataScope.SANDBOX).schema());
             assertEquals(DataScope.MAIN.dataSource(), DynamicDataSourceContextHolder.peek());
             return null;
         });
-        assertThrows(IllegalStateException.class, () -> schemas.execute(DataScope.SANDBOX, () -> {
+        assertThrows(IllegalStateException.class, () -> schemas.execute(DataScope.SANDBOX.dataSource(), () -> {
             throw new IllegalStateException("simulated failure");
         }));
         assertNull(DynamicDataSourceContextHolder.peek());
@@ -228,7 +271,7 @@ class ReferenceApplicationTest {
         assertNull(DynamicDataSourceContextHolder.peek());
         assertEquals("kuma_reference_main", inspector.inspect(DataScope.MAIN).schema());
         assertThrows(IllegalStateException.class, () -> transactions.execute(status ->
-                schemas.execute(DataScope.SANDBOX, () -> "must not switch an active transaction")));
+                schemas.execute(DataScope.SANDBOX.dataSource(), () -> "must not switch an active transaction")));
         assertNull(DynamicDataSourceContextHolder.peek());
     }
 

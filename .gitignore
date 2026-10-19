@@ -39,6 +39,9 @@ k8s/blog/blog-secret.yaml
 
 # UAA JWT 签名私钥（本地开发自动生成，改由 kuma.uaa.jwk.private-key 配置下发）
 data/
+# data 包属于 Java 源码，不能被运行数据目录规则忽略。
+!**/src/main/java/**/data/
+!**/src/test/java/**/data/
 .sync-server/
 
 # intellijPlatform
