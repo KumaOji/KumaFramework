@@ -1,0 +1,322 @@
+package com.kuma.cloud.reference;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.kuma.cloud.reference.mapper.OrderMapper;
+import com.kuma.cloud.reference.domain.entity.OrderDO;
+import com.sun.net.httpserver.HttpServer;
+import com.zaxxer.hikari.HikariDataSource;
+import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
+import com.kuma.cloud.reference.domain.enums.DataScope;
+import com.kuma.cloud.reference.support.datasource.DynamicSchemaExecutor;
+import com.kuma.cloud.reference.support.datasource.JdbcSchemaInspector;
+import com.kuma.cloud.reference.support.datasource.ScopedDataSourceInvoker;
+import com.kuma.cloud.reference.mapper.UnsafeOrderMapper;
+import com.kuma.boot.data.mybatis.utils.MybatisUtil;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
+import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
+import org.apache.ibatis.session.SqlSessionFactory;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.UUID;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntSupplier;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.support.TransactionTemplate;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
+@ActiveProfiles("local")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "reference.executor.core-size=1", "reference.executor.max-size=1", "reference.executor.queue-capacity=1"
+})
+class ReferenceApplicationTest {
+    private static final ExecutorService MOCK_WORKERS = Executors.newVirtualThreadPerTaskExecutor();
+    private static final AtomicInteger CATALOG_CALLS = new AtomicInteger();
+    private static final AtomicInteger ACTIVE_DB_DURING_HTTP = new AtomicInteger(-1);
+    private static volatile IntSupplier activeConnections = () -> -1;
+    private static final HttpServer CATALOG = catalogServer();
+    private static final JsonMapper JSON = JsonMapper.builder().build();
+
+    @LocalServerPort int port;
+    @Autowired DynamicRoutingDataSource dataSource;
+    @Autowired DynamicSchemaExecutor schemas;
+    @Autowired JdbcSchemaInspector inspector;
+    @Autowired ScopedDataSourceInvoker invoker;
+    @Autowired OrderMapper orders;
+    @Autowired TransactionTemplate transactions;
+    @Autowired MybatisUtil kumaMybatisUtil;
+    @Autowired SqlSessionFactory sqlSessionFactory;
+    @Autowired org.springframework.context.ApplicationContext context;
+    @Autowired UnsafeOrderMapper unsafeOrderMapper;
+    @Autowired @Qualifier("businessExecutor") ThreadPoolTaskExecutor executor;
+    private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
+
+    @DynamicPropertySource
+    static void catalogAddress(DynamicPropertyRegistry properties) {
+        properties.add("reference.catalog.base-url", () -> "http://127.0.0.1:" + CATALOG.getAddress().getPort());
+    }
+
+    @BeforeEach
+    void observePool() {
+        activeConnections = () -> {
+            try {
+                int active = 0;
+                for (DataScope scope : DataScope.values()) {
+                    active += dataSource.getDataSource(scope.dataSource()).unwrap(HikariDataSource.class)
+                            .getHikariPoolMXBean().getActiveConnections();
+                }
+                return active;
+            } catch (java.sql.SQLException error) { throw new IllegalStateException(error); }
+        };
+    }
+
+    @AfterAll
+    static void stopCatalog() {
+        CATALOG.stop(0);
+        MOCK_WORKERS.shutdownNow();
+    }
+
+    @Test
+    void fullHttpFlowPersistsPriceSnapshotAndProtectsStateTransitions() throws Exception {
+        var created = request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"quantity\":2}");
+        assertEquals(201, created.statusCode(), created.body());
+        var body = JSON.readTree(created.body());
+        var location = created.headers().firstValue("Location").orElseThrow();
+        assertEquals("/api/orders/" + body.path("id").asString() + "?scope=MAIN", location);
+        assertEquals(198, body.path("totalAmount").asInt());
+        assertEquals("CREATED", body.path("status").asString());
+        assertEquals(0, ACTIVE_DB_DURING_HTTP.get(), "Remote request must not hold a DB connection");
+
+        var read = request("GET", location, null);
+        assertEquals(200, read.statusCode(), read.body());
+        assertEquals("BOOK-001", JSON.readTree(read.body()).path("sku").asString());
+        String confirmPath = "/api/orders/" + body.path("id").asString() + "/confirm?scope=MAIN";
+        var confirmed = request("POST", confirmPath, null);
+        assertEquals(200, confirmed.statusCode(), confirmed.body());
+        assertEquals("CONFIRMED", JSON.readTree(confirmed.body()).path("status").asString());
+        assertEquals(1, JSON.readTree(confirmed.body()).path("version").asInt());
+        assertProblem(request("POST", confirmPath, null), 409);
+    }
+
+    @Test
+    void validatesBeforeMakingAnExternalCallAndReturns404ForMissingOrders() throws Exception {
+        int before = CATALOG_CALLS.get();
+        assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"quantity\":0}"), 400);
+        assertProblem(request("POST", "/api/orders", "{\"sku\":\"../unsafe\",\"quantity\":1}"), 400);
+        assertProblem(request("POST", "/api/orders", "not-json"), 400);
+        assertEquals(before, CATALOG_CALLS.get());
+        assertProblem(request("GET", "/api/orders/" + UUID.randomUUID(), null), 404);
+        assertProblem(request("GET", "/api/orders/not-a-uuid", null), 400);
+    }
+
+    @Test
+    void translatesMissingBrokenAndSlowUpstreamsWithoutCreatingOrders() throws Exception {
+        long before = countOrders();
+        for (var testCase : new Object[][]{{"MISSING", 422}, {"FAIL", 502}, {"BROKEN", 502},
+                {"WRONG-SKU", 502}, {"EMPTY", 502}, {"SLOW", 504}}) {
+            assertProblem(request("POST", "/api/orders", "{\"sku\":\"" + testCase[0] + "\",\"quantity\":1}"), (int) testCase[1]);
+        }
+        assertEquals(before, countOrders());
+    }
+
+    @Test
+    void rejectsStaleWritesAndRollsBackFailedTransactions() throws Exception {
+        var created = JSON.readTree(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"quantity\":1}").body());
+        var id = UUID.fromString(created.path("id").asString());
+        var snapshot = orders.selectById(id.toString()).toDomain();
+        transactions.executeWithoutResult(status -> assertEquals(1,
+                orders.updateStatus(id.toString(), "CONFIRMED", snapshot.version() + 1, snapshot.version())));
+        transactions.executeWithoutResult(status -> assertEquals(0,
+                orders.updateStatus(id.toString(), "CONFIRMED", snapshot.version() + 1, snapshot.version())));
+        long before = countOrders();
+        assertThrows(IllegalStateException.class, () -> transactions.executeWithoutResult(status -> {
+            orders.insert(OrderDO.from(com.kuma.cloud.reference.domain.model.Order.create(snapshot.product(), 1, java.time.Instant.now())));
+            throw new IllegalStateException("rollback");
+        }));
+        assertEquals(before, countOrders());
+    }
+
+    @Test
+    void boundsTheQueueAndReturns503InsteadOfSilentlyDroppingWork() throws Exception {
+        var running = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        try {
+            executor.execute(() -> {
+                running.countDown();
+                try { release.await(5, TimeUnit.SECONDS); }
+                catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+            });
+            assertTrue(running.await(2, TimeUnit.SECONDS));
+            var queued = executor.submitCompletable(() -> "queued");
+            assertProblem(request("GET", "/api/orders/" + UUID.randomUUID(), null), 503);
+            release.countDown();
+            assertEquals("queued", queued.get(2, TimeUnit.SECONDS));
+        } finally { release.countDown(); }
+    }
+
+    @Test
+    void propagatesMdcWithoutLeakingItIntoTheNextTask() throws Exception {
+        try {
+            MDC.put("requestId", "reference-test");
+            assertEquals("reference-test", executor.submitCompletable(() -> MDC.get("requestId")).get(2, TimeUnit.SECONDS));
+        } finally { MDC.clear(); }
+        assertNull(executor.submitCompletable(() -> MDC.get("requestId")).get(2, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void qoVoPaginationAndSchemaRoutingKeepOrdersIsolated() throws Exception {
+        String sku = "ISOLATION-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        var main = JSON.readTree(request("POST", "/api/orders?scope=MAIN", "{\"sku\":\"" + sku + "\",\"quantity\":1}").body());
+        var sandbox = JSON.readTree(request("POST", "/api/orders?scope=SANDBOX", "{\"sku\":\"" + sku + "\",\"quantity\":2}").body());
+        assertProblem(request("GET", "/api/orders/" + main.path("id").asString() + "?scope=SANDBOX", null), 404);
+        assertProblem(request("GET", "/api/orders/" + sandbox.path("id").asString() + "?scope=MAIN", null), 404);
+        for (DataScope scope : DataScope.values()) {
+            var page = request("GET", "/api/orders?scope=" + scope + "&sku=" + sku + "&status=CREATED&page=1&size=1", null);
+            assertEquals(200, page.statusCode(), page.body());
+            var result = JSON.readTree(page.body());
+            assertEquals(1, result.path("total").asInt());
+            assertEquals(1, result.path("items").size());
+            assertEquals(scope == DataScope.MAIN ? 1 : 2, result.path("items").get(0).path("quantity").asInt());
+        }
+        assertEquals(200, request("GET", "/api/orders", null).statusCode());
+        assertProblem(request("GET", "/api/orders?page=0", null), 400);
+        assertProblem(request("GET", "/api/orders?size=101", null), 400);
+        assertProblem(request("GET", "/api/orders?status=WRONG", null), 400);
+        assertProblem(request("GET", "/api/orders?scope=public", null), 400);
+    }
+
+    @Test
+    void customLastParameterProcessorRestoresNestedAndExceptionalRoutes() {
+        assertNull(DynamicDataSourceContextHolder.peek());
+        schemas.execute(DataScope.MAIN, () -> {
+            assertEquals("kuma_reference_main", inspector.inspect(DataScope.MAIN).schema());
+            assertEquals("kuma_reference_sandbox", inspector.inspect(DataScope.SANDBOX).schema());
+            assertEquals(DataScope.MAIN.dataSource(), DynamicDataSourceContextHolder.peek());
+            return null;
+        });
+        assertThrows(IllegalStateException.class, () -> schemas.execute(DataScope.SANDBOX, () -> {
+            throw new IllegalStateException("simulated failure");
+        }));
+        assertNull(DynamicDataSourceContextHolder.peek());
+        assertThrows(RuntimeException.class, () -> invoker.invoke(() -> orders.count(null, null), "unknownDataSource"));
+        assertNull(DynamicDataSourceContextHolder.peek());
+        assertEquals("kuma_reference_main", inspector.inspect(DataScope.MAIN).schema());
+        assertThrows(IllegalStateException.class, () -> transactions.execute(status ->
+                schemas.execute(DataScope.SANDBOX, () -> "must not switch an active transaction")));
+        assertNull(DynamicDataSourceContextHolder.peek());
+    }
+
+    @Test
+    void concurrentRequestsReportTheActualSchemaWithoutPoolLeakage() throws Exception {
+        var calls = new ArrayList<java.util.concurrent.CompletableFuture<HttpResponse<String>>>();
+        for (int i = 0; i < 20; i++) {
+            var scope = i % 2 == 0 ? DataScope.MAIN : DataScope.SANDBOX;
+            var request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/datasources/current?scope=" + scope))
+                    .timeout(Duration.ofSeconds(8)).GET().build();
+            calls.add(http.sendAsync(request, HttpResponse.BodyHandlers.ofString()));
+        }
+        for (int i = 0; i < calls.size(); i++) {
+            var response = calls.get(i).get(8, TimeUnit.SECONDS);
+            assertEquals(200, response.statusCode(), response.body());
+            assertEquals(i % 2 == 0 ? "kuma_reference_main" : "kuma_reference_sandbox",
+                    JSON.readTree(response.body()).path("schema").asString());
+        }
+        for (DataScope scope : DataScope.values()) {
+            assertEquals(5, dataSource.getDataSource(scope.dataSource()).unwrap(HikariDataSource.class).getMaximumPoolSize());
+        }
+    }
+
+    @Test
+    void kumaMybatisIsActiveAndRejectsAnUpdateWithoutWhere() {
+        assertNotNull(kumaMybatisUtil);
+        assertEquals(1, context.getBeansOfType(SqlSessionFactory.class).size());
+        assertInstanceOf(com.baomidou.mybatisplus.core.MybatisConfiguration.class, sqlSessionFactory.getConfiguration());
+        var plugin = sqlSessionFactory.getConfiguration().getInterceptors().stream()
+                .filter(MybatisPlusInterceptor.class::isInstance)
+                .map(MybatisPlusInterceptor.class::cast).findFirst().orElseThrow();
+        assertTrue(plugin.getInterceptors().stream().anyMatch(BlockAttackInnerInterceptor.class::isInstance));
+        var error = assertThrows(RuntimeException.class, () -> transactions.executeWithoutResult(status -> {
+            // 即使拦截器意外失效，也强制回滚，不能修改已有演示订单。
+            try { unsafeOrderMapper.updateWithoutWhere(); }
+            finally { status.setRollbackOnly(); }
+        }));
+        Throwable cause = error;
+        while (cause.getCause() != null) cause = cause.getCause();
+        assertInstanceOf(MybatisPlusException.class, cause);
+    }
+
+    private HttpResponse<String> request(String method, String path, String body) throws Exception {
+        var builder = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).timeout(Duration.ofSeconds(8));
+        if (body != null) builder.header("Content-Type", "application/json");
+        return http.send(builder.method(method, body == null ? HttpRequest.BodyPublishers.noBody()
+                : HttpRequest.BodyPublishers.ofString(body)).build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    private void assertProblem(HttpResponse<String> response, int status) {
+        assertEquals(status, response.statusCode(), response.body());
+        assertTrue(response.headers().firstValue("Content-Type").orElse("").contains("application/problem+json"));
+        JsonNode problem = JSON.readTree(response.body());
+        assertEquals(status, problem.path("status").asInt());
+        assertFalse(response.body().contains("Exception"));
+    }
+
+    private long countOrders() throws Exception {
+        try (var connection = dataSource.getConnection(); var query = connection.prepareStatement("SELECT COUNT(*) FROM purchase_orders");
+             var result = query.executeQuery()) {
+            result.next();
+            return result.getLong(1);
+        }
+    }
+
+    private static HttpServer catalogServer() {
+        try {
+            var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+            server.setExecutor(MOCK_WORKERS);
+            server.createContext("/products/", exchange -> {
+                CATALOG_CALLS.incrementAndGet();
+                ACTIVE_DB_DURING_HTTP.set(activeConnections.getAsInt());
+                String sku = exchange.getRequestURI().getPath().substring("/products/".length());
+                try {
+                    if (sku.equals("SLOW")) Thread.sleep(4000);
+                    int status = sku.equals("MISSING") ? 404 : sku.equals("FAIL") ? 503 : 200;
+                    String body = sku.equals("BROKEN") ? "invalid-json" : sku.equals("EMPTY") ? "" :
+                            "{\"sku\":\"" + (sku.equals("WRONG-SKU") ? "OTHER" : sku) + "\",\"name\":\"DDD Book\",\"unitPrice\":99.00}";
+                    byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders().set("Content-Type", "application/json");
+                    exchange.sendResponseHeaders(status, bytes.length == 0 ? -1 : bytes.length);
+                    exchange.getResponseBody().write(bytes);
+                } catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+                catch (IOException ignored) { /* timed-out client may disconnect */ }
+                finally { exchange.close(); }
+            });
+            server.start();
+            return server;
+        } catch (IOException error) { throw new UncheckedIOException(error); }
+    }
+}

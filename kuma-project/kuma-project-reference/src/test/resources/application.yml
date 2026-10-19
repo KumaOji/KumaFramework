@@ -1,0 +1,111 @@
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:19092}
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 100
+      min-spare: 10
+    max-connections: 200
+    accept-count: 50
+    connection-timeout: 5s
+
+spring:
+  autoconfigure:
+    exclude:
+      # MyBatis 组件传递了缓存依赖；此订单示例不启用 Redis 客户端。
+      - org.redisson.spring.starter.RedissonAutoConfigurationV4
+  application:
+    name: kuma-reference
+  profiles:
+    default: wsl
+  main:
+    web-application-type: servlet
+  lifecycle:
+    timeout-per-shutdown-phase: 25s
+  mvc:
+    problemdetails:
+      enabled: true
+    async:
+      request-timeout: 5s
+  datasource:
+    dynamic:
+      primary: referenceMain
+      strict: true
+      grace-destroy: true
+      hikari:
+        max-pool-size: ${DB_POOL_MAX:5}
+        min-idle: ${DB_POOL_MIN:1}
+        connection-timeout: 3000
+        validation-timeout: 1000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        keepalive-time: 120000
+  jdbc:
+    template:
+      query-timeout: 2s
+  transaction:
+    default-timeout: 3s
+  flyway:
+    # 每个物理池由 SchemaDataSourceConfiguration 分别迁移。
+    enabled: false
+    locations: classpath:db/migration
+    clean-disabled: true
+    validate-on-migrate: true
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    default-statement-timeout: 2
+    default-executor-type: SIMPLE
+    local-cache-scope: STATEMENT
+
+kuma:
+  boot:
+    data:
+      mybatis:
+        enabled: true
+        mybatis-plus:
+          enabled: true
+          auto-fill:
+            # 订单的 ID、版本和创建时间由领域模型生成。
+            enabled: false
+          interceptor:
+            enabled: true
+            block-attack:
+              enabled: true
+    cache:
+      jetcache:
+        enabled: false
+
+reference:
+  executor:
+    core-size: ${BUSINESS_THREADS_CORE:4}
+    max-size: ${BUSINESS_THREADS_MAX:8}
+    queue-capacity: ${BUSINESS_QUEUE_CAPACITY:100}
+    keep-alive-seconds: 60
+    shutdown-seconds: 20
+  catalog:
+    base-url: ${CATALOG_BASE_URL:http://127.0.0.1:19093}
+    max-connections: 20
+    max-pending-acquires: 40
+    pending-acquire-timeout: 500ms
+    connect-timeout: 1s
+    response-timeout: 2s
+    request-timeout: 3s
+    max-idle-time: 30s
+    max-life-time: 5m
+    max-in-memory-size: 65536
+
+management:
+  health:
+    redis:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

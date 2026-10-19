@@ -1,0 +1,38 @@
+@base = http://127.0.0.1:19092
+
+### Actual schema of the MAIN connection
+GET {{base}}/api/datasources/current?scope=MAIN
+
+### Actual schema of the SANDBOX connection
+GET {{base}}/api/datasources/current?scope=SANDBOX
+
+### Create in MAIN; save response ID for following requests
+POST {{base}}/api/orders?scope=MAIN
+Content-Type: application/json
+
+{"sku":"BOOK-001","quantity":1}
+
+> {% client.global.set("mainOrderId", response.body.id); %}
+
+### Read MAIN order: 200
+GET {{base}}/api/orders/{{mainOrderId}}?scope=MAIN
+
+### Same ID in SANDBOX: expected 404
+GET {{base}}/api/orders/{{mainOrderId}}?scope=SANDBOX
+
+### Paged query: OrderPageQO -> OrderPageQuery -> PageDTO -> PageVO
+GET {{base}}/api/orders?scope=MAIN&sku=BOOK-001&status=CREATED&page=1&size=10
+
+### Create in SANDBOX
+POST {{base}}/api/orders?scope=SANDBOX
+Content-Type: application/json
+
+{"sku":"BOOK-001","quantity":2}
+
+> {% client.global.set("sandboxOrderId", response.body.id); %}
+
+### Confirm only SANDBOX order
+POST {{base}}/api/orders/{{sandboxOrderId}}/confirm?scope=SANDBOX
+
+### Unknown scope: expected 400; never silently route to MAIN
+GET {{base}}/api/orders?scope=public

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kuma.cloud.reference.mapper.OrderMapper">
+    <resultMap id="OrderResultMap" type="com.kuma.cloud.reference.domain.entity.OrderDO">
+        <constructor>
+            <idArg column="id" javaType="string" name="id"/>
+            <arg column="sku" javaType="string" name="sku"/>
+            <arg column="product_name" javaType="string" name="productName"/>
+            <arg column="unit_price" javaType="java.math.BigDecimal" name="unitPrice"/>
+            <arg column="quantity" javaType="_int" name="quantity"/>
+            <arg column="order_status" javaType="string" name="orderStatus"/>
+            <arg column="version" javaType="_long" name="version"/>
+            <arg column="created_at" javaType="java.time.Instant" name="createdAt"/>
+        </constructor>
+    </resultMap>
+
+    <sql id="OrderColumns">
+        id, sku, product_name, unit_price, quantity, order_status, version, created_at
+    </sql>
+
+    <sql id="OrderFilter">
+        <where>
+            <if test="sku != null">sku = #{sku}</if>
+            <if test="status != null">AND order_status = #{status}</if>
+        </where>
+    </sql>
+
+    <select id="selectById" resultMap="OrderResultMap">
+        SELECT <include refid="OrderColumns"/>
+        FROM purchase_orders WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.kuma.cloud.reference.domain.entity.OrderDO">
+        INSERT INTO purchase_orders (id, sku, product_name, unit_price, quantity, order_status, version, created_at)
+        VALUES (#{id}, #{sku}, #{productName}, #{unitPrice}, #{quantity}, #{orderStatus}, #{version}, #{createdAt})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE purchase_orders SET order_status = #{status}, version = #{version}
+        WHERE id = #{id} AND version = #{expectedVersion}
+    </update>
+
+    <select id="selectPage" resultMap="OrderResultMap">
+        SELECT <include refid="OrderColumns"/> FROM purchase_orders
+        <include refid="OrderFilter"/>
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM purchase_orders
+        <include refid="OrderFilter"/>
+    </select>
+</mapper>
