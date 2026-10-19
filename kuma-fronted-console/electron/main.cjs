@@ -71,7 +71,23 @@ async function ensureBackend(){
 function external(url){try{const target=new URL(url);if(['http:','https:'].includes(target.protocol)&&!target.username&&!target.password)shell.openExternal(target.href).catch(()=>{});}catch{}}
 async function start(){
   if(process.platform==='win32')app.setAppUserModelId('io.github.kumaoji.console');
-  Menu.setApplicationMenu(null);
+  if(process.platform==='win32'&&!smoke){
+    const loginOptions={
+      path:process.env.PORTABLE_EXECUTABLE_FILE||process.execPath,
+      args:app.isPackaged?[]:[app.getAppPath()]
+    };
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
+      {label:'设置',submenu:[{
+        label:'开机自动启动',type:'checkbox',
+        checked:app.getLoginItemSettings(loginOptions).openAtLogin,
+        click:item=>{
+          try{app.setLoginItemSettings({...loginOptions,openAtLogin:item.checked});}
+          catch(error){dialog.showErrorBox('开机自启设置失败',error.message);}
+          item.checked=app.getLoginItemSettings(loginOptions).openAtLogin;
+        }
+      },{type:'separator'},{label:'退出',role:'quit'}]}
+    ]));
+  }else Menu.setApplicationMenu(null);
   window=new BrowserWindow({title:'Kuma Console',width:1520,height:1040,minWidth:1060,minHeight:720,
     show:!smoke,backgroundColor:'#f5f7fb',titleBarStyle:'hidden',
     titleBarOverlay:{color:'#101b32',symbolColor:'#cbd5e1',height:36},

@@ -13,6 +13,14 @@ Lab 目录同时包含70个 HTTP 接口与24个本机/Linux学习实验，可按
 
 ## 打开桌面程序
 
+Windows 安装桌面快捷方式并启用当前账户登录后自动启动：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-desktop.ps1
+```
+
+之后双击桌面的 `Kuma Console` 即可打开，无需终端。窗口菜单「设置 → 开机自动启动」可随时开关自启；再次运行安装脚本加 `-DisableAutoStart` 也可关闭。快捷方式和自启引用当前项目目录，移动项目后请重新运行安装脚本。
+
 Windows 双击本模块的 `start-console.cmd`。首次安装 Electron 依赖，自动连接或构建并启动 `kuma-project-console`，无需手动开浏览器。开发环境需要 Node.js 22.12+、pnpm 11.10.0 和 JDK 25。
 
 ```powershell
