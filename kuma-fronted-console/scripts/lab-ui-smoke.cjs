@@ -16,6 +16,8 @@ let discoveryInvalid=false;
 let labState='STOPPED',labStarts=0,labStops=0;
 let blogState='RUNNING',blogStarts=0,blogStops=0,knowledgeSyncs=0;
 let backendState='STOPPED',backendStarts=0,backendStops=0;
+let backendLogReads=0;
+let backendLogBody='2026-10-21 12:00:00.000 INFO  Backend log\n2026-10-21 12:00:01.000 WARN  Warning\n\x1b[31mERROR colored\x1b[0m <img src=x onerror=alert(1)>\n';
 const componentState={uaa:'STOPPED',gateway:'RUNNING'};
 const componentActions=[];
 const wslStates={'Ubuntu-24.04':'RUNNING','Debian':'STOPPED'},wslActions=[];
@@ -41,9 +43,10 @@ async function serve(request,response){
       result=action==='logs'?{body:'Component log'}:Object.fromEntries(Object.entries(componentState).map(([key,value])=>[key,{state:value,message:key,pid:value==='RUNNING'?123:0,canStart:value==='STOPPED',canStop:value==='RUNNING',url:key==='uaa'?'http://localhost:33336':'http://localhost:18080',distribution:'Ubuntu-24.04'}]));
     }
     if(url.pathname.startsWith('/api/blog/backend')){
+      if(url.pathname.endsWith('/logs'))backendLogReads++;
       if(url.pathname.endsWith('/start')){backendState='RUNNING';backendStarts++;}
       if(url.pathname.endsWith('/stop')){backendState='STOPPED';backendStops++;}
-      result=url.pathname.endsWith('/logs')?{body:'Backend log'}:{state:backendState,message:'Backend',pid:backendState==='RUNNING'?432:0,
+      result=url.pathname.endsWith('/logs')?{body:backendLogBody}:{state:backendState,message:'Backend',pid:backendState==='RUNNING'?432:0,
         canStart:backendState==='STOPPED',canStop:backendState==='RUNNING',url:'http://localhost:9000/api',distribution:'Ubuntu-24.04'};
     }
     if(url.pathname.startsWith('/api/blog/process')){
@@ -218,13 +221,66 @@ app.whenReady().then(async()=>{
   assert.ok(await evaluate(`document.getElementById('blog-open').hidden`));
   assert.ok(await evaluate(`document.getElementById('blog-knowledge-open').hidden`));
   assert.ok(await evaluate(`document.getElementById('blog-preview').hidden`));
-  assert.equal(backendStops,1);
+  assert.equal(backendStops,0,'stopping frontend leaves backend running');
+  assert.equal(backendState,'RUNNING');
   await evaluate(`document.getElementById('blog-start').click();`);
   await waitFor(`!document.getElementById('blog-stop').disabled`);
   assert.equal(blogStops,1);assert.equal(blogStarts,1);
+  assert.equal(backendStarts,1,'starting frontend leaves backend unchanged');
+  await evaluate(`document.getElementById('blog-backend-stop').click();`);
+  await waitFor(`!document.getElementById('blog-backend-start').disabled`);
+  assert.equal(blogState,'RUNNING','stopping backend leaves frontend running');
+  assert.equal(blogStops,1);
+  await evaluate(`document.getElementById('blog-stop').click();`);
+  await waitFor(`!document.getElementById('blog-start').disabled`);
+  assert.ok(await evaluate(`document.getElementById('blog-stop-all').disabled`));
+  await evaluate(`document.getElementById('blog-start').click();`);
+  await waitFor(`!document.getElementById('blog-stop').disabled`);
+  assert.equal(backendStarts,1,'starting frontend while backend is stopped does not start backend');
+  assert.equal(backendState,'STOPPED');
+  await evaluate(`document.getElementById('blog-stop-all').click();`);
+  await waitFor(`!document.getElementById('blog-start').disabled`);
+  assert.equal(blogState,'STOPPED');assert.equal(backendState,'STOPPED');
+  await evaluate(`document.getElementById('blog-backend-start').click();`);
+  await waitFor(`!document.getElementById('blog-backend-stop').disabled`);
   assert.equal(backendStarts,2);
+  assert.equal(blogState,'STOPPED','starting backend leaves frontend stopped');
+  assert.ok(await evaluate(`document.getElementById('blog-stop').disabled && !document.getElementById('blog-stop-all').disabled`));
+  await evaluate(`document.getElementById('blog-start').click();`);
+  await waitFor(`!document.getElementById('blog-stop').disabled`);
+  await evaluate(`document.getElementById('blog-stop-all').click();`);
+  await waitFor(`!document.getElementById('blog-start').disabled && !document.getElementById('blog-backend-start').disabled`);
+  assert.equal(blogState,'STOPPED');assert.equal(backendState,'STOPPED');
+  assert.ok(await evaluate(`document.getElementById('blog-stop-all').disabled`));
+  await evaluate(`document.getElementById('blog-start').click();`);
+  await waitFor(`!document.getElementById('blog-stop').disabled`);
   await evaluate(`document.getElementById('blog-logs').click();`);
   await waitFor(`document.getElementById('blog-process-log').textContent==='Blog startup log'`);
+  await evaluate(`document.getElementById('blog-logs').click();document.getElementById('blog-backend-logs').click();`);
+  await waitFor(`document.getElementById('blog-backend-log').textContent.includes('ERROR colored')`);
+  assert.ok(await evaluate(`document.getElementById('blog-process-log').hidden && document.getElementById('blog-backend-logs').getAttribute('aria-expanded')==='true'`));
+  assert.ok(await evaluate(`document.querySelector('#blog-backend-log .log-level-info') && document.querySelector('#blog-backend-log .log-level-warn')`));
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('#blog-backend-log .log-level-error span')).color`),'rgb(240, 113, 120)');
+  assert.equal(await evaluate(`document.querySelectorAll('#blog-backend-log img').length`),0);
+  backendLogBody+=Array.from({length:100},(_,i)=>`2026-10-21 12:00:02.000 INFO  Live line ${i}\n`).join('');
+  await waitFor(`document.getElementById('blog-backend-log').textContent.includes('Live line 99')`);
+  assert.ok(backendLogReads>=2,'expanded log refreshes automatically');
+  assert.ok(await evaluate(`(()=>{const el=document.getElementById('blog-backend-log');return el.scrollHeight-el.clientHeight-el.scrollTop<32;})()`));
+  await evaluate(`document.getElementById('blog-backend-log').scrollTop=0;`);
+  backendLogBody+='2026-10-21 12:00:03.000 ERROR  Latest failure\n';
+  await waitFor(`document.getElementById('blog-backend-log').textContent.includes('Latest failure')`);
+  assert.equal(await evaluate(`document.getElementById('blog-backend-log').scrollTop`),0,'refresh preserves reading position');
+  await evaluate(`document.getElementById('blog-backend-logs').click();`);
+  assert.ok(await evaluate(`document.getElementById('blog-backend-log').hidden && document.getElementById('blog-backend-logs').getAttribute('aria-expanded')==='false'`));
+  const readsWhenCollapsed=backendLogReads;
+  await new Promise(resolve=>setTimeout(resolve,1200));
+  assert.equal(backendLogReads,readsWhenCollapsed,'collapsed log stops polling');
+  await evaluate(`(async()=>{
+    const button=document.createElement('button'),element=document.createElement('pre');element.hidden=true;
+    let finish;const refresh=LogConsole.bind({button,element,load:()=>new Promise(resolve=>{finish=resolve;}),isActive:()=>true,onError:error=>{throw error;}});
+    button.click();button.click();finish({body:'late response'});await new Promise(resolve=>setTimeout(resolve,0));
+    if(!element.hidden||element.textContent)throw Error('late log response reopened collapsed panel');
+  })()`);
   await evaluate(`location.hash='lab';navigate();`);
   await waitFor(`!document.getElementById('lab-start').disabled`);
   assert.ok(await evaluate(`document.getElementById('lab-stop').disabled`));
