@@ -18,6 +18,59 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class GatewayObservabilityFiltersTest {
     @Test
+    void nativeFallbackDoesNotInventTraceIdsWithoutAnAgent() {
+        var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/no-agent"));
+        StepVerifier.create(new GatewaySkyWalkingWebFilter().filter(exchange,
+                request -> new GatewaySkyWalkingRelayGlobalFilter().filter(request,
+                        forwarded -> forwarded.getResponse().setComplete()))).verifyComplete();
+        assertThat(exchange.getAttributes()).doesNotContainKeys(
+                GatewayHeaders.SKYWALKING_ID_ATTRIBUTE, GatewayHeaders.SKYWALKING_SNAPSHOT_ATTRIBUTE);
+    }
+
+    @Test
+    void reactiveFailureLogsCarryRequestMdcAndRestoreTheCallingThread() {
+        var logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(RequestLogGlobalFilter.class);
+        var events = new CopyOnWriteArrayList<ch.qos.logback.classic.spi.ILoggingEvent>();
+        var appender = new ch.qos.logback.core.AppenderBase<ch.qos.logback.classic.spi.ILoggingEvent>() {
+            @Override
+            protected void append(ch.qos.logback.classic.spi.ILoggingEvent event) {
+                event.prepareForDeferredProcessing();
+                events.add(event);
+            }
+        };
+        appender.start();
+        logger.addAppender(appender);
+        var previous = org.slf4j.MDC.getCopyOfContextMap();
+        org.slf4j.MDC.put("sentinel", "original");
+        try {
+            var factory = new StaticListableBeanFactory();
+            var trace = new GatewayTraceGlobalFilter(factory.getBeanProvider(io.micrometer.tracing.Tracer.class));
+            var access = new RequestLogGlobalFilter(new GatewayCloudProperties(),
+                    factory.getBeanProvider(com.kuma.boot.ip2region.model.Ip2regionSearcher.class));
+            var exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/failure")
+                    .header(CommonConstants.KMC_TRACE_ID, "gateway-error")
+                    .header(CommonConstants.KMC_TENANT_ID, "demo-tenant")
+                    .header(CommonConstants.KMC_REQUEST_VERSION, "v2"));
+            StepVerifier.create(trace.filter(exchange, traced -> access.filter(traced,
+                    logged -> Mono.error(new IllegalStateException("upstream failed")))))
+                    .expectErrorMessage("upstream failed").verify();
+            assertThat(events).hasSize(1);
+            assertThat(events.getFirst().getMDCPropertyMap())
+                    .containsEntry(CommonConstants.KMC_TRACE_ID, "gateway-error")
+                    .containsEntry(CommonConstants.KMC_TENANT_ID, "demo-tenant")
+                    .containsEntry(CommonConstants.KMC_REQUEST_VERSION, "v2")
+                    .doesNotContainKey("sentinel");
+            assertThat(org.slf4j.MDC.get("sentinel")).isEqualTo("original");
+            assertThat(org.slf4j.MDC.get(CommonConstants.KMC_TRACE_ID)).isNull();
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+            if (previous == null) org.slf4j.MDC.clear();
+            else org.slf4j.MDC.setContextMap(previous);
+        }
+    }
+
+    @Test
     void keepsConcurrentRequestIdsIsolatedAcrossThreadSwitchesAndCommitsTimingHeader() {
         var factory = new StaticListableBeanFactory();
         var trace = new GatewayTraceGlobalFilter(factory.getBeanProvider(io.micrometer.tracing.Tracer.class));

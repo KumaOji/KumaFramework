@@ -108,7 +108,9 @@ Nacos 模板已配置 `management.tracing` 和 Boot 4 的 `management.openteleme
 
 SkyWalking UI 为 `http://localhost:12880`。请求订单接口后，业务日志中的 `OtlpTraceId` 应有 traceId/spanId，加载 Agent 后请求线程的 `TID` 应有值；两套追踪的 ID 可能不同。启动日志没有请求上下文时仍可能为空。只使用 OpenTelemetry 导出也可以在 SkyWalking 查看追踪，但不会自动填充 SkyWalking toolkit 的 `%tid`。
 
-reference 显式注册框架的 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
+reference 通过 WebConfiguration 显式导入框架的 WebMdcAutoConfiguration，由框架统一注册 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.trace=false`、`kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。项目提供对应 Filter Bean 或 FilterRegistrationBean 时，框架会退让，避免重复注册。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
+
+三个过滤器同时处理 REQUEST 和 ASYNC 分派：异步任务的结果或异常回到 Servlet 线程时，重新建立 MDC，并在该次分派结束后清理。框架生成的 TraceId 和解析后的请求租户保存在请求属性中，因此初始请求与异步异常日志使用同一个关联 ID，后续请求不会沿用上次的租户或版本。
 
 core 的异步池会组合框架上下文装饰器与应用提供的 TaskDecorator。reference 提供 SkyWalking RunnableWrapper 装饰器，保证其业务异步任务延续请求的 SkyWalking 链路；未加载 Agent 时该包装器不会生成 SkyWalking ID。Klog 字段读取 MDC 的 `tl`，当前框架中的 KlogAutoConfiguration 和 KlogIdGenerator 未实现实际 Klog 接入，因此该字段仍为空。
 

@@ -19,19 +19,15 @@ package com.kuma.boot.web.autoconfigure;
 import com.kuma.boot.common.constant.StarterNameConstants;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.web.autoconfigure.properties.WebMvcFilterProperties;
-import com.kuma.boot.web.servlet.filter.TenantFilter;
-import com.kuma.boot.web.servlet.filter.TraceFilter;
-import com.kuma.boot.web.servlet.filter.VersionFilter;
 import com.kuma.boot.web.servlet.filter.WebContextFilter;
 import com.kuma.boot.web.servlet.listener.KmcServletContextListener;
 import com.kuma.boot.web.servlet.servlet.KmcAsyncServlet;
 import com.kuma.boot.web.servlet.servlet.KmcServlet;
-import io.micrometer.tracing.Tracer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
@@ -51,6 +47,7 @@ import java.util.List;
  * @since 2021-09-02 22:13:50
  */
 @AutoConfiguration
+@ImportAutoConfiguration(WebMdcAutoConfiguration.class)
 public class ServletAutoConfiguration implements WebApplicationInitializer, InitializingBean {
 
     private final WebMvcFilterProperties filterProperties;
@@ -58,9 +55,6 @@ public class ServletAutoConfiguration implements WebApplicationInitializer, Init
     public ServletAutoConfiguration( WebMvcFilterProperties filterProperties) {
         this.filterProperties = filterProperties;
     }
-
-    @Autowired(required = false)
-    private Tracer tracer;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -143,38 +137,6 @@ public class ServletAutoConfiguration implements WebApplicationInitializer, Init
                 new ServletListenerRegistrationBean<>();
         bean.setListener(new KmcServletContextListener());
         return bean;
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = WebMvcFilterProperties.PREFIX, name = "version", havingValue = "true")
-    public FilterRegistrationBean<VersionFilter> versionFilterFilterRegistrationBean() {
-        FilterRegistrationBean<VersionFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new VersionFilter());
-        registrationBean.addUrlPatterns("/*");
-        registrationBean.setName(VersionFilter.class.getName());
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 6);
-        return registrationBean;
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = WebMvcFilterProperties.PREFIX, name = "tenant", havingValue = "true")
-    public FilterRegistrationBean<TenantFilter> tenantFilterFilterRegistrationBean() {
-        FilterRegistrationBean<TenantFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new TenantFilter());
-        registrationBean.addUrlPatterns("/*");
-        registrationBean.setName(TenantFilter.class.getName());
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 5);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<TraceFilter> traceFilterFilterRegistrationBean() {
-        FilterRegistrationBean<TraceFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new TraceFilter(filterProperties, tracer));
-        registrationBean.addUrlPatterns("/*");
-        registrationBean.setName(TraceFilter.class.getName());
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 4);
-        return registrationBean;
     }
 
     @Bean

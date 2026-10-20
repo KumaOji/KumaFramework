@@ -41,9 +41,16 @@ import java.io.IOException;
 // @WebFilter(filterName = "TenantFilter", urlPatterns = "/*", asyncSupported = true)
 public class TenantFilter extends OncePerRequestFilter {
 
+    private static final String TENANT_ATTRIBUTE = TenantFilter.class.getName() + ".tenant";
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return RequestUtils.excludeActuator(request);
+    }
+
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
     }
 
     @Override
@@ -51,22 +58,22 @@ public class TenantFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
         try {
-            // 优先获取请求参数中的tenantId值
-            String tenantId = request.getParameter(CommonConstants.KMC_TENANT_ID);
-            if (StrUtil.isEmpty(tenantId)) {
-                tenantId = request.getHeader(CommonConstants.KMC_TENANT_ID);
-            }
-
-            // 保存租户id
-            if (StringUtils.isNotBlank(tenantId)) {
-                TenantContextHolder.setTenant(tenantId);
-                TraceUtils.setKmcTenantId(tenantId);
-            } else {
-                if (StringUtils.isBlank(TenantContextHolder.getTenant())) {
-                    TenantContextHolder.setTenant(CommonConstants.KMC_TENANT_ID_DEFAULT);
-                    TraceUtils.setKmcTenantId(CommonConstants.KMC_TENANT_ID_DEFAULT);
+            String tenantId = (String) request.getAttribute(TENANT_ATTRIBUTE);
+            if (StringUtils.isBlank(tenantId)) {
+                tenantId = request.getParameter(CommonConstants.KMC_TENANT_ID);
+                if (StrUtil.isEmpty(tenantId)) {
+                    tenantId = request.getHeader(CommonConstants.KMC_TENANT_ID);
                 }
+                if (StringUtils.isBlank(tenantId)) {
+                    tenantId = TenantContextHolder.getTenant();
+                }
+                if (StringUtils.isBlank(tenantId)) {
+                    tenantId = CommonConstants.KMC_TENANT_ID_DEFAULT;
+                }
+                request.setAttribute(TENANT_ATTRIBUTE, tenantId);
             }
+            TenantContextHolder.setTenant(tenantId);
+            TraceUtils.setKmcTenantId(tenantId);
 
             ResponseUtils.addResponseHeader(
                     response, CommonConstants.KMC_TENANT_ID, TenantContextHolder.getTenant());

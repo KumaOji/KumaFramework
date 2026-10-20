@@ -66,7 +66,7 @@ public class AsyncAutoConfiguration implements InitializingBean {
     }
 
     @Bean
-    public MDCRequestTaskDecorator mdcRequestTaskDecorator(){
+    public static MDCRequestTaskDecorator mdcRequestTaskDecorator(AsyncProperties asyncProperties){
         return new MDCRequestTaskDecorator(asyncProperties.isEnableServletAsyncContext(), asyncProperties.getServletAsyncContextTimeoutMillis());
     }
 

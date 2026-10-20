@@ -15,6 +15,10 @@ public class ObservabilityJsonLayout extends LayoutBase<ILoggingEvent> {
         encoder.addIncludeMdcKeyName("traceId");
         encoder.addIncludeMdcKeyName("spanId");
         encoder.addIncludeMdcKeyName("kmc-trace-id");
+        encoder.addIncludeMdcKeyName("kmc-tenant-id");
+        encoder.addIncludeMdcKeyName("kmc-request-version");
+        encoder.addIncludeMdcKeyName("klog");
+        encoder.addIncludeMdcKeyName("tid");
         encoder.start();
         super.start();
     }

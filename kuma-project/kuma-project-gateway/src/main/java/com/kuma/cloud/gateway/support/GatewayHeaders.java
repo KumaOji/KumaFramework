@@ -51,6 +51,12 @@ public final class GatewayHeaders {
 
     public static final String SPAN_ID_ATTRIBUTE = GatewayHeaders.class.getName() + ".spanId";
 
+    public static final String MDC_ATTRIBUTE = GatewayHeaders.class.getName() + ".mdc";
+
+    public static final String SKYWALKING_ID_ATTRIBUTE = GatewayHeaders.class.getName() + ".skywalkingId";
+
+    public static final String SKYWALKING_SNAPSHOT_ATTRIBUTE = GatewayHeaders.class.getName() + ".skywalkingSnapshot";
+
     public static final List<String> IDENTITY_HEADERS =
             List.of(GATEWAY_SOURCE, USER_ID, USER_NAME, USER_AUTHORITIES, CLIENT_ID, CLIENT_IP);
 

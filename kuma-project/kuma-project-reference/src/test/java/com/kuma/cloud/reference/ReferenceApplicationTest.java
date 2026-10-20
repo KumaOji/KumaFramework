@@ -264,6 +264,51 @@ class ReferenceApplicationTest {
     }
 
     @Test
+    void asyncExceptionLogsKeepRequestMdcAndGeneratedTraceIds() throws Exception {
+        var logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(
+                com.kuma.boot.web.error.ErrorHandlingControllerAdvice.class);
+        var events = new java.util.concurrent.CopyOnWriteArrayList<ch.qos.logback.classic.spi.ILoggingEvent>();
+        var appender = new ch.qos.logback.core.AppenderBase<ch.qos.logback.classic.spi.ILoggingEvent>() {
+            @Override
+            protected void append(ch.qos.logback.classic.spi.ILoggingEvent event) {
+                if (event.getLevel() == ch.qos.logback.classic.Level.ERROR) {
+                    event.prepareForDeferredProcessing();
+                    events.add(event);
+                }
+            }
+        };
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            var incoming = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/orders/" + UUID.randomUUID()))
+                    .header("kmc-trace-id", "async-error-correlation")
+                    .header("kmc-tenant-id", "error-tenant")
+                    .header("kmc-request-version", "v2")
+                    .timeout(Duration.ofSeconds(5)).GET().build();
+            var response = http.send(incoming, HttpResponse.BodyHandlers.ofString());
+            assertEquals(404, response.statusCode(), response.body());
+            var first = events.getFirst().getMDCPropertyMap();
+            assertEquals("async-error-correlation", first.get("kmc-trace-id"));
+            assertEquals("error-tenant", first.get("kmc-tenant-id"));
+            assertEquals("v2", first.get("kmc-request-version"));
+
+            var next = request("GET", "/api/orders/" + UUID.randomUUID(), null);
+            assertEquals(404, next.statusCode(), next.body());
+            assertEquals(2, events.size());
+            var nextMdc = events.getLast().getMDCPropertyMap();
+            var generated = next.headers().firstValue("kmc-trace-id").orElseThrow();
+            assertFalse(generated.isBlank());
+            assertEquals(generated, nextMdc.get("kmc-trace-id"));
+            assertNotEquals("async-error-correlation", generated);
+            assertEquals("1", nextMdc.get("kmc-tenant-id"));
+            assertNull(nextMdc.get("kmc-request-version"));
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
     void qoVoPaginationAndSchemaRoutingKeepOrdersIsolated() throws Exception {
         String sku = "ISOLATION-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         var main = JSON.readTree(request("POST", "/api/orders?scope=MAIN", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}").body());

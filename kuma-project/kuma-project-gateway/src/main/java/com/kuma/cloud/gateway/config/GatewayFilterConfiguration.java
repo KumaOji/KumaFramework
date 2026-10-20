@@ -18,6 +18,8 @@ package com.kuma.cloud.gateway.config;
 
 import com.kuma.cloud.gateway.filter.ClientAccessGlobalFilter;
 import com.kuma.cloud.gateway.filter.GatewayTraceGlobalFilter;
+import com.kuma.cloud.gateway.filter.GatewaySkyWalkingWebFilter;
+import com.kuma.cloud.gateway.filter.GatewaySkyWalkingRelayGlobalFilter;
 import com.kuma.cloud.gateway.filter.IdentityRelayGlobalFilter;
 import com.kuma.cloud.gateway.filter.RequestLogGlobalFilter;
 import com.kuma.cloud.gateway.filter.StripIdentityHeadersGlobalFilter;
@@ -37,6 +39,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GatewayFilterConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewaySkyWalkingRelayGlobalFilter gatewaySkyWalkingRelayGlobalFilter() {
+        return new GatewaySkyWalkingRelayGlobalFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public GatewaySkyWalkingWebFilter gatewaySkyWalkingWebFilter() {
+        return new GatewaySkyWalkingWebFilter();
+    }
 
     @Bean
     @ConditionalOnMissingBean

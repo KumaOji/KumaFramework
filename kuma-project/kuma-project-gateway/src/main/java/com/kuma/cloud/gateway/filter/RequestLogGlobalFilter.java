@@ -23,6 +23,8 @@ import com.kuma.cloud.gateway.support.GatewayHeaders;
 import com.kuma.cloud.gateway.support.GatewayPathMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.kuma.boot.common.utils.servlet.MdcUtils;
+import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.core.Ordered;
@@ -92,16 +94,24 @@ public class RequestLogGlobalFilter implements WebFilter, Ordered {
             Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
             String routeId = route != null ? route.getId() : "-";
 
-            LoggingEventBuilder event = status >= 500 ? log.atError()
-                    : cost >= logConfig.getSlowThreshold().toMillis() ? log.atWarn() : log.atInfo();
-            event.addKeyValue("event", "gateway_access")
-                    .addKeyValue("method", method).addKeyValue("path", path)
-                    .addKeyValue("status", status).addKeyValue("duration_ms", cost)
-                    .addKeyValue("route_id", routeId).addKeyValue("client_ip", clientIp)
-                    .addKeyValue("traceId", exchange.getAttributeOrDefault(GatewayHeaders.TRACE_ID_ATTRIBUTE, ""))
-                    .addKeyValue("spanId", exchange.getAttributeOrDefault(GatewayHeaders.SPAN_ID_ATTRIBUTE, ""));
-            if (geo != null) event.addKeyValue("geo", geo);
-            event.log("Gateway request completed");
+            Map<String, String> previousMdc = MdcUtils.getCopyOfContextMap();
+            try {
+                MdcUtils.clear();
+                MdcUtils.setContextMap(exchange.getAttributeOrDefault(GatewayHeaders.MDC_ATTRIBUTE, Map.of()));
+                LoggingEventBuilder event = status >= 500 ? log.atError()
+                        : cost >= logConfig.getSlowThreshold().toMillis() ? log.atWarn() : log.atInfo();
+                event.addKeyValue("event", "gateway_access")
+                        .addKeyValue("method", method).addKeyValue("path", path)
+                        .addKeyValue("status", status).addKeyValue("duration_ms", cost)
+                        .addKeyValue("route_id", routeId).addKeyValue("client_ip", clientIp)
+                        .addKeyValue("traceId", exchange.getAttributeOrDefault(GatewayHeaders.TRACE_ID_ATTRIBUTE, ""))
+                        .addKeyValue("spanId", exchange.getAttributeOrDefault(GatewayHeaders.SPAN_ID_ATTRIBUTE, ""));
+                if (geo != null) event.addKeyValue("geo", geo);
+                event.log("Gateway request completed");
+            } finally {
+                MdcUtils.clear();
+                if (previousMdc != null) MdcUtils.setContextMap(previousMdc);
+            }
         });
     }
 

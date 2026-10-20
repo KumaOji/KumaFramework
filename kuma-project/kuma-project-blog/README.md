@@ -66,3 +66,27 @@ prod 配置通过 `Publish Nacos Prod Configs` 工作流发布。先发布配置
 数据源、MyBatis、线程池、Web、Redis、日志、Actuator 和 Prometheus 按能力分别配置。
 `FrameworkSecurityConfiguration` 导入安全属性和方法权限支持，并显式注册 `AuthorizeCheckService`；
 HTTP 安全链和 JWT 解码由本模块配置管理。
+
+
+## Local tracing and Kuma Console
+
+Kuma Console starts blog, uaa and gateway through `scripts/start-services-local.ps1`.
+The default observability launch loads the SkyWalking Java Agent before `-jar`, uses
+`kuma-cloud-blog`, `kuma-cloud-uaa` and `kuma-cloud-gateway` as service names, and reports
+to `localhost:11800`. Set `SKYWALKING_AGENT_JAR` (or `-SkywalkingAgent`) to an extracted
+Agent JAR. The local fallback is `kuma-project/kuma-project-lab/build/tools/skywalking-agent/skywalking-agent.jar`;
+the adjacent `config`, `plugins` and `activations` directories must exist. Override the OAP
+address with `-SkywalkingBackend`. Use `-WithoutSkywalking` for OTEL-only startup or
+`-WithoutObservability` to skip the observability profile and Agent.
+
+OTEL uses the existing Spring Boot 4 starter and exports through `localhost:4318/v1/traces`.
+Console logs use the shared framework MDC text layout; Loki continues to receive JSON.
+Servlet applications import `WebMdcAutoConfiguration` and the shared SkyWalking task decorator.
+Gateway preserves correlation fields in exchange/Reactor context and temporarily restores MDC
+only while logging completion, including reactive failures, without leaving it on Netty threads.
+The `kmc-trace-id`, `kmc-tenant-id` and `kmc-request-version` headers are propagated to downstream
+services. Klog remains an unimplemented reserved field. A logged request tenant is correlation
+metadata, not proof of an authenticated tenant.
+
+After these changes, rebuild and restart the service from Kuma Console. Logs are in
+`logs/<service>-local/stdout.log`; Agent diagnostics are in `logs/<service>-local/skywalking/`.

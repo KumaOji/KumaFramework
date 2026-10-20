@@ -22,6 +22,37 @@ import static org.mockito.Mockito.mock;
 
 class StarterConfigurationTest {
     @Test
+    void grpcDiscoveryDoesNotRequireAnUnconfiguredSpringGrpcClient() {
+        new ApplicationContextRunner()
+                .withConfiguration(org.springframework.boot.autoconfigure.AutoConfigurations.of(
+                        com.kuma.boot.grpc.spring.config.GrpcClientAutoConfiguration.class))
+                .withBean(org.springframework.cloud.client.discovery.DiscoveryClient.class,
+                        () -> mock(org.springframework.cloud.client.discovery.DiscoveryClient.class))
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).doesNotHaveBean("grpcClientBeanPostProcessor");
+                    assertThat(context).doesNotHaveBean("discoveryGrpcChannelFactory");
+                });
+    }
+
+    @Test
+    void redisConfigurationReusesAnExistingRedisTemplate() {
+        var template = mock(org.springframework.data.redis.core.RedisTemplate.class);
+        new ApplicationContextRunner()
+                .withConfiguration(org.springframework.boot.autoconfigure.AutoConfigurations.of(
+                        org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.class))
+                .withBean("redisTemplate", org.springframework.data.redis.core.RedisTemplate.class, () -> template)
+                .withBean(org.springframework.cache.CacheManager.class,
+                        () -> mock(org.springframework.cache.CacheManager.class))
+                .withUserConfiguration(RedisConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context.getBean("redisTemplate")).isSameAs(template);
+                    assertThat(context).hasSingleBean(RedisRepository.class);
+                });
+    }
+
+    @Test
     void explicitImportsProvideRedisTotpAndEnforceMethodPermissions() {
         new ApplicationContextRunner()
                 .withConfiguration(org.springframework.boot.autoconfigure.AutoConfigurations.of(

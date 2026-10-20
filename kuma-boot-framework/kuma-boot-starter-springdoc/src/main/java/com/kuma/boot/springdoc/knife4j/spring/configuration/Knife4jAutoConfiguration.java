@@ -64,7 +64,7 @@ public class Knife4jAutoConfiguration {
      * @return
      */
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "knife4jOpenApiCustomizer")
     @ConditionalOnBean(SpringDocConfigProperties.class)
     public Knife4jOpenApiCustomizer knife4jOpenApiCustomizer(SpringDocConfigProperties docProperties) {
         LogUtils.debug("Register Knife4jOpenApiCustomizer");
@@ -72,7 +72,7 @@ public class Knife4jAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = "knife4jJakartaOperationCustomizer")
     public Knife4jJakartaOperationCustomizer knife4jJakartaOperationCustomizer() {
         return new Knife4jJakartaOperationCustomizer();
     }

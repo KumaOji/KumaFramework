@@ -27,14 +27,14 @@ public class GrpcClientAutoConfiguration {
    }
 
    @Bean
-   @ConditionalOnBean({DiscoveryClient.class})
+   @ConditionalOnBean({DiscoveryClient.class, GrpcClientFactory.class})
    public static GrpcClientBeanPostProcessor grpcClientBeanPostProcessor(GrpcClientFactory grpcClientFactory, DiscoveryClient discoveryClient, @Qualifier("grpcVirtualThreadExecutor") ExecutorService grpcVirtualThreadExecutor) {
       NameResolverRegistry.getDefaultRegistry().register(new DiscoveryNameResolverProvider(discoveryClient, grpcVirtualThreadExecutor));
       return new GrpcClientBeanPostProcessor(grpcClientFactory, discoveryClient);
    }
 
    @Bean
-   @ConditionalOnBean({DiscoveryClient.class})
+   @ConditionalOnBean({DiscoveryClient.class, ClientInterceptorsConfigurer.class})
    DiscoveryGrpcChannelFactory discoveryGrpcChannelFactory(List globalCustomizers, ClientInterceptorsConfigurer interceptorsConfigurer) {
       return new DiscoveryGrpcChannelFactory(globalCustomizers, interceptorsConfigurer);
    }

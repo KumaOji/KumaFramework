@@ -45,6 +45,8 @@ import java.io.IOException;
 // @WebFilter(filterName = "TraceFilter", urlPatterns = "/*", asyncSupported = true)
 public class TraceFilter extends OncePerRequestFilter {
 
+    private static final String TRACE_ID_ATTRIBUTE = TraceFilter.class.getName() + ".traceId";
+
     private final WebMvcFilterProperties filterProperties;
     private final Tracer tracer;
     public TraceFilter(WebMvcFilterProperties filterProperties, Tracer tracer) {
@@ -66,13 +68,23 @@ public class TraceFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String traceId = TraceUtils.getKmcTraceIdByRequest(request);
+            String traceId = (String) request.getAttribute(TRACE_ID_ATTRIBUTE);
             if (StringUtils.isBlank(traceId)) {
-                traceId = IdGeneratorUtils.getIdStr();
+                traceId = TraceUtils.getKmcTraceIdByRequest(request);
+                if (StringUtils.isBlank(traceId)) {
+                    traceId = IdGeneratorUtils.getIdStr();
+                }
+                // Request attributes survive async redispatch; thread-local MDC does not.
+                request.setAttribute(TRACE_ID_ATTRIBUTE, traceId);
             }
             TraceContextHolder.setTraceId(traceId);
 

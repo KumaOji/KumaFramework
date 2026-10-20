@@ -81,3 +81,30 @@ WSL 通过 `wsl.exe --distribution … --user … --exec kubectl` 查询，默�
 控制台仅监听 `127.0.0.1`。k3s 功能只执行查询与日志读取，不提供删除、重启、exec 或任意命令。资源详情隐藏 Secret 数据、常见凭据字段及 kubectl 原始清单。Pod 日志显示服务原始输出。Lab 代理仅接受固定 Lab 地址下的实验和 OpenAPI 路径，实验执行结果以目标服务实际响应为准。
 
 没有开放 Actuator 的项目仍可能显示“HTTP 可达”，这只说明收到 HTTP 响应，不能证明所有依赖正常。需要完整健康状态时，在对应项目开放健康端点并配置好认证。
+
+
+## Local tracing and Kuma Console
+
+Kuma Console starts blog, uaa and gateway through `scripts/start-services-local.ps1`.
+The default observability launch loads the SkyWalking Java Agent before `-jar`, uses
+`kuma-cloud-blog`, `kuma-cloud-uaa` and `kuma-cloud-gateway` as service names, and reports
+to `localhost:11800`. Set `SKYWALKING_AGENT_JAR` (or `-SkywalkingAgent`) to an extracted
+Agent JAR. The local fallback is `kuma-project/kuma-project-lab/build/tools/skywalking-agent/skywalking-agent.jar`;
+the adjacent `config`, `plugins` and `activations` directories must exist. Override the OAP
+address with `-SkywalkingBackend`. Use `-WithoutSkywalking` for OTEL-only startup or
+`-WithoutObservability` to skip the observability profile and Agent.
+
+OTEL uses the existing Spring Boot 4 starter and exports through `localhost:4318/v1/traces`.
+Console logs use the shared framework MDC text layout; Loki continues to receive JSON.
+Servlet applications import `WebMdcAutoConfiguration` and the shared SkyWalking task decorator.
+Gateway preserves correlation fields in exchange/Reactor context and temporarily restores MDC
+only while logging completion, including reactive failures, without leaving it on Netty threads.
+If the Agent does not instrument the running WebFlux version, gateway creates and finishes an
+asynchronous native entry span, captures its snapshot, and injects a native exit carrier after
+route selection. This joins gateway and downstream servlet services in the same SkyWalking trace.
+The `kmc-trace-id`, `kmc-tenant-id` and `kmc-request-version` headers are propagated to downstream
+services. Klog remains an unimplemented reserved field. A logged request tenant is correlation
+metadata, not proof of an authenticated tenant.
+
+After these changes, rebuild and restart the service from Kuma Console. Logs are in
+`logs/<service>-local/stdout.log`; Agent diagnostics are in `logs/<service>-local/skywalking/`.

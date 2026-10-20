@@ -3,7 +3,7 @@
 Gateway 使用 Spring Boot 4 原生 OpenTelemetry/Micrometer 自动装配：
 
 - traces：Gateway → OTel Collector → SkyWalking；传播 W3C `traceparent`，查询 SkyWalking 的 Zipkin Trace 页面。
-- logs：异步 Loki4j → Loki；控制台与 Loki 使用 JSON，访问日志含 `traceId`、`spanId`、路由、状态和耗时，不记录查询串、请求体或 Authorization。
+- logs：控制台复用框架 MDC 文本格式，Loki4j 异步发送 JSON；访问日志含关联 ID、租户、请求版本、OTEL traceId/spanId、SkyWalking TID、路由、状态和耗时，不记录查询串、请求体或 Authorization。
 - metrics：Prometheus 读取独立管理端口 `/actuator/prometheus`，包括 JVM、HTTP 请求与 Gateway 路由指标和耗时直方图。
 - Grafana：`Kuma / Kuma Gateway` 面板展示请求速率、错误率、P95、JVM、路由指标和日志。
 - Alertmanager：Prometheus 管理的目标失联、持续 5xx 比例超过 5%、持续 P95 超过两秒规则；外部通知渠道仍需配置。
@@ -82,3 +82,27 @@ wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts
 `LoggerConfiguration`、`ActuatorConfiguration`、`PrometheusConfiguration`、`Ip2regionConfiguration`
 显式导入网关使用的能力，不导入 Servlet MVC、Druid 端点、Servlet 请求映射端点或 Servlet 访问日志配置。
 网关的 `SecurityWebFilterChain` 由本模块管理。
+
+
+## Local tracing and Kuma Console
+
+Kuma Console starts blog, uaa and gateway through `scripts/start-services-local.ps1`.
+The default observability launch loads the SkyWalking Java Agent before `-jar`, uses
+`kuma-cloud-blog`, `kuma-cloud-uaa` and `kuma-cloud-gateway` as service names, and reports
+to `localhost:11800`. Set `SKYWALKING_AGENT_JAR` (or `-SkywalkingAgent`) to an extracted
+Agent JAR. The local fallback is `kuma-project/kuma-project-lab/build/tools/skywalking-agent/skywalking-agent.jar`;
+the adjacent `config`, `plugins` and `activations` directories must exist. Override the OAP
+address with `-SkywalkingBackend`. Use `-WithoutSkywalking` for OTEL-only startup or
+`-WithoutObservability` to skip the observability profile and Agent.
+
+OTEL uses the existing Spring Boot 4 starter and exports through `localhost:4318/v1/traces`.
+Console logs use the shared framework MDC text layout; Loki continues to receive JSON.
+Servlet applications import `WebMdcAutoConfiguration` and the shared SkyWalking task decorator.
+Gateway preserves correlation fields in exchange/Reactor context and temporarily restores MDC
+only while logging completion, including reactive failures, without leaving it on Netty threads.
+The `kmc-trace-id`, `kmc-tenant-id` and `kmc-request-version` headers are propagated to downstream
+services. Klog remains an unimplemented reserved field. A logged request tenant is correlation
+metadata, not proof of an authenticated tenant.
+
+After these changes, rebuild and restart the service from Kuma Console. Logs are in
+`logs/<service>-local/stdout.log`; Agent diagnostics are in `logs/<service>-local/skywalking/`.

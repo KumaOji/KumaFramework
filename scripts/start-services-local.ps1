@@ -4,6 +4,9 @@ param(
     [switch]$Build,
     [switch]$Restart,
     [switch]$WithoutObservability,
+    [switch]$WithoutSkywalking,
+    [string]$SkywalkingAgent = $env:SKYWALKING_AGENT_JAR,
+    [string]$SkywalkingBackend = 'localhost:11800',
     [ValidateRange(0, 1)][double]$Sampling = 0.1,
     [int]$BlogDebugPort = 5005,
     [int]$UaaDebugPort = 5006,
@@ -11,16 +14,23 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'service-tracing.ps1')
+. (Join-Path $PSScriptRoot 'service-wsl.ps1')
+$tracingArguments = @{}
+if (!$WithoutObservability -and !$WithoutSkywalking) {
+    foreach ($service in $Services) {
+        $tracingArguments[$service] = @(Get-KumaServiceTracingJvmArguments -RepoRoot $repoRoot -Service $service `
+            -AgentJar $SkywalkingAgent -Backend $SkywalkingBackend)
+    }
+}
 if ($Build) {
     $tasks = @($Services | ForEach-Object { ":kuma-project:kuma-project-${_}:bootJar" })
     & (Join-Path $repoRoot 'gradlew.bat') -p $repoRoot @tasks --console=plain
     if ($LASTEXITCODE -ne 0) { throw 'Service build failed.' }
 }
-$routeJson = & wsl -d $Distribution -- ip -j -4 route show default
-if ($LASTEXITCODE -ne 0) { throw 'Cannot read WSL route.' }
+$routeJson = Invoke-KumaServiceWsl -Arguments @('-d', $Distribution, '--exec', 'ip', '-j', '-4', 'route', 'show', 'default')
 $windowsAddress = @($routeJson | ConvertFrom-Json)[0].gateway
-$addressJson = & wsl -d $Distribution -- ip -j -4 addr show eth0
-if ($LASTEXITCODE -ne 0) { throw 'Cannot read WSL middleware address.' }
+$addressJson = Invoke-KumaServiceWsl -Arguments @('-d', $Distribution, '--exec', 'ip', '-j', '-4', 'addr', 'show', 'eth0')
 $wslAddress = @((@($addressJson | ConvertFrom-Json)[0].addr_info) | Where-Object scope -eq 'global')[0].local
 if (!$windowsAddress -or !$wslAddress) { throw 'No WSL NAT addresses found.' }
 
@@ -70,7 +80,9 @@ foreach ($service in $Services) {
     if ((Get-FileHash -LiteralPath $runtimeJar -Algorithm SHA256).Hash -ne $jarHash) {
         throw 'Jar changed while copying. Finish the build and retry.'
     }
-    $arguments = @('--enable-preview', '--enable-native-access=ALL-UNNAMED', '-Xmx768m')
+    $arguments = @('--enable-preview', '--enable-native-access=ALL-UNNAMED', '-Xmx768m',
+        '-Dfile.encoding=UTF-8', '-Duser.timezone=Asia/Hong_Kong')
+    if ($tracingArguments.ContainsKey($service)) { $arguments += $tracingArguments[$service] }
     if ($debugPort -gt 0) { $arguments += "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:$debugPort" }
     if (!$WithoutObservability) { $arguments += "-Dlogging.config=$loggingConfig" }
     $configUri = 'file:' + ($localConfig -replace '\\', '/')
@@ -94,6 +106,7 @@ foreach ($service in $Services) {
             '--management.metrics.tags.environment=wsl',
             '--kuma.boot.monitor.enabled=false', '--kuma.boot.web.request.enabled=false',
             '--atlas.log.enabled=false', '--logging.access.enabled=false',
+            '--kuma.boot.web.filter.trace=true', '--kuma.boot.web.filter.tenant=true', '--kuma.boot.web.filter.version=true',
             '--kuma.boot.logger.logging.files.enabled=false')
     }
     if ($service -eq 'gateway') {
@@ -113,6 +126,6 @@ foreach ($service in $Services) {
 if (!$WithoutObservability) {
     $driveLetter = $repoRoot.Substring(0, 1).ToLowerInvariant()
     $linuxScript = "/mnt/$driveLetter" + ($repoRoot.Substring(2) -replace '\\', '/')
-    & wsl -d $Distribution -u root -- python3 "$linuxScript/scripts/register-services-metrics-wsl.py" $windowsAddress
-    if ($LASTEXITCODE -ne 0) { throw 'Services started, but metrics registration failed.' }
+    Invoke-KumaServiceWsl -Arguments @('-d', $Distribution, '-u', 'root', '--exec', 'python3',
+        "$linuxScript/scripts/register-services-metrics-wsl.py", $windowsAddress)
 }

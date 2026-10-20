@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply a manifest while preserving omitted, provisioner-set PVC fields."""
+"""Apply manifests, replacing probe handlers and preserving provisioner-set PVC fields."""
 import argparse
 import json
 import subprocess
@@ -23,6 +23,17 @@ def main():
         resources.extend(resource["items"] if resource.get("kind") == "List" else [resource])
         remaining = remaining[end:].lstrip()
     document = {"apiVersion": "v1", "kind": "List", "items": resources}
+    # Strategic merge retains old handlers unless they are explicitly removed.
+    # A TCP -> HTTP migration otherwise creates an invalid probe with two handlers.
+    handlers = ("exec", "httpGet", "tcpSocket", "grpc")
+    for resource in resources:
+        pod_spec = resource.get("spec", {}).get("template", {}).get("spec", {})
+        for container in pod_spec.get("containers", []) + pod_spec.get("initContainers", []):
+            for name in ("startupProbe", "readinessProbe", "livenessProbe"):
+                probe = container.get(name)
+                if probe and sum(probe.get(handler) is not None for handler in handlers) == 1:
+                    for handler in handlers:
+                        probe.setdefault(handler, None)
     if args.image:
         for resource in resources:
             for container in resource.get("spec", {}).get("template", {}).get("spec", {}).get("containers", []):

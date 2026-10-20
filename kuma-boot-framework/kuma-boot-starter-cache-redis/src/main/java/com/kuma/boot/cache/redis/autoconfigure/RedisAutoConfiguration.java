@@ -56,7 +56,7 @@ import tools.jackson.databind.json.JsonMapper;
  * @version 2021.9
  * @since 2021-09-07 21:17:02
  */
-@AutoConfiguration(after = {DataRedisAutoConfiguration.class, RedissonAutoConfigurationV4.class})
+@AutoConfiguration(before = {DataRedisAutoConfiguration.class, RedissonAutoConfigurationV4.class})
 @ConditionalOnProperty(
         prefix = RedisProperties.PREFIX,
         name = "enabled",
@@ -102,6 +102,7 @@ public class RedisAutoConfiguration implements InitializingBean {
      * 优先使用 RedissonConnectionFactory，不存在时回退到 Spring Boot 默认的 RedisConnectionFactory（Lettuce/Jedis）。
      */
     @Bean("redisTemplate")
+    @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<String, Object> redisTemplate(
             ObjectProvider<RedissonConnectionFactory> redissonConnectionFactoryProvider,
             ObjectProvider<RedisConnectionFactory> redisConnectionFactoryProvider,

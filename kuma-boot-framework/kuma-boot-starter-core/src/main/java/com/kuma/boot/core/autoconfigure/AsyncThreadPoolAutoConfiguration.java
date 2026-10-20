@@ -88,7 +88,9 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
         var decorators = new ArrayList<TaskDecorator>();
         decorators.add(new MDCRequestTaskDecorator(asyncProperties.isEnableServletAsyncContext(),
                 asyncProperties.getServletAsyncContextTimeoutMillis()));
-        taskDecorators.orderedStream().forEach(decorators::add);
+        taskDecorators.orderedStream()
+                .filter(decorator -> !(decorator instanceof MDCRequestTaskDecorator))
+                .forEach(decorators::add);
         executor.setTaskDecorator(new CompositeTaskDecorator(decorators));
         /*
          线程池拒绝策略
