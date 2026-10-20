@@ -3,6 +3,7 @@ const {spawn} = require('node:child_process');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const {createFloatingOverview}=require('./floating-overview.cjs');
+const {createSystemTray}=require('./system-tray.cjs');
 const smoke=process.argv.includes('--smoke');
 const port=Number(process.env.KUMA_CONSOLE_PORT||18090);
 if(!Number.isInteger(port)||port<1024||port>65535)throw Error('KUMA_CONSOLE_PORT must be 1024–65535');
@@ -128,6 +129,7 @@ async function start(){
   window.webContents.setWindowOpenHandler(({url})=>{external(url);return {action:'deny'};});
   window.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==origin){event.preventDefault();external(url);}});
   createFloatingOverview({mainWindow:window,origin});
+  createSystemTray({mainWindow:window,isQuitting:()=>quitting});
   await window.loadFile(path.join(__dirname,'splash.html'));
   if(smoke)window.showInactive();else window.show();
   try{

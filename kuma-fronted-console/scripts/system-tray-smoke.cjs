@@ -1,0 +1,53 @@
+const {app,BrowserWindow}=require('electron');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const http=require('node:http');
+const {createSystemTray}=require('../electron/system-tray.cjs');
+const {createFloatingOverview}=require('../electron/floating-overview.cjs');
+app.setPath('userData',path.resolve(__dirname,'../build/system-tray-smoke/profile'));
+app.commandLine.appendSwitch('disable-gpu');
+let quitting=false,main,control,floating,server;
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function until(check,message){for(let i=0;i<100;i++){if(check())return;await pause(40);}throw Error(message);}
+app.on('before-quit',()=>{quitting=true;});
+app.whenReady().then(async()=>{
+  server=http.createServer((_request,response)=>{
+    response.setHeader('Content-Type','application/json');
+    response.end(JSON.stringify({ready:true,sampledAt:new Date().toISOString()}));
+  });
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  main=new BrowserWindow({show:false,width:1060,height:720});
+  await main.loadURL('data:text/html,<h1>Kuma Console tray test</h1>');
+  floating=createFloatingOverview({mainWindow:main,origin:`http://127.0.0.1:${server.address().port}`});
+  control=createSystemTray({mainWindow:main,isQuitting:()=>quitting});
+  assert.equal(control.tray.isDestroyed(),false);
+  const {menu}=control;
+  main.show();main.close();
+  assert.equal(main.isDestroyed(),false,'Close destroyed the console');
+  assert.equal(main.isVisible(),false,'Close did not hide the console');
+  control.tray.emit('click');
+  await until(()=>main.isVisible()&&!main.isMinimized(),'Tray click did not restore');
+  menu.items[1].click();
+  assert.equal(main.isVisible(),false,'Tray hide did not hide the console');
+  menu.items[0].click();
+  await until(()=>main.isVisible(),'Tray menu did not restore');
+  main.minimize();
+  await until(()=>!main.isVisible()&&floating.getWindow()?.isVisible(),'Minimize did not hide to tray and show the orb');
+  control.tray.emit('double-click');
+  await until(()=>main.isVisible()&&!main.isMinimized()&&!floating.getWindow().isVisible(),'Restore did not hide the orb');
+  main.minimize();
+  await until(()=>!main.isVisible()&&floating.getWindow().isVisible(),'Repeated minimize failed');
+  main.close();
+  assert.equal(main.isDestroyed(),false,'Closing minimized console destroyed it');
+  control.restore();
+  await until(()=>main.isVisible()&&!floating.getWindow().isVisible(),'Restore after minimized close failed');
+  app.once('will-quit',()=>{
+    assert.equal(main.isDestroyed(),true,'Explicit quit retained the console');
+    assert.equal(control.tray.isDestroyed(),true,'Quit left the tray icon');
+    assert.equal(floating.getWindow().isDestroyed(),true,'Quit left the orb');
+    server.close();
+    console.log('PASS: close/hide/minimize to tray, click/menu restore, floating overview, explicit quit and cleanup');
+  });
+  menu.items[3].click();
+}).catch(error=>{console.error(error);server?.close();app.exit(1);});
+setTimeout(()=>{console.error('Tray smoke timed out');app.exit(1);},20000).unref();
