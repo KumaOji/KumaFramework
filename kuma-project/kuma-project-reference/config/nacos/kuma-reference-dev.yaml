@@ -129,6 +129,19 @@ kuma:
 
 
 management:
+  tracing:
+    enabled: ${REFERENCE_TRACING_ENABLED:true}
+    sampling:
+      probability: ${REFERENCE_TRACING_SAMPLING:1.0}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${REFERENCE_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+  otlp:
+    metrics:
+      export:
+        enabled: false
   health:
     redis:
       enabled: false

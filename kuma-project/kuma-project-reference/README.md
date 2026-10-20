@@ -52,6 +52,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、Mapper XML |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
 | Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
+| 链路追踪 | Spring Boot 4 OpenTelemetry starter，经 WSL Collector 导出到 SkyWalking；启动脚本加载 SkyWalking Java Agent |
 
 MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。数据库、schema 和表由部署流程预先创建，应用启动时不执行数据库初始化。上下文在调用结束或异常后恢复。
 
@@ -90,6 +91,26 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 ```
 
 应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`。
+
+### OpenTelemetry 和 SkyWalking
+
+Nacos 模板已配置 `management.tracing` 和 Boot 4 的 `management.opentelemetry.tracing.export.otlp`。默认发送到 `http://localhost:4318/v1/traces`，对应 WSL 已转发的 OTEL Collector；Collector 再转发到 SkyWalking OAP。开发环境默认采样率为 1.0，可通过 `REFERENCE_TRACING_SAMPLING` 调整，通过 `REFERENCE_OTLP_ENDPOINT` 修改接收地址，通过 `REFERENCE_TRACING_ENABLED` 控制追踪。
+
+在仓库根目录执行 `./kuma-project/kuma-project-reference/scripts/start-wsl.ps1` 会同时加载数据库环境变量和 SkyWalking Agent。Agent 优先使用 `SKYWALKING_AGENT_JAR` 指定的路径；本机未设置时复用 lab 已解压的 `kuma-project/kuma-project-lab/build/tools/skywalking-agent/skywalking-agent.jar`。复制模板到新项目时需另外准备完整 Agent 目录，包含 plugins、activations 和 config。
+
+直接使用 Gradle 启动时可传入 `-PskywalkingAgent=<Agent JAR 绝对路径>`，可选 `-PskywalkingBackend=localhost:11800`。IDEA 则在 ReferenceApplication 的 VM options 中加入：
+
+```text
+-javaagent:<Agent JAR 绝对路径>
+-Dskywalking.agent.service_name=kuma-reference
+-Dskywalking.collector.backend_service=localhost:11800
+```
+
+SkyWalking UI 为 `http://localhost:12880`。请求订单接口后，业务日志中的 `OtlpTraceId` 应有 traceId/spanId，加载 Agent 后请求线程的 `TID` 应有值；两套追踪的 ID 可能不同。启动日志没有请求上下文时仍可能为空。只使用 OpenTelemetry 导出也可以在 SkyWalking 查看追踪，但不会自动填充 SkyWalking toolkit 的 `%tid`。
+
+reference 显式注册框架的 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
+
+core 的异步池会组合框架上下文装饰器与应用提供的 TaskDecorator。reference 提供 SkyWalking RunnableWrapper 装饰器，保证其业务异步任务延续请求的 SkyWalking 链路；未加载 Agent 时该包装器不会生成 SkyWalking ID。Tlog 字段读取 MDC 的 `tl`，当前框架中的 TlogAutoConfiguration 和 TlogIdGenerator 未实现实际 TLog 接入，因此该字段仍为空。
 
 使用 `SPRING_CLOUD_NACOS_SERVER_ADDR` 修改 Nacos 地址，使用 `SPRING_PROFILES_ACTIVE` 切换环境；对应的 Nacos Data ID 需提前配置。运行时 Nacos 导入为必需项，连接池等配置修改后需重启；本地模板变更后需发布到对应的 Nacos Data ID。
 

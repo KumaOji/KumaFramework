@@ -19,6 +19,7 @@ dependencies {
     implementation project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     implementation project(':kuma-boot-framework:kuma-boot-starter-actuator')
+    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
     testRuntimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 
@@ -28,6 +29,18 @@ dependencies {
 
 springBoot { mainClass = 'com.kuma.cloud.reference.ReferenceApplication' }
 bootJar { archiveFileName = 'kuma-reference.jar' }
+tasks.named('bootRun') {
+    doFirst {
+        def agentPath = providers.gradleProperty('skywalkingAgent')
+        if (agentPath.isPresent()) {
+            def agent = rootProject.file(agentPath.get())
+            if (!agent.isFile()) throw new GradleException("SkyWalking Agent not found: ${agent}")
+            jvmArgs "-javaagent:${agent.absolutePath}",
+                    '-Dskywalking.agent.service_name=kuma-reference',
+                    "-Dskywalking.collector.backend_service=${providers.gradleProperty('skywalkingBackend').getOrElse('localhost:11800')}"
+        }
+    }
+}
 tasks.withType(Test).configureEach {
     // Tests use isolated classpath fixtures, never the developer's Nacos configuration.
     systemProperty 'spring.cloud.nacos.config.enabled', 'false'

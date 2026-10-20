@@ -23,12 +23,16 @@ import com.kuma.boot.core.support.thread.ThreadPoolFactory;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.core.autoconfigure.properties.AsyncProperties;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.TaskDecorator;
+import org.springframework.core.task.support.CompositeTaskDecorator;
+import java.util.ArrayList;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -57,7 +61,7 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
     @Primary
     @Bean("asyncThreadPoolTaskExecutor")
     @ConditionalOnMissingBean(name = "asyncThreadPoolTaskExecutor")
-    public ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor() {
+    public ThreadPoolTaskExecutor asyncThreadPoolTaskExecutor(ObjectProvider<TaskDecorator> taskDecorators) {
         MDCThreadPoolTaskExecutor executor = new MDCThreadPoolTaskExecutor();
 
         executor.setVirtualThreads(asyncProperties.isVirtualThreads());
@@ -81,8 +85,11 @@ public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
         // ThreadFactory
         executor.setThreadFactory(new ThreadPoolFactory(asyncProperties.getThreadNamePrefix(), executor));
         // 异步线程上下文装饰器
-        executor.setTaskDecorator(new MDCRequestTaskDecorator(asyncProperties.isEnableServletAsyncContext(),
+        var decorators = new ArrayList<TaskDecorator>();
+        decorators.add(new MDCRequestTaskDecorator(asyncProperties.isEnableServletAsyncContext(),
                 asyncProperties.getServletAsyncContextTimeoutMillis()));
+        taskDecorators.orderedStream().forEach(decorators::add);
+        executor.setTaskDecorator(new CompositeTaskDecorator(decorators));
         /*
          线程池拒绝策略
          rejection-policy：当pool已经达到max size的时候，如何处理新任务
