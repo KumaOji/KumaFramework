@@ -30,18 +30,11 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-ratelimit')
     api project(':kuma-boot-framework:kuma-boot-starter-idempotent')
     api project(':kuma-boot-framework:kuma-boot-starter-actuator')
-    api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
-        exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
-    }
     api project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
 
     api projectLibs.hutool.core
-    api projectLibs.spring.boot.starter.web
-    api projectLibs.spring.boot.starter.security
     api projectLibs.spring.boot.starter.oauth2.authorization.server
     api projectLibs.spring.boot.starter.thymeleaf
-    api projectLibs.spring.boot.starter.jdbc
-    api projectLibs.spring.doc.webmvc
 
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
@@ -54,6 +47,9 @@ dependencies {
 }
 
 tasks.named('test') {
+    systemProperty 'spring.cloud.nacos.config.enabled', 'false'
+    systemProperty 'spring.cloud.nacos.discovery.enabled', 'false'
+    systemProperty 'spring.cloud.nacos.config.import-check.enabled', 'false'
     useJUnitPlatform()
 }
 

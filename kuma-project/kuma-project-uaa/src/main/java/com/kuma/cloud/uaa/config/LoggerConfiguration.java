@@ -1,4 +1,4 @@
-package com.kuma.cloud.gateway.config;
+package com.kuma.cloud.uaa.config;
 
 import com.kuma.boot.logger.autoconfigure.LogbackAccessAutoConfiguration;
 import com.kuma.boot.logger.autoconfigure.LoggerAutoConfiguration;
@@ -7,7 +7,7 @@ import com.kuma.boot.logger.autoconfigure.KlogAutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
-/** Explicitly loads Kuma logging configurations used by the gateway. */
+/** Explicitly enable the Kuma logger starter features used by this application. */
 @Configuration(proxyBeanMethods = false)
 @ImportAutoConfiguration({
         LogbackAccessAutoConfiguration.class,
@@ -15,5 +15,4 @@ import org.springframework.context.annotation.Configuration;
         OpenTelemetryAppenderAutoConfiguration.class,
         KlogAutoConfiguration.class
 })
-public class KumaStarterConfiguration {
-}
+public class LoggerConfiguration {}

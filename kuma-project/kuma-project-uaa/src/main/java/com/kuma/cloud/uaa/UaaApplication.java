@@ -1,16 +1,13 @@
 package com.kuma.cloud.uaa;
 
-import com.kuma.boot.security.spring.autoconfigure.OAuth2ComplianceConfiguration;
-import com.kuma.boot.security.spring.autoconfigure.Oauth2ResourceAutoConfiguration;
-import com.kuma.cloud.uaa.annotation.EnableUaaBootApplication;
-import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
+import com.kuma.boot.core.startup.StartupSpringApplication;
+
 import org.jspecify.annotations.NonNull;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import java.util.Map;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 
 /**
  * Kuma 体系统一认证授权中心（UAA）启动类。
@@ -19,33 +16,21 @@ import org.springframework.context.annotation.FilterType;
  *
  * @author kuma
  */
-@EnableUaaBootApplication
-@KumaCloudApplication
-@ComponentScan(
-        basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"},
-        excludeFilters = {
-            @ComponentScan.Filter(
-                    type = FilterType.ASSIGNABLE_TYPE,
-                    classes = Oauth2ResourceAutoConfiguration.class),
-            @ComponentScan.Filter(
-                    type = FilterType.ASSIGNABLE_TYPE,
-                    classes = OAuth2ComplianceConfiguration.class)
-        })
-@EnableAutoConfiguration
-@ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.uaa"})
+@SpringBootApplication
+@ConfigurationPropertiesScan
 public class UaaApplication extends SpringBootServletInitializer {
 
     @Override
     protected @NonNull SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        return builder.sources(UaaApplication.class);
+        return builder.sources(UaaApplication.class)
+                .properties("spring.config.name=application,bootstrap");
     }
 
-    static void main(String[] args) {
-        new com.kuma.boot.core.startup.StartupSpringApplication(UaaApplication.class)
+    public static void main(String[] args) {
+        var application = new StartupSpringApplication(UaaApplication.class)
                 .setKmcBanner()
-                .setKmcProfileIfNotExists("dev")
-                .setKmcApplicationProperty("kuma-cloud-uaa")
-                .setKmcAllowBeanDefinitionOverriding(true)
-                .run(args);
+                .setKmcApplicationProperty("kuma-cloud-uaa");
+        application.setDefaultProperties(Map.of("spring.config.name", "application,bootstrap"));
+        application.run(args);
     }
 }

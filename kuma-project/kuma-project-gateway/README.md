@@ -68,3 +68,17 @@ wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts
 
 端到端脚本运行一个隔离的 Gateway（18180/18181）和临时上游，验证真实转发、traceparent、关联响应、Loki 日志和 SkyWalking server/client spans，完成后停止临时进程。
 告警规则测试文件为 `scripts/gateway-alerts.test.yaml`，在 Prometheus 容器中用 `promtool test rules` 执行，规则路径为 `/etc/prometheus/rules.yml`。
+
+
+## 框架配置导入
+
+沿用 `kuma-project-reference` 的方式：启动类使用 `@SpringBootApplication`，仅扫描本模块业务包；
+`config` 按能力通过 `@ImportAutoConfiguration` 显式导入 Kuma 配置，框架属性由对应配置的
+`@EnableConfigurationProperties` 绑定，不再扫描整个 `com.kuma.boot`。
+
+启动入口使用 `StartupSpringApplication`，通过 `spring.config.name=application,bootstrap`
+加载本地配置和 Nacos Config Data 导入，不再依赖旧的 Spring Cloud bootstrap 上下文。
+
+`LoggerConfiguration`、`ActuatorConfiguration`、`PrometheusConfiguration`、`Ip2regionConfiguration`
+显式导入网关使用的能力，不导入 Servlet MVC、Druid 端点、Servlet 请求映射端点或 Servlet 访问日志配置。
+网关的 `SecurityWebFilterChain` 由本模块管理。

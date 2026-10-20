@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Bean;
  * @version 2021.9
  * @since 2021-09-02 22:13:17
  */
-@AutoConfiguration
+@AutoConfiguration(after = com.kuma.boot.cache.redis.autoconfigure.RedisAutoConfiguration.class)
 @EnableConfigurationProperties({IdempotentProperties.class})
 @ConditionalOnProperty(
         prefix = IdempotentProperties.PREFIX,

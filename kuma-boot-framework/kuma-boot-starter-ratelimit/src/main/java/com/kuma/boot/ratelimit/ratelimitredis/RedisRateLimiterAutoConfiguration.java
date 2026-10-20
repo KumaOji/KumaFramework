@@ -41,7 +41,7 @@ import java.util.List;
  * @version 2022.07
  * @since 2022-07-03 09:24:19
  */
-@AutoConfiguration
+@AutoConfiguration(after = com.kuma.boot.cache.redis.autoconfigure.RedisAutoConfiguration.class)
 @ConditionalOnBean(RedissonClient.class)
 @ConditionalOnProperty(prefix = "kuma.boot.ratelimit.enable", value = "true", matchIfMissing = true)
 public class RedisRateLimiterAutoConfiguration implements InitializingBean {

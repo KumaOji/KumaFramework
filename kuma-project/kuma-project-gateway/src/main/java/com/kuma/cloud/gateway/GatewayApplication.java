@@ -17,10 +17,9 @@
 package com.kuma.cloud.gateway;
 
 import com.kuma.boot.core.startup.StartupSpringApplication;
-import com.kuma.cloud.bootstrap.annotation.KumaCloudApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.context.annotation.ComponentScan;
+import java.util.Map;
 
 /**
  * Kuma 体系统一网关启动类。
@@ -29,22 +28,19 @@ import org.springframework.context.annotation.ComponentScan;
  *
  * <p>框架能力：{@code kuma-boot-starter-prometheus}（Actuator / KMC 端点）、
  * {@code kuma-boot-starter-logger}（统一 Logback）、{@code kuma-boot-starter-ip2region}（访问日志归属地）、
- * {@code kuma-cloud-starter-bootstrap}（云应用引导）。
+ * {@code kuma-cloud-starter-alibaba}（云应用引导）。
  *
  * @author kuma
  */
 @SpringBootApplication
-@KumaCloudApplication
-@ComponentScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.gateway"})
-@ConfigurationPropertiesScan(basePackages = {"com.kuma.boot", "com.kuma.cloud.gateway"})
+@ConfigurationPropertiesScan
 public class GatewayApplication {
 
-    static void main(String[] args) {
-        new StartupSpringApplication(GatewayApplication.class)
+    public static void main(String[] args) {
+        var application = new StartupSpringApplication(GatewayApplication.class)
                 .setKmcBanner()
-                .setKmcProfileIfNotExists("dev")
-                .setKmcApplicationProperty("kuma-cloud-gateway")
-                .setKmcAllowBeanDefinitionOverriding(true)
-                .run(args);
+                .setKmcApplicationProperty("kuma-cloud-gateway");
+        application.setDefaultProperties(Map.of("spring.config.name", "application,bootstrap"));
+        application.run(args);
     }
 }

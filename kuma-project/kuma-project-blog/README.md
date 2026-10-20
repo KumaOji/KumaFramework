@@ -52,3 +52,17 @@ Blog 不保留 `application*.yml`。`bootstrap.yml` 负责应用名、运行环�
 Nacos 导入为必需项，配置中心连接失败时启动失败。
 配置源文件位于仓库 `.nacos-tmp/base/`，dev 配置通过 `scripts/publish-nacos-dev.sh` 发布，
 prod 配置通过 `Publish Nacos Prod Configs` 工作流发布。先发布配置，再重启 Blog。
+
+
+## 框架配置导入
+
+沿用 `kuma-project-reference` 的方式：启动类使用 `@SpringBootApplication`，仅扫描本模块业务包；
+`config` 按能力通过 `@ImportAutoConfiguration` 显式导入 Kuma 配置，框架属性由对应配置的
+`@EnableConfigurationProperties` 绑定，不再扫描整个 `com.kuma.boot`。
+
+启动入口使用 `StartupSpringApplication`，通过 `spring.config.name=application,bootstrap`
+加载本地配置和 Nacos Config Data 导入，不再依赖旧的 Spring Cloud bootstrap 上下文。
+
+数据源、MyBatis、线程池、Web、Redis、日志、Actuator 和 Prometheus 按能力分别配置。
+`FrameworkSecurityConfiguration` 导入安全属性和方法权限支持，并显式注册 `AuthorizeCheckService`；
+HTTP 安全链和 JWT 解码由本模块配置管理。
