@@ -47,3 +47,6 @@ data/
 # intellijPlatform
 .intellijPlatform/
 /gradle/wrapper/gradle-9.3.1-bin.zip
+# Python test bytecode
+__pycache__/
+*.py[cod]
