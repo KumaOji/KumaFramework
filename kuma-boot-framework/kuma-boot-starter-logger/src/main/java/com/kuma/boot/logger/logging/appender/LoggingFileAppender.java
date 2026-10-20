@@ -25,7 +25,7 @@ public class LoggingFileAppender implements ILoggingAppender {
    public LoggingFileAppender(Environment environment, LoggingProperties properties) {
       this.properties = properties;
       String appName = environment.getRequiredProperty(CommonConstants.SPRING_APP_NAME_KEY);
-      String fileLogPattern = environment.resolvePlaceholders("%d{yyyy-MM-dd HH:mm:ss.SSS} %level ${PID} [${APP_NAME}:${SERVER_IP}:${SERVER_PORT}] [${KMC_VERSION}] [%thread] [${SPRING_PROFILES_ACTIVE:-}] [${OS_NAME:-}:${OS_VERSION:-}:${USER_TIMEZONE:-}:${JAVA_VERSION:-}] Tlog:[%X{tl}] TraceId:[%X{kmc-trace-id:-}] TenantId:[%X{kmc-tenant-id:-}] RequestVersion:[%X{kmc-request-version:-}] OtlpTraceId:[%X{traceId:-}:%X{spanId:-}] [%tid] %class{360}:%M:%L : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}\n");
+      String fileLogPattern = environment.resolvePlaceholders("%d{yyyy-MM-dd HH:mm:ss.SSS} %level ${PID} [${APP_NAME}:${SERVER_IP}:${SERVER_PORT}] [${KMC_VERSION}] [%thread] [${SPRING_PROFILES_ACTIVE:-}] [${OS_NAME:-}:${OS_VERSION:-}:${USER_TIMEZONE:-}:${JAVA_VERSION:-}] Klog:[%X{klog}] TraceId:[%X{kmc-trace-id:-}] TenantId:[%X{kmc-tenant-id:-}] RequestVersion:[%X{kmc-request-version:-}] OtlpTraceId:[%X{traceId:-}:%X{spanId:-}] [%tid] %class{360}:%M:%L : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}\n");
       System.setProperty(LoggingSystemProperty.FILE_PATTERN.getEnvironmentVariableName(), fileLogPattern);
       String logDir = environment.getProperty("logging.file.path", "logs");
       this.logAllFile = logDir + "/" + appName + "/all.log";

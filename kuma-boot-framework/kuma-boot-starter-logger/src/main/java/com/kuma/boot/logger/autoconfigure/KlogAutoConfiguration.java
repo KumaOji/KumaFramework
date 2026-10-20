@@ -5,11 +5,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.beans.factory.InitializingBean;
 
 @AutoConfiguration
-public class TlogAutoConfiguration implements InitializingBean {
-   public TlogAutoConfiguration() {
+public class KlogAutoConfiguration implements InitializingBean {
+   public KlogAutoConfiguration() {
    }
 
    public void afterPropertiesSet() throws Exception {
-      LogUtils.started(TlogAutoConfiguration.class, "kuma-boot-starter-logger", new String[0]);
+      LogUtils.started(KlogAutoConfiguration.class, "kuma-boot-starter-logger", new String[0]);
    }
 }

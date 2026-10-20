@@ -15,7 +15,6 @@
 
 	<!-- Context listeners -->
 	<contextListener class="com.kuma.boot.logger.logback.listener.TtlMDCAdapterListener"/>
-	<!--<contextListener class="com.yomahub.tlog.core.enhance.logback.TLogLogbackTTLMdcListener"/>-->
 
 	<property name="LOG_PATH" value="${user.home}"/>
 	<property name="OS_NAME" value="${os.name}"/>
@@ -90,7 +89,7 @@
 	<!--	defaultValue="[%clr(${APP_NAME}){green}:%clr(%localIp){green}:%clr(${SERVER_PORT}){green}] %clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){green} %clr([%thread]){red} %clr([${SPRING_PROFILES_ACTIVE:-}]){green} %clr([%level]){blue} %clr([${PID}]){magenta} %clr([${OS_NAME:-}:${OS_VERSION:-}]){yellow} %clr([${USER_TIMEZONE:-}]){yellow} %clr([${JAVA_VERSION:-}]){yellow} %clr(Version:[${KMC_VERSION}]){green} %clr(TraceId:[%X{kmc-trace-id:-}]){orange} %clr(TenantId:[%X{kmc-tenant-id:-}]){cyan} %clr(RequestVersion:[%X{kmc-request-version:-}]){yellow} %clr(OtlpTraceId:[%X{X-B3-TraceId:-}:%X{X-B3-SpanId:-}]){magenta} %clr([%tid]){magenta} %clr(%logger{360}){cyan} %clr([%F:%M:%L]){orange} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
 	<springProperty name="CONSOLE_LOG_PATTERN"
 					source="logging.pattern.console"
-					defaultValue="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){red} %clr(%-5level){highlight} %clr(${PID}){magenta} %clr([${APP_NAME}:%localIp:${SERVER_PORT}]){green} %clr([${KMC_VERSION}]){green} %clr([%thread]){red} %clr([${SPRING_PROFILES_ACTIVE:-}]){faint} %clr([${OS_NAME:-}:${OS_VERSION:-}:${USER_TIMEZONE:-}:${JAVA_VERSION:-}]){yellow} %clr(Tlog:[%X{tl}]){cyan} %clr(TraceId:[%X{kmc-trace-id:-}]){orange} %clr(TenantId:[%X{kmc-tenant-id:-}]){cyan} %clr(RequestVersion:[%X{kmc-request-version:-}]){yellow} %clr(OtlpTraceId:[%X{traceId:-}:%X{spanId:-}]){magenta} %clr([%tid]){magenta} %clr(%class{360}:%M:%L){boldMagenta} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+					defaultValue="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){red} %clr(%-5level){highlight} %clr(${PID}){magenta} %clr([${APP_NAME}:%localIp:${SERVER_PORT}]){green} %clr([${KMC_VERSION}]){green} %clr([%thread]){red} %clr([${SPRING_PROFILES_ACTIVE:-}]){faint} %clr([${OS_NAME:-}:${OS_VERSION:-}:${USER_TIMEZONE:-}:${JAVA_VERSION:-}]){yellow} %clr(Klog:[%X{klog}]){cyan} %clr(TraceId:[%X{kmc-trace-id:-}]){orange} %clr(TenantId:[%X{kmc-tenant-id:-}]){cyan} %clr(RequestVersion:[%X{kmc-request-version:-}]){yellow} %clr(OtlpTraceId:[%X{traceId:-}:%X{spanId:-}]){magenta} %clr([%tid]){magenta} %clr(%class{360}:%M:%L){boldMagenta} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
 	<!--
 	   日志输出格式：
@@ -113,7 +112,7 @@
 	<!--	defaultValue="[${APP_NAME}:%localIp:${SERVER_PORT}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [${SPRING_PROFILES_ACTIVE:-}] [%level] [${PID}] [${OS_NAME:-}:${OS_VERSION:-}] [${USER_TIMEZONE:-}] [${JAVA_VERSION:-}] Version:[${KMC_VERSION}] TraceId:[%X{kmc-trace-id:-}] TenantId:[%X{kmc-tenant-id:-}] RequestVersion:[%X{kmc-request-version:-}] OtlpTraceId:[%X{X-B3-TraceId:-}:%X{X-B3-SpanId:-}] [%tid] %logger{360} %clr([%F:%M:%L]){orange} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
 	<springProperty name="CONSOLE_LOG_PATTERN_NO_COLOR"
 					source="logging.pattern.console.no.color"
-					defaultValue="%d{yyyy-MM-dd HH:mm:ss.SSS} %level ${PID} [${APP_NAME}:%localIp:${SERVER_PORT}] [${KMC_VERSION}] [%thread] [${SPRING_PROFILES_ACTIVE:-}] [${OS_NAME:-}:${OS_VERSION:-}:${USER_TIMEZONE:-}:${JAVA_VERSION:-}] Tlog:[%X{tl}] TraceId:[%X{kmc-trace-id:-}] TenantId:[%X{kmc-tenant-id:-}] RequestVersion:[%X{kmc-request-version:-}] OtlpTraceId:[%X{traceId:-}:%X{spanId:-}] [%tid] %class{360}:%M:%L : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+					defaultValue="%d{yyyy-MM-dd HH:mm:ss.SSS} %level ${PID} [${APP_NAME}:%localIp:${SERVER_PORT}] [${KMC_VERSION}] [%thread] [${SPRING_PROFILES_ACTIVE:-}] [${OS_NAME:-}:${OS_VERSION:-}:${USER_TIMEZONE:-}:${JAVA_VERSION:-}] Klog:[%X{klog}] TraceId:[%X{kmc-trace-id:-}] TenantId:[%X{kmc-tenant-id:-}] RequestVersion:[%X{kmc-request-version:-}] OtlpTraceId:[%X{traceId:-}:%X{spanId:-}] [%tid] %class{360}:%M:%L : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
 
 	<include resource="logback/console-appender.xml"/>
