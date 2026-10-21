@@ -54,21 +54,47 @@
     }
     element.replaceChildren(fragment);
   }
-  function bind({button,element,load,isActive,onError}){
-    let busy=false,previous=null,opened=false;
+  function appended(previous,current){
+    // The backend returns separate launcher/stdout/stderr tails in one snapshot.
+    // Compare each source separately so an insertion before stderr is not a replay.
+    function sources(body){
+      const headers=[...body.matchAll(/^(?:build\/blog-runtime\/|logs\/)[^\r\n]+\.log\r?$/gm)];
+      return new Map(headers.map((match,index)=>[match[0],body.slice(match.index+match[0].length+1,headers[index+1]?.index??body.length)]));
+    }
+    const before=sources(previous),after=sources(current);
+    if(before.size&&after.size)return [...after].map(([name,body])=>{
+      const added=before.has(name)?appendedText(before.get(name),body):body;
+      return added?name+'\n'+added:'';
+    }).join('');
+    return appendedText(previous,current);
+  }
+  function appendedText(previous,current){
+    if(current.startsWith(previous))return current.slice(previous.length);
+    const before=previous.match(/[^\n]*\n|[^\n]+$/g)||[],after=current.match(/[^\n]*\n|[^\n]+$/g)||[];
+    for(let count=Math.min(before.length,after.length);count>0;count--){
+      if(before[before.length-count]===after[0]&&before.slice(-count).join('')===after.slice(0,count).join(''))return after.slice(count).join('');
+    }
+    return current;
+  }
+  function bind({button,element,load,isActive,onError,clearButton,closeLabel}){
+    let busy=false,previous=null,opened=false,cleared=false,visible='',revision=0;
+    const openLabel=button.textContent;
     button.setAttribute('aria-controls',element.id);
     button.setAttribute('aria-expanded',String(!element.hidden));
     element.classList.add('log-console');
     async function refresh(){
       if(busy||element.hidden||!isActive())return;
-      busy=true;
+      busy=true;const requestedRevision=revision;
       try{
         const data=await load();
+        const body=String(data.body??'');
+        if(requestedRevision!==revision){previous=body;return;}
         if(element.hidden||!isActive())return;
-        if(data.body!==previous){
+        if(body!==previous){
           const follow=!opened||element.scrollHeight-element.clientHeight-element.scrollTop<32;
           const top=element.scrollTop;
-          render(element,data.body);previous=data.body;opened=true;
+          visible=cleared?(visible+(previous===null?'':appended(previous,body))).split('\n').slice(-1000).join('\n'):body;
+          render(element,visible);previous=body;opened=true;
           element.scrollTop=follow?element.scrollHeight:top;
         }
       }catch(error){if(!element.hidden&&isActive())onError(error);}
@@ -77,8 +103,13 @@
     button.onclick=()=>{
       element.hidden=!element.hidden;
       button.setAttribute('aria-expanded',String(!element.hidden));
+      if(closeLabel)button.textContent=element.hidden?openLabel:closeLabel;
       if(!element.hidden)void refresh();
     };
+    if(clearButton){clearButton.setAttribute('aria-controls',element.id);clearButton.onclick=()=>{
+      revision++;cleared=true;visible='';opened=false;
+      element.replaceChildren();element.scrollTop=0;
+    };}
     return refresh;
   }
   root.LogConsole={render,bind};

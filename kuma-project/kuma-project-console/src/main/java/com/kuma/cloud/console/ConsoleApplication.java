@@ -10,6 +10,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableConfigurationProperties(ConsoleProperties.class)
 public class ConsoleApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ConsoleApplication.class, args);
+        var context = SpringApplication.run(ConsoleApplication.class, args);
+        if (context.getEnvironment().getProperty("console.desktop-managed", Boolean.class, false)) {
+            Thread.ofVirtual().name("console-desktop-lifecycle").start(() -> DesktopShutdown.await(System.in, context::close));
+        }
     }
 }

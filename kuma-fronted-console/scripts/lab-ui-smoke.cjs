@@ -20,6 +20,13 @@ let backendLogReads=0;
 let backendLogBody='2026-10-21 12:00:00.000 INFO  Backend log\n2026-10-21 12:00:01.000 WARN  Warning\n\x1b[31mERROR colored\x1b[0m <img src=x onerror=alert(1)>\n';
 const componentState={uaa:'STOPPED',gateway:'RUNNING'};
 const componentActions=[];
+const componentLogReads={uaa:0,gateway:0};
+const componentLogBodies=Object.fromEntries(['uaa','gateway'].map(name=>[name,
+  `logs/${name}-local/stdout.log\n2026-10-21 12:00:00.000 INFO  ${name} log\n\x1b[31mERROR colored\x1b[0m <img src=x onerror=alert(1)>\nlogs/${name}-local/stderr.log\n`]));
+function appendComponentLog(name,line){
+  const marker=`logs/${name}-local/stderr.log\n`;
+  componentLogBodies[name]=componentLogBodies[name].replace(marker,line+marker);
+}
 const wslStates={'Ubuntu-24.04':'RUNNING','Debian':'STOPPED'},wslActions=[];
 async function serve(request,response){
   const url=new URL(request.url,'http://localhost');
@@ -40,7 +47,8 @@ async function serve(request,response){
     if(url.pathname.startsWith('/api/components')){
       const parts=url.pathname.split('/'),name=parts[3],action=parts[4];
       if(action==='start'||action==='stop'){assert.equal(request.method,'POST');componentState[name]=action==='start'?'RUNNING':'STOPPED';componentActions.push(name+'/'+action);}
-      result=action==='logs'?{body:'Component log'}:Object.fromEntries(Object.entries(componentState).map(([key,value])=>[key,{state:value,message:key,pid:value==='RUNNING'?123:0,canStart:value==='STOPPED',canStop:value==='RUNNING',url:key==='uaa'?'http://localhost:33336':'http://localhost:18080',distribution:'Ubuntu-24.04'}]));
+      if(action==='logs')componentLogReads[name]++;
+      result=action==='logs'?{body:componentLogBodies[name]}:Object.fromEntries(Object.entries(componentState).map(([key,value])=>[key,{state:value,message:key,pid:value==='RUNNING'?123:0,canStart:value==='STOPPED',canStop:value==='RUNNING',url:key==='uaa'?'http://localhost:33336':'http://localhost:18080',distribution:'Ubuntu-24.04'}]));
     }
     if(url.pathname.startsWith('/api/blog/backend')){
       if(url.pathname.endsWith('/logs'))backendLogReads++;
@@ -83,7 +91,7 @@ async function serve(request,response){
   response.writeHead(200,{'Content-Type':(types[path.extname(target)]||'application/octet-stream')+'; charset=utf-8'});
   response.end(content);
 }
-const evaluate=script=>window.webContents.executeJavaScript(script);
+const evaluate=script=>window.webContents.executeJavaScript(script).catch(error=>{throw new Error(script,{cause:error});});
 const paint=async()=>{
   await evaluate('document.getAnimations().forEach(animation=>{if(Number.isFinite(animation.effect.getTiming().iterations))animation.finish();})');
   await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
@@ -123,10 +131,10 @@ app.whenReady().then(async()=>{
   await paint();
   await fs.writeFile(path.join(output,'kuma-titlebar.png'),(await window.webContents.capturePage()).toPNG());
   await evaluate(`document.body.classList.remove('desktop');document.getElementById('desktop-bar').hidden=true;`);
-  await waitFor(`document.querySelectorAll('.workspace-hero-art').length===6 && Array.from(document.querySelectorAll('.workspace-hero-art')).every(img=>img.complete&&img.naturalWidth>0)`);
-  assert.equal(await evaluate(`new Set(Array.from(document.querySelectorAll('.workspace-hero-art')).map(img=>img.src)).size`),5);
-  assert.equal(await evaluate(`document.querySelectorAll('#workspace-navigation > a .workspace-nav-art img').length`),5);
-  assert.ok(await evaluate(`!document.getElementById('open-lab-finder') && !document.querySelector('nav [data-page="cluster"]') && !document.querySelector('nav [data-page="components"]') && document.querySelectorAll('#workspace-navigation > a[data-page]').length===5`));
+  await waitFor(`document.querySelectorAll('.workspace-hero-art').length===5 && Array.from(document.querySelectorAll('.workspace-hero-art')).every(img=>img.complete&&img.naturalWidth>0)`);
+  assert.equal(await evaluate(`new Set(Array.from(document.querySelectorAll('.workspace-hero-art')).map(img=>img.src)).size`),4);
+  assert.equal(await evaluate(`document.querySelectorAll('#workspace-navigation > a .workspace-nav-art img').length`),4);
+  assert.ok(await evaluate(`!document.getElementById('open-lab-finder') && !document.querySelector('nav [data-page="cluster"]') && !document.querySelector('nav [data-page="components"]') && !document.querySelector('nav [data-page="blog"]') && document.querySelectorAll('#workspace-navigation > a[data-page]').length===4`));
   await evaluate(`window.__sidebarBefore=document.querySelector('.sidebar').getBoundingClientRect().width;window.__contentBefore=document.querySelector('.workspace').getBoundingClientRect().x;document.getElementById('workspace-toggle').click();`);
   assert.ok(await evaluate(`!document.getElementById('workspace-navigation').hidden && document.documentElement.dataset.sidebar==='collapsed' && document.getElementById('workspace-toggle').getAttribute('aria-expanded')==='false' && !document.getElementById('lab').hidden && document.querySelector('.sidebar').getBoundingClientRect().width<window.__sidebarBefore && document.querySelector('.workspace').getBoundingClientRect().x<window.__contentBefore`));
   await evaluate(`document.getElementById('console-settings-link').click();`);
@@ -147,7 +155,7 @@ app.whenReady().then(async()=>{
   assert.ok(await evaluate(`!document.getElementById('lab-presets').hidden && document.getElementById('toggle-lab-catalog').getAttribute('aria-expanded')==='true'`));
   await evaluate(`document.getElementById('toggle-lab-catalog').click()`);
   assert.ok(await evaluate(`!document.getElementById('lab').hidden`));
-  assert.ok(await evaluate(`document.querySelector('[data-page=lab]').nextElementSibling.dataset.page==='blog'`));
+  assert.ok(await evaluate(`document.querySelector('[data-page=projects]').nextElementSibling.dataset.page==='lab' && !document.querySelector('[data-page=lab]').nextElementSibling`));
   assert.ok(await evaluate(`document.querySelector('[data-page=lab]').previousElementSibling.dataset.page==='projects'`));
   await evaluate(`location.hash='server';navigate();`);
   await waitFor(`state.page==='server' && state.infrastructureTab==='remote'`);
@@ -187,7 +195,29 @@ app.whenReady().then(async()=>{
   assert.ok(await evaluate(`state.page==='projects' && !document.getElementById('projects').hidden && !document.getElementById('components').hidden && document.getElementById('project-services').hidden && document.querySelector('nav [data-page="projects"]').classList.contains('active')`));
   await evaluate(`document.getElementById('service-projects-tab').click();`);
   await waitFor(`state.servicesTab==='projects' && !document.getElementById('project-services').hidden && document.getElementById('components').hidden && document.getElementById('project-cards').textContent.includes('Lab')`);
-  await evaluate(`document.getElementById('service-projects-tab').dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));`);
+  await evaluate(`
+    window.__projectFilterOriginal=state.projects;
+    const offline=state.projects.projects[0];
+    state.projects={...state.projects,projects:[offline,...[
+      ['Healthy service','HEALTHY',200],['Protected service','REACHABLE',401],
+      ['Unhealthy service','UNHEALTHY',503],['No health endpoint','REACHABLE',404]
+    ].map(([name,status,httpStatus])=>({...offline,name,status,httpStatus}))]};
+    renderProjects();
+    document.getElementById('project-status-filter').value='started';
+    document.getElementById('project-status-filter').dispatchEvent(new Event('change'));
+  `);
+  assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('#project-cards h2')).map(title=>title.textContent)`),
+    ['Healthy service','Protected service','Unhealthy service','No health endpoint']);
+  await evaluate(`document.querySelector('#project-cards .project-links button').click();`);
+  assert.equal(await evaluate(`document.getElementById('drawer-title').textContent`),'Healthy service','filtered diagnostics must use the displayed service');
+  await evaluate(`closeDrawer();renderProjects();`);
+  assert.equal(await evaluate(`document.querySelectorAll('#project-cards .project-card').length`),4,'refresh preserves the active filter');
+  await evaluate(`state.projects={...state.projects,projects:window.__projectFilterOriginal.projects};renderProjects();`);
+  assert.equal(await evaluate(`document.querySelectorAll('#project-cards .project-card').length`),0);
+  assert.ok(await evaluate(`document.getElementById('project-cards').textContent.includes('暂无 HTTP 可达')`));
+  await evaluate(`state.projects=window.__projectFilterOriginal;delete window.__projectFilterOriginal;document.getElementById('project-status-filter').value='all';document.getElementById('project-status-filter').dispatchEvent(new Event('change'));`);
+  assert.ok(await evaluate(`document.getElementById('project-cards').textContent.includes('Lab')`));
+  await evaluate(`document.getElementById('service-projects-tab').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));`);
   await waitFor(`location.hash==='#projects/components' && state.servicesTab==='components' && document.getElementById('service-components-tab').getAttribute('aria-selected')==='true'`);
   assert.ok(await evaluate(`document.querySelector('#projects .workspace-hero-art').src.endsWith('/components.png')`));
   await waitFor(`!document.getElementById('component-uaa-start').disabled && !document.getElementById('component-gateway-stop').disabled`);
@@ -198,9 +228,42 @@ app.whenReady().then(async()=>{
   await evaluate(`document.getElementById('component-gateway-start').click();`);
   await waitFor(`!document.getElementById('component-gateway-stop').disabled`);
   assert.deepEqual(componentActions,['uaa/start','uaa/stop','gateway/stop','gateway/start']);
-  await evaluate(`document.getElementById('component-gateway-logs').click();`);
-  await waitFor(`document.getElementById('component-gateway-log').textContent==='Component log'`);
+  for(const name of ['uaa','gateway']){
+    await evaluate(`document.getElementById('component-${name}-logs').click();`);
+    await waitFor(`document.getElementById('component-${name}-log').textContent.includes('ERROR colored')`);
+    assert.ok(await evaluate(`document.querySelector('#component-${name}-log .log-level-info') && !document.querySelector('#component-${name}-log img')`));
+    assert.equal(await evaluate(`getComputedStyle(document.querySelector('#component-${name}-log .log-level-error span')).color`),'rgb(240, 113, 120)');
+    appendComponentLog(name,'2026-10-21 12:00:01.000 WARN  Live update\n');
+    await waitFor(`document.getElementById('component-${name}-log').textContent.includes('Live update')`);
+    await evaluate(`document.getElementById('component-${name}-log-clear').click();`);
+    assert.equal(await evaluate(`document.getElementById('component-${name}-log').textContent`),'');
+    await new Promise(resolve=>setTimeout(resolve,1200));
+    assert.equal(await evaluate(`document.getElementById('component-${name}-log').textContent`),'','cleared logs must stay empty on refresh');
+    // Simulate the server's bounded tail dropping the first line while appending a new one.
+    componentLogBodies[name]=componentLogBodies[name].replace(/2026-10-21 12:00:00[^\n]*\n/,'');
+    appendComponentLog(name,'2026-10-21 12:00:02.000 INFO  After clear\n');
+    await waitFor(`document.getElementById('component-${name}-log').textContent.includes('After clear')`);
+    assert.ok(await evaluate(`!document.getElementById('component-${name}-log').textContent.includes('Live update') && !document.getElementById('component-${name}-log').textContent.includes('ERROR colored')`));
+    await evaluate(`document.getElementById('component-${name}-logs').click();`);
+    assert.ok(await evaluate(`document.getElementById('component-${name}-log').hidden && document.getElementById('component-${name}-logs').getAttribute('aria-expanded')==='false'`));
+    const reads=componentLogReads[name];
+    await new Promise(resolve=>setTimeout(resolve,1200));
+    assert.equal(componentLogReads[name],reads,'closed logs stop polling');
+    await evaluate(`document.getElementById('component-${name}-logs').click();`);
+    assert.ok(await evaluate(`!document.getElementById('component-${name}-log').hidden`));
+  }
+  await evaluate(`document.getElementById('service-projects-tab').click();`);
+  await waitFor(`state.servicesTab==='projects'`);
+  await evaluate(`document.getElementById('service-projects-tab').dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));`);
+  await waitFor(`location.hash==='#projects/blog' && state.page==='projects' && state.servicesTab==='blog' && !document.getElementById('blog').hidden`);
+  assert.ok(await evaluate(`document.getElementById('projects').contains(document.getElementById('blog')) && !document.querySelector('nav [data-page="blog"]') && document.querySelector('nav [data-page="projects"]').getAttribute('aria-current')==='page'`));
+  assert.ok(await evaluate(`document.getElementById('service-blog-tab').getAttribute('aria-selected')==='true' && document.getElementById('project-services').hidden && document.getElementById('components').hidden`));
+  await evaluate('history.back()');
+  await waitFor(`state.servicesTab==='projects' && document.getElementById('blog').hidden`);
+  await evaluate('history.forward()');
+  await waitFor(`state.servicesTab==='blog' && !document.getElementById('blog').hidden`);
   await evaluate(`location.hash='blog';navigate();`);
+  assert.ok(await evaluate(`state.page==='projects' && state.servicesTab==='blog' && !document.getElementById('projects').hidden && !document.getElementById('blog').hidden`));
   await waitFor(`!document.getElementById('blog-stop').disabled`);
   await waitFor(`!document.getElementById('blog-sync').disabled`);
   await evaluate(`document.getElementById('blog-sync').click();`);
@@ -216,6 +279,17 @@ app.whenReady().then(async()=>{
   assert.equal(backendStarts,1);
   assert.ok(await evaluate(`!document.getElementById('blog-knowledge-open').hidden && document.getElementById('blog-knowledge-open').href==='http://localhost:4321/knowledge'`));
   assert.ok(await evaluate(`!document.getElementById('blog').hidden && !document.getElementById('blog-open').hidden && document.getElementById('blog-open').href==='http://localhost:4321/'`));
+  await evaluate(`document.getElementById('blog-preview-url').value='http://localhost:4321/custom';document.getElementById('blog-preview-address').requestSubmit();`);
+  assert.equal(await evaluate(`document.getElementById('blog-preview').getAttribute('src')`),'http://localhost:4321/custom');
+  await evaluate(`pollBlogProcess()`);
+  assert.equal(await evaluate(`document.getElementById('blog-open').href`),'http://localhost:4321/custom','status polling preserves custom URL');
+  await evaluate(`document.getElementById('blog-preview-url').value='http://localhost:4321/draft';renderBlogPreview();`);
+  assert.equal(await evaluate(`document.getElementById('blog-preview-url').value`),'http://localhost:4321/draft','polling preserves address edits');
+  await evaluate(`document.getElementById('blog-preview-url').value='javascript:alert(1)';document.getElementById('blog-preview-address').dispatchEvent(new Event('submit',{cancelable:true}));`);
+  assert.ok(await evaluate(`!document.getElementById('blog-preview-error').hidden && document.getElementById('blog-preview').getAttribute('src')==='http://localhost:4321/custom'`));
+  await evaluate(`document.getElementById('blog-view-knowledge').click();`);
+  assert.equal(await evaluate(`document.getElementById('blog-preview-url').value`),'http://localhost:4321/knowledge');
+  await evaluate(`document.getElementById('blog-view-home').click();`);
   await evaluate(`document.getElementById('blog-stop').click();`);
   await waitFor(`!document.getElementById('blog-start').disabled`);
   assert.ok(await evaluate(`document.getElementById('blog-open').hidden`));
@@ -233,25 +307,25 @@ app.whenReady().then(async()=>{
   assert.equal(blogStops,1);
   await evaluate(`document.getElementById('blog-stop').click();`);
   await waitFor(`!document.getElementById('blog-start').disabled`);
-  assert.ok(await evaluate(`document.getElementById('blog-stop-all').disabled`));
+  assert.ok(await evaluate(`!document.getElementById('blog-stop-all')`));
   await evaluate(`document.getElementById('blog-start').click();`);
   await waitFor(`!document.getElementById('blog-stop').disabled`);
   assert.equal(backendStarts,1,'starting frontend while backend is stopped does not start backend');
   assert.equal(backendState,'STOPPED');
-  await evaluate(`document.getElementById('blog-stop-all').click();`);
+  await evaluate(`document.getElementById('blog-stop').click();document.getElementById('blog-backend-stop').click();`);
   await waitFor(`!document.getElementById('blog-start').disabled`);
   assert.equal(blogState,'STOPPED');assert.equal(backendState,'STOPPED');
   await evaluate(`document.getElementById('blog-backend-start').click();`);
   await waitFor(`!document.getElementById('blog-backend-stop').disabled`);
   assert.equal(backendStarts,2);
   assert.equal(blogState,'STOPPED','starting backend leaves frontend stopped');
-  assert.ok(await evaluate(`document.getElementById('blog-stop').disabled && !document.getElementById('blog-stop-all').disabled`));
+  assert.ok(await evaluate(`document.getElementById('blog-stop').disabled && !document.getElementById('blog-backend-stop').disabled`));
   await evaluate(`document.getElementById('blog-start').click();`);
   await waitFor(`!document.getElementById('blog-stop').disabled`);
-  await evaluate(`document.getElementById('blog-stop-all').click();`);
+  await evaluate(`document.getElementById('blog-stop').click();document.getElementById('blog-backend-stop').click();`);
   await waitFor(`!document.getElementById('blog-start').disabled && !document.getElementById('blog-backend-start').disabled`);
   assert.equal(blogState,'STOPPED');assert.equal(backendState,'STOPPED');
-  assert.ok(await evaluate(`document.getElementById('blog-stop-all').disabled`));
+  assert.ok(await evaluate(`!document.getElementById('blog-stop-all')`));
   await evaluate(`document.getElementById('blog-start').click();`);
   await waitFor(`!document.getElementById('blog-stop').disabled`);
   await evaluate(`document.getElementById('blog-logs').click();`);
@@ -270,7 +344,16 @@ app.whenReady().then(async()=>{
   backendLogBody+='2026-10-21 12:00:03.000 ERROR  Latest failure\n';
   await waitFor(`document.getElementById('blog-backend-log').textContent.includes('Latest failure')`);
   assert.equal(await evaluate(`document.getElementById('blog-backend-log').scrollTop`),0,'refresh preserves reading position');
+  assert.equal(await evaluate(`document.getElementById('blog-backend-logs').textContent`),'关闭日志');
+  await evaluate(`document.getElementById('blog-backend-log-clear').click();`);
+  assert.equal(await evaluate(`document.getElementById('blog-backend-log').textContent`),'');
+  await new Promise(resolve=>setTimeout(resolve,1200));
+  assert.equal(await evaluate(`document.getElementById('blog-backend-log').textContent`),'','cleared backend logs stay empty on refresh');
+  backendLogBody+='2026-10-21 12:00:04.000 INFO  Backend after clear\n';
+  await waitFor(`document.getElementById('blog-backend-log').textContent.includes('Backend after clear')`);
+  assert.ok(await evaluate(`!document.getElementById('blog-backend-log').textContent.includes('Latest failure') && !document.getElementById('blog-backend-log').textContent.includes('Live line')`));
   await evaluate(`document.getElementById('blog-backend-logs').click();`);
+  assert.equal(await evaluate(`document.getElementById('blog-backend-logs').textContent`),'查看日志');
   assert.ok(await evaluate(`document.getElementById('blog-backend-log').hidden && document.getElementById('blog-backend-logs').getAttribute('aria-expanded')==='false'`));
   const readsWhenCollapsed=backendLogReads;
   await new Promise(resolve=>setTimeout(resolve,1200));
@@ -427,7 +510,7 @@ app.whenReady().then(async()=>{
   assert.equal(await evaluate(`document.getElementById('console-welcome').checked`),false);
   await evaluate(`document.querySelector('[data-lab-scope="favorites"]').click();`);
   assert.equal(await evaluate(`document.querySelectorAll('#lab-quick-results .favorite-toggle[aria-pressed="true"]').length`),1);
-  await fs.writeFile(path.join(output,'result.json'),JSON.stringify({passed:true,interfaces:catalog.length,lessons:lessons.length,middlewareUiLinks:true,discovery:true,narrowLayout:true,workspaceImages:7,workspacePages:5,mergedInfrastructure:true,mergedServices:true,consoleSettings:true},null,2));
+  await fs.writeFile(path.join(output,'result.json'),JSON.stringify({passed:true,interfaces:catalog.length,lessons:lessons.length,middlewareUiLinks:true,discovery:true,narrowLayout:true,workspaceImages:7,workspacePages:5,mergedInfrastructure:true,mergedServices:true,mergedBlog:true,consoleSettings:true},null,2));
   console.log(`Lab UI smoke passed: ${catalog.length} interfaces, ${lessons.length} lessons, middleware UI links, discovery, docs, mode switching and narrow layout.`);
   window.destroy();server.close();app.exit(0);
 }).catch(error=>{console.error(error);window?.destroy();server?.close();app.exit(1);});

@@ -55,7 +55,9 @@ pnpm start
 
 桌面窗口最小化时自动显示置顶的 Yuna 悬浮球，可拖动调整位置，球上显示 CPU 使用率。点击展开「本机概览」，查看 CPU、内存、存储、进程数、运行时间及上下行网速，每 2 秒读取本机监控数据；断线时保留最近数值并提示重试，过期采样也会明确标记。再次点击球、面板右上角 × 或按 Esc 可收起；「打开 Kuma Console」恢复主窗口并隐藏悬浮球。恢复主窗口后停止悬浮球轮询，退出程序时销毁悬浮窗口。此功能仅适用于 Electron 桌面客户端。
 
-系统托盘验证：`pnpm run test:system-tray`，覆盖关闭、隐藏、最小化驻留托盘，图标和菜单恢复，悬浮球联动，以及显式退出后的窗口和托盘清理。
+退出 Kuma Console 会保留 WSL 及其中的中间件和集群。需要关闭时，在「服务器与 WSL」中手动选择关闭发行版或关闭全部 WSL。
+
+系统托盘验证：`pnpm run test:system-tray`，覆盖关闭、隐藏、最小化驻留托盘，图标和菜单恢复，悬浮球联动，以及显式退出后的窗口和托盘清理。`pnpm test` 使用 JDK 验证结束 Java 控制台后端后，其常驻子会话仍保持运行。
 
 悬浮球验证：`pnpm run test:floating-overview`，使用真实 Electron 窗口与沙箱预加载，模拟监控 API 和鼠标屏幕坐标，覆盖最小化、拖动与点击区分、屏幕边界、数据展示、断线恢复、窗口恢复、隐藏停止轮询及 IPC 隔离。预览截图位于 `build/floating-overview-smoke/`。
 
@@ -82,3 +84,5 @@ pnpm run dist        # 构建便携 EXE，包含后端 JAR
 修改前端后，停止并重新启动后端，或者运行 `pnpm run prepare:backend` 后重启服务。更新离线 Lab 目录继续使用后端的 `scripts/refresh-lab-catalog.py`，生成文件写入本模块的 `renderer/`。
 
 学习目录与说明同步：运行 `python kuma-project/kuma-project-console/scripts/refresh-lab-learning.py`（从仓库根目录）。脚本检查源码路径及JDK版本表，生成 `lab-learning.json` 和 `lab-guides/`；正常使用界面无需Python。
+
+项目目录默认筛选「已启动」：发现匹配的本机项目进程，或服务探测获得 HTTP 响应（包括健康检查异常），即纳入列表；Gradle 构建启用状态不作为启动依据。计数随运行状态刷新，探测失败时不使用对应来源的旧数据判断已启动。服务可达与健康检查通过分别展示，后端每 10 秒探测一次。

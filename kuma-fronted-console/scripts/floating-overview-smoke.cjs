@@ -36,6 +36,7 @@ app.whenReady().then(async()=>{
   assert.equal(await evaluate('typeof window.require'),'undefined');
   assert.equal(await evaluate('document.getElementById("overview").hidden'),true);
   await assert.rejects(main.webContents.executeJavaScript('window.kumaOverview.expand(true)'),/不允许此页面/);
+  await assert.rejects(main.webContents.executeJavaScript('window.kumaOverview.quit()'),/不允许此页面/);
   const sanitized=await evaluate('window.kumaOverview.host()');
   assert.equal(sanitized.processes,undefined);assert.equal(sanitized.hardware,undefined);
   // A drag uses OS screen coordinates, clamps to the monitor and must not open the card.

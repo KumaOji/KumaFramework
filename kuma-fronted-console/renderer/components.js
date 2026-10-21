@@ -26,10 +26,20 @@ async function controlComponent(name,action){
   catch(e){notice(`component-${name}-error`,e.message);}
   finally{componentBusy[name]=false;await pollComponents();}
 }
+const componentLogRefreshers=[];
+function isComponentsViewActive(){return !document.hidden&&state.page==='projects'&&state.servicesTab==='components';}
 for(const name of componentNames){
   $(`component-${name}-start`).onclick=()=>controlComponent(name,'start');
   $(`component-${name}-stop`).onclick=()=>controlComponent(name,'stop');
-  $(`component-${name}-logs`).onclick=async()=>{try{const data=await api(`/api/components/${name}/logs`);$(`component-${name}-log`).hidden=false;$(`component-${name}-log`).textContent=data.body;}catch(e){notice(`component-${name}-error`,e.message);}};
+  componentLogRefreshers.push(LogConsole.bind({
+    button:$(`component-${name}-logs`),element:$(`component-${name}-log`),
+    clearButton:$(`component-${name}-log-clear`),load:()=>api(`/api/components/${name}/logs`),
+    isActive:isComponentsViewActive,closeLabel:'关闭日志',onError:error=>notice(`component-${name}-error`,error.message)
+  }));
 }
+function refreshComponentLogs(){componentLogRefreshers.forEach(refresh=>refresh());}
+setInterval(refreshComponentLogs,1000);
+document.addEventListener('visibilitychange',refreshComponentLogs);
+window.addEventListener('hashchange',refreshComponentLogs);
 window.addEventListener('hashchange',()=>{if(state.page==='projects'&&state.servicesTab==='components')pollComponents();});
 setInterval(()=>{if(!document.hidden&&state.page==='projects'&&state.servicesTab==='components')pollComponents();},3000);

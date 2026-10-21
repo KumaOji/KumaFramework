@@ -1,18 +1,23 @@
 'use strict';
 let projectCatalog;
+function catalogRuntime(project) {
+  const processes=state.errors.running?[]:(state.running||[]).filter(r=>project.mainClasses.includes(r.name)||project.jarName===r.name||r.name===`${project.shortName}.jar`);
+  const service=state.errors.projects?null:state.projects?.projects?.find(s=>s.name.toLowerCase()===project.shortName.toLowerCase());
+  return {processes,service,started:processes.length>0||['HEALTHY','REACHABLE','UNHEALTHY'].includes(service?.status)};
+}
 function renderCatalog() {
   if (!projectCatalog) return;
   const search=$('catalog-search').value.trim().toLowerCase(), filter=$('catalog-filter').value;
-  const rows=projectCatalog.projects.filter(p=>(filter==='all'||p.enabled===(filter==='enabled')) &&
+  const startedCount=projectCatalog.projects.filter(p=>catalogRuntime(p).started).length;
+  const rows=projectCatalog.projects.filter(p=>(filter==='all'||(filter==='started'?catalogRuntime(p).started:!p.enabled)) &&
     `${p.name} ${p.description} ${p.starters.map(s=>s.name).join(' ')}`.toLowerCase().includes(search));
-  $('catalog-count').textContent=`${projectCatalog.projects.length} 个 · ${projectCatalog.projects.filter(p=>p.enabled).length} 个启用`;
+  $('catalog-count').textContent=`${projectCatalog.projects.length} 个 · ${startedCount} 个已启动`;
   $('project-catalog').innerHTML=`<table class="catalog-table"><thead><tr><th>项目</th><th>构建状态</th><th>运行 / 服务</th><th>Starter 依赖</th><th></th></tr></thead><tbody>${rows.map(p=>{
-    const processes=(state.running||[]).filter(r=>p.mainClasses.includes(r.name)||p.jarName===r.name||r.name===`${p.shortName}.jar`);
-    const service=state.projects?.projects?.find(s=>s.name.toLowerCase()===p.shortName.toLowerCase());
+    const {processes,service}=catalogRuntime(p);
     const health=state.errors.projects?badge('健康探测失败','bad'):service?projectBadge(service.status):badge('未配置健康检查','');
     const direct=p.starters.filter(s=>s.direct).length, kuma=p.starters.filter(s=>!s.external).length;
     return `<tr><td><strong>${esc(p.name)}</strong><div class="catalog-description" title="${esc(p.description)}">${esc(p.description)}</div><div class="muted mono">${esc(p.directory)}</div></td><td>${badge(p.enabled?'已启用':'未启用',p.enabled?'good':'')}<div class="muted">${p.dependencySource==='gradle'?'Gradle 配置':'源码静态读取'}</div></td><td>${state.errors.running?'<span class="muted">进程探测失败</span>':processes.length?processes.map(r=>`<div>${badge('进程已发现','good')} <span class="mono">PID ${r.pid}</span></div>`).join(''):'<span class="muted">未发现本机进程</span>'}<div>${health}</div></td><td><strong>${p.starters.length} <small>个</small></strong><div class="muted">直接 ${direct} · 间接 ${p.starters.length-direct}</div><div class="muted">Kuma ${kuma} · 第三方 ${p.starters.length-kuma}</div></td><td><button class="button small" data-dependencies="${esc(p.id)}">查看依赖 →</button></td></tr>`;
-  }).join('')||'<tr><td colspan="5" class="empty">没有匹配的项目</td></tr>'}</tbody></table>`;
+  }).join('')||`<tr><td colspan="5" class="empty">${filter==='started'?'暂无匹配的已启动项目':'没有匹配的项目'}</td></tr>`}</tbody></table>`;
   document.querySelectorAll('[data-dependencies]').forEach(button=>button.onclick=()=>showDependencies(button.dataset.dependencies));
 }
 async function showDependencies(id) {

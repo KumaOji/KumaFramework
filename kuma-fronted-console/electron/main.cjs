@@ -4,6 +4,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const {createFloatingOverview}=require('./floating-overview.cjs');
 const {createSystemTray}=require('./system-tray.cjs');
+const {spawnBackend,stopChild}=require('./owned-process.cjs');
 const smoke=process.argv.includes('--smoke');
 const port=Number(process.env.KUMA_CONSOLE_PORT||18090);
 if(!Number.isInteger(port)||port<1024||port>65535)throw Error('KUMA_CONSOLE_PORT must be 1024–65535');
@@ -14,7 +15,7 @@ let window, ownedBackend, ownedBuild, quitting=false, shutdownComplete=false;
 if(smoke){app.setPath('userData',path.join(smokeRoot,'smoke-profile'));app.commandLine.appendSwitch('disable-gpu');}
 if(!smoke&&!app.requestSingleInstanceLock()){app.quit();}else{
   app.on('second-instance',()=>{if(window){if(window.isMinimized())window.restore();window.show();window.focus();}});
-  app.whenReady().then(start).catch(async error=>{dialog.showErrorBox('Kuma Console 启动失败',error.message);await Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]);app.exit(1);});
+  app.whenReady().then(start).catch(async error=>{dialog.showErrorBox('Kuma Console 启动失败',error.message);await Promise.all([stopChild(ownedBuild,{tree:true}),stopChild(ownedBackend,{graceful:true})]);app.exit(1);});
 }
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function startupStage(stage,message){
@@ -37,8 +38,8 @@ async function ensureBackend(){
   let child;
   if(app.isPackaged){
     await startupStage('build','正在启动内置监控服务…');
-    child=spawn('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
-      path.join(process.resourcesPath,'backend/kuma-console.jar'),'--console.open-browser=false'],
+    child=spawnBackend('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
+      path.join(process.resourcesPath,'backend/kuma-console.jar'),'--console.open-browser=false','--console.desktop-managed=true'],
       {cwd:app.getPath('userData'),env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
     ownedBackend=child;
   }else{
@@ -58,8 +59,8 @@ async function ensureBackend(){
     const runtimeJar=path.join(runtimeRoot,`kuma-console-${process.pid}-${Date.now()}.jar`);
     await fs.copyFile(path.join(workspace,'kuma-project/kuma-project-console/build/libs/kuma-console.jar'),runtimeJar);
     if(quitting)throw Error('启动已取消');
-    child=spawn('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
-      runtimeJar,'--console.open-browser=false'],
+    child=spawnBackend('java',['--enable-preview','--enable-native-access=ALL-UNNAMED','-jar',
+      runtimeJar,'--console.open-browser=false','--console.desktop-managed=true'],
       {cwd:workspace,env:{...process.env,KUMA_CONSOLE_OPEN_BROWSER:'false'},windowsHide:true});
     ownedBackend=child;
   }
@@ -128,7 +129,7 @@ async function start(){
   window.webContents.session.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
   window.webContents.setWindowOpenHandler(({url})=>{external(url);return {action:'deny'};});
   window.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==origin){event.preventDefault();external(url);}});
-  createFloatingOverview({mainWindow:window,origin});
+  createFloatingOverview({mainWindow:window,origin,isQuitting:()=>quitting});
   createSystemTray({mainWindow:window,isQuitting:()=>quitting});
   await window.loadFile(path.join(__dirname,'splash.html'));
   if(smoke)window.showInactive();else window.show();
@@ -138,7 +139,7 @@ async function start(){
     if(smoke)await verifyDesktop();
   }catch(error){
     if(quitting||window.isDestroyed())return;
-    if(smoke){console.error(error);await Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]);app.exit(1);return;}
+    if(smoke){console.error(error);await Promise.all([stopChild(ownedBuild,{tree:true}),stopChild(ownedBackend,{graceful:true})]);app.exit(1);return;}
     await window.webContents.executeJavaScript(`document.getElementById('startup-message').textContent=${JSON.stringify(error.message)};document.getElementById('startup-label').textContent='启动遇到问题';document.body.classList.add('failed');`);
   }
 }
@@ -175,25 +176,12 @@ async function verifyDesktop(){
   console.log('Electron smoke passed: five pages, real data, starter drawer, context isolation.');app.quit();
 }
 app.on('window-all-closed',()=>app.quit());
-function stopChild(child){
-  if(!child?.pid||child.exitCode!==null||child.signalCode!==null)return Promise.resolve();
-  return new Promise(resolve=>{
-    let timer;
-    const done=()=>{clearTimeout(timer);resolve();};
-    child.once('exit',done);
-    if(process.platform==='win32'){
-      // Stop the owned process and its monitoring helpers; never search for unrelated Java processes.
-      const killer=spawn('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});
-      killer.once('error',()=>{child.kill();});
-    }else child.kill('SIGTERM');
-    timer=setTimeout(()=>{child.kill('SIGKILL');done();},5000);
-  });
-}
 app.on('before-quit',event=>{
   if(shutdownComplete)return;
   event.preventDefault();
   if(quitting)return;
   quitting=true;
-  Promise.all([stopChild(ownedBuild),stopChild(ownedBackend)]).finally(()=>{shutdownComplete=true;app.quit();});
+  Promise.all([stopChild(ownedBuild,{tree:true}),stopChild(ownedBackend,{graceful:true})]).finally(()=>{shutdownComplete=true;app.quit();});
 });
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>app.quit());
+process.on('message',message=>{if(message?.type==='kuma-console:quit')app.quit();});

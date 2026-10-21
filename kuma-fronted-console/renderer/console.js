@@ -15,22 +15,22 @@ async function api(path, options) {
 }
 function navigate() {
   const previousPage=state.page;
-  const requested=location.hash.slice(1),page=['cluster','server/wsl'].includes(requested)?'server':['components','projects/components'].includes(requested)?'projects':requested;
-  state.page = ['overview','server','projects','lab','blog','settings'].includes(page) ? page : 'overview';
+  const requested=location.hash.slice(1),page=['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog'].includes(requested)?'projects':requested;
+  state.page = ['overview','server','projects','lab','settings'].includes(page) ? page : 'overview';
   state.infrastructureTab=['cluster','server/wsl'].includes(requested)?'wsl':'remote';
   $('infrastructure-remote').hidden=state.infrastructureTab!=='remote';$('cluster').hidden=state.infrastructureTab!=='wsl';
   document.querySelectorAll('[data-environment]').forEach(button=>{const active=button.dataset.environment===state.infrastructureTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
-  state.servicesTab=['components','projects/components'].includes(requested)?'components':'projects';
-  $('project-services').hidden=state.servicesTab!=='projects';$('components').hidden=state.servicesTab!=='components';
+  state.servicesTab=['components','projects/components'].includes(requested)?'components':['blog','projects/blog'].includes(requested)?'blog':'projects';
+  $('project-services').hidden=state.servicesTab!=='projects';$('components').hidden=state.servicesTab!=='components';$('blog').hidden=state.servicesTab!=='blog';
   document.querySelectorAll('[data-service-view]').forEach(button=>{const active=button.dataset.serviceView===state.servicesTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   document.querySelectorAll('.page').forEach(el => el.hidden = el.id !== state.page);
   document.querySelectorAll('.sidebar [data-page]').forEach(el => {const active=el.dataset.page===state.page;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
-  $('page-title').textContent = {overview:'本机概览',server:'服务器与 WSL',projects:'项目与组件',lab:'Lab 实验室',blog:'Blog',settings:'Console 配置'}[state.page];
+  $('page-title').textContent = {overview:'本机概览',server:'服务器与 WSL',projects:'项目与组件',lab:'Lab 实验室',settings:'Console 配置'}[state.page];
   closeDrawer();clearTimeout(pageScrollTimer);
   if(previousPage!==state.page){window.scrollTo(0,0);pageScrollTimer=setTimeout(()=>window.scrollTo(0,0),0);}
 }
 window.addEventListener('hashchange', navigate); navigate();
-for(const [id,attribute,paths] of [['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',components:'projects/components'}]]){
+for(const [id,attribute,paths] of [['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',components:'projects/components',blog:'projects/blog'}]]){
   $(id).onclick=event=>{
     const button=event.target.closest(`[data-${attribute}]`);if(!button)return;
     const hash='#'+paths[button.getAttribute(`data-${attribute}`)];if(location.hash===hash)return;
@@ -216,12 +216,16 @@ $('cluster-table').addEventListener('click',e=>{const row=e.target.closest('[dat
 $('cluster-table').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset.resource){e.preventDefault();showResource(Number(e.target.dataset.resource));}});
 function closeDrawer(){$('drawer-content').classList.remove('rich-dependencies');$('resource-drawer').hidden=true;$('drawer-backdrop').hidden=true;}
 $('close-drawer').onclick=closeDrawer;$('drawer-backdrop').onclick=closeDrawer;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
-function projectBadge(status) {return badge({HEALTHY:'健康',REACHABLE:'HTTP 可达',UNHEALTHY:'健康异常',OFFLINE:'服务未连接'}[status]||'探测中',status==='HEALTHY'?'ok':status==='REACHABLE'?'warn':status==='OFFLINE'||status==='UNHEALTHY'?'bad':'');}
+function projectBadge(status) {return badge({HEALTHY:'健康检查通过',REACHABLE:'服务可达 · 健康未确认',UNHEALTHY:'服务可达 · 健康检查异常',OFFLINE:'服务未连接'}[status]||'探测中',status==='HEALTHY'?'ok':status==='REACHABLE'?'warn':status==='OFFLINE'||status==='UNHEALTHY'?'bad':'');}
+$('project-status-filter').onchange=()=>renderProjects();
 function renderProjects() {
   if (typeof renderCatalog === "function") renderCatalog();
   const data=state.projects;notice('projects-warning',state.errors.projects||data?.error);if(!data?.ready)return;$('projects-updated').textContent=time(data.sampledAt);
-  $('project-cards').innerHTML=(data.projects||[]).map(p=>`<article class="panel project-card"><div class="project-top"><div class="project-name"><span class="project-symbol">${esc(p.name[0])}</span><h2>${esc(p.name)}</h2></div>${projectBadge(p.status)}</div><div class="project-url">${esc(p.url)}</div><div class="project-facts"><span>HTTP<strong>${p.httpStatus||'—'}</strong></span><span>响应<strong>${p.latency} ms</strong></span></div><div class="project-message">${esc(p.message)}</div><div class="project-links"><a href="${esc(p.url)}" target="_blank" rel="noreferrer" class="button small">打开服务 ↗</a><a href="${esc(p.url)}/swagger-ui.html" target="_blank" rel="noreferrer" class="button small">Swagger ↗</a><a href="${esc(p.url)}/actuator/health" target="_blank" rel="noreferrer" class="button small">健康检查 ↗</a>${p.name==='Lab'?'<a href="#lab" class="button small">进入实验室 →</a>':''}</div></article>`).join('')||'<div class="empty">未配置项目服务</div>';
-  document.querySelectorAll('.project-card').forEach((card,i)=>{const button=document.createElement('button');button.className='button small';button.textContent='运行诊断';button.onclick=()=>showProjectDetails(data.projects[i]);card.querySelector('.project-links').append(button);});
+  const projects=data.projects||[],startedOnly=$('project-status-filter').value==='started';
+  const visibleProjects=projects.filter(project=>!startedOnly||['HEALTHY','REACHABLE','UNHEALTHY'].includes(project.status));
+  $('project-status-count').textContent=`显示 ${visibleProjects.length} / ${projects.length}`;
+  $('project-cards').innerHTML=visibleProjects.map(p=>`<article class="panel project-card"><div class="project-top"><div class="project-name"><span class="project-symbol">${esc(p.name[0])}</span><h2>${esc(p.name)}</h2></div>${projectBadge(p.status)}</div><div class="project-url">${esc(p.url)}</div><div class="project-facts"><span>HTTP<strong>${p.httpStatus||'—'}</strong></span><span>响应<strong>${p.latency} ms</strong></span></div><div class="project-message">${esc(p.message)}</div><div class="project-links"><a href="${esc(p.url)}" target="_blank" rel="noreferrer" class="button small">打开服务 ↗</a><a href="${esc(p.url)}/swagger-ui.html" target="_blank" rel="noreferrer" class="button small">Swagger ↗</a><a href="${esc(p.url)}/actuator/health" target="_blank" rel="noreferrer" class="button small">健康检查 ↗</a>${p.name==='Lab'?'<a href="#lab" class="button small">进入实验室 →</a>':''}</div></article>`).join('')||`<div class="empty">${startedOnly&&projects.length?'暂无 HTTP 可达的已启动服务':'未配置项目服务'}</div>`;
+  document.querySelectorAll('.project-card').forEach((card,i)=>{const button=document.createElement('button');button.className='button small';button.textContent='运行诊断';button.onclick=()=>showProjectDetails(visibleProjects[i]);card.querySelector('.project-links').append(button);});
   const lab=(data.projects||[]).find(p=>p.name==='Lab');
   const connected=lab&&['HEALTHY','REACHABLE','UNHEALTHY'].includes(lab.status);
   $('lab-target').dataset.status=connected?(lab.status==='UNHEALTHY'?'warning':'online'):(lab?'offline':'unknown');

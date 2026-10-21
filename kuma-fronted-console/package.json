@@ -10,8 +10,8 @@
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
     "start": "node scripts/start-desktop.cjs",
-    "check": "node --check electron/main.cjs && node --check electron/system-tray.cjs && node --check electron/preload.cjs && node --check electron/floating-overview.cjs && node --check electron/floating-preload.cjs && node --check electron/floating-overview.js && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js && node --check renderer/lab-catalog.js && node --check renderer/guide-format.js && node --check renderer/lab-explorer.js && node --check renderer/sakura.js && node --check renderer/yuna-workspace.js && node --check renderer/console-settings.js",
-    "test": "node --test scripts/response-format.test.cjs scripts/lab-catalog.test.cjs scripts/guide-format.test.cjs scripts/knowledge-cache.test.cjs",
+    "check": "node --check electron/main.cjs && node --check electron/owned-process.cjs && node --check electron/system-tray.cjs && node --check electron/preload.cjs && node --check electron/floating-overview.cjs && node --check electron/floating-preload.cjs && node --check electron/floating-overview.js && node --check renderer/desktop.js && node --check renderer/console.js && node --check renderer/project-catalog.js && node --check renderer/response-format.js && node --check renderer/lab-catalog.js && node --check renderer/guide-format.js && node --check renderer/lab-explorer.js && node --check renderer/sakura.js && node --check renderer/yuna-workspace.js && node --check renderer/console-settings.js",
+    "test": "node --test scripts/owned-process.test.cjs scripts/response-format.test.cjs scripts/lab-catalog.test.cjs scripts/guide-format.test.cjs scripts/knowledge-cache.test.cjs",
     "test:lab-ui": "electron scripts/lab-ui-smoke.cjs",
     "test:floating-overview": "electron scripts/floating-overview-smoke.cjs",
     "test:system-tray": "electron scripts/system-tray-smoke.cjs",

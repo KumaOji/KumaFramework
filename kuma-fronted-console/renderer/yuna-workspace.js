@@ -3,9 +3,8 @@
   const pages={
     overview:{title:'本机概览',label:'01 / SYSTEM OVERVIEW',caption:'看见系统的每一次脉动',description:'处理器、内存与进程，一眼掌握。',art:'银白发少女在系统监控工作台前查看数据'},
     server:{title:'服务器与 WSL',label:'02 / SERVER & WSL',caption:'远程与本机，在同一处连接',description:'远程服务器、本机 WSL 与 k3s，在同一工作空间管理。',art:'银白发少女在服务器机房检查运行状态'},
-    projects:{title:'项目与组件',label:'03 / PROJECTS & COMPONENTS',caption:'让项目与公共能力，自然连接',description:'项目目录、服务监控与公共组件，在同一处管理。',art:'银白发少女整理项目蓝图与模块'},
+    projects:{title:'项目与组件',label:'03 / PROJECTS & COMPONENTS',caption:'让项目与公共能力，自然连接',description:'项目服务、公共组件与 Blog，在同一处管理。',art:'银白发少女整理项目蓝图与模块'},
     lab:{title:'Lab 实验室',label:'04 / EXPERIMENT ATELIER',caption:'找到实验，开始探索',description:'搜索、收藏、运行，从好奇走向理解。',art:'银白发少女在实验室观察发光的玻璃烧瓶'},
-    blog:{title:'Blog',label:'05 / KNOWLEDGE GARDEN',caption:'把今天的发现，留给明天',description:'博客与知识仓库，记录每一步探索。',art:'银白发少女在数字图书馆阅读和记录'},
     settings:{title:'Console 配置',label:'CONSOLE / PREFERENCES',caption:'让工作空间，更合你的习惯',image:'overview',art:'银白发的控制台助手在工作台前'}
   };
   for(const [id,config] of Object.entries(pages)){

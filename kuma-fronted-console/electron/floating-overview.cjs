@@ -1,10 +1,10 @@
-const {BrowserWindow,ipcMain,screen}=require('electron');
+const {app,BrowserWindow,ipcMain,screen,Menu}=require('electron');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 
-function createFloatingOverview({mainWindow,origin}) {
+function createFloatingOverview({mainWindow,origin,isQuitting=()=>false}) {
   const page=pathToFileURL(path.join(__dirname,'floating-overview.html')).href;
-  const channels=['overview-float:expand','overview-float:restore','overview-float:host','overview-float:drag'];
+  const channels=['overview-float:expand','overview-float:restore','overview-float:host','overview-float:drag','overview-float:quit'];
   let floating,loading,expanded=false,disposed=false,dragStart;
   function authorize(event) {
     if(!floating||event.sender!==floating.webContents||event.senderFrame!==floating.webContents.mainFrame||event.senderFrame.url!==page)
@@ -22,7 +22,7 @@ function createFloatingOverview({mainWindow,origin}) {
   function expand(value) {
     if(!floating||floating.isDestroyed())return;
     expanded=value;
-    floating.setBounds(clamp({...floating.getBounds(),width:value?360:84,height:value?520:84}));
+    floating.setBounds(clamp({...floating.getBounds(),width:value?360:84,height:value?560:84}));
     publish();
     if(value)floating.focus();
   }
@@ -31,10 +31,11 @@ function createFloatingOverview({mainWindow,origin}) {
     dragStart=null;floating.hide();expand(false);
   }
   function restore() {
+    if(disposed||isQuitting()||mainWindow.isDestroyed())return;
     hide();if(mainWindow.isMinimized())mainWindow.restore();mainWindow.show();mainWindow.focus();
   }
   async function show() {
-    if(disposed)return;
+    if(disposed||isQuitting())return;
     if(!floating) {
       const area=screen.getDisplayMatching(mainWindow.getBounds()).workArea;
       floating=new BrowserWindow({x:area.x+area.width-104,y:area.y+Math.round(area.height*.6),
@@ -44,13 +45,21 @@ function createFloatingOverview({mainWindow,origin}) {
           nodeIntegration:false,contextIsolation:true,sandbox:true,backgroundThrottling:false}});
       floating.webContents.setWindowOpenHandler(()=>({action:'deny'}));
       floating.webContents.on('will-navigate',event=>event.preventDefault());
-      floating.on('close',event=>{if(!disposed){event.preventDefault();restore();}});
+      floating.on('close',event=>{if(!disposed&&!isQuitting()){event.preventDefault();restore();}});
+      floating.webContents.on('context-menu',()=>{
+        if(disposed||isQuitting())return;
+        Menu.buildFromTemplate([
+          {label:'打开 Kuma Console',click:restore},
+          {type:'separator'},
+          {label:'彻底退出 Kuma Console',click:()=>app.quit()}
+        ]).popup({window:floating});
+      });
       loading=floating.loadURL(page);
       // Handle load failures without creating unhandled minimize-event rejections.
       loading.catch(error=>console.error('悬浮概览加载失败:',error.message));
     }
     try {await loading;} catch {return;}
-    if(disposed||mainWindow.isDestroyed()||!mainWindow.isMinimized())return;
+    if(disposed||isQuitting()||mainWindow.isDestroyed()||(mainWindow.isVisible()&&!mainWindow.isMinimized()))return;
     expand(false);floating.showInactive();publish();
   }
   ipcMain.handle(channels[0],(event,value)=>{authorize(event);if(typeof value!=='boolean')throw Error('无效状态');expand(value);});
@@ -80,14 +89,15 @@ function createFloatingOverview({mainWindow,origin}) {
     floating.setBounds(clamp({...floating.getBounds(),x:dragStart.bounds.x+cursor.x-dragStart.cursor.x,
       y:dragStart.bounds.y+cursor.y-dragStart.cursor.y}));
   });
+  ipcMain.handle(channels[4],event=>{authorize(event);app.quit();});
   function fit(){if(floating&&!floating.isDestroyed())floating.setBounds(clamp(floating.getBounds()));}
   function dispose() {
     disposed=true;channels.forEach(channel=>ipcMain.removeHandler(channel));
     screen.removeListener('display-removed',fit);screen.removeListener('display-metrics-changed',fit);
-    mainWindow.removeListener('minimize',show);mainWindow.removeListener('restore',hide);mainWindow.removeListener('show',hide);
+    mainWindow.removeListener('minimize',show);mainWindow.removeListener('hide',show);mainWindow.removeListener('restore',hide);mainWindow.removeListener('show',hide);
     if(floating&&!floating.isDestroyed())floating.destroy();
   }
-  mainWindow.on('minimize',show);mainWindow.on('restore',hide);mainWindow.on('show',hide);
+  mainWindow.on('minimize',show);mainWindow.on('hide',show);mainWindow.on('restore',hide);mainWindow.on('show',hide);
   mainWindow.once('closed',dispose);
   screen.on('display-removed',fit);screen.on('display-metrics-changed',fit);
   return {show,hide,dispose,getWindow:()=>floating};
