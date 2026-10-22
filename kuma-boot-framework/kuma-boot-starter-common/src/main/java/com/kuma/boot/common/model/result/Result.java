@@ -120,11 +120,11 @@ public class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> fail( String message, T data ) {
-        return of(StatusEnum.FAILURE.name(), ResultEnum.SUCCESS.codeDesc(), message, data);
+        return of(StatusEnum.FAILURE.name(), ResultEnum.FAILED.codeDesc(), message, data);
     }
 
     public static <T> Result<T> fail( String message ) {
-        return of(StatusEnum.FAILURE.name(), ResultEnum.SUCCESS.codeDesc(), message, null);
+        return of(StatusEnum.FAILURE.name(), ResultEnum.FAILED.codeDesc(), message, null);
     }
 
     public static <T> Result<T> fail( ResultEnum resultEnum, T data ) {

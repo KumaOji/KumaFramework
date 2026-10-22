@@ -113,7 +113,7 @@ class ReferenceApplicationTest {
     void fullHttpFlowPersistsPriceSnapshotAndProtectsStateTransitions() throws Exception {
         var created = request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":2}");
         assertEquals(201, created.statusCode(), created.body());
-        var body = JSON.readTree(created.body());
+        var body = successData(created);
         var location = created.headers().firstValue("Location").orElseThrow();
         assertEquals("/api/orders/" + body.path("id").asString() + "?scope=MAIN", location);
         assertEquals(198, body.path("totalAmount").asInt());
@@ -121,12 +121,12 @@ class ReferenceApplicationTest {
 
         var read = request("GET", location, null);
         assertEquals(200, read.statusCode(), read.body());
-        assertEquals("BOOK-001", JSON.readTree(read.body()).path("sku").asString());
+        assertEquals("BOOK-001", successData(read).path("sku").asString());
         String confirmPath = "/api/orders/" + body.path("id").asString() + "/confirm?scope=MAIN";
         var confirmed = request("POST", confirmPath, null);
         assertEquals(200, confirmed.statusCode(), confirmed.body());
-        assertEquals("CONFIRMED", JSON.readTree(confirmed.body()).path("status").asString());
-        assertEquals(1, JSON.readTree(confirmed.body()).path("version").asInt());
+        assertEquals("CONFIRMED", successData(confirmed).path("status").asString());
+        assertEquals(1, successData(confirmed).path("version").asInt());
         var conflict = request("POST", confirmPath, null);
         assertProblem(conflict, 409);
         assertEquals(ResultEnum.REQUEST_OTHER_OPERATION.code().getCode(),
@@ -137,7 +137,13 @@ class ReferenceApplicationTest {
     @Test
     void validatesInputAndReturns404ForMissingOrders() throws Exception {
         long before = countOrders();
-        assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"quantity\":1}"), 400);
+        var invalid = request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"quantity\":1}");
+        assertProblem(invalid, 400);
+        var fieldErrors = JSON.readTree(invalid.body()).path("data").path("fieldErrors");
+        assertTrue(fieldErrors.isArray(), invalid.body());
+        assertTrue(fieldErrors.size() > 0, invalid.body());
+        assertEquals(ResultEnum.BAD_REQUEST.codeDesc(), fieldErrors.get(0).path("code").asString());
+        assertFalse(fieldErrors.get(0).path("property").asString().isBlank());
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"\",\"unitPrice\":99,\"quantity\":1}"), 400);
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":-1,\"quantity\":1}"), 400);
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":1.001,\"quantity\":1}"), 400);
@@ -158,7 +164,7 @@ class ReferenceApplicationTest {
 
     @Test
     void rejectsStaleWritesAndRollsBackFailedTransactions() throws Exception {
-        var created = JSON.readTree(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}").body());
+        var created = successData(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}"));
         var id = created.path("id").asLong();
         var snapshot = orders.selectById(id).toDomain();
         var first = OrderDO.from(snapshot);
@@ -216,11 +222,13 @@ class ReferenceApplicationTest {
         var response = http.send(incoming, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode(), response.body());
         assertEquals("reference-correlation-test", response.headers().firstValue("kmc-trace-id").orElseThrow());
+        successData(response);
         var next = request("GET", "/api/orders", null);
         assertEquals(200, next.statusCode(), next.body());
         var generated = next.headers().firstValue("kmc-trace-id").orElseThrow();
         assertFalse(generated.isBlank());
         assertNotEquals("reference-correlation-test", generated);
+        successData(next);
     }
 
     @Test
@@ -290,6 +298,7 @@ class ReferenceApplicationTest {
                     .timeout(Duration.ofSeconds(5)).GET().build();
             var response = http.send(incoming, HttpResponse.BodyHandlers.ofString());
             assertEquals(404, response.statusCode(), response.body());
+            assertProblem(response, 404);
             var first = events.getFirst().getMDCPropertyMap();
             assertEquals("async-error-correlation", first.get("kmc-trace-id"));
             assertEquals("error-tenant", first.get("kmc-tenant-id"));
@@ -314,12 +323,12 @@ class ReferenceApplicationTest {
     @Test
     void qoVoPaginationAndSchemaRoutingKeepOrdersIsolated() throws Exception {
         String sku = "ISOLATION-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        var main = JSON.readTree(request("POST", "/api/orders?scope=MAIN", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}").body());
-        var mysql = JSON.readTree(request("POST", "/api/orders?scope=MYSQL", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":2}").body());
+        var main = successData(request("POST", "/api/orders?scope=MAIN", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}"));
+        var mysql = successData(request("POST", "/api/orders?scope=MYSQL", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":2}"));
         for (DataScope scope : new DataScope[] {DataScope.MAIN, DataScope.MYSQL}) {
             var page = request("GET", "/api/orders?scope=" + scope + "&sku=" + sku + "&status=CREATED&currentPage=1&pageSize=1", null);
             assertEquals(200, page.statusCode(), page.body());
-            var result = JSON.readTree(page.body());
+            var result = successData(page);
             assertEquals(1, result.path("totalSize").asInt());
             assertEquals(1, result.path("data").size());
             assertEquals(scope == DataScope.MAIN ? 1 : 2, result.path("data").get(0).path("quantity").asInt());
@@ -337,18 +346,18 @@ class ReferenceApplicationTest {
         for (int i = 0; i < 3; i++) {
             var created = request("POST", "/api/orders", "{\"sku\":\"PAGE-TEST\",\"productName\":\"Page item\",\"unitPrice\":1.00,\"quantity\":1}");
             assertEquals(201, created.statusCode(), created.body());
-            ids.add(JSON.readTree(created.body()).path("id").asLong());
+            ids.add(successData(created).path("id").asLong());
         }
         assertTrue(ids.getFirst() > 0);
         var response = request("GET", "/api/orders?sku=PAGE-TEST&currentPage=2&pageSize=1&sort=id&order=desc", null);
         assertEquals(200, response.statusCode(), response.body());
-        var page = JSON.readTree(response.body());
+        var page = successData(response);
         assertEquals(3, page.path("totalSize").asInt());
         assertEquals(3, page.path("totalPage").asInt());
         assertEquals(2, page.path("currentPage").asInt());
         assertEquals(1, page.path("pageSize").asInt());
         assertEquals(ids.get(1).longValue(), page.path("data").get(0).path("id").asLong());
-        var empty = JSON.readTree(request("GET", "/api/orders?sku=PAGE-TEST&currentPage=4&pageSize=1", null).body());
+        var empty = successData(request("GET", "/api/orders?sku=PAGE-TEST&currentPage=4&pageSize=1", null));
         assertEquals(3, empty.path("totalSize").asInt());
         assertEquals(0, empty.path("data").size());
         assertProblem(request("GET", "/api/orders?sort=id%3BDROP%20TABLE%20purchase_orders", null), 400);
@@ -407,10 +416,27 @@ class ReferenceApplicationTest {
         assertEquals(status, response.statusCode(), response.body());
         assertTrue(response.headers().firstValue("Content-Type").orElse("").contains("application/json"));
         JsonNode problem = JSON.readTree(response.body());
+        assertEquals("FAILURE", problem.path("status").asString(), response.body());
+        assertEnvelope(problem, response);
         assertTrue(problem.path("code").isTextual(), response.body());
         assertTrue(problem.path("message").isTextual(), response.body());
         assertFalse(response.body().contains("Exception"));
         if (status == 400) assertEquals(ResultEnum.BAD_REQUEST.codeDesc(), problem.path("code").asString(), response.body());
+    }
+
+    private JsonNode successData(HttpResponse<String> response) {
+        JsonNode result = JSON.readTree(response.body());
+        assertEquals("SUCCESS", result.path("status").asString(), response.body());
+        assertEquals(ResultEnum.SUCCESS.codeDesc(), result.path("code").asString(), response.body());
+        assertEnvelope(result, response);
+        return result.path("data");
+    }
+
+    private void assertEnvelope(JsonNode result, HttpResponse<String> response) {
+        assertTrue(result.path("timestamp").asLong() > 0, response.body());
+        assertFalse(result.path("version").asString().isBlank(), response.body());
+        assertEquals(response.headers().firstValue("kmc-trace-id").orElseThrow(),
+                result.path("requestId").asString(), response.body());
     }
 
     private long countOrders() throws Exception {

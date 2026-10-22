@@ -131,7 +131,9 @@ WSL 开发环境可运行 `scripts/initialize-wsl.ps1` 初始化 PostgreSQL sche
 {"sku":"BOOK-001","productName":"示例商品","unitPrice":99.00,"quantity":2}
 ```
 
-这是演示持久化和事务的模板接口，正式业务的价格来源应由业务规则确定。异常由 web starter 统一返回 `application/json`，包含 `code`、`message`，校验失败时还包含字段错误信息。HTTP 状态为：参数 400、不存在 404、状态或版本冲突 409、资源繁忙 503。创建接口没有幂等键，重复提交会产生新订单。
+这是演示持久化和事务的模板接口，正式业务的价格来源应由业务规则确定。业务接口的成功和异常响应统一复用框架 `Result<T>`，包含 `status`、`code`、`message`、`data`、`timestamp`、`version`、`requestId`。`requestId` 与响应头 `kmc-trace-id` 一致。成功时 `status=SUCCESS`，订单数据位于 `data`；失败时 `status=FAILURE`，校验详情位于 `data.fieldErrors`、`data.globalErrors` 或 `data.parameterErrors`，没有详情时 `data=null`。HTTP 状态为：创建 201、参数 400、不存在 404、状态或版本冲突 409、资源繁忙 503。创建接口没有幂等键，重复提交会产生新订单。
+
+`WebConfiguration` 显式导入框架 `WebResponseAutoConfiguration`，Controller 标记 `@BusinessApi` 后自动包装成功响应；框架异常处理将同一 Controller 的错误转换为 `Result`，保留原错误码、公开消息和 HTTP 状态。Controller 继续返回 VO、分页对象或 `ResponseEntity`，业务层不负责 HTTP 包装，已经返回的 `Result` 不会重复包装。Actuator 保持自身的响应协议；不通过 `AutoConfiguration.imports` 注册这些配置。
 
 ### 复用 framework 业务错误码
 
@@ -157,7 +159,7 @@ reference 设置 `kuma.boot.web.error.handling.default-error-code-strategy=RESUL
 ## 框架复用与数据结构
 
 - `OrderPageQO extends PageQuery`，默认 `currentPage=1`、`pageSize=20`，页码至少为 1，每页 1–100 条；`page`、`size` 仍可作为参数别名。
-- 分页由框架 `MpUtils`、分页拦截器和 `PageUtils.toResult` 完成，响应统一为 `PageResultRecord<OrderVO>`：`totalSize`、`totalPage`、`currentPage`、`pageSize`、`data`。删除原先的 `PageVO`；超出最后一页返回空 data 并保留总数。排序只允许 `createdAt`、`id`、`sku`，方向为 asc/desc。分页插件根据当前 JDBC 连接识别方言，不固定 MySQL。
+- 分页由框架 `MpUtils`、分页拦截器和 `PageUtils.toResult` 完成，HTTP 响应为 `Result<PageResultRecord<OrderVO>>`：外层 `data` 内包含 `totalSize`、`totalPage`、`currentPage`、`pageSize`、`data`（订单列表）。删除原先的 `PageVO`；超出最后一页返回空列表并保留总数。排序只允许 `createdAt`、`id`、`sku`，方向为 asc/desc。分页插件根据当前 JDBC 连接识别方言，不固定 MySQL。
 - `OrderDO extends MpSuperEntity<Long>`，`OrderMapper extends BaseMapperX<OrderDO>`，复用插入、按 ID 查询、审计字段和 `updateById`。确认订单通过 `@Version` 与框架乐观锁插件检查旧版本，不再手写版本更新 SQL。ID 为数据库自增 Long，`create_date`、`modify_date`、`created_user`、`modify_user` 对齐框架。不同数据源可能存在同一个数字 ID，订单定位需同时包含 scope。
 - Service 复用修复后的 `TransactionalUtils`，每次执行使用独立事务定义，继承统一超时。先路由，再执行事务；分页 count 和 data 保留同一 REPEATABLE READ 只读事务。框架 `TransactionAutoConfiguration` 同步和异步失败保留原始原因，异步 Task API 返回可观察的 CompletableFuture。
 - UTC `Clock` 和异步线程池由 core 提供，业务或测试可提供对应 Bean 替换；SkyWalking 装饰器由 logger 提供。

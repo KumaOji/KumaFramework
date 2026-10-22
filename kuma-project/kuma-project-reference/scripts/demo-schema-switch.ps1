@@ -6,17 +6,17 @@ $mainBody = @{sku=$sku; productName='Sample product'; unitPrice=99.00; quantity=
 $mysqlBody = @{sku=$sku; productName='Sample product'; unitPrice=99.00; quantity=2} | ConvertTo-Json
 
 Write-Host '1. Create an order in PostgreSQL MAIN'
-$mainOrder = Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=MAIN" -ContentType 'application/json' -Body $mainBody
-$read = Invoke-RestMethod "$BaseUrl/api/orders/$($mainOrder.id)?scope=MAIN"
+$mainOrder = (Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=MAIN" -ContentType 'application/json' -Body $mainBody).data
+$read = (Invoke-RestMethod "$BaseUrl/api/orders/$($mainOrder.id)?scope=MAIN").data
 if ($read.id -ne $mainOrder.id) { throw 'MAIN order lookup failed.' }
 
 Write-Host '2. The unique SKU must not yet exist in MySQL (numeric IDs can overlap)'
-$mysqlPage = Invoke-RestMethod "$BaseUrl/api/orders?scope=MYSQL&sku=$sku"
+$mysqlPage = (Invoke-RestMethod "$BaseUrl/api/orders?scope=MYSQL&sku=$sku").data
 if ($mysqlPage.totalSize -ne 0) { throw 'Isolation failed: MAIN order was visible in MYSQL.' }
 
 Write-Host '3. Create and confirm an independent MySQL order'
-$mysqlOrder = Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=MYSQL" -ContentType 'application/json' -Body $mysqlBody
-$confirmed = Invoke-RestMethod -Method Post "$BaseUrl/api/orders/$($mysqlOrder.id)/confirm?scope=MYSQL"
+$mysqlOrder = (Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/orders?scope=MYSQL" -ContentType 'application/json' -Body $mysqlBody).data
+$confirmed = (Invoke-RestMethod -Method Post "$BaseUrl/api/orders/$($mysqlOrder.id)/confirm?scope=MYSQL").data
 if ($confirmed.status -ne 'CONFIRMED') { throw 'MYSQL confirmation failed.' }
 @($mainOrder, $confirmed) | Format-Table id, sku, quantity, totalAmount, status, version
 

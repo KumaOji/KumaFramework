@@ -5,6 +5,7 @@ import com.kuma.cloud.reference.domain.enums.DataScope;
 import com.kuma.cloud.reference.domain.qo.OrderPageQO;
 import com.kuma.cloud.reference.domain.vo.OrderVO;
 import com.kuma.boot.common.model.result.PageResultRecord;
+import com.kuma.boot.web.annotation.BusinessApi;
 import com.kuma.cloud.reference.service.OrderService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@BusinessApi
 @RequestMapping("/api/orders")
 public class OrderController {
     private final OrderService orderService;

@@ -16,15 +16,19 @@
 
 package com.kuma.boot.web.error;
 
+import com.kuma.boot.web.annotation.BusinessApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.List;
 import java.util.Locale;
@@ -83,7 +87,12 @@ public class ErrorHandlingControllerAdvice {
             logFullStacktraceIfNeeded(errorResponse.getHttpStatus(), exception);
         }
 
-        return ResponseEntity.status(errorResponse.getHttpStatus()).body(errorResponse);
+        Object handler = webRequest.getAttribute(
+                HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, WebRequest.SCOPE_REQUEST);
+        boolean businessApi = handler instanceof HandlerMethod method
+                && AnnotatedElementUtils.hasAnnotation(method.getBeanType(), BusinessApi.class);
+        return ResponseEntity.status(errorResponse.getHttpStatus())
+                .body(businessApi ? errorResponse.toResult() : errorResponse);
     }
 
     private void logException(Throwable exception) {

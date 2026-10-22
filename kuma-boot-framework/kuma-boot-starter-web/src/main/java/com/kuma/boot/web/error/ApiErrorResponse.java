@@ -19,6 +19,8 @@ package com.kuma.boot.web.error;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.kuma.boot.common.model.Code;
+import com.kuma.boot.common.model.result.Result;
 import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
@@ -65,6 +67,21 @@ public class ApiErrorResponse {
 
     public String getMessage() {
         return message;
+    }
+
+    /** Convert mapped errors to the standard envelope, preserving validation details. */
+    public Result<Map<String, Object>> toResult() {
+        Map<String, Object> details = new HashMap<>(properties);
+        if (!fieldErrors.isEmpty()) {
+            details.put("fieldErrors", fieldErrors);
+        }
+        if (!globalErrors.isEmpty()) {
+            details.put("globalErrors", globalErrors);
+        }
+        if (!parameterErrors.isEmpty()) {
+            details.put("parameterErrors", parameterErrors);
+        }
+        return Result.fail(Code.raw(code), message, details.isEmpty() ? null : details);
     }
 
     @JsonAnyGetter
