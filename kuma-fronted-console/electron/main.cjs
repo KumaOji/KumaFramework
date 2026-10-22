@@ -4,11 +4,14 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const {createFloatingOverview}=require('./floating-overview.cjs');
 const {createSystemTray}=require('./system-tray.cjs');
+const {attachBlogLogin}=require('./blog-login.cjs');
 const {spawnBackend,stopChild}=require('./owned-process.cjs');
 const smoke=process.argv.includes('--smoke');
 const port=Number(process.env.KUMA_CONSOLE_PORT||18090);
 if(!Number.isInteger(port)||port<1024||port>65535)throw Error('KUMA_CONSOLE_PORT must be 1024–65535');
-const origin=`http://127.0.0.1:${port}`;
+// Match the Blog's localhost host so its Strict authentication cookies remain
+// available inside the preview after OAuth returns.
+const origin=`http://localhost:${port}`;
 const workspace=path.resolve(__dirname,'../..');
 const smokeRoot=app.isPackaged?path.join(app.getPath('temp'),'kuma-console-desktop-smoke'):path.resolve(__dirname,'../build');
 let window, ownedBackend, ownedBuild, quitting=false, shutdownComplete=false;
@@ -129,6 +132,7 @@ async function start(){
   window.webContents.session.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
   window.webContents.setWindowOpenHandler(({url})=>{external(url);return {action:'deny'};});
   window.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==origin){event.preventDefault();external(url);}});
+  attachBlogLogin(window);
   createFloatingOverview({mainWindow:window,origin,isQuitting:()=>quitting});
   createSystemTray({mainWindow:window,isQuitting:()=>quitting});
   await window.loadFile(path.join(__dirname,'splash.html'));

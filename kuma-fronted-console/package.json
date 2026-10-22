@@ -15,6 +15,7 @@
     "test:lab-ui": "electron scripts/lab-ui-smoke.cjs",
     "test:floating-overview": "electron scripts/floating-overview-smoke.cjs",
     "test:system-tray": "electron scripts/system-tray-smoke.cjs",
+    "test:blog-login": "electron scripts/blog-login-smoke.cjs",
     "build:icons": "electron scripts/build-icons.cjs",
     "test:knowledge-graph": "electron scripts/knowledge-graph-smoke.cjs",
     "prepare:backend": "node scripts/build-backend.cjs",

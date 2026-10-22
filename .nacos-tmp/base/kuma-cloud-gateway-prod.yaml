@@ -77,15 +77,6 @@ spring:
                   args:
                     name: blog
                     fallbackUri: forward:/fallback/blog
-            - id: blog-api
-              uri: lb://kuma-cloud-blog
-              predicates:
-                - Path=/api/**
-              filters:
-                - name: CircuitBreaker
-                  args:
-                    name: blog
-                    fallbackUri: forward:/fallback/blog
 
 resilience4j:
   circuitbreaker:
