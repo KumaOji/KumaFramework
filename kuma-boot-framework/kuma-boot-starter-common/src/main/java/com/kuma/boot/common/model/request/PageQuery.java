@@ -43,9 +43,9 @@ public class PageQuery implements Serializable {
             requiredMode = RequiredMode.REQUIRED,
             defaultValue = "1")
     @NotNull(message = "当前页显示数量不能为空")
-    @Min(value = 0, message = "当前页数不能小于0")
+    @Min(value = 1, message = "当前页数不能小于1")
     @Max(value = Integer.MAX_VALUE)
-    private Integer currentPage;
+    private Integer currentPage = 1;
 
     /** 每页显示条数 */
     @Schema(
@@ -57,7 +57,10 @@ public class PageQuery implements Serializable {
     @NotNull(message = "每页数据显示数量不能为空")
     @Min(value = 1, message = "每页显示条数最小为1条")
     @Max(value = 100, message = "每页显示条数最大为100条")
-    private Integer pageSize;
+    private Integer pageSize = 20;
+
+    /** 兼容 page 参数（与 currentPage 等价）。 */
+    public void setPage(Integer page) { this.currentPage = page; }
 
     /** 排序字段 */
     @Schema(description = "排序字段")

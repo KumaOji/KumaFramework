@@ -287,17 +287,28 @@ public class MpUtils {
      * @since 2022/3/14 13:50
      */
     public static <T extends PageQuery, R> IPage<R> buildMpPage(T pageParam) {
+        return buildMpPage(pageParam, null);
+    }
+
+    /** Business aliases are mapped to trusted SQL columns before creating ORDER BY. */
+    public static <T extends PageQuery, R> IPage<R> buildMpPage(T pageParam, Map<String, String> allowedSorts) {
+        if (pageParam.getCurrentPage() == null || pageParam.getCurrentPage() < 1
+                || pageParam.getPageSize() == null || pageParam.getPageSize() < 1 || pageParam.getPageSize() > 100) {
+            throw new IllegalArgumentException("分页页码必须大于0，每页条数必须在1到100之间");
+        }
         Page<R> page = new Page<>(pageParam.getCurrentPage(), pageParam.getPageSize());
 
         List<OrderItem> orders = new ArrayList<>();
-        orders.add(OrderItem.desc("create_time"));
 
-        if (StringUtils.isNotBlank(pageParam.getSort())
-                && StringUtils.isNotBlank(pageParam.getOrder())) {
+        if (StringUtils.isNotBlank(pageParam.getSort())) {
+            String column = allowedSorts == null ? pageParam.getSort() : allowedSorts.get(pageParam.getSort());
+            if (column == null || !column.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+                throw new IllegalArgumentException("不支持的排序字段");
+            }
+            String direction = pageParam.getOrder() == null ? "asc" : pageParam.getOrder().toLowerCase(java.util.Locale.ROOT);
+            if (!direction.equals("asc") && !direction.equals("desc")) throw new IllegalArgumentException("排序方向必须为asc或desc");
             OrderItem orderItem =
-                    "asc".equals(pageParam.getOrder())
-                            ? OrderItem.asc(pageParam.getSort())
-                            : OrderItem.desc(pageParam.getSort());
+                    "asc".equals(direction) ? OrderItem.asc(column) : OrderItem.desc(column);
             orders.add(orderItem);
         }
 

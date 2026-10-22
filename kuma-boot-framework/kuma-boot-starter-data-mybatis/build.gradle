@@ -35,4 +35,8 @@ dependencies {
     api projectLibs.swagger.annotations.jakarta
     api projectLibs.hutool.db
     api projectLibs.aviator
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+tasks.named('test') { useJUnitPlatform() }

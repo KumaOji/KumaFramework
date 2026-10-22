@@ -45,6 +45,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @EnableConfigurationProperties({AsyncProperties.class})
 @AutoConfiguration(beforeName = "org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = AsyncProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class AsyncThreadPoolAutoConfiguration implements InitializingBean {
 
     private final AsyncProperties asyncProperties;

@@ -69,7 +69,9 @@ import java.util.List;
  * @version 2021.9
  * @since 2021-09-02 21:30:20
  */
-@AutoConfiguration
+@AutoConfiguration(afterName = "com.kuma.boot.core.autoconfigure.AsyncThreadPoolAutoConfiguration")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication(type = org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnBean(name = "asyncThreadPoolTaskExecutor")
 @EnableConfigurationProperties({
         WebMvcFilterProperties.class,
         WebMvcInterceptorProperties.class,

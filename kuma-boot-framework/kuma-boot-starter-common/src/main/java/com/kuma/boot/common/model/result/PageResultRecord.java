@@ -44,6 +44,8 @@ public record PageResultRecord<R>(
 
     @Serial private static final long serialVersionUID = -275582248840137389L;
 
+    public PageResultRecord { data = List.copyOf(data); }
+
     // public static <R, T> PageResult<R> convertJpaPage(Page<T> page, Class<R> rClass) {
     // return convertJpaPage(page, rClass, new HashMap<>());
     // }

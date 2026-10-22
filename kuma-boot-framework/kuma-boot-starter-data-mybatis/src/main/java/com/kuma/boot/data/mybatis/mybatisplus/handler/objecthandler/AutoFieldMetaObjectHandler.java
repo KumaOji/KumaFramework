@@ -79,6 +79,8 @@ public class AutoFieldMetaObjectHandler implements MetaObjectHandler {
     }
 
     private void fillId(MetaObject metaObject) {
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(metaObject.getOriginalObject().getClass());
+        if (tableInfo != null && tableInfo.getIdType() == com.baomidou.mybatisplus.annotation.IdType.AUTO) return;
         String id = IdGeneratorUtils.getId();
 
         // 1. 继承了SuperEntity 若 ID 中有值，就不设置
@@ -118,8 +120,6 @@ public class AutoFieldMetaObjectHandler implements MetaObjectHandler {
         }
 
         // 3. 实体没有继承 Entity 和 SuperEntity，且 主键名为其他字段
-        TableInfo tableInfo =
-                TableInfoHelper.getTableInfo(metaObject.getOriginalObject().getClass());
         if (tableInfo == null) {
             return;
         }

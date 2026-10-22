@@ -41,7 +41,7 @@ public record PageQueryRecord<QueryDTO>(
                 example = "1",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "当前页显示数量不能为空")
-        @Min(value = 0)
+        @Min(value = 1)
         @Max(value = Integer.MAX_VALUE)
         Integer currentPage,
 
@@ -51,7 +51,7 @@ public record PageQueryRecord<QueryDTO>(
                 example = "10",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "每页数据显示数量不能为空")
-        @Min(value = 5)
+        @Min(value = 1)
         @Max(value = 100)
         Integer pageSize,
 
@@ -61,6 +61,11 @@ public record PageQueryRecord<QueryDTO>(
 
     @Serial
     private static final long serialVersionUID = -2483306509077581330L;
+
+    public PageQueryRecord {
+        currentPage = currentPage == null ? 1 : currentPage;
+        pageSize = pageSize == null ? 20 : pageSize;
+    }
 
     // /**
     // * 支持多个字段排序，用法： eg.1, 参数：{order:"name,id", order:"desc,asc" }。 排序： name desc, id asc

@@ -40,6 +40,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @since 2021-09-02 20:01:42
  */
 @AutoConfiguration(after = AsyncThreadPoolAutoConfiguration.class)
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(name = "asyncThreadPoolTaskExecutor")
 @EnableAsync(proxyTargetClass = true)
 @EnableConfigurationProperties({AsyncProperties.class})
 @ConditionalOnProperty(prefix = AsyncProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)

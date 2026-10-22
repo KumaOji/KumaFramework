@@ -53,17 +53,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @version 2021.9
  * @since 2021-09-04 07:40:02
  */
-@MapperScan(
-        basePackages = {
-                "com.kuma.boot.mybatis.mapper",
-                "com.kuma.boot.data.mybatis.delay",
-                "com.kuma.cloud.*.biz.mapper",
-                "com.kuma.cloud.*.infrastructure.persistent.mapper",
-                "com.kuma.cloud.*.infrastructure.persistent.*.mapper",
-                "com.kuma.cloud.*.mapper"
-        })
 @EnableTransactionManagement
-@AutoConfiguration(after = {com.kuma.boot.data.mybatis.autoconfigure.MybatisPlusInterceptorAutoConfiguration.class})
+@AutoConfiguration(after = {com.kuma.boot.data.mybatis.autoconfigure.MybatisPlusInterceptorAutoConfiguration.class},
+        afterName = {"com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration", "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"},
+        beforeName = "com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(javax.sql.DataSource.class)
 @EnableConfigurationProperties({MybatisPlusAutoFillProperties.class, MybatisPlusProperties.class})
 @ConditionalOnProperty(
         prefix = MybatisPlusProperties.PREFIX,

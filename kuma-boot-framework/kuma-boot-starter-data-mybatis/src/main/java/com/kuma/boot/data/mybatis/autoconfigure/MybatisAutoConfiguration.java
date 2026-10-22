@@ -34,8 +34,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * 插件容器
  */
 @EnableTransactionManagement
-@AutoConfiguration(after = {com.kuma.boot.data.mybatis.autoconfigure.MybatisInterceptorAutoConfiguration.class})
-@Import({MybatisUtil.class, TransactionalUtils.class, BatchUtils.class})
+@AutoConfiguration(afterName = {"com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration", "com.kuma.boot.data.datasource.autoconfigure.TransactionSupportAutoConfiguration"})
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(org.apache.ibatis.session.SqlSessionFactory.class)
+@Import({MybatisUtil.class, BatchUtils.class})
 @EnableConfigurationProperties({MybatisProperties.class, MybatisInterceptorProperties.class})
 @ConditionalOnProperty(
         prefix = MybatisProperties.PREFIX,

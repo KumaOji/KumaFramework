@@ -34,13 +34,16 @@ public class PageUtils {
     public static <T, R> IPage<R> convertPage( IPage<T> iPage, Function<T, R> function ) {
         List<R> records = iPage.getRecords().stream().map(function).toList();
 
-        IPage<R> result = new Page<>();
-        result.setPages(iPage.getPages());
-        result.setCurrent(iPage.getCurrent());
-        result.setSize(iPage.getSize());
-        result.setCurrent(iPage.getCurrent());
+        IPage<R> result = new Page<>(iPage.getCurrent(), iPage.getSize(), iPage.getTotal());
         result.setRecords(records);
         return result;
+    }
+
+    public static <T, R> com.kuma.boot.common.model.result.PageResultRecord<R> toResult(
+            IPage<T> page, Function<T, R> mapper) {
+        return com.kuma.boot.common.model.result.PageResultRecord.of(page.getTotal(),
+                Math.toIntExact(page.getPages()), Math.toIntExact(page.getCurrent()),
+                Math.toIntExact(page.getSize()), convertRecords(page, mapper));
     }
 
     public static <T, R> List<R> convertRecords( IPage<T> iPage, Function<T, R> function ) {

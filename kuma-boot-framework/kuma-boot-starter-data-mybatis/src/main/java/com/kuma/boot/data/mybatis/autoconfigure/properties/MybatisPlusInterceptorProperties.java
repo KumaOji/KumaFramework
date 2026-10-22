@@ -106,7 +106,7 @@ public class MybatisPlusInterceptorProperties {
         /**
          * 溢出总页数后是否进行处理
          */
-        private boolean overflow = true;
+        private boolean overflow = false;
 
         /**
          * 单页分页条数限制
@@ -116,7 +116,7 @@ public class MybatisPlusInterceptorProperties {
         /**
          * 数据库类型
          */
-        private DbType dbType = DbType.MYSQL;
+        private DbType dbType;
 
         /**
          * 方言实现类
