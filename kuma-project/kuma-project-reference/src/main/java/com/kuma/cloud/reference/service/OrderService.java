@@ -4,12 +4,11 @@ import com.kuma.cloud.reference.domain.dto.CreateOrderDTO;
 import com.kuma.cloud.reference.domain.enums.DataScope;
 import com.kuma.cloud.reference.domain.qo.OrderPageQO;
 import com.kuma.cloud.reference.domain.vo.OrderVO;
-import com.kuma.cloud.reference.domain.vo.PageVO;
-import java.util.UUID;
+import com.kuma.boot.common.model.result.PageResultRecord;
 
 public interface OrderService {
     OrderVO create(CreateOrderDTO request, DataScope scope);
-    OrderVO get(UUID id, DataScope scope);
-    PageVO<OrderVO> page(OrderPageQO query);
-    OrderVO confirm(UUID id, DataScope scope);
+    OrderVO get(Long id, DataScope scope);
+    PageResultRecord<OrderVO> page(OrderPageQO query);
+    OrderVO confirm(Long id, DataScope scope);
 }

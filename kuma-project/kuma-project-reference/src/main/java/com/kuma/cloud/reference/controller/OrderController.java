@@ -4,11 +4,10 @@ import com.kuma.cloud.reference.domain.dto.CreateOrderDTO;
 import com.kuma.cloud.reference.domain.enums.DataScope;
 import com.kuma.cloud.reference.domain.qo.OrderPageQO;
 import com.kuma.cloud.reference.domain.vo.OrderVO;
-import com.kuma.cloud.reference.domain.vo.PageVO;
+import com.kuma.boot.common.model.result.PageResultRecord;
 import com.kuma.cloud.reference.service.OrderService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -42,17 +41,17 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public CompletableFuture<OrderVO> get(@PathVariable UUID id, @RequestParam(defaultValue = "MAIN") DataScope scope) {
+    public CompletableFuture<OrderVO> get(@PathVariable Long id, @RequestParam(defaultValue = "MAIN") DataScope scope) {
         return executor.submitCompletable(() -> orderService.get(id, scope));
     }
 
     @GetMapping
-    public CompletableFuture<PageVO<OrderVO>> page(@Valid @ModelAttribute OrderPageQO query) {
+    public CompletableFuture<PageResultRecord<OrderVO>> page(@Valid @ModelAttribute OrderPageQO query) {
         return executor.submitCompletable(() -> orderService.page(query));
     }
 
     @PostMapping("/{id}/confirm")
-    public OrderVO confirm(@PathVariable UUID id, @RequestParam(defaultValue = "MAIN") DataScope scope) {
+    public OrderVO confirm(@PathVariable Long id, @RequestParam(defaultValue = "MAIN") DataScope scope) {
         return orderService.confirm(id, scope);
     }
 }

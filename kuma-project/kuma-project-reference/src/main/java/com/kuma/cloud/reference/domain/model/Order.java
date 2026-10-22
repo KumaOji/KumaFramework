@@ -1,17 +1,18 @@
 package com.kuma.cloud.reference.domain.model;
 
-import com.kuma.cloud.reference.exception.OrderConflictException;
+import com.kuma.boot.common.exception.BusinessException;
+import com.kuma.boot.common.enums.ResultEnum;
+import com.kuma.boot.common.utils.number.Money;
 
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 
 /** 聚合根：业务规则在领域层，保持对 Spring、HTTP、数据库的零依赖。 */
-public record Order(UUID id, ProductSnapshot product, int quantity, Status status, long version, Instant createdAt) {
+public record Order(Long id, ProductSnapshot product, int quantity, Status status, long version, Instant createdAt) {
     public enum Status { CREATED, CONFIRMED }
 
     public Order {
-        Objects.requireNonNull(id);
+        if (id != null && id < 1) throw new IllegalArgumentException("订单 ID 必须为正数");
         Objects.requireNonNull(product);
         Objects.requireNonNull(status);
         Objects.requireNonNull(createdAt);
@@ -21,7 +22,7 @@ public record Order(UUID id, ProductSnapshot product, int quantity, Status statu
     }
 
     public static Order create(ProductSnapshot product, int quantity, Instant now) {
-        return new Order(UUID.randomUUID(), product, quantity, Status.CREATED, 0, now);
+        return new Order(null, product, quantity, Status.CREATED, 0, now);
     }
 
     public Money total() {
@@ -29,7 +30,7 @@ public record Order(UUID id, ProductSnapshot product, int quantity, Status statu
     }
 
     public Order confirm() {
-        if (status != Status.CREATED) throw new OrderConflictException("只有待确认订单可以确认");
+        if (status != Status.CREATED) throw new BusinessException(ResultEnum.REQUEST_OTHER_OPERATION, "只有待确认订单可以确认");
         return new Order(id, product, quantity, Status.CONFIRMED, version + 1, createdAt);
     }
 }

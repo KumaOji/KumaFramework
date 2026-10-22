@@ -9,11 +9,12 @@ kuma-project-reference/
 ├── build.gradle
 ├── config/nacos/                 Nacos 配置模板
 ├── scripts/                      本机初始化、启动和演示
+├── sql/                          PostgreSQL/MySQL 建表与保留数据的升级脚本
 └── src/
     ├── main/
     │   ├── java/com/kuma/cloud/reference/
     │   │   ├── ReferenceApplication.java
-    │   │   ├── config/           中间件配置、配置属性、线程池和连接池
+    │   │   ├── config/           显式选择框架配置和业务安全策略
     │   │   ├── controller/       HTTP 入口与参数校验
     │   │   ├── service/
     │   │   │   └── impl/         业务处理、事务、Mapper 调用及响应转换
@@ -21,19 +22,16 @@ kuma-project-reference/
     │   │   ├── domain/
     │   │   │   ├── dto/          写入参数 CreateOrderDTO
     │   │   │   ├── qo/           查询参数 OrderPageQO
-    │   │   │   ├── vo/           响应 OrderVO、PageVO
+    │   │   │   ├── vo/           响应 OrderVO，分页复用框架 PageResultRecord
     │   │   │   ├── entity/       数据库行对象 OrderDO
     │   │   │   ├── model/        订单状态、金额计算与商品快照
     │   │   │   └── enums/        数据源范围
-    │   │   ├── support/          实际数据库连接检查
-    │   │   └── exception/        业务异常及统一异常处理
     │   └── resources/
     │       ├── bootstrap.yml     应用名称、环境和 Nacos 导入
-    │       ├── mapper/           SQL XML
     └── test/                     单元测试、集成测试及隔离配置
 ```
 
-业务调用链：`Controller → Service → ServiceImpl → Mapper → XML`。
+业务调用链：`Controller → Service → ServiceImpl → BaseMapperX`，查询条件使用框架的 LambdaQueryWrapper，当前示例无需手写 XML。
 
 Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；ServiceImpl 处理业务和事务，返回 VO。Mapper 只负责数据库操作，不直接作为 HTTP 入口。订单状态与金额约束保留在 model，数据库行对象不直接对外返回。
 
@@ -49,14 +47,14 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | Schema 切换 | kuma-boot-starter-data-mybatis 的 SchemaInterceptor，SCHEMA 模式 |
 | Web MVC | kuma-boot-starter-web，MVC 配置、参数转换、异步执行、Trace MDC 和 HTTP 交换记录 |
 | 日志 | kuma-boot-starter-logger，统一 Logback 输出；Nacos 模板启用 reference DEBUG 日志以查看数据源/schema 路由 |
-| MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、Mapper XML |
+| MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、BaseMapperX 和条件构造器 |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
 | Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
 | 链路追踪 | Spring Boot 4 OpenTelemetry starter，经 WSL Collector 导出到 SkyWalking；启动脚本加载 SkyWalking Java Agent |
 
 MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。数据库、schema 和表由部署流程预先创建，应用启动时不执行数据库初始化。上下文在调用结束或异常后恢复。
 
-先选择数据源再开启事务，事务内禁止切换到其他数据源。分页 count 与 items 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
+先选择数据源再开启事务，事务内禁止切换到其他数据源。分页 count 与 data 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
 
 Redis / JetCache 当前禁用；Kafka、认证、对象存储等尚未在本模块配置。传递依赖不代表已接入。
 
@@ -72,7 +70,7 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 
 入口使用 `kuma-boot-starter-core` 的 `StartupSpringApplication`，启用 Kuma Banner、应用属性初始化和初始化器耗时记录。环境仍由 bootstrap.yml、环境变量及命令行控制。
 
-启动类使用 core 的启动入口，WebConfiguration 显式导入 web starter 的 MVC 和 HTTP 交换记录配置。现有 `@KumaBootApplication` 同时开启 OAuth2 资源服务；本模板尚未配置认证，保留 `@SpringBootApplication` 并排除传递依赖带来的默认登录与管理端点安全配置。新项目接入认证时应移除这些排除项并配置对应安全组件。
+框架保持显式接入设计：reference 在 config 下通过 `@ImportAutoConfiguration` 选择 core、logger、data-datasource、data-mybatis、web、actuator 所需的配置，不通过 `AutoConfiguration.imports` 随依赖自动启用。配置类只负责接入，具体能力复用框架实现。ExecutionConfiguration 显式引入框架 Clock，MyBatisConfiguration 通过 `@MapperScan` 指定本项目 Mapper。现有 `@KumaBootApplication` 同时开启 OAuth2 资源服务，因此模板继续使用 `@SpringBootApplication`；`SecurityConfig` 保留业务的放行策略，接入认证时修改该策略。
 
 运行配置由 Nacos 加载，本地模板为 `config/nacos/kuma-reference-dev.yaml`：
 
@@ -108,7 +106,7 @@ Nacos 模板已配置 `management.tracing` 和 Boot 4 的 `management.openteleme
 
 SkyWalking UI 为 `http://localhost:12880`。请求订单接口后，业务日志中的 `OtlpTraceId` 应有 traceId/spanId，加载 Agent 后请求线程的 `TID` 应有值；两套追踪的 ID 可能不同。启动日志没有请求上下文时仍可能为空。只使用 OpenTelemetry 导出也可以在 SkyWalking 查看追踪，但不会自动填充 SkyWalking toolkit 的 `%tid`。
 
-reference 通过 WebConfiguration 显式导入框架的 WebMdcAutoConfiguration，由框架统一注册 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.trace=false`、`kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。项目提供对应 Filter Bean 或 FilterRegistrationBean 时，框架会退让，避免重复注册。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
+WebConfiguration 显式引入 WebMdcAutoConfiguration，由框架统一注册 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.trace=false`、`kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。项目提供对应 Filter Bean 或 FilterRegistrationBean 时，框架会退让，避免重复注册。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
 
 三个过滤器同时处理 REQUEST 和 ASYNC 分派：异步任务的结果或异常回到 Servlet 线程时，重新建立 MDC，并在该次分派结束后清理。框架生成的 TraceId 和解析后的请求租户保存在请求属性中，因此初始请求与异步异常日志使用同一个关联 ID，后续请求不会沿用上次的租户或版本。
 
@@ -124,7 +122,7 @@ WSL 开发环境可运行 `scripts/initialize-wsl.ps1` 初始化 PostgreSQL sche
 |---|---|---|
 | POST | /api/orders?scope=MAIN | 创建订单 |
 | GET | /api/orders/{id}?scope=MAIN | 查询订单 |
-| GET | /api/orders?scope=MAIN&page=1&size=10 | 分页查询 |
+| GET | /api/orders?scope=MAIN&currentPage=1&pageSize=10 | 分页查询 |
 | POST | /api/orders/{id}/confirm?scope=MAIN | 确认订单 |
 
 创建订单由请求直接提供示例商品信息：
@@ -133,12 +131,48 @@ WSL 开发环境可运行 `scripts/initialize-wsl.ps1` 初始化 PostgreSQL sche
 {"sku":"BOOK-001","productName":"示例商品","unitPrice":99.00,"quantity":2}
 ```
 
-这是演示持久化和事务的模板接口，正式业务的价格来源应由业务规则确定。异常统一为 `application/problem+json`：参数 400、不存在 404、状态或版本冲突 409、资源繁忙 503。创建接口没有幂等键，重复提交会产生新订单。
+这是演示持久化和事务的模板接口，正式业务的价格来源应由业务规则确定。异常由 web starter 统一返回 `application/json`，包含 `code`、`message`，校验失败时还包含字段错误信息。HTTP 状态为：参数 400、不存在 404、状态或版本冲突 409、资源繁忙 503。创建接口没有幂等键，重复提交会产生新订单。
+
+### 复用 framework 业务错误码
+
+业务错误只使用 common starter 的 `ResultEnum`、`Code` 和 `BusinessException`，不另建项目级通用错误码枚举或异常处理器。通用错误直接抛出 framework 异常：
+
+```java
+throw new BusinessException(ResultEnum.BAD_REQUEST);
+```
+
+订单直接抛出框架 `BusinessException`，不再声明项目异常子类或 `@ResponseStatus`：
+
+| 场景 | 复用的 ResultEnum | HTTP 状态 |
+|---|---|---|
+| 订单不存在 | DATA_NOT_EXIST_ERROR | 404 |
+| 状态或版本冲突 | REQUEST_OTHER_OPERATION | 409 |
+
+通过 `new BusinessException(ResultEnum.DATA_NOT_EXIST_ERROR, "订单不存在：" + id)` 传递错误码和业务说明。web starter 的 HttpStatusMapper 集中映射现有错误码对应的 HTTP 状态，显式配置的状态映射仍优先。未知业务码默认 500，不通过解析错误码数字猜测 HTTP 状态。响应 code 保留框架 Code 的完整字符串，业务 message 原样返回，内部异常使用配置的通用错误提示。
+
+reference 设置 `kuma.boot.web.error.handling.default-error-code-strategy=RESULT_ENUM`，参数解析、字段校验、金额精度和溢出错误也返回 ResultEnum.BAD_REQUEST 的完整错误码。未知内部错误使用 INNER_ERROR；字段错误保留字段及校验提示。其他应用的默认策略保持原样。复制模板后优先复用已有 ResultEnum；新的业务码沿用框架 Code 和集中状态映射。
+
+## 框架复用与数据结构
+
+- `OrderPageQO extends PageQuery`，默认 `currentPage=1`、`pageSize=20`，页码至少为 1，每页 1–100 条；`page`、`size` 仍可作为参数别名。
+- 分页由框架 `MpUtils`、分页拦截器和 `PageUtils.toResult` 完成，响应统一为 `PageResultRecord<OrderVO>`：`totalSize`、`totalPage`、`currentPage`、`pageSize`、`data`。删除原先的 `PageVO`；超出最后一页返回空 data 并保留总数。排序只允许 `createdAt`、`id`、`sku`，方向为 asc/desc。分页插件根据当前 JDBC 连接识别方言，不固定 MySQL。
+- `OrderDO extends MpSuperEntity<Long>`，`OrderMapper extends BaseMapperX<OrderDO>`，复用插入、按 ID 查询、审计字段和 `updateById`。确认订单通过 `@Version` 与框架乐观锁插件检查旧版本，不再手写版本更新 SQL。ID 为数据库自增 Long，`create_date`、`modify_date`、`created_user`、`modify_user` 对齐框架。不同数据源可能存在同一个数字 ID，订单定位需同时包含 scope。
+- Service 复用修复后的 `TransactionalUtils`，每次执行使用独立事务定义，继承统一超时。先路由，再执行事务；分页 count 和 data 保留同一 REPEATABLE READ 只读事务。框架 `TransactionAutoConfiguration` 同步和异步失败保留原始原因，异步 Task API 返回可观察的 CompletableFuture。
+- UTC `Clock` 和异步线程池由 core 提供，业务或测试可提供对应 Bean 替换；SkyWalking 装饰器由 logger 提供。
+- 金额直接复用 common 的 `Money`，不再维护 reference 自己的金额类。框架 Money 为不可变对象，转换金额时拒绝精度损失，运算时检查溢出。示例币种为 CNY、单价非负，订单总金额上限为 `92233720368547758.07` 元，数据库约束同步检查该范围；数量和订单状态仍由业务模型约束。
+
+### 表结构升级
+
+新库执行 `sql/postgresql/schema.sql` 或 `sql/mysql/schema.sql`。这些脚本也用于集成测试建表，应用启动不会自动执行 DDL。
+
+已有 UUID 订单表使用对应目录的 `migrate-uuid-orders.sql` 一次性升级：原 UUID 保留在可空唯一列 `legacy_id`，增加 Long 自增主键，并将 `created_at` 改为 `create_date`、补齐审计字段和金额范围约束。既有订单须满足上述金额范围；迁移不会截断或舍入金额。旧进程停止后执行升级，再启动新版本；MySQL DDL 隐式提交。这些脚本只针对本模板之前的单表结构。
+
+接口变化：订单 ID 从 UUID 字符串改为 Long 数字，分页 JSON 改为框架字段，原 UUID 链接不再作为新 ID 使用。已有数据可通过 `legacy_id` 查询对应的新 ID。Nacos 须同步开启 `kuma.boot.data.mybatis.mybatis-plus.interceptor.pagination.enabled=true`、`optimistic-locker.enabled=true` 和 `auto-fill.enabled=true`，仓库模板已更新。本轮未对正在运行的数据库执行升级脚本。
 
 ## 复制为新项目
 
 1. 复制源码及配置模板，排除 build、日志及真实凭据。
-2. 修改模块名、根包、启动类、Gradle mainClass 和 JAR 名称；同步更新 XML 中的完整类名。
+2. 修改模块名、根包、启动类、Gradle mainClass 和 JAR 名称。
 3. 在 settings.gradle 注册新模块，更新脚本和请求示例中的模块路径。
 4. 分配应用名、端口、Nacos Data ID、数据库账户和 schema，更新 DataScope 与 JDBC currentSchema。
 5. 根据业务替换订单示例，并由部署流程预先创建并维护所需的数据库、schema 和表。

@@ -2,6 +2,7 @@ package com.kuma.cloud.reference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.cloud.reference.mapper.OrderMapper;
 import com.kuma.cloud.reference.domain.entity.OrderDO;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
@@ -63,22 +64,11 @@ class ReferenceApplicationTest {
         for (var scope : DataScope.values()) {
             try (var connection = dataSource.getDataSource(scope.dataSource()).getConnection();
                     var statement = connection.createStatement()) {
-                statement.execute("""
-                        CREATE TABLE IF NOT EXISTS purchase_orders (
-                            id VARCHAR(36) NOT NULL PRIMARY KEY,
-                            sku VARCHAR(64) NOT NULL,
-                            product_name VARCHAR(120) NOT NULL,
-                            unit_price DECIMAL(19, 2) NOT NULL,
-                            quantity INT NOT NULL,
-                            order_status VARCHAR(16) NOT NULL,
-                            version BIGINT NOT NULL,
-                            created_at TIMESTAMP(6) NOT NULL,
-                            CONSTRAINT ck_order_price CHECK (unit_price >= 0),
-                            CONSTRAINT ck_order_quantity CHECK (quantity BETWEEN 1 AND 1000),
-                            CONSTRAINT ck_order_status CHECK (order_status IN ('CREATED', 'CONFIRMED')),
-                            CONSTRAINT ck_order_version CHECK (version >= 0)
-                        )
-                        """);
+                String dialect = connection.getMetaData().getDatabaseProductName().equals("MySQL") ? "mysql" : "postgresql";
+                String sql = java.nio.file.Files.readString(java.nio.file.Path.of("sql", dialect, "schema.sql"))
+                        .replace("kuma_reference_main", scope.schema());
+                org.springframework.jdbc.datasource.init.ScriptUtils.executeSqlScript(connection,
+                        new org.springframework.core.io.ByteArrayResource(sql.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                 statement.executeUpdate("DELETE FROM purchase_orders");
             }
         }
@@ -137,7 +127,11 @@ class ReferenceApplicationTest {
         assertEquals(200, confirmed.statusCode(), confirmed.body());
         assertEquals("CONFIRMED", JSON.readTree(confirmed.body()).path("status").asString());
         assertEquals(1, JSON.readTree(confirmed.body()).path("version").asInt());
-        assertProblem(request("POST", confirmPath, null), 409);
+        var conflict = request("POST", confirmPath, null);
+        assertProblem(conflict, 409);
+        assertEquals(ResultEnum.REQUEST_OTHER_OPERATION.code().getCode(),
+                JSON.readTree(conflict.body()).path("code").asString());
+        assertEquals("只有待确认订单可以确认", JSON.readTree(conflict.body()).path("message").asString());
     }
 
     @Test
@@ -147,23 +141,32 @@ class ReferenceApplicationTest {
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"\",\"unitPrice\":99,\"quantity\":1}"), 400);
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":-1,\"quantity\":1}"), 400);
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":1.001,\"quantity\":1}"), 400);
+        assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":92233720368547758.08,\"quantity\":1}"), 400);
+        assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":92233720368547758.07,\"quantity\":2}"), 400);
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":0}"), 400);
         assertProblem(request("POST", "/api/orders", "{\"sku\":\"../unsafe\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}"), 400);
         assertProblem(request("POST", "/api/orders", "not-json"), 400);
-        assertProblem(request("GET", "/api/orders/" + UUID.randomUUID(), null), 404);
-        assertProblem(request("GET", "/api/orders/not-a-uuid", null), 400);
+        var missingId = Long.MAX_VALUE;
+        var missing = request("GET", "/api/orders/" + missingId, null);
+        assertProblem(missing, 404);
+        assertEquals(ResultEnum.DATA_NOT_EXIST_ERROR.code().getCode(),
+                JSON.readTree(missing.body()).path("code").asString());
+        assertEquals("订单不存在：" + missingId, JSON.readTree(missing.body()).path("message").asString());
+        assertProblem(request("GET", "/api/orders/not-a-number", null), 400);
         assertEquals(before, countOrders());
     }
 
     @Test
     void rejectsStaleWritesAndRollsBackFailedTransactions() throws Exception {
         var created = JSON.readTree(request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}").body());
-        var id = UUID.fromString(created.path("id").asString());
-        var snapshot = orders.selectById(id.toString()).toDomain();
-        transactions.executeWithoutResult(status -> assertEquals(1,
-                orders.updateStatus(id.toString(), "CONFIRMED", snapshot.version() + 1, snapshot.version())));
-        transactions.executeWithoutResult(status -> assertEquals(0,
-                orders.updateStatus(id.toString(), "CONFIRMED", snapshot.version() + 1, snapshot.version())));
+        var id = created.path("id").asLong();
+        var snapshot = orders.selectById(id).toDomain();
+        var first = OrderDO.from(snapshot);
+        var stale = OrderDO.from(snapshot);
+        first.setOrderStatus("CONFIRMED");
+        stale.setOrderStatus("CONFIRMED");
+        transactions.executeWithoutResult(status -> assertEquals(1, orders.updateById(first)));
+        transactions.executeWithoutResult(status -> assertEquals(0, orders.updateById(stale)));
         long before = countOrders();
         assertThrows(IllegalStateException.class, () -> transactions.executeWithoutResult(status -> {
             orders.insert(OrderDO.from(com.kuma.cloud.reference.domain.model.Order.create(snapshot.product(), 1, java.time.Instant.now())));
@@ -184,7 +187,7 @@ class ReferenceApplicationTest {
             });
             assertTrue(running.await(2, TimeUnit.SECONDS));
             var queued = executor.submitCompletable(() -> "queued");
-            assertProblem(request("GET", "/api/orders/" + UUID.randomUUID(), null), 503);
+            assertProblem(request("GET", "/api/orders/" + Long.MAX_VALUE, null), 503);
             release.countDown();
             assertEquals("queued", queued.get(2, TimeUnit.SECONDS));
         } finally { release.countDown(); }
@@ -280,7 +283,7 @@ class ReferenceApplicationTest {
         appender.start();
         logger.addAppender(appender);
         try {
-            var incoming = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/orders/" + UUID.randomUUID()))
+            var incoming = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/orders/" + Long.MAX_VALUE))
                     .header("kmc-trace-id", "async-error-correlation")
                     .header("kmc-tenant-id", "error-tenant")
                     .header("kmc-request-version", "v2")
@@ -292,7 +295,7 @@ class ReferenceApplicationTest {
             assertEquals("error-tenant", first.get("kmc-tenant-id"));
             assertEquals("v2", first.get("kmc-request-version"));
 
-            var next = request("GET", "/api/orders/" + UUID.randomUUID(), null);
+            var next = request("GET", "/api/orders/" + Long.MAX_VALUE, null);
             assertEquals(404, next.statusCode(), next.body());
             assertEquals(2, events.size());
             var nextMdc = events.getLast().getMDCPropertyMap();
@@ -313,21 +316,47 @@ class ReferenceApplicationTest {
         String sku = "ISOLATION-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         var main = JSON.readTree(request("POST", "/api/orders?scope=MAIN", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":1}").body());
         var mysql = JSON.readTree(request("POST", "/api/orders?scope=MYSQL", "{\"sku\":\"" + sku + "\",\"productName\":\"Sample product\",\"unitPrice\":99.00,\"quantity\":2}").body());
-        assertProblem(request("GET", "/api/orders/" + main.path("id").asString() + "?scope=MYSQL", null), 404);
-        assertProblem(request("GET", "/api/orders/" + mysql.path("id").asString() + "?scope=MAIN", null), 404);
         for (DataScope scope : new DataScope[] {DataScope.MAIN, DataScope.MYSQL}) {
-            var page = request("GET", "/api/orders?scope=" + scope + "&sku=" + sku + "&status=CREATED&page=1&size=1", null);
+            var page = request("GET", "/api/orders?scope=" + scope + "&sku=" + sku + "&status=CREATED&currentPage=1&pageSize=1", null);
             assertEquals(200, page.statusCode(), page.body());
             var result = JSON.readTree(page.body());
-            assertEquals(1, result.path("total").asInt());
-            assertEquals(1, result.path("items").size());
-            assertEquals(scope == DataScope.MAIN ? 1 : 2, result.path("items").get(0).path("quantity").asInt());
+            assertEquals(1, result.path("totalSize").asInt());
+            assertEquals(1, result.path("data").size());
+            assertEquals(scope == DataScope.MAIN ? 1 : 2, result.path("data").get(0).path("quantity").asInt());
         }
         assertEquals(200, request("GET", "/api/orders", null).statusCode());
         assertProblem(request("GET", "/api/orders?page=0", null), 400);
         assertProblem(request("GET", "/api/orders?size=101", null), 400);
         assertProblem(request("GET", "/api/orders?status=WRONG", null), 400);
         assertProblem(request("GET", "/api/orders?scope=public", null), 400);
+    }
+
+    @Test
+    void frameworkPaginationKeepsCountsAcrossPagesAndWhitelistsSorts() throws Exception {
+        var ids = new java.util.ArrayList<Long>();
+        for (int i = 0; i < 3; i++) {
+            var created = request("POST", "/api/orders", "{\"sku\":\"PAGE-TEST\",\"productName\":\"Page item\",\"unitPrice\":1.00,\"quantity\":1}");
+            assertEquals(201, created.statusCode(), created.body());
+            ids.add(JSON.readTree(created.body()).path("id").asLong());
+        }
+        assertTrue(ids.getFirst() > 0);
+        var response = request("GET", "/api/orders?sku=PAGE-TEST&currentPage=2&pageSize=1&sort=id&order=desc", null);
+        assertEquals(200, response.statusCode(), response.body());
+        var page = JSON.readTree(response.body());
+        assertEquals(3, page.path("totalSize").asInt());
+        assertEquals(3, page.path("totalPage").asInt());
+        assertEquals(2, page.path("currentPage").asInt());
+        assertEquals(1, page.path("pageSize").asInt());
+        assertEquals(ids.get(1).longValue(), page.path("data").get(0).path("id").asLong());
+        var empty = JSON.readTree(request("GET", "/api/orders?sku=PAGE-TEST&currentPage=4&pageSize=1", null).body());
+        assertEquals(3, empty.path("totalSize").asInt());
+        assertEquals(0, empty.path("data").size());
+        assertProblem(request("GET", "/api/orders?sort=id%3BDROP%20TABLE%20purchase_orders", null), 400);
+        assertProblem(request("GET", "/api/orders?sort=unknown", null), 400);
+        var row = orders.selectById(ids.getFirst());
+        assertNotNull(row.getCreateDate());
+        assertNotNull(row.getModifyDate());
+        assertEquals(3, countOrders());
     }
 
     @Test
@@ -341,7 +370,7 @@ class ReferenceApplicationTest {
             throw new IllegalStateException("simulated failure");
         }));
         assertNull(DynamicDataSourceContextHolder.peek());
-        assertThrows(RuntimeException.class, () -> invoker.invoke(() -> orders.count(null, null), "unknownDataSource"));
+        assertThrows(RuntimeException.class, () -> invoker.invoke(() -> orders.selectCount(null), "unknownDataSource"));
         assertNull(DynamicDataSourceContextHolder.peek());
         assertThrows(IllegalStateException.class, () -> transactions.execute(status ->
                 schemas.execute(DataScope.MYSQL.dataSource(), () -> "must not switch an active transaction")));
@@ -381,6 +410,7 @@ class ReferenceApplicationTest {
         assertTrue(problem.path("code").isTextual(), response.body());
         assertTrue(problem.path("message").isTextual(), response.body());
         assertFalse(response.body().contains("Exception"));
+        if (status == 400) assertEquals(ResultEnum.BAD_REQUEST.codeDesc(), problem.path("code").asString(), response.body());
     }
 
     private long countOrders() throws Exception {

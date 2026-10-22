@@ -58,7 +58,6 @@ spring:
     default-timeout: 3s
 
 mybatis-plus:
-  mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
     default-statement-timeout: 2
@@ -83,6 +82,7 @@ kuma:
       error:
         handling:
           enabled: true
+          default-error-code-strategy: RESULT_ENUM
           search-super-class-hierarchy: true
           http-statuses:
             java.lang.IllegalArgumentException: BAD_REQUEST
@@ -112,10 +112,16 @@ kuma:
         mybatis-plus:
           enabled: true
           auto-fill:
-            # 订单的 ID、版本和创建时间由领域模型生成。
-            enabled: false
+            # 复用审计字段填充；AUTO 主键由数据库生成，创建时间使用 Clock。
+            enabled: true
           interceptor:
             enabled: true
+            optimistic-locker:
+              enabled: true
+            pagination:
+              enabled: true
+              max-limit: 100
+              overflow: false
             block-attack:
               enabled: true
             multi-tenant:

@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS kuma_reference_mysql.purchase_orders (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    sku VARCHAR(64) NOT NULL,
+    product_name VARCHAR(120) NOT NULL,
+    unit_price DECIMAL(19,2) NOT NULL,
+    quantity INT NOT NULL,
+    order_status VARCHAR(16) NOT NULL,
+    version BIGINT NOT NULL DEFAULT 0,
+    create_date DATETIME(6) NOT NULL,
+    modify_date DATETIME(6),
+    created_user VARCHAR(64),
+    modify_user VARCHAR(64),
+    CONSTRAINT ck_order_price CHECK (unit_price >= 0),
+    CONSTRAINT ck_order_quantity CHECK (quantity BETWEEN 1 AND 1000),
+    CONSTRAINT ck_order_status CHECK (order_status IN ('CREATED','CONFIRMED')),
+    CONSTRAINT ck_order_version CHECK (version >= 0),
+    CONSTRAINT ck_order_money_range CHECK (unit_price * quantity <= 92233720368547758.07),
+    INDEX ix_orders_sku_status_date (sku, order_status, create_date DESC, id DESC)
+);
