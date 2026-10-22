@@ -16,7 +16,6 @@
 
 package com.kuma.boot.data.datasource.tx;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
 
 import java.util.function.Consumer;
 
@@ -48,15 +47,14 @@ public class TransactionalUtils {
         transactionTemplate.executeWithoutResult(action);
     }
 
-    private static final ThreadLocal<TransactionTemplate> TRANSACTION_LOCAL =
-            new TransmittableThreadLocal<>();
-
+    /** @deprecated Each execution now owns its definition; no thread-local setup is needed. */
+    @Deprecated
     public void set() {
-        TRANSACTION_LOCAL.set(transactionTemplate);
     }
 
+    /** @deprecated Each execution now owns its definition; no thread-local cleanup is needed. */
+    @Deprecated
     public void remove() {
-        TRANSACTION_LOCAL.remove();
     }
 
     public <T> T execute(
@@ -64,12 +62,7 @@ public class TransactionalUtils {
             int propagationBehavior,
             int isolationLevel,
             boolean readOnly ) {
-        try {
-            set();
-            return convert(propagationBehavior, isolationLevel, readOnly).execute(action);
-        } finally {
-            remove();
-        }
+        return convert(propagationBehavior, isolationLevel, readOnly).execute(action);
     }
 
     public <T> T defaultExecute(
@@ -104,12 +97,7 @@ public class TransactionalUtils {
             int propagationBehavior,
             int isolationLevel,
             boolean readOnly ) {
-        try {
-            set();
-            convert(propagationBehavior, isolationLevel, readOnly).executeWithoutResult(action);
-        } finally {
-            remove();
-        }
+        convert(propagationBehavior, isolationLevel, readOnly).executeWithoutResult(action);
     }
 
     public void defaultExecuteWithoutResult(
@@ -142,10 +130,10 @@ public class TransactionalUtils {
 
     private TransactionTemplate convert(
             int propagationBehavior, int isolationLevel, boolean readOnly ) {
-        TransactionTemplate transactionTemplate = TRANSACTION_LOCAL.get();
-        transactionTemplate.setPropagationBehavior(propagationBehavior);
-        transactionTemplate.setIsolationLevel(isolationLevel);
-        transactionTemplate.setReadOnly(readOnly);
-        return transactionTemplate;
+        var execution = new TransactionTemplate(transactionTemplate.getTransactionManager(), transactionTemplate);
+        execution.setPropagationBehavior(propagationBehavior);
+        execution.setIsolationLevel(isolationLevel);
+        execution.setReadOnly(readOnly);
+        return execution;
     }
 }

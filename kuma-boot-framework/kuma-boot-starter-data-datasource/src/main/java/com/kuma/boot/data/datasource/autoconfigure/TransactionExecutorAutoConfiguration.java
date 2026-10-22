@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
 public class TransactionExecutorAutoConfiguration {
 
     @Bean("transactionThreadPoolExecutor")
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean(name = "transactionThreadPoolExecutor")
     public ThreadPoolExecutor transactionThreadPoolExecutor() {
         MDCThreadPoolExecutor transactionThreadPoolExecutor =
                 new MDCThreadPoolExecutor(

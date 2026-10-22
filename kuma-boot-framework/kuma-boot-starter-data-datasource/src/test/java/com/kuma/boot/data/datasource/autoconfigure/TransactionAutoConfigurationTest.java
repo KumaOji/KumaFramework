@@ -21,6 +21,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class TransactionAutoConfigurationTest {
+    @Test
+    void originalBusinessFailureSurvivesSyncAndAsyncRollback() throws Exception {
+        var manager = mock(PlatformTransactionManager.class);
+        when(manager.getTransaction(any())).thenAnswer(call -> new org.springframework.transaction.support.SimpleTransactionStatus());
+        var executor = new java.util.concurrent.ThreadPoolExecutor(1, 1, 0, java.util.concurrent.TimeUnit.SECONDS,
+                new java.util.concurrent.LinkedBlockingQueue<>());
+        try {
+            var transactions = new TransactionAutoConfiguration(manager, new DefaultTransactionDefinition(), executor);
+            var failure = new IllegalStateException("business failure");
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> transactions.execute(
+                    (java.util.function.Supplier<String>) () -> { throw failure; })).isSameAs(failure);
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> transactions.asyncExecute(
+                    (java.util.function.Supplier<String>) () -> { throw failure; })).isSameAs(failure);
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> transactions.asyncExecute(
+                    (TransactionAutoConfiguration.Task) () -> { throw failure; }).get(3, java.util.concurrent.TimeUnit.SECONDS))
+                    .hasCause(failure);
+            verify(manager, times(3)).rollback(any());
+        } finally { executor.shutdownNow(); }
+    }
+
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(TransactionExecutorAutoConfiguration.class,
                     TransactionSupportAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
