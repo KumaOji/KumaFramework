@@ -16,6 +16,7 @@
 
 package com.kuma.boot.web.error.mapper;
 
+import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.web.error.ErrorHandlingProperties;
 
 /**
@@ -31,6 +32,11 @@ public class ErrorMessageMapper {
     }
 
     public String getErrorMessage(Throwable exception) {
+        // Business messages are intentional client-facing explanations; do not
+        // mask them with a generic Exception superclass message.
+        if (exception instanceof BusinessException) {
+            return exception.getMessage();
+        }
         String code = getErrorMessageFromProperties(exception.getClass());
         if (code != null) {
             return code;

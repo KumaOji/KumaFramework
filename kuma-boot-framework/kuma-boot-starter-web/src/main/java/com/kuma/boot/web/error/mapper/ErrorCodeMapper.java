@@ -16,6 +16,8 @@
 
 package com.kuma.boot.web.error.mapper;
 
+import com.kuma.boot.common.exception.BaseException;
+import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.web.error.ErrorHandlingProperties;
 import com.kuma.boot.web.error.ResponseErrorCode;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -35,11 +37,26 @@ public class ErrorCodeMapper {
     }
 
     public String getErrorCode(Throwable exception) {
+        // Keep the code carried by Kuma exceptions, including business subclasses.
+        // Class names and annotation/configuration mappings must not replace it.
+        if (exception instanceof BaseException kumaException && kumaException.getCode() != null) {
+            return kumaException.getCode().getCode();
+        }
         String code = getErrorCodeFromPropertiesOrAnnotation(exception.getClass());
         if (code != null) {
             return code;
         }
         switch (properties.getDefaultErrorCodeStrategy()) {
+            case RESULT_ENUM:
+                return switch (new HttpStatusMapper(properties).getHttpStatus(exception)) {
+                    case BAD_REQUEST -> ResultEnum.BAD_REQUEST.codeDesc();
+                    case UNAUTHORIZED -> ResultEnum.UNAUTHORIZED.codeDesc();
+                    case FORBIDDEN -> ResultEnum.FORBIDDEN.codeDesc();
+                    case NOT_FOUND -> ResultEnum.DATA_NOT_EXIST_ERROR.codeDesc();
+                    case CONFLICT -> ResultEnum.REQUEST_OTHER_OPERATION.codeDesc();
+                    case TOO_MANY_REQUESTS -> ResultEnum.REQUEST_MORE_ERROR.codeDesc();
+                    default -> ResultEnum.INNER_ERROR.codeDesc();
+                };
             case FULL_QUALIFIED_NAME:
                 return exception.getClass().getName();
             case ALL_CAPS:
@@ -64,7 +81,8 @@ public class ErrorCodeMapper {
             return properties.getCodes().get(errorCode);
         }
 
-        return errorCode;
+        return properties.getDefaultErrorCodeStrategy() == ErrorHandlingProperties.DefaultErrorCodeStrategy.RESULT_ENUM
+                ? ResultEnum.BAD_REQUEST.codeDesc() : errorCode;
     }
 
     private String convertToAllCaps(String exceptionClassName) {

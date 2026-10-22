@@ -31,16 +31,17 @@ public class Money implements Comparable<Money>, Serializable {
     /**
      * 币种最小单位
      */
-    private long cent;
+    private final long cent;
 
     /**
      * 币种
      */
-    private Currency currency;
+    private final Currency currency;
 
     private Money(long cent, Currency currency) {
         this.cent = cent;
-        this.currency = currency;
+        this.currency = Objects.requireNonNull(currency, "currency");
+        if (currency.getDefaultFractionDigits() < 0) throw new IllegalArgumentException("Currency must define minor units");
     }
 
     private static final RoundingMode DEFAULT_ROUNDING = RoundingMode.HALF_EVEN;
@@ -65,11 +66,7 @@ public class Money implements Comparable<Money>, Serializable {
      * @return
      */
     public static Money of(long minorUnits, Currency currency) {
-        Money money = new Money(0, currency);
-
-        money.cent = minorUnits;
-
-        return money;
+        return new Money(minorUnits, currency);
     }
 
     /**
@@ -92,11 +89,9 @@ public class Money implements Comparable<Money>, Serializable {
      * @return
      */
     public static Money of(BigDecimal amount, Currency currency) {
-        Money money = new Money(0, currency);
-
-        money.cent = amount.movePointRight(currency.getDefaultFractionDigits()).longValue();
-
-        return money;
+        Objects.requireNonNull(amount, "amount");
+        Objects.requireNonNull(currency, "currency");
+        return new Money(amount.movePointRight(currency.getDefaultFractionDigits()).longValueExact(), currency);
     }
 
     /**
@@ -106,6 +101,8 @@ public class Money implements Comparable<Money>, Serializable {
     public BigDecimal getAmount() {
         return BigDecimal.valueOf(cent, currency.getDefaultFractionDigits());
     }
+
+    public Currency getCurrency() { return currency; }
 
     /**
      * 返回币种最小单位 内部系统强制使用getAmount，不能使用getCents，除非在和银行渠道对接时，需要使用getCent。
@@ -137,8 +134,7 @@ public class Money implements Comparable<Money>, Serializable {
      * @return
      */
     public Money divide(BigDecimal value) {
-        BigDecimal newCent = BigDecimal.valueOf(this.cent).divide(value, DEFAULT_ROUNDING);
-        return Money.of(newCent.longValue(), this.currency);
+        return divide(value, DEFAULT_ROUNDING);
     }
 
     /**
@@ -147,8 +143,8 @@ public class Money implements Comparable<Money>, Serializable {
      * @return
      */
     public Money divide(BigDecimal value, RoundingMode roundingMode) {
-        BigDecimal newCent = BigDecimal.valueOf(this.cent).divide(value, roundingMode);
-        return Money.of(newCent.longValue(), this.currency);
+        BigDecimal newCent = BigDecimal.valueOf(this.cent).divide(value, 0, roundingMode);
+        return Money.of(newCent.longValueExact(), this.currency);
     }
 
     /**
@@ -158,9 +154,7 @@ public class Money implements Comparable<Money>, Serializable {
      * @return
      */
     public Money divide(long value, RoundingMode roundingMode) {
-        BigDecimal newCent =
-                BigDecimal.valueOf(this.cent).divide(BigDecimal.valueOf(value), roundingMode);
-        return Money.of(newCent.longValue(), this.currency);
+        return divide(BigDecimal.valueOf(value), roundingMode);
     }
 
     /**
@@ -170,7 +164,7 @@ public class Money implements Comparable<Money>, Serializable {
      */
     public Money add(Money value) {
         assertSameCurrency(value);
-        return Money.of(this.cent + value.cent, this.currency);
+        return Money.of(Math.addExact(this.cent, value.cent), this.currency);
     }
 
     /**
@@ -180,7 +174,7 @@ public class Money implements Comparable<Money>, Serializable {
      */
     public Money subtract(Money value) {
         assertSameCurrency(value);
-        return Money.of(this.cent - value.cent, this.currency);
+        return Money.of(Math.subtractExact(this.cent, value.cent), this.currency);
     }
 
     /**
@@ -189,7 +183,7 @@ public class Money implements Comparable<Money>, Serializable {
      * @return
      */
     public Money multiply(long value) {
-        return Money.of(this.cent * value, this.currency);
+        return Money.of(Math.multiplyExact(this.cent, value), this.currency);
     }
 
     /**
@@ -200,7 +194,7 @@ public class Money implements Comparable<Money>, Serializable {
      */
     public Money multiply(BigDecimal value, RoundingMode roundingMode) {
         long newCent =
-                BigDecimal.valueOf(this.cent).multiply(value).setScale(0, roundingMode).longValue();
+                BigDecimal.valueOf(this.cent).multiply(value).setScale(0, roundingMode).longValueExact();
         return Money.of(newCent, this.currency);
     }
 
@@ -209,7 +203,7 @@ public class Money implements Comparable<Money>, Serializable {
                 BigDecimal.valueOf(this.cent)
                         .multiply(value)
                         .setScale(0, DEFAULT_ROUNDING)
-                        .longValue();
+                        .longValueExact();
         return Money.of(newCent, this.currency);
     }
 
@@ -244,4 +238,7 @@ public class Money implements Comparable<Money>, Serializable {
         }
         return false;
     }
+
+    @Override
+    public int hashCode() { return Objects.hash(cent, currency); }
 }

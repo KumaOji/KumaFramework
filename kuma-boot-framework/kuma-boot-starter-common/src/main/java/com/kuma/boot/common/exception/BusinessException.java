@@ -73,6 +73,10 @@ public class BusinessException extends BaseException {
         super(result);
     }
 
+    public BusinessException(ResultEnum result, String message) {
+        super(result.code(), message);
+    }
+
     public BusinessException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }

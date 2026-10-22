@@ -156,7 +156,9 @@ public class ErrorHandlingProperties {
 
     public enum DefaultErrorCodeStrategy {
         FULL_QUALIFIED_NAME,
-        ALL_CAPS
+        ALL_CAPS,
+        /** Use framework ResultEnum codes for technical and validation errors too. */
+        RESULT_ENUM
     }
 
     public static class JsonFieldNames {

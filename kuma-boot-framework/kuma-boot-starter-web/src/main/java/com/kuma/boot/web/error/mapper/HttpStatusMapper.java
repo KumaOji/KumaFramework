@@ -16,6 +16,8 @@
 
 package com.kuma.boot.web.error.mapper;
 
+import com.kuma.boot.common.enums.ResultEnum;
+import com.kuma.boot.common.exception.BaseException;
 import com.kuma.boot.web.error.ErrorHandlingProperties;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Throwable}.
  */
 public class HttpStatusMapper {
+
+    // Business codes are opaque strings, never parsed as HTTP status numbers.
+    private static final java.util.Map<String, HttpStatus> BUSINESS_STATUSES = java.util.Map.ofEntries(
+            java.util.Map.entry(ResultEnum.BAD_REQUEST.codeDesc(), HttpStatus.BAD_REQUEST),
+            java.util.Map.entry(ResultEnum.DATA_NOT_EXIST_ERROR.codeDesc(), HttpStatus.NOT_FOUND),
+            java.util.Map.entry(ResultEnum.REQUEST_NOT_FOUND.codeDesc(), HttpStatus.NOT_FOUND),
+            java.util.Map.entry(ResultEnum.REQUEST_OTHER_OPERATION.codeDesc(), HttpStatus.CONFLICT),
+            java.util.Map.entry(ResultEnum.UNAUTHORIZED.codeDesc(), HttpStatus.UNAUTHORIZED),
+            java.util.Map.entry(ResultEnum.FORBIDDEN.codeDesc(), HttpStatus.FORBIDDEN),
+            java.util.Map.entry(ResultEnum.REQUEST_MORE_ERROR.codeDesc(), HttpStatus.TOO_MANY_REQUESTS));
 
     private final ErrorHandlingProperties properties;
 
@@ -43,9 +55,21 @@ public class HttpStatusMapper {
             return status;
         }
 
-        // if (exception instanceof ResponseStatusException) {
-        //	return ((ResponseStatusException) exception).getStatus();
-        // }
+        if (exception instanceof BaseException business && business.getCode() != null) {
+            return BUSINESS_STATUSES.getOrDefault(business.getCode().getCode(), defaultHttpStatus);
+        }
+        if (exception instanceof org.springframework.web.ErrorResponse error) {
+            HttpStatus resolved = HttpStatus.resolve(error.getStatusCode().value());
+            return resolved == null ? defaultHttpStatus : resolved;
+        }
+        if (exception instanceof org.springframework.security.access.AccessDeniedException) return HttpStatus.FORBIDDEN;
+        if (exception instanceof org.springframework.security.core.AuthenticationException) return HttpStatus.UNAUTHORIZED;
+        if (exception instanceof IllegalArgumentException || exception instanceof ArithmeticException
+                || exception instanceof org.springframework.beans.TypeMismatchException
+                || exception instanceof org.springframework.http.converter.HttpMessageNotReadableException
+                || exception instanceof jakarta.validation.ConstraintViolationException) {
+            return HttpStatus.BAD_REQUEST;
+        }
 
         return defaultHttpStatus;
     }
