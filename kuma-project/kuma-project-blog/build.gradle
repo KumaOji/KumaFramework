@@ -32,7 +32,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-grpc')
 
     api projectLibs.hutool.core
-    api projectLibs.spring.boot.starter.websocket
+    implementation project(':kuma-boot-framework:kuma-boot-starter-websocket')
 
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok

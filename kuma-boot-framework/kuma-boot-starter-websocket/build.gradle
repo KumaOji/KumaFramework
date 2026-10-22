@@ -18,10 +18,10 @@ dependencies {
     api projectLibs.spring.messaging
 
     // Spring Data Redis (RedisTemplate / RedisMessageListenerContainer — 分布式消息分发)
-    api projectLibs.spring.boot.starter.data.redis
+    compileOnly projectLibs.spring.boot.starter.data.redis
 
     // Redisson (RTopic — Redis Pub/Sub 分布式推送)
-    api projectLibs.spring.redisson
+    compileOnly projectLibs.spring.redisson
 
     // Hutool
     api projectLibs.hutool.core
@@ -66,4 +66,9 @@ dependencies {
 
     // Redis Repository (RedisRepository — distributed session tracking)
     compileOnly project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+tasks.named('test') { useJUnitPlatform() }

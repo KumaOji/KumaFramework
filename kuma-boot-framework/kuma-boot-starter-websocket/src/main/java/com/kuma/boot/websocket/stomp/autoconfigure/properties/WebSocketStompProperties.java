@@ -18,6 +18,37 @@ public class WebSocketStompProperties {
    private String userDestinationPrefix = "/user";
    private String topic = "ws";
    private String principalHeader = "X-Websocket-Open-Id";
+   private List<String> brokerPrefixes = List.of("/broadcast", "/personal");
+   private List<String> allowedOriginPatterns = List.of();
+   private boolean sockjsEnabled = true;
+   private boolean nativeEndpointEnabled = true;
+   private boolean principalAuthenticationEnabled = false;
+   private boolean clusterEnabled = false;
+   private long heartbeatInterval = 10000;
+   private int messageSizeLimit = 10240;
+   private int sendBufferSizeLimit = 10240;
+   private int sendTimeLimit = 10000;
+
+   public List<String> getBrokerPrefixes() { return brokerPrefixes; }
+   public void setBrokerPrefixes(List<String> value) { brokerPrefixes = value; }
+   public List<String> getAllowedOriginPatterns() { return allowedOriginPatterns; }
+   public void setAllowedOriginPatterns(List<String> value) { allowedOriginPatterns = value; }
+   public boolean isSockjsEnabled() { return sockjsEnabled; }
+   public void setSockjsEnabled(boolean value) { sockjsEnabled = value; }
+   public boolean isNativeEndpointEnabled() { return nativeEndpointEnabled; }
+   public void setNativeEndpointEnabled(boolean value) { nativeEndpointEnabled = value; }
+   public boolean isPrincipalAuthenticationEnabled() { return principalAuthenticationEnabled; }
+   public void setPrincipalAuthenticationEnabled(boolean value) { principalAuthenticationEnabled = value; }
+   public boolean isClusterEnabled() { return clusterEnabled; }
+   public void setClusterEnabled(boolean value) { clusterEnabled = value; }
+   public long getHeartbeatInterval() { return heartbeatInterval; }
+   public void setHeartbeatInterval(long value) { heartbeatInterval = value; }
+   public int getMessageSizeLimit() { return messageSizeLimit; }
+   public void setMessageSizeLimit(int value) { messageSizeLimit = value; }
+   public int getSendBufferSizeLimit() { return sendBufferSizeLimit; }
+   public void setSendBufferSizeLimit(int value) { sendBufferSizeLimit = value; }
+   public int getSendTimeLimit() { return sendTimeLimit; }
+   public void setSendTimeLimit(int value) { sendTimeLimit = value; }
 
    public WebSocketStompProperties() {
    }

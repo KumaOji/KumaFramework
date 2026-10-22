@@ -36,12 +36,6 @@ public class WebSocketPrincipalHandshakeHandler extends DefaultHandshakeHandler 
                return webSocketPrincipal;
             }
 
-            String userId = httpServletRequest.getParameter("openid");
-            if (StringUtils.isNotBlank(userId)) {
-               WebSocketPrincipal webSocketPrincipal = new WebSocketPrincipal(userId);
-               log.debug("[Websocket] |- Determine user by request parameter, userId is  [{}].", userId);
-               return webSocketPrincipal;
-            }
          }
 
          log.warn("[Websocket] |- Can not determine user from request.");

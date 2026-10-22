@@ -1,95 +1,95 @@
 package com.kuma.boot.websocket.stomp.autoconfigure;
 
-import com.kuma.boot.common.utils.lang.StringUtils;
 import com.kuma.boot.websocket.stomp.autoconfigure.properties.WebSocketStompProperties;
 import com.kuma.boot.websocket.stomp.interceptor.WebSocketChannelInterceptor;
 import com.kuma.boot.websocket.stomp.interceptor.WebSocketPrincipalHandshakeHandler;
 import com.kuma.boot.websocket.stomp.interceptor.WebSocketSessionHandshakeInterceptor;
-import jakarta.annotation.PostConstruct;
-import java.util.List;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
-import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
-import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.socket.config.annotation.*;
+import java.util.List;
 
-@AutoConfiguration(
-   after = {WebSocketSessionHandshakeInterceptor.class}
-)
-@EnableScheduling
+@Configuration(proxyBeanMethods = false)
 @EnableWebSocketMessageBroker
 public class WebSocketMessageBrokerAutoConfiguration implements WebSocketMessageBrokerConfigurer {
-   private static final Logger log = LoggerFactory.getLogger(WebSocketMessageBrokerAutoConfiguration.class);
-   private final WebSocketStompProperties webSocketStompProperties;
-   private final WebSocketChannelInterceptor webSocketChannelInterceptor;
-   private final WebSocketSessionHandshakeInterceptor webSocketSessionHandshakeInterceptor;
+    private final WebSocketStompProperties properties;
+    private final ObjectProvider<WebSocketChannelInterceptor> channelInterceptor;
+    private final ObjectProvider<WebSocketSessionHandshakeInterceptor> handshakeInterceptor;
+    private final List<WebSocketStompEndpointCustomizer> customizers;
+    private final ThreadPoolTaskScheduler heartbeatScheduler;
 
-   public WebSocketMessageBrokerAutoConfiguration(WebSocketStompProperties webSocketStompProperties, WebSocketChannelInterceptor webSocketChannelInterceptor, WebSocketSessionHandshakeInterceptor webSocketSessionHandshakeInterceptor) {
-      this.webSocketStompProperties = webSocketStompProperties;
-      this.webSocketChannelInterceptor = webSocketChannelInterceptor;
-      this.webSocketSessionHandshakeInterceptor = webSocketSessionHandshakeInterceptor;
-   }
+    public WebSocketMessageBrokerAutoConfiguration(WebSocketStompProperties properties,
+            ObjectProvider<WebSocketChannelInterceptor> channelInterceptor,
+            ObjectProvider<WebSocketSessionHandshakeInterceptor> handshakeInterceptor,
+            ObjectProvider<WebSocketStompEndpointCustomizer> customizers,
+            @org.springframework.beans.factory.annotation.Qualifier("kumaWebSocketHeartbeatScheduler")
+            ThreadPoolTaskScheduler heartbeatScheduler) {
+        this.properties = properties;
+        this.channelInterceptor = channelInterceptor;
+        this.handshakeInterceptor = handshakeInterceptor;
+        this.customizers = customizers.orderedStream().toList();
+        this.heartbeatScheduler = heartbeatScheduler;
+    }
 
-   @PostConstruct
-   public void postConstruct() {
-      log.debug("[Websocket] |- SDK [WebSocket Message Broker] Auto Configure.");
-   }
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        if (!properties.isSockjsEnabled() && !properties.isNativeEndpointEnabled()) {
+            throw new IllegalArgumentException("Enable at least one STOMP endpoint transport");
+        }
+        if (properties.isSockjsEnabled()) {
+            configureEndpoint(registry.addEndpoint(properties.getEndpoint())).withSockJS();
+        }
+        if (properties.isNativeEndpointEnabled()) {
+            configureEndpoint(registry.addEndpoint(properties.getEndpoint()));
+        }
+    }
 
-   public void registerStompEndpoints(StompEndpointRegistry registry) {
-      WebSocketPrincipalHandshakeHandler principalHandshakeHandler = new WebSocketPrincipalHandshakeHandler();
-      registry.addEndpoint(new String[]{this.webSocketStompProperties.getEndpoint()}).setAllowedOrigins(new String[]{"*"}).addInterceptors(new HandshakeInterceptor[]{this.webSocketSessionHandshakeInterceptor}).setHandshakeHandler(principalHandshakeHandler).withSockJS();
-      registry.addEndpoint(new String[]{this.webSocketStompProperties.getEndpoint()}).setAllowedOrigins(new String[]{"*"}).addInterceptors(new HandshakeInterceptor[]{this.webSocketSessionHandshakeInterceptor}).setHandshakeHandler(principalHandshakeHandler);
-   }
+    private StompWebSocketEndpointRegistration configureEndpoint(StompWebSocketEndpointRegistration endpoint) {
+        endpoint.setAllowedOriginPatterns(properties.getAllowedOriginPatterns().toArray(String[]::new));
+        if (properties.isPrincipalAuthenticationEnabled()) {
+            endpoint.addInterceptors(handshakeInterceptor.getObject());
+            endpoint.setHandshakeHandler(new WebSocketPrincipalHandshakeHandler());
+        }
+        customizers.forEach(customizer -> customizer.customize(endpoint));
+        return endpoint;
+    }
 
-   public void configureMessageBroker(MessageBrokerRegistry registry) {
-      ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-      taskScheduler.setPoolSize(1);
-      taskScheduler.setThreadNamePrefix("Websocket-websocket-heartbeat-thread-");
-      taskScheduler.initialize();
-      registry.enableSimpleBroker(new String[]{"/broadcast", "/personal"}).setHeartbeatValue(new long[]{10000L, 10000L}).setTaskScheduler(taskScheduler);
-      String[] applicationDestinationPrefixes = this.webSocketStompProperties.getApplicationPrefixes();
-      if (ArrayUtils.isNotEmpty(applicationDestinationPrefixes)) {
-         registry.setApplicationDestinationPrefixes(applicationDestinationPrefixes);
-      }
+    // Spring manages scheduler shutdown with the broker lifecycle.
+    @Bean
+    public static ThreadPoolTaskScheduler kumaWebSocketHeartbeatScheduler() {
+        var scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("kuma-websocket-heartbeat-");
+        scheduler.setRemoveOnCancelPolicy(true);
+        return scheduler;
+    }
 
-      if (StringUtils.isNotBlank(this.webSocketStompProperties.getUserDestinationPrefix())) {
-         registry.setUserDestinationPrefix(this.webSocketStompProperties.getUserDestinationPrefix());
-      }
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        var broker = registry.enableSimpleBroker(properties.getBrokerPrefixes().toArray(String[]::new));
+        long heartbeat = properties.getHeartbeatInterval();
+        if (heartbeat < 0) throw new IllegalArgumentException("STOMP heartbeat interval must be non-negative");
+        broker.setHeartbeatValue(new long[]{heartbeat, heartbeat});
+        if (heartbeat > 0) broker.setTaskScheduler(heartbeatScheduler);
+        registry.setApplicationDestinationPrefixes(properties.getApplicationPrefixes());
+        if (properties.getUserDestinationPrefix() != null && !properties.getUserDestinationPrefix().isBlank()) {
+            registry.setUserDestinationPrefix(properties.getUserDestinationPrefix());
+        }
+    }
 
-   }
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(properties.getMessageSizeLimit())
+                .setSendBufferSizeLimit(properties.getSendBufferSizeLimit())
+                .setSendTimeLimit(properties.getSendTimeLimit());
+    }
 
-   public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-      registration.setMessageSizeLimit(10240).setSendBufferSizeLimit(10240).setSendTimeLimit(10000);
-   }
-
-   public void configureClientInboundChannel(ChannelRegistration registration) {
-      registration.taskExecutor().corePoolSize(10).maxPoolSize(20).keepAliveSeconds(60);
-      registration.interceptors(new ChannelInterceptor[]{this.webSocketChannelInterceptor});
-   }
-
-   public void configureClientOutboundChannel(ChannelRegistration registration) {
-      registration.taskExecutor().corePoolSize(10).maxPoolSize(20).keepAliveSeconds(60);
-   }
-
-   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-   }
-
-   public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-   }
-
-   public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
-      return true;
-   }
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        if (properties.isPrincipalAuthenticationEnabled()) registration.interceptors(channelInterceptor.getObject());
+    }
 }

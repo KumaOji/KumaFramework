@@ -32,7 +32,6 @@ public class WebSocketSessionHandshakeInterceptor extends HttpSessionHandshakeIn
          String protocol = httpServletRequest.getHeader("Sec-WebSocket-Protocol");
          String token = this.determineToken(protocol);
          if (StringUtils.isNotBlank(token)) {
-            log.debug("[Websocket] |- WebSocket fetch the token is [{}].", token);
             PrincipalDetails details = this.bearerTokenResolver.resolve(token);
             if (!ObjectUtils.isNotEmpty(details)) {
                response.setStatusCode(HttpStatus.UNAUTHORIZED);
