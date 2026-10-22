@@ -12,6 +12,7 @@ import com.kuma.boot.data.mybatis.mybatisplus.MpUtils;
 import com.kuma.boot.data.mybatis.mybatisplus.PageUtils;
 import com.kuma.boot.common.enums.ResultEnum;
 import com.kuma.boot.common.exception.BusinessException;
+import com.kuma.boot.data.common.exception.DataCommonException;
 import com.kuma.boot.common.utils.number.Money;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kuma.cloud.reference.domain.model.ProductSnapshot;
@@ -23,7 +24,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.function.Supplier;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
         return inScope(scope, false, () -> {
             var row = OrderDO.from(order);
             if (orders.insert(row) != 1) {
-                throw new DataAccessResourceFailureException("订单插入未生效");
+                throw new DataCommonException(ResultEnum.FAILED, "订单插入未生效");
             }
             return toVO(row.toDomain());
         });

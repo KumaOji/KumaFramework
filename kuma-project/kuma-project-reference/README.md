@@ -152,6 +152,8 @@ throw new BusinessException(ResultEnum.BAD_REQUEST);
 
 reference 设置 `kuma.boot.web.error.handling.default-error-code-strategy=RESULT_ENUM`，参数解析、字段校验、金额精度和溢出错误也返回 ResultEnum.BAD_REQUEST 的完整错误码。未知内部错误使用 INNER_ERROR；字段错误保留字段及校验提示。其他应用的默认策略保持原样。复制模板后优先复用已有 ResultEnum；新的业务码沿用框架 Code 和集中状态映射。
 
+数据操作结果不符合预期时复用 data-common 的 `DataCommonException`，例如 `new DataCommonException(ResultEnum.FAILED, "订单插入未生效")`。它支持自定义消息、框架错误码及原始 cause，不把影响行数为 0 误判为数据库连接故障。异常保留诊断消息，对外仍遵循内部错误提示配置；数据库驱动实际抛出的异常不在业务层重复包装。
+
 ## 框架复用与数据结构
 
 - `OrderPageQO extends PageQuery`，默认 `currentPage=1`、`pageSize=20`，页码至少为 1，每页 1–100 条；`page`、`size` 仍可作为参数别名。
