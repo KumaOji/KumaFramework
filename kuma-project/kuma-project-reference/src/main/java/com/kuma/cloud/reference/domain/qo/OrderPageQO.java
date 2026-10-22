@@ -1,6 +1,7 @@
 package com.kuma.cloud.reference.domain.qo;
 
 import com.kuma.boot.common.model.request.PageQuery;
+import com.kuma.boot.web.validation.annotation.StringEnums;
 import com.kuma.cloud.reference.domain.enums.DataScope;
 import jakarta.validation.constraints.Pattern;
 
@@ -9,7 +10,7 @@ public class OrderPageQO extends PageQuery {
     private DataScope scope = DataScope.MAIN;
     @Pattern(regexp = "[A-Z0-9-]{1,64}")
     private String sku;
-    @Pattern(regexp = "CREATED|CONFIRMED")
+    @StringEnums(enumList = {"CREATED", "CONFIRMED"})
     private String status;
     public DataScope getScope() { return scope; }
     public void setScope(DataScope value) { scope = value; }

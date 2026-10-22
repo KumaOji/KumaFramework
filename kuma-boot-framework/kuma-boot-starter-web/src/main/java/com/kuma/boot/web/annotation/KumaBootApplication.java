@@ -17,11 +17,11 @@
 package com.kuma.boot.web.annotation;
 
 import com.kuma.boot.core.utils.context.EnableContextUtils;
-import com.kuma.boot.security.spring.annotation.EnableOauth2ResourceServer;
 //import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.servlet.context.ServletComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
 
@@ -38,7 +38,10 @@ import java.lang.annotation.*;
 @EnableContextUtils
 @ServletComponentScan(basePackages = {"com.kuma.boot.web.servlet"})
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
-@EnableOauth2ResourceServer
+@Import(KumaBootApplicationImportSelector.class)
 //@EnableEncryptableProperties
 @SpringBootApplication
-public @interface KumaBootApplication {}
+public @interface KumaBootApplication {
+    /** Keep resource-server security enabled by default; anonymous templates may opt out. */
+    boolean oauth2ResourceServer() default true;
+}

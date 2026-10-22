@@ -17,13 +17,15 @@
 package com.kuma.boot.data.datasource.dynamic.mybatisplus.annotation;
 
 import com.kuma.boot.data.datasource.autoconfigure.DynamicDataSourceAutoConfiguration;
+import com.kuma.boot.data.datasource.autoconfigure.DataSourceProcessorAutoConfiguration;
+import com.kuma.boot.data.datasource.autoconfigure.DataSourceRoutingAutoConfiguration;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 
 /**
  * 开启动态数据源
@@ -32,5 +34,6 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(DynamicDataSourceAutoConfiguration.class)
+@ImportAutoConfiguration({DynamicDataSourceAutoConfiguration.class,
+        DataSourceProcessorAutoConfiguration.class, DataSourceRoutingAutoConfiguration.class})
 public @interface EnableDynamicDataSource {}

@@ -24,12 +24,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.function.Supplier;
-import org.springframework.stereotype.Service;
+import com.kuma.boot.web.annotation.Manager;
 import org.springframework.transaction.TransactionDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Service
+@Manager
 public class OrderServiceImpl implements OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final OrderMapper orders;

@@ -37,6 +37,20 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 
 单个实现的数据源支持类直接使用具体类。不额外增加 Repository 转发层、Command/Query、副本输出 DTO、转换层或抽象 Service 基类。
 
+## 框架注解复用
+
+| 使用位置 | 框架注解 | 作用 |
+|---|---|---|
+| ReferenceApplication | `@KumaBootApplication(oauth2ResourceServer = false)` | 代替直接使用 `@SpringBootApplication`，复用上下文工具、Servlet 扫描和 AOP；本示例显式关闭 OAuth2 资源服务器 |
+| OrderController | `@BusinessApi` | 复用统一 `Result<T>` 返回体；仍配合 `@RestController` 和请求映射注解 |
+| OrderServiceImpl | `@Manager` | 复用框架基于 `@Service` 的组件注解，保留 Service 接口及实现分层 |
+| DataSourceConfiguration | `@EnableDynamicDataSource` | 统一导入动态数据源配置、`#last` 参数解析链和数据源路由组件 |
+| OrderPageQO.status | `@StringEnums` | 复用字段取值校验，允许 CREATED / CONFIRMED，未传值时不筛选状态 |
+
+`@KumaBootApplication` 默认仍启用 OAuth2，已有项目无需修改。reference 使用显式关闭选项，并由 SecurityConfig 声明匿名访问策略。`@EnableDynamicDataSource` 同时适用于 YAML/Nacos 配置来源；数据库配置来源仍受原有 enabled 配置控制。事务支持继续显式导入，不修改 `AutoConfiguration.imports`。
+
+框架尚无等价组合注解的 `@Configuration`、`@Bean`、请求映射和构造器参数 `@Qualifier` 继续使用 Spring 注解。通用必填、数值范围及格式约束继续使用 Jakarta Validation；框架注解按实际用途使用。
+
 ## 已配置的能力
 
 | 能力 | 实现与配置 |

@@ -78,6 +78,11 @@ class ReferenceApplicationTest {
     void starterRestoresTenantAndDataSourceAfterNestedFailures() {
         assertEquals(1, context.getBeansOfType(
                 com.kuma.boot.web.autoconfigure.WebMvcAutoConfiguration.class).size());
+        assertEquals(1, context.getBeansOfType(
+                com.kuma.boot.core.utils.context.ContextUtils.class).size());
+        assertTrue(context.getBeansOfType(
+                com.kuma.boot.security.spring.autoconfigure.Oauth2ResourceAutoConfiguration.class).isEmpty());
+        assertEquals(1, context.getBeansWithAnnotation(com.kuma.boot.web.annotation.Manager.class).size());
         assertInstanceOf(com.kuma.boot.data.datasource.dynamic.mybatisplus.config.DsLastParamProcessor.class,
                 context.getBean(com.baomidou.dynamic.datasource.processor.DsProcessor.class));
         assertTrue(sqlSessionFactory.getConfiguration().getInterceptors().stream()
