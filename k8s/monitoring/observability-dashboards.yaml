@@ -1,0 +1,1281 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: observability-dashboards
+  namespace: base
+data:
+  kuma-overview.json: |
+    {
+      "uid": "kuma-overview",
+      "title": "00 · 可观测性总览",
+      "description": "从服务健康、指标、日志进入调用链。默认最近一小时，30 秒刷新。",
+      "tags": [
+        "kuma",
+        "observability",
+        "prometheus"
+      ],
+      "schemaVersion": 39,
+      "version": 2,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timezone": "browser",
+      "links": [
+        {
+          "type": "link",
+          "title": "00 · 可观测性总览",
+          "url": "/d/kuma-overview",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "10 · Prometheus · 服务指标",
+          "url": "/d/kuma-services",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "11 · Prometheus · Gateway 网关",
+          "url": "/d/kuma-gateway",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "12 · Prometheus · 监控组件",
+          "url": "/d/kuma-monitoring",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "20 · Loki · 服务日志",
+          "url": "/d/kuma-logs",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "30 · SkyWalking · 调用链",
+          "url": "/d/kuma-traces",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        }
+      ],
+      "templating": {
+        "list": []
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Prometheus · 指标",
+          "type": "text",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 8,
+            "h": 5
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "### 服务与基础设施\n查看流量、错误率、延迟、JVM 和采集状态。\n\n[服务指标](/d/kuma-services) · [Gateway](/d/kuma-gateway) · [监控组件](/d/kuma-monitoring)"
+          }
+        },
+        {
+          "id": 2,
+          "title": "Loki · 日志",
+          "type": "text",
+          "gridPos": {
+            "x": 8,
+            "y": 0,
+            "w": 8,
+            "h": 5
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "### 按服务定位问题\n用环境、服务和关键词筛选日志，展开 traceId 查看关联链路。\n\n[打开日志工作台](/d/kuma-logs)"
+          }
+        },
+        {
+          "id": 3,
+          "title": "SkyWalking · 调用链",
+          "type": "text",
+          "gridPos": {
+            "x": 16,
+            "y": 0,
+            "w": 8,
+            "h": 5
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "### 跨服务请求追踪\n从日志 traceId 查看请求跨度与耗时，再反查同一链路的日志。\n\n[打开调用链工作台](/d/kuma-traces)"
+          }
+        },
+        {
+          "id": 4,
+          "title": "在线采集目标",
+          "type": "stat",
+          "gridPos": {
+            "x": 0,
+            "y": 5,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(up)",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          }
+        },
+        {
+          "id": 5,
+          "title": "异常采集目标",
+          "type": "stat",
+          "gridPos": {
+            "x": 6,
+            "y": 5,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(1-up)",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          }
+        },
+        {
+          "id": 6,
+          "title": "三服务请求速率",
+          "type": "stat",
+          "gridPos": {
+            "x": 12,
+            "y": 5,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\"}[5m]))",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          }
+        },
+        {
+          "id": 7,
+          "title": "三服务 5xx 比例",
+          "type": "stat",
+          "gridPos": {
+            "x": 18,
+            "y": 5,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "(sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\",status=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\"}[5m])),0.001)",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          }
+        },
+        {
+          "id": 8,
+          "title": "采集状态 · 1 正常 / 0 失联",
+          "type": "stat",
+          "gridPos": {
+            "x": 0,
+            "y": 9,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "up",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "min": 0,
+              "max": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          }
+        },
+        {
+          "id": 9,
+          "title": "三服务流量趋势",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 12,
+            "y": 9,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(application)(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\"}[5m]))",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 10,
+          "title": "最近 WARN / ERROR 日志 · 展开 traceId 查看调用链",
+          "type": "logs",
+          "gridPos": {
+            "x": 0,
+            "y": 17,
+            "w": 24,
+            "h": 10
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{service_name=~\"kuma-cloud-(blog|uaa|gateway)\"} | json | level=~\"(?i)warn|error|fatal\"",
+              "queryType": "range",
+              "editorMode": "code",
+              "maxLines": 200
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
+          }
+        }
+      ]
+    }
+  kuma-monitoring.json: |
+    {
+      "uid": "kuma-monitoring",
+      "title": "12 · Prometheus · 监控组件",
+      "description": "Prometheus 采集的监控组件进程指标；不等同于节点或容器资源指标。",
+      "tags": [
+        "kuma",
+        "observability",
+        "prometheus"
+      ],
+      "schemaVersion": 39,
+      "version": 2,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timezone": "browser",
+      "links": [
+        {
+          "type": "link",
+          "title": "00 · 可观测性总览",
+          "url": "/d/kuma-overview",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "10 · Prometheus · 服务指标",
+          "url": "/d/kuma-services",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "11 · Prometheus · Gateway 网关",
+          "url": "/d/kuma-gateway",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "12 · Prometheus · 监控组件",
+          "url": "/d/kuma-monitoring",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "20 · Loki · 服务日志",
+          "url": "/d/kuma-logs",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "30 · SkyWalking · 调用链",
+          "url": "/d/kuma-traces",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        }
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "job",
+            "label": "监控组件",
+            "type": "custom",
+            "query": "prometheus,grafana,loki,alertmanager,skywalking-oap",
+            "multi": true,
+            "includeAll": true,
+            "current": {
+              "text": "全部",
+              "value": "$__all"
+            },
+            "allValue": "prometheus|grafana|loki|alertmanager|skywalking-oap"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "组件采集状态 · 1 正常 / 0 失联",
+          "type": "stat",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 5
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "up{job=~\"$job\"}",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "min": 0,
+              "max": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none"
+          }
+        },
+        {
+          "id": 2,
+          "title": "进程 CPU 使用 · 核数",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 0,
+            "y": 5,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(job)(rate(process_cpu_seconds_total{job=~\"$job\"}[5m]))",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "cores"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 3,
+          "title": "进程常驻内存",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 12,
+            "y": 5,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "process_resident_memory_bytes{job=~\"$job\"}",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "采集耗时",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 0,
+            "y": 13,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "scrape_duration_seconds{job=~\"$job\"}",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "每次采集样本数",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 12,
+            "y": 13,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "scrape_samples_scraped{job=~\"$job\"}",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 6,
+          "title": "正在触发的告警",
+          "type": "table",
+          "gridPos": {
+            "x": 0,
+            "y": 21,
+            "w": 24,
+            "h": 7
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "ALERTS{alertstate=\"firing\"}",
+              "legendFormat": "{{application}}{{service_name}}{{job}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "description": "空表表示当前没有正在触发的告警。",
+          "options": {
+            "showHeader": true
+          }
+        }
+      ]
+    }
+  kuma-logs.json: |
+    {
+      "uid": "kuma-logs",
+      "title": "20 · Loki · 服务日志",
+      "description": "Loki 日志工作台：服务、环境、关键词筛选及 traceId 关联。",
+      "tags": [
+        "kuma",
+        "observability",
+        "loki"
+      ],
+      "schemaVersion": 39,
+      "version": 2,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timezone": "browser",
+      "links": [
+        {
+          "type": "link",
+          "title": "00 · 可观测性总览",
+          "url": "/d/kuma-overview",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "10 · Prometheus · 服务指标",
+          "url": "/d/kuma-services",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "11 · Prometheus · Gateway 网关",
+          "url": "/d/kuma-gateway",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "12 · Prometheus · 监控组件",
+          "url": "/d/kuma-monitoring",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "20 · Loki · 服务日志",
+          "url": "/d/kuma-logs",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "30 · SkyWalking · 调用链",
+          "url": "/d/kuma-traces",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        }
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "application",
+            "label": "服务",
+            "type": "custom",
+            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway",
+            "multi": true,
+            "includeAll": true,
+            "current": {
+              "text": "全部",
+              "value": "$__all"
+            },
+            "allValue": "kuma-cloud-(blog|uaa|gateway)"
+          },
+          {
+            "name": "environment",
+            "label": "环境",
+            "type": "custom",
+            "query": "wsl,server",
+            "multi": true,
+            "includeAll": true,
+            "current": {
+              "text": "全部",
+              "value": "$__all"
+            },
+            "allValue": ".*"
+          },
+          {
+            "name": "search",
+            "label": "关键词",
+            "type": "textbox",
+            "query": "",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "options": [
+              {
+                "text": "",
+                "value": "",
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "筛选与关联",
+          "type": "text",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 3
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "顶部选择服务、环境，输入关键词即可搜索。日志保留原始 JSON，展开日志详情中的 **traceId** 可跳到 SkyWalking 链路。\n\n[查看服务指标](/d/kuma-services) · [调用链工作台](/d/kuma-traces)"
+          }
+        },
+        {
+          "id": 2,
+          "title": "日志速率 · 条/秒",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 0,
+            "y": 3,
+            "w": 12,
+            "h": 7
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(service_name)(rate(({service_name=~\"$application\",environment=~\"$environment\"} |= ${search:doublequote})[5m]))",
+              "queryType": "range",
+              "editorMode": "code",
+              "maxLines": 200
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 3,
+          "title": "WARN / ERROR 日志速率 · 条/秒",
+          "type": "timeseries",
+          "gridPos": {
+            "x": 12,
+            "y": 3,
+            "w": 12,
+            "h": 7
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by(service_name)(rate(({service_name=~\"$application\",environment=~\"$environment\"} |= ${search:doublequote} | json | level=~\"(?i)warn|error|fatal\")[5m]))",
+              "queryType": "range",
+              "editorMode": "code",
+              "maxLines": 200
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "服务日志 · 最新 200 条",
+          "type": "logs",
+          "gridPos": {
+            "x": 0,
+            "y": 10,
+            "w": 24,
+            "h": 16
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{service_name=~\"$application\",environment=~\"$environment\"} |= ${search:doublequote}",
+              "queryType": "range",
+              "editorMode": "code",
+              "maxLines": 200
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
+          },
+          "description": "可展开 JSON 字段和 traceId；关键词按原文匹配。范围过大时可缩短顶部时间范围。"
+        }
+      ]
+    }
+  kuma-traces.json: |
+    {
+      "uid": "kuma-traces",
+      "title": "30 · SkyWalking · 调用链",
+      "description": "SkyWalking Zipkin 链路工作台，保留原有 Loki ↔ Trace 关联。",
+      "tags": [
+        "kuma",
+        "observability",
+        "skywalking"
+      ],
+      "schemaVersion": 39,
+      "version": 2,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timezone": "browser",
+      "links": [
+        {
+          "type": "link",
+          "title": "00 · 可观测性总览",
+          "url": "/d/kuma-overview",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "10 · Prometheus · 服务指标",
+          "url": "/d/kuma-services",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "11 · Prometheus · Gateway 网关",
+          "url": "/d/kuma-gateway",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "12 · Prometheus · 监控组件",
+          "url": "/d/kuma-monitoring",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "20 · Loki · 服务日志",
+          "url": "/d/kuma-logs",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "30 · SkyWalking · 调用链",
+          "url": "/d/kuma-traces",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        }
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "application",
+            "label": "服务",
+            "type": "custom",
+            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway",
+            "multi": true,
+            "includeAll": true,
+            "current": {
+              "text": "全部",
+              "value": "$__all"
+            },
+            "allValue": "kuma-cloud-(blog|uaa|gateway)"
+          },
+          {
+            "name": "environment",
+            "label": "环境",
+            "type": "custom",
+            "query": "wsl,server",
+            "multi": true,
+            "includeAll": true,
+            "current": {
+              "text": "全部",
+              "value": "$__all"
+            },
+            "allValue": ".*"
+          },
+          {
+            "name": "traceId",
+            "label": "Trace ID",
+            "type": "textbox",
+            "query": "",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "options": [
+              {
+                "text": "",
+                "value": "",
+                "selected": true
+              }
+            ]
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "日志 → 链路 → 日志",
+          "type": "text",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 5
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "1. 在下方请求日志中展开 **traceId**，点击链接可直接在 Explore 查看链路。\n2. 或将 traceId 粘贴到顶部 **Trace ID**，按 Enter 查看本页跨度与耗时。\n3. 下方关联日志只显示该 Trace ID 的记录。\n\n当前通过 SkyWalking 的 Zipkin 接口读取采样链路；没有 Trace ID 时链路面板留空。"
+          }
+        },
+        {
+          "id": 2,
+          "title": "可追踪请求日志 · 展开 traceId 进入链路",
+          "type": "logs",
+          "gridPos": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 9
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{service_name=~\"$application\",environment=~\"$environment\"} | json | traceId != \"\" | traceId != \"00000000000000000000000000000000\"",
+              "queryType": "range",
+              "editorMode": "code",
+              "maxLines": 200
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
+          }
+        },
+        {
+          "id": 3,
+          "title": "SkyWalking · 请求跨度与耗时",
+          "type": "traces",
+          "gridPos": {
+            "x": 0,
+            "y": 14,
+            "w": 24,
+            "h": 13
+          },
+          "datasource": {
+            "type": "zipkin",
+            "uid": "skywalking-zipkin"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "zipkin",
+                "uid": "skywalking-zipkin"
+              },
+              "queryType": "traceID",
+              "query": "$traceId"
+            }
+          ],
+          "options": {}
+        },
+        {
+          "id": 4,
+          "title": "同一 Trace ID 的关联日志",
+          "type": "logs",
+          "gridPos": {
+            "x": 0,
+            "y": 27,
+            "w": 24,
+            "h": 10
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "{service_name=~\"$application\",environment=~\"$environment\"} | json | traceId != \"\" | traceId = \"$traceId\"",
+              "queryType": "range",
+              "editorMode": "code",
+              "maxLines": 200
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "enableLogDetails": true,
+            "dedupStrategy": "none"
+          }
+        }
+      ]
+    }

@@ -68,12 +68,14 @@ def main():
     for uid in ("prometheus", "loki", "skywalking-zipkin"):
         poll(lambda uid=uid: get(grafana + "/api/datasources/uid/" + uid + "/health", auth)[0] == 200,
              "Grafana data source " + uid)
-    assert get(grafana + "/api/dashboards/uid/kuma-services", auth)[0] == 200
+    for uid in ("kuma-overview", "kuma-services", "kuma-gateway", "kuma-monitoring", "kuma-logs", "kuma-traces"):
+        poll(lambda uid=uid: get(grafana + "/api/dashboards/uid/" + uid, auth)[0] == 200,
+             "Grafana dashboard " + uid)
     assert get(alertmanager + "/-/ready")[0] == 200
     rules = json.loads(get(prometheus + "/api/v1/rules")[2])
     names = {rule["name"] for group in rules["data"]["groups"] for rule in group["rules"]}
     assert {"MonitoringTargetDown", "ServiceHighErrorRate", "ServiceHighLatency"}.issubset(names)
-    print("PASS: provisioned three-service dashboard, Alertmanager and service alert rules", flush=True)
+    print("PASS: six provisioned Kuma dashboards, Alertmanager and service alert rules", flush=True)
     marker = "server-monitoring-" + secrets.token_hex(8)
     status, _, _ = get(loki + "/loki/api/v1/push", body={"streams": [{
         "stream": {"service_name": "kuma-server-monitoring-smoke", "environment": "server"},

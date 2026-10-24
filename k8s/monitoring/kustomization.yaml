@@ -7,3 +7,4 @@ resources:
   - alertmanager.yaml
   - gateway-dashboard.yaml
   - services-dashboard.yaml
+  - observability-dashboards.yaml

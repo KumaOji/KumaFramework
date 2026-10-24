@@ -121,9 +121,17 @@ auth = {"Authorization": "Basic " + base64.b64encode(("admin:" + password).encod
 poll(lambda: get("http://127.0.0.1:3000/api/health")[0] == 200, "Grafana ready")
 status, _, body = get("http://127.0.0.1:3000/api/dashboards/uid/kuma-services", auth)
 assert status == 200 and len(json.loads(body)["dashboard"]["panels"]) == 8
+dashboard_uids = {"kuma-overview", "kuma-services", "kuma-gateway", "kuma-monitoring", "kuma-logs", "kuma-traces"}
+folder_uid = json.loads(body)["meta"]["folderUid"]
+for uid in sorted(dashboard_uids):
+    status, _, body = get("http://127.0.0.1:3000/api/dashboards/uid/" + uid, auth)
+    assert status == 200, uid
+    dashboard = json.loads(body)
+    assert dashboard["meta"]["folderUid"] == folder_uid, uid
+    assert {link["url"] for link in dashboard["dashboard"]["links"]} == {"/d/" + item for item in dashboard_uids}, uid
 for uid in ("prometheus", "loki", "skywalking-zipkin"):
     assert get("http://127.0.0.1:3000/api/datasources/uid/" + uid + "/health", auth)[0] == 200, uid
 status, _, body = get("http://127.0.0.1:3000/api/datasources/proxy/uid/skywalking-zipkin/api/v2/trace/" + trace_id, auth)
 assert status == 200 and len(json.loads(body)) >= 5
-print("PASS: Grafana three-service dashboard, healthy data sources and trace query", flush=True)
+print("PASS: six linked Kuma dashboards, healthy data sources and trace query", flush=True)
 print(json.dumps({"traceId": trace_id, "spans": len(spans), "dashboard": "http://localhost:3000/d/kuma-services"}), flush=True)

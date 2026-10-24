@@ -31,7 +31,24 @@ Grafana 用户名：`admin`。随机密码保存在 WSL 的 `~/.config/kuma-obse
 wsl -d Ubuntu-24.04 -- cat /home/kuma/.config/kuma-observability/grafana-admin-password
 ```
 
-Grafana 已配置 Prometheus（默认）、Loki、Alertmanager 三个数据源；在 Explore 中选择数据源查询。
+Grafana 已配置 Prometheus（默认）、Loki、SkyWalking Zipkin、Alertmanager 四个数据源。
+
+Kuma 文件夹按编号排列六张中文仪表盘，各页顶部可直接切换并保留时间范围：
+
+| 仪表盘 | 地址 | 用途 |
+|---|---|---|
+| 00 · 可观测性总览 | http://localhost:3000/d/kuma-overview | 采集健康、流量、异常日志与三个观测入口 |
+| 10 · Prometheus · 服务指标 | http://localhost:3000/d/kuma-services | Blog、UAA、Gateway 的请求、延迟、JVM 与连接池 |
+| 11 · Prometheus · Gateway 网关 | http://localhost:3000/d/kuma-gateway | 网关专属指标 |
+| 12 · Prometheus · 监控组件 | http://localhost:3000/d/kuma-monitoring | 组件进程 CPU、内存、采集耗时与告警 |
+| 20 · Loki · 服务日志 | http://localhost:3000/d/kuma-logs | 按服务、环境和关键词搜索，日志速率及异常趋势 |
+| 30 · SkyWalking · 调用链 | http://localhost:3000/d/kuma-traces | 从日志进入链路，或填写 Trace ID 查看跨度和关联日志 |
+
+默认每 30 秒刷新；新增页面默认最近一小时。日志每次最多展示 200 条。
+调用链页面未填写 Trace ID 时，跨度面板留空；可先展开请求日志中的 traceId，
+点击数据源关联链接进入 Explore。仪表盘通过 ConfigMap 文件供应，修改应同步到
+`k8s/monitoring/*dashboard*.yaml`，避免下一次供应覆盖手动修改。
+
 Prometheus 查询 `up` 可看到八个采集目标（含 Gateway、Blog、UAA），Loki 查询 `{service_name="kuma-monitoring-smoke"}` 可看到监控验证脚本的日志。
 Loki 是日志 API 服务，其日志界面由 Grafana 提供。
 

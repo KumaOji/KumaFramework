@@ -18,14 +18,14 @@ data:
   gateway.json: |
     {
       "uid": "kuma-gateway",
-      "title": "Kuma Gateway",
+      "title": "11 · Prometheus · Gateway 网关",
       "tags": [
         "kuma",
         "gateway"
       ],
       "schemaVersion": 39,
-      "version": 1,
-      "refresh": "15s",
+      "version": 2,
+      "refresh": "30s",
       "time": {
         "from": "now-30m",
         "to": "now"
@@ -225,6 +225,62 @@ data:
             "wrapLogMessage": true,
             "sortOrder": "Descending"
           }
+        }
+      ],
+      "links": [
+        {
+          "type": "link",
+          "title": "00 · 可观测性总览",
+          "url": "/d/kuma-overview",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "10 · Prometheus · 服务指标",
+          "url": "/d/kuma-services",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "11 · Prometheus · Gateway 网关",
+          "url": "/d/kuma-gateway",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "12 · Prometheus · 监控组件",
+          "url": "/d/kuma-monitoring",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "20 · Loki · 服务日志",
+          "url": "/d/kuma-logs",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
+        },
+        {
+          "type": "link",
+          "title": "30 · SkyWalking · 调用链",
+          "url": "/d/kuma-traces",
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": false
         }
       ]
     }

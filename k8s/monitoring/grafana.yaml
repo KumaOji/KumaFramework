@@ -165,6 +165,8 @@ spec:
                   items:
                     - key: services.json
                       path: services.json
+              - configMap:
+                  name: observability-dashboards
         - name: provisioning
           configMap:
             name: grafana-provisioning
