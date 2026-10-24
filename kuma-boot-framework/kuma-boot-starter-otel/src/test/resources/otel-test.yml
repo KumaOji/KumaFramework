@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: kuma-otel-test
+kuma:
+  boot:
+    otel:
+      enabled: true
+      endpoint: ${test.collector-url}
+      timeout: 3s
+      compression: gzip
+      headers:
+        X-Kuma-Test: otel-starter
+      sampling:
+        probability: 1.0
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false

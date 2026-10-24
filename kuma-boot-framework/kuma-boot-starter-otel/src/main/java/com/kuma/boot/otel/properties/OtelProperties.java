@@ -25,7 +25,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * OpenTelemetry 链路追踪配置（{@code kuma.boot.otel.*}）.
  *
  * <p>作为统一配置入口，启动阶段由 {@link com.kuma.boot.otel.env.OtelEnvironmentPostProcessor}
- * 中继到 Spring Boot 原生的 {@code management.tracing.*} / {@code management.otlp.tracing.*}，
+ * 中继到 Spring Boot 原生的 {@code management.tracing.*} /
+ * {@code management.opentelemetry.tracing.export.otlp.*}，
  * 单一 endpoint 即可对接 Tempo / Jaeger / Zipkin（OTLP 接收端）。
  * 业务应用仍可直接覆盖 {@code management.*} 做精细化控制。
  *
@@ -37,7 +38,7 @@ public class OtelProperties {
 
     public static final String PREFIX = "kuma.boot.otel";
 
-    /** 是否启用链路追踪. */
+    /** 是否启用 Kuma 配置映射；关闭时仍可使用原生 management.* 配置. */
     private boolean enabled = false;
 
     /** OTLP 导出端点（http/protobuf）. Tempo: 4318/v1/traces；Jaeger / Zipkin OTLP 接收端同理. */

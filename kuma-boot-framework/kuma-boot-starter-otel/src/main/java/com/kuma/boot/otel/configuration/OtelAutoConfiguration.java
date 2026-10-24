@@ -30,7 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  *
  * <p>基于 Micrometer Tracing 门面 + OpenTelemetry SDK 桥接 + OTLP Exporter，
  * 作为 SDK 方案与 {@code kuma-boot-starter-skywalking}（Agent 方案）互补。
- * 实际的 Tracer / SpanExporter Bean 由 Spring Boot Actuator 原生自动装配创建，
+ * 实际的 Tracer / SpanExporter Bean 由 Spring Boot 4 OpenTelemetry 原生自动装配创建，
  * 本类负责暴露 {@link OtelProperties} 统一配置入口并打印启动标识。
  *
  * @author kuma

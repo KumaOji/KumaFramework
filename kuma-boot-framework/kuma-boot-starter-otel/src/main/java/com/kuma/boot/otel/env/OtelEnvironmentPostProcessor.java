@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * 将 {@code kuma.boot.otel.*} 中继到 Spring Boot 原生的
- * {@code management.tracing.*} / {@code management.otlp.tracing.*}，
+ * {@code management.tracing.*} / {@code management.opentelemetry.tracing.export.otlp.*}，
  * 以驱动 Boot 内置的 Micrometer Tracing + OTLP 自动装配.
  *
  * <p>中继属性源以最低优先级（addLast）注入，因此用户在 application.yml 中显式声明的
@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
 public class OtelEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String PROPERTY_SOURCE_NAME = "kumaBootOtel";
+    private static final String OTLP_PREFIX = "management.opentelemetry.tracing.export.otlp.";
 
     @Override
     public void postProcessEnvironment(
@@ -64,17 +65,17 @@ public class OtelEnvironmentPostProcessor implements EnvironmentPostProcessor, O
         relayed.put("management.tracing.sampling.probability", props.getSampling().getProbability());
 
         if (StringUtils.hasText(props.getEndpoint())) {
-            relayed.put("management.otlp.tracing.endpoint", props.getEndpoint());
+            relayed.put(OTLP_PREFIX + "endpoint", props.getEndpoint());
         }
         if (StringUtils.hasText(props.getTimeout())) {
-            relayed.put("management.otlp.tracing.timeout", props.getTimeout());
+            relayed.put(OTLP_PREFIX + "timeout", props.getTimeout());
         }
         if (StringUtils.hasText(props.getCompression())) {
-            relayed.put("management.otlp.tracing.compression", props.getCompression());
+            relayed.put(OTLP_PREFIX + "compression", props.getCompression());
         }
         if (props.getHeaders() != null) {
             props.getHeaders().forEach((k, v) ->
-                    relayed.put("management.otlp.tracing.headers." + k, v));
+                    relayed.put(OTLP_PREFIX + "headers." + k, v));
         }
 
         environment.getPropertySources().addLast(new MapPropertySource(PROPERTY_SOURCE_NAME, relayed));

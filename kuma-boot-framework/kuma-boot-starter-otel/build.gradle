@@ -5,23 +5,22 @@ plugins {
 description = 'KumaFramework 分布式链路追踪模块（Micrometer Tracing + OpenTelemetry SDK + OTLP，对接 Tempo / Jaeger / Zipkin）'
 
 dependencies {
+    api platform(projectLibs.spring.boot.bom)
     api project(':kuma-boot-framework:kuma-boot-starter-core')
 
-    // Spring Boot Actuator：提供 MicrometerTracingAutoConfiguration / OpenTelemetryAutoConfiguration / OtlpTracingAutoConfiguration
+    // Boot 4 将 OTel SDK、Tracing 自动装配及 OTLP 导出拆分到了独立模块，统一由官方 starter 引入。
+    api projectLibs.spring.boot.starter.opentelemetry
     api projectLibs.spring.boot.starter.actuator
 
-    // Micrometer Tracing 门面（Tracer、Span、Baggage 等）
+    // 向业务模块暴露 Tracer / Span API，版本由 Boot BOM 对齐。
     api projectLibs.micrometer.tracing.api
-
-    // OpenTelemetry SDK 桥接（SDK 方案，与 SkyWalking agent 方案互补）
-    api projectLibs.micrometer.tracing.bridge.otel
-
-    // OTLP Exporter：通过 OTLP 协议导出 span 至 Tempo / Jaeger / Zipkin（OTLP 接收端）
-    api projectLibs.opentelemetry.exporter.otlp
-
-    // Spring Boot 自动装配（@AutoConfiguration、@ConfigurationProperties、EnvironmentPostProcessor 等）
-    api projectLibs.spring.boot.autoconfigure
 
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
+
+    testImplementation projectLibs.spring.boot.starter.test
+    testImplementation 'io.opentelemetry:opentelemetry-sdk'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+tasks.named('test') { useJUnitPlatform() }
