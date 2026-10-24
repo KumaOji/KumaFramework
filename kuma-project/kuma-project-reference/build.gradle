@@ -19,7 +19,7 @@ dependencies {
     implementation project(':kuma-cloud-framework:kuma-cloud-starter-alibaba')
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     implementation project(':kuma-boot-framework:kuma-boot-starter-actuator')
-    implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+    implementation project(':kuma-boot-framework:kuma-boot-starter-otel')
     testRuntimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 
