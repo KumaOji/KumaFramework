@@ -52,6 +52,34 @@ class BlogLifecycleTest {
         } finally { blog.shutdown(); }
     }
 
+    @Test void preparesFirstPageAndRetriesHttpErrorsBeforeOpeningPreview() throws Exception {
+        int port; try (var socket = new ServerSocket(0)) { port = socket.getLocalPort(); }
+        var blog = create(port);
+        Path allowPage = root.resolve("front end/KumaBlog/ready");
+        Files.writeString(root.resolve("front end/KumaBlog/node_modules/astro/astro.js"), """
+                const http=require('node:http'),fs=require('node:fs');
+                const port=Number(process.argv[process.argv.indexOf('--port')+1]);
+                http.createServer((req,res)=>{
+                    console.log('Page requested');
+                    if(req.headers.upgrade) { res.writeHead(400); res.end('HTTP/1.1 required'); return; }
+                    if(!fs.existsSync('ready')) { res.writeHead(503); res.end('Compiling'); return; }
+                    setTimeout(()=>res.end('Blog test'),300);
+                }).listen(port,'127.0.0.1');
+                """);
+        try {
+            blog.start();
+            assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
+                while (!blog.logs().get("body").contains("Page requested")) { blog.status(); Thread.sleep(25); }
+            });
+            assertThat(blog.status()).containsEntry("state", "STARTING").containsEntry("canOpen", false).containsEntry("canStop", true);
+            Files.writeString(allowPage, "ready");
+            assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
+                while (!Boolean.TRUE.equals(blog.status().get("canOpen"))) Thread.sleep(25);
+            });
+            assertThat(blog.status()).containsEntry("state", "RUNNING");
+        } finally { blog.shutdown(); }
+    }
+
     @Test void matchesOnlyAstroDevFromConfiguredDirectory() throws Exception {
         var blog = create(4321);
         String cli = root.resolve("front end/KumaBlog/node_modules/astro/astro.js").toString();

@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.Duration;
@@ -23,6 +27,9 @@ public class BlogLifecycle {
     private final CommandRunner commands;
     private final ObjectMapper mapper;
     private ProcessHandle process;
+    private boolean frontendReady, probing;
+    private final HttpClient http = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(2))
+            .followRedirects(HttpClient.Redirect.NORMAL).build();
     private Process synchronizing;
     private long generation;
     private String knowledgeState = "IDLE", knowledgeMessage = "启动 Blog 时自动同步知识仓库";
@@ -75,15 +82,45 @@ public class BlogLifecycle {
         return ProcessHandle.allProcesses().filter(p -> matches(p.info().command().orElse(""), p.info().commandLine().orElse(""))).findFirst();
     }
 
+    // Astro can listen before the first page has compiled. Prepare that page
+    // outside the status lock, so polling and Stop remain responsive.
+    private void preparePreview() {
+        if (process == null || frontendReady || probing || phase.equals("STOPPING")) return;
+        ProcessHandle candidate = process;
+        probing = true;
+        Thread.ofVirtual().name("blog-preview-ready").start(() -> {
+            while (candidate.isAlive()) {
+                synchronized (this) { if (process != candidate || phase.equals("STOPPING")) return; }
+                boolean ready = false;
+                try {
+                    var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/"))
+                            .timeout(Duration.ofSeconds(45)).GET().build();
+                    var response = http.send(request, HttpResponse.BodyHandlers.discarding());
+                    ready = response.statusCode() >= 200 && response.statusCode() < 300;
+                } catch (Exception ignored) { }
+                synchronized (this) {
+                    if (process != candidate || phase.equals("STOPPING")) return;
+                    if (ready) {
+                        frontendReady = true; probing = false;
+                        phase = "RUNNING"; message = "Blog 页面已就绪";
+                        return;
+                    }
+                }
+                try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); return; }
+            }
+            synchronized (this) { if (process == candidate) probing = false; }
+        });
+    }
+
     public synchronized Map<String, Object> status() {
         if (process != null && !process.isAlive() && !phase.equals("STOPPING")) {
-            process = null; phase = "STOPPED"; message = "Blog 已退出，请查看日志";
+            process = null; frontendReady = false; probing = false; phase = "STOPPED"; message = "Blog 已退出，请查看日志";
         }
         boolean occupied = reachable();
         if (process == null && occupied && !Set.of("STOPPING", "SYNCING").contains(phase)) {
-            discover().ifPresent(p -> { process = p; owned = false; phase = "RUNNING"; message = "已识别运行中的 Blog 前端"; });
+            discover().ifPresent(p -> { process = p; owned = false; frontendReady = false; probing = false; phase = "STARTING"; message = "正在准备 Blog 页面…"; });
         }
-        if (process != null && phase.equals("STARTING") && occupied) { phase = "RUNNING"; message = "Blog 已启动"; }
+        preparePreview();
         boolean external = process == null && occupied;
         boolean ready = Files.exists(directory.resolve("package.json")) && Files.exists(directory.resolve("node_modules/astro/astro.js"));
         boolean syncBusy = knowledgeState.equals("SYNCING");
@@ -97,7 +134,7 @@ public class BlogLifecycle {
         result.put("knowledgeState", knowledgeState); result.put("knowledgeMessage", knowledgeMessage);
         result.put("knowledgePid", synchronizing == null ? 0L : synchronizing.pid());
         result.put("knowledgeUrl", "http://localhost:" + port + "/knowledge");
-        result.put("canOpen", process != null && occupied && phase.equals("RUNNING"));
+        result.put("canOpen", process != null && occupied && frontendReady && phase.equals("RUNNING"));
         result.put("url", "http://localhost:" + port); result.put("directory", directory.toString());
         result.put("logPath", log == null ? "" : log.toString());
         return result;
@@ -155,7 +192,8 @@ public class BlogLifecycle {
             if (reachable()) throw new IOException("Blog 端口已被占用");
             Process launched = new ProcessBuilder("node", directory.resolve("node_modules/astro/astro.js").toString(), "dev", "--host", "127.0.0.1", "--port", Integer.toString(port))
                     .directory(directory.toFile()).redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.appendTo(log.toFile())).start();
-            process = launched.toHandle(); owned = true; phase = "STARTING"; message = "Blog 正在启动…";
+            process = launched.toHandle(); owned = true; frontendReady = false; probing = false;
+            phase = "STARTING"; message = "正在启动并准备 Blog 页面…";
         } catch (IOException e) { phase = "FAILED"; message = "Blog 启动失败：" + e.getMessage(); }
     }
 
@@ -173,7 +211,7 @@ public class BlogLifecycle {
             synchronized (this) {
                 if ((stopping != null && stopping.isAlive()) || (sync != null && sync.isAlive())) { phase = "FAILED"; message = "停止失败，请检查日志和进程"; }
                 else {
-                    process = null; synchronizing = null; owned = false; phase = "STOPPED"; message = "Blog 和知识仓库页面已关闭";
+                    process = null; synchronizing = null; owned = false; frontendReady = false; probing = false; phase = "STOPPED"; message = "Blog 和知识仓库页面已关闭";
                     if (knowledgeState.equals("SYNCING")) { knowledgeState = "CANCELLED"; knowledgeMessage = "知识仓库同步已取消"; }
                 }
             }

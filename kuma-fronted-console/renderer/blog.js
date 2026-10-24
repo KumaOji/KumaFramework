@@ -9,8 +9,11 @@ function renderBlogPreview(){
   if($('blog-preview-url').dataset.url!==url){$('blog-preview-url').value=url;$('blog-preview-url').dataset.url=url;}
   $('blog-open').hidden=!ready;$('blog-open').href=url;
   $('blog-preview').hidden=!ready;$('blog-preview-empty').hidden=ready;
-  if(ready){if($('blog-preview').dataset.url!==url){$('blog-preview').src=url;$('blog-preview').dataset.url=url;}}
-  else if($('blog-preview').hasAttribute('src')){$('blog-preview').removeAttribute('src');delete $('blog-preview').dataset.url;}
+  $('blog-preview-empty').textContent=['STARTING','SYNCING'].includes(blogFrontendStatus?.state)?blogFrontendStatus.message:'展开「配置与服务」启动 Blog，即可在这里浏览博客与知识仓库。';
+  $('blog-preview-reload').disabled=!ready;
+  // Initialize the embedded page with a visible viewport when its tab is opened.
+  if(ready&&isBlogViewActive()){if($('blog-preview').dataset.url!==url){$('blog-preview').src=url;$('blog-preview').dataset.url=url;}}
+  else if(!ready&&$('blog-preview').hasAttribute('src')){$('blog-preview').removeAttribute('src');delete $('blog-preview').dataset.url;}
   renderBlogControls();
   $('blog-settings-summary').textContent=`前端 ${blogFrontendStatus?.canOpen?'运行中':'未就绪'} · 后端 ${blogBackendStatus?.state==='RUNNING'?'运行中':'未就绪'}`;
 }
@@ -78,12 +81,13 @@ $('blog-preview-address').onsubmit=event=>{
   try{
     const url=new URL($('blog-preview-url').value.trim());
     if(!['http:','https:'].includes(url.protocol))throw new Error('请输入以 http:// 或 https:// 开头的 URL');
-    blogCustomUrl=url.href;notice('blog-preview-error','');renderBlogPreview();
+    blogCustomUrl=url.href;delete $('blog-preview').dataset.url;notice('blog-preview-error','');renderBlogPreview();
   }catch(error){notice('blog-preview-error','请输入有效的 HTTP 或 HTTPS 地址');}
 };
+$('blog-preview-reload').onclick=()=>{delete $('blog-preview').dataset.url;renderBlogPreview();};
 $('blog-view-home').onclick=()=>{blogView='home';blogCustomUrl=null;notice('blog-preview-error','');renderBlogPreview();};$('blog-view-knowledge').onclick=()=>{blogView='knowledge';blogCustomUrl=null;notice('blog-preview-error','');renderBlogPreview();};
 try{$('blog-settings').open=localStorage.getItem('blog-settings-open')==='true';}catch{}
 $('blog-settings').addEventListener('toggle',()=>{try{localStorage.setItem('blog-settings-open',String($('blog-settings').open));}catch{}});
-window.addEventListener('hashchange',()=>{if(isBlogViewActive()){pollBlogProcess();pollBlogBackend();}});
+window.addEventListener('hashchange',()=>{if(isBlogViewActive()){renderBlogPreview();pollBlogProcess();pollBlogBackend();}});
 setInterval(()=>{if(!document.hidden&&isBlogViewActive()){pollBlogProcess();pollBlogBackend();}},2000);
 pollBlogProcess();pollBlogBackend();
