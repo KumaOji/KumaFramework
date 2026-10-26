@@ -20,6 +20,9 @@ dependencies {
     implementation project(':kuma-boot-framework:kuma-boot-starter-data-mybatis')
     implementation project(':kuma-boot-framework:kuma-boot-starter-actuator')
     implementation project(':kuma-boot-framework:kuma-boot-starter-otel')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-audit-log')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-metrics')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-prometheus')
     testRuntimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 

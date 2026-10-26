@@ -6,7 +6,12 @@ import subprocess
 import sys
 
 address = str(ipaddress.IPv4Address(sys.argv[1]))
-for service, port in (("blog", 19001), ("uaa", 19002), ("gateway", 18081)):
+selected = set(sys.argv[2:]) or {"blog", "uaa", "gateway", "reference"}
+if selected - {"blog", "uaa", "gateway", "reference"}:
+    raise SystemExit("Unknown service name")
+for service, port in (("blog", 19001), ("uaa", 19002), ("gateway", 18081), ("reference", 19092)):
+    if service not in selected:
+        continue
     name = service + "-local"
     resources = [
         {"apiVersion": "v1", "kind": "Service", "metadata": {"name": name, "namespace": "base"},

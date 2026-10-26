@@ -21,6 +21,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-cache-redis')
     api project(':kuma-boot-framework:kuma-boot-starter-data-vector')
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-audit-log')
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
     }
@@ -190,6 +191,15 @@ tasks.register('socketLab', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.kuma.cloud.lab.network.SocketLifecycleLesson'
     args providers.gradleProperty('socketLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('auditLogLab', JavaExec) {
+    group = 'application'
+    description = 'Run audit-log starter lessons in an isolated Spring AOP context'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.auditlog.AuditLogLearningDemo'
+    args providers.gradleProperty('auditLesson').getOrElse('all')
     jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
 }
 

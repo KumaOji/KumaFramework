@@ -240,7 +240,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\"}[5m]))",
+              "expr": "sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)|kuma-reference\"}[5m]))",
               "legendFormat": "{{application}}{{service_name}}{{job}}",
               "range": true
             }
@@ -280,7 +280,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "(sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\",status=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\"}[5m])),0.001)",
+              "expr": "(sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)|kuma-reference\",status=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)|kuma-reference\"}[5m])),0.001)",
               "legendFormat": "{{application}}{{service_name}}{{job}}",
               "range": true
             }
@@ -377,7 +377,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by(application)(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)\"}[5m]))",
+              "expr": "sum by(application)(rate(http_server_requests_seconds_count{application=~\"kuma-cloud-(blog|uaa|gateway)|kuma-reference\"}[5m]))",
               "legendFormat": "{{application}}{{service_name}}{{job}}",
               "range": true
             }
@@ -416,7 +416,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "{service_name=~\"kuma-cloud-(blog|uaa|gateway)\"} | json | level=~\"(?i)warn|error|fatal\"",
+              "expr": "{service_name=~\"kuma-cloud-(blog|uaa|gateway)|kuma-reference\"} | json | level=~\"(?i)warn|error|fatal\"",
               "queryType": "range",
               "editorMode": "code",
               "maxLines": 200
@@ -859,14 +859,14 @@ data:
             "name": "application",
             "label": "服务",
             "type": "custom",
-            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway",
+            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway,kuma-reference",
             "multi": true,
             "includeAll": true,
             "current": {
               "text": "全部",
               "value": "$__all"
             },
-            "allValue": "kuma-cloud-(blog|uaa|gateway)"
+            "allValue": "kuma-cloud-(blog|uaa|gateway)|kuma-reference"
           },
           {
             "name": "environment",
@@ -1117,14 +1117,14 @@ data:
             "name": "application",
             "label": "服务",
             "type": "custom",
-            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway",
+            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway,kuma-reference",
             "multi": true,
             "includeAll": true,
             "current": {
               "text": "全部",
               "value": "$__all"
             },
-            "allValue": "kuma-cloud-(blog|uaa|gateway)"
+            "allValue": "kuma-cloud-(blog|uaa|gateway)|kuma-reference"
           },
           {
             "name": "environment",

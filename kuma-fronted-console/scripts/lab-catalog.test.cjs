@@ -5,6 +5,19 @@ const path=require('node:path');
 const model=require('../renderer/lab-catalog.js');
 const renderer=path.resolve(__dirname,'../renderer');
 
+test('audit lessons expose the runnable reports and all six HTTP entry points',()=>{
+  const apis=require('../renderer/lab-catalog.json');
+  const cards=require('../renderer/lab-learning.json');
+  for(const lesson of ['scenario','success','failure','content','proxy','storage']){
+    assert.ok(apis.some(entry=>entry.method==='POST'&&entry.path==='/lab/audit-log/'+lesson));
+  }
+  for(const lesson of ['all','content','proxy','storage']){
+    const card=cards.find(entry=>entry.id==='audit-log-'+lesson);
+    assert.ok(card);assert.equal(card.mainArgs,lesson);
+    assert.ok(model.matches(card,'审计'));
+  }
+});
+
 test('finder combines keywords and recognizes Chinese topics without matching ES inside unrelated words',()=>{
   const entries=[{group:'Redis',name:'写入字符串',path:'/lab/redis/string',method:'POST'},
     {group:'Elasticsearch',name:'全文搜索',path:'/lab/elasticsearch/search',method:'GET'},

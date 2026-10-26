@@ -44,6 +44,10 @@ data:
         metrics_path: /actuator/prometheus
         static_configs:
           - targets: [uaa-local:19002]
+      - job_name: reference
+        metrics_path: /actuator/prometheus
+        static_configs:
+          - targets: [reference-local:19092]
   rules.yml: |
     groups:
       - name: local-monitoring

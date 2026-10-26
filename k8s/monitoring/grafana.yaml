@@ -41,7 +41,7 @@ data:
             spanStartTimeShift: '-1m'
             spanEndTimeShift: '1m'
             customQuery: true
-            query: '{service_name=~"kuma-cloud-(blog|uaa|gateway)"} |= "$${__span.traceId}"'
+            query: '{service_name=~"kuma-cloud-(blog|uaa|gateway)|kuma-reference"} |= "$${__span.traceId}"'
       - name: Alertmanager
         uid: alertmanager
         type: alertmanager
@@ -167,6 +167,8 @@ spec:
                       path: services.json
               - configMap:
                   name: observability-dashboards
+              - configMap:
+                  name: reference-dashboard
         - name: provisioning
           configMap:
             name: grafana-provisioning

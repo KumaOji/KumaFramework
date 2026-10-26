@@ -8,3 +8,4 @@ resources:
   - gateway-dashboard.yaml
   - services-dashboard.yaml
   - observability-dashboards.yaml
+  - reference-dashboard.yaml

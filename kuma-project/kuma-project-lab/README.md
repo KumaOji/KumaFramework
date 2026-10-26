@@ -22,6 +22,7 @@
 ## 测试分类
 
 - `transaction`：数据库事务、提交、回滚和变更快照测试
+- `auditlog`：操作审计、SpEL、敏感内容策略、代理边界与审计存储故障实验
 - `binlog`：MySQL Row Binlog 变更捕获测试
 - `kafka`：Kafka 消息生产与消费测试
 - `redis`：String / Hash / List / Set 读写与 TTL 验证
@@ -39,6 +40,16 @@
 - `memory`：JMM 重排序与发布、JVM 堆/线程栈/堆外内存；配套 Linux 用户态/内核态、系统调用、mmap 与写时复制实验
 - `network`：Webhook 签名、时间窗口、幂等与重试；TCP 分帧、半关闭、读取超时及 UDP 数据报通信
 - `jdk`：按 JDK 8～25 的代表性功能正式版本组织的实验，统一在 JDK25 运行，含独立预览示例
+
+## 日志审计实验
+
+复用现有 audit-log starter，观察成功/失败记录、操作人和 SpEL 业务标识、敏感内容关闭与截断、代理自调用，以及审计存储失败时的业务行为。每次创建独立 Spring 上下文，无需中间件。
+
+```powershell
+./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab
+```
+
+可用 `-PauditLesson=content` 等参数选择单项；Lab 接口为 `/api/lab/audit-log/*`，控制台包含实验入口与学习卡片。步骤与预期见 [日志审计实验教程](docs/audit-log-labs.md)。
 
 ## Elasticsearch 实验
 

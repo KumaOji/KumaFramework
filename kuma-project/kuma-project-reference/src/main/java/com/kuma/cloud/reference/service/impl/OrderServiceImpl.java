@@ -25,6 +25,7 @@ import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.function.Supplier;
 import com.kuma.boot.web.annotation.Manager;
+import com.kuma.boot.metrics.method.annotation.TimedMethod;
 import org.springframework.transaction.TransactionDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @TimedMethod("createOrder")
     public OrderVO create(CreateOrderDTO request, DataScope scope) {
         var product = new ProductSnapshot(request.sku(), request.productName(), Money.of(request.unitPrice(), "CNY"));
         var order = Order.create(product, request.quantity(), clock.instant());
@@ -59,11 +61,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @TimedMethod("getOrder")
     public OrderVO get(Long id, DataScope scope) {
         return inScope(scope, true, () -> toVO(requireOrder(id)));
     }
 
     @Override
+    @TimedMethod("pageOrders")
     public PageResultRecord<OrderVO> page(OrderPageQO query) {
         return inScope(query.getScope(), true, () -> {
             var filters = new LambdaQueryWrapper<OrderDO>()
@@ -77,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @TimedMethod("confirmOrder")
     public OrderVO confirm(Long id, DataScope scope) {
         return inScope(scope, false, () -> {
             var previous = requireOrder(id);

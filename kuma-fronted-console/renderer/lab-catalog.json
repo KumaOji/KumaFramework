@@ -837,5 +837,53 @@
     "path": "/lab/vector/status",
     "body": "",
     "source": "VectorTestController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "完整日志审计实验",
+    "method": "POST",
+    "path": "/lab/audit-log/scenario",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "成功审计与 SpEL 业务标识",
+    "method": "POST",
+    "path": "/lab/audit-log/success",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "失败审计与原异常传播",
+    "method": "POST",
+    "path": "/lab/audit-log/failure",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "敏感内容关闭与截断",
+    "method": "POST",
+    "path": "/lab/audit-log/content",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "代理调用与自调用对照",
+    "method": "POST",
+    "path": "/lab/audit-log/proxy",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "审计存储故障与业务结果",
+    "method": "POST",
+    "path": "/lab/audit-log/storage",
+    "body": "",
+    "source": "AuditLogLabController.java"
   }
 ]

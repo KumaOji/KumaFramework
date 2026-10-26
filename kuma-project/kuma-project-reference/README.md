@@ -2,6 +2,10 @@
 
 参考 blog 的常规分层，用于复制后开发新业务。沿用仓库 Java 25、Spring Boot 和 Gradle 版本管理。
 
+日常开发约定见 [业务项目开发规范](DEVELOPMENT.md)，涵盖命名、分层、接口、异常、事务及框架复用。
+
+日志、操作审计、指标及 Grafana 演示见 [可观测性说明](OBSERVABILITY.md)。
+
 ## 项目结构
 
 ```text
@@ -63,7 +67,9 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | 日志 | kuma-boot-starter-logger，统一 Logback 输出；Nacos 模板启用 reference DEBUG 日志以查看数据源/schema 路由 |
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、BaseMapperX 和条件构造器 |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
-| Actuator | kuma-boot-starter-actuator，health / info 及 Kuma 监控扩展 |
+| Actuator / Prometheus | kuma-boot-starter-actuator、kuma-boot-starter-prometheus，health / info / prometheus 及 Kuma 监控扩展 |
+| 操作审计 | kuma-boot-starter-audit-log，创建与确认订单的 `@AuditLog` 示例 |
+| 业务与资源指标 | kuma-boot-starter-metrics，`@TimedMethod`、动态数据源连接池和业务线程池指标 |
 | 链路追踪 | Spring Boot 4 OpenTelemetry starter，经 WSL Collector 导出到 SkyWalking；启动脚本加载 SkyWalking Java Agent |
 
 MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。数据库、schema 和表由部署流程预先创建，应用启动时不执行数据库初始化。上下文在调用结束或异常后恢复。
@@ -84,7 +90,7 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 
 入口使用 `kuma-boot-starter-core` 的 `StartupSpringApplication`，启用 Kuma Banner、应用属性初始化和初始化器耗时记录。环境仍由 bootstrap.yml、环境变量及命令行控制。
 
-框架保持显式接入设计：reference 在 config 下通过 `@ImportAutoConfiguration` 选择 core、logger、data-datasource、data-mybatis、web、actuator 所需的配置，不通过 `AutoConfiguration.imports` 随依赖自动启用。配置类只负责接入，具体能力复用框架实现。ExecutionConfiguration 显式引入框架 Clock，MyBatisConfiguration 通过 `@MapperScan` 指定本项目 Mapper。现有 `@KumaBootApplication` 同时开启 OAuth2 资源服务，因此模板继续使用 `@SpringBootApplication`；`SecurityConfig` 保留业务的放行策略，接入认证时修改该策略。
+reference 在 config 下通过 `@ImportAutoConfiguration` 选择 core、logger、data-datasource、data-mybatis、web、actuator 所需的配置。配置类只负责接入，具体能力复用框架实现。ExecutionConfiguration 显式引入框架 Clock，MyBatisConfiguration 通过 `@MapperScan` 指定本项目 Mapper。入口使用 `@KumaBootApplication(oauth2ResourceServer = false)` 显式关闭 OAuth2 资源服务；`SecurityConfig` 声明匿名放行策略，接入认证时同步调整启动注解与安全策略。OpenTelemetry starter 通过自身的 `AutoConfiguration.imports` 自动接入。
 
 运行配置由 Nacos 加载，本地模板为 `config/nacos/kuma-reference-dev.yaml`：
 
@@ -102,7 +108,7 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 .\gradlew.bat :kuma-project:kuma-project-reference:bootRun
 ```
 
-应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`。
+应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`，指标入口 `/actuator/prometheus`。
 
 ### OpenTelemetry 和 SkyWalking
 

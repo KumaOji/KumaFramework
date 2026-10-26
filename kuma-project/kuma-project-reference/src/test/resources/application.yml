@@ -54,6 +54,9 @@ mybatis-plus:
 
 kuma:
   boot:
+    audit-log:
+      enabled: true
+      async: false
     web:
       error:
         handling:
@@ -111,13 +114,24 @@ kuma:
 
 
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  otlp:
+    metrics:
+      export:
+        enabled: false
   health:
     redis:
       enabled: false
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: never
+
+method:
+  metrics:
+    prefix: reference.business

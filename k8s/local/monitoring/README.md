@@ -41,6 +41,7 @@ Kuma 文件夹按编号排列六张中文仪表盘，各页顶部可直接切换
 | 10 · Prometheus · 服务指标 | http://localhost:3000/d/kuma-services | Blog、UAA、Gateway 的请求、延迟、JVM 与连接池 |
 | 11 · Prometheus · Gateway 网关 | http://localhost:3000/d/kuma-gateway | 网关专属指标 |
 | 12 · Prometheus · 监控组件 | http://localhost:3000/d/kuma-monitoring | 组件进程 CPU、内存、采集耗时与告警 |
+| 13 · Reference · 开发模板观测 | http://localhost:3000/d/kuma-reference | 订单业务变化、HTTP、JVM、连接池、线程池、操作审计与日志链路 |
 | 20 · Loki · 服务日志 | http://localhost:3000/d/kuma-logs | 按服务、环境和关键词搜索，日志速率及异常趋势 |
 | 30 · SkyWalking · 调用链 | http://localhost:3000/d/kuma-traces | 从日志进入链路，或填写 Trace ID 查看跨度和关联日志 |
 

@@ -140,6 +140,52 @@ class ReferenceApplicationTest {
     }
 
     @Test
+    void orderAuditAndPrometheusDescribeSuccessfulAndRejectedChanges() throws Exception {
+        var logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("com.kuma.boot.auditlog.AUDIT");
+        var events = new java.util.concurrent.CopyOnWriteArrayList<ch.qos.logback.classic.spi.ILoggingEvent>();
+        var appender = new ch.qos.logback.core.AppenderBase<ch.qos.logback.classic.spi.ILoggingEvent>() {
+            @Override protected void append(ch.qos.logback.classic.spi.ILoggingEvent event) {
+                event.prepareForDeferredProcessing();
+                events.add(event);
+            }
+        };
+        appender.setContext(logger.getLoggerContext());
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            var created = request("POST", "/api/orders", "{\"sku\":\"AUDIT-001\",\"productName\":\"Audit sample\",\"unitPrice\":12.50,\"quantity\":2}");
+            assertEquals(201, created.statusCode());
+            long id = successData(created).path("id").asLong();
+            var builder = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/orders/" + id + "/confirm"))
+                    .header("X-User-Id", "demo-user").header("X-User-Name", "Demo")
+                    .POST(HttpRequest.BodyPublishers.noBody());
+            var confirmed = http.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, confirmed.statusCode());
+            assertEquals(409, request("POST", "/api/orders/" + id + "/confirm", null).statusCode());
+            assertEquals(3, events.size());
+            var success = JSON.readTree(events.get(1).getFormattedMessage());
+            assertEquals("demo-user", success.path("operatorId").asString());
+            assertEquals("MAIN:" + id, success.path("bizId").asString());
+            assertTrue(success.path("success").asBoolean());
+            assertEquals(confirmed.headers().firstValue("kmc-trace-id").orElseThrow(),
+                    events.get(1).getMDCPropertyMap().get("kmc-trace-id"));
+            assertFalse(JSON.readTree(events.get(2).getFormattedMessage()).path("success").asBoolean());
+            var registry = context.getBean(io.micrometer.core.instrument.MeterRegistry.class);
+            assertTrue(registry.get("reference.business.calls.success").tag("method", "confirmOrder").counter().count() >= 1);
+            assertTrue(registry.get("reference.business.calls.error").tag("method", "confirmOrder").counter().count() >= 1);
+            var metrics = request("GET", "/actuator/prometheus", null);
+            assertEquals(200, metrics.statusCode());
+            for (String name : new String[] {"reference_business_calls_success_total", "jvm_memory_used_bytes",
+                    "hikaricp_connections_active", "executor_queued_tasks"}) {
+                assertTrue(metrics.body().contains(name), name);
+            }
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
     void validatesInputAndReturns404ForMissingOrders() throws Exception {
         long before = countOrders();
         var invalid = request("POST", "/api/orders", "{\"sku\":\"BOOK-001\",\"quantity\":1}");

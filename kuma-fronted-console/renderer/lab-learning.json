@@ -1165,5 +1165,101 @@
     "doc": "/lab-guides/socket-session-labs.md",
     "mainClass": "com.kuma.cloud.lab.session.SessionLearningDemo",
     "mainArgs": "expiry"
+  },
+  {
+    "kind": "learning",
+    "id": "audit-log-all",
+    "group": "日志审计实验",
+    "name": "日志审计完整实验",
+    "description": "复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。",
+    "runtime": "JDK 25 · Spring AOP · 无外部中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab",
+    "topics": [
+      "AuditLog",
+      "SpEL",
+      "操作人",
+      "成功/失败",
+      "异常传播"
+    ],
+    "expected": [
+      "5条实际审计快照，全部checks通过；业务失败与存储故障均有明确解释。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java"
+    ],
+    "doc": "/lab-guides/audit-log-labs.md",
+    "mainClass": "com.kuma.cloud.lab.auditlog.AuditLogLearningDemo",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "audit-log-content",
+    "group": "日志审计实验",
+    "name": "审计敏感内容策略与截断",
+    "description": "复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。",
+    "runtime": "JDK 25 · Spring AOP · 无外部中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=content",
+    "topics": [
+      "recordParams",
+      "recordResult",
+      "敏感信息",
+      "长度截断"
+    ],
+    "expected": [
+      "教学密钥不出现在审计入参/出参，400字符普通文本按160字符加后缀截断。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java"
+    ],
+    "doc": "/lab-guides/audit-log-labs.md",
+    "mainClass": "com.kuma.cloud.lab.auditlog.AuditLogLearningDemo",
+    "mainArgs": "content"
+  },
+  {
+    "kind": "learning",
+    "id": "audit-log-proxy",
+    "group": "日志审计实验",
+    "name": "审计代理边界与自调用",
+    "description": "复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。",
+    "runtime": "JDK 25 · Spring AOP · 无外部中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=proxy",
+    "topics": [
+      "Spring AOP",
+      "代理",
+      "self invocation",
+      "this调用"
+    ],
+    "expected": [
+      "自调用无新增记录；通过Spring代理调用相同方法新增一条审计。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java"
+    ],
+    "doc": "/lab-guides/audit-log-labs.md",
+    "mainClass": "com.kuma.cloud.lab.auditlog.AuditLogLearningDemo",
+    "mainArgs": "proxy"
+  },
+  {
+    "kind": "learning",
+    "id": "audit-log-storage",
+    "group": "日志审计实验",
+    "name": "审计存储失败的业务语义",
+    "description": "复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。",
+    "runtime": "JDK 25 · Spring AOP · 无外部中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=storage",
+    "topics": [
+      "AuditLogStore",
+      "故障隔离",
+      "审计丢失"
+    ],
+    "expected": [
+      "存储抛错时业务仍成功，但没有审计记录；不能以业务成功推断审计可靠。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java"
+    ],
+    "doc": "/lab-guides/audit-log-labs.md",
+    "mainClass": "com.kuma.cloud.lab.auditlog.AuditLogLearningDemo",
+    "mainArgs": "storage"
   }
 ]

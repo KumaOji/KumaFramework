@@ -1,5 +1,7 @@
 package com.kuma.cloud.reference.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
 import com.kuma.cloud.reference.domain.dto.CreateOrderDTO;
 import com.kuma.cloud.reference.domain.enums.DataScope;
 import com.kuma.cloud.reference.domain.qo.OrderPageQO;
@@ -36,6 +38,8 @@ public class OrderController {
     }
 
     @PostMapping
+    @AuditLog(module = "reference.orders", type = OperateType.CREATE,
+            description = "'创建订单 scope=' + #scope", recordParams = false)
     public ResponseEntity<OrderVO> create(@Valid @RequestBody CreateOrderDTO request,
             @RequestParam(defaultValue = "MAIN") DataScope scope) {
         var order = orderService.create(request, scope);
@@ -53,6 +57,9 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/confirm")
+    @AuditLog(module = "reference.orders", type = OperateType.UPDATE,
+            description = "'确认订单 CREATED -> CONFIRMED scope=' + #scope", bizId = "#scope + ':' + #id",
+            recordParams = false)
     public OrderVO confirm(@PathVariable Long id, @RequestParam(defaultValue = "MAIN") DataScope scope) {
         return orderService.confirm(id, scope);
     }

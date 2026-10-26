@@ -65,6 +65,7 @@ mybatis-plus:
     local-cache-scope: STATEMENT
 
 logging:
+  config: classpath:logback-observability.xml
   level:
     com.kuma.cloud.reference: DEBUG
   access:
@@ -76,6 +77,11 @@ logback:
 
 kuma:
   boot:
+    audit-log:
+      enabled: true
+      # Keep the request/trace MDC on the audit event. Loki itself sends in batches.
+      async: false
+      max-content-length: 2000
     logger:
       enabled: true
     web:
@@ -135,6 +141,16 @@ kuma:
 
 
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${KUMA_ENVIRONMENT:local}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        hikaricp.connections.acquire: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
   tracing:
     enabled: ${REFERENCE_TRACING_ENABLED:true}
     sampling:
@@ -154,7 +170,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: never
+
+observability:
+  environment: ${KUMA_ENVIRONMENT:local}
+  loki-url: ${KUMA_LOKI_URL:http://localhost:3100/loki/api/v1/push}
+
+method:
+  metrics:
+    enabled: true
+    prefix: reference.business
+    histogram: true

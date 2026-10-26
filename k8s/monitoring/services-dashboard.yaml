@@ -27,10 +27,10 @@ data:
             "name": "application",
             "label": "服务",
             "type": "custom",
-            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway",
+            "query": "kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway,kuma-reference",
             "multi": true,
             "includeAll": true,
-            "allValue": "kuma-cloud-(blog|uaa|gateway)",
+            "allValue": "kuma-cloud-(blog|uaa|gateway)|kuma-reference",
             "current": {
               "text": "All",
               "value": "$__all"
@@ -56,7 +56,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "up{job=~\"blog|uaa|gateway\"}",
+              "expr": "up{job=~\"blog|uaa|gateway|reference\"}",
               "legendFormat": "{{application}} {{pool}} {{job}}"
             }
           ],
