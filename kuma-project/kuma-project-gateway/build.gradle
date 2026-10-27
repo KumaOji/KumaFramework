@@ -14,6 +14,7 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation project(':kuma-boot-framework:kuma-boot-starter-audit-log')
     // ── Kuma 框架（栈无关能力） ───────────────────────────────────────────
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')

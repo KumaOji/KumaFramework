@@ -4,6 +4,7 @@ Gateway 使用 Spring Boot 4 原生 OpenTelemetry/Micrometer 自动装配：
 
 - traces：Gateway → OTel Collector → SkyWalking；传播 W3C `traceparent`，查询 SkyWalking 的 Zipkin Trace 页面。
 - logs：控制台复用框架 MDC 文本格式，Loki4j 异步发送 JSON；访问日志含关联 ID、租户、请求版本、OTEL traceId/spanId、SkyWalking TID、路由、状态和耗时，不记录查询串、请求体或 Authorization。
+- audit：复用 audit-log starter 的记录与存储，在响应式请求完成、异常或取消后记录写操作和失败请求；身份来自 Spring Security 验证后的主体。配置与查询见 [三服务操作审计](../AUDIT_LOG.md)。
 - metrics：Prometheus 读取独立管理端口 `/actuator/prometheus`，包括 JVM、HTTP 请求与 Gateway 路由指标和耗时直方图。
 - Grafana：`Kuma / Kuma Gateway` 面板展示请求速率、错误率、P95、JVM、路由指标和日志。
 - Alertmanager：Prometheus 管理的目标失联、持续 5xx 比例超过 5%、持续 P95 超过两秒规则；外部通知渠道仍需配置。

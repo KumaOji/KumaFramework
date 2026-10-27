@@ -17,6 +17,9 @@
 package com.kuma.cloud.gateway.config;
 
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
+import com.kuma.cloud.gateway.filter.GatewayAuditWebFilter;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -42,12 +45,18 @@ public class GatewaySecurityConfiguration {
     @Order(0)
     public SecurityWebFilterChain gatewaySecurityWebFilterChain(
             ServerHttpSecurity http, GatewayCloudProperties properties,
+            ObjectProvider<GatewayAuditWebFilter> auditFilters,
             @Value("${server.port:18080}") int serverPort,
             @Value("${management.server.port:${server.port:18080}}") int managementPort) {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable);
+
+        GatewayAuditWebFilter audit = auditFilters.getIfAvailable();
+        if (audit != null) {
+            http.addFilterAfter(audit::capturePrincipal, SecurityWebFiltersOrder.SECURITY_CONTEXT_SERVER_WEB_EXCHANGE);
+        }
 
         if (properties.getAuth().isEnabled()) {
             http.authorizeExchange(exchanges -> {

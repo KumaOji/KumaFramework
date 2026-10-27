@@ -13,16 +13,20 @@ class StarterConfigurationTest {
         new ReactiveWebApplicationContextRunner()
                 .withClassLoader(new FilteredClassLoader("jakarta.servlet"))
                 .withPropertyValues("spring.application.name=kuma-cloud-gateway")
+                .withBean(com.kuma.cloud.gateway.properties.GatewayCloudProperties.class,
+                        com.kuma.cloud.gateway.properties.GatewayCloudProperties::new)
                 .withConfiguration(org.springframework.boot.autoconfigure.AutoConfigurations.of(
                         org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.class))
                 .withUserConfiguration(ActuatorConfiguration.class, LoggerConfiguration.class,
-                        PrometheusConfiguration.class, Ip2regionConfiguration.class)
+                        PrometheusConfiguration.class, Ip2regionConfiguration.class, AuditLogConfiguration.class)
                 .run(context -> {
                     assertThat(context).hasNotFailed();
                     assertThat(context).hasSingleBean(KmcHealthIndicator.class);
                     assertThat(context).hasBean("prometheusThreadPoolTaskScheduler");
                     assertThat(context).doesNotHaveBean("oauth2ResourceSecurityFilterChain");
                     assertThat(context).doesNotHaveBean("webMvcAutoConfiguration");
+                    assertThat(context).hasSingleBean(com.kuma.boot.auditlog.core.AuditLogStore.class);
+                    assertThat(context).doesNotHaveBean(com.kuma.boot.auditlog.core.AuditOperatorProvider.class);
                 });
     }
 }

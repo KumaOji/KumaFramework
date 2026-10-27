@@ -140,6 +140,9 @@ knife4j:
 
 kuma:
   boot:
+    audit-log:
+      enabled: true
+      async: false
     security:
       oauth2:
         endpoint:
