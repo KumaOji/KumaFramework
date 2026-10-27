@@ -3,6 +3,7 @@ package com.kuma.cloud.blog.security;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.UserService;
+import com.kuma.boot.auditlog.core.ServletAuthenticationAuditRecorder;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final OAuth2CookieService cookieService;
     private final UserService userService;
     private final PermissionService permissionService;
+    private final ServletAuthenticationAuditRecorder audit;
     private final String usernameClaim;
     private final String successUrl;
     private final long permissionCacheSeconds;
@@ -34,6 +36,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             OAuth2CookieService cookieService,
             UserService userService,
             PermissionService permissionService,
+            ServletAuthenticationAuditRecorder audit,
             @Value("${blog.oauth2.username-claim:preferred_username}") String usernameClaim,
             @Value("${blog.oauth2.login-success-url:/}") String successUrl,
             @Value("${blog.token-expire-seconds:86400}") long permissionCacheSeconds) {
@@ -41,6 +44,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         this.cookieService = cookieService;
         this.userService = userService;
         this.permissionService = permissionService;
+        this.audit = audit;
         this.usernameClaim = usernameClaim;
         this.successUrl = successUrl;
         this.permissionCacheSeconds = permissionCacheSeconds;
@@ -51,6 +55,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication)
             throws IOException, ServletException {
         if (!(authentication instanceof OAuth2AuthenticationToken oauth)) {
+            audit.record("blog.authentication", null, false, "invalid_oauth_state", request);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "OAuth2 登录状态无效");
             return;
         }
@@ -58,6 +63,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                 oauth.getAuthorizedClientRegistrationId(), oauth.getName());
         if (client == null || client.getAccessToken() == null) {
+            audit.record("blog.authentication", null, false, "missing_access_token", request);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "UAA 未返回 Access Token");
             return;
         }
@@ -68,6 +74,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
         User user = userService.getByUsername(username);
         if (user == null || (user.getStatus() != null && user.getStatus() == 0)) {
+            audit.record("blog.authentication", null, false, "blog_user_unavailable", request);
             authorizedClientService.removeAuthorizedClient(
                     oauth.getAuthorizedClientRegistrationId(), oauth.getName());
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "UAA 用户未在 Blog 中启用");
@@ -90,6 +97,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             session.invalidate();
         }
         response.setStatus(HttpServletResponse.SC_FOUND);
+        audit.record("blog.authentication", user.getUsername(), true, "login_success", request);
         response.setHeader("Location", response.encodeRedirectURL(successUrl));
     }
 }

@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
@@ -39,6 +42,8 @@ public class ArticleController {
     @Operation(summary = "创建文章")
     @PostMapping
     @Authorize(BlogPermissions.ARTICLE_CREATE)
+    @AuditLog(module = "blog.article", type = OperateType.CREATE, description = "create",
+            recordParams = false, recordResult = false)
     public Result<Long> create(@Valid @RequestBody ArticleSaveDTO dto) {
         Article article = new Article();
         BeanUtils.copyProperties(dto, article);
@@ -48,6 +53,8 @@ public class ArticleController {
     @Operation(summary = "更新文章")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.ARTICLE_UPDATE)
+    @AuditLog(module = "blog.article", type = OperateType.UPDATE, description = "update",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ArticleSaveDTO dto) {
         Article article = new Article();
         BeanUtils.copyProperties(dto, article);
@@ -58,6 +65,8 @@ public class ArticleController {
     @Operation(summary = "删除文章（逻辑）")
     @DeleteMapping("/{id}")
     @Authorize(BlogPermissions.ARTICLE_DELETE)
+    @AuditLog(module = "blog.article", type = OperateType.DELETE, description = "delete",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(articleService.deleteArticle(id));
     }
@@ -65,6 +74,8 @@ public class ArticleController {
     @Operation(summary = "物理删除文章")
     @DeleteMapping("/{id}/physical")
     @Authorize(BlogPermissions.ARTICLE_DELETE)
+    @AuditLog(module = "blog.article", type = OperateType.DELETE, description = "deletePhysical",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> deletePhysical(@PathVariable Long id) {
         return Result.success(articleService.deleteArticlePhysical(id));
     }
@@ -117,6 +128,8 @@ public class ArticleController {
     @Operation(summary = "发布文章")
     @PostMapping("/{id}/publish")
     @Authorize(BlogPermissions.ARTICLE_UPDATE)
+    @AuditLog(module = "blog.article", type = OperateType.UPDATE, description = "publish",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> publish(@PathVariable Long id) {
         return Result.success(articleService.publishArticle(id));
     }
@@ -124,6 +137,8 @@ public class ArticleController {
     @Operation(summary = "取消发布（转为草稿）")
     @PostMapping("/{id}/unpublish")
     @Authorize(BlogPermissions.ARTICLE_UPDATE)
+    @AuditLog(module = "blog.article", type = OperateType.UPDATE, description = "unpublish",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> unpublish(@PathVariable Long id) {
         return Result.success(articleService.unpublishArticle(id));
     }

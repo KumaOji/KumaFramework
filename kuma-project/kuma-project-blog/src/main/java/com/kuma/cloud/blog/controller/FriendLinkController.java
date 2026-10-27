@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
@@ -42,6 +45,8 @@ public class FriendLinkController {
 
     @Operation(summary = "申请添加友链（公开，提交后待审核）")
     @PostMapping("/apply")
+    @AuditLog(module = "blog.friend-link", type = OperateType.CREATE, description = "apply",
+            recordParams = false, recordResult = false)
     public Result<Long> apply(@Valid @RequestBody FriendLinkSaveDTO dto) {
         FriendLink friendLink = new FriendLink();
         BeanUtils.copyProperties(dto, friendLink);
@@ -57,6 +62,8 @@ public class FriendLinkController {
     @Operation(summary = "管理后台：直接创建友链")
     @PostMapping
     @Authorize(BlogPermissions.FRIEND_LINK_CREATE)
+    @AuditLog(module = "blog.friend-link", type = OperateType.CREATE, description = "create",
+            recordParams = false, recordResult = false)
     public Result<Long> create(@Valid @RequestBody FriendLinkSaveDTO dto) {
         FriendLink friendLink = new FriendLink();
         BeanUtils.copyProperties(dto, friendLink);
@@ -66,6 +73,8 @@ public class FriendLinkController {
     @Operation(summary = "管理后台：更新友链")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.FRIEND_LINK_UPDATE)
+    @AuditLog(module = "blog.friend-link", type = OperateType.UPDATE, description = "update",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody FriendLinkSaveDTO dto) {
         FriendLink friendLink = new FriendLink();
         BeanUtils.copyProperties(dto, friendLink);
@@ -76,6 +85,8 @@ public class FriendLinkController {
     @Operation(summary = "管理后台：删除友链（逻辑）")
     @DeleteMapping("/{id}")
     @Authorize(BlogPermissions.FRIEND_LINK_DELETE)
+    @AuditLog(module = "blog.friend-link", type = OperateType.DELETE, description = "delete",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(friendLinkService.delete(id));
     }
@@ -83,6 +94,8 @@ public class FriendLinkController {
     @Operation(summary = "管理后台：审核通过")
     @PostMapping("/{id}/approve")
     @Authorize(BlogPermissions.FRIEND_LINK_AUDIT)
+    @AuditLog(module = "blog.friend-link", type = OperateType.UPDATE, description = "approve",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> approve(@PathVariable Long id) {
         return Result.success(friendLinkService.approve(id));
     }

@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.blog.domain.dto.BlacklistAddDTO;
@@ -119,6 +122,8 @@ public class ChatRoomController {
     @Operation(summary = "创建聊天空间（管理员）")
     @PostMapping("/room")
     @Authorize(BlogPermissions.CHAT_CREATE)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.CREATE, description = "create",
+            recordParams = false, recordResult = false)
     public Result<Long> create(@Valid @RequestBody ChatRoomSaveDTO dto) {
         ChatRoom chatRoom = new ChatRoom();
         BeanUtils.copyProperties(dto, chatRoom);
@@ -128,6 +133,8 @@ public class ChatRoomController {
     @Operation(summary = "更新聊天空间（管理员）")
     @PutMapping("/room/{id}")
     @Authorize(BlogPermissions.CHAT_UPDATE)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.UPDATE, description = "update",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ChatRoomSaveDTO dto) {
         ChatRoom chatRoom = new ChatRoom();
         BeanUtils.copyProperties(dto, chatRoom);
@@ -138,6 +145,8 @@ public class ChatRoomController {
     @Operation(summary = "删除聊天空间（管理员）")
     @DeleteMapping("/room/{id}")
     @Authorize(BlogPermissions.CHAT_DELETE)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.DELETE, description = "delete",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(chatRoomService.delete(id));
     }
@@ -159,6 +168,8 @@ public class ChatRoomController {
     @Operation(summary = "清理聊天空间历史记录（管理员，before 为空则清空全部）")
     @DeleteMapping("/room/{roomId}/history")
     @Authorize(BlogPermissions.CHAT_HISTORY)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.DELETE, description = "clearHistory",
+            recordParams = false, recordResult = false)
     public Result<Integer> clearHistory(
             @PathVariable Long roomId,
             @RequestParam(required = false)
@@ -179,6 +190,8 @@ public class ChatRoomController {
     @Operation(summary = "删除单条聊天记录（管理员撤回 / 审核）")
     @DeleteMapping("/message/{id}")
     @Authorize(BlogPermissions.CHAT_HISTORY)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.DELETE, description = "deleteMessage",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> deleteMessage(@PathVariable Long id) {
         ChatHistory removed = chatRoomService.deleteMessage(id);
         if (removed == null) {
@@ -213,6 +226,8 @@ public class ChatRoomController {
     @Operation(summary = "添加邮箱到黑名单（管理员）")
     @PostMapping("/blacklist")
     @Authorize(BlogPermissions.CHAT_BLACKLIST)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.UPDATE, description = "blacklistAdd",
+            recordParams = false, recordResult = false)
     public Result<Void> blacklistAdd(@Valid @RequestBody BlacklistAddDTO request) {
         chatBlacklistService.add(request.getEmail(), request.getReason());
         return Result.success();
@@ -221,6 +236,8 @@ public class ChatRoomController {
     @Operation(summary = "移除黑名单（管理员）")
     @DeleteMapping("/blacklist/{id}")
     @Authorize(BlogPermissions.CHAT_BLACKLIST)
+    @AuditLog(module = "blog.chat-admin", type = OperateType.DELETE, description = "blacklistRemove",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Void> blacklistRemove(@PathVariable Long id) {
         chatBlacklistService.remove(id);
         return Result.success();

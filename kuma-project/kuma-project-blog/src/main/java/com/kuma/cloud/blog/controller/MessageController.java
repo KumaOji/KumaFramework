@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
@@ -36,6 +39,8 @@ public class MessageController {
 
     @Operation(summary = "发表留言或回复")
     @PostMapping
+    @AuditLog(module = "blog.message", type = OperateType.CREATE, description = "post",
+            recordParams = false, recordResult = false)
     public Result<Long> post(@Valid @RequestBody MessageSaveDTO dto, HttpServletRequest request) {
         Message message = new Message();
         BeanUtils.copyProperties(dto, message);
@@ -66,6 +71,8 @@ public class MessageController {
     @Operation(summary = "审核通过")
     @PostMapping("/{id}/approve")
     @Authorize(BlogPermissions.MESSAGE_AUDIT)
+    @AuditLog(module = "blog.message", type = OperateType.UPDATE, description = "approve",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> approve(@PathVariable Long id) {
         return Result.success(messageService.approve(id));
     }
@@ -73,6 +80,8 @@ public class MessageController {
     @Operation(summary = "删除留言（逻辑，status=2）")
     @DeleteMapping("/{id}")
     @Authorize(BlogPermissions.MESSAGE_DELETE)
+    @AuditLog(module = "blog.message", type = OperateType.DELETE, description = "delete",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(messageService.delete(id));
     }
@@ -80,6 +89,8 @@ public class MessageController {
     @Operation(summary = "物理删除留言（仅限 status=2 已删除的记录）")
     @DeleteMapping("/{id}/purge")
     @Authorize(BlogPermissions.MESSAGE_DELETE)
+    @AuditLog(module = "blog.message", type = OperateType.DELETE, description = "purge",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> purge(@PathVariable Long id) {
         return Result.success(messageService.purge(id));
     }

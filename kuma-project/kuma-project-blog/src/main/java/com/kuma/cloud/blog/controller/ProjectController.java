@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
@@ -37,6 +40,8 @@ public class ProjectController {
     @Operation(summary = "创建项目")
     @PostMapping
     @Authorize(BlogPermissions.PROJECT_CREATE)
+    @AuditLog(module = "blog.project", type = OperateType.CREATE, description = "create",
+            recordParams = false, recordResult = false)
     public Result<Long> create(@Valid @RequestBody ProjectSaveDTO dto) {
         Project project = new Project();
         BeanUtils.copyProperties(dto, project);
@@ -46,6 +51,8 @@ public class ProjectController {
     @Operation(summary = "更新项目")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.PROJECT_UPDATE)
+    @AuditLog(module = "blog.project", type = OperateType.UPDATE, description = "update",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody ProjectSaveDTO dto) {
         Project project = new Project();
         BeanUtils.copyProperties(dto, project);
@@ -56,6 +63,8 @@ public class ProjectController {
     @Operation(summary = "删除项目（逻辑）")
     @DeleteMapping("/{id}")
     @Authorize(BlogPermissions.PROJECT_DELETE)
+    @AuditLog(module = "blog.project", type = OperateType.DELETE, description = "delete",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(projectService.deleteProject(id));
     }
@@ -63,6 +72,8 @@ public class ProjectController {
     @Operation(summary = "物理删除项目")
     @DeleteMapping("/{id}/physical")
     @Authorize(BlogPermissions.PROJECT_DELETE)
+    @AuditLog(module = "blog.project", type = OperateType.DELETE, description = "deletePhysical",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> deletePhysical(@PathVariable Long id) {
         return Result.success(projectService.deleteProjectPhysical(id));
     }
@@ -90,6 +101,8 @@ public class ProjectController {
     @Operation(summary = "设置重点展示")
     @PostMapping("/{id}/featured")
     @Authorize(BlogPermissions.PROJECT_UPDATE)
+    @AuditLog(module = "blog.project", type = OperateType.UPDATE, description = "setFeatured",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> setFeatured(@PathVariable Long id,
                                        @Parameter(description = "true=展示 false=取消") @RequestParam boolean featured) {
         return Result.success(projectService.setFeatured(id, featured));

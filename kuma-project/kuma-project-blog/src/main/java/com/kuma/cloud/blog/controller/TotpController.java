@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.dto.TotpVerifyDTO;
 import com.kuma.cloud.blog.domain.vo.TotpFeatureVO;
@@ -44,6 +47,8 @@ public class TotpController {
 
     @Operation(summary = "生成绑定二维码")
     @PostMapping("/setup")
+    @AuditLog(module = "blog.mfa", type = OperateType.UPDATE, description = "setup",
+            recordParams = false, recordResult = false)
     public Result<TotpSetupVO> setup(HttpServletRequest request) {
         uaaAuthSettingsService.requireMfaEnabled();
         return Result.success(mfaClient.setup(request));
@@ -51,6 +56,8 @@ public class TotpController {
 
     @Operation(summary = "验证动态码并启用 TOTP")
     @PostMapping("/enable")
+    @AuditLog(module = "blog.mfa", type = OperateType.UPDATE, description = "enable",
+            recordParams = false, recordResult = false)
     public Result<String> enable(
             HttpServletRequest request, @Valid @RequestBody TotpVerifyDTO dto) {
         uaaAuthSettingsService.requireMfaEnabled();
@@ -60,6 +67,8 @@ public class TotpController {
 
     @Operation(summary = "验证动态码并关闭 TOTP")
     @PostMapping("/disable")
+    @AuditLog(module = "blog.mfa", type = OperateType.UPDATE, description = "disable",
+            recordParams = false, recordResult = false)
     public Result<String> disable(
             HttpServletRequest request, @Valid @RequestBody TotpVerifyDTO dto) {
         uaaAuthSettingsService.requireMfaEnabled();

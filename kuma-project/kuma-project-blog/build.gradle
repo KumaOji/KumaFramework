@@ -14,6 +14,7 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation project(':kuma-boot-framework:kuma-boot-starter-audit-log')
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')

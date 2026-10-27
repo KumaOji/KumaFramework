@@ -115,6 +115,9 @@ jetcache:
 
 kuma:
   boot:
+    audit-log:
+      enabled: true
+      async: false
     ai:
       base-url: ${AI_CHAT_BASE_URL}
       api-key: ${AI_CHAT_API_KEY}

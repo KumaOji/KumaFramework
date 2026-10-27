@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.blog.domain.entity.User;
@@ -89,6 +92,8 @@ public class AuthController {
 
     @Operation(summary = "使用 Refresh Token 换取新的 JWT")
     @PostMapping("/refresh")
+    @AuditLog(module = "blog.auth", type = OperateType.UPDATE, description = "refresh",
+            recordParams = false, recordResult = false)
     public Result<String> refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieService.resolveRefreshToken(request);
         if (!StringUtils.hasText(refreshToken)) {
@@ -121,6 +126,8 @@ public class AuthController {
 
     @Operation(summary = "撤销 Refresh Token、清除认证 Cookie，并返回 UAA 登出地址")
     @PostMapping("/logout")
+    @AuditLog(module = "blog.auth", type = OperateType.LOGOUT, description = "logout",
+            recordParams = false, recordResult = false)
     public Result<String> logout(HttpServletRequest request, HttpServletResponse response) {
         performLogout(request, response);
         return Result.success("登出成功");
@@ -128,6 +135,8 @@ public class AuthController {
 
     @Operation(summary = "浏览器登出：清除 Blog Cookie 后跳转 UAA 销毁统一认证会话")
     @GetMapping("/logout")
+    @AuditLog(module = "blog.auth", type = OperateType.LOGOUT, description = "logoutRedirect",
+            recordParams = false, recordResult = false)
     public ResponseEntity<Void> logoutRedirect(HttpServletRequest request, HttpServletResponse response) {
         performLogout(request, response);
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(uaaLogoutUrl())).build();

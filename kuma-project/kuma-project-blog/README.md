@@ -54,6 +54,10 @@ Nacos 导入为必需项，配置中心连接失败时启动失败。
 prod 配置通过 `Publish Nacos Prod Configs` 工作流发布。先发布配置，再重启 Blog。
 
 
+## 操作审计
+
+已接入 audit-log starter，覆盖内容管理、授权、MFA 和认证相关操作；记录已认证操作人及业务结果，采用仅元数据策略。范围、配置和 Grafana 查询见 [三服务操作审计](../AUDIT_LOG.md)。
+
 ## 框架配置导入
 
 沿用 `kuma-project-reference` 的方式：启动类使用 `@SpringBootApplication`，仅扫描本模块业务包；

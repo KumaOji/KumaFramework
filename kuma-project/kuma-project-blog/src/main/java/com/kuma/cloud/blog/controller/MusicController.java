@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.request.PageQuery;
 import com.kuma.boot.common.model.result.Result;
@@ -46,6 +49,8 @@ public class MusicController {
     @Operation(summary = "创建音乐")
     @PostMapping
     @Authorize(BlogPermissions.MUSIC_UPLOAD)
+    @AuditLog(module = "blog.music", type = OperateType.CREATE, description = "create",
+            recordParams = false, recordResult = false)
     public Result<Long> create(@Valid @RequestBody MusicSaveDTO dto) {
         Music music = new Music();
         BeanUtils.copyProperties(dto, music);
@@ -55,6 +60,8 @@ public class MusicController {
     @Operation(summary = "更新音乐")
     @PutMapping("/{id}")
     @Authorize(BlogPermissions.MUSIC_UPLOAD)
+    @AuditLog(module = "blog.music", type = OperateType.UPDATE, description = "update",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> update(@PathVariable Long id, @Valid @RequestBody MusicSaveDTO dto) {
         Music music = new Music();
         BeanUtils.copyProperties(dto, music);
@@ -65,6 +72,8 @@ public class MusicController {
     @Operation(summary = "删除音乐（逻辑）")
     @DeleteMapping("/{id}")
     @Authorize(BlogPermissions.MUSIC_DELETE)
+    @AuditLog(module = "blog.music", type = OperateType.DELETE, description = "delete",
+            bizId = "#id", recordParams = false, recordResult = false)
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(musicService.deleteMusic(id));
     }
@@ -108,6 +117,8 @@ public class MusicController {
     @Operation(summary = "上传音乐文件", description = "支持 mp3/flac/ogg/wav/aac/m4a/opus，返回存储文件名，再通过创建/更新接口写入 filePath")
     @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Authorize(BlogPermissions.MUSIC_UPLOAD)
+    @AuditLog(module = "blog.music", type = OperateType.CREATE, description = "uploadFile",
+            recordParams = false, recordResult = false)
     public Result<String> uploadFile(@RequestParam("file") MultipartFile file) {
         return Result.success(musicService.uploadMusicFile(file));
     }

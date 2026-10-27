@@ -1,5 +1,8 @@
 package com.kuma.cloud.blog.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.request.PageQuery;
@@ -89,6 +92,8 @@ public class PermissionController {
     @Operation(summary = "给用户授权")
     @PostMapping("/grant")
     @Authorize(BlogPermissions.SYSTEM_USER)
+    @AuditLog(module = "blog.permission", type = OperateType.GRANT, description = "grant",
+            bizId = "#req.userId + ':' + #req.permissionId", recordParams = false, recordResult = false)
     public Result<Void> grant(@Valid @RequestBody GrantPermissionDTO req) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userService.getByUsername(currentUsername);
@@ -107,6 +112,8 @@ public class PermissionController {
     @Operation(summary = "撤销用户权限")
     @DeleteMapping("/revoke")
     @Authorize(BlogPermissions.SYSTEM_USER)
+    @AuditLog(module = "blog.permission", type = OperateType.GRANT, description = "revoke",
+            bizId = "#req.userId + ':' + #req.permissionId", recordParams = false, recordResult = false)
     public Result<Void> revoke(@Valid @RequestBody RevokePermissionDTO req) {
         permissionService.revokePermission(req.getUserId(), req.getPermissionId());
 
@@ -120,6 +127,8 @@ public class PermissionController {
     @Operation(summary = "刷新用户权限缓存")
     @PostMapping("/cache/evict/{username}")
     @Authorize(BlogPermissions.SYSTEM_USER)
+    @AuditLog(module = "blog.permission", type = OperateType.UPDATE, description = "evictCache",
+            bizId = "#username", recordParams = false, recordResult = false)
     public Result<Void> evictCache(@PathVariable String username) {
         permissionService.evictCache(username);
         return Result.success();
