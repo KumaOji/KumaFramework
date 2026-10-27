@@ -22,6 +22,7 @@ import com.kuma.boot.auditlog.autoconfigure.properties.AuditLogProperties;
 import com.kuma.boot.auditlog.core.AuditLogStore;
 import com.kuma.boot.auditlog.core.AuditOperatorProvider;
 import com.kuma.boot.auditlog.model.AuditLogEntry;
+import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.common.utils.log.LogUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -39,6 +40,8 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.MDC;
+import org.springframework.core.annotation.Order;
 
 /**
  * 操作审计切面.
@@ -50,6 +53,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author kuma
  */
 @Aspect
+@Order(0) // Wrap method-security checks as well as the business invocation.
 public class AuditLogAspect {
 
     private final AuditLogStore store;
@@ -74,6 +78,15 @@ public class AuditLogAspect {
         long start = System.currentTimeMillis();
         Throwable error = null;
         Object result = null;
+        String operatorId = null;
+        String operatorName = null;
+        try {
+            // Snapshot before logout/password changes can clear the security context.
+            operatorId = operatorProvider.currentOperatorId();
+            operatorName = operatorProvider.currentOperatorName();
+        } catch (RuntimeException ignored) {
+            // Missing audit identity must not block the business operation.
+        }
         try {
             result = point.proceed();
             return result;
@@ -82,7 +95,7 @@ public class AuditLogAspect {
             throw t;
         } finally {
             try {
-                AuditLogEntry entry = buildEntry(point, auditLog, result, error, start);
+                AuditLogEntry entry = buildEntry(point, auditLog, result, error, start, operatorId, operatorName);
                 dispatch(entry);
             } catch (Exception e) {
                 // 审计采集失败绝不影响业务
@@ -92,7 +105,7 @@ public class AuditLogAspect {
     }
 
     private AuditLogEntry buildEntry(ProceedingJoinPoint point, AuditLog auditLog,
-            Object result, Throwable error, long start) {
+            Object result, Throwable error, long start, String operatorId, String operatorName) {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Object[] args = point.getArgs();
 
@@ -102,11 +115,16 @@ public class AuditLogAspect {
         entry.setDescription(evalSpel(auditLog.description(), signature, args));
         entry.setBizId(evalSpel(auditLog.bizId(), signature, args));
         entry.setMethod(signature.getDeclaringTypeName() + "#" + signature.getName());
-        entry.setOperatorId(operatorProvider.currentOperatorId());
-        entry.setOperatorName(operatorProvider.currentOperatorName());
-        entry.setSuccess(error == null);
+        entry.setOperatorId(operatorId);
+        entry.setOperatorName(operatorName);
+        entry.setTraceId(MDC.get("traceId") != null ? MDC.get("traceId") : MDC.get("kmc-trace-id"));
+        boolean rejected = Boolean.FALSE.equals(result) || result instanceof Result<?> response
+                && (!"SUCCESS".equals(response.getStatus()) || Boolean.FALSE.equals(response.getData()));
+        entry.setSuccess(error == null && !rejected);
         if (error != null) {
             entry.setErrorMsg(truncate(error.getMessage()));
+        } else if (rejected) {
+            entry.setErrorMsg("operation_rejected");
         }
         if (auditLog.recordParams()) {
             entry.setParams(truncate(toJson(filterArgs(args))));
@@ -122,11 +140,18 @@ public class AuditLogAspect {
 
     private void dispatch(AuditLogEntry entry) {
         if (executor != null) {
+            var requestMdc = MDC.getCopyOfContextMap();
             executor.execute(() -> {
+                var previousMdc = MDC.getCopyOfContextMap();
                 try {
+                    MDC.clear();
+                    if (requestMdc != null) MDC.setContextMap(requestMdc);
                     store.save(entry);
                 } catch (Exception e) {
                     LogUtils.error("审计日志异步落库失败", e);
+                } finally {
+                    MDC.clear();
+                    if (previousMdc != null) MDC.setContextMap(previousMdc);
                 }
             });
         } else {

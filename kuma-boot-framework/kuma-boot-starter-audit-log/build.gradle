@@ -20,4 +20,9 @@ dependencies {
     compileOnly projectLibs.jakarta.servlet.api
     compileOnly projectLibs.lombok
     annotationProcessor projectLibs.lombok
+    testImplementation projectLibs.spring.boot.starter.test
+    testImplementation projectLibs.spring.boot.starter.web
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+tasks.named('test') { useJUnitPlatform() }
