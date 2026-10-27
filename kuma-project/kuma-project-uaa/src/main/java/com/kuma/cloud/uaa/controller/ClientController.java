@@ -1,5 +1,8 @@
 package com.kuma.cloud.uaa.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.idempotent.idempotetduplicate.PreventDuplicateSubmit;
 import com.kuma.boot.security.spring.access.expression.Authorize;
@@ -47,6 +50,8 @@ public class ClientController {
     @PostMapping
     @Authorize(UaaPermissions.CLIENT_WRITE)
     @PreventDuplicateSubmit(expire = 3)
+    @AuditLog(module = "uaa.clients", type = OperateType.UPDATE, description = "save",
+            bizId = "#dto.clientId", recordParams = false, recordResult = false)
     public Result<String> save(@Valid @RequestBody ClientSaveDTO dto) {
         clientService.save(dto);
         return Result.success("保存成功");
@@ -55,6 +60,8 @@ public class ClientController {
     @Operation(summary = "删除客户端，同时清理其授权记录与授权同意")
     @DeleteMapping("/{clientId}")
     @Authorize(UaaPermissions.CLIENT_WRITE)
+    @AuditLog(module = "uaa.clients", type = OperateType.DELETE, description = "delete",
+            bizId = "#clientId", recordParams = false, recordResult = false)
     public Result<String> delete(@PathVariable String clientId) {
         clientService.delete(clientId);
         return Result.success("删除成功");

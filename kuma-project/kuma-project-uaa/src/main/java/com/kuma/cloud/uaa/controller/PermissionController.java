@@ -1,5 +1,8 @@
 package com.kuma.cloud.uaa.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.security.spring.access.expression.Authorize;
 import com.kuma.cloud.uaa.domain.vo.PermissionVO;
@@ -36,6 +39,8 @@ public class PermissionController {
     @Operation(summary = "新增权限")
     @PostMapping
     @Authorize(UaaPermissions.PERMISSION_WRITE)
+    @AuditLog(module = "uaa.permissions", type = OperateType.CREATE, description = "create",
+            bizId = "#code", recordParams = false, recordResult = false)
     public Result<Long> create(
             @RequestParam String code,
             @RequestParam String name,
@@ -46,6 +51,8 @@ public class PermissionController {
     @Operation(summary = "删除权限，同时解除与角色的绑定")
     @DeleteMapping("/{code}")
     @Authorize(UaaPermissions.PERMISSION_WRITE)
+    @AuditLog(module = "uaa.permissions", type = OperateType.DELETE, description = "delete",
+            bizId = "#code", recordParams = false, recordResult = false)
     public Result<String> delete(@PathVariable String code) {
         permissionService.delete(code);
         return Result.success("删除成功");

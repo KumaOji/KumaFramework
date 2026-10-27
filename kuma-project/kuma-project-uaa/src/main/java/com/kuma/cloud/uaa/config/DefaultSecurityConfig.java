@@ -121,6 +121,8 @@ public class DefaultSecurityConfig {
                         .failureHandler(failureHandler)
                         .permitAll())
                 .logout(logout -> logout
+                        .addLogoutHandler((request, response, authentication) -> auditService.recordLogout(
+                                authentication == null ? null : authentication.getName(), request))
                         .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher("/logout"))
                         .logoutSuccessUrl(LOGIN_PAGE + "?logout")
                         .invalidateHttpSession(true)

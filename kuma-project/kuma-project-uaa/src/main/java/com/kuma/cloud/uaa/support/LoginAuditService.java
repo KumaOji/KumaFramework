@@ -2,6 +2,7 @@ package com.kuma.cloud.uaa.support;
 
 import com.kuma.cloud.uaa.domain.entity.UaaLoginLog;
 import com.kuma.cloud.uaa.mapper.UaaLoginLogMapper;
+import com.kuma.boot.auditlog.core.ServletAuthenticationAuditRecorder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class LoginAuditService {
     private static final int USER_AGENT_MAX_LENGTH = 512;
 
     private final UaaLoginLogMapper loginLogMapper;
+    private final ServletAuthenticationAuditRecorder operationAudit;
 
     public void recordSuccess(String username, HttpServletRequest request) {
         record(username, true, null, request);
@@ -26,6 +28,10 @@ public class LoginAuditService {
 
     public void recordFailure(String username, String failureCode, HttpServletRequest request) {
         record(username, false, failureCode, request);
+    }
+
+    public void recordLogout(String username, HttpServletRequest request) {
+        operationAudit.logout("uaa.authentication", username, request);
     }
 
     /**
@@ -57,6 +63,8 @@ public class LoginAuditService {
         } catch (RuntimeException exception) {
             log.warn("写入登录审计失败: username={}, {}", username, exception.getMessage());
         }
+        operationAudit.record("uaa.authentication", success ? username : null, success,
+                success ? "login_success" : "login_failed", request);
     }
 
     private String truncate(String userAgent) {

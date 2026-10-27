@@ -1,5 +1,8 @@
 package com.kuma.cloud.uaa.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.kuma.boot.common.exception.BusinessException;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.cloud.uaa.domain.dto.PasswordChangeDTO;
@@ -37,6 +40,8 @@ public class MeController {
 
     @Operation(summary = "修改当前用户密码，成功后吊销全部令牌并销毁当前会话")
     @PostMapping("/password")
+    @AuditLog(module = "uaa.me", type = OperateType.UPDATE, description = "changePassword",
+            bizId = "#principal.name", recordParams = false, recordResult = false)
     public Result<String> changePassword(
             Principal principal,
             HttpServletRequest request,

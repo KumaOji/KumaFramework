@@ -1,5 +1,8 @@
 package com.kuma.cloud.uaa.controller;
 
+import com.kuma.boot.auditlog.annotation.AuditLog;
+import com.kuma.boot.auditlog.enums.OperateType;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kuma.boot.common.model.result.Result;
 import com.kuma.boot.idempotent.idempotetduplicate.PreventDuplicateSubmit;
@@ -51,6 +54,8 @@ public class UserController {
     @PostMapping
     @Authorize(UaaPermissions.USER_WRITE)
     @PreventDuplicateSubmit(expire = 3)
+    @AuditLog(module = "uaa.users", type = OperateType.CREATE, description = "create",
+            recordParams = false, recordResult = false)
     public Result<Long> create(@Valid @RequestBody UserSaveDTO dto) {
         return Result.success(userService.create(dto));
     }
@@ -58,6 +63,8 @@ public class UserController {
     @Operation(summary = "修改用户，password 留空表示不改密码")
     @PutMapping("/{userId}")
     @Authorize(UaaPermissions.USER_WRITE)
+    @AuditLog(module = "uaa.users", type = OperateType.UPDATE, description = "update",
+            bizId = "#userId", recordParams = false, recordResult = false)
     public Result<String> update(@PathVariable Long userId, @Valid @RequestBody UserSaveDTO dto) {
         userService.update(userId, dto);
         return Result.success("修改成功");
@@ -66,6 +73,8 @@ public class UserController {
     @Operation(summary = "启用或禁用用户，禁用后其在途 JWT 仍在有效期内，需配合 Token 撤销")
     @PutMapping("/{userId}/status")
     @Authorize(UaaPermissions.USER_WRITE)
+    @AuditLog(module = "uaa.users", type = OperateType.UPDATE, description = "changeStatus",
+            bizId = "#userId", recordParams = false, recordResult = false)
     public Result<String> changeStatus(@PathVariable Long userId, @RequestParam boolean enabled) {
         userService.changeStatus(userId, enabled);
         return Result.success(enabled ? "已启用" : "已禁用");
@@ -74,6 +83,8 @@ public class UserController {
     @Operation(summary = "重置用户密码")
     @PutMapping("/{userId}/password")
     @Authorize(UaaPermissions.USER_WRITE)
+    @AuditLog(module = "uaa.users", type = OperateType.UPDATE, description = "resetPassword",
+            bizId = "#userId", recordParams = false, recordResult = false)
     public Result<String> resetPassword(@PathVariable Long userId, @RequestParam String password) {
         userService.resetPassword(userId, password);
         return Result.success("密码已重置");
@@ -82,6 +93,8 @@ public class UserController {
     @Operation(summary = "覆盖式设置用户角色")
     @PutMapping("/{userId}/roles")
     @Authorize(UaaPermissions.USER_WRITE)
+    @AuditLog(module = "uaa.users", type = OperateType.GRANT, description = "assignRoles",
+            bizId = "#userId", recordParams = false, recordResult = false)
     public Result<String> assignRoles(@PathVariable Long userId, @RequestBody List<String> roleCodes) {
         userService.assignRoles(userId, roleCodes);
         return Result.success("角色已更新");
@@ -90,6 +103,8 @@ public class UserController {
     @Operation(summary = "强制下线用户，吊销其全部 Access Token 与 Refresh Token")
     @PutMapping("/{userId}/sessions")
     @Authorize(UaaPermissions.USER_WRITE)
+    @AuditLog(module = "uaa.users", type = OperateType.LOGOUT, description = "revokeSessions",
+            bizId = "#userId", recordParams = false, recordResult = false)
     public Result<String> revokeSessions(@PathVariable Long userId) {
         userService.revokeSessions(userId);
         return Result.success("已强制下线");
@@ -98,6 +113,8 @@ public class UserController {
     @Operation(summary = "删除用户")
     @DeleteMapping("/{userId}")
     @Authorize(UaaPermissions.USER_WRITE)
+    @AuditLog(module = "uaa.users", type = OperateType.DELETE, description = "delete",
+            bizId = "#userId", recordParams = false, recordResult = false)
     public Result<String> delete(@PathVariable Long userId) {
         userService.delete(userId);
         return Result.success("删除成功");

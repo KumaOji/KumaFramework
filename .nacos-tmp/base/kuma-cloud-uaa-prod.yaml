@@ -153,6 +153,9 @@ kuma:
         require-authorization-consent: false
         require-proof-key: false
   boot:
+    audit-log:
+      enabled: true
+      async: false
     ratelimit:
       enabled: true
     idempotent:

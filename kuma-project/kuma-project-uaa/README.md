@@ -18,6 +18,10 @@ OAuth issuer 为 `http://localhost:33336`，网关访问前缀为 `/uaa`。
 日志与 PID 位于 `logs/uaa-local/`。
 
 
+## 操作审计
+
+已接入 audit-log starter，覆盖用户、角色、权限、客户端、密码、MFA 及登录/退出。保留原登录审计落库，统一日志不采集密码、令牌或密钥正文。范围与查看方法见 [三服务操作审计](../AUDIT_LOG.md)。
+
 ## 框架配置导入
 
 沿用 `kuma-project-reference` 的方式：启动类使用 `@SpringBootApplication`，仅扫描本模块业务包；
