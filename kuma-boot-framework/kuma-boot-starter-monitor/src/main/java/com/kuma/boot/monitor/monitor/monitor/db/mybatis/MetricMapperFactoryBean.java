@@ -21,7 +21,7 @@ public class MetricMapperFactoryBean<T> implements FactoryBean<T> {
       Object target = this.mapperFactoryBean.getObject();
       String var10000 = Metrics.getApplicationName(this.applicationContext);
       String key = "mybatis_mapper_" + var10000 + "_" + this.mapperFactoryBean.getObjectType().getSimpleName();
-      LogUtils.info("\u589e\u52a0mybatis\u9ed8\u8ba4\u76d1\u63a7:{}", new Object[]{key});
+      LogUtils.info("增加mybatis默认监控:{}", new Object[]{key});
       return (T)Proxy.getProxy(target, new MetricsMethodInterceptor(key));
    }
 

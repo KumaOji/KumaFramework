@@ -45,7 +45,7 @@ public class HealthReportFilter implements Filter {
             response.setHeader("Content-type", "text/html;charset=UTF-8");
             String html = report.toHtml().replace("\r\n", "<br/>").replace("\n", "<br/>").replace("/n", "\n").replace("/r", "\r");
             if (dumpProperties.isEnabled()) {
-               html = "dump\u4fe1\u606f:<a href='/health/dump/'>\u67e5\u770b</a><br/>" + html;
+               html = "dump信息:<a href='/health/dump/'>查看</a><br/>" + html;
             }
 
             response.setCharacterEncoding("UTF-8");
@@ -53,7 +53,7 @@ public class HealthReportFilter implements Filter {
             response.getWriter().flush();
             response.getWriter().close();
          } catch (Exception e) {
-            LogUtils.error(e, "kuma-boot-starter-monitor", new Object[]{"/health/report\u6253\u5f00\u51fa\u9519"});
+            LogUtils.error(e, "kuma-boot-starter-monitor", new Object[]{"/health/report打开出错"});
             response.getWriter().close();
          }
       }

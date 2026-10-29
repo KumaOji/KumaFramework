@@ -44,11 +44,11 @@ public class RetryNode extends StandardActivityNode {
 
    private void checkError(Flow flow) {
       if (StringUtils.isNotEmpty(this.retryMaxLimitNode) && this.target.equals(this.retryMaxLimitNode)) {
-         throw new FlowException(String.format("\u91cd\u8bd5\u8282\u70b9[%s]\u7684retryMaxLimitNode\u4e0d\u80fd\u4e0etarget[%s]\u76f8\u540c", this.getName(), this.target));
+         throw new FlowException(String.format("重试节点[%s]的retryMaxLimitNode不能与target[%s]相同", this.getName(), this.target));
       } else if (flow.notExistNode(this.target)) {
-         throw new FlowException(String.format("\u91cd\u8bd5\u8282\u70b9[%s]\u7684target[%s]\u8282\u70b9\u4e0d\u5b58\u5728", this.getName(), this.target));
+         throw new FlowException(String.format("重试节点[%s]的target[%s]节点不存在", this.getName(), this.target));
       } else if (StringUtils.isNotEmpty(this.retryMaxLimitNode) && flow.notExistNode(this.retryMaxLimitNode)) {
-         throw new FlowException(String.format("\u91cd\u8bd5\u8282\u70b9[%s]\u7684retryMaxLimitNode[%s]\u8282\u70b9\u4e0d\u5b58\u5728", this.getName(), this.retryMaxLimitNode));
+         throw new FlowException(String.format("重试节点[%s]的retryMaxLimitNode[%s]节点不存在", this.getName(), this.retryMaxLimitNode));
       }
    }
 
@@ -56,7 +56,7 @@ public class RetryNode extends StandardActivityNode {
       Transition endTransition = new Transition();
       endTransition.setEvent("retry_end");
       endTransition.setFrom(this);
-      endTransition.setDescription("\u91cd\u8bd5\u6d41\u7a0b\u7ed3\u675f");
+      endTransition.setDescription("重试流程结束");
       endTransition.setTo(new NodeRef(flow.getEndNode().getName()));
       this.getCondition().addTransition(endTransition);
       flow.addEvent(endTransition.getEvent());
@@ -66,7 +66,7 @@ public class RetryNode extends StandardActivityNode {
       Transition endTransition = new Transition();
       endTransition.setEvent("retry_normal_end");
       endTransition.setFrom(this);
-      endTransition.setDescription("\u91cd\u8bd5\u6d41\u7a0b\u6b63\u5e38\u7ed3\u675f(\u65f6\u95f4\u672a\u5230,\u4e0d\u6267\u884c\u91cd\u8bd5)");
+      endTransition.setDescription("重试流程正常结束(时间未到,不执行重试)");
       endTransition.setTo(new NodeRef(flow.getEndNode().getName()));
       this.getCondition().addTransition(endTransition);
       flow.addEvent(endTransition.getEvent());
@@ -77,7 +77,7 @@ public class RetryNode extends StandardActivityNode {
          Transition maxLimitTransition = new Transition();
          maxLimitTransition.setEvent("retry_max_limit_event");
          maxLimitTransition.setFrom(this);
-         maxLimitTransition.setDescription("\u91cd\u8bd5\u6d41\u7a0b\u8d85\u9650");
+         maxLimitTransition.setDescription("重试流程超限");
          NodeRef limitRef = new NodeRef(this.getRetryMaxLimitNode());
          limitRef.initialize(flow);
          maxLimitTransition.setTo(limitRef);
@@ -90,7 +90,7 @@ public class RetryNode extends StandardActivityNode {
    private void addRetryToTargetTransition(Flow flow) {
       Transition retryTransition = new Transition();
       retryTransition.setEvent("retry_to_target");
-      retryTransition.setDescription("\u91cd\u8bd5\u5230\u76ee\u6807\u8282\u70b9:" + this.target);
+      retryTransition.setDescription("重试到目标节点:" + this.target);
       retryTransition.setFrom(this);
       NodeRef retryRef = new NodeRef(this.getTarget());
       retryRef.initialize(flow);
@@ -104,7 +104,7 @@ public class RetryNode extends StandardActivityNode {
       Transition retryFromTransition = new Transition();
       retryFromTransition.setFrom(node);
       retryFromTransition.setEvent("retry_from_target");
-      retryFromTransition.setDescription("\u8fdb\u5165\u91cd\u8bd5\u8282\u70b9:" + this.getName());
+      retryFromTransition.setDescription("进入重试节点:" + this.getName());
       NodeRef retryRef = new NodeRef(this.getName());
       retryRef.initialize(flow);
       retryFromTransition.setTo(retryRef);
@@ -164,7 +164,7 @@ public class RetryNode extends StandardActivityNode {
 
    public void setRetryMax(Integer retryMax) {
       if (null == this.retryFailType) {
-         throw new IllegalArgumentException("\u8bf7\u5148\u8bbe\u7f6eretryFail\u7c7b\u578b");
+         throw new IllegalArgumentException("请先设置retryFail类型");
       } else if (this.retryFailType == RetryFailTypeEnum.FAIL_RETREAT && retryMax > 8) {
          this.retryMax = 8;
       } else if (this.retryFailType == RetryFailTypeEnum.FAIL_FAST && retryMax > 3) {

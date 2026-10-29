@@ -49,7 +49,7 @@ public class SetHandler implements FenixHandler {
    private String getAndCheckFieldText(Node fieldNode, String namespace, int i) {
       String fieldText = fieldNode.getText();
       if (StringHelper.isBlank(fieldText)) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011namespace \u4e3a\u3010" + namespace + "\u3011\u7684 XML \u4e2d\uff0c<set /> \u6807\u7b7e\u4e2d\u7b2c\u3010" + i + "\u3011\u4e2a field \u5c5e\u6027\u5185\u5bb9\u662f\u7a7a\u7684\uff0c\u8bf7\u68c0\u67e5\uff01");
+         throw new FenixException("【Fenix 异常提示】namespace 为【" + namespace + "】的 XML 中，<set /> 标签中第【" + i + "】个 field 属性内容是空的，请检查！");
       } else {
          return fieldText;
       }

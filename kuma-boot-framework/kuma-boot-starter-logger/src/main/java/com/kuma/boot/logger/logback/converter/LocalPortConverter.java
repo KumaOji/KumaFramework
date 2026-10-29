@@ -38,7 +38,7 @@ public class LocalPortConverter extends ClassicConverter {
             }
          }
       } catch (Exception e) {
-         logger.error("\u83b7\u53d6port\u5931\u8d25,\u5f71\u54cdlogback\u7684\u6587\u4ef6\u62fc\u63a5", e);
+         logger.error("获取port失败,影响logback的文件拼接", e);
          webPort = null;
       }
 

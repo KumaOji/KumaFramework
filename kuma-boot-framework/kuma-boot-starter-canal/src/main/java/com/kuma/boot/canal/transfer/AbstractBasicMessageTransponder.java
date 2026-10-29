@@ -31,7 +31,7 @@ public abstract class AbstractBasicMessageTransponder extends AbstractMessageTra
             try {
                rowChange = RowChange.parseFrom(entry.getStoreValue());
             } catch (Exception e) {
-               throw new CanalClientException("\u9519\u8bef ##\u8f6c\u6362\u9519\u8bef , \u6570\u636e\u4fe1\u606f:" + entry.toString(), e);
+               throw new CanalClientException("错误 ##转换错误 , 数据信息:" + entry.toString(), e);
             }
 
             this.distributeByAnnotation(this.destination, entry.getHeader().getSchemaName(), entry.getHeader().getTableName(), rowChange);
@@ -55,7 +55,7 @@ public abstract class AbstractBasicMessageTransponder extends AbstractMessageTra
                   Object[] args = this.getInvokeArgs(method, canalMsg, rowChange);
                   method.invoke(point.getTarget(), args);
                } catch (Exception var10) {
-                  LogUtils.error("{}: \u59d4\u6258 canal \u76d1\u542c\u5668\u53d1\u751f\u9519\u8bef! \u9519\u8bef\u7c7b:{}, \u65b9\u6cd5\u540d:{}", new Object[]{Thread.currentThread().getName(), point.getTarget().getClass().getName(), method.getName()});
+                  LogUtils.error("{}: 委托 canal 监听器发生错误! 错误类:{}, 方法名:{}", new Object[]{Thread.currentThread().getName(), point.getTarget().getClass().getName(), method.getName()});
                }
 
             }));

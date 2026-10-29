@@ -78,7 +78,7 @@ public class ThreadPoolExecutorFactory {
 
                executor2.getQueue().put(r);
             } catch (InterruptedException e) {
-               LogUtils.error("\u7ebf\u7a0b\u5904\u7406\u62d2\u7edd\u7b56\u7565\u5931\u8d252:{}", new Object[]{e.getMessage()});
+               LogUtils.error("线程处理拒绝策略失败2:{}", new Object[]{e.getMessage()});
                e.printStackTrace();
             }
 
@@ -94,7 +94,7 @@ public class ThreadPoolExecutorFactory {
 
          protected void afterExecute(Runnable r, Throwable t) {
             if (t != null) {
-               LogUtils.error("afterExecute\u83b7\u53d6\u5230\u5f02\u5e38\u4fe1\u606f2:{}", new Object[]{t.getMessage()});
+               LogUtils.error("afterExecute获取到异常信息2:{}", new Object[]{t.getMessage()});
             }
 
             if (r instanceof FutureTask) {
@@ -102,13 +102,13 @@ public class ThreadPoolExecutorFactory {
                   FutureTask<?> futureTask = (FutureTask)r;
                   futureTask.get();
                } catch (Exception e) {
-                  LogUtils.error("afterExecute\u83b7\u53d6\u5230submit\u63d0\u4ea4\u7684\u5f02\u5e38\u4fe1\u606f2:{}", new Object[]{e.getMessage()});
+                  LogUtils.error("afterExecute获取到submit提交的异常信息2:{}", new Object[]{e.getMessage()});
                }
             }
 
             ThreadPoolExecutorErrorEvent threadPoolExecutorErrorEvent = new ThreadPoolExecutorErrorEvent(this, r, t);
             ZlfDisruptorSpringUtils.getApplicationContext().publishEvent(threadPoolExecutorErrorEvent);
-            LogUtils.info("====ThreadPoolExecutorFactory.\u6355\u83b7\u5f02\u5e38\u53d1\u9001springBoot\u4e8b\u4ef6\u5b8c\u6210======", new Object[0]);
+            LogUtils.info("====ThreadPoolExecutorFactory.捕获异常发送springBoot事件完成======", new Object[0]);
          }
       };
       executor.setRejectedExecutionHandler(rejectedExecutionHandler);

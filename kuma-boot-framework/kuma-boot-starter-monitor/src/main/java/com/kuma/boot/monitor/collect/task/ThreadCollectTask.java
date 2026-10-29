@@ -106,42 +106,42 @@ public class ThreadCollectTask extends AbstractCollectTask {
    private static class ThreadInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.thread.deadlocked.count",
-         desc = "\u6b7b\u9501\u7ebf\u7a0b\u6570"
+         desc = "死锁线程数"
       )
       private Integer deadlockedThreadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.thread.total",
-         desc = "\u7ebf\u7a0b\u603b\u6570"
+         desc = "线程总数"
       )
       private Integer threadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.thread.runnable.count",
-         desc = "\u8fd0\u884c\u7ebf\u7a0b\u603b\u6570"
+         desc = "运行线程总数"
       )
       private Integer runnableThreadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.thread.blocked.count",
-         desc = "\u963b\u585e\u7ebf\u7a0b\u603b\u6570"
+         desc = "阻塞线程总数"
       )
       private Integer blockedThreadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.thread.waiting.count",
-         desc = "\u7b49\u5f85\u7ebf\u7a0b\u603b\u6570"
+         desc = "等待线程总数"
       )
       private Integer waitingThreadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.thread.runnable.max.detail",
-         desc = "\u6700\u8fd1\u8fd0\u884c\u6700\u8017\u65f6\u7684\u7ebf\u7a0b\u8be6\u60c5"
+         desc = "最近运行最耗时的线程详情"
       )
       private String maxRunnableDetail = "";
       @FieldReport(
          name = "kmc.monitor.collect.thread.blocked.max.detail",
-         desc = "\u963b\u585e\u6700\u8017\u65f6\u7684\u7ebf\u7a0b\u8be6\u60c5"
+         desc = "阻塞最耗时的线程详情"
       )
       private String maxBlockedDetail = "";
       @FieldReport(
          name = "kmc.monitor.collect.thread.waiting.max.detail",
-         desc = "\u7b49\u5f85\u6700\u8017\u65f6\u7684\u7ebf\u7a0b\u8be6\u60c5"
+         desc = "等待最耗时的线程详情"
       )
       private String maxWaitingDetail = "";
 

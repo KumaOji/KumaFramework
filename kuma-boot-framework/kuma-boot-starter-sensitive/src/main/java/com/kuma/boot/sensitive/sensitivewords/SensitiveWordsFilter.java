@@ -59,7 +59,7 @@ public class SensitiveWordsFilter implements Serializable {
    }
 
    public static void init(List<String> words) {
-      LogUtils.info("\u5f00\u59cb\u521d\u59cb\u5316\u654f\u611f\u8bcd", new Object[0]);
+      LogUtils.info("开始初始化敏感词", new Object[0]);
       nodesUpdate = new SensitiveWordsNode[131072];
 
       for(String word : words) {

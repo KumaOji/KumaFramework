@@ -23,7 +23,7 @@ public class JobLoginServiceImpl implements JobLoginService {
 
    public void login() {
       if (StrUtil.isBlank(this.xxlJobProperties.getAdmin().getAddresses())) {
-         throw new RuntimeException("xxl admin address url \u4e0d\u80fd\u4e3a\u7a7a");
+         throw new RuntimeException("xxl admin address url 不能为空");
       } else {
          String url = this.xxlJobProperties.getAdmin().getAddresses() + "/auth/doLogin";
          Map<String, Object> formMap = new HashMap();
@@ -47,7 +47,7 @@ public class JobLoginServiceImpl implements JobLoginService {
          try {
             this.login();
          } catch (Exception var4) {
-            LogUtils.error("\u83b7\u53d6xxljob cookieStr \u9519\u8bef, \u6b21\u6570: {}", new Object[]{i});
+            LogUtils.error("获取xxljob cookieStr 错误, 次数: {}", new Object[]{i});
          }
       }
 

@@ -28,9 +28,9 @@ public class MqttClient {
          this.client.setCallback(new MqttMessageCallback(this.mqttLoadBalancer, this.mqttBrokerProperties, this.client));
          this.client.connect(this.options());
          this.client.subscribe((String[])this.mqttBrokerProperties.getTopics().toArray((x$0) -> new String[x$0]), this.mqttBrokerProperties.getTopics().stream().mapToInt((item) -> this.mqttBrokerProperties.getSubscribeQos()).toArray());
-         LogUtils.info("MQTT\u8fde\u63a5\u6210\u529f", new Object[0]);
+         LogUtils.info("MQTT连接成功", new Object[0]);
       } catch (Exception e) {
-         LogUtils.error("MQTT\u8fde\u63a5\u5931\u8d25\uff0c\u9519\u8bef\u4fe1\u606f\uff1a{}", new Object[]{e.getMessage(), e});
+         LogUtils.error("MQTT连接失败，错误信息：{}", new Object[]{e.getMessage(), e});
       }
 
    }
@@ -39,7 +39,7 @@ public class MqttClient {
       if (ObjectUtils.isNotNull(this.client)) {
          this.client.disconnectForcibly(10L);
          this.client.close();
-         LogUtils.info("\u5173\u95edMQTT\u8fde\u63a5", new Object[0]);
+         LogUtils.info("关闭MQTT连接", new Object[0]);
       }
 
    }

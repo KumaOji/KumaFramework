@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
    validatedBy = {NodeRefValidator.class}
 )
 public @interface NodeRefConstraint {
-   String message() default "{\u975e\u6cd5\u7684\u8282\u70b9\u5f15\u7528\u4e3anull\u6216\"\"}";
+   String message() default "{非法的节点引用为null或\"\"}";
 
    Class<?>[] groups() default {};
 

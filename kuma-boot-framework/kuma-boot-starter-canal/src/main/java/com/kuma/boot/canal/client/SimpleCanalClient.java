@@ -54,7 +54,7 @@ public class SimpleCanalClient extends AbstractCanalClient {
    }
 
    private void initListeners() {
-      LogUtils.info("{}: \u76d1\u542c\u5668\u6b63\u5728\u521d\u59cb\u5316....", new Object[]{Thread.currentThread().getName()});
+      LogUtils.info("{}: 监听器正在初始化....", new Object[]{Thread.currentThread().getName()});
       List<CanalEventListener> list = ContextUtils.getBeansOfTypeWithList(CanalEventListener.class);
       if (list != null) {
          this.listeners.addAll(list);
@@ -74,9 +74,9 @@ public class SimpleCanalClient extends AbstractCanalClient {
          }
       }
 
-      LogUtils.info("{}: \u76d1\u542c\u5668\u521d\u59cb\u5316\u5b8c\u6210.", new Object[]{Thread.currentThread().getName()});
+      LogUtils.info("{}: 监听器初始化完成.", new Object[]{Thread.currentThread().getName()});
       if (LogUtils.isWarnEnabled() && this.listeners.isEmpty() && this.annoListeners.isEmpty()) {
-         LogUtils.warn("{}: \u9879\u76ee\u4e2d\u6ca1\u6709\u4efb\u4f55\u76d1\u542c\u7684\u76ee\u6807! ", new Object[]{Thread.currentThread().getName()});
+         LogUtils.warn("{}: 项目中没有任何监听的目标! ", new Object[]{Thread.currentThread().getName()});
       }
 
    }

@@ -30,7 +30,7 @@ public class SpelSensitiveJsonSerializer extends ValueSerializer<Object> {
       try {
          value = SpringElUtil.parse(this.el, SpringElUtil.getStandardEvaluationContext(this.name, value), Object.class);
       } catch (Exception e) {
-         LogUtils.error(this.name + " el \u8868\u8fbe\u5f0f " + this.el + "\u9519\u8bef", new Object[]{e});
+         LogUtils.error(this.name + " el 表达式 " + this.el + "错误", new Object[]{e});
       }
 
       jsonGenerator.writeStartObject(value);

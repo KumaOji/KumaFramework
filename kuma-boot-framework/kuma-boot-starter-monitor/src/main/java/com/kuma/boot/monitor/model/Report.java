@@ -69,7 +69,7 @@ public class Report extends LinkedHashMap<String, Object> implements Serializabl
                } else if (itemValue instanceof String) {
                   String text = StringUtils.nullToEmpty(itemValue);
                   if (((String)item.getKey()).contains(".detail") && !text.isEmpty()) {
-                     itemValue = "<span style='color:blue;cursor:pointer' title='{title}' onclick='this.innerHTML=(this.textContent==\"\u663e\u793a\u8be6\u60c5\"?this.title.replace(/\\r/g,\"\").replace(/\\n/g,\"<br/>\"):\"\u663e\u793a\u8be6\u60c5\");'>\u663e\u793a\u8be6\u60c5</span>".replace("{title}", this.htmlEncode(text).replace("\r", "/r").replace("\n", "/n"));
+                     itemValue = "<span style='color:blue;cursor:pointer' title='{title}' onclick='this.innerHTML=(this.textContent==\"显示详情\"?this.title.replace(/\\r/g,\"\").replace(/\\n/g,\"<br/>\"):\"显示详情\");'>显示详情</span>".replace("{title}", this.htmlEncode(text).replace("\r", "/r").replace("\n", "/n"));
                   }
                } else {
                   itemValue = JacksonUtils.toJSONString(itemValue);
@@ -78,7 +78,7 @@ public class Report extends LinkedHashMap<String, Object> implements Serializabl
                itemValue = "NULL";
             }
 
-            stringBuilder.append(String.format("%s(%s):%s%s\r\n", item.getKey(), reportItem.getDesc(), itemValue, reportItem.isWarn() ? "<font color=\"#FF0000\">[\u62a5\u8b66]</font>" : ""));
+            stringBuilder.append(String.format("%s(%s):%s%s\r\n", item.getKey(), reportItem.getDesc(), itemValue, reportItem.isWarn() ? "<font color=\"#FF0000\">[报警]</font>" : ""));
          } else if (value instanceof Report) {
             stringBuilder.append(((Report)value).toHtml());
          }

@@ -34,10 +34,10 @@ public class XssFilter implements Filter {
    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
       String uriPath = ((HttpServletRequest)request).getRequestURI();
       if (this.isIgnorePath(uriPath)) {
-         LogUtils.debug("\u5ffd\u7565\u8fc7\u6ee4\u8def\u5f84=[{}]", new Object[]{uriPath});
+         LogUtils.debug("忽略过滤路径=[{}]", new Object[]{uriPath});
          chain.doFilter(request, response);
       } else {
-         LogUtils.debug("\u8fc7\u6ee4\u5668\u5305\u88c5\u8bf7\u6c42\u8def\u5f84=[{}]", new Object[]{uriPath});
+         LogUtils.debug("过滤器包装请求路径=[{}]", new Object[]{uriPath});
          chain.doFilter(new XssRequestWrapper((HttpServletRequest)request, this.ignoreParamValueList), response);
       }
    }

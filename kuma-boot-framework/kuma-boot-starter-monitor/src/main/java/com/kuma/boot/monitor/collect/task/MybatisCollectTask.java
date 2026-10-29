@@ -57,27 +57,27 @@ public class MybatisCollectTask extends AbstractCollectTask {
    private static class SqlMybatisInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.mybatis.sql.hook.error",
-         desc = "mybatis \u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "mybatis 拦截上一次每秒出错次数"
       )
       private Long hookError = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.mybatis.sql.hook.success",
-         desc = "mybatis \u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "mybatis 拦截上一次每秒成功次数"
       )
       private Long hookSuccess = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.mybatis.sql.hook.current",
-         desc = "mybatis \u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "mybatis 拦截当前执行任务数"
       )
       private Long hookCurrent = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.mybatis.sql.hook.list.detail",
-         desc = "mybatis \u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "mybatis 拦截历史最大耗时任务列表"
       )
       private String hookList = "";
       @FieldReport(
          name = "kmc.monitor.collect.mybatis.sql.hook.list.minute.detail",
-         desc = "mybatis \u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "mybatis 拦截历史最大耗时任务列表(每分钟)"
       )
       private String hookListPerMinute = "";
 

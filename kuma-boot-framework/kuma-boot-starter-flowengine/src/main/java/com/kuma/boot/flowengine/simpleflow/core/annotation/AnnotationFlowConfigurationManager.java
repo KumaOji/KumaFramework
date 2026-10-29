@@ -36,10 +36,10 @@ public class AnnotationFlowConfigurationManager {
 
    public FlowEngine initialize() {
       if (this.initialized) {
-         LogUtils.warn("\u6ce8\u89e3\u914d\u7f6e\u7ba1\u7406\u5668\u5df2\u7ecf\u521d\u59cb\u5316\uff0c\u8df3\u8fc7\u91cd\u590d\u521d\u59cb\u5316", new Object[0]);
+         LogUtils.warn("注解配置管理器已经初始化，跳过重复初始化", new Object[0]);
          return this.flowEngine;
       } else {
-         LogUtils.info("\u5f00\u59cb\u521d\u59cb\u5316\u6ce8\u89e3\u6d41\u7a0b\u914d\u7f6e\u7ba1\u7406\u5668", new Object[0]);
+         LogUtils.info("开始初始化注解流程配置管理器", new Object[0]);
 
          try {
             this.initializeThreadPool();
@@ -48,15 +48,15 @@ public class AnnotationFlowConfigurationManager {
 
             for(Map.Entry<String, com.kuma.boot.flowengine.simpleflow.api.model.FlowDefinition> entry : flowDefinitions.entrySet()) {
                this.flowEngine.registerFlow((com.kuma.boot.flowengine.simpleflow.api.model.FlowDefinition)entry.getValue());
-               LogUtils.info("\u6ce8\u518c\u6d41\u7a0b\u5b9a\u4e49: {}", new Object[]{entry.getKey()});
+               LogUtils.info("注册流程定义: {}", new Object[]{entry.getKey()});
             }
 
             this.instantiateAndRegisterBeans(flowDefinitions);
             this.initialized = true;
-            LogUtils.info("\u6ce8\u89e3\u6d41\u7a0b\u914d\u7f6e\u7ba1\u7406\u5668\u521d\u59cb\u5316\u5b8c\u6210\uff0c\u5171\u6ce8\u518c {} \u4e2a\u6d41\u7a0b\u5b9a\u4e49", new Object[]{flowDefinitions.size()});
+            LogUtils.info("注解流程配置管理器初始化完成，共注册 {} 个流程定义", new Object[]{flowDefinitions.size()});
             return this.flowEngine;
          } catch (Exception e) {
-            LogUtils.error("\u521d\u59cb\u5316\u6ce8\u89e3\u6d41\u7a0b\u914d\u7f6e\u7ba1\u7406\u5668\u65f6\u53d1\u751f\u9519\u8bef", new Object[]{e});
+            LogUtils.error("初始化注解流程配置管理器时发生错误", new Object[]{e});
             throw new RuntimeException("Failed to initialize annotation flow configuration manager", e);
          }
       }
@@ -78,7 +78,7 @@ public class AnnotationFlowConfigurationManager {
          }
       };
       this.executorService = Executors.newFixedThreadPool(this.threadPoolConfig.getCoreSize(), threadFactory);
-      LogUtils.info("\u521d\u59cb\u5316\u7ebf\u7a0b\u6c60\uff0c\u6838\u5fc3\u7ebf\u7a0b\u6570: {}", new Object[]{this.threadPoolConfig.getCoreSize()});
+      LogUtils.info("初始化线程池，核心线程数: {}", new Object[]{this.threadPoolConfig.getCoreSize()});
    }
 
    private void instantiateAndRegisterBeans(Map<String, com.kuma.boot.flowengine.simpleflow.api.model.FlowDefinition> flowDefinitions) {
@@ -114,23 +114,23 @@ public class AnnotationFlowConfigurationManager {
                   if (className.equals(firstStepBean)) {
                      this.beanRegistry.put(flowDef.getId(), instance);
                      StandaloneStepExecutorRegistry.getInstance().registerBean(flowDef.getId(), instance);
-                     LogUtils.debug("\u6ce8\u518c\u6d41\u7a0b\u5b9a\u4e49Bean: {} -> {}", new Object[]{flowDef.getId(), instance.getClass().getSimpleName()});
+                     LogUtils.debug("注册流程定义Bean: {} -> {}", new Object[]{flowDef.getId(), instance.getClass().getSimpleName()});
                   }
                }
             }
 
-            LogUtils.debug("\u5b9e\u4f8b\u5316\u5e76\u6ce8\u518cBean: {} -> {}", new Object[]{className, instance.getClass().getSimpleName()});
+            LogUtils.debug("实例化并注册Bean: {} -> {}", new Object[]{className, instance.getClass().getSimpleName()});
          } catch (Exception e) {
-            LogUtils.error("\u5b9e\u4f8b\u5316Bean {} \u65f6\u53d1\u751f\u9519\u8bef", new Object[]{className, e});
+            LogUtils.error("实例化Bean {} 时发生错误", new Object[]{className, e});
          }
       }
 
-      LogUtils.info("\u5171\u5b9e\u4f8b\u5316\u5e76\u6ce8\u518c {} \u4e2aBean", new Object[]{this.beanRegistry.size()});
+      LogUtils.info("共实例化并注册 {} 个Bean", new Object[]{this.beanRegistry.size()});
    }
 
    public void registerBean(String name, Object bean) {
       this.beanRegistry.put(name, bean);
-      LogUtils.debug("\u624b\u52a8\u6ce8\u518cBean: {} -> {}", new Object[]{name, bean.getClass().getSimpleName()});
+      LogUtils.debug("手动注册Bean: {} -> {}", new Object[]{name, bean.getClass().getSimpleName()});
    }
 
    public Object getBean(String name) {
@@ -176,12 +176,12 @@ public class AnnotationFlowConfigurationManager {
    public void destroy() {
       if (this.executorService != null && !this.executorService.isShutdown()) {
          this.executorService.shutdown();
-         LogUtils.info("\u7ebf\u7a0b\u6c60\u5df2\u5173\u95ed", new Object[0]);
+         LogUtils.info("线程池已关闭", new Object[0]);
       }
 
       this.beanRegistry.clear();
       this.initialized = false;
-      LogUtils.info("\u6ce8\u89e3\u6d41\u7a0b\u914d\u7f6e\u7ba1\u7406\u5668\u5df2\u9500\u6bc1", new Object[0]);
+      LogUtils.info("注解流程配置管理器已销毁", new Object[0]);
    }
 
    public ThreadPoolConfig getThreadPoolConfig() {

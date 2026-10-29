@@ -24,13 +24,13 @@ public class AnnotationFlowProcessor {
    }
 
    public Map<String, com.kuma.boot.flowengine.simpleflow.api.model.FlowDefinition> processAnnotations() {
-      LogUtils.info("\u5f00\u59cb\u626b\u63cf\u6ce8\u89e3\u914d\u7f6e\uff0c\u626b\u63cf\u5305: {}", new Object[]{this.basePackages});
+      LogUtils.info("开始扫描注解配置，扫描包: {}", new Object[]{this.basePackages});
 
       for(String basePackage : this.basePackages) {
          this.scanPackage(basePackage);
       }
 
-      LogUtils.info("\u6ce8\u89e3\u626b\u63cf\u5b8c\u6210\uff0c\u5171\u53d1\u73b0 {} \u4e2a\u6d41\u7a0b\u5b9a\u4e49", new Object[]{this.flowDefinitions.size()});
+      LogUtils.info("注解扫描完成，共发现 {} 个流程定义", new Object[]{this.flowDefinitions.size()});
       return new HashMap(this.flowDefinitions);
    }
 
@@ -48,7 +48,7 @@ public class AnnotationFlowProcessor {
             }
          }
       } catch (Exception e) {
-         LogUtils.error("\u626b\u63cf\u5305 {} \u65f6\u53d1\u751f\u9519\u8bef", new Object[]{packageName, e});
+         LogUtils.error("扫描包 {} 时发生错误", new Object[]{packageName, e});
       }
 
    }
@@ -75,7 +75,7 @@ public class AnnotationFlowProcessor {
             this.processFlowDefinition(clazz);
          }
       } catch (Exception e) {
-         LogUtils.debug("\u5904\u7406\u7c7b {} \u65f6\u53d1\u751f\u9519\u8bef: {}", new Object[]{className, e.getMessage()});
+         LogUtils.debug("处理类 {} 时发生错误: {}", new Object[]{className, e.getMessage()});
       }
 
    }
@@ -84,7 +84,7 @@ public class AnnotationFlowProcessor {
       FlowDefinition flowAnnotation = (FlowDefinition)clazz.getAnnotation(FlowDefinition.class);
       String flowId = flowAnnotation.id().isEmpty() ? clazz.getSimpleName() : flowAnnotation.id();
       String flowName = flowAnnotation.name().isEmpty() ? clazz.getSimpleName() : flowAnnotation.name();
-      LogUtils.info("\u53d1\u73b0\u6d41\u7a0b\u5b9a\u4e49: {} ({})", new Object[]{flowName, flowId});
+      LogUtils.info("发现流程定义: {} ({})", new Object[]{flowName, flowId});
       List<StepDefinition> steps = this.processSteps(clazz);
       Map<String, List<String>> dependencies = new HashMap();
 
@@ -152,7 +152,7 @@ public class AnnotationFlowProcessor {
       }
 
       StepDefinition stepDefinition = builder.build();
-      LogUtils.debug("\u5904\u7406\u6b65\u9aa4: {} ({})", new Object[]{stepName, stepId});
+      LogUtils.debug("处理步骤: {} ({})", new Object[]{stepName, stepId});
       return stepDefinition;
    }
 
@@ -178,7 +178,7 @@ public class AnnotationFlowProcessor {
       }
 
       StepDefinition stepDefinition = builder.build();
-      LogUtils.debug("\u5904\u7406\u6761\u4ef6\u6b65\u9aa4: {} ({})", new Object[]{stepName, stepId});
+      LogUtils.debug("处理条件步骤: {} ({})", new Object[]{stepName, stepId});
       return stepDefinition;
    }
 

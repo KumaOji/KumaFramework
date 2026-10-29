@@ -47,8 +47,8 @@ public class NosGenerator implements Nos {
    }
 
    public String getOrderNo(String businessCode, String serviceCode, String shardCode, String extensionCode) {
-      this.assertLen(businessCode, 12, "businessCode\u957f\u5ea6\u5fc5\u987b\u662f12\u4f4d");
-      this.assertLen(serviceCode, 4, "businessCode\u957f\u5ea6\u5fc5\u987b\u662f4\u4f4d");
+      this.assertLen(businessCode, 12, "businessCode长度必须是12位");
+      this.assertLen(serviceCode, 4, "businessCode长度必须是4位");
       String id = this.getNo(shardCode, extensionCode);
       StringBuilder sb = new StringBuilder(46);
       sb.append(businessCode).append(serviceCode).append(id);
@@ -72,8 +72,8 @@ public class NosGenerator implements Nos {
    }
 
    public String getNo(String shardCode, String extensionCode) {
-      this.assertLen(shardCode, 2, "shardCode\u957f\u5ea6\u5fc5\u987b\u662f2\u4f4d");
-      this.assertLen(extensionCode, 3, "extensionCode\u957f\u5ea6\u5fc5\u987b\u662f3\u4f4d");
+      this.assertLen(shardCode, 2, "shardCode长度必须是2位");
+      this.assertLen(extensionCode, 3, "extensionCode长度必须是3位");
       StringBuilder sb = new StringBuilder(30);
       sb.append(this.uidGenProperties.getSystemCode()).append(KmcEnvEnum.getCurrEnv().getCode()).append(this.uidGenProperties.getDataCenterCode()).append(shardCode).append(extensionCode);
 
@@ -97,7 +97,7 @@ public class NosGenerator implements Nos {
          map.putAll(this.uidGenerator.parseUid(Long.parseLong(UidParser.parse(id, UidParser.ID_SEQ_CODE), 16)));
          return Collections.unmodifiableMap(map);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b\u662f30\u4f4d");
+         throw new BusinessException("id 长度必须是30位");
       }
    }
 
@@ -107,7 +107,7 @@ public class NosGenerator implements Nos {
       } else if (uid != null && uid.length() == 46) {
          return UidParser.parse(uid, UidParser.OID_SYSTEM_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b\u662f30\u4f4d\u6216\u800546\u4f4d");
+         throw new BusinessException("id 长度必须是30位或者46位");
       }
    }
 
@@ -117,7 +117,7 @@ public class NosGenerator implements Nos {
       } else if (uid != null && uid.length() == 46) {
          return UidParser.parse(uid, UidParser.ID_DATA_CENTER_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b\u662f30\u4f4d\u6216\u800546\u4f4d");
+         throw new BusinessException("id 长度必须是30位或者46位");
       }
    }
 
@@ -127,7 +127,7 @@ public class NosGenerator implements Nos {
       } else if (uid != null && uid.length() == 46) {
          return UidParser.parse(uid, UidParser.ID_SHARD_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b\u662f30\u4f4d\u6216\u800546\u4f4d");
+         throw new BusinessException("id 长度必须是30位或者46位");
       }
    }
 
@@ -137,7 +137,7 @@ public class NosGenerator implements Nos {
       } else if (uid != null && uid.length() == 46) {
          return Long.parseLong(UidParser.parse(uid, UidParser.OID_SEQ_CODE), 16);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b\u662f30\u4f4d\u6216\u800546\u4f4d");
+         throw new BusinessException("id 长度必须是30位或者46位");
       }
    }
 
@@ -147,7 +147,7 @@ public class NosGenerator implements Nos {
       } else if (uid != null && uid.length() == 46) {
          return UidParser.parse(uid, UidParser.OID_EXTENSION_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b\u662f30\u4f4d\u6216\u800546\u4f4d");
+         throw new BusinessException("id 长度必须是30位或者46位");
       }
    }
 
@@ -155,7 +155,7 @@ public class NosGenerator implements Nos {
       if (oid != null && oid.length() == 46) {
          return UidParser.parse(oid, UidParser.OID_BUSINESS_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b46\u4f4d");
+         throw new BusinessException("id 长度必须46位");
       }
    }
 
@@ -163,7 +163,7 @@ public class NosGenerator implements Nos {
       if (oid != null && oid.length() == 46) {
          return UidParser.parse(oid, UidParser.OID_SERVICE_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b46\u4f4d");
+         throw new BusinessException("id 长度必须46位");
       }
    }
 
@@ -171,7 +171,7 @@ public class NosGenerator implements Nos {
       if (oid != null && oid.length() == 46) {
          return UidParser.parse(oid, UidParser.OID_CHANNEL_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b46\u4f4d");
+         throw new BusinessException("id 长度必须46位");
       }
    }
 
@@ -179,7 +179,7 @@ public class NosGenerator implements Nos {
       if (oid != null && oid.length() == 46) {
          return UidParser.parse(oid, UidParser.OID_PRODUCT_CODE);
       } else {
-         throw new BusinessException("id \u957f\u5ea6\u5fc5\u987b46\u4f4d");
+         throw new BusinessException("id 长度必须46位");
       }
    }
 

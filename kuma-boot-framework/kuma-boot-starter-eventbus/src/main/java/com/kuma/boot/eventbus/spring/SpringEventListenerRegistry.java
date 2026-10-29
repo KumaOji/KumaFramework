@@ -26,8 +26,8 @@ public class SpringEventListenerRegistry implements EventListenerRegistry<EventM
 
    @PostConstruct
    public void init() {
-      LogUtils.info("\u5f00\u59cb\u521d\u59cb\u5316Spring\u4e8b\u4ef6\u76d1\u542c\u5668\u7684\u7ec4\u4ef6\u670d\u52a1", new Object[0]);
+      LogUtils.info("开始初始化Spring事件监听器的组件服务", new Object[0]);
       this.initRegistryEventListener(this.eventListeners);
-      LogUtils.info("\u5b8c\u6210\u521d\u59cb\u5316Spring\u4e8b\u4ef6\u76d1\u542c\u5668\u7684\u7ec4\u4ef6\u670d\u52a1", new Object[0]);
+      LogUtils.info("完成初始化Spring事件监听器的组件服务", new Object[0]);
    }
 }

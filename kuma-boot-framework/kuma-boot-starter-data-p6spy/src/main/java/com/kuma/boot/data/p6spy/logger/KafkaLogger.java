@@ -19,7 +19,7 @@ public class KafkaLogger extends FormattedLogger {
          this.kafkaTemplate = kafkaTemplate;
          this.applicationName = applicationName;
       } catch (Exception e) {
-         throw new ClassNotFoundException("KafkaTemplate\u4e0d\u5b58\u5728\uff0c\u8bf7\u6dfb\u52a0org.springframework.kafka:spring-kafka", e);
+         throw new ClassNotFoundException("KafkaTemplate不存在，请添加org.springframework.kafka:spring-kafka", e);
       }
    }
 

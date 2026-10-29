@@ -35,9 +35,9 @@ public class DisruptorService {
 
    public Tuple buildKey(DisruptorCreateMethodEnum disruptorCreateMethodEnum, String bizName) {
       if (Objects.isNull(disruptorCreateMethodEnum)) {
-         throw new RuntimeException("DisruptorService.buildKey.disruptorCreateMethodEnum\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.buildKey.disruptorCreateMethodEnum不为空!");
       } else if (StringUtils.isBlank(bizName)) {
-         throw new RuntimeException("DisruptorService.buildKey.bizName\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.buildKey.bizName不为空!");
       } else {
          String var10000 = disruptorCreateMethodEnum.getName();
          String key = var10000 + bizName;
@@ -54,20 +54,20 @@ public class DisruptorService {
 
    public Tuple create0(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.create0.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.create0.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          ConcurrentHashMap<String, DisruptorCreate> bizNameDcbMaps = DisruptorCreateMethodEnum.CREATE0.getDcbMaps();
          DisruptorCreate dcb = (DisruptorCreate)bizNameDcbMaps.get(key);
          if (Objects.isNull(dcb)) {
-            throw new RuntimeException("DisruptorService.create0.\u8bf7\u5148\u8bbe\u7f6eDisruptorCreatMethodEnum\u7684createDcbMaps\u5bf9\u5e94\u5173\u7cfb!");
+            throw new RuntimeException("DisruptorService.create0.请先设置DisruptorCreatMethodEnum的createDcbMaps对应关系!");
          } else {
             int bufferSize = dcb.getBufferSize();
             WaitStrategy waitStrategy = dcb.getWaitStrategy();
             if (Objects.isNull(bufferSize)) {
-               throw new RuntimeException("DisruptorService.create0.bufferSize\u4e0d\u4e3a\u7a7a,2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,,!");
+               throw new RuntimeException("DisruptorService.create0.bufferSize不为空,2的整数次幂 比如1024,2048,,,,,!");
             } else if (Objects.isNull(waitStrategy)) {
-               throw new RuntimeException("DisruptorService.create0.waitStrategy\u7b49\u5f85\u7b56\u7565\u4e0d\u4e3a\u7a7a-- 2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,!");
+               throw new RuntimeException("DisruptorService.create0.waitStrategy等待策略不为空-- 2的整数次幂 比如1024,2048,,,,!");
             } else if (Objects.nonNull(this.disruptorMaps.get(key))) {
                return (Tuple)this.disruptorMaps.get(key);
             } else {
@@ -84,23 +84,23 @@ public class DisruptorService {
 
    public Tuple create1(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.create1.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.create1.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          ConcurrentHashMap<String, DisruptorCreate> bizNameDcbMaps = DisruptorCreateMethodEnum.CREATE1.getDcbMaps();
          DisruptorCreate dcb = (DisruptorCreate)bizNameDcbMaps.get(key);
          if (Objects.isNull(dcb)) {
-            throw new RuntimeException("DisruptorService.create1.\u8bf7\u5148\u8bbe\u7f6eDisruptorCreatMethodEnum\u7684createDcbMaps\u5bf9\u5e94\u5173\u7cfb!");
+            throw new RuntimeException("DisruptorService.create1.请先设置DisruptorCreatMethodEnum的createDcbMaps对应关系!");
          } else {
             int bufferSize = dcb.getBufferSize();
             ProducerType producerType = dcb.getProducerType();
             WaitStrategy waitStrategy = dcb.getWaitStrategy();
             if (Objects.isNull(bufferSize)) {
-               throw new RuntimeException("DisruptorService.create1.bufferSize\u4e0d\u4e3a\u7a7a,2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,,!");
+               throw new RuntimeException("DisruptorService.create1.bufferSize不为空,2的整数次幂 比如1024,2048,,,,,!");
             } else if (Objects.isNull(producerType)) {
-               throw new RuntimeException("DisruptorService.create1.producerType\u751f\u4ea7\u8005\u7c7b\u578b\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create1.producerType生产者类型不为空!");
             } else if (Objects.isNull(waitStrategy)) {
-               throw new RuntimeException("DisruptorService.create1.waitStrategy\u7b49\u5f85\u7b56\u7565\u4e0d\u4e3a\u7a7a-- 2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,!");
+               throw new RuntimeException("DisruptorService.create1.waitStrategy等待策略不为空-- 2的整数次幂 比如1024,2048,,,,!");
             } else if (Objects.nonNull(this.disruptorMaps.get(key))) {
                return (Tuple)this.disruptorMaps.get(key);
             } else {
@@ -123,26 +123,26 @@ public class DisruptorService {
 
    public Tuple create2(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.create2.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.create2.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          ConcurrentHashMap<String, DisruptorCreate> bizNameDcbMaps = DisruptorCreateMethodEnum.CREATE2.getDcbMaps();
          DisruptorCreate dcb = (DisruptorCreate)bizNameDcbMaps.get(key);
          if (Objects.isNull(dcb)) {
-            throw new RuntimeException("DisruptorService.create2.\u8bf7\u5148\u8bbe\u7f6eDisruptorCreatMethodEnum\u7684createDcbMaps\u5bf9\u5e94\u5173\u7cfb!");
+            throw new RuntimeException("DisruptorService.create2.请先设置DisruptorCreatMethodEnum的createDcbMaps对应关系!");
          } else {
             int bufferSize = dcb.getBufferSize();
             EventFactory eventFactory = dcb.getEventFactory();
             ProducerType producerType = dcb.getProducerType();
             WaitStrategy waitStrategy = dcb.getWaitStrategy();
             if (Objects.isNull(eventFactory)) {
-               throw new RuntimeException("DisruptorService.create2.eventFactory\u81ea\u5b9a\u4e49\u4e8b\u4ef6\u5de5\u5382\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create2.eventFactory自定义事件工厂不为空!");
             } else if (Objects.isNull(bufferSize)) {
-               throw new RuntimeException("DisruptorService.create2.bufferSize\u4e0d\u4e3a\u7a7a,2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,,!");
+               throw new RuntimeException("DisruptorService.create2.bufferSize不为空,2的整数次幂 比如1024,2048,,,,,!");
             } else if (Objects.isNull(producerType)) {
-               throw new RuntimeException("DisruptorService.create2.producerType\u751f\u4ea7\u8005\u7c7b\u578b\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create2.producerType生产者类型不为空!");
             } else if (Objects.isNull(waitStrategy)) {
-               throw new RuntimeException("DisruptorService.create2.waitStrategy\u7b49\u5f85\u7b56\u7565\u4e0d\u4e3a\u7a7a-- 2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,!");
+               throw new RuntimeException("DisruptorService.create2.waitStrategy等待策略不为空-- 2的整数次幂 比如1024,2048,,,,!");
             } else if (Objects.nonNull(this.disruptorMaps.get(key))) {
                return (Tuple)this.disruptorMaps.get(key);
             } else {
@@ -163,13 +163,13 @@ public class DisruptorService {
 
    public Tuple create3(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.create3.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.create3.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          ConcurrentHashMap<String, DisruptorCreate> bizNameDcbMaps = DisruptorCreateMethodEnum.CREATE3.getDcbMaps();
          DisruptorCreate dcb = (DisruptorCreate)bizNameDcbMaps.get(key);
          if (Objects.isNull(dcb)) {
-            throw new RuntimeException("DisruptorService.create3.\u8bf7\u5148\u8bbe\u7f6eDisruptorCreatMethodEnum\u7684createDcbMaps\u5bf9\u5e94\u5173\u7cfb!");
+            throw new RuntimeException("DisruptorService.create3.请先设置DisruptorCreatMethodEnum的createDcbMaps对应关系!");
          } else {
             int bufferSize = dcb.getBufferSize();
             EventFactory eventFactory = dcb.getEventFactory();
@@ -177,15 +177,15 @@ public class DisruptorService {
             ProducerType producerType = dcb.getProducerType();
             WaitStrategy waitStrategy = dcb.getWaitStrategy();
             if (Objects.isNull(eventFactory)) {
-               throw new RuntimeException("DisruptorService.create3.eventFactory\u81ea\u5b9a\u4e49\u4e8b\u4ef6\u5de5\u5382\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create3.eventFactory自定义事件工厂不为空!");
             } else if (Objects.isNull(threadFactory)) {
-               throw new RuntimeException("DisruptorService.create3.threadFactory\u81ea\u5b9a\u4e49\u7ebf\u7a0b\u5de5\u5382\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create3.threadFactory自定义线程工厂不为空!");
             } else if (Objects.isNull(bufferSize)) {
-               throw new RuntimeException("DisruptorService.create3.bufferSize\u4e0d\u4e3a\u7a7a,2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,,!");
+               throw new RuntimeException("DisruptorService.create3.bufferSize不为空,2的整数次幂 比如1024,2048,,,,,!");
             } else if (Objects.isNull(producerType)) {
-               throw new RuntimeException("DisruptorService.create3.producerType\u751f\u4ea7\u8005\u7c7b\u578b\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create3.producerType生产者类型不为空!");
             } else if (Objects.isNull(waitStrategy)) {
-               throw new RuntimeException("DisruptorService.create3.waitStrategy\u7b49\u5f85\u7b56\u7565\u4e0d\u4e3a\u7a7a-- 2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,!");
+               throw new RuntimeException("DisruptorService.create3.waitStrategy等待策略不为空-- 2的整数次幂 比如1024,2048,,,,!");
             } else if (Objects.nonNull(this.disruptorMaps.get(key))) {
                return (Tuple)this.disruptorMaps.get(key);
             } else {
@@ -206,26 +206,26 @@ public class DisruptorService {
 
    public Tuple create4(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.create4.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.create4.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          ConcurrentHashMap<String, DisruptorCreate> bizNameDcbMaps = DisruptorCreateMethodEnum.CREATE4.getDcbMaps();
          DisruptorCreate dcb = (DisruptorCreate)bizNameDcbMaps.get(key);
          if (Objects.isNull(dcb)) {
-            throw new RuntimeException("DisruptorService.create4.\u8bf7\u5148\u8bbe\u7f6eDisruptorCreatMethodEnum\u7684createDcbMaps\u5bf9\u5e94\u5173\u7cfb!");
+            throw new RuntimeException("DisruptorService.create4.请先设置DisruptorCreatMethodEnum的createDcbMaps对应关系!");
          } else {
             int bufferSize = dcb.getBufferSize();
             EventFactory eventFactory = dcb.getEventFactory();
             ProducerType producerType = dcb.getProducerType();
             WaitStrategy waitStrategy = dcb.getWaitStrategy();
             if (Objects.isNull(eventFactory)) {
-               throw new RuntimeException("DisruptorService.create4.eventFactory\u81ea\u5b9a\u4e49\u4e8b\u4ef6\u5de5\u5382\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create4.eventFactory自定义事件工厂不为空!");
             } else if (Objects.isNull(bufferSize)) {
-               throw new RuntimeException("DisruptorService.create4.bufferSize\u4e0d\u4e3a\u7a7a,2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,,!");
+               throw new RuntimeException("DisruptorService.create4.bufferSize不为空,2的整数次幂 比如1024,2048,,,,,!");
             } else if (Objects.isNull(producerType)) {
-               throw new RuntimeException("DisruptorService.create4.producerType\u751f\u4ea7\u8005\u7c7b\u578b\u4e0d\u4e3a\u7a7a!");
+               throw new RuntimeException("DisruptorService.create4.producerType生产者类型不为空!");
             } else if (Objects.isNull(waitStrategy)) {
-               throw new RuntimeException("DisruptorService.create3.waitStrategy\u7b49\u5f85\u7b56\u7565\u4e0d\u4e3a\u7a7a-- 2\u7684\u6574\u6570\u6b21\u5e42 \u6bd4\u59821024,2048,,,,!");
+               throw new RuntimeException("DisruptorService.create3.waitStrategy等待策略不为空-- 2的整数次幂 比如1024,2048,,,,!");
             } else if (Objects.nonNull(this.disruptorMaps.get(key))) {
                return (Tuple)this.disruptorMaps.get(key);
             } else {
@@ -246,7 +246,7 @@ public class DisruptorService {
 
    public Tuple createAddHandlerStart1(String key, DisruptorHandler disruptorHandler) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.createAddHandlerStart1.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.createAddHandlerStart1.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          Tuple tuple = null;
@@ -278,12 +278,12 @@ public class DisruptorService {
 
    public Boolean start(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.start.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.start.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          Tuple tuple = (Tuple)this.disruptorMaps.get(key);
          if (Objects.isNull(tuple)) {
-            throw new RuntimeException("DisruptorService.start.\u6839\u636ekey\u672a\u5339\u914d\u5230tuple!");
+            throw new RuntimeException("DisruptorService.start.根据key未匹配到tuple!");
          } else {
             AtomicBoolean started = (AtomicBoolean)tuple.get(2);
             if (Objects.nonNull(started) && !started.compareAndSet(false, true)) {
@@ -293,7 +293,7 @@ public class DisruptorService {
                if (Objects.nonNull(disruptor)) {
                   disruptor.start();
                   this.disruptorMaps.put(key, new Tuple(new Object[]{disruptor, disruptor.getRingBuffer(), started}));
-                  LogUtils.info("DisruptorService.start.disruptor:{}==>\u6210\u529f!", new Object[]{disruptor});
+                  LogUtils.info("DisruptorService.start.disruptor:{}==>成功!", new Object[]{disruptor});
                   return Boolean.TRUE;
                } else {
                   return Boolean.FALSE;
@@ -305,14 +305,14 @@ public class DisruptorService {
 
    public void shutdown(String key) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.start.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.start.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          Tuple tuple = (Tuple)this.disruptorMaps.get(key);
          if (Objects.nonNull(tuple) && Objects.nonNull(tuple.get(0))) {
             Disruptor disruptor = (Disruptor)tuple.get(0);
             disruptor.shutdown();
-            LogUtils.info("DisruptorService.shutdown.disruptor:{}==>\u5173\u95ed\u6210\u529f!", new Object[]{disruptor});
+            LogUtils.info("DisruptorService.shutdown.disruptor:{}==>关闭成功!", new Object[]{disruptor});
             this.disruptorMaps.entrySet().removeIf((e) -> key.equals(e.getKey()));
          }
 
@@ -321,23 +321,23 @@ public class DisruptorService {
 
    public void pushEvent0(String key, Object o1) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.pushEvent0.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.pushEvent0.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          if (Objects.isNull(o1)) {
-            throw new RuntimeException("pushEvent0.o1\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent0.o1不为空!");
          } else {
             Tuple tuple = (Tuple)this.disruptorMaps.get(key);
             if (Objects.isNull(tuple)) {
-               throw new RuntimeException("DisruptorService.pushEvent0.\u6839\u636ekey\u672a\u5339\u914d\u5230tuple!");
+               throw new RuntimeException("DisruptorService.pushEvent0.根据key未匹配到tuple!");
             } else {
                Disruptor disruptor = (Disruptor)tuple.get(0);
                if (Objects.isNull(disruptor)) {
-                  throw new RuntimeException("pushEvent0.\u672a\u627e\u5230\u5bf9\u5e94key\u7684disruptor,\u8bf7\u68c0\u67e5key\u53c2\u6570\u662f\u5426\u6b63\u786e!");
+                  throw new RuntimeException("pushEvent0.未找到对应key的disruptor,请检查key参数是否正确!");
                } else {
                   RingBuffer ringBuffer = disruptor.getRingBuffer();
                   if (Objects.isNull(ringBuffer)) {
-                     throw new RuntimeException("pushEvent0.ringBuffer\u4e0d\u4e3a\u7a7a!");
+                     throw new RuntimeException("pushEvent0.ringBuffer不为空!");
                   } else {
                      EventTranslatorOneArg<DisruptorEvent, Object> eventTranslatorOneArg = (event, sequence, arg0) -> event.setO1(o1);
                      ringBuffer.publishEvent(eventTranslatorOneArg, o1);
@@ -350,25 +350,25 @@ public class DisruptorService {
 
    public void pushEvent1(String key, Object o1, Object o2) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.pushEvent1.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.pushEvent1.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          if (Objects.isNull(o1)) {
-            throw new RuntimeException("pushEvent1.o1\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent1.o1不为空!");
          } else if (Objects.isNull(o2)) {
-            throw new RuntimeException("pushEvent1.o2\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent1.o2不为空!");
          } else {
             Tuple tuple = (Tuple)this.disruptorMaps.get(key);
             if (Objects.isNull(tuple)) {
-               throw new RuntimeException("DisruptorService.pushEvent1.\u6839\u636ekey\u672a\u5339\u914d\u5230tuple!");
+               throw new RuntimeException("DisruptorService.pushEvent1.根据key未匹配到tuple!");
             } else {
                Disruptor disruptor = (Disruptor)tuple.get(0);
                if (Objects.isNull(disruptor)) {
-                  throw new RuntimeException("pushEvent1.\u672a\u627e\u5230\u5bf9\u5e94key\u7684disruptor,\u8bf7\u68c0\u67e5key\u53c2\u6570\u662f\u5426\u6b63\u786e!");
+                  throw new RuntimeException("pushEvent1.未找到对应key的disruptor,请检查key参数是否正确!");
                } else {
                   RingBuffer ringBuffer = disruptor.getRingBuffer();
                   if (Objects.isNull(ringBuffer)) {
-                     throw new RuntimeException("pushEvent1.ringBuffer\u4e0d\u4e3a\u7a7a!");
+                     throw new RuntimeException("pushEvent1.ringBuffer不为空!");
                   } else {
                      EventTranslatorTwoArg<DisruptorEvent, Object, Object> eventTranslatorTwoArg = (event, sequence, arg0, arg1) -> {
                         event.setO1(o1);
@@ -384,27 +384,27 @@ public class DisruptorService {
 
    public void pushEvent2(String key, Object o1, Object o2, Object o3) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.pushEvent2.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.pushEvent2.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          if (Objects.isNull(o1)) {
-            throw new RuntimeException("pushEvent2.o1\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent2.o1不为空!");
          } else if (Objects.isNull(o2)) {
-            throw new RuntimeException("pushEvent2.o2\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent2.o2不为空!");
          } else if (Objects.isNull(o3)) {
-            throw new RuntimeException("pushEvent2.o3\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent2.o3不为空!");
          } else {
             Tuple tuple = (Tuple)this.disruptorMaps.get(key);
             if (Objects.isNull(tuple)) {
-               throw new RuntimeException("DisruptorService.pushEvent2.\u6839\u636ekey\u672a\u5339\u914d\u5230tuple!");
+               throw new RuntimeException("DisruptorService.pushEvent2.根据key未匹配到tuple!");
             } else {
                Disruptor disruptor = (Disruptor)tuple.get(0);
                if (Objects.isNull(disruptor)) {
-                  throw new RuntimeException("pushEvent2.\u672a\u627e\u5230\u5bf9\u5e94key\u7684disruptor,\u8bf7\u68c0\u67e5key\u53c2\u6570\u662f\u5426\u6b63\u786e!");
+                  throw new RuntimeException("pushEvent2.未找到对应key的disruptor,请检查key参数是否正确!");
                } else {
                   RingBuffer ringBuffer = disruptor.getRingBuffer();
                   if (Objects.isNull(ringBuffer)) {
-                     throw new RuntimeException("pushEvent2.ringBuffer\u4e0d\u4e3a\u7a7a!");
+                     throw new RuntimeException("pushEvent2.ringBuffer不为空!");
                   } else {
                      EventTranslatorThreeArg<DisruptorEvent, Object, Object, Object> eventTranslatorThreeArg = (event, sequence, arg0, arg1, arg2) -> {
                         event.setO1(o1);
@@ -421,23 +421,23 @@ public class DisruptorService {
 
    public void pushEvent3(String key, List<Object> objectList) {
       if (StringUtils.isBlank(key)) {
-         throw new RuntimeException("DisruptorService.pushEvent3.key\u4e0d\u4e3a\u7a7a!");
+         throw new RuntimeException("DisruptorService.pushEvent3.key不为空!");
       } else {
          DisruptorCreateMethodEnum.checkKeyFormat(key);
          if (CollectionUtils.isNotEmpty(objectList)) {
-            throw new RuntimeException("pushEvent2.objectList\u4e0d\u4e3a\u7a7a!");
+            throw new RuntimeException("pushEvent2.objectList不为空!");
          } else {
             Tuple tuple = (Tuple)this.disruptorMaps.get(key);
             if (Objects.isNull(tuple)) {
-               throw new RuntimeException("DisruptorService.pushEvent3.\u6839\u636ekey\u672a\u5339\u914d\u5230tuple!");
+               throw new RuntimeException("DisruptorService.pushEvent3.根据key未匹配到tuple!");
             } else {
                Disruptor disruptor = (Disruptor)tuple.get(0);
                if (Objects.isNull(disruptor)) {
-                  throw new RuntimeException("pushEvent3.\u672a\u627e\u5230\u5bf9\u5e94key\u7684disruptor,\u8bf7\u68c0\u67e5key\u53c2\u6570\u662f\u5426\u6b63\u786e!");
+                  throw new RuntimeException("pushEvent3.未找到对应key的disruptor,请检查key参数是否正确!");
                } else {
                   RingBuffer ringBuffer = disruptor.getRingBuffer();
                   if (Objects.isNull(ringBuffer)) {
-                     throw new RuntimeException("pushEvent2.ringBuffer\u4e0d\u4e3a\u7a7a!");
+                     throw new RuntimeException("pushEvent2.ringBuffer不为空!");
                   } else {
                      EventTranslatorOneArg<DisruptorEvent, Object> eventTranslatorOneArg = (event, sequence, arg0) -> event.setObjectList(objectList);
                      ringBuffer.publishEvent(eventTranslatorOneArg, objectList);
@@ -455,7 +455,7 @@ public class DisruptorService {
             Tuple tuple = (Tuple)entry.getValue();
             if (!Objects.isNull(tuple)) {
                this.shutdown((String)tuple.get(1));
-               LogUtils.info("key:{}\u7684disruptor\u5173\u95ed\u5b8c\u6210!", new Object[]{entry.getKey()});
+               LogUtils.info("key:{}的disruptor关闭完成!", new Object[]{entry.getKey()});
             }
          }
       }

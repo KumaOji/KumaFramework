@@ -96,67 +96,67 @@ public class AsyncThreadPoolCollectTask extends AbstractCollectTask {
    private static class AsyncExecutorCollectInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.active.count",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u6d3b\u52a8\u7ebf\u7a0b\u6570"
+         desc = "异步核心线程池活动线程数"
       )
       private Integer asyncExecutorActiveCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.core.pool.size",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u6838\u5fc3\u7ebf\u7a0b\u6570"
+         desc = "异步核心线程池核心线程数"
       )
       private Integer asyncExecutorCorePoolSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.pool.size.largest",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5386\u53f2\u6700\u5927\u7ebf\u7a0b\u6570"
+         desc = "异步核心线程池历史最大线程数"
       )
       private Integer asyncExecutorPoolSizeLargest = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.pool.size.max",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u6700\u5927\u7ebf\u7a0b\u6570"
+         desc = "异步核心线程池最大线程数"
       )
       private Integer asyncExecutorPoolSizeMax = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.pool.size.count",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5f53\u524d\u7ebf\u7a0b\u6570"
+         desc = "异步核心线程池当前线程数"
       )
       private Integer asyncExecutorPoolSizeCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.queue.size",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5f53\u524d\u6392\u961f\u7b49\u5f85\u4efb\u52a1\u6570"
+         desc = "异步核心线程池当前排队等待任务数"
       )
       private Integer asyncExecutorQueueSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.count",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5386\u53f2\u4efb\u52a1\u6570"
+         desc = "异步核心线程池历史任务数"
       )
       private Long asyncExecutorTaskCount = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.completed",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u5df2\u5b8c\u6210\u4efb\u52a1\u6570"
+         desc = "异步核心线程池已完成任务数"
       )
       private Long asyncExecutorTaskCompleted = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.hook.error",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "异步核心线程池拦截上一次每秒出错次数"
       )
       private Long asyncExecutorTaskHookError = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.hook.success",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "异步核心线程池拦截上一次每秒成功次数"
       )
       private Long asyncExecutorTaskHookSuccess = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.hook.current",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "异步核心线程池拦截当前执行任务数"
       )
       private Long asyncExecutorTaskHookCurrent = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.hook.list.detail",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "异步核心线程池拦截历史最大耗时任务列表"
       )
       private String asyncExecutorTaskHookList = "";
       @FieldReport(
          name = "kmc.monitor.collect.executor.async.task.hook.list.minute.detail",
-         desc = "\u5f02\u6b65\u6838\u5fc3\u7ebf\u7a0b\u6c60\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "异步核心线程池拦截历史最大耗时任务列表(每分钟)"
       )
       private String asyncExecutorTaskHookListPerMinute = "";
 

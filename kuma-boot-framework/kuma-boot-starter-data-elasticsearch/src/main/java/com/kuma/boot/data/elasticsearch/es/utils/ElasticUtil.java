@@ -56,7 +56,7 @@ public class ElasticUtil {
    public Query getSearchModel(EsMatch model) {
       SearchStrategy searchStrategy = this.searchStrategyFactory.handleStrategy(model.getMode());
       if (searchStrategy == null) {
-         LogUtils.info("\u672a\u627e\u5230\u8be5\u7b56\u7565\uff1a" + model.getMode(), new Object[0]);
+         LogUtils.info("未找到该策略：" + model.getMode(), new Object[0]);
          return null;
       } else {
          return searchStrategy.searchHandle(model);
@@ -81,10 +81,10 @@ public class ElasticUtil {
                c.mappings(this.createMapping(clazz));
                return c;
             });
-            LogUtils.info("\u521b\u5efa\u7d22\u5f15\u6210\u529f:" + response.index(), new Object[0]);
+            LogUtils.info("创建索引成功:" + response.index(), new Object[0]);
             response.acknowledged();
          } else {
-            LogUtils.info("===========\u7d22\u5f15\u5df2\u5b58\u5728===========", new Object[0]);
+            LogUtils.info("===========索引已存在===========", new Object[0]);
          }
       } catch (Exception e) {
          LogUtils.error(e);
@@ -142,7 +142,7 @@ public class ElasticUtil {
       });
       SearchResponse<HashMap> response = this.client.search(request, HashMap.class);
       long total = response.hits().total().value();
-      LogUtils.info("\u67e5\u8be2\u6570\u636e\u8017\u65f6:" + response.took(), new Object[0]);
+      LogUtils.info("查询数据耗时:" + response.took(), new Object[0]);
       List<Hit<HashMap>> hits = response.hits().hits();
       response.hits().maxScore();
       Iterator<Hit<HashMap>> iterator = hits.iterator();
@@ -257,7 +257,7 @@ public class ElasticUtil {
                Property property = propertyStratgy.handleProperty(esField, declaredField, this);
                map.put(declaredField.getName(), property);
             } else {
-               LogUtils.info("\u8be5\u7b56\u7565\u672a\u6dfb\u52a0\u5230\u5de5\u5382\uff1a" + esField.type().getType(), new Object[0]);
+               LogUtils.info("该策略未添加到工厂：" + esField.type().getType(), new Object[0]);
             }
          }
       }

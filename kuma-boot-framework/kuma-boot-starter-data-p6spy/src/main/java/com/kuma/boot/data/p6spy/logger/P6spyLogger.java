@@ -10,7 +10,7 @@ public class P6spyLogger extends FormattedLogger {
    }
 
    public void logException(Exception e) {
-      LogUtils.error(e, "\u6570\u636e\u5e93\u65e5\u5fd7\u9519\u8bef", new Object[0]);
+      LogUtils.error(e, "数据库日志错误", new Object[0]);
    }
 
    public void logText(String text) {

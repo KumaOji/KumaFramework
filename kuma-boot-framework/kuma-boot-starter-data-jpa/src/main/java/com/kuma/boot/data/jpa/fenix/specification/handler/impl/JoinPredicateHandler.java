@@ -20,7 +20,7 @@ public class JoinPredicateHandler extends AbstractPredicateHandler {
    public <Z, X> Predicate buildPredicate(CriteriaBuilder criteriaBuilder, From<Z, X> from, String name, Object value, Annotation annotation) {
       if (!(annotation instanceof com.kuma.boot.data.jpa.fenix.specification.annotation.Join)) {
          String var10002 = this.getClass().getName();
-         throw new BuildSpecificationException("\u3010Fenix \u5f02\u5e38\u3011\u4f7f\u7528\u3010@Join\u3011\u6784\u5efa\u8868\u8fde\u63a5\u65f6,\u3010" + var10002 + ".getAnnotation()\u3011\u83b7\u53d6\u5230\u7684\u503c\u3010" + this.getAnnotation().getName() + "\u3011\u4e0e\u5b57\u6bb5\u4f7f\u7528\u7684\u6ce8\u89e3\u503c\u3010" + annotation.getClass().getName() + "\u3011\u4e0d\u540c");
+         throw new BuildSpecificationException("【Fenix 异常】使用【@Join】构建表连接时,【" + var10002 + ".getAnnotation()】获取到的值【" + this.getAnnotation().getName() + "】与字段使用的注解值【" + annotation.getClass().getName() + "】不同");
       } else {
          Join<X, ?> subJoin = from.join(name, ((com.kuma.boot.data.jpa.fenix.specification.annotation.Join)annotation).joinType());
          return criteriaBuilder.and((Predicate[])FenixSpecification.beanParamToPredicate(subJoin, criteriaBuilder, value).toArray(new Predicate[0]));
@@ -28,6 +28,6 @@ public class JoinPredicateHandler extends AbstractPredicateHandler {
    }
 
    public Predicate buildPredicate(CriteriaBuilder criteriaBuilder, From<?, ?> from, String fieldName, Object value) {
-      throw new BuildSpecificationException("\u672c\u65b9\u6cd5\u6682\u4e0d\u652f\u6301.");
+      throw new BuildSpecificationException("本方法暂不支持.");
    }
 }

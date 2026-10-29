@@ -49,7 +49,7 @@ public class Flow extends FlowNode {
          errorMessage.append("Flow\u5b9a\u4e49\u68c0\u67e5\u51fa\u9519,name=").append(this.getName()).append(",version=").append(this.version).append("");
 
          for(ConstraintViolation<AbstractNode> constraintViolation : constraintViolations) {
-            errorMessage.append("\u9519\u8bef\u4fe1\u606f:").append(constraintViolation.getPropertyPath().toString()).append("->").append(constraintViolation.getMessage()).append(",\u8282\u70b9\u4fe1\u606f:").append(constraintViolation.getLeafBean().toString()).append(",");
+            errorMessage.append("\u9519\u8bef\u4fe1\u606f:").append(constraintViolation.getPropertyPath().toString()).append("->").append(constraintViolation.getMessage()).append(",节点信息:").append(constraintViolation.getLeafBean().toString()).append(",");
          }
 
          throw new FlowException(errorMessage.substring(0, errorMessage.length() - 1));

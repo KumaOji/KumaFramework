@@ -7,17 +7,17 @@ import java.util.List;
 import org.joda.time.DateTime;
 
 public enum RetryRetreatTimeUnitEnum {
-   HOUR("hour", "\u65f6") {
+   HOUR("hour", "时") {
       Date doCalUnitTime(DateTime dateTime, int skipUnit) {
          return dateTime.plusHours(skipUnit).toDate();
       }
    },
-   MINUTE("minute", "\u5206") {
+   MINUTE("minute", "分") {
       Date doCalUnitTime(DateTime dateTime, int skipUnit) {
          return dateTime.plusMinutes(skipUnit).toDate();
       }
    },
-   DAY("day", "\u5929") {
+   DAY("day", "天") {
       Date doCalUnitTime(DateTime dateTime, int skipUnit) {
          return dateTime.plusDays(skipUnit).toDate();
       }

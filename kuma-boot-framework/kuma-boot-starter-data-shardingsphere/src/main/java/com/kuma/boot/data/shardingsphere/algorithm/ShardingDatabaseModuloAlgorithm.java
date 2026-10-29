@@ -27,7 +27,7 @@ public class ShardingDatabaseModuloAlgorithm<T extends Comparable<?>> implements
          }
       }
 
-      throw new UnsupportedOperationException("\u4e0d\u652f\u6301\u7684\u5e93" + value);
+      throw new UnsupportedOperationException("不支持的库" + value);
    }
 
    public Collection<String> doSharding(Collection<String> collection, RangeShardingValue<T> rangeShardingValue) {

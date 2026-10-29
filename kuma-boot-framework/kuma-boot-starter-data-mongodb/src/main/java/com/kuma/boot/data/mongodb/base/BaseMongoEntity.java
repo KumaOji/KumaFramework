@@ -9,7 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 public abstract class BaseMongoEntity {
    @Schema(
-      title = "\u6570\u636e\u521b\u5efa\u65f6\u95f4"
+      title = "数据创建时间"
    )
    @Column(
       name = "create_time",
@@ -21,7 +21,7 @@ public abstract class BaseMongoEntity {
    )
    private Date createTime = new Date();
    @Schema(
-      title = "\u6570\u636e\u66f4\u65b0\u65f6\u95f4"
+      title = "数据更新时间"
    )
    @Column(
       name = "update_time"

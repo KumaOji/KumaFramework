@@ -122,7 +122,7 @@ public class MinioUploadFileServiceImpl extends AbstractUploadFileService {
 
    public void uploadFile(MultipartFile file, String bucketName, String fileName) {
       if (null == file || 0L == file.getSize()) {
-         LogUtils.error("\u6587\u4ef6\u4e0d\u80fd\u4e3a\u7a7a", new Object[0]);
+         LogUtils.error("文件不能为空", new Object[0]);
       }
 
       this.bucketExists(bucketName);

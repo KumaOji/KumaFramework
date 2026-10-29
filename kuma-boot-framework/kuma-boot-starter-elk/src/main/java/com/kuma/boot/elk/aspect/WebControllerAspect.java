@@ -49,7 +49,7 @@ public class WebControllerAspect {
             String inPutParam = this.preHandle(joinPoint, request);
             String outPutParam = this.postHandle(result);
             String ip = this.getRemoteHost(request);
-            LogUtils.info("\u3010\u8fdc\u7a0bip\u3011{},\u3010url\u3011{},\u3010\u8f93\u5165\u3011{},\u3010\u8f93\u51fa\u3011{},\u3010\u5f02\u5e38\u3011{},\u3010\u8017\u65f6\u3011{}ms", new Object[]{ip, uri, inPutParam, outPutParam, exception == null ? "\u65e0" : exception.getMessage(), timeSpan});
+            LogUtils.info("【远程ip】{},【url】{},【输入】{},【输出】{},【异常】{},【耗时】{}ms", new Object[]{ip, uri, inPutParam, outPutParam, exception == null ? "无" : exception.getMessage(), timeSpan});
          }
 
       }

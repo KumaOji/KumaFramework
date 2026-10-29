@@ -74,107 +74,107 @@ public class WebServerCollectTask extends AbstractCollectTask {
    private static class UndertowInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.webserver.buffer.size",
-         desc = "undertow buffer\u5927\u5c0f"
+         desc = "undertow buffer大小"
       )
       private Integer bufferSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.io.threads",
-         desc = "undertow io\u7ebf\u7a0b\u6570"
+         desc = "undertow io线程数"
       )
       private Integer ioThreads = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.threads",
-         desc = "undertow \u5de5\u4f5c\u7ebf\u7a0b\u6570"
+         desc = "undertow 工作线程数"
       )
       private Integer workerThreads = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.listeners.size",
-         desc = "undertow listeners\u6570\u91cf"
+         desc = "undertow listeners数量"
       )
       private Integer listeners = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.listenerinfo.size",
-         desc = "undertow listenerInfo\u6570\u91cf"
+         desc = "undertow listenerInfo数量"
       )
       private Integer listenerInfo = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.internal.worker",
-         desc = "undertow \u662f\u5426\u5185\u90e8work"
+         desc = "undertow 是否内部work"
       )
       private Boolean internalWorker = false;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.byte.buffer.pool",
-         desc = "undertow byteBufferPool\u5927\u5c0f"
+         desc = "undertow byteBufferPool大小"
       )
       private Integer byteBufferPool = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.channels.size",
-         desc = "undertow \u7ba1\u9053\u6570\u91cf"
+         desc = "undertow 管道数量"
       )
       private Integer channels = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.options.size",
-         desc = "undertow workerOptions\u6570\u91cf"
+         desc = "undertow workerOptions数量"
       )
       private Integer workerOptions = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.socket.options.size",
-         desc = "undertow socketOptions\u6570\u91cf"
+         desc = "undertow socketOptions数量"
       )
       private Integer socketOptions = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.server.options.size",
-         desc = "undertow serverOptions\u6570\u91cf"
+         desc = "undertow serverOptions数量"
       )
       private Integer serverOptions = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.xino.name",
-         desc = "undertow xion \u540d\u79f0"
+         desc = "undertow xion 名称"
       )
       private String xinoName = "";
       @FieldReport(
          name = "kmc.monitor.collect.webserver.work.name",
-         desc = "undertow work \u540d\u79f0"
+         desc = "undertow work 名称"
       )
       private String workName = "";
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.core.pool.size",
-         desc = "undertow \u6838\u5fc3\u5de5\u4f5c\u7ebf\u7a0b\u6c60\u5927\u5c0f"
+         desc = "undertow 核心工作线程池大小"
       )
       private Integer workerCorePoolSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.max.pool.size",
-         desc = "undertow \u6700\u5927\u5de5\u4f5c\u7ebf\u7a0b\u6c60\u5927\u5c0f"
+         desc = "undertow 最大工作线程池大小"
       )
       private Integer workerMaxPoolSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.io.thread.count",
-         desc = "undertow I/O \u7ebf\u7a0b\u6570"
+         desc = "undertow I/O 线程数"
       )
       private Integer workerIoThreadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.busy.thread.count",
-         desc = "undertow \u5de5\u4f5c\u6c60\u4e2d\u7e41\u5fd9\u7ebf\u7a0b\u6570"
+         desc = "undertow 工作池中繁忙线程数"
       )
       private Integer workerBusyThreadCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.provider.name",
-         desc = "undertow work\u63d0\u4f9b\u8005\u540d\u79f0"
+         desc = "undertow work提供者名称"
       )
       private String workerProviderName = "";
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.werver.mxbeans.size",
-         desc = "undertow server mxbean\u6570\u91cf"
+         desc = "undertow server mxbean数量"
       )
       private Integer workerServerMXBeans = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.pool.size",
-         desc = "undertow \u83b7\u53d6\u5de5\u4f5c\u6c60\u4e2d\u7ebf\u7a0b\u6570"
+         desc = "undertow 获取工作池中线程数"
       )
       private Integer workerPoolSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.worker.queue.size",
-         desc = "undertow \u5de5\u4f5c\u961f\u5217\u4e2d\u4efb\u52a1\u6570\u91cf"
+         desc = "undertow 工作队列中任务数量"
       )
       private Integer workerQueueSize = 0;
 
@@ -185,42 +185,42 @@ public class WebServerCollectTask extends AbstractCollectTask {
    private static class TomcatInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.webserver.active.count",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u6d3b\u52a8\u7ebf\u7a0b\u6570"
+         desc = "tomcat 线程池活动线程数"
       )
       private Integer activeCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.core.pool.size",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u6838\u5fc3\u7ebf\u7a0b\u6570"
+         desc = "tomcat 线程池核心线程数"
       )
       private Integer corePoolSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.pool.size.largest",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u5386\u53f2\u6700\u5927\u7ebf\u7a0b\u6570"
+         desc = "tomcat 线程池历史最大线程数"
       )
       private Integer poolSizeLargest = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.pool.size.max",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u6700\u5927\u7ebf\u7a0b\u6570"
+         desc = "tomcat 线程池最大线程数"
       )
       private Integer poolSizeMax = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.pool.size.count",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u5f53\u524d\u7ebf\u7a0b\u6570"
+         desc = "tomcat 线程池当前线程数"
       )
       private Integer poolSizeCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.queue.size",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u5f53\u524d\u6392\u961f\u7b49\u5f85\u4efb\u52a1\u6570"
+         desc = "tomcat 线程池当前排队等待任务数"
       )
       private Integer queueSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.task.count",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u5386\u53f2\u4efb\u52a1\u6570"
+         desc = "tomcat 线程池历史任务数"
       )
       private Long taskCount = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.webserver.task.completed",
-         desc = "tomcat \u7ebf\u7a0b\u6c60\u5df2\u5b8c\u6210\u4efb\u52a1\u6570"
+         desc = "tomcat 线程池已完成任务数"
       )
       private Long taskCompleted = 0L;
 

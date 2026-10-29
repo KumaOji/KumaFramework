@@ -11,21 +11,21 @@ import java.util.List;
 import java.util.Map;
 
 @Schema(
-   title = "\u901a\u77e5\u7c7b\u522b"
+   title = "通知类别"
 )
 @JsonFormat(
    shape = Shape.OBJECT
 )
 public enum NotificationCategory {
-   ANNOUNCEMENT(0, "\u7cfb\u7edf\u516c\u544a"),
-   DIALOGUE(1, "\u79c1\u4fe1");
+   ANNOUNCEMENT(0, "系统公告"),
+   DIALOGUE(1, "私信");
 
    @Schema(
-      title = "\u679a\u4e3e\u503c"
+      title = "枚举值"
    )
    private final Integer value;
    @Schema(
-      title = "\u8bf4\u660e"
+      title = "说明"
    )
    private final String description;
    private static final Map<Integer, NotificationCategory> INDEX_MAP = new HashMap<>();

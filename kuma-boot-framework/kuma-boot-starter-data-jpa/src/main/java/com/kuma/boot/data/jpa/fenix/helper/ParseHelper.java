@@ -13,7 +13,7 @@ public final class ParseHelper {
       try {
          return MVEL.eval(exp, context);
       } catch (Exception e) {
-         LogUtils.error("\u3010Fenix \u9519\u8bef\u8b66\u793a\u3011\u89e3\u6790\u8868\u8fbe\u5f0f\u51fa\u9519\uff0c\u8868\u8fbe\u5f0f\u4e3a:\u3010{}\u3011.", new Object[]{exp, e});
+         LogUtils.error("【Fenix 错误警示】解析表达式出错，表达式为:【{}】.", new Object[]{exp, e});
          return null;
       }
    }
@@ -22,7 +22,7 @@ public final class ParseHelper {
       try {
          return MVEL.eval(exp, context);
       } catch (Exception e) {
-         throw new ParseExpressionException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u89e3\u6790\u8868\u8fbe\u5f0f\u5f02\u5e38\uff0c\u89e3\u6790\u51fa\u9519\u7684\u8868\u8fbe\u5f0f\u4e3a:\u3010" + exp + "\u3011.", e);
+         throw new ParseExpressionException("【Fenix 异常提示】解析表达式异常，解析出错的表达式为:【" + exp + "】.", e);
       }
    }
 
@@ -30,7 +30,7 @@ public final class ParseHelper {
       try {
          return (String)TemplateRuntime.eval(template, context);
       } catch (Exception e) {
-         throw new ParseExpressionException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u89e3\u6790\u6a21\u677f\u5f02\u5e38\uff0c\u89e3\u6790\u51fa\u9519\u7684\u6a21\u677f\u4e3a:\u3010" + template + "\u3011.", e);
+         throw new ParseExpressionException("【Fenix 异常提示】解析模板异常，解析出错的模板为:【" + template + "】.", e);
       }
    }
 

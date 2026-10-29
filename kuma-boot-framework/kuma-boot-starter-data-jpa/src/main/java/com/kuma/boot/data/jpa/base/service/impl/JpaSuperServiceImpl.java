@@ -38,9 +38,9 @@ public class JpaSuperServiceImpl<R extends JpaSuperRepository<T, I>, T extends J
 
    public boolean saveIdempotency(T entity, DistributedLock lock, String lockKey, Predicate predicate, String msg) {
       if (lock == null) {
-         throw new LockException("\u5206\u5e03\u5f0f\u9501\u4e3a\u7a7a");
+         throw new LockException("分布式锁为空");
       } else if (StrUtil.isEmpty(lockKey)) {
-         throw new LockException("\u9501\u7684key\u4e3a\u7a7a");
+         throw new LockException("锁的key为空");
       } else {
          return true;
       }

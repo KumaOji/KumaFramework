@@ -62,7 +62,7 @@ public class MongoStartedEventListener {
                if (document != null) {
                   if (!this.mongoTemplate.collectionExists(clazz)) {
                      this.mongoTemplate.createCollection(clazz);
-                     LogUtils.info("\u521b\u5efa\u4e86" + clazz.getSimpleName() + "\u8868", new Object[0]);
+                     LogUtils.info("创建了" + clazz.getSimpleName() + "表", new Object[0]);
                   }
 
                   IndexOperations indexOps = this.mongoTemplate.indexOps(clazz);
@@ -112,7 +112,7 @@ public class MongoStartedEventListener {
 
                               Update update = (new Update()).set(field.getName(), value);
                               UpdateResult updateResult = this.mongoTemplate.updateMulti(query, update, clazz);
-                              LogUtils.info(clazz.getSimpleName() + "\u8868\u66f4\u65b0\u4e86" + updateResult.getModifiedCount() + "\u6761\u9ed8\u8ba4\u503c", new Object[0]);
+                              LogUtils.info(clazz.getSimpleName() + "表更新了" + updateResult.getModifiedCount() + "条默认值", new Object[0]);
                            }
                         }
                      }

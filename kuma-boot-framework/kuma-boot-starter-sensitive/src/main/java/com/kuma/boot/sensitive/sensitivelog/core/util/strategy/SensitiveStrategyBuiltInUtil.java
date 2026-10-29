@@ -30,7 +30,7 @@ public final class SensitiveStrategyBuiltInUtil {
    public static Strategy require(final Class<? extends Annotation> annotationClass) {
       Strategy strategy = (Strategy)MAP.get(annotationClass);
       if (ObjectUtils.isNull(strategy)) {
-         throw new SensitiveRuntimeException("\u4e0d\u652f\u6301\u7684\u7cfb\u7edf\u5185\u7f6e\u65b9\u6cd5\uff0c\u7528\u6237\u8bf7\u52ff\u5728\u81ea\u5b9a\u4e49\u6ce8\u89e3\u4e2d\u4f7f\u7528[SensitiveStrategyBuiltIn]!");
+         throw new SensitiveRuntimeException("不支持的系统内置方法，用户请勿在自定义注解中使用[SensitiveStrategyBuiltIn]!");
       } else {
          return strategy;
       }

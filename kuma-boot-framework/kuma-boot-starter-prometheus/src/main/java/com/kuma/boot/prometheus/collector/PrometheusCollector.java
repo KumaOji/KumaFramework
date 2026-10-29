@@ -22,8 +22,8 @@ public class PrometheusCollector implements InitializingBean {
    }
 
    private void init() {
-      this.requestCounter = Counter.builder(this.getName() + "_requests_total").description("\u8bf7\u6c42\u603b\u6570\u6570\u636e").tags(new String[]{"service", "method", "code", "dd"}).register(this.prometheusMeterRegistry);
-      this.inprogressRequests = Gauge.builder(this.getName() + "_http_inprogress_requests", () -> (double)0.0F).tags(new String[]{"path", "method"}).description("\u8fdb\u884c\u4e2d\u7684\u8bf7\u6c42\u72b6\u6001\u6570\u636e").register(this.prometheusMeterRegistry);
+      this.requestCounter = Counter.builder(this.getName() + "_requests_total").description("请求总数数据").tags(new String[]{"service", "method", "code", "dd"}).register(this.prometheusMeterRegistry);
+      this.inprogressRequests = Gauge.builder(this.getName() + "_http_inprogress_requests", () -> (double)0.0F).tags(new String[]{"path", "method"}).description("进行中的请求状态数据").register(this.prometheusMeterRegistry);
    }
 
    private String getName() {

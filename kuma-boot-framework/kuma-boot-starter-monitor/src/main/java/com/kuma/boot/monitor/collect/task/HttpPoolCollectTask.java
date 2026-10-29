@@ -46,22 +46,22 @@ public class HttpPoolCollectTask extends AbstractCollectTask {
    private static class HttpPoolInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.httpPool.available",
-         desc = "HttpPool\u53ef\u7528\u7684\u8fde\u63a5\u6570"
+         desc = "HttpPool可用的连接数"
       )
       private Integer availableCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.httpPool.pending",
-         desc = "HttpPool\u7b49\u5f85\u7684\u8fde\u63a5\u6570"
+         desc = "HttpPool等待的连接数"
       )
       private Integer pendingCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.httpPool.leased",
-         desc = "HttpPool\u4f7f\u7528\u4e2d\u7684\u8fde\u63a5\u6570"
+         desc = "HttpPool使用中的连接数"
       )
       private Integer leasedCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.httpPool.detail",
-         desc = "HttpPool\u8be6\u60c5"
+         desc = "HttpPool详情"
       )
       private String poolDetail = "";
 

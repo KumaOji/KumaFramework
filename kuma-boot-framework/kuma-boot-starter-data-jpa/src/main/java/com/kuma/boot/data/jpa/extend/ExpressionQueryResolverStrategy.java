@@ -18,7 +18,7 @@ public final class ExpressionQueryResolverStrategy {
    public static QueryResolveResult resolve(String queryString, boolean expressionQuery, JpaParameters parameters, Object[] values) {
       Optional<ExpressionQueryResolverEnum> resolverEnumOptional = Arrays.stream(ExpressionQueryResolverStrategy.ExpressionQueryResolverEnum.values()).filter((item) -> item.match(queryString, expressionQuery)).findFirst();
       if (!resolverEnumOptional.isPresent()) {
-         throw new RuntimeException("\u6ca1\u6709\u627e\u5230SQL\u89e3\u6790\u7b56\u7565");
+         throw new RuntimeException("没有找到SQL解析策略");
       } else {
          return ((ExpressionQueryResolverEnum)resolverEnumOptional.get()).resolve(queryString, parameters, values);
       }

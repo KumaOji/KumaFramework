@@ -32,7 +32,7 @@ public class WarnProviderAutoConfiguration implements InitializingBean {
 
    @Bean
    public WarnStrategy defaultWarnStrategy() {
-      WarnTemplate warnTemplate = (new WarnTemplate()).register("", "\u53c2\u6570:{name}({desc}),\u547d\u4e2d\u89c4\u5219:{rule},\u5f53\u524d\u503c\uff1a{value}");
+      WarnTemplate warnTemplate = (new WarnTemplate()).register("", "参数:{name}({desc}),命中规则:{rule},当前值：{value}");
       return new DefaultWarnStrategy(warnTemplate, new Rule.RulesAnalyzer());
    }
 

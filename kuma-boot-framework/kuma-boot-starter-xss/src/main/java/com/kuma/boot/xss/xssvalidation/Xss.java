@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
    validatedBy = {XssValidator.class}
 )
 public @interface Xss {
-   String message() default "\u4e0d\u5141\u8bb8\u4efb\u4f55\u811a\u672c\u8fd0\u884c";
+   String message() default "不允许任何脚本运行";
 
    Class<?>[] groups() default {};
 

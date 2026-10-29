@@ -206,7 +206,7 @@ public class FieldTranslationService {
       try {
          BeanUtil.setProperty(bean, fieldNameOrIndex, value);
       } catch (Exception var5) {
-         LogUtils.warn("\u7c7b {} \u7684 \u5b57\u6bb5\u540d\u79f0\u6216\u4e0b\u6807: {}\uff0c\u8d4b\u503c\u9519\u8bef\uff0c\u53ef\u80fd\u662f\u503c\u7c7b\u578b\u4e0e\u5b57\u6bb5\u7c7b\u578b\u4e0d\u5339\u914d", new Object[]{bean.getClass().getName(), fieldNameOrIndex});
+         LogUtils.warn("类 {} 的 字段名称或下标: {}，赋值错误，可能是值类型与字段类型不匹配", new Object[]{bean.getClass().getName(), fieldNameOrIndex});
       }
 
    }

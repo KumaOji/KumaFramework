@@ -23,7 +23,7 @@ public class FlowTraceRepository extends DBDialectSupport {
    }
 
    public void store(FlowTrace flowTrace) {
-      this.logger.debug("\u5b58\u50a8\u6d41\u7a0b\u6267\u884c.traceId: {},orderId:{}", flowTrace.getTraceId(), flowTrace.getOrderId());
+      this.logger.debug("存储流程执行.traceId: {},orderId:{}", flowTrace.getTraceId(), flowTrace.getOrderId());
       if (this.isMysql()) {
          this.insert(flowTrace, "INSERT INTO FLOW_TRACE%s ( ORDER_ID,TRACE_ID,FLOW_NAME,VERSION, NODE,RETRY_TIMES, NEXT_RETRY_TIME,NODE_NAME, RETRY_MAX, RETRY_MAX_LIMIT_NODE,TARGET,RETRY_FAIL_TYPE,RETREAT_UNIT,RETREAT_TYPE,RETREAT_TIME_UNIT,START_TIME,EVENT_ID,EVENT_TIME,EXECUTION_TARGET,ATTACHMENT ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", this.toSqlParams(flowTrace));
       }
@@ -35,12 +35,12 @@ public class FlowTraceRepository extends DBDialectSupport {
    }
 
    public void remove(FlowTrace flowTrace) {
-      this.logger.debug("\u79fb\u9664\u6d41\u7a0b\u6267\u884c.,traceId:{},orderId:{}", flowTrace.getTraceId(), flowTrace.getOrderId());
+      this.logger.debug("移除流程执行.,traceId:{},orderId:{}", flowTrace.getTraceId(), flowTrace.getOrderId());
       this.delete(flowTrace, "DELETE FROM FLOW_TRACE%s WHERE TRACE ID=?", new Object[]{flowTrace.getTraceId()});
    }
 
    public void restore(FlowTrace flowTrace) {
-      this.logger.debug("\u66f4\u65b0\u6d41\u7a0b\u6267\u884c.traceId:{},orderId:{}", flowTrace.getTraceId(), flowTrace.getOrderId());
+      this.logger.debug("更新流程执行.traceId:{},orderId:{}", flowTrace.getTraceId(), flowTrace.getOrderId());
       this.update(flowTrace, "UPDATE FLOW_TRACE%s SET RETRY_TIMES=?,NEXT_RETRY_TIME=?,EXECUTION_TARGET=?,ATTACHMENT=? WHERE TRACE_ID=?", new Object[]{flowTrace.getRetryTimes(), flowTrace.getNextRetryTime(), flowTrace.getRetryMeta().executionTargetString(), flowTrace.getRetryMeta().attachmentString(), flowTrace.getTraceId()});
    }
 
@@ -62,7 +62,7 @@ public class FlowTraceRepository extends DBDialectSupport {
          sqlBuilder.append(" WHERE RN >=0");
          return this.selectList(failType, sqlBuilder.toString());
       } else {
-         throw new FlowException("\u4e0d\u53ef\u80fd\u7684\u914d\u7f6e");
+         throw new FlowException("不可能的配置");
       }
    }
 

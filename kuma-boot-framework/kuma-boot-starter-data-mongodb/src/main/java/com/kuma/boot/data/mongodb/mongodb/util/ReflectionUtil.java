@@ -39,7 +39,7 @@ public class ReflectionUtil {
          try {
             result = field.get(obj);
          } catch (IllegalAccessException e) {
-            LogUtils.error("\u4e0d\u53ef\u80fd\u629b\u51fa\u7684\u5f02\u5e38{}", new Object[]{e.getMessage()});
+            LogUtils.error("不可能抛出的异常{}", new Object[]{e.getMessage()});
          }
 
          return result;
@@ -54,14 +54,14 @@ public class ReflectionUtil {
          try {
             field.set(obj, value);
          } catch (IllegalAccessException e) {
-            LogUtils.error("\u4e0d\u53ef\u80fd\u629b\u51fa\u7684\u5f02\u5e38:{}", new Object[]{e.getMessage()});
+            LogUtils.error("不可能抛出的异常:{}", new Object[]{e.getMessage()});
          }
 
       }
    }
 
    public static Field getAccessibleField(final Object obj, final String fieldName) {
-      Assert.notNull(obj, "object\u4e0d\u80fd\u4e3a\u7a7a");
+      Assert.notNull(obj, "object不能为空");
       Assert.hasText(fieldName, "fieldName");
 
       for(Class<?> superClass = obj.getClass(); superClass != Object.class; superClass = superClass.getSuperclass()) {
@@ -91,7 +91,7 @@ public class ReflectionUtil {
    }
 
    public static Method getAccessibleMethod(final Object obj, final String methodName, final Class<?>... parameterTypes) {
-      Assert.notNull(obj, "object\u4e0d\u80fd\u4e3a\u7a7a");
+      Assert.notNull(obj, "object不能为空");
 
       for(Class<?> superClass = obj.getClass(); superClass != Object.class; superClass = superClass.getSuperclass()) {
          try {

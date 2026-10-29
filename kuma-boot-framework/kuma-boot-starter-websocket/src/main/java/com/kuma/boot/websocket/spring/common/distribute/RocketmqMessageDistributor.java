@@ -49,8 +49,8 @@ public class RocketmqMessageDistributor extends AbstractMessageDistributor imple
       try {
          this.doSend(event);
       } catch (Exception e) {
-         LogUtils.error("MQ\u6d88\u8d39\u4fe1\u606f\u5904\u7406\u5f02\u5e38: {}", new Object[]{e.getMessage(), e});
-         throw new ErrorJsonMessageException("MQ\u6d88\u8d39\u4fe1\u606f\u5904\u7406\u5f02\u5e38, " + e.getMessage());
+         LogUtils.error("MQ消费信息处理异常: {}", new Object[]{e.getMessage(), e});
+         throw new ErrorJsonMessageException("MQ消费信息处理异常, " + e.getMessage());
       }
    }
 }

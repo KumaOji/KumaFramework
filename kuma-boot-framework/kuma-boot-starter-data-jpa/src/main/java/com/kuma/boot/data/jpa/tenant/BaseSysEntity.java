@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners({AuditingEntityListener.class})
 public abstract class BaseSysEntity extends BaseEntity {
    @Schema(
-      name = "\u6570\u636e\u72b6\u6001"
+      name = "数据状态"
    )
    @Column(
       name = "status"
@@ -21,22 +21,22 @@ public abstract class BaseSysEntity extends BaseEntity {
    @Enumerated(EnumType.ORDINAL)
    private DataItemStatusEnum status;
    @Schema(
-      name = "\u662f\u5426\u4e3a\u4fdd\u7559\u6570\u636e",
-      description = "True \u4e3a\u4e0d\u80fd\u5220\uff0cFalse\u4e3a\u53ef\u4ee5\u5220\u9664"
+      name = "是否为保留数据",
+      description = "True 为不能删，False为可以删除"
    )
    @Column(
       name = "is_reserved"
    )
    private Boolean reserved;
    @Schema(
-      name = "\u7248\u672c\u53f7"
+      name = "版本号"
    )
    @Column(
       name = "reversion"
    )
    private Integer reversion;
    @Schema(
-      name = "\u5907\u6ce8"
+      name = "备注"
    )
    @Column(
       name = "description",

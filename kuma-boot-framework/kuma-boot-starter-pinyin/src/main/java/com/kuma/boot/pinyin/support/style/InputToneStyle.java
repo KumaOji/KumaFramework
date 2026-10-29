@@ -14,6 +14,6 @@ public class InputToneStyle extends AbstractPinyinToneStyle {
          result = super.connector(tone, index, String.valueOf(letter));
       }
 
-      return result.replace('\u00fc', 'v');
+      return result.replace('ü', 'v');
    }
 }

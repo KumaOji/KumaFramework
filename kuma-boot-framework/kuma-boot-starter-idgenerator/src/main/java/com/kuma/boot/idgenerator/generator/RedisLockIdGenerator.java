@@ -42,13 +42,13 @@ public class RedisLockIdGenerator implements CommandLineRunner, ApplicationConte
       boolean existWorkerId = this.redisRepository.opsForHash().hasKey("CACHE_ID_IP", macAddress);
       if (existWorkerId) {
          Integer workerId = (Integer)this.redisRepository.opsForHash().get("CACHE_ID_IP", macAddress);
-         LogUtils.info("\u914d\u7f6e\u5206\u5e03\u5f0fworkerId {} - {}", new Object[]{macAddress, workerId});
+         LogUtils.info("配置分布式workerId {} - {}", new Object[]{macAddress, workerId});
          this.initWorkerId(workerId);
       } else {
          try {
             boolean result = this.distributedLock.tryLock("LOCK_ID_GENERATOR", 120L, TimeUnit.SECONDS);
             if (!result) {
-               throw new RuntimeException(macAddress + "\u8bbe\u7f6e\u5206\u5e03\u5f0fId\u673a\u5668\u53f7\u5931\u8d25");
+               throw new RuntimeException(macAddress + "设置分布式Id机器号失败");
             }
 
             ValueOperations<String, Object> stringOperation = this.redisRepository.opsForValue();
@@ -60,7 +60,7 @@ public class RedisLockIdGenerator implements CommandLineRunner, ApplicationConte
             Integer workerId = (Integer)stringOperation.get("CACHE_WORKER_ID_MAXID");
             this.initWorkerId(workerId);
             this.redisRepository.opsForHash().put("CACHE_ID_IP", macAddress, workerId);
-            LogUtils.info("\u914d\u7f6e\u5206\u5e03\u5f0fworkerId {} - {}", new Object[]{macAddress, workerId});
+            LogUtils.info("配置分布式workerId {} - {}", new Object[]{macAddress, workerId});
          } catch (Exception e) {
             LogUtils.error(e);
          } finally {

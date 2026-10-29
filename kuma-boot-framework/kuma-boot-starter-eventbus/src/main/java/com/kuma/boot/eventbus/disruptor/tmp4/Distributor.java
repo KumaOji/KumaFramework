@@ -22,14 +22,14 @@ public class Distributor {
 
    public Distributor start() {
       this.lines.forEach(DistributorLine::start);
-      LOGGER.info("\u3010Distributor\u3011 \"{}\" start to work", this.name);
+      LOGGER.info("【Distributor】 \"{}\" start to work", this.name);
       return this;
    }
 
    public void stop() {
       this.lines.forEach(DistributorLine::stop);
       WorkerStationManager.INSTANCE.stopAll();
-      LOGGER.info("\u3010Distributor\u3011 \"{}\" has stopped", this.name);
+      LOGGER.info("【Distributor】 \"{}\" has stopped", this.name);
    }
 
    public long hasPublishNum() {

@@ -17,7 +17,7 @@ public final class SerializedLambda implements Serializable {
 
    public static SerializedLambda resolve(SFunction lambda) {
       if (!lambda.getClass().isSynthetic()) {
-         throw new BusinessException("\u8be5\u65b9\u6cd5\u4ec5\u80fd\u4f20\u5165 lambda \u8868\u8fbe\u5f0f\u4ea7\u751f\u7684\u5408\u6210\u7c7b");
+         throw new BusinessException("该方法仅能传入 lambda 表达式产生的合成类");
       } else {
          try {
             ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(SerializationUtils.serialize(lambda))) {

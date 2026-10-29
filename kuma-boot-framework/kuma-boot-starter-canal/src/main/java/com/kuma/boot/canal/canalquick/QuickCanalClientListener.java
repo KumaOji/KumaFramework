@@ -32,14 +32,14 @@ public class QuickCanalClientListener {
          long batchId = message.getId();
          int size = message.getEntries().size();
          if (batchId != -1L && size != 0) {
-            LogUtils.debug("\u5904\u7406 batchId \u4e3a {} \u7684\u6570\u636e", new Object[]{batchId});
+            LogUtils.debug("处理 batchId 为 {} 的数据", new Object[]{batchId});
             List<EventHandleContext> handlers = this.createHandlers(this.createEventInfos(message.getEntries()));
             if (handlers != null) {
                for(EventHandleContext handler : handlers) {
                   try {
                      handler.handle();
                   } catch (Exception e) {
-                     LogUtils.error("\u5904\u7406 batchId \u4e3a {} \u7684\u6570\u636e\u53d1\u751f\u5f02\u5e38 , \u5f02\u5e38 : {} ", new Object[]{batchId, e});
+                     LogUtils.error("处理 batchId 为 {} 的数据发生异常 , 异常 : {} ", new Object[]{batchId, e});
                      this.canalConnector.rollback();
                   }
                }
@@ -91,7 +91,7 @@ public class QuickCanalClientListener {
 
          return eventHandlerList;
       } else {
-         LogUtils.debug("\u65e0\u76d1\u542c\u4e8b\u4ef6\u4ea7\u751f, \u65e0\u9700\u5904\u7406 .................................", new Object[0]);
+         LogUtils.debug("无监听事件产生, 无需处理 .................................", new Object[0]);
          return null;
       }
    }

@@ -23,17 +23,17 @@ public class MqttReceiveHandler {
       return (message) -> {
          MessageHeaders headers = message.getHeaders();
          String receivedTopic = (String)headers.get("mqtt_receivedTopic");
-         log.info("\u83b7\u53d6\u5230v5\u7684\u6d88\u606f\u7684topic :{} ", receivedTopic);
+         log.info("获取到v5的消息的topic :{} ", receivedTopic);
          String responseTopic = (String)headers.get("mqtt_responseTopic");
-         log.info("\u83b7\u53d6\u5230v5\u7684\u6d88\u606f\u7684\u54cd\u5e94\u4e3b\u9898 :{} ", responseTopic);
+         log.info("获取到v5的消息的响应主题 :{} ", responseTopic);
          String correlationData = null;
          if (Objects.nonNull(headers.get("mqtt_correlationData"))) {
             correlationData = new String((byte[])Objects.requireNonNull(headers.get("mqtt_correlationData")), StandardCharsets.UTF_8);
-            log.info("\u83b7\u53d6\u5230v5\u7684\u6d88\u606f\u5173\u8054\u6570\u636e :{} ", correlationData);
+            log.info("获取到v5的消息关联数据 :{} ", correlationData);
          }
 
          String payload = new String((byte[])message.getPayload(), StandardCharsets.UTF_8);
-         log.info("\u83b7\u53d6\u5230v5\u7684\u6d88\u606f\u7684payload :{} ", payload);
+         log.info("获取到v5的消息的payload :{} ", payload);
       };
    }
 }

@@ -66,7 +66,7 @@ public class SqlInfoBuilder {
 
    public void buildBetweenSql(String fieldText, String startText, Object startValue, String endText, Object endValue) {
       if (startValue == null && endValue == null) {
-         LogUtils.warn("between \u533a\u95f4\u67e5\u8be2\u7684\u5f00\u59cb\u503c\u548c\u7ed3\u675f\u503c\u5747\u4e3a null\uff0c\u5c06\u76f4\u63a5\u8df3\u8fc7.", new Object[0]);
+         LogUtils.warn("between 区间查询的开始值和结束值均为 null，将直接跳过.", new Object[0]);
       } else {
          this.doPrependWhere();
          if (startValue != null && endValue == null) {

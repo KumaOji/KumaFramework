@@ -17,17 +17,17 @@ public final class WebSocketMessageSender {
 
    public static boolean send(WebSocketSession session, String message) {
       if (session == null) {
-         LogUtils.error("[send] session \u4e3a null", new Object[0]);
+         LogUtils.error("[send] session 为 null", new Object[0]);
          return false;
       } else if (!session.isOpen()) {
-         LogUtils.error("[send] session \u5df2\u7ecf\u5173\u95ed", new Object[0]);
+         LogUtils.error("[send] session 已经关闭", new Object[0]);
          return false;
       } else {
          try {
             session.sendMessage(new TextMessage(message));
             return true;
          } catch (IOException e) {
-            LogUtils.error("[send] session({}) \u53d1\u9001\u6d88\u606f({}) \u5f02\u5e38", new Object[]{session, message, e});
+            LogUtils.error("[send] session({}) 发送消息({}) 异常", new Object[]{session, message, e});
             return false;
          }
       }

@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners({AuditingEntityListener.class})
 public abstract class BaseEntity extends AbstractEntity {
    @Schema(
-      name = "\u6570\u636e\u521b\u5efa\u65f6\u95f4"
+      name = "数据创建时间"
    )
    @Column(
       name = "create_time",
@@ -27,7 +27,7 @@ public abstract class BaseEntity extends AbstractEntity {
    )
    private Date createTime = new Date();
    @Schema(
-      name = "\u6570\u636e\u66f4\u65b0\u65f6\u95f4"
+      name = "数据更新时间"
    )
    @Column(
       name = "update_time"
@@ -38,7 +38,7 @@ public abstract class BaseEntity extends AbstractEntity {
    )
    private Date updateTime = new Date();
    @Schema(
-      name = "\u6392\u5e8f\u503c"
+      name = "排序值"
    )
    @Column(
       name = "ranking"

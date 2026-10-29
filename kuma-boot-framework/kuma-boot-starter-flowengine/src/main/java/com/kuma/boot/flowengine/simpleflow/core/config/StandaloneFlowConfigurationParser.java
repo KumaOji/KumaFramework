@@ -31,7 +31,7 @@ public class StandaloneFlowConfigurationParser {
             }
 
             FlowDefinition definition = FlowDefinition.builder().id(id).name(name != null ? name : id).description(description).version(version != null ? version : "1.0").steps(steps).threadPoolName(threadPoolName).sync(syncValue).build();
-            LogUtils.info("\u89e3\u6790\u6d41\u7a0b\u914d\u7f6e: id={}, threadPoolName={}, sync={}", new Object[]{id, threadPoolName, syncValue});
+            LogUtils.info("解析流程配置: id={}, threadPoolName={}, sync={}", new Object[]{id, threadPoolName, syncValue});
             return definition;
          } else {
             throw new IllegalArgumentException("Flow steps are required for flow: " + id);

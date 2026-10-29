@@ -1,9 +1,9 @@
 package com.kuma.boot.monitor.enums;
 
 public enum WarnTypeEnum {
-   ERROR(2, "\u9519\u8bef"),
-   WARN(1, "\u544a\u8b66"),
-   INFO(0, "\u901a\u77e5");
+   ERROR(2, "错误"),
+   WARN(1, "告警"),
+   INFO(0, "通知");
 
    private int level;
    private String description;

@@ -26,24 +26,24 @@ public class FlowDefinition<Context, Result> implements Step<Context, Result> {
          if (step.hasAction(context)) {
             try {
                ((LinkedList)stepCache.get()).addLast(step);
-               LogUtils.info("\u6267\u884c:{}", new Object[]{this.getCurrentFlowInfo()});
+               LogUtils.info("执行:{}", new Object[]{this.getCurrentFlowInfo()});
                holder = step.execute(context);
                if (holder.isTerminate()) {
                   holder.setCurrentStepPath(this.getCurrentFlowInfo());
                   break;
                }
             } catch (RuntimeException be) {
-               LogUtils.warn("\u6267\u884c:{}\u4e1a\u52a1\u62a5\u9519", new Object[]{this.getCurrentFlowInfo(), be});
+               LogUtils.warn("执行:{}业务报错", new Object[]{this.getCurrentFlowInfo(), be});
                throw be;
             } catch (Exception e) {
-               LogUtils.error("\u6267\u884c:{}\u672a\u77e5\u62a5\u9519", new Object[]{this.getCurrentFlowInfo(), e});
+               LogUtils.error("执行:{}未知报错", new Object[]{this.getCurrentFlowInfo(), e});
                throw e;
             } finally {
                ((LinkedList)stepCache.get()).removeLast();
             }
          } else {
             ((LinkedList)stepCache.get()).addLast(step);
-            LogUtils.info("\u8df3\u8fc7:{}", new Object[]{this.getCurrentFlowInfo()});
+            LogUtils.info("跳过:{}", new Object[]{this.getCurrentFlowInfo()});
             ((LinkedList)stepCache.get()).removeLast();
          }
       }
@@ -51,10 +51,10 @@ public class FlowDefinition<Context, Result> implements Step<Context, Result> {
       try {
          result = (Result)holder.getResult();
       } catch (Exception e) {
-         LogUtils.info("\u6d41\u7a0b ${}\uff0c\u6700\u7ec8\u83b7\u53d6\u8fd4\u56de\u62a5\u6587\u62a5\u9519", new Object[]{this.name, e});
+         LogUtils.info("流程 ${}，最终获取返回报文报错", new Object[]{this.name, e});
       }
 
-      LogUtils.info("\u6d41\u7a0b ${} \u7ed3\u675f", new Object[]{this.name});
+      LogUtils.info("流程 ${} 结束", new Object[]{this.name});
       return holder;
    }
 

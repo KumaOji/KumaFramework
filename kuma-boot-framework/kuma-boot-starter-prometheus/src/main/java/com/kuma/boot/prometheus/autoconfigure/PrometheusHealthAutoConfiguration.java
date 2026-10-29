@@ -79,7 +79,7 @@ public class PrometheusHealthAutoConfiguration implements InitializingBean, Disp
 
                      return null;
                   });
-                  LogUtils.debug("prometheusThreadPoolTaskScheduler , {}, \u65f6\u95f4\uff1a{}", new Object[]{Thread.currentThread().getName(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))});
+                  LogUtils.debug("prometheusThreadPoolTaskScheduler , {}, 时间：{}", new Object[]{Thread.currentThread().getName(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))});
                } catch (Exception e) {
                   LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"HealthCheck Prometheus error ", e});
                }

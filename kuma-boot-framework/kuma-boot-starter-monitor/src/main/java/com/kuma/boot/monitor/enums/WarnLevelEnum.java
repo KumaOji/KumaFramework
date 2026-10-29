@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public enum WarnLevelEnum {
-   HIGN(3, "\u6781\u5176\u4e25\u91cd"),
-   MIDDLE(2, "\u4e25\u91cd"),
-   LOW(1, "\u4e00\u822c");
+   HIGN(3, "极其严重"),
+   MIDDLE(2, "严重"),
+   LOW(1, "一般");
 
    private int level = 1;
    private String description;

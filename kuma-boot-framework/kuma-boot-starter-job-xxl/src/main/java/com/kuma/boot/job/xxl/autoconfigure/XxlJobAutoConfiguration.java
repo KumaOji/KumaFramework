@@ -56,7 +56,7 @@ public class XxlJobAutoConfiguration implements InitializingBean {
       if (!StringUtils.hasText(this.xxlJobProperties.getAdmin().getAddresses())) {
          XxlJobServerList xxlJobServerList = (XxlJobServerList)xxlJobServerListProvider.getIfAvailable();
          if (xxlJobServerList == null) {
-            throw new BusinessException("\u8bf7\u914d\u7f6exxljob admin address");
+            throw new BusinessException("请配置xxljob admin address");
          }
 
          String serverList = xxlJobServerList.getXxlJobServerList();

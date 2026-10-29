@@ -76,47 +76,47 @@ public class ElkCollectTask extends AbstractCollectTask {
    private static class ElkInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.elk.ring.buffer.size",
-         desc = "ELK\u6d88\u606f\u961f\u5217\u5927\u5c0f"
+         desc = "ELK消息队列大小"
       )
       private Integer ringBufferSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.elk.consecutive.dropped.count",
-         desc = "ELK\u6d88\u606f\u8fde\u7eed\u4e22\u5f03\u6570\u91cf"
+         desc = "ELK消息连续丢弃数量"
       )
       private Long consecutiveDropped = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.elk.dropped.warn.frequency",
-         desc = "ELK\u4e0b\u964d\u8b66\u544a\u9891\u7387"
+         desc = "ELK下降警告频率"
       )
       private Integer droppedWarnFrequency = 0;
       @FieldReport(
          name = "kmc.monitor.collect.elk.keep.alive.duration",
-         desc = "ELK\u4fdd\u6301\u6d3b\u52a8\u6301\u7eed\u65f6\u95f4"
+         desc = "ELK保持活动持续时间"
       )
       private Long keepAliveDuration = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.elk.producer.type",
-         desc = "ELK\u751f\u4ea7\u8005\u7c7b\u578b"
+         desc = "ELK生产者类型"
       )
       private String producerType = "";
       @FieldReport(
          name = "kmc.monitor.collect.elk.reconnection.delay",
-         desc = "ELK\u5728\u4e0e\u76ee\u6807\u7684\u8fde\u63a5\u5931\u8d25\u540e\uff0c\u5728\u5c1d\u8bd5\u91cd\u65b0\u8fde\u63a5\u5230\u8be5\u76ee\u6807\u4e4b\u524d\u7b49\u5f85\u7684\u65f6\u95f4\u6bb5"
+         desc = "ELK在与目标的连接失败后，在尝试重新连接到该目标之前等待的时间段"
       )
       private Long reconnectionDelay = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.elk.secondary.connection.ttl",
-         desc = "ELK\u8f85\u52a9\u8fde\u63a5 TTL\u5927\u5c0f"
+         desc = "ELK辅助连接 TTL大小"
       )
       private Long secondaryConnectionTtl = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.elk.write.timeout",
-         desc = "ELK\u5728\u8d85\u65f6\u4e4b\u524d\u7b49\u5f85\u5199\u5165\u5b8c\u6210\u7684\u65f6\u95f4\u6bb5.\u5e76\u5c1d\u8bd5\u91cd\u65b0\u8fde\u63a5\u5230\u8be5\u76ee\u7684\u5730\u3002"
+         desc = "ELK在超时之前等待写入完成的时间段.并尝试重新连接到该目的地。"
       )
       private Long writeTimeout = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.elk.write.buffer.size",
-         desc = "ELK\u6d88\u5199\u5165\u7f13\u51b2\u533a\u4e2d\u53ef\u7528\u7684\u5b57\u8282\u6570"
+         desc = "ELK消写入缓冲区中可用的字节数"
       )
       private Integer writeBufferSize = 0;
 

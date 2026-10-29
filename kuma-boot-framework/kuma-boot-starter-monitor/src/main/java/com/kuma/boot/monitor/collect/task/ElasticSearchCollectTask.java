@@ -97,57 +97,57 @@ public class ElasticSearchCollectTask extends AbstractCollectTask {
    private static class ElasticSearchData implements CollectInfo {
       @FieldReport(
          name = "elasticSearch.hook.error",
-         desc = "ElasticSearch\u670d\u52a1\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "ElasticSearch服务拦截上一次每秒出错次数"
       )
       private Long hookError;
       @FieldReport(
          name = "elasticSearch.hook.success",
-         desc = "ElasticSearch\u670d\u52a1\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "ElasticSearch服务拦截上一次每秒成功次数"
       )
       private Long hookSuccess;
       @FieldReport(
          name = "elasticSearch.hook.current",
-         desc = "ElasticSearch\u670d\u52a1\u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "ElasticSearch服务拦截当前执行任务数"
       )
       private Long hookCurrent;
       @FieldReport(
          name = "elasticSearch.hook.list.detail",
-         desc = "ElasticSearch\u670d\u52a1\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "ElasticSearch服务拦截历史最大耗时任务列表"
       )
       private String hookList;
       @FieldReport(
          name = "elasticSearch.hook.list.minute.detail",
-         desc = "ElasticSearch\u670d\u52a1\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "ElasticSearch服务拦截历史最大耗时任务列表(每分钟)"
       )
       private String hookListPerMinute;
       @FieldReport(
          name = "elasticSearch.node.count",
-         desc = "ElasticSearch\u96c6\u7fa4\u53d1\u73b0\u8282\u70b9\u6570"
+         desc = "ElasticSearch集群发现节点数"
       )
       private Integer nodesCount;
       @FieldReport(
          name = "elasticSearch.node.connected",
-         desc = "ElasticSearch\u96c6\u7fa4\u5df2\u8fde\u63a5\u8282\u70b9\u6570"
+         desc = "ElasticSearch集群已连接节点数"
       )
       private Integer connectedCount;
       @FieldReport(
          name = "elasticSearch.node.connections",
-         desc = "ElasticSearch\u96c6\u7fa4\u8fde\u63a5\u6570"
+         desc = "ElasticSearch集群连接数"
       )
       private Integer connectionCount;
       @FieldReport(
          name = "elasticSearch.pool.threads.count",
-         desc = "ElasticSearch\u96c6\u7fa4\u7ebf\u7a0b\u6c60\u7ebf\u7a0b\u6570"
+         desc = "ElasticSearch集群线程池线程数"
       )
       private Integer threadsTotal;
       @FieldReport(
          name = "elasticSearch.pool.threads.active",
-         desc = "ElasticSearch\u96c6\u7fa4\u6c60\u7ebf\u7a0b\u6d3b\u52a8\u7ebf\u7a0b\u6570"
+         desc = "ElasticSearch集群池线程活动线程数"
       )
       private Integer activateTotal;
       @FieldReport(
          name = "elasticSearch.pool.queue.size",
-         desc = "ElasticSearch\u96c6\u7fa4\u6c60\u7ebf\u7a0b\u961f\u5217\u5927\u5c0f"
+         desc = "ElasticSearch集群池线程队列大小"
       )
       private Integer queueSize;
 

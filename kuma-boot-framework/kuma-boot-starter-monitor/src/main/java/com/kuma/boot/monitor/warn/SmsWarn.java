@@ -21,7 +21,7 @@ public class SmsWarn extends AbstractWarn {
 
    public void notify(Message message) {
       if (!this.driverExist) {
-         LogUtils.error("\u672a\u627e\u5230SmsService, \u4e0d\u652f\u6301\u77ed\u4fe1\u9884\u8b66", new Object[0]);
+         LogUtils.error("未找到SmsService, 不支持短信预警", new Object[0]);
       } else {
          WarnProperties warnProperties = (WarnProperties)ContextUtils.getBean(WarnProperties.class, true);
          Object smsService = ContextUtils.getBean(ReflectionUtils.tryClassForName("com.kuma.boot.sms.service.SmsService"), true);
@@ -30,7 +30,7 @@ public class SmsWarn extends AbstractWarn {
             String dingDingFilterIP = warnProperties.getDingdingFilterIP();
             if (!StringUtils.isEmpty(ip) && !dingDingFilterIP.contains(ip)) {
                String var10000 = StringUtils.subString3(message.getTitle(), 100);
-               String context = var10000 + "\n\u8be6\u60c5: " + RequestWebUtils.getBaseUrl() + "/kuma/cloud/health/\n" + StringUtils.subString3(message.getContent(), 500);
+               String context = var10000 + "\n详情: " + RequestWebUtils.getBaseUrl() + "/kuma/cloud/health/\n" + StringUtils.subString3(message.getContent(), 500);
 
                try {
                   List<Object> param = new ArrayList();

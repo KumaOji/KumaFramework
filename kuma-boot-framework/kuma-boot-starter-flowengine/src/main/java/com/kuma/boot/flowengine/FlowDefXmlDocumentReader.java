@@ -33,7 +33,7 @@ public class FlowDefXmlDocumentReader {
          Schema schema = schemaFactory.newSchema(resource.getURL());
          this.validator = schema.newValidator();
       } catch (SAXException | IOException | ParserConfigurationException e) {
-         throw new FlowException("\u6784\u5efaXML\u89e3\u6790\u5bf9\u8c61\u8fc7\u7a0b\u4e2d\u51fa\u73b0\u9519\u8bef", e);
+         throw new FlowException("构建XML解析对象过程中出现错误", e);
       }
    }
 
@@ -52,9 +52,9 @@ public class FlowDefXmlDocumentReader {
          Document document = this.domBuilder.parse(resource.getInputStream());
          return document;
       } catch (SAXException e) {
-         throw new FlowException("\u5206\u6790xml\u6587\u4ef6\u51fa\u9519...", e);
+         throw new FlowException("分析xml文件出错...", e);
       } catch (IOException e) {
-         throw new FlowException("\u52a0\u8f7dxml\u6587\u4ef6\u5931\u8d25...", e);
+         throw new FlowException("加载xml文件失败...", e);
       }
    }
 
@@ -63,9 +63,9 @@ public class FlowDefXmlDocumentReader {
          Source source = new StreamSource(resource.getURL().openStream());
          this.validator.validate(source);
       } catch (SAXException e) {
-         throw new FlowException("xml\u9a8c\u8bc1\u5931\u8d25...", e);
+         throw new FlowException("xml验证失败...", e);
       } catch (IOException var4) {
-         throw new FlowException("\u52a0\u8f7dxml\u6587\u4ef6\u5931\u8d25..");
+         throw new FlowException("加载xml文件失败..");
       }
    }
 }

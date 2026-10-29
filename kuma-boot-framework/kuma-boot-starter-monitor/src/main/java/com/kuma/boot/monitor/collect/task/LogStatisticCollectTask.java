@@ -54,12 +54,12 @@ public class LogStatisticCollectTask extends AbstractCollectTask {
    private static class LogErrorInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.log.statistic.error.count",
-         desc = "\u6700\u8fd11\u5206\u949f\u9519\u8bef\u65e5\u5fd7\u6570\u91cf"
+         desc = "最近1分钟错误日志数量"
       )
       private Integer logerrorCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.log.statistic.incre.count",
-         desc = "\u6700\u8fd11\u5206\u949f\u65e5\u5fd7\u6761\u6570\u589e\u91cf"
+         desc = "最近1分钟日志条数增量"
       )
       private Integer logIncreCount = 0;
 

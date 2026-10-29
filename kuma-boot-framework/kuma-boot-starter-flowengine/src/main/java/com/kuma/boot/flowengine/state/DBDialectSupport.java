@@ -31,10 +31,10 @@ public class DBDialectSupport {
       try {
          return null != this.jdbcTemplate.queryForObject(this.sql(flowTrace, sql), String.class, new Object[]{traceId});
       } catch (DataAccessException e) {
-         this.logger.error("\u5b58\u50a8\u5c42\u5f02\u5e38", flowTrace, e);
+         this.logger.error("存储层异常", flowTrace, e);
          return false;
       } catch (Exception e) {
-         this.logger.error("\u672a\u77e5\u5f02\u5e38", flowTrace, e);
+         this.logger.error("未知异常", flowTrace, e);
          return false;
       }
    }
@@ -58,10 +58,10 @@ public class DBDialectSupport {
          int result = this.jdbcTemplate.update(this.sql(flowTrace, sql), new ArgumentPreparedStatementSetter(args));
          return result != 0;
       } catch (DataAccessException e) {
-         this.logger.error("\u5b58\u50a8\u5c42\u5f02\u5e38", flowTrace, e);
+         this.logger.error("存储层异常", flowTrace, e);
          return false;
       } catch (Exception e) {
-         this.logger.error("\u672a\u77e5\u5f02\u5e38", flowTrace, e);
+         this.logger.error("未知异常", flowTrace, e);
          return false;
       }
    }

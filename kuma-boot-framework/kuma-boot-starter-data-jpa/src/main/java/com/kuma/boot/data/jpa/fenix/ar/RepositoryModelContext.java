@@ -21,7 +21,7 @@ public final class RepositoryModelContext {
    public static Object getRepositoryObject(String repositoryBeanName, String entityClassName, Consumer<Object> repoValidConsumer, Consumer<Object> executorValidConsumer) {
       return repositoryMap.computeIfAbsent(repositoryBeanName, (key) -> {
          if (!applicationContext.containsBean(key)) {
-            throw new NoSuchBeanDefinitionException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u83b7\u53d6\u5b9e\u4f53\u7c7b\u3010{}\u3011\u6240\u5bf9\u5e94\u7684 Spring Data JPA \u7684 Repository Bean\u3010{}\u3011\u7684\u5b9e\u4f8b\u4e3a Null\uff0c\u8bf7\u5148\u5b9a\u4e49\u8be5\u5b9e\u4f53\u7c7b\u7684 Repository \u63a5\u53e3\uff0c\u5e76\u6807\u6ce8\u3010@Repository\u3011\u6ce8\u89e3\u3002", entityClassName, key));
+            throw new NoSuchBeanDefinitionException(StringHelper.format("【Fenix 异常】获取实体类【{}】所对应的 Spring Data JPA 的 Repository Bean【{}】的实例为 Null，请先定义该实体类的 Repository 接口，并标注【@Repository】注解。", entityClassName, key));
          } else {
             Object repository = applicationContext.getBean(key);
             if (repoValidConsumer != null) {

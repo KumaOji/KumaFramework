@@ -37,12 +37,12 @@ public class ExportProvider {
          }
       }
 
-      this.monitorThreadPool.monitorSubmit("\u7cfb\u7edf\u4efb\u52a1: ExportProvider \u91c7\u96c6\u4e0a\u4f20\u4efb\u52a1", (Runnable)(() -> {
+      this.monitorThreadPool.monitorSubmit("系统任务: ExportProvider 采集上传任务", (Runnable)(() -> {
          while(!this.monitorThreadPool.monitorIsShutdown() && !this.isClose) {
             try {
                this.run();
             } catch (Exception e) {
-               LogUtils.error("kuma-boot-starter-monitor", new Object[]{"run \u5faa\u73af\u4e0a\u4f20\u62a5\u8868\u51fa\u9519", e});
+               LogUtils.error("kuma-boot-starter-monitor", new Object[]{"run 循环上传报表出错", e});
             }
 
             try {
@@ -58,7 +58,7 @@ public class ExportProvider {
          try {
             e.start();
          } catch (Exception ex) {
-            LogUtils.error("kuma-boot-starter-monitor", new Object[]{e.getClass().getName() + "\u542f\u52a8\u51fa\u9519", ex});
+            LogUtils.error("kuma-boot-starter-monitor", new Object[]{e.getClass().getName() + "启动出错", ex});
          }
       }
 
@@ -82,7 +82,7 @@ public class ExportProvider {
          try {
             e.close();
          } catch (Exception ex) {
-            LogUtils.error(ex, "kuma-boot-starter-monitor", new Object[]{e.getClass().getName() + "\u5173\u95ed\u51fa\u9519"});
+            LogUtils.error(ex, "kuma-boot-starter-monitor", new Object[]{e.getClass().getName() + "关闭出错"});
          }
       }
 

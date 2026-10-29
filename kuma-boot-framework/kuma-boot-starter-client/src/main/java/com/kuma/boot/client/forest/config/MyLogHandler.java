@@ -11,25 +11,25 @@ public class MyLogHandler extends DefaultLogHandler {
    }
 
    public void logContent(String content) {
-      super.logContent("[\u54c8\u54c8\uff0c\u8fd9\u662f\u6211\u81ea\u5df1\u7684\u65e5\u5fd7]: " + content);
+      super.logContent("[哈哈，这是我自己的日志]: " + content);
    }
 
    protected String requestLoggingContent(RequestLogMessage requestLogMessage) {
       StringBuilder builder = new StringBuilder();
-      builder.append("\u8bf7\u6c42: \n\t");
+      builder.append("请求: \n\t");
       builder.append(this.retryContent(requestLogMessage));
       builder.append(this.proxyContent(requestLogMessage));
       builder.append(this.requestTypeChangeHistory(requestLogMessage));
       builder.append(requestLogMessage.getRequestLine());
       String headers = this.requestLoggingHeaders(requestLogMessage);
       if (StringUtils.isNotEmpty(headers)) {
-         builder.append("\n\t\u8bf7\u6c42\u5934: \n");
+         builder.append("\n\t请求头: \n");
          builder.append(headers);
       }
 
       String body = this.requestLoggingBody(requestLogMessage);
       if (StringUtils.isNotEmpty(body)) {
-         builder.append("\n\t\u8bf7\u6c42\u4f53: \n");
+         builder.append("\n\t请求体: \n");
          builder.append(body);
       }
 
@@ -39,11 +39,11 @@ public class MyLogHandler extends DefaultLogHandler {
    protected String responseLoggingContent(ResponseLogMessage responseLogMessage) {
       ForestResponse response = responseLogMessage.getResponse();
       if (response != null && response.getException() != null) {
-         return "[\u7f51\u7edc\u9519\u8bef]: " + response.getException().getMessage();
+         return "[网络错误]: " + response.getException().getMessage();
       } else {
          int status = responseLogMessage.getStatus();
          long time = responseLogMessage.getTime();
-         return status >= 0 ? "\u8bf7\u6c42\u54cd\u5e94: \u72b6\u6001\u7801: " + status + ", \u8017\u65f6: " + time + "ms" : "[\u7f51\u7edc\u9519\u8bef]: \u672a\u77e5\u7684\u7f51\u7edc\u9519\u8bef!";
+         return status >= 0 ? "请求响应: 状态码: " + status + ", 耗时: " + time + "ms" : "[网络错误]: 未知的网络错误!";
       }
    }
 }

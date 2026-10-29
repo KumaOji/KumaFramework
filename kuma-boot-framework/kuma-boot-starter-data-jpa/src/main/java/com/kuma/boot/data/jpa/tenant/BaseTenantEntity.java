@@ -7,8 +7,8 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class BaseTenantEntity extends AbstractEntity {
    @Schema(
-      name = "\u79df\u6237ID",
-      description = "Partitioned \u7c7b\u578b\u79df\u6237ID"
+      name = "租户ID",
+      description = "Partitioned 类型租户ID"
    )
    @Column(
       name = "tenant_id",

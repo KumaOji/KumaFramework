@@ -19,12 +19,12 @@ public class ThreadPoolConfig {
    public static ThreadPoolConfig parseFromConfig(Map<String, Object> config) {
       ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig();
       if (config == null) {
-         LogUtils.info("\u672a\u627e\u5230\u7ebf\u7a0b\u6c60\u914d\u7f6e\uff0c\u4f7f\u7528\u9ed8\u8ba4\u914d\u7f6e", new Object[0]);
+         LogUtils.info("未找到线程池配置，使用默认配置", new Object[0]);
          return threadPoolConfig;
       } else {
          Map<String, Object> threadPoolMap = (Map)config.get("thread-pool");
          if (threadPoolMap == null) {
-            LogUtils.info("\u672a\u627e\u5230thread-pool\u914d\u7f6e\uff0c\u4f7f\u7528\u9ed8\u8ba4\u914d\u7f6e", new Object[0]);
+            LogUtils.info("未找到thread-pool配置，使用默认配置", new Object[0]);
             return threadPoolConfig;
          } else {
             Object coreSizeObj = threadPoolMap.get("core-size");
@@ -52,7 +52,7 @@ public class ThreadPoolConfig {
                threadPoolConfig.setThreadNamePrefix((String)threadNamePrefixObj);
             }
 
-            LogUtils.info("\u89e3\u6790\u7ebf\u7a0b\u6c60\u914d\u7f6e: coreSize={}, maxSize={}, keepAliveSeconds={}, queueCapacity={}, threadNamePrefix={}", new Object[]{threadPoolConfig.getCoreSize(), threadPoolConfig.getMaxSize(), threadPoolConfig.getKeepAliveSeconds(), threadPoolConfig.getQueueCapacity(), threadPoolConfig.getThreadNamePrefix()});
+            LogUtils.info("解析线程池配置: coreSize={}, maxSize={}, keepAliveSeconds={}, queueCapacity={}, threadNamePrefix={}", new Object[]{threadPoolConfig.getCoreSize(), threadPoolConfig.getMaxSize(), threadPoolConfig.getKeepAliveSeconds(), threadPoolConfig.getQueueCapacity(), threadPoolConfig.getThreadNamePrefix()});
             return threadPoolConfig;
          }
       }
@@ -106,7 +106,7 @@ public class ThreadPoolConfig {
          thread.setDaemon(false);
          return thread;
       }, new ThreadPoolExecutor.CallerRunsPolicy());
-      LogUtils.info("\u521b\u5efa\u7ebf\u7a0b\u6c60\u6267\u884c\u5668: coreSize={}, maxSize={}, keepAliveSeconds={}, queueCapacity={}", new Object[]{this.coreSize, this.maxSize, this.keepAliveSeconds, this.queueCapacity});
+      LogUtils.info("创建线程池执行器: coreSize={}, maxSize={}, keepAliveSeconds={}, queueCapacity={}", new Object[]{this.coreSize, this.maxSize, this.keepAliveSeconds, this.queueCapacity});
       return executor;
    }
 }

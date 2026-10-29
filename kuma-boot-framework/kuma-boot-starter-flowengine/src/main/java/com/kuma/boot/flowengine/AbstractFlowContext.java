@@ -38,7 +38,7 @@ public abstract class AbstractFlowContext extends PathMatchingResourcePatternRes
 
    public synchronized void loadDefinition(String location) {
       if (logger.isInfoEnabled()) {
-         logger.info("\u6d41\u7a0b\u5b9a\u4e49\u52a0\u8f7d\u914d\u7f6e\u8def\u5f84\uff1a{}", location);
+         logger.info("流程定义加载配置路径：{}", location);
       }
 
       try {
@@ -48,18 +48,18 @@ public abstract class AbstractFlowContext extends PathMatchingResourcePatternRes
          for(int j = resources.length; i < j; ++i) {
             Resource resource = resources[i];
             if (logger.isInfoEnabled()) {
-               logger.info("\u52a0\u8f7d\u914d\u7f6e\u6587\u4ef6:{}", resource.getURL());
+               logger.info("加载配置文件:{}", resource.getURL());
             }
 
             if (!resource.exists()) {
-               throw new FlowException(String.format("%s\u6d41\u7a0b\u5b9a\u4e49\u6587\u4ef6\u4e0d\u5b58\u5728", resource.getURL()));
+               throw new FlowException(String.format("%s流程定义文件不存在", resource.getURL()));
             }
 
             this.flowDefXmLDocumentReader.analyze(resource);
          }
 
       } catch (IOException e) {
-         throw new FlowException(String.format("\u52a0\u8f7d\u914d\u7f6e\u8fc7\u7a0b\u4e2d\u51fa\u73b0\u9519\u8bef,path=%s", location), e);
+         throw new FlowException(String.format("加载配置过程中出现错误,path=%s", location), e);
       }
    }
 
@@ -67,16 +67,16 @@ public abstract class AbstractFlowContext extends PathMatchingResourcePatternRes
       try {
          flow.setRetryException(this.retryExceptions);
          this.flowEngine.registry(flow);
-         logger.info("\u6ce8\u518c\u6d41\u7a0b:[{}\uff3d\u6210\u529f,\u63cf\u8ff0:{},version={}", new Object[]{flow.getName(), flow.getDescription(), flow.getVersion()});
+         logger.info("注册流程:[{}］成功,描述:{},version={}", new Object[]{flow.getName(), flow.getDescription(), flow.getVersion()});
          if (logger.isDebugEnabled()) {
-            logger.debug("\u6d41\u7a0b\u8be6\u7ec6\u5b9a\u4e49:{}", JSON.toJSONString(flow));
+            logger.debug("流程详细定义:{}", JSON.toJSONString(flow));
          }
 
       } catch (Exception e) {
          if (e instanceof FlowEngineNestException) {
             throw (FlowEngineNestException)e;
          } else {
-            throw new FlowException(String.format("\u6ce8\u518c\u6d41\u7a0b\u5b9a\u4e49\u8fc7\u7a0b\u51fa\u9519,Flow=%s,Version=%s", flow.getName(), flow.getVersion()), e);
+            throw new FlowException(String.format("注册流程定义过程出错,Flow=%s,Version=%s", flow.getName(), flow.getVersion()), e);
          }
       }
    }

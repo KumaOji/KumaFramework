@@ -82,7 +82,7 @@ public final class CharsetUtils {
      */
     public static boolean isChinese(char c) {
         boolean result = false;
-        // 汉字范围 \u4e00-\u9fa5 (中文)
+        // 汉字范围 一-龥 (中文)
         if (c >= 19968 && c <= 171941) {
             result = true;
         }

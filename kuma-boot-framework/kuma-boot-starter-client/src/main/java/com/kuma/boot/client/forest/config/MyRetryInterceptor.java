@@ -10,6 +10,6 @@ public class MyRetryInterceptor implements Interceptor {
    }
 
    public void onRetry(ForestRequest req, ForestResponse res) {
-      LogUtils.info("\u8981\u91cd\u8bd5\u4e86\uff01\u5f53\u524d\u91cd\u8bd5\u6b21\u6570\uff1a" + req.getCurrentRetryCount(), new Object[0]);
+      LogUtils.info("要重试了！当前重试次数：" + req.getCurrentRetryCount(), new Object[0]);
    }
 }

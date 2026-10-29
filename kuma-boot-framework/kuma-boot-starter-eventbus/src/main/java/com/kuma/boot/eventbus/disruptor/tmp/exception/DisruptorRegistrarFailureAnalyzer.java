@@ -8,6 +8,6 @@ public class DisruptorRegistrarFailureAnalyzer extends AbstractFailureAnalyzer<D
    }
 
    protected FailureAnalysis analyze(Throwable rootFailure, DisruptorRegistrarException cause) {
-      return new FailureAnalysis(cause.getMessage(), "\u8bf7\u6dfb\u52a0 basePackages or basePackageClasses", cause);
+      return new FailureAnalysis(cause.getMessage(), "请添加 basePackages or basePackageClasses", cause);
    }
 }

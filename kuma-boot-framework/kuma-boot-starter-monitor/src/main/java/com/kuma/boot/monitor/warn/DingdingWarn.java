@@ -23,7 +23,7 @@ public class DingdingWarn extends AbstractWarn {
 
    public void notify(Message message) {
       if (!this.driverExist) {
-         LogUtils.error("\u672a\u627e\u5230DingerRobot, \u4e0d\u652f\u6301\u9489\u9489\u9884\u8b66", new Object[0]);
+         LogUtils.error("未找到DingerRobot, 不支持钉钉预警", new Object[0]);
       } else {
          WarnProperties warnProperties = (WarnProperties)ContextUtils.getBean(WarnProperties.class, true);
          Object dingerRobot = ContextUtils.getBean(ReflectionUtils.tryClassForName("com.kuma.boot.dingtalk.model.DingerRobot"), true);
@@ -34,7 +34,7 @@ public class DingdingWarn extends AbstractWarn {
                String var10000 = message.getWarnType().getDescription();
                String title = "[" + var10000 + "]" + StringUtils.subString3(message.getTitle(), 100);
                var10000 = StringUtils.subString3(message.getTitle(), 100);
-               String context = var10000 + "\n\u8be6\u60c5: " + RequestWebUtils.getBaseUrl() + "/health/\n" + StringUtils.subString3(message.getContent(), 500);
+               String context = var10000 + "\n详情: " + RequestWebUtils.getBaseUrl() + "/health/\n" + StringUtils.subString3(message.getContent(), 500);
 
                try {
                   Object messageSubType = ReflectionUtils.findEnumObjByName((Class)Objects.requireNonNull(ReflectionUtils.tryClassForName("com.kuma.boot.dingtalk.enums.MessageSubType")), "name", "TEXT");

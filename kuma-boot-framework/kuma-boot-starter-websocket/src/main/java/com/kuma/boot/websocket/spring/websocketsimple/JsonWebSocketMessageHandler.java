@@ -29,18 +29,18 @@ public class JsonWebSocketMessageHandler extends TextWebSocketHandler {
             try {
                JsonWebSocketMessage jsonMessage = (JsonWebSocketMessage)BeanUtil.toBean(message.getPayload(), JsonWebSocketMessage.class);
                if (jsonMessage == null) {
-                  LogUtils.error("[handleTextMessage][session({}) message({}) \u89e3\u6790\u4e3a\u7a7a]", new Object[]{session.getId(), message.getPayload()});
+                  LogUtils.error("[handleTextMessage][session({}) message({}) 解析为空]", new Object[]{session.getId(), message.getPayload()});
                   return;
                }
 
                if (FileUtils.isEmpty(jsonMessage.getType())) {
-                  LogUtils.error("[handleTextMessage][session({}) message({}) \u7c7b\u578b\u4e3a\u7a7a]", new Object[]{session.getId(), message.getPayload()});
+                  LogUtils.error("[handleTextMessage][session({}) message({}) 类型为空]", new Object[]{session.getId(), message.getPayload()});
                   return;
                }
 
                WebSocketMessageListener<Object> messageListener = this.listeners.get(jsonMessage.getType());
                if (messageListener == null) {
-                  LogUtils.error("[handleTextMessage][session({}) message({}) \u76d1\u542c\u5668\u4e3a\u7a7a]", new Object[]{session.getId(), message.getPayload()});
+                  LogUtils.error("[handleTextMessage][session({}) message({}) 监听器为空]", new Object[]{session.getId(), message.getPayload()});
                   return;
                }
 
@@ -48,7 +48,7 @@ public class JsonWebSocketMessageHandler extends TextWebSocketHandler {
                Object messageObj = BeanUtil.toBean(jsonMessage.getContent(), type.getClass());
                messageListener.onMessage(session, messageObj);
             } catch (Throwable var7) {
-               LogUtils.error("[handleTextMessage][session({}) message({}) \u5904\u7406\u5f02\u5e38]", new Object[]{session.getId(), message.getPayload()});
+               LogUtils.error("[handleTextMessage][session({}) message({}) 处理异常]", new Object[]{session.getId(), message.getPayload()});
             }
 
          }

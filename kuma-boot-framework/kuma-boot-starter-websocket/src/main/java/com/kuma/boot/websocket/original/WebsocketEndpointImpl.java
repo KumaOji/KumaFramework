@@ -33,7 +33,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
       Map<String, WebSocketBean> concurrentHashMap = new ConcurrentHashMap<>();
       concurrentHashMap.put(userId, bean);
       webSocketInfo.put(projectId, concurrentHashMap);
-      log.info("ws\u9879\u76ee:" + projectId + ",\u5ba2\u6237\u7aef\u8fde\u63a5\u670d\u52a1\u5668userId :" + userId + "\u5f53\u524d\u8fde\u63a5\u6570\uff1a" + this.countUser(projectId));
+      log.info("ws项目:" + projectId + ",客户端连接服务器userId :" + userId + "当前连接数：" + this.countUser(projectId));
    }
 
    @OnClose
@@ -43,12 +43,12 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
          concurrentHashMap.remove(userId);
       }
 
-      log.info("ws\u9879\u76ee:" + projectId + ",\u5ba2\u6237\u7aef\u65ad\u5f00\u8fde\u63a5\uff0c\u5f53\u524d\u8fde\u63a5\u6570\uff1a" + this.countUser(projectId));
+      log.info("ws项目:" + projectId + ",客户端断开连接，当前连接数：" + this.countUser(projectId));
    }
 
    @OnMessage
    public void onMessage(Session session, String message, @PathParam("userId") String userId, @PathParam("projectId") String projectId) {
-      log.info("ws\u9879\u76ee:" + projectId + ",\u5ba2\u6237\u7aef userId: " + userId + "\uff0c\u6d88\u606f:" + message);
+      log.info("ws项目:" + projectId + ",客户端 userId: " + userId + "，消息:" + message);
    }
 
    @OnError
@@ -56,7 +56,7 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
    }
 
    public void sendMessage(Session session, String message, String projectId, String userId) {
-      log.info("ws\u9879\u76ee:" + projectId + ",\u8fde\u63a5\u6570:" + this.countUser(projectId) + ",\u53d1\u9001\u6d88\u606f " + String.valueOf(session));
+      log.info("ws项目:" + projectId + ",连接数:" + this.countUser(projectId) + ",发送消息 " + String.valueOf(session));
 
       try {
          synchronized(session) {
@@ -67,12 +67,12 @@ public class WebsocketEndpointImpl implements WebsocketEndpoint {
 
          this.cleanErrorNum(projectId, userId);
       } catch (Exception e) {
-         log.error("ws\u9879\u76ee:" + projectId + ",\u7528\u6237:" + userId + "\uff0c\u53d1\u9001\u6d88\u606f\u5931\u8d25" + e.getMessage(), e);
+         log.error("ws项目:" + projectId + ",用户:" + userId + "，发送消息失败" + e.getMessage(), e);
          int errorNum = this.getErroerLinkCount(projectId, userId);
          if (errorNum <= 3) {
             this.sendMessage(session, message, projectId, userId);
          } else {
-            log.error("ws\u53d1\u9001\u6d88\u606f\u5931\u8d25\u8d85\u8fc7\u6700\u5927\u6b21\u6570");
+            log.error("ws发送消息失败超过最大次数");
             this.cleanErrorNum(projectId, userId);
          }
       }

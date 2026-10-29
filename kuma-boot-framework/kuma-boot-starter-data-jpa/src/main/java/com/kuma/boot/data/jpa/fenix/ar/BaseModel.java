@@ -15,7 +15,7 @@ public interface BaseModel<R> {
    }
 
    default void assertNotNullRepository(Object repository) {
-      Assert.notNull(repository, StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u83b7\u53d6\u5230 Spring \u5bb9\u5668\u4e2d Spring Data JPA \u7684 Repository \u63a5\u53e3\u7684 Bean\u3010{}\u3011\u4e3a Null\u3002", this.getRepositoryBeanName()));
+      Assert.notNull(repository, StringHelper.format("【Fenix 异常】获取到 Spring 容器中 Spring Data JPA 的 Repository 接口的 Bean【{}】为 Null。", this.getRepositoryBeanName()));
    }
 
    default String getRepositoryBeanName() {

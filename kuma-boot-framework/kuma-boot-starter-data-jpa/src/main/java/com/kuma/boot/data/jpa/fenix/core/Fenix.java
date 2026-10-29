@@ -220,7 +220,7 @@ public final class Fenix {
 
    public Fenix param(String key, Object value) {
       if (StringHelper.isBlank(key)) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u6dfb\u52a0\u7684\u547d\u540d\u53c2\u6570\u540d\u79f0\u4e3a\u7a7a\uff01");
+         throw new FenixException("【Fenix 异常提示】添加的命名参数名称为空！");
       } else {
          this.source.getSqlInfo().getParams().put(key, value);
          return this;
@@ -229,7 +229,7 @@ public final class Fenix {
 
    public Fenix params(Map<String, Object> paramMap) {
       if (paramMap == null) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u6dfb\u52a0\u7684\u547d\u540d\u53c2\u6570 Map \u4e3anull");
+         throw new FenixException("【Fenix 异常提示】添加的命名参数 Map 为null");
       } else {
          paramMap.forEach(this::param);
          return this;

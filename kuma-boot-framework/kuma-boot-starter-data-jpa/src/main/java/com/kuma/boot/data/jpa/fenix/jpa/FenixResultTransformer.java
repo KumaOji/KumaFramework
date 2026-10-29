@@ -45,7 +45,7 @@ public class FenixResultTransformer extends AbstractResultTransformer {
       for(int len = aliases.length; i < len; ++i) {
          String column = aliases[i];
          if (StringHelper.isBlank(column)) {
-            throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u8981\u6620\u5c04\u4e3a\u3010" + super.resultClass.getName() + "\u3011\u5b9e\u4f53\u7684\u67e5\u8be2\u7ed3\u679c\u5217\u4e3a\u7a7a\uff0c\u8bf7\u68c0\u67e5\u5e76\u4fdd\u8bc1\u6bcf\u4e00\u4e2a\u67e5\u8be2\u7ed3\u679c\u5217\u90fd\u5fc5\u987b\u7528\u3010as\u3011\u540e\u52a0\u201c\u522b\u540d\u201d\u7684\u65b9\u5f0f\uff01");
+            throw new FenixException("【Fenix 异常】要映射为【" + super.resultClass.getName() + "】实体的查询结果列为空，请检查并保证每一个查询结果列都必须用【as】后加“别名”的方式！");
          }
 
          super.setResultPropertyValue(beanWrapper, (String)fieldsMap.get(column.trim().toLowerCase()), tuple[i]);

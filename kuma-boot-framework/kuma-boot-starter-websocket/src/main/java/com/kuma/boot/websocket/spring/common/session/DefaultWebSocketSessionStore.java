@@ -54,7 +54,7 @@ public class DefaultWebSocketSessionStore implements WebSocketSessionStore {
    public Collection<WebSocketSession> getSessions(Object sessionKey) {
       Map<String, WebSocketSession> sessions = this.sessionKeyToWsSessions.get(sessionKey);
       if (sessions == null) {
-         LogUtils.warn("\u6839\u636e\u6307\u5b9a\u7684sessionKey: {} \u83b7\u53d6\u5bf9\u5e94\u7684wsSessions\u4e3a\u7a7a!", new Object[]{sessionKey});
+         LogUtils.warn("根据指定的sessionKey: {} 获取对应的wsSessions为空!", new Object[]{sessionKey});
          return Collections.emptyList();
       } else {
          return sessions.values();

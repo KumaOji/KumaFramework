@@ -43,7 +43,7 @@ public class StandardKafkaAppender<E> extends KafkaAppenderConfig<E> {
          StandardKafkaAppender.this.aai.appendLoopOnAppenders(evt);
          long andIncrement = StandardKafkaAppender.this.sendErrorNum.getAndIncrement();
          if (andIncrement > 0L && andIncrement % 1000L == 0L) {
-            StandardKafkaAppender.this.errorLog(andIncrement, "\u7cfb\u7edf\u65e5\u5fd7\u6d88\u606f\u53d1\u9001\u5931\u8d25");
+            StandardKafkaAppender.this.errorLog(andIncrement, "系统日志消息发送失败");
          }
 
       }
@@ -129,7 +129,7 @@ public class StandardKafkaAppender<E> extends KafkaAppenderConfig<E> {
       } catch (Exception var12) {
          long andIncrement = this.msgErrorNum.getAndIncrement();
          if (andIncrement > 0L && andIncrement % 1000L == 0L) {
-            this.errorLog(andIncrement, "\u7cfb\u7edf\u65e5\u5fd7\u6d88\u606f\u5904\u7406\u5931\u8d25");
+            this.errorLog(andIncrement, "系统日志消息处理失败");
          }
 
          return;
@@ -150,7 +150,7 @@ public class StandardKafkaAppender<E> extends KafkaAppenderConfig<E> {
          } catch (Exception var13) {
             long andIncrement = this.sendErrorNum.getAndIncrement();
             if (andIncrement > 0L && andIncrement % 1000L == 0L) {
-               this.errorLog(andIncrement, "\u7cfb\u7edf\u65e5\u5fd7\u6d88\u606f\u53d1\u9001\u5931\u8d25");
+               this.errorLog(andIncrement, "系统日志消息发送失败");
             }
          }
       } else {
@@ -168,7 +168,7 @@ public class StandardKafkaAppender<E> extends KafkaAppenderConfig<E> {
       long lastSeconds = this.lastSuccessStopwatch.elapsed(TimeUnit.SECONDS);
       long lastMinute = this.lastSuccessStopwatch.elapsed(TimeUnit.MINUTES);
       long lastHour = this.lastSuccessStopwatch.elapsed(TimeUnit.HOURS);
-      LogUtils.info("KafkaAppender [{}\u5df2\u8fbe {}\u6761 \u5171\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6, \u6700\u8fd1\u4e00\u6b21\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6]", new Object[]{"\u7cfb\u7edf\u65e5\u5fd7\u6d88\u606f\u53d1\u9001\u6210\u529f", num, seconds, minute, hour, lastSeconds, lastMinute, lastHour});
+      LogUtils.info("KafkaAppender [{}已达 {}条 共用时{}秒 {}分 {}小时, 最近一次用时{}秒 {}分 {}小时]", new Object[]{"系统日志消息发送成功", num, seconds, minute, hour, lastSeconds, lastMinute, lastHour});
       this.lastSuccessStopwatch.reset().start();
    }
 
@@ -179,7 +179,7 @@ public class StandardKafkaAppender<E> extends KafkaAppenderConfig<E> {
       long lastSeconds = this.lastErrorStopwatch.elapsed(TimeUnit.SECONDS);
       long lastMinute = this.lastErrorStopwatch.elapsed(TimeUnit.MINUTES);
       long lastHour = this.lastErrorStopwatch.elapsed(TimeUnit.HOURS);
-      LogUtils.error("KafkaAppender [{}\u5df2\u8fbe {}\u6761 \u5171\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6, \u6700\u8fd1\u4e00\u6b21\u7528\u65f6{}\u79d2 {}\u5206 {}\u5c0f\u65f6]", new Object[]{msg, num, seconds, minute, hour, lastSeconds, lastMinute, lastHour});
+      LogUtils.error("KafkaAppender [{}已达 {}条 共用时{}秒 {}分 {}小时, 最近一次用时{}秒 {}分 {}小时]", new Object[]{msg, num, seconds, minute, hour, lastSeconds, lastMinute, lastHour});
       this.lastErrorStopwatch.reset().start();
    }
 

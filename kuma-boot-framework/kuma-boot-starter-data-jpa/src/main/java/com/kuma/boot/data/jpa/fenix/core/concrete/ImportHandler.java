@@ -19,11 +19,11 @@ public class ImportHandler implements FenixHandler {
          String nameSpace = StringHelper.isNotBlank(nameSpaceText) ? nameSpaceText : source.getNamespace();
          String fenixId = XmlNodeHelper.getNodeAttrText(source.getNode(), "attribute::fenixId");
          if (StringHelper.isBlank(fenixId)) {
-            throw new NodeNotFoundException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011<import /> \u6807\u7b7e\u4e2d\u5b58\u5728 fenixId \u4e3a\u7a7a\u7684\u60c5\u51b5\uff0c\u8bf7\u68c0\u67e5\uff01");
+            throw new NodeNotFoundException("【Fenix 异常提示】<import /> 标签中存在 fenixId 为空的情况，请检查！");
          } else {
             Node node = XmlNodeHelper.getNodeBySpaceAndId(nameSpace, fenixId);
             if (node == null) {
-               throw new NodeNotFoundException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011\u4ece <import /> \u6807\u7b7e\u4e2d\uff0c\u672a\u627e\u5230 namespace \u4e3a\u3010" + nameSpace + "\u3011\uff0cfenixId \u4e3a\u3010" + fenixId + "\u3011\u7684 XML \u8282\u70b9\uff0c\u8bf7\u68c0\u67e5\uff01");
+               throw new NodeNotFoundException("【Fenix 异常提示】从 <import /> 标签中，未找到 namespace 为【" + nameSpace + "】，fenixId 为【" + fenixId + "】的 XML 节点，请检查！");
             } else {
                String valueText = XmlNodeHelper.getNodeAttrText(source.getNode(), "attribute::value");
                FenixXmlBuilder.buildSqlInfo(nameSpace, source.getSqlInfo(), node, StringHelper.isNotBlank(valueText) ? ParseHelper.parseExpressWithException(valueText, source.getContext()) : source.getContext());

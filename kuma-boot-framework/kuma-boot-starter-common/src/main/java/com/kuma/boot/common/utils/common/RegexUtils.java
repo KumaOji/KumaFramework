@@ -127,7 +127,7 @@ public final class RegexUtils {
     /**
      * 只能输入汉字
      */
-    public static final String REGEX_CHINESE_CHARACTER = "^[\u4e00-\u9fa5]{0,}$";
+    public static final String REGEX_CHINESE_CHARACTER = "^[一-龥]{0,}$";
 
     /**
      * 验证Email地址

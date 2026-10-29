@@ -16,9 +16,9 @@ public class ZlfDisruptorSpringUtils implements ApplicationContextAware {
    }
 
    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-      logger.info("\u5e94\u7528\u7a0b\u5e8f\u4e0a\u4e0b\u6587 \uff1a [{}]", "\u5f00\u59cb\u521d\u59cb\u5316");
+      logger.info("应用程序上下文 ： [{}]", "开始初始化");
       ZlfDisruptorSpringUtils.applicationContext = applicationContext;
-      logger.info("\u5e94\u7528\u7a0b\u5e8f\u4e0a\u4e0b\u6587 \uff1a [{}]", "\u521d\u59cb\u5316\u5b8c\u6210");
+      logger.info("应用程序上下文 ： [{}]", "初始化完成");
    }
 
    public static ApplicationContext getApplicationContext() {

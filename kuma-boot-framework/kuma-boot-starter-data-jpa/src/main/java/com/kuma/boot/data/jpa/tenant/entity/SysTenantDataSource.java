@@ -15,7 +15,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.UuidGenerator;
 
 @Schema(
-   title = "\u591a\u79df\u6237\u6570\u636e\u6e90\u7ba1\u7406"
+   title = "多租户数据源管理"
 )
 @Entity
 @Table(
@@ -35,7 +35,7 @@ import org.hibernate.annotations.UuidGenerator;
 )
 public class SysTenantDataSource extends BaseSysEntity {
    @Schema(
-      name = "\u79df\u6237\u6570\u636e\u6e90\u4e3b\u952e"
+      name = "租户数据源主键"
    )
    @Id
    @UuidGenerator
@@ -45,8 +45,8 @@ public class SysTenantDataSource extends BaseSysEntity {
    )
    private String datasourceId;
    @Schema(
-      name = "\u79df\u6237ID",
-      description = "\u79df\u6237\u7684\u552f\u4e00\u6807\u8bc6"
+      name = "租户ID",
+      description = "租户的唯一标识"
    )
    @Column(
       name = "tenant_id",
@@ -55,7 +55,7 @@ public class SysTenantDataSource extends BaseSysEntity {
    )
    private String tenantId;
    @Schema(
-      name = "\u6570\u636e\u5e93\u7528\u6237\u540d"
+      name = "数据库用户名"
    )
    @Column(
       name = "username",
@@ -63,7 +63,7 @@ public class SysTenantDataSource extends BaseSysEntity {
    )
    private String username;
    @Schema(
-      name = "\u6570\u636e\u5e93\u5bc6\u7801"
+      name = "数据库密码"
    )
    @Column(
       name = "password",
@@ -71,7 +71,7 @@ public class SysTenantDataSource extends BaseSysEntity {
    )
    private String password;
    @Schema(
-      name = "\u6570\u636e\u5e93\u9a71\u52a8"
+      name = "数据库驱动"
    )
    @Column(
       name = "driver_class_name",
@@ -79,7 +79,7 @@ public class SysTenantDataSource extends BaseSysEntity {
    )
    private String driverClassName;
    @Schema(
-      name = "\u6570\u636e\u5e93\u8fde\u63a5"
+      name = "数据库连接"
    )
    @Column(
       name = "url",
@@ -87,8 +87,8 @@ public class SysTenantDataSource extends BaseSysEntity {
    )
    private String url;
    @Schema(
-      name = "\u662f\u5426\u5df2\u7ecf\u521d\u59cb\u5316",
-      description = "\u9ed8\u8ba4\u503c false"
+      name = "是否已经初始化",
+      description = "默认值 false"
    )
    private Boolean initialize = false;
 

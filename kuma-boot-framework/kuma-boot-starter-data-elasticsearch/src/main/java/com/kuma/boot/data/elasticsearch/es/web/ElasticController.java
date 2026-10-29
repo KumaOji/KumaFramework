@@ -32,12 +32,12 @@ public class ElasticController {
       try {
          Student student = new Student();
          student.setId("123");
-         student.setName("\u5c0f\u963f\u98de");
+         student.setName("小阿飞");
          student.setBirthday("2005-04-11 12:03:00");
-         student.setAddress("\u4e0a\u6d77\u95f5\u884c");
+         student.setAddress("上海闵行");
          School school = new School();
-         school.setName("\u4e0a\u6d77\u5e02\u95f5\u884c\u5c0f\u5b66");
-         school.setAddres("\u4e0a\u6d77\u95f5\u884c");
+         school.setName("上海市闵行小学");
+         school.setAddres("上海闵行");
          student.setSchool(school);
          EsDoc<Student> doc = new EsDoc<Student>(student.getId(), student, "student");
          this.elasticUtil.addDocument(doc);

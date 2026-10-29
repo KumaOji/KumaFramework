@@ -1,11 +1,11 @@
 package com.kuma.boot.sensitive.sensitiveword.constant.enums;
 
 public enum WordTagType {
-   ZHENGZHI("0", "\u653f\u6cbb"),
-   DUPIN("1", "\u6bd2\u54c1"),
-   SEQING("2", "\u8272\u60c5"),
-   DUBO("3", "\u8d4c\u535a"),
-   FANZUI("4", "\u8fdd\u6cd5\u72af\u7f6a");
+   ZHENGZHI("0", "政治"),
+   DUPIN("1", "毒品"),
+   SEQING("2", "色情"),
+   DUBO("3", "赌博"),
+   FANZUI("4", "违法犯罪");
 
    private final String code;
    private final String desc;

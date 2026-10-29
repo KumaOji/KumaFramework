@@ -62,7 +62,7 @@ public class HealthCheckProvider implements AutoCloseable {
       this.registerCollectTask(new DoubtApiCollectTask(collectTaskProperties));
       this.registerCollectTask(new LogStatisticCollectTask(collectTaskProperties));
       this.registerCollectTask(new NacosCollectTask(collectTaskProperties));
-      monitor.monitorSubmit("\u7cfb\u7edf\u4efb\u52a1: MonitorCheckProvider \u91c7\u96c6\u4efb\u52a1", (Runnable)(() -> {
+      monitor.monitorSubmit("系统任务: MonitorCheckProvider 采集任务", (Runnable)(() -> {
          while(!monitor.monitorIsShutdown() && !this.close) {
             try {
                Report report = this.getReport(false);
@@ -71,9 +71,9 @@ public class HealthCheckProvider implements AutoCloseable {
                   return;
                }
 
-               AbstractCollectTask.notifyMessage(WarnTypeEnum.ERROR, "\u5065\u5eb7\u68c0\u67e5", text);
+               AbstractCollectTask.notifyMessage(WarnTypeEnum.ERROR, "健康检查", text);
             } catch (Exception e) {
-               LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"run \u5faa\u73af\u91c7\u96c6\u51fa\u9519", e});
+               LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"run 循环采集出错", e});
             }
 
             try {
@@ -87,7 +87,7 @@ public class HealthCheckProvider implements AutoCloseable {
    }
 
    public Report getReport(boolean isAnalyse) {
-      Report report = (new Report()).setDesc("\u5065\u5eb7\u68c0\u67e5\u62a5\u8868").setName("kmc.monitor.report");
+      Report report = (new Report()).setDesc("健康检查报表").setName("kmc.monitor.report");
 
       for(AbstractCollectTask task : this.checkTasks) {
          if (task.getEnabled()) {
@@ -97,7 +97,7 @@ public class HealthCheckProvider implements AutoCloseable {
                   report.put(task.getName(), report2.setDesc(task.getDesc()).setName(task.getName()));
                }
             } catch (Exception e) {
-               LogUtils.error(e, "kuma-boot-starter-monitor" + task.getName() + "\u91c7\u96c6\u83b7\u53d6\u62a5\u8868\u51fa\u9519", new Object[0]);
+               LogUtils.error(e, "kuma-boot-starter-monitor" + task.getName() + "采集获取报表出错", new Object[0]);
             }
          }
       }
@@ -117,7 +117,7 @@ public class HealthCheckProvider implements AutoCloseable {
          try {
             task.close();
          } catch (Exception exp) {
-            LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"close\u8d44\u6e90\u91ca\u653e\u51fa\u9519", exp});
+            LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"close资源释放出错", exp});
          }
       }
 

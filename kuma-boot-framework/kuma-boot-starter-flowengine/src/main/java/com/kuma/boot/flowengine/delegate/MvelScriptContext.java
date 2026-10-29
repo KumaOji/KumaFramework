@@ -36,14 +36,14 @@ public class MvelScriptContext implements Script, InvokeSupport {
             vars.put("execution", execution);
             result = MVEL.executeExpression(compiled, vars);
             if (!(result instanceof String)) {
-               throw new FlowException(String.format("\u72b6\u6001\u673a \u3010stateachine=%s,version=%s ,Node=%s\u3011\u6267\u884c\u811a\u672c\u3010script=%s\u3011\u65e0\u8fd4\u56de\u503c", key.getFlowName(), key.getVersion(), nodeName, script));
+               throw new FlowException(String.format("状态机 【stateachine=%s,version=%s ,Node=%s】执行脚本【script=%s】无返回值", key.getFlowName(), key.getVersion(), nodeName, script));
             }
 
             var9 = result.toString();
          } finally {
             Logger logger = TraceLogFactory.getLogger(execution.getCurrentFlow().getLogName());
             if (logger.isDebugEnabled()) {
-               logger.debug("\u8282\u70b9:{}\u8fdb\u884c\u811a\u672c\u51b3\u7b56|nMVEL->{}n\u5165\u53c2->execution={}rn\u5feb\u7b56\u7ed3\u679c->{}", new Object[]{execution.currentNodeExecution().currentNode().getName(), script, execution, result});
+               logger.debug("节点:{}进行脚本决策|nMVEL->{}n入参->execution={}rn快策结果->{}", new Object[]{execution.currentNodeExecution().currentNode().getName(), script, execution, result});
             }
 
          }

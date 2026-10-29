@@ -33,7 +33,7 @@ public class EnhanceMetricsBeanPostProcessor implements BeanPostProcessor, Appli
       } else {
          String var10000 = Metrics.getApplicationName(applicationContext);
          String key = "http_" + var10000 + "_" + clazz.getSimpleName();
-         LogUtils.info("\u589e\u52a0http\u9ed8\u8ba4\u76d1\u63a7:{}", new Object[]{key});
+         LogUtils.info("增加http默认监控:{}", new Object[]{key});
          return Proxy.getProxy(bean, new MetricsMethodInterceptor(key));
       }
    }

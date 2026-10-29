@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public enum WebSocketChannel {
-   NOTICE("/notice", "\u4e2a\u4eba\u901a\u77e5");
+   NOTICE("/notice", "个人通知");
 
    @Schema(
-      title = "\u6d88\u606f\u7aef\u70b9"
+      title = "消息端点"
    )
    private final String destination;
    @Schema(
-      title = "\u8bf4\u660e"
+      title = "说明"
    )
    private final String description;
    private static final Map<String, WebSocketChannel> INDEX_MAP = new HashMap<>();

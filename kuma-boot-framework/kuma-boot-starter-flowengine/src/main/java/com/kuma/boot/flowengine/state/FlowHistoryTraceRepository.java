@@ -12,7 +12,7 @@ public class FlowHistoryTraceRepository extends DBDialectSupport {
    }
 
    public void store(FlowHistoryTrace flowHistoryTrace) {
-      this.logger.debug("\u5b58\u50a8\u5386\u53f2\u6267\u884c.traceId: {},orderId:{}", flowHistoryTrace.getTraceId(), flowHistoryTrace.getOrderId());
+      this.logger.debug("存储历史执行.traceId: {},orderId:{}", flowHistoryTrace.getTraceId(), flowHistoryTrace.getOrderId());
       List<Object> params = this.toSqlParams(flowHistoryTrace);
       params.add(flowHistoryTrace.getEndTime());
       params.add(flowHistoryTrace.getError());

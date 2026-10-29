@@ -40,7 +40,7 @@ final class QueryResultContext {
          try {
             return (AbstractResultTransformer)transformer.getDeclaredConstructor().newInstance();
          } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
-            throw new FenixException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u901a\u8fc7\u53cd\u5c04\u521b\u5efa\u3010{}\u3011\u7c7b\u7684\u5bf9\u8c61\u5b9e\u4f8b\u5f02\u5e38\uff0c\u8bf7\u68c0\u67e5\u8be5\u7c7b\u7684\u6784\u9020\u65b9\u6cd5\u662f\u5426\u6709 public \u7684\u65e0\u53c2\u6784\u9020\u65b9\u6cd5\uff0c\u5efa\u8bae\u4f60\u53c2\u8003\u3010com.kuma.boot.data.jpa.fenix.jpa.FenixResultTransformer\u3011\u7c7b\u6765\u5b9e\u73b0\u81ea\u5df1\u7684 ResultTransformer \u7c7b\u3002", transformer.getName()), e);
+            throw new FenixException(StringHelper.format("【Fenix 异常】通过反射创建【{}】类的对象实例异常，请检查该类的构造方法是否有 public 的无参构造方法，建议你参考【com.kuma.boot.data.jpa.fenix.jpa.FenixResultTransformer】类来实现自己的 ResultTransformer 类。", transformer.getName()), e);
          }
       }
    }
@@ -52,7 +52,7 @@ final class QueryResultContext {
          try {
             return Class.forName(resultTypeClassStr);
          } catch (ClassNotFoundException e) {
-            throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u672a\u627e\u5230\u3010" + resultTypeClassStr + "\u3011\u5bf9\u5e94\u7684 class\uff0c\u8bf7\u68c0\u67e5\uff01", e);
+            throw new FenixException("【Fenix 异常】未找到【" + resultTypeClassStr + "】对应的 class，请检查！", e);
          }
       }
    }

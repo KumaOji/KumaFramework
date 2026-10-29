@@ -64,7 +64,7 @@ public class ElasticsearchTemplate {
    public <TDocument> CompletableFuture<Boolean> asyncCreateIndex(String name, String alias, Class<TDocument> clazz) {
       return this.asyncExist(List.of(name)).thenApplyAsync((resp) -> {
          if (resp) {
-            LogUtils.error("\u7d22\u5f15\uff1a{} -> \u521b\u5efa\u7d22\u5f15\u5931\u8d25\uff0c\u7d22\u5f15\u5df2\u5b58\u5728", new Object[]{name});
+            LogUtils.error("索引：{} -> 创建索引失败，索引已存在", new Object[]{name});
             return Boolean.FALSE;
          } else {
             return Boolean.TRUE;
@@ -74,10 +74,10 @@ public class ElasticsearchTemplate {
             Document document = this.convert(name, alias, clazz);
             this.elasticsearchAsyncClient.indices().create(this.getCreateIndexRequest(document)).thenApplyAsync((response) -> {
                if (response.acknowledged()) {
-                  LogUtils.info("\u7d22\u5f15\uff1a{} -> \u521b\u5efa\u7d22\u5f15\u6210\u529f", new Object[]{name});
+                  LogUtils.info("索引：{} -> 创建索引成功", new Object[]{name});
                   return Boolean.TRUE;
                } else {
-                  LogUtils.error("\u7d22\u5f15\uff1a{} -> \u521b\u5efa\u7d22\u5f15\u5931\u8d25", new Object[]{name});
+                  LogUtils.error("索引：{} -> 创建索引失败", new Object[]{name});
                   return Boolean.FALSE;
                }
             });
@@ -89,15 +89,15 @@ public class ElasticsearchTemplate {
 
    public <TDocument> void createIndex(String name, String alias, Class<TDocument> clazz) throws IOException {
       if (this.exist(List.of(name))) {
-         LogUtils.error("\u7d22\u5f15\uff1a{} -> \u521b\u5efa\u7d22\u5f15\u5931\u8d25\uff0c\u7d22\u5f15\u5df2\u5b58\u5728", new Object[]{name});
+         LogUtils.error("索引：{} -> 创建索引失败，索引已存在", new Object[]{name});
       } else {
          Document document = this.convert(name, alias, clazz);
          CreateIndexResponse createIndexResponse = this.elasticsearchClient.indices().create(this.getCreateIndexRequest(document));
          boolean acknowledged = createIndexResponse.acknowledged();
          if (acknowledged) {
-            LogUtils.info("\u7d22\u5f15\uff1a{} -> \u521b\u5efa\u7d22\u5f15\u6210\u529f", new Object[]{name});
+            LogUtils.info("索引：{} -> 创建索引成功", new Object[]{name});
          } else {
-            LogUtils.error("\u7d22\u5f15\uff1a{} -> \u521b\u5efa\u7d22\u5f15\u5931\u8d25", new Object[]{name});
+            LogUtils.error("索引：{} -> 创建索引失败", new Object[]{name});
          }
 
       }
@@ -105,14 +105,14 @@ public class ElasticsearchTemplate {
 
    public void deleteIndex(List<String> names) throws IOException {
       if (!this.exist(names)) {
-         LogUtils.error("\u7d22\u5f15\uff1a{} -> \u5220\u9664\u7d22\u5f15\u5931\u8d25\uff0c\u7d22\u5f15\u4e0d\u5b58\u5728", new Object[]{StringUtil.collectionToDelimitedString(names, SymbolConstants.COMMA)});
+         LogUtils.error("索引：{} -> 删除索引失败，索引不存在", new Object[]{StringUtil.collectionToDelimitedString(names, SymbolConstants.COMMA)});
       } else {
          DeleteIndexResponse deleteIndexResponse = this.elasticsearchClient.indices().delete(this.getDeleteIndexRequest(names));
          boolean acknowledged = deleteIndexResponse.acknowledged();
          if (acknowledged) {
-            LogUtils.info("\u7d22\u5f15\uff1a{} -> \u5220\u9664\u7d22\u5f15\u6210\u529f", new Object[]{StringUtil.collectionToDelimitedString(names, SymbolConstants.COMMA)});
+            LogUtils.info("索引：{} -> 删除索引成功", new Object[]{StringUtil.collectionToDelimitedString(names, SymbolConstants.COMMA)});
          } else {
-            LogUtils.error("\u7d22\u5f15\uff1a{} -> \u5220\u9664\u7d22\u5f15\u5931\u8d25", new Object[]{StringUtil.collectionToDelimitedString(names, SymbolConstants.COMMA)});
+            LogUtils.error("索引：{} -> 删除索引失败", new Object[]{StringUtil.collectionToDelimitedString(names, SymbolConstants.COMMA)});
          }
 
       }
@@ -125,9 +125,9 @@ public class ElasticsearchTemplate {
    public void createDocument(String index, String id, Object obj) throws IOException {
       IndexResponse response = this.elasticsearchClient.index((idx) -> idx.index(index).refresh(Refresh.True).id(id).document(obj));
       if (StringUtil.isNotEmpty(response.result().jsonValue())) {
-         LogUtils.info("\u7d22\u5f15\uff1a{} -> \u540c\u6b65\u7d22\u5f15\u6210\u529f", new Object[]{index});
+         LogUtils.info("索引：{} -> 同步索引成功", new Object[]{index});
       } else {
-         LogUtils.error("\u7d22\u5f15\uff1a{} -> \u540c\u6b65\u7d22\u5f15\u5931\u8d25", new Object[]{index});
+         LogUtils.error("索引：{} -> 同步索引失败", new Object[]{index});
       }
 
    }
@@ -135,10 +135,10 @@ public class ElasticsearchTemplate {
    public CompletableFuture<Boolean> asyncCreateDocument(String index, String id, Object obj) {
       return this.elasticsearchAsyncClient.index((idx) -> idx.index(index).refresh(Refresh.True).id(id).document(obj)).thenApplyAsync((resp) -> {
          if (StringUtil.isNotEmpty(resp.result().jsonValue())) {
-            LogUtils.info("\u7d22\u5f15\uff1a{} -> \u5f02\u6b65\u540c\u6b65\u7d22\u5f15\u6210\u529f", new Object[]{index});
+            LogUtils.info("索引：{} -> 异步同步索引成功", new Object[]{index});
             return Boolean.TRUE;
          } else {
-            LogUtils.error("\u7d22\u5f15\uff1a{} -> \u5f02\u6b65\u540c\u6b65\u7d22\u5f15\u5931\u8d25", new Object[]{index});
+            LogUtils.error("索引：{} -> 异步同步索引失败", new Object[]{index});
             return Boolean.FALSE;
          }
       });
@@ -147,9 +147,9 @@ public class ElasticsearchTemplate {
    public void bulkCreateDocument(String index, Map<String, Object> map) throws IOException {
       boolean errors = this.elasticsearchClient.bulk((bulk) -> bulk.index(index).refresh(Refresh.True).operations(this.getBulkOperations(map))).errors();
       if (errors) {
-         LogUtils.error("\u7d22\u5f15\uff1a{} -> \u6279\u91cf\u540c\u6b65\u7d22\u5f15\u5931\u8d25", new Object[]{index});
+         LogUtils.error("索引：{} -> 批量同步索引失败", new Object[]{index});
       } else {
-         LogUtils.info("\u7d22\u5f15\uff1a{} -> \u6279\u91cf\u540c\u6b65\u7d22\u5f15\u6210\u529f", new Object[]{index});
+         LogUtils.info("索引：{} -> 批量同步索引成功", new Object[]{index});
       }
 
    }
@@ -157,10 +157,10 @@ public class ElasticsearchTemplate {
    public CompletableFuture<Boolean> asyncBulkCreateDocument(String index, Map<String, Object> map) {
       return this.elasticsearchAsyncClient.bulk((bulk) -> bulk.index(index).refresh(Refresh.True).operations(this.getBulkOperations(map))).thenApplyAsync((resp) -> {
          if (resp.errors()) {
-            LogUtils.error("\u7d22\u5f15\uff1a{} -> \u5f02\u6b65\u6279\u91cf\u540c\u6b65\u7d22\u5f15\u5931\u8d25", new Object[]{index});
+            LogUtils.error("索引：{} -> 异步批量同步索引失败", new Object[]{index});
             return Boolean.FALSE;
          } else {
-            LogUtils.info("\u7d22\u5f15\uff1a{} -> \u5f02\u6b65\u6279\u91cf\u540c\u6b65\u7d22\u5f15\u6210\u529f", new Object[]{index});
+            LogUtils.info("索引：{} -> 异步批量同步索引成功", new Object[]{index});
             return Boolean.TRUE;
          }
       });

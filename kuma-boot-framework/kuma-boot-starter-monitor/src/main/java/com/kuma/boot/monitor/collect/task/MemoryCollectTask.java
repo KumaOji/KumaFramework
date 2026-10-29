@@ -104,42 +104,42 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JvmInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.total.info",
-         desc = "JVM \u5185\u5b58\u7edf\u8ba1"
+         desc = "JVM 内存统计"
       )
       private JvmTotalInfo totalInfo;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.eden.info",
-         desc = "JVM Eden \u5e74\u8f7b\u4ee3\u5185\u5b58(M)"
+         desc = "JVM Eden 年轻代内存(M)"
       )
       private JVMEdenInfo edenInfo;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.survivor.info",
-         desc = "JVM Survivor \u5e74\u8f7b\u4ee3\u5185\u5b58(M)"
+         desc = "JVM Survivor 年轻代内存(M)"
       )
       private JVMSurvivorInfo survivorInfo;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.old.info",
-         desc = "JVM Old \u8001\u5e74\u4ee3\u5185\u5b58(M)"
+         desc = "JVM Old 老年代内存(M)"
       )
       private JVMOldInfo genOldInfo;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.perm.info",
-         desc = "JVM Perm \u6c38\u4e45\u4ee3\u5185\u5b58(M)"
+         desc = "JVM Perm 永久代内存(M)"
       )
       private JVMPermInfo genPermInfo;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.codeCache.info",
-         desc = "JVM CodeCache \u7f16\u8bd1\u7801\u7f13\u5b58\u5185\u5b58(M)"
+         desc = "JVM CodeCache 编译码缓存内存(M)"
       )
       private JVMCodeCacheInfo genCodeCache;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.metaspace.info",
-         desc = "JVM metaspace \u5143\u6570\u636e\u7f13\u5b58\u5185\u5b58(M)"
+         desc = "JVM metaspace 元数据缓存内存(M)"
       )
       private JVMMetaspaceInfo genMetaspace;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.compressed.class.space.info",
-         desc = "JVM CompressedClassSpace \u7f13\u5b58\u5185\u5b58(M)"
+         desc = "JVM CompressedClassSpace 缓存内存(M)"
       )
       private JVMCompressedClassSpaceInfo genCompressedClassSpace;
 
@@ -150,22 +150,22 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JvmTotalInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.use",
-         desc = "JVM\u5185\u5b58\u5df2\u7528\u7a7a\u95f4(M)"
+         desc = "JVM内存已用空间(M)"
       )
       private Long use = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.free",
-         desc = "JVM\u5185\u5b58\u53ef\u7528\u7a7a\u95f4(M)"
+         desc = "JVM内存可用空间(M)"
       )
       private Long free = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.max",
-         desc = "JVM\u5185\u5b58\u6700\u5927\u53ef\u7528\u7a7a\u95f4(M)"
+         desc = "JVM内存最大可用空间(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.total",
-         desc = "JVM\u5185\u5b58\u603b\u7a7a\u95f4(M)"
+         desc = "JVM内存总空间(M)"
       )
       private Long total = 0L;
 
@@ -176,17 +176,17 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class SystemInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.os.use",
-         desc = "Os\u5185\u5b58\u5df2\u7528\u7a7a\u95f4(M)"
+         desc = "Os内存已用空间(M)"
       )
       private Long use = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.os.free",
-         desc = "Os\u5185\u5b58\u53ef\u7528\u7a7a\u95f4(M)"
+         desc = "Os内存可用空间(M)"
       )
       private Long free = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.os.total",
-         desc = "Os\u5185\u5b58\u603b\u7a7a\u95f4(M)"
+         desc = "Os内存总空间(M)"
       )
       private Long total = 0L;
 
@@ -197,12 +197,12 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class MemeryInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm",
-         desc = "JVM\u5185\u5b58\u7a7a\u95f4(M)"
+         desc = "JVM内存空间(M)"
       )
       private JvmInfo jvmInfo = new JvmInfo();
       @FieldReport(
          name = "kmc.monitor.collect.memory.system",
-         desc = "Os\u5185\u5b58\u7a7a\u95f4(M)"
+         desc = "Os内存空间(M)"
       )
       private SystemInfo systemInfo = new SystemInfo();
 
@@ -215,27 +215,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMPermInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.perm.init",
-         desc = "perm \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "perm 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.perm.max",
-         desc = "perm \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "perm 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.perm.used",
-         desc = "perm \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "perm 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.perm.committed",
-         desc = "perm \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "perm 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.perm.usedRate",
-         desc = "perm \u4f7f\u7528\u7387 %"
+         desc = "perm 使用率 %"
       )
       private Long usedRate = 0L;
 
@@ -246,27 +246,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMOldInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.old.init",
-         desc = "old \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "old 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.old.max",
-         desc = "old \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "old 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.old.used",
-         desc = "old \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "old 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.old.committed",
-         desc = "old \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "old 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.old.usedRate",
-         desc = "old \u4f7f\u7528\u7387 %"
+         desc = "old 使用率 %"
       )
       private Long usedRate = 0L;
 
@@ -277,27 +277,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMSurvivorInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.survivor.init",
-         desc = "survivor \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "survivor 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.survivor.max",
-         desc = "survivor \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "survivor 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.survivor.used",
-         desc = "survivor \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "survivor 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.survivor.committed",
-         desc = "survivor \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "survivor 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.survivor.usedRate",
-         desc = "survivor \u4f7f\u7528\u7387 %"
+         desc = "survivor 使用率 %"
       )
       private Long usedRate = 0L;
 
@@ -308,27 +308,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMEdenInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.eden.init",
-         desc = "eden \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "eden 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.eden.max",
-         desc = "eden \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "eden 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.eden.used",
-         desc = "eden \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "eden 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.eden.committed",
-         desc = "eden \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "eden 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.eden.usedRate",
-         desc = "eden \u4f7f\u7528\u7387 %"
+         desc = "eden 使用率 %"
       )
       private Long usedRate = 0L;
 
@@ -339,27 +339,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMCodeCacheInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.codeCache.init",
-         desc = "codeCache \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "codeCache 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.codeCache.max",
-         desc = "codeCache \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "codeCache 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.codeCache.used",
-         desc = "codeCache \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "codeCache 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.codeCache.committed",
-         desc = "codeCache \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "codeCache 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.codeCache.usedRate",
-         desc = "codeCache \u4f7f\u7528\u7387 %"
+         desc = "codeCache 使用率 %"
       )
       private Long usedRate = 0L;
 
@@ -370,27 +370,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMMetaspaceInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.metaspace.init",
-         desc = "metaspace \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "metaspace 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.metaspace.max",
-         desc = "metaspace \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "metaspace 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.metaspace.used",
-         desc = "metaspace \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "metaspace 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.metaspace.committed",
-         desc = "metaspace \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "metaspace 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.metaspace.usedRate",
-         desc = "metaspace \u4f7f\u7528\u7387 %"
+         desc = "metaspace 使用率 %"
       )
       private Long usedRate = 0L;
 
@@ -401,27 +401,27 @@ public class MemoryCollectTask extends AbstractCollectTask {
    private static class JVMCompressedClassSpaceInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.compressed.class.space.init",
-         desc = "Compressed Class Space \u521d\u59cb\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "Compressed Class Space 初始内存大小(M)"
       )
       private Long init = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.compressed.class.space.max",
-         desc = "Compressed Class Space \u6700\u5927\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "Compressed Class Space 最大内存大小(M)"
       )
       private Long max = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.compressed.class.space.used",
-         desc = "Compressed Class Space \u5df2\u4f7f\u7528\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "Compressed Class Space 已使用内存大小(M)"
       )
       private Long used = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.compressed.class.space.committed",
-         desc = "Compressed Class Space \u5df2\u7533\u8bf7\u5185\u5b58\u5927\u5c0f(M)"
+         desc = "Compressed Class Space 已申请内存大小(M)"
       )
       private Long committed = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.memory.jvm.gen.compressed.class.space.usedRate",
-         desc = "Compressed Class Space \u4f7f\u7528\u7387 %"
+         desc = "Compressed Class Space 使用率 %"
       )
       private Long usedRate = 0L;
 

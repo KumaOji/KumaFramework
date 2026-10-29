@@ -4,10 +4,10 @@ import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.boot.data.jpa.fenix.bean.SqlInfo;
 
 public final class SqlInfoPrinter {
-   private static final String PRINT_START = "------------------------------------------------------------ Fenix \u751f\u6210\u7684 SQL \u4fe1\u606f ---------------------------------------------------------";
+   private static final String PRINT_START = "------------------------------------------------------------ Fenix 生成的 SQL 信息 ---------------------------------------------------------";
    private static final String PRINT_END = "-------------------------------------------------------------------------------------------------------------------------------------------";
    private static final String LINE_BREAK = "\n";
-   private StringBuilder builder = (new StringBuilder("\n")).append("------------------------------------------------------------ Fenix \u751f\u6210\u7684 SQL \u4fe1\u606f ---------------------------------------------------------").append("\n");
+   private StringBuilder builder = (new StringBuilder("\n")).append("------------------------------------------------------------ Fenix 生成的 SQL 信息 ---------------------------------------------------------").append("\n");
 
    public SqlInfoPrinter() {
    }

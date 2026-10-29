@@ -64,8 +64,8 @@ public class UnCatchExceptionCollectTask extends AbstractCollectTask {
          try {
             if (e != null) {
                this.unCatchExceptionCheckTask.lastException = e;
-               AbstractCollectTask.notifyMessage(WarnTypeEnum.ERROR, "\u672a\u6355\u83b7\u9519\u8bef", ExceptionUtils.trace2String(e));
-               LogUtils.error(e, "\u672a\u6355\u83b7\u9519\u8bef", new Object[0]);
+               AbstractCollectTask.notifyMessage(WarnTypeEnum.ERROR, "未捕获错误", ExceptionUtils.trace2String(e));
+               LogUtils.error(e, "未捕获错误", new Object[0]);
             }
          } catch (Exception var4) {
             if (LogUtils.isErrorEnabled()) {
@@ -83,7 +83,7 @@ public class UnCatchExceptionCollectTask extends AbstractCollectTask {
    private static class UnCatchInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.unCatchException.trace",
-         desc = "\u672a\u6355\u83b7\u9519\u8bef\u5806\u6808"
+         desc = "未捕获错误堆栈"
       )
       private String trace = "";
 

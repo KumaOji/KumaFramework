@@ -68,7 +68,7 @@ public final class CommonUtils {
     /**
      * 正则表达式：验证汉字
      */
-    public static final String REGEX_CHINESE = "^[\u4e00-\u9fa5],*$";
+    public static final String REGEX_CHINESE = "^[一-龥],*$";
 
     /**
      * 正则表达式：验证身份证
@@ -117,7 +117,7 @@ public final class CommonUtils {
             Pattern.compile(
                     "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n"
                             + "|\r"
-                            + "|\t|[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]");
+                            + "|\t|[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[☀-⟿]");
 
     /**
      * 判断是否为数字

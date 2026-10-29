@@ -29,7 +29,7 @@ public class DubboMetricsBeanPostProcessor implements BeanPostProcessor, Applica
          Object ref = serviceBean.getRef();
          String var10000 = Metrics.getApplicationName(applicationContext);
          String key = "p_" + var10000 + "_" + ref.getClass().getSimpleName();
-         LogUtils.info("\u589e\u52a0dubbo service\u9ed8\u8ba4\u76d1\u63a7:{}", new Object[]{key});
+         LogUtils.info("增加dubbo service默认监控:{}", new Object[]{key});
          serviceBean.setRef(Proxy.getProxy(ref, new MetricsMethodInterceptor(key)));
          return bean;
       } else if (bean instanceof ReferenceBean) {
@@ -44,7 +44,7 @@ public class DubboMetricsBeanPostProcessor implements BeanPostProcessor, Applica
                   String name = ((ReferenceBean)bean).getInterfaceClass().getSimpleName();
                   String var10000 = Metrics.getApplicationName(DubboMetricsBeanPostProcessor.applicationContext);
                   String key = "c_" + var10000 + "_" + name;
-                  LogUtils.info("\u589e\u52a0dubbo reference\u9ed8\u8ba4\u76d1\u63a7:{}", new Object[]{key});
+                  LogUtils.info("增加dubbo reference默认监控:{}", new Object[]{key});
                   return Proxy.getProxy(result, new MetricsMethodInterceptor(key));
                } else {
                   return result;

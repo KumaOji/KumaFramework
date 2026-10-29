@@ -1,12 +1,12 @@
 package com.kuma.boot.pinyin.constant.enums;
 
 public enum PinyinToneNumEnum {
-   ONE(1, "\u9634\u5e73"),
-   TWO(2, "\u9633\u5e73"),
-   THREE(3, "\u4e0a\u58f0"),
-   FOUR(4, "\u53bb\u58f0"),
-   FIVE(5, "\u8f7b\u58f0"),
-   UN_KNOWN(-1, "\u672a\u77e5");
+   ONE(1, "阴平"),
+   TWO(2, "阳平"),
+   THREE(3, "上声"),
+   FOUR(4, "去声"),
+   FIVE(5, "轻声"),
+   UN_KNOWN(-1, "未知");
 
    private final int num;
    private final String desc;

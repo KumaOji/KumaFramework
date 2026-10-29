@@ -68,7 +68,7 @@ public class ElkAutoConfiguration implements InitializingBean {
 
          return appender;
       } else {
-         throw new BaseException("\u672a\u8bbe\u7f6eelk\u5730\u5740");
+         throw new BaseException("未设置elk地址");
       }
    }
 
@@ -90,7 +90,7 @@ public class ElkAutoConfiguration implements InitializingBean {
       }
 
       if (StrUtil.isBlank(appName)) {
-         throw new BaseException("\u7f3a\u5c11appName\u914d\u7f6e");
+         throw new BaseException("缺少appName配置");
       } else {
          encoder.setCustomFields("{\"appname\":\"" + appName + "\",\"appindex\":\"applog\"}");
          encoder.setEncoding("UTF-8");

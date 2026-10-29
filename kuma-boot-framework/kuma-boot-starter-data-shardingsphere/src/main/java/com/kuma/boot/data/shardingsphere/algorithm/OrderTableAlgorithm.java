@@ -35,7 +35,7 @@ public class OrderTableAlgorithm implements StandardShardingAlgorithm<LocalDateT
          }
 
          final String finalTableName = tableName;
-         return (String)collection.stream().filter((str) -> str.equals(finalTableName)).findFirst().orElseThrow(() -> new RuntimeException(finalTableName + "\u5206\u8868\u4e0d\u5b58\u5728"));
+         return (String)collection.stream().filter((str) -> str.equals(finalTableName)).findFirst().orElseThrow(() -> new RuntimeException(finalTableName + "分表不存在"));
       }
    }
 
@@ -57,7 +57,7 @@ public class OrderTableAlgorithm implements StandardShardingAlgorithm<LocalDateT
       }
 
       if (upperEndpoint.isAfter(maxBaseDate)) {
-         throw new RuntimeException("\u7ed3\u675f\u65f6\u95f4\u4e0d\u5728\u5f53\u524d\u65f6\u95f4\u5185");
+         throw new RuntimeException("结束时间不在当前时间内");
       } else {
          while(lowerEndpoint.isBefore(upperEndpoint)) {
             String tableName = logicTableName.concat("_").concat(lowerEndpoint.format(monthFormatter));

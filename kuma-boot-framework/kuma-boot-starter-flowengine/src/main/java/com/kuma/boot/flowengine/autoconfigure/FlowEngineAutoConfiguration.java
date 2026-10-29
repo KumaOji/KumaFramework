@@ -52,7 +52,7 @@ public class FlowEngineAutoConfiguration implements InitializingBean {
 
    @Bean
    public FlowContext standardFlowContext(FlowEngineProperties properties) {
-      Assert.hasText(properties.getFlowConfLocation(), "\u6d41\u7a0b\u63cf\u8ff0\u914d\u7f6e\u6587\u4ef6\u8def\u5f84\u4e0d\u80fd\u4e3a\u7a7a");
+      Assert.hasText(properties.getFlowConfLocation(), "流程描述配置文件路径不能为空");
       return new StandardFlowContext(properties.getFlowConfLocation(), properties.getRetryable());
    }
 

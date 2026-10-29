@@ -39,7 +39,7 @@ public class WorkerStation {
          WorkerStationManager.INSTANCE.registerThreadPool(this.name, threadPool);
          this.workerLine.handleEventsWith(new EventHandler[]{new WorkerLineHandler(threadPool)});
          this.workerLine.start();
-         LOGGER.info("\u3010WorkerStation\u3011 \"{}\" start to work", this.name);
+         LOGGER.info("【WorkerStation】 \"{}\" start to work", this.name);
       }
    }
 
@@ -67,6 +67,6 @@ public class WorkerStation {
 
    public void stop() {
       this.workerLine.halt();
-      LOGGER.info("\u3010WorkerStation\u3011 \"{}\" has stopped", this.name);
+      LOGGER.info("【WorkerStation】 \"{}\" has stopped", this.name);
    }
 }

@@ -20,10 +20,10 @@ public class CustomThreadFactory implements ThreadFactory {
       if (Objects.isNull(uncaughtExceptionHandler)) {
          t.setUncaughtExceptionHandler((t1, e) -> {
             e.printStackTrace();
-            LogUtils.error("\u7ebf\u7a0b\u5de5\u5382\u8bbe\u7f6eexceptionHandler\u6355\u83b7\u7ebf\u7a0b\u6267\u884c\u5f02\u5e38:{}", new Object[]{e.getMessage()});
+            LogUtils.error("线程工厂设置exceptionHandler捕获线程执行异常:{}", new Object[]{e.getMessage()});
             ThreadPoolExecutorErrorEvent threadPoolExecutorErrorEvent = new ThreadPoolExecutorErrorEvent(this, t1, e);
             ZlfDisruptorSpringUtils.getApplicationContext().publishEvent(threadPoolExecutorErrorEvent);
-            LogUtils.info("====CustomFactory.\u6355\u83b7\u5f02\u5e38\u53d1\u9001springBoot\u4e8b\u4ef6\u5b8c\u6210======", new Object[0]);
+            LogUtils.info("====CustomFactory.捕获异常发送springBoot事件完成======", new Object[0]);
          });
       } else {
          t.setUncaughtExceptionHandler(uncaughtExceptionHandler);

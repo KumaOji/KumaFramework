@@ -1,12 +1,12 @@
 package com.kuma.boot.sensitive.sensitiveword.constant.enums;
 
 public enum WordTypeEnum {
-   WORD("WORD", "\u654f\u611f\u8bcd"),
-   EMAIL("EMAIL", "\u90ae\u7bb1"),
-   URL("URL", "\u94fe\u63a5"),
-   NUM("NUM", "\u6570\u5b57"),
+   WORD("WORD", "敏感词"),
+   EMAIL("EMAIL", "邮箱"),
+   URL("URL", "链接"),
+   NUM("NUM", "数字"),
    IPV4("IPV4", "IPv4"),
-   DEFAULTS("DEFAULTS", "\u9ed8\u8ba4");
+   DEFAULTS("DEFAULTS", "默认");
 
    private final String code;
    private final String desc;

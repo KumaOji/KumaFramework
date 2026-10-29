@@ -18,7 +18,7 @@ public enum EventBusTypeEnum {
    public static String getBeanName(EventBusTypeEnum eventBusTypeEnum) {
       String className = (String)typeClass.get(eventBusTypeEnum);
       if (StrUtil.isEmpty(className)) {
-         throw new RuntimeException("\u672a\u627e\u5230\u5bf9\u5e94\u7684\u7c7b\u578b");
+         throw new RuntimeException("未找到对应的类型");
       } else {
          return className;
       }

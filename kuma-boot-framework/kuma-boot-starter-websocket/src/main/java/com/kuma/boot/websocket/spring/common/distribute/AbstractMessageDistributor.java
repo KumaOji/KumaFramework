@@ -24,7 +24,7 @@ public abstract class AbstractMessageDistributor implements MessageDistributor {
       }
 
       if (CollUtil.isEmpty(sessionKeys)) {
-         LogUtils.warn("\u53d1\u9001 websocket \u6d88\u606f\uff0c\u5374\u6ca1\u6709\u627e\u5230\u5bf9\u5e94 sessionKeys, messageDo: {}", new Object[]{messageDO});
+         LogUtils.warn("发送 websocket 消息，却没有找到对应 sessionKeys, messageDo: {}", new Object[]{messageDO});
       } else {
          String messageText = messageDO.getMessageText();
          Boolean onlyOneClientInSameKey = messageDO.getOnlyOneClientInSameKey();

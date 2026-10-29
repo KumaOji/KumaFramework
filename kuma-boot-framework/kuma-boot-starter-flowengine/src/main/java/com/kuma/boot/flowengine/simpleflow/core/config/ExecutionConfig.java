@@ -56,12 +56,12 @@ public class ExecutionConfig {
    public static ExecutionConfig parseFromConfig(Map<String, Object> config) {
       ExecutionConfig executionConfig = new ExecutionConfig();
       if (config == null) {
-         LogUtils.info("\u672a\u627e\u5230\u6267\u884c\u914d\u7f6e\uff0c\u4f7f\u7528\u9ed8\u8ba4\u914d\u7f6e", new Object[0]);
+         LogUtils.info("未找到执行配置，使用默认配置", new Object[0]);
          return executionConfig;
       } else {
          Map<String, Object> executionMap = (Map)config.get("execution");
          if (executionMap == null) {
-            LogUtils.info("\u672a\u627e\u5230execution\u914d\u7f6e\uff0c\u4f7f\u7528\u9ed8\u8ba4\u914d\u7f6e", new Object[0]);
+            LogUtils.info("未找到execution配置，使用默认配置", new Object[0]);
             return executionConfig;
          } else {
             Object defaultTimeoutObj = executionMap.get("default-timeout-ms");
@@ -89,7 +89,7 @@ public class ExecutionConfig {
                executionConfig.setMaxParallelism(((Number)maxParallelismObj).intValue());
             }
 
-            LogUtils.info("\u89e3\u6790\u6267\u884c\u914d\u7f6e: defaultTimeoutMs={}, defaultRetryCount={}, defaultRetryDelayMs={}, parallelEnabled={}, maxParallelism={}", new Object[]{executionConfig.getDefaultTimeoutMs(), executionConfig.getDefaultRetryCount(), executionConfig.getDefaultRetryDelayMs(), executionConfig.isParallelEnabled(), executionConfig.getMaxParallelism()});
+            LogUtils.info("解析执行配置: defaultTimeoutMs={}, defaultRetryCount={}, defaultRetryDelayMs={}, parallelEnabled={}, maxParallelism={}", new Object[]{executionConfig.getDefaultTimeoutMs(), executionConfig.getDefaultRetryCount(), executionConfig.getDefaultRetryDelayMs(), executionConfig.isParallelEnabled(), executionConfig.getMaxParallelism()});
             return executionConfig;
          }
       }

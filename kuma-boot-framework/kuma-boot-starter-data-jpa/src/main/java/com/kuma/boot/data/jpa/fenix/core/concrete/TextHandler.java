@@ -21,7 +21,7 @@ public class TextHandler implements FenixHandler {
 
          for(Node n : node.selectNodes("child::node()")) {
             if (!"Text".equals(n.getNodeTypeName())) {
-               throw new FenixException("\u3010Fenix \u5f02\u5e38\u63d0\u793a\u3011<text></text> \u6807\u7b7e\u4e2d\u5305\u542b\u4e86\u3010" + n.getName() + "\u3011\u7684 XML \u6807\u7b7e\uff0c\u53ea\u80fd\u662f\u6587\u672c\u5143\u7d20\uff0c\u8bf7\u68c0\u67e5\uff01");
+               throw new FenixException("【Fenix 异常提示】<text></text> 标签中包含了【" + n.getName() + "】的 XML 标签，只能是文本元素，请检查！");
             }
 
             FenixContext.buildPlainTextSqlInfo(sqlInfo, n.getText());

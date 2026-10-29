@@ -14,13 +14,13 @@ public class ShardingAlgorithmDB implements StandardShardingAlgorithm<LocalDateT
    }
 
    public String doSharding(Collection<String> availableTargetNames, PreciseShardingValue<LocalDateTime> shardingValue) {
-      LogUtils.info("[\u5206\u5e93\u7b97\u6cd5\u5f00\u59cb]", new Object[0]);
-      availableTargetNames.stream().forEach((item) -> LogUtils.info("[\u5b58\u5728\u7684\u5e93\u540d<{}>]", new Object[]{item}));
-      LogUtils.info("[\u8868\u540d<{}> \u5217\u540d<{}>]", new Object[]{shardingValue.getLogicTableName(), shardingValue.getColumnName()});
-      LogUtils.info("[\u5206\u5e93\u5217\u7684\u503c<{}>]", new Object[]{shardingValue.getValue()});
+      LogUtils.info("[分库算法开始]", new Object[0]);
+      availableTargetNames.stream().forEach((item) -> LogUtils.info("[存在的库名<{}>]", new Object[]{item}));
+      LogUtils.info("[表名<{}> 列名<{}>]", new Object[]{shardingValue.getLogicTableName(), shardingValue.getColumnName()});
+      LogUtils.info("[分库列的值<{}>]", new Object[]{shardingValue.getValue()});
 
       for(String each : availableTargetNames) {
-         LogUtils.info("[\u5206\u5e93\u5217\u7684\u503c<{}>]", new Object[]{shardingValue.getValue()});
+         LogUtils.info("[分库列的值<{}>]", new Object[]{shardingValue.getValue()});
          if (each.equals("db0")) {
             return "db0";
          }

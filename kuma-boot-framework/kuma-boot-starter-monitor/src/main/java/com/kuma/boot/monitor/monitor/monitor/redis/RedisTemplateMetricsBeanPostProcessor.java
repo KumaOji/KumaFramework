@@ -36,7 +36,7 @@ public class RedisTemplateMetricsBeanPostProcessor implements BeanPostProcessor,
       if (bean instanceof RedisTemplate redisTemplate) {
          RedisConnectionFactory redisConnectionFactory = redisTemplate.getConnectionFactory();
          String key = "redis_metrics_" + Metrics.getApplicationName(applicationContext);
-         LogUtils.info("\u589e\u52a0redisTemplate\u9ed8\u8ba4\u76d1\u63a7:{}", new Object[]{key});
+         LogUtils.info("增加redisTemplate默认监控:{}", new Object[]{key});
          RedisConnectionFactory proxy = (RedisConnectionFactory)Proxy.getProxy(redisConnectionFactory, new MethodInterceptor() {
             {
                Objects.requireNonNull(RedisTemplateMetricsBeanPostProcessor.this);

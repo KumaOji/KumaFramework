@@ -78,7 +78,7 @@ public interface CreateTimeShardingAlgorithm {
          }
 
       } catch (SQLException var14) {
-         throw new RuntimeException("\u5efa\u8868\u5931\u8d25");
+         throw new RuntimeException("建表失败");
       }
    }
 }

@@ -16,9 +16,9 @@ public class CanalApplicationRunner implements ApplicationRunner {
    public void run(ApplicationArguments applicationArguments) throws Exception {
       if (Objects.nonNull(this.canalClient)) {
          try {
-            LogUtils.info(" CanalClient \u6b63\u5728\u5c1d\u8bd5\u5f00\u542f canal \u5ba2\u6237\u7aef....", new Object[0]);
+            LogUtils.info(" CanalClient 正在尝试开启 canal 客户端....", new Object[0]);
             this.canalClient.start();
-            LogUtils.info(" CanalClient \u542f\u52a8 canal \u5ba2\u6237\u7aef\u6210\u529f....", new Object[0]);
+            LogUtils.info(" CanalClient 启动 canal 客户端成功....", new Object[0]);
          } catch (Exception e) {
             LogUtils.error(e);
          }

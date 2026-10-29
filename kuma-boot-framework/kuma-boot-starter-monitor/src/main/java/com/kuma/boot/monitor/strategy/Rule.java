@@ -63,7 +63,7 @@ public class Rule {
                   }
                }
             } catch (Exception exp) {
-               LogUtils.error("health", new Object[]{"check \u89c4\u5219\u68c0\u67e5\u51fa\u9519", exp});
+               LogUtils.error("health", new Object[]{"check 规则检查出错", exp});
             }
 
             return false;
@@ -102,7 +102,7 @@ public class Rule {
       public RulesAnalyzer() {
          PropertyCache propertyCache = (PropertyCache)ContextUtils.getBean(PropertyCache.class, false);
          if (Objects.nonNull(propertyCache)) {
-            propertyCache.listenUpdateCache("RulesAnalyzer \u52a8\u6001\u89c4\u5219\u8ba2\u9605", (map) -> {
+            propertyCache.listenUpdateCache("RulesAnalyzer 动态规则订阅", (map) -> {
                for(Map.Entry<String, Object> e : map.entrySet()) {
                   String key = (String)e.getKey();
                   if (StringUtils.startsWithIgnoreCase(key, "kmc.monitor.strategy.")) {
@@ -152,13 +152,13 @@ public class Rule {
                for(RuleInfo ruleInfo : rules) {
                   boolean isWarn = ruleInfo.check(item.getValue());
                   if (isWarn) {
-                     item.setWarn("\u62a5\u8b66");
+                     item.setWarn("报警");
                      item.setRule(ruleInfo);
                      if (ruleInfo.getHitCallBack() != null) {
                         try {
                            ruleInfo.hitCallBack.run(item.getValue());
                         } catch (Exception exp) {
-                           LogUtils.error("health", new Object[]{"analyse\u5206\u6790\u65f6\u6267\u884c\u62a5\u8b66\u56de\u8c03\u89c4\u5219\u51fa\u9519", exp});
+                           LogUtils.error("health", new Object[]{"analyse分析时执行报警回调规则出错", exp});
                         }
                      }
                   }
@@ -172,10 +172,10 @@ public class Rule {
    }
 
    public static enum RuleType {
-      more(">", "\u5927\u4e8e"),
-      less("<", "\u5c0f\u4e8e"),
-      equal("=", "\u7b49\u4e8e"),
-      contain("%", "\u5305\u542b");
+      more(">", "大于"),
+      less("<", "小于"),
+      equal("=", "等于"),
+      contain("%", "包含");
 
       private final String desc;
       private final String tag;
@@ -222,7 +222,7 @@ public class Rule {
                }
             }
          } catch (Exception exp) {
-            LogUtils.error("health", new Object[]{"parser\u89c4\u5219\u89e3\u6790\u51fa\u9519", exp});
+            LogUtils.error("health", new Object[]{"parser规则解析出错", exp});
          }
 
          return result;

@@ -10,7 +10,7 @@ public class StandardFlowContext extends AbstractFlowContext {
 
    public StandardFlowContext(String location, boolean retryEnable) {
       if (StringUtils.isBlank(location)) {
-         throw new FlowException(String.format("location=%s\u4e0d\u80fd\u4e3a\u7a7a", location));
+         throw new FlowException(String.format("location=%s不能为空", location));
       } else {
          this.location = location;
          this.retryEnable = retryEnable;
@@ -69,11 +69,11 @@ public class StandardFlowContext extends AbstractFlowContext {
    public void execute(String flowName, String activeNode, int version, Object target, Map<String, Object> attachment) {
       if (this.retryEnable) {
          if (null == attachment) {
-            throw new FlowException("\u91cd\u8bd5\u542f\u7528\u65f6,\u5fc5\u987b\u8981\u9644\u4ef6");
+            throw new FlowException("重试启用时,必须要附件");
          }
 
          if (null == attachment.get("orderId")) {
-            throw new FlowException("\u91cd\u8bd5\u542f\u7528\u65f6,\u9644\u4ef6\u5fc5\u987b\u6709orderId,\u8bf7attachment.put(FlowContext.ORDER_ID,orderId)");
+            throw new FlowException("重试启用时,附件必须有orderId,请attachment.put(FlowContext.ORDER_ID,orderId)");
          }
 
          attachment.put("retryEnable", true);

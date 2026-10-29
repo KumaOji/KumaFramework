@@ -22,7 +22,7 @@ public final class FenixXmlBuilder {
 
    static SqlInfo getXmlSqlInfo(String fullFenixId, Object context) {
       if (!fullFenixId.contains(".")) {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011fullFenixId \u53c2\u6570\u7684\u503c\u5fc5\u987b\u662f XML \u6587\u4ef6\u4e2d\u7684 namespace + '.' + fenixId \u8282\u70b9\u7684\u503c\uff0c\u5982:\u3010student.queryStudentById\u3011\u3002\u5176\u4e2d student \u4e3a namespace, queryStudentById \u4e3a XML \u6587\u4ef6\u4e2d fenixId\u3002");
+         throw new FenixException("【Fenix 异常】fullFenixId 参数的值必须是 XML 文件中的 namespace + '.' + fenixId 节点的值，如:【student.queryStudentById】。其中 student 为 namespace, queryStudentById 为 XML 文件中 fenixId。");
       } else {
          int dotIndex = fullFenixId.lastIndexOf(".");
          return getXmlSqlInfo(fullFenixId.substring(0, dotIndex), fullFenixId.substring(dotIndex + 1), context);
@@ -33,7 +33,7 @@ public final class FenixXmlBuilder {
       if (!StringHelper.isBlank(namespace) && !StringHelper.isBlank(fenixId)) {
          Node fenixNode = XmlNodeHelper.getNodeBySpaceAndId(namespace, fenixId);
          if (fenixNode == null) {
-            throw new NodeNotFoundException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u672a\u627e\u5230 namespace \u4e3a:\u3010{}\u3011, fenixId \u4e3a:\u3010{}\u3011\u7684 XML \u8282\u70b9!", namespace, fenixId));
+            throw new NodeNotFoundException(StringHelper.format("【Fenix 异常】未找到 namespace 为:【{}】, fenixId 为:【{}】的 XML 节点!", namespace, fenixId));
          } else {
             SqlInfo sqlInfo = buildNewSqlInfo(namespace, fenixNode, context);
             if (fenixConfigManager.getFenixConfig().isPrintSqlInfo()) {
@@ -43,7 +43,7 @@ public final class FenixXmlBuilder {
             return sqlInfo;
          }
       } else {
-         throw new FenixException("\u3010Fenix \u5f02\u5e38\u3011\u8bf7\u8f93\u5165\u6709\u6548\u7684 namespace \u6216\u8005 fenixId \u7684\u503c\uff0c\u4e24\u8005\u4e4b\u95f4\u7528\u70b9\u53f7('.')\u9694\u5f00!");
+         throw new FenixException("【Fenix 异常】请输入有效的 namespace 或者 fenixId 的值，两者之间用点号('.')隔开!");
       }
    }
 

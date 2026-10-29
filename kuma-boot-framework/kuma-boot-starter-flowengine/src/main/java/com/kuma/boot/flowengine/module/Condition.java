@@ -55,7 +55,7 @@ public class Condition extends AbstractNode {
       if (currentFlowNode instanceof StartNode) {
          Iterator<Transition> ts = this.getTransitions().values().iterator();
          if (!ts.hasNext()) {
-            throw new FlowException("\u6d41\u7a0b\u5b9a\u4e49Flow={},Version={}\u5f00\u59cb\u8282\u70b9\u6ca1\u6709\u914d\u7f6e\u6b63\u5e38\u7684Transition\u6d41\u8f6c...");
+            throw new FlowException("流程定义Flow={},Version={}开始节点没有配置正常的Transition流转...");
          } else {
             Transition transition = (Transition)ts.next();
             transition.execute(execution);
@@ -82,7 +82,7 @@ public class Condition extends AbstractNode {
                   execution.getEngine().getListenerDelegateContext().action(execution, transition.getEvent());
                   transition.execute(execution);
                } else {
-                  throw new FlowException(String.format("\u6c7d\u8d77\u6c7d\u7ed3\u51fa\u9020,\u4e0d\u80fd\u6210\u5230\u80a5\u7684\u6d41\u8f6c\u8282\u70b9Decisi=NULL FLOWE=%s.Versi0n=%s,.N0de=%s\u6d3b\u6cd5\u56db?\u7684\u6d41\u7ed3\u52a1\u4ef6,", flow.getName(), flow.getVersion(), execution.currentNodeExecution().currentNode()));
+                  throw new FlowException(String.format("汽起汽结出造,不能成到肥的流转节点Decisi=NULL FLOWE=%s.Versi0n=%s,.N0de=%s活法四?的流结务件,", flow.getName(), flow.getVersion(), execution.currentNodeExecution().currentNode()));
                }
             }
          }
@@ -98,7 +98,7 @@ public class Condition extends AbstractNode {
          if (!decision.equals("app.kit.flow.decision.skip")) {
             Transition transition = (Transition)this.transitions.get(decision);
             if (transition == null) {
-               throw new FlowException(String.format("\u5feb\u62e9\u6761\u4ef6\u51fa\u9519Decision=%s\u4e0d\u5b58\u5728\u5bf9\u5e94\u7684Iransition\u5b9a\u4e49,\u6d41\u7a0bFlow=%s,version=%s,Modelamne=%s", decision, execution.getCurrentFlow().getName(), execution.getCurrentFlow().getVersion(), this.activityNode.getName()));
+               throw new FlowException(String.format("快择条件出错Decision=%s不存在对应的Iransition定义,流程Flow=%s,version=%s,Modelamne=%s", decision, execution.getCurrentFlow().getName(), execution.getCurrentFlow().getVersion(), this.activityNode.getName()));
             }
 
             execution.getEngine().getListenerDelegateContext().action(execution, decision);

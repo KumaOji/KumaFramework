@@ -30,11 +30,11 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
          try {
             this.handleWithJson(session, payload);
          } catch (ErrorJsonMessageException ex) {
-            LogUtils.debug("\u6d88\u606f\u8f7d\u8377 [{}] \u56de\u9000\u4f7f\u7528 PlanTextMessageHandler\uff0c\u539f\u56e0\uff1a{}", new Object[]{payload, ex.getMessage()});
+            LogUtils.debug("消息载荷 [{}] 回退使用 PlanTextMessageHandler，原因：{}", new Object[]{payload, ex.getMessage()});
             if (this.planTextMessageHandler != null) {
                this.planTextMessageHandler.handle(session, payload);
             } else {
-               LogUtils.error("[handleTextMessage] \u666e\u901a\u6587\u672c\u6d88\u606f\uff08{}\uff09\u6ca1\u6709\u5bf9\u5e94\u7684\u6d88\u606f\u5904\u7406\u5668", new Object[]{payload});
+               LogUtils.error("[handleTextMessage] 普通文本消息（{}）没有对应的消息处理器", new Object[]{payload});
             }
          }
 
@@ -47,20 +47,20 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
       try {
          jsonNode = MAPPER.readTree(payload);
       } catch (JacksonException var11) {
-         throw new ErrorJsonMessageException("json \u89e3\u6790\u5f02\u5e38");
+         throw new ErrorJsonMessageException("json 解析异常");
       }
 
       if (!jsonNode.isObject()) {
-         throw new ErrorJsonMessageException("json \u683c\u5f0f\u5f02\u5e38\uff01\u975e object \u7c7b\u578b\uff01");
+         throw new ErrorJsonMessageException("json 格式异常！非 object 类型！");
       } else {
          JsonNode typeNode = jsonNode.get("type");
          String messageType = typeNode.asString();
          if (messageType == null) {
-            throw new ErrorJsonMessageException("json \u65e0 type \u5c5e\u6027");
+            throw new ErrorJsonMessageException("json 无 type 属性");
          } else {
             JsonMessageHandler<JsonWebSocketMessage> jsonMessageHandler = JsonMessageHandlerHolder.getHandler(messageType);
             if (jsonMessageHandler == null) {
-               LogUtils.error("[handleTextMessage] \u6d88\u606f\u7c7b\u578b\uff08{}\uff09\u4e0d\u5b58\u5728\u5bf9\u5e94\u7684\u6d88\u606f\u5904\u7406\u5668", new Object[]{messageType});
+               LogUtils.error("[handleTextMessage] 消息类型（{}）不存在对应的消息处理器", new Object[]{messageType});
             } else {
                Class<? extends JsonWebSocketMessage> messageClass = jsonMessageHandler.getMessageClass();
 
@@ -68,7 +68,7 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
                try {
                   websocketMessageJson = (JsonWebSocketMessage)MAPPER.treeToValue(jsonNode, messageClass);
                } catch (JacksonException var10) {
-                  throw new ErrorJsonMessageException("\u6d88\u606f\u5e8f\u5217\u5316\u5f02\u5e38\uff0cclass " + String.valueOf(messageClass));
+                  throw new ErrorJsonMessageException("消息序列化异常，class " + String.valueOf(messageClass));
                }
 
                jsonMessageHandler.handle(session, websocketMessageJson);

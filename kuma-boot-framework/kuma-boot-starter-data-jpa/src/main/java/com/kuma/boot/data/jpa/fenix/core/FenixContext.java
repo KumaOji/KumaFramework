@@ -36,7 +36,7 @@ public final class FenixContext {
    static void buildSqlInfo(BuildSource source, String tag) {
       TagHandler handler = (TagHandler)FenixConfig.getTagHandlerMap().get(tag);
       if (handler == null) {
-         throw new NodeNotFoundException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u672a\u627e\u5230\u8be5\u3010<{}>\u3011\u6807\u7b7e\u5bf9\u5e94\u7684\u5904\u7406\u5668.", tag));
+         throw new NodeNotFoundException(StringHelper.format("【Fenix 异常】未找到该【<{}>】标签对应的处理器.", tag));
       } else {
          source.setPrefix(handler.getPrefix()).setSymbol(handler.getSymbol());
          FenixHandlerFactory handlerFactory = handler.getHandlerFactory();
@@ -46,7 +46,7 @@ public final class FenixContext {
             try {
                ((FenixHandler)handler.getHandlerCls().getDeclaredConstructor().newInstance()).buildSqlInfo(source);
             } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
-               throw new FenixException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u8bbf\u95ee\u6216\u5b9e\u4f8b\u5316\u3010{}\u3011class \u51fa\u9519!", handler.getHandlerCls().getName()), e);
+               throw new FenixException(StringHelper.format("【Fenix 异常】访问或实例化【{}】class 出错!", handler.getHandlerCls().getName()), e);
             }
          }
       }

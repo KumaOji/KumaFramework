@@ -61,9 +61,9 @@ public class RedisIdGenerator implements DisposableBean, CommandLineRunner {
       }
 
       if (this.workerId == -1) {
-         throw new RuntimeException(String.format("\u5df2\u5c1d\u8bd5\u751f\u6210%d\u4e2aID\u751f\u6210\u5668\u7f16\u53f7, \u65e0\u6cd5\u83b7\u53d6\u5230\u53ef\u7528\u7f16\u53f7", 65536));
+         throw new RuntimeException(String.format("已尝试生成%d个ID生成器编号, 无法获取到可用编号", 65536));
       } else {
-         LogUtils.info("\u5f53\u524dID\u751f\u6210\u5668\u7f16\u53f7: " + this.workerId, new Object[0]);
+         LogUtils.info("当前ID生成器编号: " + this.workerId, new Object[0]);
          ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, ThreadFactoryCreator.create("kmc-idgenerator-scheduled-task"));
          scheduledThreadPoolExecutor.scheduleWithFixedDelay(this.resetExpire, 1800L, 1800L, TimeUnit.SECONDS);
       }
@@ -85,7 +85,7 @@ public class RedisIdGenerator implements DisposableBean, CommandLineRunner {
                }
             }
          } catch (Exception e) {
-            LogUtils.error("\u5220\u9664\u5f53\u524dID\u751f\u6210\u5668\u7f16\u53f7\u5f02\u5e38", new Object[]{e});
+            LogUtils.error("删除当前ID生成器编号异常", new Object[]{e});
          }
       }
 

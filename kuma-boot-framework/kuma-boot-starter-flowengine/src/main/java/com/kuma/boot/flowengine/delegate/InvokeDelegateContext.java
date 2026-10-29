@@ -41,7 +41,7 @@ public class InvokeDelegateContext extends AbstractInvokeDelegate implements Inv
    public void proceed(Flow.Key flowKey, String nodeName, String target) {
       if (StringUtils.isNotBlank(target)) {
          if (Object.class.getName().equals(target)) {
-            throw new FlowException("targetClass\u4e3aObject\u7c7b\u578b,\u8fd8\u641e\u4e2a\u55b5!");
+            throw new FlowException("targetClass为Object类型,还搞个喵!");
          }
 
          Map<Key, InvokeDelegate> invokeHolder = (Map)this.invokeDelegateArrayHolder.get(flowKey);
@@ -55,16 +55,16 @@ public class InvokeDelegateContext extends AbstractInvokeDelegate implements Inv
             Map<String, Object> targets = this.applicationContext.getBeansOfType(targetType);
             Iterator<Map.Entry<String, Object>> targetsIterator = targets.entrySet().iterator();
             if (!targetsIterator.hasNext()) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49flow=%s,,version=%s\u5904\u7406\u5668\u7c7b\u578b\u5206\u6790\u5931\u8d25,\u7c7b\u578b\u4e3atargetType=%s\u7684\u5904\u7406\u5668\u4e0d\u5b58\u5728\u76f8\u5e94\u7684spring bean\u5b9a\u4e49", flowKey.getFlowName(), flowKey.getVersion(), targetType));
+               throw new FlowException(String.format("流程定义flow=%s,,version=%s处理器类型分析失败,类型为targetType=%s的处理器不存在相应的spring bean定义", flowKey.getFlowName(), flowKey.getVersion(), targetType));
             }
 
             if (targets.size() != 1) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s\u5904\u7406\u5668\u7c7b\u578b\u5206\u6790\u5931\u8d25,\u7c7b\u578b\u4e3atargetType=%s\u7684\u5904\u7406\u5668\u5b9a\u4e49\u5b58\u5728\u591a\u4e2a\u5b9e\u73b0\u7248\u672c.beans=%s", flowKey.getFlowName(), flowKey.getVersion(), targetType, targets));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s处理器类型分析失败,类型为targetType=%s的处理器定义存在多个实现版本.beans=%s", flowKey.getFlowName(), flowKey.getVersion(), targetType, targets));
             }
 
             Object targetInstance = ((Map.Entry)targetsIterator.next()).getValue();
             if (AopUtils.isAopProxy(targetInstance)) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,,version=%s\u5904\u7406\u5668\u7c7b\u578b\u5206\u6790\u5931\u8d25,\u7c7b\u578b\u4e3atargetType=%s\u7684\u5904\u7406\u5668\u662f\u4e00\u4e2a\u52a8\u6001\u4ee3\u7406\u5bf9\u8c61->(%s)", flowKey.getFlowName(), flowKey.getVersion(), targetType, targetInstance));
+               throw new FlowException(String.format("流程定义Flow=%s,,version=%s处理器类型分析失败,类型为targetType=%s的处理器是一个动态代理对象->(%s)", flowKey.getFlowName(), flowKey.getVersion(), targetType, targetInstance));
             }
 
             Class<?> supperType = targetType;
@@ -90,7 +90,7 @@ public class InvokeDelegateContext extends AbstractInvokeDelegate implements Inv
                throw (FlowException)e;
             }
 
-            throw new FlowException(String.format("Flow=%s,Version=%s\u5904\u7406\u5668\u7c7b\u578b\u5206\u6790\u5931\u8d25,targetClasses=%s", flowKey.getFlowName(), flowKey.getVersion(), target), e);
+            throw new FlowException(String.format("Flow=%s,Version=%s处理器类型分析失败,targetClasses=%s", flowKey.getFlowName(), flowKey.getVersion(), target), e);
          }
       }
 

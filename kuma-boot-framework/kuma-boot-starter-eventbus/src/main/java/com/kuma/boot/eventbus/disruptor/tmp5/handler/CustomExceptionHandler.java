@@ -27,7 +27,7 @@ public class CustomExceptionHandler implements ExceptionHandler<DisruptorEvent> 
       }
 
       this.applicationContext.publishEvent(exceptionHandlerEvent);
-      LogUtils.info("======CustomExceptionHandler\u53d1\u9001exceptionHandlerEvent:{}\u5b8c\u6210======", new Object[]{JSON.toJSONString(exceptionHandlerEvent)});
+      LogUtils.info("======CustomExceptionHandler发送exceptionHandlerEvent:{}完成======", new Object[]{JSON.toJSONString(exceptionHandlerEvent)});
    }
 
    public void handleOnStartException(Throwable ex) {

@@ -243,7 +243,7 @@ public class MinioOssClient implements StandardOssClient {
             ossInfo.setLength(Long.valueOf((String)Objects.requireNonNull(headers.get("Content-Length"))));
             ossInfo.setUrl(this.minioOssConfig.getEndpoint() + "/" + bucketName + key);
          } catch (Exception e) {
-            LogUtils.error("\u83b7\u53d6{}\u6587\u4ef6\u5c5e\u6027\u5931\u8d25", new Object[]{key, e});
+            LogUtils.error("获取{}文件属性失败", new Object[]{key, e});
          }
       } else {
          ossInfo = new DirectoryOssInfo();

@@ -77,52 +77,52 @@ public class RocketMQCollectTask extends AbstractCollectTask {
    private static class RocketMQInfo implements CollectInfo {
       @FieldReport(
          name = "rocketmq.consumer.hook.error",
-         desc = "Consumer\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "Consumer拦截上一次每秒出错次数"
       )
       private Long consumerHookError;
       @FieldReport(
          name = "rocketmq.consumer.hook.success",
-         desc = "Consumer\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "Consumer拦截上一次每秒成功次数"
       )
       private Long consumerHookSuccess;
       @FieldReport(
          name = "rocketmq.consumer.hook.current",
-         desc = "Consumer\u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "Consumer拦截当前执行任务数"
       )
       private Long consumerHookCurrent;
       @FieldReport(
          name = "rocketmq.consumer.hook.list.detail",
-         desc = "Consumer\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "Consumer拦截历史最大耗时任务列表"
       )
       private String consumerHookList;
       @FieldReport(
          name = "rocketmq.consumer.hook.list.minute.detail",
-         desc = "Consumer\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "Consumer拦截历史最大耗时任务列表(每分钟)"
       )
       private String consumerHookListPerMinute;
       @FieldReport(
          name = "rocketmq.producer.hook.error",
-         desc = "Producer\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "Producer拦截上一次每秒出错次数"
       )
       private Long producerHookError;
       @FieldReport(
          name = "rocketmq.producer.hook.success",
-         desc = "Producer\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "Producer拦截上一次每秒成功次数"
       )
       private Long producerHookSuccess;
       @FieldReport(
          name = "rocketmq.producer.hook.current",
-         desc = "Producer\u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "Producer拦截当前执行任务数"
       )
       private Long producerHookCurrent;
       @FieldReport(
          name = "rocketmq.producer.hook.list.detail",
-         desc = "Producer\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "Producer拦截历史最大耗时任务列表"
       )
       private String producerHookList;
       @FieldReport(
          name = "rocketmq.producer.hook.list.minute.detail",
-         desc = "Producer\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "Producer拦截历史最大耗时任务列表(每分钟)"
       )
       private String producerHookListPerMinute;
 

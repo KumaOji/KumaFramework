@@ -20,8 +20,8 @@ public abstract class AbstractCanalClient implements CanalClient {
    protected final TransponderFactory factory;
 
    protected AbstractCanalClient(CanalProperties canalProperties) {
-      Objects.requireNonNull(canalProperties, "canalConfig \u4e0d\u80fd\u4e3a\u7a7a!");
-      Objects.requireNonNull(canalProperties, "transponderFactory \u4e0d\u80fd\u4e3a\u7a7a!");
+      Objects.requireNonNull(canalProperties, "canalConfig 不能为空!");
+      Objects.requireNonNull(canalProperties, "transponderFactory 不能为空!");
       this.canalProperties = canalProperties;
       this.factory = DefaultMessageTransponder::new;
    }
@@ -46,7 +46,7 @@ public abstract class AbstractCanalClient implements CanalClient {
          for(String s : instance.getZookeeperAddress()) {
             String[] entry = s.split(":");
             if (entry.length != 2) {
-               throw new CanalClientException("zookeeper \u5730\u5740\u683c\u5f0f\u4e0d\u6b63\u786e\uff0c\u5e94\u8be5\u4e3a ip:port....:" + s);
+               throw new CanalClientException("zookeeper 地址格式不正确，应该为 ip:port....:" + s);
             }
 
             addresses.add(new InetSocketAddress(entry[0], Integer.parseInt(entry[1])));
@@ -74,7 +74,7 @@ public abstract class AbstractCanalClient implements CanalClient {
       if ((instanceMap = config.getInstances()) != null && !instanceMap.isEmpty()) {
          return config.getInstances();
       } else {
-         throw new CanalClientException("\u65e0\u6cd5\u89e3\u6790 canal \u7684\u8fde\u63a5\u4fe1\u606f\uff0c\u8bf7\u8054\u7cfb\u5f00\u53d1\u4eba\u5458!");
+         throw new CanalClientException("无法解析 canal 的连接信息，请联系开发人员!");
       }
    }
 

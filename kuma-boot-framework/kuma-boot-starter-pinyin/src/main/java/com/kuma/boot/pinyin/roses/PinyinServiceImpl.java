@@ -26,25 +26,25 @@ public class PinyinServiceImpl implements PinYinApi {
    /** 初始化多音字中文字和拼音首字母大写的映射 */
    public void init() {
       // 百家姓多音字的汉语-首字母大写的映射
-      properties.put("\u533A", "O");
-      properties.put("\u665F", "C");
-      properties.put("\u4E50", "Y");
-      properties.put("\u5458", "Y");
-      properties.put("\u8D20", "Y");
-      properties.put("\u9ED1", "H");
-      properties.put("\u91CD", "C");
-      properties.put("\u4EC7", "Q");
-      properties.put("\u79D8", "B");
-      properties.put("\u51BC", "X");
-      properties.put("\u89E3", "X");
-      properties.put("\u6298", "S");
-      properties.put("\u5355", "S");
-      properties.put("\u6734", "P");
-      properties.put("\u7FDF", "Z");
-      properties.put("\u67E5", "Z");
-      properties.put("\u76D6", "G");
-      properties.put("\u4E07\u4FDF", "M I");
-      properties.put("\u5C09\u8FDF", "Y C");
+      properties.put("区", "O");
+      properties.put("晟", "C");
+      properties.put("乐", "Y");
+      properties.put("员", "Y");
+      properties.put("贠", "Y");
+      properties.put("黑", "H");
+      properties.put("重", "C");
+      properties.put("仇", "Q");
+      properties.put("秘", "B");
+      properties.put("冼", "X");
+      properties.put("解", "X");
+      properties.put("折", "S");
+      properties.put("单", "S");
+      properties.put("朴", "P");
+      properties.put("翟", "Z");
+      properties.put("查", "Z");
+      properties.put("盖", "G");
+      properties.put("万俟", "M I");
+      properties.put("尉迟", "Y C");
    }
 
    @Override

@@ -8,7 +8,7 @@ public abstract class AbstractEventHandler implements IEventHandler {
 
    public AbstractEventHandler(RowDataCustomParser rowDataCustomParser) {
       if (rowDataCustomParser == null) {
-         throw new RuntimeException("\u7f3a\u5c11\u884c\u6570\u636e\u89e3\u6790\u5668 !!!");
+         throw new RuntimeException("缺少行数据解析器 !!!");
       } else {
          this.rowDataCustomParser = rowDataCustomParser;
       }

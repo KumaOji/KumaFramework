@@ -46,11 +46,11 @@ public class AlarmWrapper {
    }
 
    public void sendMsg(String key, String content) {
-      this.sendMsg(new AlarmContent(key, (String)null, content, (List)null, " ip:{0} >>> key:{1} >>> \u5f02\u5e38\u6570:{2} >>> {3}"));
+      this.sendMsg(new AlarmContent(key, (String)null, content, (List)null, " ip:{0} >>> key:{1} >>> 异常数:{2} >>> {3}"));
    }
 
    public void sendMsg(String key, String title, String content) {
-      this.sendMsg(new AlarmContent(key, title, content, (List)null, " ip:{0} >>> key:{1} >>> \u5f02\u5e38\u6570:{2} >>> {3}"));
+      this.sendMsg(new AlarmContent(key, title, content, (List)null, " ip:{0} >>> key:{1} >>> 异常数:{2} >>> {3}"));
    }
 
    public void sendMsg(String key, String title, String content, String template) {
@@ -58,11 +58,11 @@ public class AlarmWrapper {
    }
 
    public void sendMsgToUser(String key, String content, List<String> users) {
-      this.sendMsg(new AlarmContent(key, (String)null, content, users, " ip:{0} >>> key:{1} >>> \u5f02\u5e38\u6570:{2} >>> {3}"));
+      this.sendMsg(new AlarmContent(key, (String)null, content, users, " ip:{0} >>> key:{1} >>> 异常数:{2} >>> {3}"));
    }
 
    public void sendMsgToUser(String key, String title, String content, List<String> users) {
-      this.sendMsg(new AlarmContent(key, title, content, users, " ip:{0} >>> key:{1} >>> \u5f02\u5e38\u6570:{2} >>> {3}"));
+      this.sendMsg(new AlarmContent(key, title, content, users, " ip:{0} >>> key:{1} >>> 异常数:{2} >>> {3}"));
    }
 
    public void sendMsgToUser(String key, String title, String content, String template, List<String> users) {
@@ -105,7 +105,7 @@ public class AlarmWrapper {
    }
 
    private static class AlarmContent {
-      static final String DEFAULT_CONTENT_TEMPLATE = " ip:{0} >>> key:{1} >>> \u5f02\u5e38\u6570:{2} >>> {3}";
+      static final String DEFAULT_CONTENT_TEMPLATE = " ip:{0} >>> key:{1} >>> 异常数:{2} >>> {3}";
       private static String LOCAL_IP = IpUtil.getLocalIp();
       private static String PREFIX;
       private String key;
@@ -120,7 +120,7 @@ public class AlarmWrapper {
          this.title = title;
          this.content = content;
          this.alarmUser = alarmUser;
-         this.template = (String)Optional.ofNullable(template).orElse(" ip:{0} >>> key:{1} >>> \u5f02\u5e38\u6570:{2} >>> {3}");
+         this.template = (String)Optional.ofNullable(template).orElse(" ip:{0} >>> key:{1} >>> 异常数:{2} >>> {3}");
       }
 
       public String getTitle() {
@@ -196,7 +196,7 @@ public class AlarmWrapper {
          try {
             PREFIX = "[" + ConfLoaderFactory.loader().getRegisterInfo().getAppName() + "]";
          } catch (Exception var1) {
-            PREFIX = "[\u62a5\u8b66]";
+            PREFIX = "[报警]";
          }
 
       }

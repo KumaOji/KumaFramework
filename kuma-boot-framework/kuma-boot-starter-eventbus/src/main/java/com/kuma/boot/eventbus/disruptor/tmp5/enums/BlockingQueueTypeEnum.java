@@ -53,8 +53,8 @@ public enum BlockingQueueTypeEnum {
       if (blockingQueue != null) {
          return blockingQueue;
       } else {
-         LogUtils.error("BlockingQueueTypeEnum.buildBq\u672a\u5339\u914d\u5230\u961f\u5217name:{}", new Object[]{name});
-         throw new RuntimeException("BlockingQueueTypeEnum.buildBq\u672a\u5339\u914d\u5230\u961f\u5217name:" + name);
+         LogUtils.error("BlockingQueueTypeEnum.buildBq未匹配到队列name:{}", new Object[]{name});
+         throw new RuntimeException("BlockingQueueTypeEnum.buildBq未匹配到队列name:" + name);
       }
    }
 

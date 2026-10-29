@@ -39,7 +39,7 @@ public class ZookeeperIdGenerator implements CommandLineRunner {
       boolean initFlag = holder.init();
       if (initFlag) {
          int workerId = holder.getWorkerId();
-         LogUtils.info("\u5f53\u524dID\u751f\u6210\u5668\u7f16\u53f7: " + workerId, new Object[0]);
+         LogUtils.info("当前ID生成器编号: " + workerId, new Object[0]);
       }
 
    }

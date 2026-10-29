@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum RetryRetreatTypeEnum {
-   BY_DOUBLE("byDouble", "\u6210\u500d") {
+   BY_DOUBLE("byDouble", "成倍") {
       public void retreatNextTime(FlowTrace flowTrace) {
          int timeUnit = flowTrace.getRetryMeta().getRetreatUnit();
          int skipUnit = timeUnit * (flowTrace.getRetryTimes() + 1);
          flowTrace.getRetryMeta().getRetreatTimeUnit().calUnitTime(flowTrace, skipUnit);
       }
    },
-   BY_FIXED("byFixed", "\u56fa\u5b9a") {
+   BY_FIXED("byFixed", "固定") {
       public void retreatNextTime(FlowTrace flowTrace) {
          flowTrace.getRetryMeta().getRetreatTimeUnit().calUnitTime(flowTrace, flowTrace.getRetryMeta().getRetreatUnit());
       }

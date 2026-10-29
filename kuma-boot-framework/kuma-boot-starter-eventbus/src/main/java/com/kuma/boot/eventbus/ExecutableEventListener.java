@@ -15,7 +15,7 @@ public abstract class ExecutableEventListener extends BaseEventListener<EventMod
       threadMode = ThreadMode.ASYNC
    )
    public void onMessage(EventModel<?> message) {
-      LogUtils.info("\u6536\u5230\u6d88\u606f\uff1a{}", new Object[]{message});
+      LogUtils.info("收到消息：{}", new Object[]{message});
       if (this.topic().equals(message.getTopic())) {
          this.handle(message);
       }

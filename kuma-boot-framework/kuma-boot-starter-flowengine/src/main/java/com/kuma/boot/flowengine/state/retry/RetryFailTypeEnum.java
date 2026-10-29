@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum RetryFailTypeEnum {
-   FAIL_RETREAT("failRetreat", "\u5931\u8d25\u540e\u9000\u907f\u8c03\u5ea6") {
+   FAIL_RETREAT("failRetreat", "失败后退避调度") {
       public String execute(Execution execution) {
          return execution.getFlowTrace().retryRetreat();
       }
@@ -13,7 +13,7 @@ public enum RetryFailTypeEnum {
       public void prepareNext(Execution execution) {
       }
    },
-   FAIL_FAST("failFast", "\u5931\u8d25\u540e\u7acb\u5373") {
+   FAIL_FAST("failFast", "失败后立即") {
       public String execute(Execution execution) {
          return execution.getFlowTrace().retryFast();
       }
@@ -21,7 +21,7 @@ public enum RetryFailTypeEnum {
       public void prepareNext(Execution execution) {
       }
    },
-   FAIL_BOMB("failBomb", "\u5931\u8d25\u540e\u91cd\u8bd5\u5230\u7206") {
+   FAIL_BOMB("failBomb", "失败后重试到爆") {
       public String execute(Execution execution) {
          return execution.getFlowTrace().retryBomb();
       }

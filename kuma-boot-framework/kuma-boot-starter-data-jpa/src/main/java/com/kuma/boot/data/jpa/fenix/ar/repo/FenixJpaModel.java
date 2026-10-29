@@ -9,7 +9,7 @@ public interface FenixJpaModel<T, ID, R extends FenixJpaRepository<T, ID>> exten
    default void validRepository(Object repository) {
       this.assertNotNullRepository(repository);
       if (!(repository instanceof FenixJpaRepository)) {
-         throw new FenixException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u83b7\u53d6\u5230\u7684 Spring Data JPA \u7684 Repository \u63a5\u53e3\u3010{}\u3011\u4e0d\u662f\u771f\u6b63\u7684 FenixJpaRepository \u63a5\u53e3\u3002", repository.getClass().getName()));
+         throw new FenixException(StringHelper.format("【Fenix 异常】获取到的 Spring Data JPA 的 Repository 接口【{}】不是真正的 FenixJpaRepository 接口。", repository.getClass().getName()));
       }
    }
 

@@ -17,7 +17,7 @@ public class SkywalkingCallbackController {
 
    @PostMapping({"/webhook"})
    public void webhook(@RequestBody List<SkywalkingAlarmMessage> skywalkingAlarmMessageList) {
-      LogUtils.info("\u6536\u5230\u6d88\u606f \u8be5\u6d88\u606f\u63a5\u6536\u5230\u540e\uff0c\u53ef\u4ee5\u63a8\u9001\u90ae\u7bb1\u6216\u8005\u77ed\u4fe1\uff1a" + String.valueOf(skywalkingAlarmMessageList), new Object[0]);
+      LogUtils.info("收到消息 该消息接收到后，可以推送邮箱或者短信：" + String.valueOf(skywalkingAlarmMessageList), new Object[0]);
       this.messageList.addAll(skywalkingAlarmMessageList);
    }
 

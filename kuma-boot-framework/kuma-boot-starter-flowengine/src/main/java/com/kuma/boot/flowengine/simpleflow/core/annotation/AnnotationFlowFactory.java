@@ -32,7 +32,7 @@ public class AnnotationFlowFactory {
 
    public static void setGlobalConfigurationManager(AnnotationFlowConfigurationManager configManager) {
       globalConfigManager = configManager;
-      LogUtils.info("\u8bbe\u7f6e\u5168\u5c40\u6ce8\u89e3\u6d41\u7a0b\u914d\u7f6e\u7ba1\u7406\u5668", new Object[0]);
+      LogUtils.info("设置全局注解流程配置管理器", new Object[0]);
    }
 
    public static AnnotationFlowConfigurationManager getGlobalConfigurationManager() {
@@ -41,7 +41,7 @@ public class AnnotationFlowFactory {
 
    public static FlowEngine getGlobalFlowEngine() {
       if (globalConfigManager == null) {
-         throw new IllegalStateException("\u5168\u5c40\u914d\u7f6e\u7ba1\u7406\u5668\u672a\u8bbe\u7f6e\uff0c\u8bf7\u5148\u8c03\u7528 setGlobalConfigurationManager");
+         throw new IllegalStateException("全局配置管理器未设置，请先调用 setGlobalConfigurationManager");
       } else {
          return globalConfigManager.getFlowEngine();
       }
@@ -49,7 +49,7 @@ public class AnnotationFlowFactory {
 
    public static FlowEngine initializeGlobal(String... basePackages) {
       if (globalConfigManager != null) {
-         LogUtils.warn("\u5168\u5c40\u914d\u7f6e\u7ba1\u7406\u5668\u5df2\u5b58\u5728\uff0c\u5c06\u9500\u6bc1\u73b0\u6709\u914d\u7f6e\u5e76\u91cd\u65b0\u521d\u59cb\u5316", new Object[0]);
+         LogUtils.warn("全局配置管理器已存在，将销毁现有配置并重新初始化", new Object[0]);
          globalConfigManager.destroy();
       }
 
@@ -59,7 +59,7 @@ public class AnnotationFlowFactory {
 
    public static FlowEngine initializeGlobal(ThreadPoolConfig threadPoolConfig, String... basePackages) {
       if (globalConfigManager != null) {
-         LogUtils.warn("\u5168\u5c40\u914d\u7f6e\u7ba1\u7406\u5668\u5df2\u5b58\u5728\uff0c\u5c06\u9500\u6bc1\u73b0\u6709\u914d\u7f6e\u5e76\u91cd\u65b0\u521d\u59cb\u5316", new Object[0]);
+         LogUtils.warn("全局配置管理器已存在，将销毁现有配置并重新初始化", new Object[0]);
          globalConfigManager.destroy();
       }
 
@@ -71,7 +71,7 @@ public class AnnotationFlowFactory {
       if (globalConfigManager != null) {
          globalConfigManager.destroy();
          globalConfigManager = null;
-         LogUtils.info("\u5168\u5c40\u6ce8\u89e3\u6d41\u7a0b\u914d\u7f6e\u5df2\u9500\u6bc1", new Object[0]);
+         LogUtils.info("全局注解流程配置已销毁", new Object[0]);
       }
 
    }

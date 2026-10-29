@@ -38,12 +38,12 @@ public class WarnProvider extends AbstractWarn implements AutoCloseable, Applica
       this.duplicateFilter = new DuplicateFilter(warnProperties);
       this.isClose = false;
       this.registerWarn();
-      this.monitorThreadPool.monitorSubmit("\u7cfb\u7edf\u4efb\u52a1: WarnProvider \u5b9e\u65f6\u62a5\u8b66\u4efb\u52a1", (Runnable)(() -> {
+      this.monitorThreadPool.monitorSubmit("系统任务: WarnProvider 实时报警任务", (Runnable)(() -> {
          while(!this.monitorThreadPool.monitorIsShutdown() && !this.isClose) {
             try {
                this.notifyRunning();
             } catch (Exception var4) {
-               LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"WarnProvider \u6d88\u606f\u5faa\u73af\u5f02\u5e38"});
+               LogUtils.warn("kuma-boot-starter-monitor", new Object[]{"WarnProvider 消息循环异常"});
             }
 
             try {
@@ -83,15 +83,15 @@ public class WarnProvider extends AbstractWarn implements AutoCloseable, Applica
       int msgCount = this.atomicInteger.getAndSet(0);
       if (msgCount > 0) {
          StringBuilder content = new StringBuilder();
-         content.append(String.format("\u6700\u65b0\u62a5\u8b66\u7d2f\u8ba1:%s\u6761,\u8be6\u60c5\u8bf7\u67e5\u770b\u65e5\u5fd7\u7cfb\u7edf,\u6700\u540e%s\u6761\u62a5\u8b66\u5185\u5bb9\u5982\u4e0b:\n", msgCount, this.warnProperties.getCacheCount()));
+         content.append(String.format("最新报警累计:%s条,详情请查看日志系统,最后%s条报警内容如下:\n", msgCount, this.warnProperties.getCacheCount()));
          msgs.forEach((c) -> {
             if (c.getWarnType().getLevel() > msg.getWarnType().getLevel()) {
                msg.setWarnType(c.getWarnType());
             }
 
-            content.append(String.format("[%s][%s]\u5185\u5bb9%s\n", c.getWarnType().getDescription(), c.getTitle(), c.getContent()));
+            content.append(String.format("[%s][%s]内容%s\n", c.getWarnType().getDescription(), c.getTitle(), c.getContent()));
          });
-         msg.setTitle(String.format("\u6536\u5230%s\u6761\u62a5\u8b66", msgCount));
+         msg.setTitle(String.format("收到%s条报警", msgCount));
          msg.setContent(content.toString());
          this.notifyNow(msg);
       }
@@ -162,7 +162,7 @@ public class WarnProvider extends AbstractWarn implements AutoCloseable, Applica
 
    public void run(ApplicationArguments args) {
       this.atomicChannel.getAndSet(true);
-      LogUtils.info("kuma-boot-starter-monitor", new Object[]{"\u5f00\u542f\u6d88\u606f\u901a\u9053"});
+      LogUtils.info("kuma-boot-starter-monitor", new Object[]{"开启消息通道"});
    }
 
    private static class DuplicateFilter {

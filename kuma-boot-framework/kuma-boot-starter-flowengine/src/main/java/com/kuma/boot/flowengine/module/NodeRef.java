@@ -13,7 +13,7 @@ public class NodeRef extends ActivityNode {
    public void execute(Execution execution) {
       if (this.flowNode == null) {
          Flow flow = execution.getCurrentFlow();
-         throw new FlowException(String.format("flow=%s,version=%s\u6d41\u7a0b\u5b9a\u4e49\u4e2d\u4e0d\u5b58\u5728transition\u7684\u5f15\u7528\u8282\u70b9ref=%s", flow.getName(), flow.getVersion(), this.getName()));
+         throw new FlowException(String.format("flow=%s,version=%s流程定义中不存在transition的引用节点ref=%s", flow.getName(), flow.getVersion(), this.getName()));
       } else {
          this.flowNode.execute(execution);
       }
@@ -36,7 +36,7 @@ public class NodeRef extends ActivityNode {
          }
 
          if (this.flowNode == null) {
-            throw new FlowException(String.format("flow=%s,version=%s,node=%s\u5f13\u7528\u4e0d\u5b58\u5728..", flow.getName(), flow.getVersion(), this.getName()));
+            throw new FlowException(String.format("flow=%s,version=%s,node=%s弓用不存在..", flow.getName(), flow.getVersion(), this.getName()));
          }
       }
 
@@ -52,7 +52,7 @@ public class NodeRef extends ActivityNode {
 
    public void setTriggerClass(String triggerClass) {
       if (this.flowNode == null) {
-         throw new FlowException("NodeRef\u8d4b\u4e88Triggerclass\u51fa\u9519flowNode = null");
+         throw new FlowException("NodeRef赋予Triggerclass出错flowNode = null");
       } else {
          this.flowNode.setTriggerClass(triggerClass);
       }

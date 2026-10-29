@@ -71,52 +71,52 @@ public class JedisCollectTask extends AbstractCollectTask {
    private static class JedisInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.pool.wait",
-         desc = "jedis\u96c6\u7fa4\u6392\u961f\u7b49\u5f85\u7684\u8bf7\u6c42\u6570"
+         desc = "jedis集群排队等待的请求数"
       )
       private Integer wait = 0;
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.pool.active",
-         desc = "jedis\u96c6\u7fa4\u6d3b\u52a8\u4f7f\u7528\u7684\u8bf7\u6c42\u6570"
+         desc = "jedis集群活动使用的请求数"
       )
       private Integer active = 0;
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.pool.idle",
-         desc = "jedis\u96c6\u7fa4\u7a7a\u95f2\u7684\u8bf7\u6c42\u6570"
+         desc = "jedis集群空闲的请求数"
       )
       private Integer idle = 0;
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.pool.detail",
-         desc = "jedis\u96c6\u7fa4\u8fde\u63a5\u6c60\u8be6\u60c5"
+         desc = "jedis集群连接池详情"
       )
       private String detail = " = 0L";
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.hook.error",
-         desc = "jedis\u96c6\u7fa4\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "jedis集群拦截上一次每秒出错次数"
       )
       private Long hookError = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.hook.success",
-         desc = "jedis\u96c6\u7fa4\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "jedis集群拦截上一次每秒成功次数"
       )
       private Long hookSuccess = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.hook.current",
-         desc = "jedis\u96c6\u7fa4\u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "jedis集群拦截当前执行任务数"
       )
       private Long hookCurrent = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.hook.list.detail",
-         desc = "jedis\u96c6\u7fa4\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "jedis集群拦截历史最大耗时任务列表"
       )
       private String hookList = "";
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.hook.list.minute.detail",
-         desc = "jedis\u96c6\u7fa4\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "jedis集群拦截历史最大耗时任务列表(每分钟)"
       )
       private String hookListPerMinute = "";
       @FieldReport(
          name = "kmc.monitor.collect.jedis.cluster.lock.error.detail",
-         desc = "jedis\u96c6\u7fa4\u5206\u5e03\u5f0f\u9501\u5f02\u5e38\u4fe1\u606f"
+         desc = "jedis集群分布式锁异常信息"
       )
       private String lockInfo = "";
 

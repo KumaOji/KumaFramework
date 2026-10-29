@@ -61,7 +61,7 @@ public final class PingYinUtils {
             }
             return buffer.toString();
         } catch (Exception e) {
-            LogUtils.error("\u53D6\u4E2D\u6587\u62FC\u97F3\u6709\u9519", e);
+            LogUtils.error("取中文拼音有错", e);
         }
         return null;
     }

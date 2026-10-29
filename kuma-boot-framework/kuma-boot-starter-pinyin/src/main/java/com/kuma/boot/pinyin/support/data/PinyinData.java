@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PinyinData implements IPinyinData {
-   private static final List<String> ZERO_SHENG_MU_LIST = Arrays.asList("a", "ai", "an", "ang", "ao", "e", "\u00ea", "ei", "en", "eng", "er", "o", "ou");
+   private static final List<String> ZERO_SHENG_MU_LIST = Arrays.asList("a", "ai", "an", "ang", "ao", "e", "ê", "ei", "en", "eng", "er", "o", "ou");
    private static final List<String> DOUBLE_SHENG_MU_LIST = Arrays.asList("zh", "ch", "sh");
 
    public PinyinData() {

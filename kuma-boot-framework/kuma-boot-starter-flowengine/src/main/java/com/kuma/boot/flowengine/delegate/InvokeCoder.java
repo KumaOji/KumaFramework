@@ -19,10 +19,10 @@ public enum InvokeCoder {
       protected void validateTypes(InvokeDelegateContext.Key key, Method method, Class<?>[] parameterTypes, Class<?> returnType) {
          if (parameterTypes.length == 1 && parameterTypes[0] == Execution.class) {
             if (returnType != Void.class && returnType != Void.TYPE && returnType != String.class) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s,Executor\u5904\u7406\u5668\u8fd0\u56de\u53c2\u6570\u5b9a\u4e49\u51fa\u9519,\u4f8b\u5982:Object\u3001void\u3001void\u3001String func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s,Executor处理器运回参数定义出错,例如:Object、void、void、String func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
             }
          } else {
-            throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49flow=%s,version=%s,nodeName=%s,Executor\u5904\u7406\u5668\u5165\u53c2\u5b9a\u4e49\u51fa\u9519,\u4f8b\u5982:func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+            throw new FlowException(String.format("流程定义flow=%s,version=%s,nodeName=%s,Executor处理器入参定义出错,例如:func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
          }
       }
    },
@@ -30,10 +30,10 @@ public enum InvokeCoder {
       protected void validateTypes(InvokeDelegateContext.Key key, Method method, Class<?>[] parameterTypes, Class<?> returnType) {
          if (parameterTypes.length == 1 && parameterTypes[0] == Execution.class) {
             if (returnType != Void.class && returnType != Void.TYPE) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s, Before\u5904\u7406\u5668\u8fd4\u56de\u53c2\u6570\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:void\u3001void func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s, Before处理器返回参数定义出错,例加:void、void func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
             }
          } else {
-            throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s,Before\u5904\u7406\u5668\u4eba\u53c2\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+            throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s,Before处理器人参定义出错,例加:func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
          }
       }
    },
@@ -41,10 +41,10 @@ public enum InvokeCoder {
       protected void validateTypes(InvokeDelegateContext.Key key, Method method, Class<?>[] parameterTypes, Class<?> returnType) {
          if (parameterTypes.length == 1 && parameterTypes[0] == Execution.class) {
             if (returnType != Void.class && returnType != Void.TYPE) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s, After\u5904\u7406\u5668\u8fd4\u56de\u53c2\u6570\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:void\u3001void func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s, After处理器返回参数定义出错,例加:void、void func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
             }
          } else {
-            throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s,After\u5904\u7406\u5668\u4eba\u53c2\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+            throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s,After处理器人参定义出错,例加:func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
          }
       }
    },
@@ -52,10 +52,10 @@ public enum InvokeCoder {
       protected void validateTypes(InvokeDelegateContext.Key key, Method method, Class<?>[] parameterTypes, Class<?> returnType) {
          if (parameterTypes.length == 1 && parameterTypes[0] == Execution.class) {
             if (returnType != Void.class && returnType != Void.TYPE) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s, End\u5904\u7406\u5668\u8fd4\u56de\u53c2\u6570\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:void\u3001void func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s, End处理器返回参数定义出错,例加:void、void func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
             }
          } else {
-            throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s,End\u5904\u7406\u5668\u4eba\u53c2\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+            throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s,End处理器人参定义出错,例加:func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
          }
       }
    },
@@ -63,10 +63,10 @@ public enum InvokeCoder {
       protected void validateTypes(InvokeDelegateContext.Key key, Method method, Class<?>[] parameterTypes, Class<?> returnType) {
          if (parameterTypes.length == 1 && parameterTypes[0] == Execution.class) {
             if (returnType != String.class) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s, Condition\u5904\u7406\u5668\u8fd4\u56de\u53c2\u6570\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:void\u3001void func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s, Condition处理器返回参数定义出错,例加:void、void func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
             }
          } else {
-            throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s,Condition\u5904\u7406\u5668\u4eba\u53c2\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+            throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s,Condition处理器人参定义出错,例加:func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
          }
       }
    },
@@ -74,10 +74,10 @@ public enum InvokeCoder {
       protected void validateTypes(InvokeDelegateContext.Key key, Method method, Class<?>[] parameterTypes, Class<?> returnType) {
          if (parameterTypes.length == 1 && parameterTypes[0] == Execution.class) {
             if (returnType != String.class) {
-               throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s, Error\u5904\u7406\u5668\u8fd4\u56de\u53c2\u6570\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:void\u3001void func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+               throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s, Error处理器返回参数定义出错,例加:void、void func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
             }
          } else {
-            throw new FlowException(String.format("\u6d41\u7a0b\u5b9a\u4e49Flow=%s,version=%s,nodeName=%s,Error\u5904\u7406\u5668\u4eba\u53c2\u5b9a\u4e49\u51fa\u9519,\u4f8b\u52a0:func(Execution execution),\u51fa\u9519\u65b9\u6cd5method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
+            throw new FlowException(String.format("流程定义Flow=%s,version=%s,nodeName=%s,Error处理器人参定义出错,例加:func(Execution execution),出错方法method=%s,parameterTypes=%s", key.getFlowName(), key.getVersion(), key.getNodeName(), method, Arrays.toString(parameterTypes)));
          }
       }
    };

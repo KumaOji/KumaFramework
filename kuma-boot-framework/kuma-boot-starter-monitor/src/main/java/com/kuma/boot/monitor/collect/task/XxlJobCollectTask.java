@@ -76,27 +76,27 @@ public class XxlJobCollectTask extends AbstractCollectTask {
    private static class JobInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.xxljob.count",
-         desc = "xxljob\u4efb\u52a1\u6570\u91cf"
+         desc = "xxljob任务数量"
       )
       private Integer count = 0;
       @FieldReport(
          name = "kmc.monitor.collect.xxljob.job.thread.repository",
-         desc = "xxljob thread repository\u6570\u91cf"
+         desc = "xxljob thread repository数量"
       )
       private Integer jobThreadRepository = 0;
       @FieldReport(
          name = "kmc.monitor.collect.xxljob.job.handler.repository",
-         desc = "xxljob handler repository \u6570\u91cf"
+         desc = "xxljob handler repository 数量"
       )
       private Integer jobHandlerRepository = 0;
       @FieldReport(
          name = "kmc.monitor.collect.xxljob.admin.biz.list",
-         desc = "xxljob admin biz \u6570\u91cf"
+         desc = "xxljob admin biz 数量"
       )
       private Integer adminBizList = 0;
       @FieldReport(
          name = "kmc.monitor.collect.xxljob.log.retention.days",
-         desc = "xxljob\u65e5\u5fd7\u4fdd\u7559\u5929\u6570"
+         desc = "xxljob日志保留天数"
       )
       private Integer logRetentionDays = 0;
 

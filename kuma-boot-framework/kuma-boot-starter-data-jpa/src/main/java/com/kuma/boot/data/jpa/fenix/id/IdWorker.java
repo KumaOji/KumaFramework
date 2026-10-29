@@ -46,7 +46,7 @@ public final class IdWorker {
          }
 
          if (source[j] >= 16) {
-            throw new IllegalArgumentException("ID Worker \u7d22\u5f15\u5fc5\u987b\u5c0f\u4e8e16, \u5b9e\u9645\u503c\u662f:" + source[j]);
+            throw new IllegalArgumentException("ID Worker 索引必须小于16, 实际值是:" + source[j]);
          }
 
          arr[i] = source[j];
@@ -159,7 +159,7 @@ public final class IdWorker {
          if (workerId >= 0L && workerId <= 15L) {
             this.workerId = workerId;
          } else {
-            throw new IllegalArgumentException(String.format("worker Id \u4e0d\u80fd\u5c0f\u4e8e0\u6216\u8005\u5927\u4e8e %d", 15L));
+            throw new IllegalArgumentException(String.format("worker Id 不能小于0或者大于 %d", 15L));
          }
       }
 

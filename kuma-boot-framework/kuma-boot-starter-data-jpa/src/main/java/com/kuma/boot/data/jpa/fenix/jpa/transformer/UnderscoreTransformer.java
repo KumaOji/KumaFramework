@@ -41,7 +41,7 @@ public class UnderscoreTransformer extends AbstractResultTransformer {
       for(int len = aliases.length; i < len; ++i) {
          String column = aliases[i];
          if (StringHelper.isBlank(column)) {
-            throw new FenixException(StringHelper.format("\u3010Fenix \u5f02\u5e38\u3011\u5c06\u67e5\u8be2\u7ed3\u679c\u8f6c\u6362\u4e3a\u3010{}\u3011\u5bf9\u8c61\u65f6\uff0c\u7b2c\u3010{}\u3011\u4e2a\u67e5\u8be2\u7ed3\u679c\u5217\u4e3a\u7a7a\uff0c\u8bf7\u68c0\u67e5\u4f60\u662f\u5426\u5f00\u542f\u4e86\u3010nativeQuery = true\u3011\u7684\u539f\u751f SQL \u9009\u9879\u6216\u8005\u5c31\u8981\u4f7f\u7528\u3010as\u3011\u201c\u522b\u540d\u201d\u7684\u65b9\u5f0f\u6765\u663e\u793a\u58f0\u660e\u67e5\u8be2\u7ed3\u679c\u5217\u7684\u540d\u79f0\uff01", super.resultClass.getName(), i));
+            throw new FenixException(StringHelper.format("【Fenix 异常】将查询结果转换为【{}】对象时，第【{}】个查询结果列为空，请检查你是否开启了【nativeQuery = true】的原生 SQL 选项或者就要使用【as】“别名”的方式来显示声明查询结果列的名称！", super.resultClass.getName(), i));
          }
 
          String propertyName = this.toLowerCamelCase(column);

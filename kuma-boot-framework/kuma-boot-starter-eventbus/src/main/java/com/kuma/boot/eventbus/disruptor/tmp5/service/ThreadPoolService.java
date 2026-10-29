@@ -26,7 +26,7 @@ public class ThreadPoolService {
                executor = new ThreadPoolExecutor(8, 100, 2147483647L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque(1000), Executors.defaultThreadFactory()) {
                   protected void afterExecute(Runnable r, Throwable t) {
                      if (t != null) {
-                        LogUtils.error("afterExecute\u83b7\u53d6\u5230\u5f02\u5e38\u4fe1\u606f:{}", new Object[]{t.getMessage()});
+                        LogUtils.error("afterExecute获取到异常信息:{}", new Object[]{t.getMessage()});
                      }
 
                      if (r instanceof FutureTask) {
@@ -34,13 +34,13 @@ public class ThreadPoolService {
                            FutureTask<?> futureTask = (FutureTask)r;
                            futureTask.get();
                         } catch (Exception e) {
-                           LogUtils.error("afterExecute\u83b7\u53d6\u5230submit\u63d0\u4ea4\u7684\u5f02\u5e38\u4fe1\u606f:{}", new Object[]{e.getMessage()});
+                           LogUtils.error("afterExecute获取到submit提交的异常信息:{}", new Object[]{e.getMessage()});
                         }
                      }
 
                      ThreadPoolExecutorErrorEvent threadPoolExecutorErrorEvent = new ThreadPoolExecutorErrorEvent(this, r, t);
                      ZlfDisruptorSpringUtils.getApplicationContext().publishEvent(threadPoolExecutorErrorEvent);
-                     LogUtils.info("====ThreadPoolService.\u6355\u83b7\u5f02\u5e38\u53d1\u9001springBoot\u4e8b\u4ef6\u5b8c\u6210======", new Object[0]);
+                     LogUtils.info("====ThreadPoolService.捕获异常发送springBoot事件完成======", new Object[0]);
                   }
                };
                executor.setRejectedExecutionHandler((r, executor) -> {
@@ -51,7 +51,7 @@ public class ThreadPoolService {
 
                      executor.getQueue().put(r);
                   } catch (InterruptedException e) {
-                     LogUtils.error("\u7ebf\u7a0b\u5904\u7406\u62d2\u7edd\u7b56\u7565\u5931\u8d25:{}", new Object[]{e.getMessage()});
+                     LogUtils.error("线程处理拒绝策略失败:{}", new Object[]{e.getMessage()});
                      e.printStackTrace();
                   }
 

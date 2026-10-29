@@ -66,7 +66,7 @@ public class StandardNodeExecution implements NodeExecution {
          invokeDelegatecontext.invoke(new Object[]{flowKey, nodeName, End.class, this.execution});
          this.endTime = new Timestamp(System.currentTimeMillis());
          if (this.currentFlowNode.isTraceLog() && this.logger.isInfoEnabled()) {
-            this.logger.info("\u6267\u884c\u5b8c\u6210NodeName=l},stateMachine={},Version={},NodeExecutionstatus={},Target={},Attachment={},\u8017\u65f6:{}\u4eb3\u79d2", new Object[]{this.currentFlowNode.getName(), flow.getName(), flow.getVersion(), this.status, this.execution.getTarget(), this.execution.getAttachment(), this.endTime.getTime() - this.startTime.getTime()});
+            this.logger.info("执行完成NodeName=l},stateMachine={},Version={},NodeExecutionstatus={},Target={},Attachment={},耗时:{}亳秒", new Object[]{this.currentFlowNode.getName(), flow.getName(), flow.getVersion(), this.status, this.execution.getTarget(), this.execution.getAttachment(), this.endTime.getTime() - this.startTime.getTime()});
          }
 
       }

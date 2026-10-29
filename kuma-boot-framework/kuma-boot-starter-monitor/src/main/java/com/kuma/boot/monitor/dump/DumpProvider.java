@@ -28,13 +28,13 @@ public class DumpProvider {
 
    public void list() {
       StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("\u4e0d\u8981\u591a\u6b21dump,\u4e00\u5206\u949f\u4ec5\u9650\u4e00\u6b21,\u4ec5\u9650linux\u7cfb\u7edf\u6709\u6548<br/><a href='do/'>\u7acb\u5373Dump</a><br/>");
+      stringBuilder.append("不要多次dump,一分钟仅限一次,仅限linux系统有效<br/><a href='do/'>立即Dump</a><br/>");
 
       for(File f : this.getList()) {
          if (!f.getName().endsWith(".tar")) {
-            stringBuilder.append(String.format("%s (%s M)<a href='zip/?name=%s'>\u538b\u7f29</a><br/>", f.getName(), f.length() / 1024L / 1024L, f.getName()));
+            stringBuilder.append(String.format("%s (%s M)<a href='zip/?name=%s'>压缩</a><br/>", f.getName(), f.length() / 1024L / 1024L, f.getName()));
          } else {
-            stringBuilder.append(String.format("%s (%s M)<a href='download/?name=%s'>\u4e0b\u8f7d</a><br/>", f.getName(), f.length() / 1024L / 1024L, f.getName()));
+            stringBuilder.append(String.format("%s (%s M)<a href='download/?name=%s'>下载</a><br/>", f.getName(), f.length() / 1024L / 1024L, f.getName()));
          }
       }
 
@@ -46,10 +46,10 @@ public class DumpProvider {
          if (name != null && name.equals(f.getName())) {
             try {
                Runtime.getRuntime().exec(String.format("tar -zcvf %s.tar %s", name, name), (String[])null, (File)null);
-               this.response("\u538b\u7f29\u6210\u529f,\u8bf7\u7b49\u5f85\u8010\u5fc3\u7b49\u5f85,\u4e0d\u8981\u91cd\u590d\u6267\u884c!");
+               this.response("压缩成功,请等待耐心等待,不要重复执行!");
             } catch (Exception exp) {
-               LogUtils.error("kuma-boot-starter-monitor", new Object[]{"zip \u51fa\u9519", exp});
-               this.response("\u538b\u7f29\u51fa\u9519:" + exp.getMessage());
+               LogUtils.error("kuma-boot-starter-monitor", new Object[]{"zip 出错", exp});
+               this.response("压缩出错:" + exp.getMessage());
             }
          }
       }
@@ -59,15 +59,15 @@ public class DumpProvider {
    public void dump() {
       try {
          if (System.currentTimeMillis() - lastDumpTime < TimeUnit.MINUTES.toMillis(1L)) {
-            throw new HealthException("dump\u8fc7\u4e8e\u9891\u7e41,\u8bf7\u7b49\u5f85\u540e1\u5206\u949f\u91cd\u8bd5");
+            throw new HealthException("dump过于频繁,请等待后1分钟重试");
          }
 
          Runtime.getRuntime().exec(String.format("jmap -dump:format=b,file=heap.%s.hprof %s", (new SimpleDateFormat("yyyyMMddHHmmssSSS")).format(new Date()), ProcessUtils.getProcessID()));
          lastDumpTime = System.currentTimeMillis();
-         this.response("dump\u6210\u529f,\u8bf7\u7b49\u5f85\u8010\u5fc3\u7b49\u5f85,\u4e0d\u8981\u91cd\u590d\u6267\u884c!");
+         this.response("dump成功,请等待耐心等待,不要重复执行!");
       } catch (Exception exp) {
-         LogUtils.error("kuma-boot-starter-monitor", new Object[]{"dump \u51fa\u9519", exp});
-         this.response("dump\u51fa\u9519:" + exp.getMessage());
+         LogUtils.error("kuma-boot-starter-monitor", new Object[]{"dump 出错", exp});
+         this.response("dump出错:" + exp.getMessage());
       }
 
    }
@@ -136,8 +136,8 @@ public class DumpProvider {
 
                fs.close();
             } catch (Exception exp) {
-               LogUtils.error("kuma-boot-starter-monitor", new Object[]{"download \u51fa\u9519", exp});
-               this.response("\u4e0b\u8f7d\u51fa\u9519:" + exp.getMessage());
+               LogUtils.error("kuma-boot-starter-monitor", new Object[]{"download 出错", exp});
+               this.response("下载出错:" + exp.getMessage());
             }
          }
       }

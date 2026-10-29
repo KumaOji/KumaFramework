@@ -13,7 +13,7 @@ public class StandardSourceOkHttpClientRegistrar implements SourceOkHttpClientRe
 
    public void register(SourceOkHttpClientRegistry registry) {
       registry.register("testSourceOkHttpClient", (new OkHttpClient.Builder()).addInterceptor((chain) -> {
-         LogUtils.info("============\u4f7f\u7528testSourceOkHttpClient=============", new Object[0]);
+         LogUtils.info("============使用testSourceOkHttpClient=============", new Object[0]);
          return chain.proceed(chain.request());
       }).build());
    }

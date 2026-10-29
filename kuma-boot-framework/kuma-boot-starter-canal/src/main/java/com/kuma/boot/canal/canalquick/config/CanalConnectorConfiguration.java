@@ -49,7 +49,7 @@ public class CanalConnectorConfiguration implements ApplicationContextAware {
          result.addAll(annotationFilters);
       }
 
-      Assert.notEmpty(result, "\u76ee\u6807\u8fc7\u6ee4\u8868\u4e0d\u80fd\u4e3a\u7a7a");
+      Assert.notEmpty(result, "目标过滤表不能为空");
       return result.stream().distinct().toList();
    }
 

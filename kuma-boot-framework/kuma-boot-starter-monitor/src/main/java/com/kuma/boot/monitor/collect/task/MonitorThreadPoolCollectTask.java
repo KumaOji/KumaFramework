@@ -94,67 +94,67 @@ public class MonitorThreadPoolCollectTask extends AbstractCollectTask {
    private static class MonitorThreadPoolInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.active.count",
-         desc = "\u7cfb\u7edf\u7ebf\u7a0b\u6c60\u6d3b\u52a8\u7ebf\u7a0b\u6570"
+         desc = "系统线程池活动线程数"
       )
       private Integer systemActiveCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.core.pool.size",
-         desc = "\u7cfb\u7edf\u7ebf\u7a0b\u6c60\u6838\u5fc3\u7ebf\u7a0b\u6570"
+         desc = "系统线程池核心线程数"
       )
       private Integer systemCorePoolSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.pool.size.largest",
-         desc = "\u7ebf\u7a0b\u6c60\u5386\u53f2\u6700\u5927\u7ebf\u7a0b\u6570"
+         desc = "线程池历史最大线程数"
       )
       private Integer systemPoolSizeLargest = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.pool.size.max",
-         desc = "\u7ebf\u7a0b\u6c60\u6700\u5927\u7ebf\u7a0b\u6570"
+         desc = "线程池最大线程数"
       )
       private Integer systemPoolSizeMax = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.pool.size.count",
-         desc = "\u7ebf\u7a0b\u6c60\u5f53\u524d\u7ebf\u7a0b\u6570"
+         desc = "线程池当前线程数"
       )
       private Integer systemPoolSizeCount = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.queue.size",
-         desc = "\u7ebf\u7a0b\u6c60\u5f53\u524d\u6392\u961f\u7b49\u5f85\u4efb\u52a1\u6570"
+         desc = "线程池当前排队等待任务数"
       )
       private Integer systemQueueSize = 0;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.count",
-         desc = "\u7ebf\u7a0b\u6c60\u5386\u53f2\u4efb\u52a1\u6570"
+         desc = "线程池历史任务数"
       )
       private Long systemTaskCount = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.completed",
-         desc = "\u7ebf\u7a0b\u6c60\u5df2\u5b8c\u6210\u4efb\u52a1\u6570"
+         desc = "线程池已完成任务数"
       )
       private Long systemTaskCompleted = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.hook.error",
-         desc = "\u7ebf\u7a0b\u6c60\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u51fa\u9519\u6b21\u6570"
+         desc = "线程池拦截上一次每秒出错次数"
       )
       private Long systemTaskHookError = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.hook.success",
-         desc = "\u7ebf\u7a0b\u6c60\u62e6\u622a\u4e0a\u4e00\u6b21\u6bcf\u79d2\u6210\u529f\u6b21\u6570"
+         desc = "线程池拦截上一次每秒成功次数"
       )
       private Long systemTaskHookSuccess = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.hook.current",
-         desc = "\u7ebf\u7a0b\u6c60\u62e6\u622a\u5f53\u524d\u6267\u884c\u4efb\u52a1\u6570"
+         desc = "线程池拦截当前执行任务数"
       )
       private Long systemTaskHookCurrent = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.hook.list.detail",
-         desc = "\u7ebf\u7a0b\u6c60\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868"
+         desc = "线程池拦截历史最大耗时任务列表"
       )
       private String systemTaskHookList = "";
       @FieldReport(
          name = "kmc.monitor.collect.executor.monitor.task.hook.list.minute.detail",
-         desc = "\u7ebf\u7a0b\u6c60\u62e6\u622a\u5386\u53f2\u6700\u5927\u8017\u65f6\u4efb\u52a1\u5217\u8868(\u6bcf\u5206\u949f)"
+         desc = "线程池拦截历史最大耗时任务列表(每分钟)"
       )
       private String systemTaskHookListPerMinute = "";
 

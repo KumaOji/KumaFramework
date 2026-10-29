@@ -157,7 +157,7 @@ public class StringUtil {
 
          for(int i = 0; i < content.length(); ++i) {
             char ch = content.charAt(i);
-            if (ch == '\t' || ch == '\n' || ch == '\r' || ch >= ' ' && ch <= '\ud7ff' || ch >= '\ue000' && ch <= '\ufffd' || ch >= 65536 && ch <= 1114111) {
+            if (ch == '\t' || ch == '\n' || ch == '\r' || ch >= ' ' && ch <= '\ud7ff' || ch >= '\ue000' && ch <= '�' || ch >= 65536 && ch <= 1114111) {
                result.append(ch);
             }
          }

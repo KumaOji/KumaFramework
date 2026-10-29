@@ -52,7 +52,7 @@ public class DoubtApiCollectTask extends AbstractCollectTask {
    public static class DoubtApiInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.doubtApi.detail",
-         desc = "\u53ef\u7591\u5185\u5b58\u589e\u957fapi\u5206\u6790\u62a5\u544a"
+         desc = "可疑内存增长api分析报告"
       )
       String detail = "";
 

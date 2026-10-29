@@ -1,7 +1,7 @@
 package com.kuma.boot.data.elasticsearch.es.annotation;
 
 public enum AnalyzerType {
-   NO("\u4e0d\u4f7f\u7528\u5206\u8bcd"),
+   NO("不使用分词"),
    STANDARD("standard"),
    IK_SMART("ik_smart"),
    IK_MAX_WORD("ik_max_word");

@@ -73,7 +73,7 @@ public class IOCollectTask extends AbstractCollectTask {
             }
          }
 
-         AbstractCollectTask.notifyMessage(WarnTypeEnum.INFO, "\u81ea\u52a8\u6e05\u7406\u65e5\u5fd7\u6210\u529f", info.toString());
+         AbstractCollectTask.notifyMessage(WarnTypeEnum.INFO, "自动清理日志成功", info.toString());
       }
 
    }
@@ -113,10 +113,10 @@ public class IOCollectTask extends AbstractCollectTask {
             }
 
             f.delete();
-            return "\u6e05\u7406\u5b8c\u6bd5";
+            return "清理完毕";
          } catch (Exception e) {
             LogUtils.error(e);
-            return "\u6e05\u7406\u51fa\u9519";
+            return "清理出错";
          }
       }
    }
@@ -124,32 +124,32 @@ public class IOCollectTask extends AbstractCollectTask {
    private static class IoInfo implements CollectInfo {
       @FieldReport(
          name = "kmc.monitor.collect.io.current.dir.usable.size",
-         desc = "\u5f53\u524d\u76ee\u5f55\u53ef\u7528\u5927\u5c0f(M)"
+         desc = "当前目录可用大小(M)"
       )
       private Long currentDirUsableSize = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.io.current.dir.total.size",
-         desc = "\u5f53\u524d\u76ee\u5f55\u603b\u5927\u5c0f(M)"
+         desc = "当前目录总大小(M)"
       )
       private Long currentDirTotalSize = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.io.current.dir.path",
-         desc = "\u5f53\u524d\u76ee\u5f55\u8def\u5f84"
+         desc = "当前目录路径"
       )
       private String currentDir = "";
       @FieldReport(
          name = "kmc.monitor.collect.io.process.read.size",
-         desc = "\u5f53\u524d\u8fdb\u7a0b\u7684\u8bfbio(B)"
+         desc = "当前进程的读io(B)"
       )
       private Long processReadSize = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.io.process.write.size",
-         desc = "\u5f53\u524d\u8fdb\u7a0b\u7684\u5199io(B)"
+         desc = "当前进程的写io(B)"
       )
       private Long processWriteSize = 0L;
       @FieldReport(
          name = "kmc.monitor.collect.io.process.wa",
-         desc = "\u78c1\u76d8wa\u767e\u5206\u6bd4"
+         desc = "磁盘wa百分比"
       )
       private Double processWa = (double)0.0F;
 

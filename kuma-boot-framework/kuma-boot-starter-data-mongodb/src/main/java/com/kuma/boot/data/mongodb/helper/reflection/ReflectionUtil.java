@@ -39,10 +39,10 @@ public class ReflectionUtil {
          } else {
             if (!implMethodName.startsWith("is") || implMethodName.length() <= 2) {
                if (implMethodName.startsWith("lambda$")) {
-                  throw new IllegalArgumentException("SerializableFunction\u4e0d\u80fd\u4f20\u9012lambda\u8868\u8fbe\u5f0f,\u53ea\u80fd\u4f7f\u7528\u65b9\u6cd5\u5f15\u7528");
+                  throw new IllegalArgumentException("SerializableFunction不能传递lambda表达式,只能使用方法引用");
                }
 
-               throw new IllegalArgumentException(implMethodName + "\u4e0d\u662fGetter\u65b9\u6cd5\u5f15\u7528");
+               throw new IllegalArgumentException(implMethodName + "不是Getter方法引用");
             }
 
             fieldName = Introspector.decapitalize(implMethodName.substring(2));

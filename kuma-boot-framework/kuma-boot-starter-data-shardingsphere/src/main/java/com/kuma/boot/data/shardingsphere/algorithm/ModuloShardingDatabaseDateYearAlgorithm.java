@@ -64,9 +64,9 @@ public class ModuloShardingDatabaseDateYearAlgorithm implements StandardSharding
             }
          }
 
-         throw new UnsupportedOperationException("content_channel\u6ca1\u6709\u5339\u914d\u5230\u53ef\u7528\u6570\u636e\u5e93\u8282\u70b9");
+         throw new UnsupportedOperationException("content_channel没有匹配到可用数据库节点");
       } else {
-         throw new UnsupportedOperationException("\u5206\u7247\u5217\u4e3a\u7a7a");
+         throw new UnsupportedOperationException("分片列为空");
       }
    }
 
@@ -101,7 +101,7 @@ public class ModuloShardingDatabaseDateYearAlgorithm implements StandardSharding
 
          return collect;
       } else {
-         throw new UnsupportedOperationException("\u5206\u7247\u5217\u4e3a\u7a7a");
+         throw new UnsupportedOperationException("分片列为空");
       }
    }
 
