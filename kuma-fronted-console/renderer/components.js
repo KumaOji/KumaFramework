@@ -11,7 +11,9 @@ function renderComponents(data){
     $(`component-${name}-start`).disabled=componentBusy[name]||!item.canStart;
     $(`component-${name}-stop`).disabled=componentBusy[name]||!item.canStop;
     $(`component-${name}-url`).textContent=item.url;
+    document.querySelector(`[data-managed-service="${name}"]`).dataset.running=String(['RUNNING','EXTERNAL'].includes(item.state));
   }
+  renderManagedServices();
 }
 async function pollComponents(){
   if(componentPolling)return;componentPolling=true;const revision=componentRevision;
@@ -27,19 +29,20 @@ async function controlComponent(name,action){
   finally{componentBusy[name]=false;await pollComponents();}
 }
 const componentLogRefreshers=[];
-function isComponentsViewActive(){return !document.hidden&&state.page==='projects'&&state.servicesTab==='components';}
+function isComponentsViewActive(){return !document.hidden&&state.page==='projects'&&state.servicesTab==='projects';}
 for(const name of componentNames){
   $(`component-${name}-start`).onclick=()=>controlComponent(name,'start');
   $(`component-${name}-stop`).onclick=()=>controlComponent(name,'stop');
   componentLogRefreshers.push(LogConsole.bind({
     button:$(`component-${name}-logs`),element:$(`component-${name}-log`),
     clearButton:$(`component-${name}-log-clear`),load:()=>api(`/api/components/${name}/logs`),
-    isActive:isComponentsViewActive,closeLabel:'关闭日志',onError:error=>notice(`component-${name}-error`,error.message)
+    isActive:()=>isComponentsViewActive()&&!!window.ServiceDialog?.isOpen(name),closeLabel:'关闭日志',onError:error=>notice(`component-${name}-error`,error.message)
   }));
 }
 function refreshComponentLogs(){componentLogRefreshers.forEach(refresh=>refresh());}
 setInterval(refreshComponentLogs,1000);
 document.addEventListener('visibilitychange',refreshComponentLogs);
 window.addEventListener('hashchange',refreshComponentLogs);
-window.addEventListener('hashchange',()=>{if(state.page==='projects'&&state.servicesTab==='components')pollComponents();});
-setInterval(()=>{if(!document.hidden&&state.page==='projects'&&state.servicesTab==='components')pollComponents();},3000);
+window.addEventListener('hashchange',()=>{if(isComponentsViewActive())pollComponents();});
+setInterval(()=>{if(isComponentsViewActive())pollComponents();},3000);
+pollComponents();

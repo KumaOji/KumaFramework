@@ -13,8 +13,8 @@ app.whenReady().then(async()=>{
   server=http.createServer((request,response)=>{
     response.setHeader('Content-Type','text/html; charset=utf-8');
     const redirect=url=>{response.writeHead(302,{Location:url});response.end();};
-    if(request.url==='/console')return response.end(`<h1>Console</h1><iframe name="kuma-blog-preview" src="${base}/kuma"></iframe>`);
-    if(request.url==='/console-live')return response.end('<h1>Console</h1><iframe name="kuma-blog-preview" src="http://localhost:4321/kuma"></iframe>');
+    if(request.url==='/console')return response.end(`<h1>Console</h1><iframe name="kuma-public-panel-preview" src="${base}/kuma"></iframe>`);
+    if(request.url==='/console-live')return response.end('<h1>Console</h1><iframe name="kuma-public-panel-preview" src="http://localhost:4321/kuma"></iframe>');
     if(request.url==='/api/auth/login')return redirect(`${base.replace('127.0.0.1','localhost')}/uaa/login`);
     if(request.url==='/uaa/login'){
       response.setHeader('X-Frame-Options','SAMEORIGIN');
@@ -33,7 +33,7 @@ app.whenReady().then(async()=>{
   main=new BrowserWindow({show:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true}});
   const control=attachBlogLogin(main,{show:false});
   await main.loadURL(`${base}/console`);
-  const preview=()=>main.webContents.mainFrame.frames.find(frame=>frame.name==='kuma-blog-preview');
+  const preview=()=>main.webContents.mainFrame.frames.find(frame=>frame.name==='kuma-public-panel-preview');
   await until(()=>preview()?.url===`${base}/kuma`,'Preview did not load');
   const click=()=>preview().executeJavaScript('document.getElementById("login").click()',true);
   await click();

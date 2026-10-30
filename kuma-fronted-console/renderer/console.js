@@ -15,22 +15,25 @@ async function api(path, options) {
 }
 function navigate() {
   const previousPage=state.page;
-  const requested=location.hash.slice(1),page=['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog'].includes(requested)?'projects':requested;
-  state.page = ['overview','server','projects','lab','settings'].includes(page) ? page : 'overview';
+  const requested=location.hash.slice(1),page=['network','overview/network'].includes(requested)?'overview':['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog','projects/panels'].includes(requested)?'projects':requested;
+  state.page = ['overview','server','projects','ai','lab','settings'].includes(page) ? page : 'overview';
+  state.overviewTab=['network','overview/network'].includes(requested)?'network':'system';
+  $('overview-system').hidden=state.overviewTab!=='system';$('network').hidden=state.overviewTab!=='network';
+  document.querySelectorAll('[data-overview-view]').forEach(button=>{const active=button.dataset.overviewView===state.overviewTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   state.infrastructureTab=['cluster','server/wsl'].includes(requested)?'wsl':'remote';
   $('infrastructure-remote').hidden=state.infrastructureTab!=='remote';$('cluster').hidden=state.infrastructureTab!=='wsl';
   document.querySelectorAll('[data-environment]').forEach(button=>{const active=button.dataset.environment===state.infrastructureTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
-  state.servicesTab=['components','projects/components'].includes(requested)?'components':['blog','projects/blog'].includes(requested)?'blog':'projects';
-  $('project-services').hidden=state.servicesTab!=='projects';$('components').hidden=state.servicesTab!=='components';$('blog').hidden=state.servicesTab!=='blog';
+  state.servicesTab=['blog','projects/blog','projects/panels'].includes(requested)?'panels':'projects';
+  $('project-services').hidden=state.servicesTab!=='projects';$('public-panels').hidden=state.servicesTab!=='panels';
   document.querySelectorAll('[data-service-view]').forEach(button=>{const active=button.dataset.serviceView===state.servicesTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   document.querySelectorAll('.page').forEach(el => el.hidden = el.id !== state.page);
   document.querySelectorAll('.sidebar [data-page]').forEach(el => {const active=el.dataset.page===state.page;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
-  $('page-title').textContent = {overview:'本机概览',server:'服务器与 WSL',projects:'项目与组件',lab:'Lab 实验室',settings:'Console 配置'}[state.page];
+  $('page-title').textContent = {overview:'本机概览',network:'本机网络',server:'服务器与 WSL',projects:'项目与组件',ai:'AI 工作台',lab:'Lab 实验室',settings:'Console 配置'}[state.page];
   closeDrawer();clearTimeout(pageScrollTimer);
   if(previousPage!==state.page){window.scrollTo(0,0);pageScrollTimer=setTimeout(()=>window.scrollTo(0,0),0);}
 }
 window.addEventListener('hashchange', navigate); navigate();
-for(const [id,attribute,paths] of [['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',components:'projects/components',blog:'projects/blog'}]]){
+for(const [id,attribute,paths] of [['overview-tabs','overview-view',{system:'overview',network:'overview/network'}],['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',panels:'projects/panels'}]]){
   $(id).onclick=event=>{
     const button=event.target.closest(`[data-${attribute}]`);if(!button)return;
     const hash='#'+paths[button.getAttribute(`data-${attribute}`)];if(location.hash===hash)return;
@@ -105,7 +108,15 @@ function renderNetwork() {
   if(!n?.ready)return;
   $('network-updated').textContent=time(n.sampledAt);
   const adapters=n.adapters||[];
-  $('network-adapters').innerHTML=adapters.length?`<table><thead><tr><th>网卡 / 类型</th><th>状态 / 链路</th><th>地址</th><th>网关 / DNS</th></tr></thead><tbody>${[...adapters].sort((a,b)=>Number(b.status==='Up')-Number(a.status==='Up')||Number(a.virtual)-Number(b.virtual)).map(a=>`<tr><td><strong>${esc(a.name)}</strong> ${badge(a.virtual?'虚拟':'物理')}${a.hidden?badge('隐藏'):''}<div class="muted">${esc(a.description)}</div><div class="muted">MAC ${esc(a.mac||'—')} · MTU ${esc(a.mtu??'—')}</div></td><td>${badge(a.status,a.status==='Up'?'ok':'')}<div>${esc(a.speed)}</div></td><td class="mono">${[...(a.ipv4||[]),...(a.ipv6||[])].map(esc).join('<br>')||'无 IP'}</td><td>网关：${esc((a.gateways||[]).join(' / ')||'—')}<br>DNS：${esc((a.dns||[]).join(' / ')||'—')}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">暂无平台网卡详情，通用网卡信息见上方网络接口</div>';
+  const list=$('network-adapters'),signature=JSON.stringify(adapters);
+  if(list.dataset.signature!==signature){
+    const opened=new Set([...list.querySelectorAll('details[open]')].map(el=>el.dataset.adapterKey));
+    list.innerHTML=adapters.length?[...adapters].sort((a,b)=>Number(b.status==='Up')-Number(a.status==='Up')||Number(a.virtual)-Number(b.virtual)).map(a=>{
+      const key=JSON.stringify([a.index??'',a.name??'',a.mac??'']);
+      return `<details class="network-adapter" data-adapter-key="${esc(key)}"${opened.has(key)?' open':''}><summary><span class="network-adapter-summary"><strong>${esc(a.name)}</strong>${badge(a.virtual?'虚拟':'物理')}${a.hidden?badge('隐藏'):''}${badge(a.status,a.status==='Up'?'ok':'')}<span class="muted">${esc(a.speed||'—')}</span></span></summary><div class="network-adapter-details"><div><h3>网卡信息</h3><p>${esc(a.description||'—')}</p><p>MAC <span class="mono">${esc(a.mac||'—')}</span></p><p>MTU ${esc(a.mtu??'—')}</p></div><div><h3>IP 地址</h3><p class="mono">${[...(a.ipv4||[]),...(a.ipv6||[])].map(esc).join('<br>')||'无 IP'}</p></div><div><h3>网关 / DNS</h3><p>网关：${esc((a.gateways||[]).join(' / ')||'—')}</p><p>DNS：${esc((a.dns||[]).join(' / ')||'—')}</p></div></div></details>`;
+    }).join(''):'<div class="empty">暂无平台网卡详情，可在「系统概览」查看通用网卡信息。</div>';
+    list.dataset.signature=signature;
+  }
   const p=n.system||{};
   const rows=[['Windows 用户代理',p.enabled?'已启用 · '+(p.server||'未配置地址'):'未启用'],['代理绕过',p.bypass||'—'],['PAC 配置',p.pac||'未配置'],...(n.environment||[]).map(e=>[e.name,e.value]),['可测试代理',(n.proxyRoutes||[]).join(' / ')||'未检测到可测试的静态代理（带认证信息的代理不参与测试）']];
   $('network-proxies').innerHTML=rows.map(([k,v])=>`<div class="stack-row"><strong>${esc(k)}</strong><div class="subtle">${esc(v)}</div></div>`).join('')+(n.winhttp?`<details><summary>WinHTTP 代理</summary><pre>${esc(n.winhttp)}</pre></details>`:'');
@@ -238,21 +249,43 @@ function closeDrawer(){$('drawer-content').classList.remove('rich-dependencies')
 $('close-drawer').onclick=closeDrawer;$('drawer-backdrop').onclick=closeDrawer;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
 function projectBadge(status) {return badge({HEALTHY:'健康检查通过',REACHABLE:'服务可达 · 健康未确认',UNHEALTHY:'服务可达 · 健康检查异常',OFFLINE:'服务未连接'}[status]||'探测中',status==='HEALTHY'?'ok':status==='REACHABLE'?'warn':status==='OFFLINE'||status==='UNHEALTHY'?'bad':'');}
 $('project-status-filter').onchange=()=>renderProjects();
+function managedServiceKey(project){const name=project.name?.toLowerCase();return ['uaa','gateway','blog','lab'].includes(name)?name:null;}
+function renderManagedServices(){
+  const projects=state.projects?.projects||[],startedOnly=$('project-status-filter').value==='started';
+  let shown=0;
+  document.querySelectorAll('[data-managed-service]').forEach(card=>{
+    const project=projects.find(p=>managedServiceKey(p)===card.dataset.managedService);
+    const reachable=project&&['HEALTHY','REACHABLE','UNHEALTHY'].includes(project.status);
+    card.hidden=startedOnly&&!reachable&&card.dataset.running!=='true';if(!card.hidden)shown++;
+    const key=card.dataset.managedService,details=document.querySelector(`[data-service-detail="${key}"]`);
+    let probe=details.querySelector('.managed-probe');
+    if(!probe){probe=document.createElement('div');probe.className='managed-probe';details.append(probe);}
+    const status=card.querySelector('[data-service-status]');status.replaceChildren();
+    const statusIds={uaa:['component-uaa-state'],gateway:['component-gateway-state'],blog:['blog-process-state','blog-backend-state'],lab:['lab-process-state']}[key];
+    statusIds.forEach((id,index)=>{const source=$(id),copy=source.cloneNode(true);copy.removeAttribute('id');if(key==='blog')copy.textContent=(index?'后端 ':'前端 ')+source.textContent;status.append(copy);});
+    card.querySelector('[data-service-address]').textContent=project?.url||({uaa:$('component-uaa-url').textContent,gateway:$('component-gateway-url').textContent,blog:$('blog-url').textContent,lab:'未配置服务地址'}[key]);
+    probe.replaceChildren();
+    if(project){
+      const summary=document.createElement('div');summary.className='project-message';summary.textContent=`${project.name} · ${project.url} · HTTP ${project.httpStatus||'—'} · ${project.latency??'—'} ms · ${project.message||''}`;
+      const health=document.createElement('div');health.innerHTML=projectBadge(project.status);
+      const links=document.createElement('div');links.className='project-links';
+      for(const [label,path] of [['打开服务 ↗',''],['Swagger ↗','/swagger-ui.html'],['健康检查 ↗','/actuator/health']]){const link=document.createElement('a');link.className='button small';link.textContent=label;link.href=project.url.replace(/\/+$/,'')+path;link.target='_blank';link.rel='noopener noreferrer';links.append(link);}
+      const diagnostics=document.createElement('button');diagnostics.className='button small';diagnostics.textContent='运行诊断';diagnostics.onclick=()=>{window.ServiceDialog?.close();showProjectDetails(project);};links.append(diagnostics);
+      probe.append(health,summary,links);
+    }
+  });
+  const others=projects.filter(p=>!managedServiceKey(p));
+  const visible=others.filter(p=>!startedOnly||['HEALTHY','REACHABLE','UNHEALTHY'].includes(p.status));
+  $('project-status-count').textContent=`显示 ${shown+visible.length} / ${document.querySelectorAll('[data-managed-service]').length+others.length}`;
+}
 function renderProjects() {
   if (typeof renderCatalog === "function") renderCatalog();
+  renderManagedServices();
   const data=state.projects;notice('projects-warning',state.errors.projects||data?.error);if(!data?.ready)return;$('projects-updated').textContent=time(data.sampledAt);
-  const projects=data.projects||[],startedOnly=$('project-status-filter').value==='started';
+  const projects=(data.projects||[]).filter(p=>!managedServiceKey(p)),startedOnly=$('project-status-filter').value==='started';
   const visibleProjects=projects.filter(project=>!startedOnly||['HEALTHY','REACHABLE','UNHEALTHY'].includes(project.status));
-  $('project-status-count').textContent=`显示 ${visibleProjects.length} / ${projects.length}`;
-  $('project-cards').innerHTML=visibleProjects.map(p=>`<article class="panel project-card"><div class="project-top"><div class="project-name"><span class="project-symbol">${esc(p.name[0])}</span><h2>${esc(p.name)}</h2></div>${projectBadge(p.status)}</div><div class="project-url">${esc(p.url)}</div><div class="project-facts"><span>HTTP<strong>${p.httpStatus||'—'}</strong></span><span>响应<strong>${p.latency} ms</strong></span></div><div class="project-message">${esc(p.message)}</div><div class="project-links"><a href="${esc(p.url)}" target="_blank" rel="noreferrer" class="button small">打开服务 ↗</a><a href="${esc(p.url)}/swagger-ui.html" target="_blank" rel="noreferrer" class="button small">Swagger ↗</a><a href="${esc(p.url)}/actuator/health" target="_blank" rel="noreferrer" class="button small">健康检查 ↗</a>${p.name==='Lab'?'<a href="#lab" class="button small">进入实验室 →</a>':''}</div></article>`).join('')||`<div class="empty">${startedOnly&&projects.length?'暂无 HTTP 可达的已启动服务':'未配置项目服务'}</div>`;
-  document.querySelectorAll('.project-card').forEach((card,i)=>{const button=document.createElement('button');button.className='button small';button.textContent='运行诊断';button.onclick=()=>showProjectDetails(visibleProjects[i]);card.querySelector('.project-links').append(button);});
-  const lab=(data.projects||[]).find(p=>p.name==='Lab');
-  const connected=lab&&['HEALTHY','REACHABLE','UNHEALTHY'].includes(lab.status);
-  $('lab-target').dataset.status=connected?(lab.status==='UNHEALTHY'?'warning':'online'):(lab?'offline':'unknown');
-  $('lab-target-status').textContent=lab?({HEALTHY:'服务健康',REACHABLE:'服务可达',UNHEALTHY:'健康检查异常',OFFLINE:'未连接 · 启动 Lab 后重试'}[lab.status]||'连接状态未知'):'等待服务连接信息';
-  if(lab?.url)$('lab-target-url').textContent=lab.url;
-  $('lab-docs-link').setAttribute('aria-disabled',String(!connected));
-  if(connected)$('lab-docs-link').href=lab.url.replace(/\/+$/,'')+'/swagger-ui.html';else $('lab-docs-link').removeAttribute('href');
+  $('project-probe-cards').innerHTML=visibleProjects.map(p=>`<article class="panel project-card"><div class="project-top"><div class="project-name"><span class="project-symbol">${esc(p.name[0])}</span><h2>${esc(p.name)}</h2></div>${projectBadge(p.status)}</div><div class="project-url">${esc(p.url)}</div><div class="project-facts"><span>HTTP<strong>${p.httpStatus||'—'}</strong></span><span>响应<strong>${p.latency} ms</strong></span></div><div class="project-message">${esc(p.message)}</div><div class="project-links"><a href="${esc(p.url)}" target="_blank" rel="noreferrer" class="button small">打开服务 ↗</a><a href="${esc(p.url)}/swagger-ui.html" target="_blank" rel="noreferrer" class="button small">Swagger ↗</a><a href="${esc(p.url)}/actuator/health" target="_blank" rel="noreferrer" class="button small">健康检查 ↗</a>${p.name==='Lab'?'<a href="#lab" class="button small">进入实验室 →</a>':''}</div></article>`).join('')||(projects.length?`<div class="empty">${startedOnly&&projects.length?'暂无 HTTP 可达的已启动服务':'未配置项目服务'}</div>`:'');
+  document.querySelectorAll('#project-probe-cards .project-card').forEach((card,i)=>{const button=document.createElement('button');button.className='button small';button.textContent='运行诊断';button.onclick=()=>showProjectDetails(visibleProjects[i]);card.querySelector('.project-links').append(button);});
   $('discovered-projects').innerHTML=`<table><thead><tr><th>主类 / JAR</th><th>PID</th><th>实际监听端口</th><th>进程启动时间</th><th>累计 CPU 时间</th></tr></thead><tbody>${(state.running||[]).map(p=>`<tr><td>${esc(p.name)}</td><td class="mono">${p.pid}</td><td class="mono">${esc(p.ports.join(', ')||'无监听端口')}</td><td>${esc(p.startTime?new Date(p.startTime).toLocaleString('zh-CN'):'—')}</td><td>${p.cpuTime} s</td></tr>`).join('')||'<tr><td colspan="5" class="empty">当前账户未发现运行中的 Kuma 项目 JVM</td></tr>'}</tbody></table>`;
   renderEnvironment();
 }
@@ -339,6 +372,8 @@ function renderLabProcess(data){
   $('lab-process-state').className='status '+(data.state==='RUNNING'?'ok':data.state==='FAILED'?'bad':'');
   $('lab-process-message').textContent=data.message+(data.pid?` · PID ${data.pid}`:'');
   $('lab-start').disabled=labControlBusy||!data.canStart;$('lab-stop').disabled=labControlBusy||!data.canStop;
+  document.querySelector('[data-managed-service="lab"]').dataset.running=String(['RUNNING','EXTERNAL'].includes(data.state));
+  renderManagedServices();
 }
 async function pollLabProcess(){
   if(labPollBusy||labControlBusy)return;labPollBusy=true;
@@ -361,7 +396,9 @@ $('lab-logs').onclick=async()=>{
   catch(e){notice('lab-process-error',e.message);}
   finally{button.disabled=false;}
 };
-setInterval(()=>{if(!document.hidden&&state.page==='lab')pollLabProcess();},2000);pollLabProcess();
+function isLabServiceViewActive(){return state.page==='projects'&&state.servicesTab==='projects';}
+window.addEventListener('hashchange',()=>{if(isLabServiceViewActive())pollLabProcess();});
+setInterval(()=>{if(!document.hidden&&isLabServiceViewActive())pollLabProcess();},2000);pollLabProcess();
 function sampleValue(schema,schemas,depth=0){if(!schema||depth>4)return null;if(schema.$ref)return sampleValue(schemas[schema.$ref.split('/').pop()],schemas,depth+1);if(schema.example!==undefined)return schema.example;if(schema.default!==undefined)return schema.default;if(schema.enum)return schema.enum[0];if(schema.type==='object'||schema.properties)return Object.fromEntries(Object.entries(schema.properties||{}).map(([k,v])=>[k,sampleValue(v,schemas,depth+1)]));if(schema.type==='array')return [sampleValue(schema.items,schemas,depth+1)];if(schema.type==='boolean')return false;if(schema.type==='integer'||schema.type==='number')return 1;return '';}
 $('discover-lab').onclick=async()=>{
   const button=$('discover-lab'),status=$('lab-discovery-status');

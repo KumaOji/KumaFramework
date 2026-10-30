@@ -195,3 +195,54 @@ summary { font-size:12px;border-color:var(--border-soft) }
 @media(prefers-reduced-motion:reduce) {
   .quick-experiment { transition:none }
 }
+.ai-prompt-tools { padding:0 23px 8px }
+.ai-prompt { display:block;margin:0 23px;width:calc(100% - 46px);min-height:250px;resize:vertical;line-height:1.8 }
+.ai-entry-content { padding:0 23px 23px }
+.ai-entry-content .button { margin-top:16px }
+.public-panel-form { display:flex;align-items:end;flex-wrap:wrap;gap:12px;padding:18px }
+.public-panel-form label { display:flex;flex-direction:column;gap:7px;font-size:12px;min-width:0;flex:1 1 180px }
+.public-panel-form .public-panel-address { flex:3 1 280px }
+.public-panel-form input,.public-panel-form select { width:100% }
+.public-panel-status { margin:10px 0 }
+.public-panel-preview { display:block;width:100%;height:calc(100vh - 300px);min-height:600px;border:1px solid var(--border);border-radius:12px;background:#fff }
+.public-panel-preview[hidden] { display:none }
+.service-probes { display:contents }
+.managed-service-card[hidden] { display:none }
+.managed-probe { padding:18px 23px;border-top:1px solid var(--border) }
+.configured-services .panel-heading { border-bottom:1px solid var(--border) }
+.service-summary-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:20px }
+.service-summary { min-width:0;padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--panel);display:flex;flex-direction:column;gap:14px }
+.service-summary-heading { display:flex;align-items:center;gap:10px }
+.service-summary-heading h3 { margin:0;font-size:16px }
+.service-summary-heading p { margin-top:4px;font-size:11px }
+.service-summary-icon { display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:color-mix(in srgb,var(--mint) 12%,transparent);color:var(--mint);font-size:22px }
+.service-summary-status { display:flex;flex-wrap:wrap;gap:5px;min-height:24px }
+.service-summary-address { font:11px/1.6 ui-monospace,Consolas,monospace;overflow-wrap:anywhere;color:var(--muted);margin:0 }
+.service-summary-open { width:100%;margin-top:auto }
+.service-detail-content[hidden] { display:none }
+.service-dialog { width:min(920px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 48px);padding:0;border:1px solid var(--border);border-radius:18px;color:var(--text);background:var(--panel);box-shadow:0 24px 100px #0008;overflow:auto;overscroll-behavior:contain }
+.service-dialog::backdrop { background:#06101bb3;backdrop-filter:blur(5px) }
+.service-dialog-header { position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:15px;padding:20px 23px;background:var(--panel);border-bottom:1px solid var(--border) }
+.service-dialog-header h2 { margin-top:6px;font-size:18px }
+.service-dialog .panel-heading { flex-wrap:wrap }
+.service-dialog .component-controls { flex-wrap:wrap }
+.service-dialog .stack-row { padding:12px 23px;overflow-wrap:anywhere }
+.service-dialog #blog-knowledge-message { padding:0 23px 16px }
+.service-dialog .notice { margin:12px 23px }
+.service-dialog pre { max-height:45vh }
+.network-adapter:first-child { border-top:0 }
+.network-adapter summary { padding:16px 23px }
+.network-adapter summary::marker { color:var(--mint) }
+.network-adapter-summary { display:inline-flex;align-items:center;flex-wrap:wrap;gap:9px;vertical-align:middle;max-width:calc(100% - 20px) }
+.network-adapter-summary strong { color:var(--text);font-size:13px;overflow-wrap:anywhere }
+.network-adapter-details { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding:0 23px 20px }
+.network-adapter-details h3 { font-size:12px;margin:0 0 8px;color:var(--text) }
+.network-adapter-details p { overflow-wrap:anywhere;margin:4px 0;font-size:12px }
+.network-connectivity { margin:20px 23px 23px;border:1px solid var(--border);border-radius:12px;overflow:hidden }
+.network-connectivity h3 { margin:0;font-size:14px;font-weight:550 }
+.network-test-note { padding:0 23px 18px }
+@media(max-width:600px) { .network-connectivity { margin:14px } }
+@media(max-width:700px) { .network-adapter-details { grid-template-columns:1fr;gap:14px } }
+@media(max-width:1250px) { .service-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media(max-width:600px) { .service-summary-grid { grid-template-columns:1fr;padding:14px;gap:12px }.service-dialog { width:calc(100vw - 20px);max-height:calc(100dvh - 20px) } }
+@media(max-width:520px) { .public-panel-form label,.public-panel-form .public-panel-address { flex-basis:100% }.public-panel-preview { min-height:480px } }

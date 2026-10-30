@@ -1,11 +1,12 @@
 'use strict';
 (() => {
   const pages={
+    ai:{title:'AI 工作台',label:'AI / YOUR THOUGHT PARTNER',caption:'让想法，从这里开始',image:'settings-v1',art:'Yuna 在工作台前思考问题并操作悬浮面板'},
     overview:{title:'本机概览',label:'01 / SYSTEM OVERVIEW',caption:'看见系统的每一次脉动',description:'处理器、内存与进程，一眼掌握。',art:'银白发少女在系统监控工作台前查看数据'},
     server:{title:'服务器与 WSL',label:'02 / SERVER & WSL',caption:'远程与本机，在同一处连接',description:'远程服务器、本机 WSL 与 k3s，在同一工作空间管理。',art:'银白发少女在服务器机房检查运行状态'},
     projects:{title:'项目与组件',label:'03 / PROJECTS & COMPONENTS',caption:'让项目与公共能力，自然连接',description:'项目服务、公共组件与 Blog，在同一处管理。',art:'银白发少女整理项目蓝图与模块'},
     lab:{title:'Lab 实验室',label:'04 / EXPERIMENT ATELIER',caption:'找到实验，开始探索',description:'搜索、收藏、运行，从好奇走向理解。',art:'银白发少女在实验室观察发光的玻璃烧瓶'},
-    settings:{title:'Console 配置',label:'CONSOLE / PREFERENCES',caption:'让工作空间，更合你的习惯',image:'overview',art:'银白发的控制台助手在工作台前'}
+    settings:{title:'Console 配置',label:'CONSOLE / PREFERENCES',caption:'让工作空间，更合你的习惯',image:'settings-v1',art:'Yuna 在工作台前调整齿轮与滑块组成的悬浮配置面板'}
   };
   for(const [id,config] of Object.entries(pages)){
     const page=document.getElementById(id);if(!page)continue;
@@ -60,9 +61,10 @@
     });
   }
   function updateWorkspaceArt(){
+    const overviewImage=document.querySelector('#overview .workspace-hero-art');if(overviewImage){const network=state.overviewTab==='network';setWorkspaceArt(overviewImage,network?'network-v1':'overview',network?'Yuna 查看网络节点与地球连接图':'Yuna 在系统监控工作台前查看数据');}
     const image=document.querySelector('#server .workspace-hero-art');if(!image)return;
     const local=state.infrastructureTab==='wsl';setWorkspaceArt(image,local?'cluster':'server',local?'银白发少女观察相互连接的集群立方体':'银白发少女在服务器机房检查运行状态');
-    const projectImage=document.querySelector('#projects .workspace-hero-art');if(projectImage){const components=state.servicesTab==='components';setWorkspaceArt(projectImage,components?'components':'projects',components?'银白发少女在组件工作台检查认证与网关连接':'银白发少女整理项目蓝图与模块');}
+
   }
   window.addEventListener('hashchange',updateWorkspaceArt);updateWorkspaceArt();
   ['server','cluster','projects','components'].forEach(prepareArtwork);

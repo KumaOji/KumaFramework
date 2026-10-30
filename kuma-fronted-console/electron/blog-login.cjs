@@ -5,7 +5,7 @@ const {BrowserWindow}=require('electron');
 function attachBlogLogin(mainWindow,{show=true}={}){
   let loginWindow=null;
   const navigate=event=>{
-    if(event.isMainFrame||event.frame?.name!=='kuma-blog-preview')return;
+    if(event.isMainFrame||event.frame?.name!=='kuma-public-panel-preview')return;
     const frame=event.frame;
     let target,source;
     try{target=new URL(event.url);source=new URL(frame.url);}catch{return;}

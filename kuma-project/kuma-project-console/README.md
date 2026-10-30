@@ -29,7 +29,7 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 
 本机每 2 秒采样、项目每 10 秒、WSL/k3s 每 15 秒。采样耗时会增加实际间隔。曲线保留当前页面会话最近 60 个采样点。首次 CPU 采样显示 `—`，而非假定为 0%。网络按网卡单独展示，避免虚拟网卡重复计入合计。采样错误会明确显示，不把离线服务显示成健康。
 
-本机概览的「本地网络详情」每 30 秒读取 Windows 物理 / 虚拟 / 隐藏网卡、状态、IPv4 / IPv6 前缀、MAC、链路速度、MTU、默认网关和 DNS，并展示当前用户系统代理、绕过列表、PAC、WinHTTP 及控制台进程继承的代理环境变量。部分字段读取失败会显示错误。其他平台继续显示通用网卡信息和环境变量代理。
+「本机概览 → 本机网络」页签的「本地网络详情」每 30 秒读取 Windows 物理 / 虚拟 / 隐藏网卡、状态、IPv4 / IPv6 前缀、MAC、链路速度、MTU、默认网关和 DNS，并展示当前用户系统代理、绕过列表、PAC、WinHTTP 及控制台进程继承的代理环境变量。部分字段读取失败会显示错误。其他平台继续显示通用网卡信息和环境变量代理。
 
 「网站连通性测试」手动向百度、GitHub、Google、Cloudflare 发送 HTTPS HEAD 请求，对比直连与检测到的静态代理，显示 HTTP 状态、DNS / TCP / 总耗时及错误；各项并行执行，单项最多 8 秒，需要本机 curl。HTTP 403 / 429 仍表示链路可达。测试不跟随重定向，不执行 PAC 或自动代理发现，不使用代理绕过规则，带认证信息的代理仅脱敏展示而不参与测试；TUN / VPN 仍可接管直连流量。代理链路中的 DNS / TCP 指标可能对应代理节点，TCP 耗时为从请求开始到连接建立的累计时间。
 
@@ -41,9 +41,9 @@ Lab、Blog 后端、UAA、Gateway 启动时会检查构建缓存：已有 JAR �
 
 UAA、Gateway 与 Blog 后端通过 `scripts/service-build.ps1` 对同一工作区的服务构建互斥，避免独立 Gradle 进程并发写入共享 starter 的 classes / JAR。仅实际构建时等待，直接复用 JAR 的启动不占用构建锁；进程退出或构建失败后释放锁。可运行 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/service-build.test.ps1` 验证并发构建串行化与异常释放。
 
-「本地公共组件」位于 Lab 上方，支持 UAA 与 Gateway 的启动、停止、状态和日志。两者均在 Windows 本机运行，复用 `start-services-local.ps1 -Services uaa` 或 `-Services gateway`，自动读取 WSL 中间件地址，关闭调试端口。UAA 业务端口为 33336，Gateway 业务端口为 18080、管理端口为 18081。WSL 仅承载中间件与监控，不运行 UAA / Gateway 应用。`KUMA_COMPONENTS_DISTRIBUTION` 可指定中间件所在的 WSL 发行版，默认 `Ubuntu-24.04`。已运行的服务可被识别和停止，不会重复启动。
+「项目与组件 → 项目服务 → 已配置的服务探测」统一管理 UAA、Gateway 和 Blog。UAA / Gateway 提供独立启停、状态、日志与清空日志；复用本机启动脚本并读取 WSL 中间件地址，UAA 业务端口为 33336，Gateway 业务端口为 18080、管理端口为 18081。已运行的服务可被识别和停止，不会重复启动。
 
-Blog 页面将控制入口收在默认折叠的「配置与服务」中，展开状态会记住。启动 Blog 时，如果本机后端可启动，会同时调用现有 `scripts/start-blog-local.ps1 -Build -DebugPort 0`，自动读取 WSL 中间件地址；也可单独启动、停止后端及查看后端日志。「全部停止」停止前端、知识仓库构建和 Blog 后端。后端默认使用 `Ubuntu-24.04`，可通过 `console.blog.backend-distribution` 指定发行版。折叠区域下方直接显示 Blog 页面，可切换博客和知识仓库，也可在新窗口打开。前端登录仍使用项目现有的 Gateway / UAA 配置。
+Blog 服务卡片保留前端、后端独立启停、知识仓库同步、状态、运行目录与日志。前端与后端不会互相自动启停。Blog 和知识仓库在「公共面板」中是两个普通 URL 条目，与其他服务使用相同的编辑、展示、刷新和新窗口功能，不再有独立的 Blog 预览区。桌面登录继续使用现有 Gateway / UAA 流程。服务卡片提供直接进入 Blog 面板的按钮。
 
 启动 Blog 会先执行前端项目的 `scripts/sync-knowledge.mjs`，把同级 `KumaKnowledge` 构建到 Blog 的 `public/knowledge/`，成功后才启动前端。「同步知识仓库」按钮可独立更新内容，Blog 运行时也可使用；同步状态及构建日志会显示在 Blog 页面。停止 Blog 会取消进行中的知识仓库构建，并停止前端进程，因此 Blog 与 `/knowledge` 页面一起关闭。已生成的知识仓库文件保留。同步脚本支持通过 `KNOWLEDGE_ROOT` 指定知识仓库路径。
 
@@ -78,7 +78,7 @@ Blog 页面将控制入口收在默认折叠的「配置与服务」中，展开
 
 `console.projects` 可添加其他正在运行的项目；Lab 工作台使用名称为 `Lab` 的地址。地址包含应用的 context-path，例如 `/api`。接口路径填写 `/lab/kafka/status`，无需重复 `/api`。
 
-Lab 页面提供 **启动 Lab / 停止 Lab / 查看日志**。启动会先构建当前仓库的 Lab，再用控制台所用的 JDK 启动独立 JVM，使用 `dev` 配置和现有 `bootstrap-local.yml`，端口及 context-path 跟随 `KUMA_LAB_URL`。构建和启动均在后台执行，日志位于 Lab 的 `build/console-runtime/`。构建中也可停止；控制台退出时会停止它启动的 Lab。
+「项目与组件 → 项目服务 → 已配置的服务探测」的 Lab 卡片提供 **启动 Lab / 停止 Lab / 查看日志**，并合并 HTTP 探测与诊断；Lab 页面专注于实验目录与请求操作；服务连接、Swagger 和管理操作集中在服务探测区的 Lab 详情中。启动会先构建当前仓库的 Lab，再用控制台所用的 JDK 启动独立 JVM，使用 `dev` 配置和现有 `bootstrap-local.yml`，端口及 context-path 跟随 `KUMA_LAB_URL`。构建和启动均在后台执行，日志位于 Lab 的 `build/console-runtime/`。构建中也可停止；控制台退出时会停止它启动的 Lab。
 
 停止按钮只控制本控制台启动的进程。已有 IDE 启动的 Lab 或其他程序占用目标端口时，会显示端口占用并禁用启动。仅支持本机 HTTP Lab 地址；WSL 或远程服务继续使用实验请求功能。通常自动从当前目录向上查找仓库；独立安装的桌面程序可设置 `KUMA_CONSOLE_WORKSPACE=D:\KumaProject\KumaFramework` 指定仓库。
 
