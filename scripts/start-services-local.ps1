@@ -16,6 +16,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'service-tracing.ps1')
 . (Join-Path $PSScriptRoot 'service-wsl.ps1')
+. (Join-Path $PSScriptRoot 'service-build.ps1')
 $tracingArguments = @{}
 if (!$WithoutObservability -and !$WithoutSkywalking) {
     foreach ($service in $Services) {
@@ -25,8 +26,10 @@ if (!$WithoutObservability -and !$WithoutSkywalking) {
 }
 if ($Build) {
     $tasks = @($Services | ForEach-Object { ":kuma-project:kuma-project-${_}:bootJar" })
-    & (Join-Path $repoRoot 'gradlew.bat') -p $repoRoot @tasks --console=plain
-    if ($LASTEXITCODE -ne 0) { throw 'Service build failed.' }
+    Invoke-KumaServiceBuild -RepoRoot $repoRoot -Build {
+        & (Join-Path $repoRoot 'gradlew.bat') -p $repoRoot @tasks --console=plain
+        if ($LASTEXITCODE -ne 0) { throw 'Service build failed.' }
+    }
 }
 $routeJson = Invoke-KumaServiceWsl -Arguments @('-d', $Distribution, '--exec', 'ip', '-j', '-4', 'route', 'show', 'default')
 $windowsAddress = @($routeJson | ConvertFrom-Json)[0].gateway

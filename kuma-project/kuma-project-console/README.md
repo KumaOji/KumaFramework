@@ -39,6 +39,8 @@ WSL / k3s 页可选择已安装的发行版进行「启动发行版」「关闭�
 
 Lab、Blog 后端、UAA、Gateway 启动时会检查构建缓存：已有 JAR 与源码、资源及 Gradle 配置一致时直接启动，跳过 Gradle；缺少产物或相关输入变化时才执行增量构建。共享 starter 的源码变化也会使缓存失效，其他应用源码变化不会触发该应用构建。缓存标记保存在 `build/startup-cache/`；Lab 按 JAR 内容复用运行副本，Blog/UAA/Gateway 继续使用已有 SHA256 运行副本。前端直接运行 Astro 开发服务，保留其开发缓存；知识仓库同步在内容、代码、配置及依赖锁文件未变化时复用现有页面。可设置 `KNOWLEDGE_FORCE_BUILD=1` 强制重新生成知识仓库。
 
+UAA、Gateway 与 Blog 后端通过 `scripts/service-build.ps1` 对同一工作区的服务构建互斥，避免独立 Gradle 进程并发写入共享 starter 的 classes / JAR。仅实际构建时等待，直接复用 JAR 的启动不占用构建锁；进程退出或构建失败后释放锁。可运行 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/service-build.test.ps1` 验证并发构建串行化与异常释放。
+
 「本地公共组件」位于 Lab 上方，支持 UAA 与 Gateway 的启动、停止、状态和日志。两者均在 Windows 本机运行，复用 `start-services-local.ps1 -Services uaa` 或 `-Services gateway`，自动读取 WSL 中间件地址，关闭调试端口。UAA 业务端口为 33336，Gateway 业务端口为 18080、管理端口为 18081。WSL 仅承载中间件与监控，不运行 UAA / Gateway 应用。`KUMA_COMPONENTS_DISTRIBUTION` 可指定中间件所在的 WSL 发行版，默认 `Ubuntu-24.04`。已运行的服务可被识别和停止，不会重复启动。
 
 Blog 页面将控制入口收在默认折叠的「配置与服务」中，展开状态会记住。启动 Blog 时，如果本机后端可启动，会同时调用现有 `scripts/start-blog-local.ps1 -Build -DebugPort 0`，自动读取 WSL 中间件地址；也可单独启动、停止后端及查看后端日志。「全部停止」停止前端、知识仓库构建和 Blog 后端。后端默认使用 `Ubuntu-24.04`，可通过 `console.blog.backend-distribution` 指定发行版。折叠区域下方直接显示 Blog 页面，可切换博客和知识仓库，也可在新窗口打开。前端登录仍使用项目现有的 Gateway / UAA 配置。
