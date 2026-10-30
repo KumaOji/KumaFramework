@@ -60,15 +60,25 @@ public class HostMonitor {
             }
             List<Map<String, Object>> networks = new ArrayList<>();
             Map<String, long[]> nextNetwork = new HashMap<>();
-            for (var network : hardware.getNetworkIFs()) {
+            for (var network : hardware.getNetworkIFs(true)) {
                 network.updateAttributes();
                 long received = network.getBytesRecv(), sent = network.getBytesSent();
                 long[] before = previousNetwork.get(network.getName());
                 double down = before == null || seconds <= 0 ? 0 : Math.max(0, received - before[0]) / seconds;
                 double up = before == null || seconds <= 0 ? 0 : Math.max(0, sent - before[1]) / seconds;
-                networks.add(Map.of("name", network.getName(), "displayName", network.getDisplayName(),
+                var row = new LinkedHashMap<String, Object>(Map.of("name", network.getName(), "displayName", network.getDisplayName(),
                         "ipv4", List.of(network.getIPv4addr()), "mac", network.getMacaddr(),
                         "received", received, "sent", sent, "download", down, "upload", up));
+                row.put("ipv6", List.of(network.getIPv6addr()));
+                row.put("status", network.getIfOperStatus().toString());
+                row.put("speed", network.getSpeed());
+                row.put("mtu", network.getMTU());
+                try {
+                    var nic = java.net.NetworkInterface.getByName(network.getName());
+                    row.put("virtual", nic != null && nic.isVirtual());
+                    row.put("loopback", nic != null && nic.isLoopback());
+                } catch (java.net.SocketException ignored) {}
+                networks.add(row);
                 nextNetwork.put(network.getName(), new long[]{received, sent});
             }
             previousNetwork = nextNetwork;

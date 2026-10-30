@@ -29,6 +29,10 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 
 本机每 2 秒采样、项目每 10 秒、WSL/k3s 每 15 秒。采样耗时会增加实际间隔。曲线保留当前页面会话最近 60 个采样点。首次 CPU 采样显示 `—`，而非假定为 0%。网络按网卡单独展示，避免虚拟网卡重复计入合计。采样错误会明确显示，不把离线服务显示成健康。
 
+本机概览的「本地网络详情」每 30 秒读取 Windows 物理 / 虚拟 / 隐藏网卡、状态、IPv4 / IPv6 前缀、MAC、链路速度、MTU、默认网关和 DNS，并展示当前用户系统代理、绕过列表、PAC、WinHTTP 及控制台进程继承的代理环境变量。部分字段读取失败会显示错误。其他平台继续显示通用网卡信息和环境变量代理。
+
+「网站连通性测试」手动向百度、GitHub、Google、Cloudflare 发送 HTTPS HEAD 请求，对比直连与检测到的静态代理，显示 HTTP 状态、DNS / TCP / 总耗时及错误；各项并行执行，单项最多 8 秒，需要本机 curl。HTTP 403 / 429 仍表示链路可达。测试不跟随重定向，不执行 PAC 或自动代理发现，不使用代理绕过规则，带认证信息的代理仅脱敏展示而不参与测试；TUN / VPN 仍可接管直连流量。代理链路中的 DNS / TCP 指标可能对应代理节点，TCP 耗时为从请求开始到连接建立的累计时间。
+
 ## 配置
 
 WSL / k3s 页可选择已安装的发行版进行「启动发行版」「关闭发行版」，也可「关闭全部 WSL」。启动执行 `wsl --distribution … --exec /bin/sh -c "exec sleep infinity"` 并保持后台会话，关闭指定发行版执行 `wsl --terminate …`，关闭全部执行 `wsl --shutdown`；不删除发行版及其文件。关闭会停止其中的 Linux 服务与集群，启动后由发行版自身的 systemd 配置恢复服务。监控会先检查发行版是否运行，避免查询自动拉起已关闭的 WSL。Gateway 日志直接读取 Windows 本机文件。

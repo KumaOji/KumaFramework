@@ -10,8 +10,8 @@ function createFloatingOverview({mainWindow,origin,isQuitting=()=>false}) {
     if(!floating||event.sender!==floating.webContents||event.senderFrame!==floating.webContents.mainFrame||event.senderFrame.url!==page)
       throw Error('不允许此页面操作悬浮概览');
   }
-  function clamp(bounds) {
-    const area=screen.getDisplayNearestPoint({x:bounds.x+Math.min(bounds.width,84)/2,y:bounds.y+42}).workArea;
+  function clamp(bounds,point={x:bounds.x+42,y:bounds.y+42}) {
+    const area=screen.getDisplayNearestPoint(point).workArea;
     return {x:Math.round(Math.max(area.x,Math.min(bounds.x,area.x+area.width-bounds.width))),
       y:Math.round(Math.max(area.y,Math.min(bounds.y,area.y+area.height-bounds.height))),
       width:bounds.width,height:bounds.height};
@@ -86,8 +86,18 @@ function createFloatingOverview({mainWindow,origin,isQuitting=()=>false}) {
     if(phase==='end'){dragStart=null;return;}
     if(phase!=='move'||!dragStart)return;
     const cursor=screen.getCursorScreenPoint();
-    floating.setBounds(clamp({...floating.getBounds(),x:dragStart.bounds.x+cursor.x-dragStart.cursor.x,
-      y:dragStart.bounds.y+cursor.y-dragStart.cursor.y}));
+    // Drag the orb itself; the expanded card must not create an invisible boundary.
+    if(expanded){expanded=false;publish();}
+    const desired={width:84,height:84,
+      x:Math.round(dragStart.bounds.x+cursor.x-dragStart.cursor.x),
+      y:Math.round(dragStart.bounds.y+cursor.y-dragStart.cursor.y)};
+    const bounded=clamp(desired,cursor);
+    // Always supply the logical size: setPosition preserves rounded native bounds
+    // and can grow the transparent window on every move at fractional DPI scales.
+    floating.setBounds(bounded);
+    // Correct only blocked axes, preserving immediate reversal at screen edges.
+    dragStart.bounds.x+=bounded.x-desired.x;
+    dragStart.bounds.y+=bounded.y-desired.y;
   });
   ipcMain.handle(channels[4],event=>{authorize(event);app.quit();});
   function fit(){if(floating&&!floating.isDestroyed())floating.setBounds(clamp(floating.getBounds()));}

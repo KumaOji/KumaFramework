@@ -12,6 +12,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class ConsoleController {
     private final HostMonitor host;
+    private final NetworkDiagnostics network;
     private final ClusterMonitor cluster;
     private final ProjectMonitor projects;
     private final LabClient lab;
@@ -26,10 +27,10 @@ public class ConsoleController {
     private final LocalComponents components;
     private final WslLifecycle wslLifecycle;
 
-    public ConsoleController(HostMonitor host, ClusterMonitor cluster, ProjectMonitor projects, LabClient lab,
+    public ConsoleController(NetworkDiagnostics network, HostMonitor host, ClusterMonitor cluster, ProjectMonitor projects, LabClient lab,
                              WslInspector wsl, ProjectDiscovery discovery, ProjectDetails projectDetails, ProjectCatalog catalog,
                              RemoteServerMonitor remote, LabLifecycle lifecycle, BlogLifecycle blog, BlogBackend blogBackend, LocalComponents components, WslLifecycle wslLifecycle) {
-        this.host = host; this.cluster = cluster; this.projects = projects; this.lab = lab;
+        this.network = network; this.host = host; this.cluster = cluster; this.projects = projects; this.lab = lab;
         this.wsl = wsl; this.discovery = discovery; this.projectDetails = projectDetails;
         this.catalog = catalog;
         this.remote = remote;
@@ -41,6 +42,8 @@ public class ConsoleController {
     }
 
     @GetMapping("/host") public Object host() { return host.snapshot(); }
+    @GetMapping("/host/network") public Object network() { return network.snapshot(); }
+    @PostMapping("/host/network/test") public Object networkTest(HttpServletRequest servlet) { checkOrigin(servlet); return network.test(); }
     @GetMapping("/remote") public Object remote() { return remote.snapshot(); }
     @GetMapping("/identity") public Object identity() { return Map.of("application", "kuma-local-console"); }
     @GetMapping("/cluster") public Object cluster() { return cluster.snapshot(); }

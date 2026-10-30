@@ -1,4 +1,4 @@
-// Real Electron windows and sandboxed IPC; only the monitoring endpoint and cursor are mocked.
+// Real Electron windows and sandboxed IPC, with simulated monitoring, cursor and display conditions.
 const {app,BrowserWindow,screen}=require('electron');
 const assert=require('node:assert/strict');
 const http=require('node:http');
@@ -54,6 +54,55 @@ app.whenReady().then(async()=>{
   await evaluate('window.kumaOverview.drag("move")');await evaluate('window.kumaOverview.drag("end")');
   const area=screen.getDisplayMatching(initial).workArea;
   assert.ok(floating.getBounds().x>=area.x);assert.ok(floating.getBounds().y>=area.y);
+  const edge=floating.getBounds();
+  await evaluate('window.kumaOverview.drag("start")');
+  cursor={x:cursor.x-200,y:cursor.y-200};
+  await evaluate('window.kumaOverview.drag("move")');
+  cursor={x:cursor.x+12,y:cursor.y+12};
+  await evaluate('window.kumaOverview.drag("move")');
+  await evaluate('window.kumaOverview.drag("end")');
+  assert.equal(floating.getBounds().x,edge.x+12,'Reversing at an edge left a horizontal dead zone');
+  assert.equal(floating.getBounds().y,edge.y+12,'Reversing at an edge left a vertical dead zone');
+  // Split the real work area into two monitors to reproduce crossing with the cursor
+  // while the orb's center is still on the previous monitor.
+  const originalNearest=screen.getDisplayNearestPoint;
+  const seam=area.x+Math.floor(area.width/2);
+  screen.getDisplayNearestPoint=point=>({workArea:point.x<seam?
+    {...area,width:seam-area.x}:{...area,x:seam,width:area.x+area.width-seam}});
+  floating.setBounds({x:seam-84,y:area.y+100,width:84,height:84});
+  cursor={x:seam-10,y:area.y+142};
+  await evaluate('window.kumaOverview.drag("start")');
+  cursor={x:seam+5,y:cursor.y};
+  await evaluate('window.kumaOverview.drag("move")');
+  await evaluate('window.kumaOverview.drag("end")');
+  assert.equal(floating.getBounds().x,seam,'The previous monitor blocked crossing at the cursor');
+  screen.getDisplayNearestPoint=originalNearest;
+  // Repeated counterclockwise loops must keep the cursor-to-orb offset and size.
+  floating.setPosition(area.x+Math.floor(area.width/2),area.y+Math.floor(area.height/2));
+  const loopOrigin=floating.getBounds(),nativeGetBounds=floating.getBounds.bind(floating);
+  const loopCursor={x:loopOrigin.x+42,y:loopOrigin.y+42};
+  for(const delayedReadback of [false,true]){
+    cursor={...loopCursor};
+    await evaluate('window.kumaOverview.drag("start")');
+    if(delayedReadback)floating.getBounds=()=>({...loopOrigin});
+    try {
+      for(let step=1;step<=96;step++){
+        const angle=step*Math.PI/12;
+        cursor={x:loopCursor.x+Math.round(60*(Math.cos(angle)-1)),
+          y:loopCursor.y-Math.round(60*Math.sin(angle))};
+        await evaluate('window.kumaOverview.drag("move")');
+        const actual=nativeGetBounds();
+        assert.equal(actual.x,cursor.x-42,'Counterclockwise dragging accumulated horizontal drift');
+        assert.equal(actual.y,cursor.y-42,'Counterclockwise dragging accumulated vertical drift');
+        // Native pixels may round one DIP; they must never accumulate across moves.
+        assert.ok(Math.abs(actual.width-loopOrigin.width)<=1,`Dragging grew the invisible window at step ${step}: ${actual.width}`);
+        assert.ok(Math.abs(actual.height-loopOrigin.height)<=1,`Dragging grew the invisible window at step ${step}: ${actual.height}`);
+      }
+    } finally {
+      floating.getBounds=nativeGetBounds;
+      await evaluate('window.kumaOverview.drag("end")');
+    }
+  }
   screen.getCursorScreenPoint=originalCursor;
   // Real click opens; keyboard Escape closes; values are fetched through the real preload.
   floating.webContents.sendInputEvent({type:'mouseDown',x:42,y:42,button:'left',clickCount:1});
@@ -66,6 +115,19 @@ app.whenReady().then(async()=>{
   assert.ok(await evaluate('document.getElementById("overview").getBoundingClientRect().bottom<innerHeight'),'Panel is clipped');
   await pause(200);
   await fs.writeFile(path.join(output,'expanded.png'),(await floating.webContents.capturePage()).toPNG());
+  const expandedBounds=floating.getBounds();
+  cursor={x:expandedBounds.x+42,y:expandedBounds.y+42};
+  screen.getCursorScreenPoint=()=>cursor;
+  await evaluate('window.kumaOverview.drag("start")');
+  cursor={x:area.x+area.width-42,y:area.y+area.height-42};
+  await evaluate('window.kumaOverview.drag("move")');
+  await evaluate('window.kumaOverview.drag("end")');
+  assert.equal(floating.getBounds().width,84,'Dragging kept the expanded card boundary');
+  assert.equal(floating.getBounds().x,area.x+area.width-84);
+  assert.equal(floating.getBounds().y,area.y+area.height-84);
+  await until(()=>evaluate('document.getElementById("overview").hidden'),'Dragging did not collapse the card');
+  screen.getCursorScreenPoint=originalCursor;
+  await evaluate('window.kumaOverview.expand(true)');
   fail=true;
   await until(()=>evaluate('document.getElementById("orb-value").textContent==="未连接"'),'Connection failure not shown');
   assert.equal(await evaluate('document.getElementById("cpu").textContent'),'23.5%');
@@ -86,6 +148,6 @@ app.whenReady().then(async()=>{
   main.destroy();
   assert.equal(floating.isDestroyed(),true,'Closing console left an orphan orb');
   server.close();
-  console.log('PASS: minimize, click, drag vs click, screen bounds, overview data, disconnect/recovery, Escape, restore, hidden polling, IPC isolation and cleanup');
+  console.log('PASS: minimize, click, drag vs click, edge reversal, monitor crossing, counterclockwise loops, delayed bounds readback, stable window size, expanded drag, screen bounds, overview data, disconnect/recovery, Escape, restore, hidden polling, IPC isolation and cleanup');
   app.exit(0);
 }).catch(error=>{console.error(error);server?.close();app.exit(1);});

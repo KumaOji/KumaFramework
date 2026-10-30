@@ -46,10 +46,10 @@ public class Flow extends FlowNode {
       Set<ConstraintViolation<AbstractNode>> constraintViolations = ValidatorUtils.validate(this, new Class[0]);
       if (constraintViolations != null && !constraintViolations.isEmpty()) {
          StringBuilder errorMessage = new StringBuilder();
-         errorMessage.append("Flow\u5b9a\u4e49\u68c0\u67e5\u51fa\u9519,name=").append(this.getName()).append(",version=").append(this.version).append("");
+         errorMessage.append("Flow定义检查出错,name=").append(this.getName()).append(",version=").append(this.version).append("");
 
          for(ConstraintViolation<AbstractNode> constraintViolation : constraintViolations) {
-            errorMessage.append("\u9519\u8bef\u4fe1\u606f:").append(constraintViolation.getPropertyPath().toString()).append("->").append(constraintViolation.getMessage()).append(",节点信息:").append(constraintViolation.getLeafBean().toString()).append(",");
+            errorMessage.append("错误信息:").append(constraintViolation.getPropertyPath().toString()).append("->").append(constraintViolation.getMessage()).append(",节点信息:").append(constraintViolation.getLeafBean().toString()).append(",");
          }
 
          throw new FlowException(errorMessage.substring(0, errorMessage.length() - 1));

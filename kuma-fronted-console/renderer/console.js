@@ -99,6 +99,26 @@ function renderServerCluster() {
 $('server-k3s-tabs').onclick=e=>{const b=e.target.closest('[data-kind]');if(!b)return;serverClusterKind=b.dataset.kind;document.querySelectorAll('#server-k3s-tabs button').forEach(x=>x.classList.toggle('active',x===b));renderServerCluster();};
 $('server-k3s-namespace').onchange=renderServerCluster;
 $('server-k3s-search').oninput=renderServerCluster;
+function renderNetwork() {
+  const n=state.network;
+  notice('network-warning',state.errors.network||n?.error||n?.note||'');
+  if(!n?.ready)return;
+  $('network-updated').textContent=time(n.sampledAt);
+  const adapters=n.adapters||[];
+  $('network-adapters').innerHTML=adapters.length?`<table><thead><tr><th>网卡 / 类型</th><th>状态 / 链路</th><th>地址</th><th>网关 / DNS</th></tr></thead><tbody>${[...adapters].sort((a,b)=>Number(b.status==='Up')-Number(a.status==='Up')||Number(a.virtual)-Number(b.virtual)).map(a=>`<tr><td><strong>${esc(a.name)}</strong> ${badge(a.virtual?'虚拟':'物理')}${a.hidden?badge('隐藏'):''}<div class="muted">${esc(a.description)}</div><div class="muted">MAC ${esc(a.mac||'—')} · MTU ${esc(a.mtu??'—')}</div></td><td>${badge(a.status,a.status==='Up'?'ok':'')}<div>${esc(a.speed)}</div></td><td class="mono">${[...(a.ipv4||[]),...(a.ipv6||[])].map(esc).join('<br>')||'无 IP'}</td><td>网关：${esc((a.gateways||[]).join(' / ')||'—')}<br>DNS：${esc((a.dns||[]).join(' / ')||'—')}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">暂无平台网卡详情，通用网卡信息见上方网络接口</div>';
+  const p=n.system||{};
+  const rows=[['Windows 用户代理',p.enabled?'已启用 · '+(p.server||'未配置地址'):'未启用'],['代理绕过',p.bypass||'—'],['PAC 配置',p.pac||'未配置'],...(n.environment||[]).map(e=>[e.name,e.value]),['可测试代理',(n.proxyRoutes||[]).join(' / ')||'未检测到可测试的静态代理（带认证信息的代理不参与测试）']];
+  $('network-proxies').innerHTML=rows.map(([k,v])=>`<div class="stack-row"><strong>${esc(k)}</strong><div class="subtle">${esc(v)}</div></div>`).join('')+(n.winhttp?`<details><summary>WinHTTP 代理</summary><pre>${esc(n.winhttp)}</pre></details>`:'');
+}
+$('network-test').onclick=async()=>{
+  const button=$('network-test'),status=$('network-test-status');button.disabled=true;button.setAttribute('aria-busy','true');status.textContent='正在测试直连与代理链路…';
+  try {
+    const data=await api('/api/host/network/test',{method:'POST'});
+    $('network-test-results').innerHTML=`<table><thead><tr><th>网站</th><th>链路</th><th>结果</th><th>DNS / TCP / 总耗时</th><th>远端 IP / 错误</th></tr></thead><tbody>${data.results.map(r=>`<tr><td><strong>${esc(r.name)}</strong><div class="muted">${esc(r.url)}</div></td><td>${esc(r.route)}</td><td>${badge(r.reachable?'可达':'失败',r.reachable?'ok':'bad')}<div>${r.status?'HTTP '+esc(r.status):'无 HTTP 响应'}</div></td><td class="mono">${[r.dnsMs,r.connectMs,r.totalMs].map(v=>v==null?'—':Math.round(v)+' ms').join(' / ')}</td><td>${esc(r.remoteIp||'—')}<div class="muted">${esc(r.error)}</div></td></tr>`).join('')}</tbody></table>`;
+    status.textContent='最近测试 '+time(data.testedAt)+' · TCP 为从请求开始到连接建立的累计耗时';
+  }catch(e){status.textContent='测试失败：'+e.message+'；下方保留上次结果';}
+  finally{button.disabled=false;button.removeAttribute('aria-busy');}
+};
 function renderHost() {
   const h = state.host; notice('host-warning',state.errors.host || h?.error);
   if(!h?.ready || !h.cpu) return;
@@ -369,6 +389,6 @@ $('discover-lab').onclick=async()=>{
   }catch(e){status.dataset.state='error';status.textContent='同步失败：'+e.message+'。请确认 Lab 已启动；内置实验仍可浏览。';}
   finally{button.disabled=false;button.textContent='同步接口';button.removeAttribute('aria-busy');}
 };
-async function refresh(){if(state.busy)return;state.busy=true;$('refresh').disabled=true;const keys=['host','cluster','projects','remote'];if(!state.runningAt||Date.now()-state.runningAt>10000){keys.push('running');state.runningAt=Date.now();}const results=await Promise.allSettled(keys.map(async key=>{state[key]=await api(key==='running'?'/api/projects/running':'/api/'+key);delete state.errors[key];}));results.forEach((r,i)=>{if(r.status==='rejected')state.errors[keys[i]]=r.reason.message;});renderHost();renderCluster();renderProjects();renderServer();const failed=Object.keys(state.errors).length;$('connection').innerHTML=`<i class="live-dot" style="${failed?'background:var(--amber)':''}"></i>${failed?'部分连接异常':'本机已连接'}`;state.busy=false;$('refresh').disabled=false;}
+async function refresh(){if(state.busy)return;state.busy=true;$('refresh').disabled=true;const keys=['host','cluster','projects','remote'];if(!state.networkAt||Date.now()-state.networkAt>30000){keys.push('network');state.networkAt=Date.now();}if(!state.runningAt||Date.now()-state.runningAt>10000){keys.push('running');state.runningAt=Date.now();}const results=await Promise.allSettled(keys.map(async key=>{state[key]=await api(key==='running'?'/api/projects/running':key==='network'?'/api/host/network':'/api/'+key);delete state.errors[key];}));results.forEach((r,i)=>{if(r.status==='rejected')state.errors[keys[i]]=r.reason.message;});renderHost();renderNetwork();renderCluster();renderProjects();renderServer();const failed=Object.keys(state.errors).length;$('connection').innerHTML=`<i class="live-dot" style="${failed?'background:var(--amber)':''}"></i>${failed?'部分连接异常':'本机已连接'}`;state.busy=false;$('refresh').disabled=false;}
 $('refresh').onclick=refresh;$('pause').onclick=()=>{state.paused=!state.paused;$('pause').textContent=state.paused?'恢复刷新':'暂停刷新';$('footer-status').textContent=state.paused?'面板刷新已暂停 · 后台仍在采样':'本机 2s / 项目 10s / 集群与服务器 15s';};
 setInterval(()=>{$('clock').textContent=new Date().toLocaleString('zh-CN',{hour12:false});},1000);setInterval(()=>{if(!state.paused&&!document.hidden)refresh();},2000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!state.paused)refresh();});refresh();
