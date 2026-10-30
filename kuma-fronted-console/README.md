@@ -10,7 +10,7 @@
 
 左下角独立的「Console 配置」入口位于工作空间分组之外，折叠分组后仍可访问，窄侧栏显示齿轮图标。配置页（`#settings`）集中提供深浅主题、浏览器启动欢迎动画开关、动画预览、Windows 桌面开机自启及当前客户端信息。主题与欢迎动画偏好保存在当前客户端；桌面启动页继续用于展示真实服务启动进度。
 
-顶部标题栏、侧栏、启动页和浏览器页签共用 `renderer/assets/kuma-console.svg`；桌面窗口使用同目录的 ICO / PNG。修改矢量标识后运行 `pnpm run build:icons`，生成 256px PNG 与包含 16–256px 七种尺寸的 Windows ICO，再重建后端。
+顶部标题栏、侧栏、启动页和浏览器页签共用 Yuna 头像 `renderer/assets/kuma-console.png`；桌面窗口、托盘和打包程序使用同目录的 ICO / PNG。头像原图位于 `renderer/assets/yuna/app-icon-v1.png`，提示词见同目录 `APP-ICON.md`。更新原图后运行 `pnpm run build:icons`，生成 256px PNG 与包含 16–256px 七种尺寸的 Windows ICO，再重建后端。
 
 `renderer/yuna-workspace.js` 统一组织页头和导航图片，保留原有监控数据节点与操作按钮；`renderer/yuna-workspace.css` 提供场景主题，最后加载的 `renderer/design-system.css` 统一字体、卡片、边框、阴影及控件状态。普通卡片使用 16px 圆角和轻阴影，内部容器使用 11px 圆角，控件使用 9px 圆角；深浅主题分别设置边框、阴影和焦点颜色，字体使用本地系统字体，无需联网。`renderer/assets/yuna/` 保存本地插画与生成记录，运行时不依赖 Yuna 项目路径或外部图片服务。Electron 启动页使用同套插画与独立的 `electron/yuna-splash.css`。
 
