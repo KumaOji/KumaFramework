@@ -3,6 +3,8 @@
 部署 Loki、Grafana、Prometheus 和 Alertmanager，命名空间为 `base`。
 本目录用于本地 K3s，现有远程部署流水线仅应用 `base`、`blog` 和服务器覆盖配置。
 
+本地覆盖配置通过 `grafana-embedding.yaml` 设置 `GF_SECURITY_ALLOW_EMBEDDING=true`，允许 Console 的「公共面板」嵌入 Grafana。仍需使用现有账号登录；未启用匿名访问。该设置仅加入本地覆盖，不修改服务器覆盖配置。
+
 固定版本：Loki 3.7.8、Grafana 13.2.3、Prometheus 3.15.0、Alertmanager 0.34.1。
 
 ## 部署

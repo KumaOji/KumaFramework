@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - ../../monitoring
   - gateway-metrics.yaml
+patches:
+  - path: grafana-embedding.yaml
