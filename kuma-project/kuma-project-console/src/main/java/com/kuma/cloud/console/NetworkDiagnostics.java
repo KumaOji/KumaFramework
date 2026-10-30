@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -43,7 +44,7 @@ public class NetworkDiagnostics {
         data.put("adapters", List.of());
         data.put("system", Map.of());
         if (System.getProperty("os.name").startsWith("Windows")) {
-            var result = commands.run(List.of("powershell", "-NoProfile", "-Command", """
+            var result = commands.run(powershellCommand("""
                     [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
                     $ErrorActionPreference = 'Stop'
                     $p = Get-ItemProperty 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'
@@ -73,6 +74,12 @@ public class NetworkDiagnostics {
         data.put("proxyRoutes", proxies.keySet().stream().toList());
         data.put("ready", true); data.put("sampledAt", Instant.now().toString());
         probeProxies = Collections.unmodifiableMap(proxies); snapshot = Collections.unmodifiableMap(data);
+    }
+
+    static List<String> powershellCommand(String script) {
+        // Windows command-line parsing can strip quotes inside a -Command argument.
+        return List.of("powershell", "-NoProfile", "-EncodedCommand",
+                Base64.getEncoder().encodeToString(script.getBytes(StandardCharsets.UTF_16LE)));
     }
 
     static String windowsHttpsProxy(String server) {
