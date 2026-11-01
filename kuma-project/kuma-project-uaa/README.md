@@ -58,3 +58,9 @@ metadata, not proof of an authenticated tenant.
 
 After these changes, rebuild and restart the service from Kuma Console. Logs are in
 `logs/<service>-local/stdout.log`; Agent diagnostics are in `logs/<service>-local/skywalking/`.
+
+
+## 配置热更新
+
+支持范围、配置发布方式与验证命令见 [三服务配置热更新](../CONFIG_REFRESH.md)。
+部署本次代码后重启一次，后续在 Nacos 发布受支持的配置即可生效。
