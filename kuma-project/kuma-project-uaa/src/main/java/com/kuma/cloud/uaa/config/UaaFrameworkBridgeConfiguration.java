@@ -4,6 +4,8 @@ import com.kuma.boot.security.spring.autoconfigure.properties.OAuth2EndpointProp
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
 
 /**
  * 将 UAA 业务配置同步到框架 OAuth2 端点属性，供消费方与文档工具统一引用。
@@ -16,6 +18,7 @@ public class UaaFrameworkBridgeConfiguration {
     private final OAuth2EndpointProperties endpointProperties;
 
     @PostConstruct
+    @EventListener(RefreshScopeRefreshedEvent.class)
     public void syncFrameworkEndpoints() {
         String issuer = uaaProperties.getIssuer();
         endpointProperties.setIssuerUri(issuer);

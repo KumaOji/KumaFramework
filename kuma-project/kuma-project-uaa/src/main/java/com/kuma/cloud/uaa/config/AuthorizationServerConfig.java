@@ -1,7 +1,10 @@
 package com.kuma.cloud.uaa.config;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import com.kuma.boot.security.spring.constants.DefaultConstants;
 import com.kuma.cloud.uaa.security.UaaOidcUserInfoMapper;
+import com.kuma.cloud.uaa.support.RefreshingRegisteredClientRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -42,6 +45,7 @@ public class AuthorizationServerConfig {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE + 10)
+    @RefreshScope(proxyMode = ScopedProxyMode.INTERFACES)
     public SecurityFilterChain authorizationServerSecurityFilterChain(
             HttpSecurity http, JwtDecoder jwtDecoder, UaaOidcUserInfoMapper userInfoMapper)
             throws Exception {
@@ -66,8 +70,9 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-        return new JdbcRegisteredClientRepository(jdbcTemplate);
+    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate, UaaProperties properties) {
+        return new RefreshingRegisteredClientRepository(
+                new JdbcRegisteredClientRepository(jdbcTemplate), properties);
     }
 
     /**
@@ -86,6 +91,8 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
+    // AuthorizationServerSettings is final. Recreate it with the refreshed security chain, without a class proxy.
+    @RefreshScope(proxyMode = ScopedProxyMode.NO)
     public AuthorizationServerSettings authorizationServerSettings(UaaProperties properties) {
         return AuthorizationServerSettings.builder().issuer(properties.getIssuer()).build();
     }

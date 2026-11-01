@@ -1,5 +1,6 @@
 package com.kuma.cloud.uaa.config;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -15,6 +16,7 @@ import java.util.Set;
  * @author kuma
  */
 @Data
+@RefreshScope
 @ConfigurationProperties(prefix = UaaProperties.PREFIX)
 public class UaaProperties {
 

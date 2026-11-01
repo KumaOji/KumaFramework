@@ -1,5 +1,7 @@
 package com.kuma.cloud.uaa.config;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import com.kuma.cloud.uaa.security.UaaSecurityResponses;
 import com.kuma.boot.security.spring.autoconfigure.properties.SecurityProperties;
 import com.kuma.boot.security.spring.oauth2.authentication.SecurityJwtGrantedAuthoritiesConverter;
@@ -56,6 +58,7 @@ public class DefaultSecurityConfig {
 
     @Bean
     @Order(2)
+    @RefreshScope(proxyMode = ScopedProxyMode.INTERFACES)
     public SecurityFilterChain defaultSecurityFilterChain(
             HttpSecurity http,
             JwtDecoder jwtDecoder,

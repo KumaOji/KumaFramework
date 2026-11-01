@@ -1,5 +1,7 @@
 package com.kuma.cloud.uaa.config;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -48,6 +50,7 @@ public class JwkConfig {
     private static final String PEM_FOOTER = "-----END PRIVATE KEY-----";
 
     @Bean
+    @RefreshScope(proxyMode = ScopedProxyMode.INTERFACES)
     public JWKSource<SecurityContext> jwkSource(UaaProperties properties) {
         RSAKey rsaKey = loadOrCreateRsaKey(properties.getJwk());
         log.info("UAA JWKS 就绪，kid={}", rsaKey.getKeyID());
@@ -60,6 +63,7 @@ public class JwkConfig {
      */
     @Bean
     @Primary
+    @RefreshScope(proxyMode = ScopedProxyMode.INTERFACES)
     public JwtDecoder uaaJwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
