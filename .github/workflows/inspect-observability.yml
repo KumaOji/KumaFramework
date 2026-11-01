@@ -10,6 +10,22 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
+      - name: Inspect application deployments and Blog startup
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 5m
+          script: |
+            kubectl get deployments -n base gateway uaa lab -o wide
+            kubectl get deployment/blog-background -n blog -o wide
+            kubectl get pods -n base -l 'app in (gateway,uaa,lab)' -o wide
+            kubectl get pods -n blog -l app=blog-background -o wide
+            kubectl get events -n blog --sort-by=.lastTimestamp | tail -30
+            kubectl logs -n blog deployment/blog-background --all-containers=true --tail=160 || true
+            kubectl logs -n blog deployment/blog-background --all-containers=true --previous --tail=80 || true
+            kubectl get --request-timeout=15s --raw /api/v1/namespaces/blog/services/http:blog-background:management/proxy/actuator/health/readiness || true
       - name: Inspect server observability resources
         uses: appleboy/ssh-action@v1
         with:
