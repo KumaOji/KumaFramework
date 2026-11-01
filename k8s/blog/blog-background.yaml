@@ -9,7 +9,10 @@ spec:
   # 镜像拉取也计入部署进度期限，与 CI 的 rollout 等待时间保持一致。
   progressDeadlineSeconds: 1800
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: blog-background
