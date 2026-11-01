@@ -2,6 +2,11 @@ name: Inspect Observability
 
 on:
   workflow_dispatch:
+    inputs:
+      recover_blog:
+        description: Roll back Blog to the previous deployment revision before inspection
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -10,6 +15,18 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
+      - name: Restore previous Blog deployment
+        if: ${{ inputs.recover_blog }}
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BLOG_SERVER_HOST }}
+          username: ${{ secrets.BLOG_SERVER_USER }}
+          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -eu
+            kubectl rollout undo deployment/blog-background -n blog
+            kubectl rollout status deployment/blog-background -n blog --timeout=540s
       - name: Inspect application deployments and Blog startup
         uses: appleboy/ssh-action@v1
         with:
