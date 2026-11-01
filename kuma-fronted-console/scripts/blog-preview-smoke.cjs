@@ -18,12 +18,12 @@ app.whenReady().then(async()=>{
     if(pathname==='/preview'){homeRequests++;return res.end('<h1>Blog home</h1>');}
     if(pathname==='/knowledge'){knowledgeRequests++;return res.end('<h1>Knowledge</h1>');}
     if(pathname!=='/console'){res.writeHead(404);return res.end();}
-    const panels=[{name:'Blog',url:base.replace('127.0.0.1','localhost')+'/preview'},{name:'知识仓库',url:base.replace('127.0.0.1','localhost')+'/knowledge'}];
+    const panels=[{name:'Blog',url:base.replace('127.0.0.1','localhost')+'/preview'},{name:'Custom page',url:base.replace('127.0.0.1','localhost')+'/knowledge'}];
     const scaffold=`<script>
       const $=id=>document.getElementById(id);
       const state={page:'overview',servicesTab:'projects'};
       localStorage.setItem('kuma-public-panels-v1',${JSON.stringify(JSON.stringify(panels))});
-      localStorage.setItem('kuma-public-panels-catalog-version','3');
+      localStorage.setItem('kuma-public-panels-catalog-version','6');
     </script><script src='/public-panels.js' defer></script>`;
     const html=fs.readFileSync(path.join(renderer,'index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'');
     res.end(html.replace('</head>',scaffold+'</head>'));
@@ -50,7 +50,7 @@ app.whenReady().then(async()=>{
   assert.equal(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1'))[1].name"),'Custom knowledge');
   await js("$('public-panel-delete').click()");
   assert.equal(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length"),1);
-  console.log('PASS: Blog and knowledge use editable ordinary panels, shared iframe/refresh, no lifecycle gating or automatic load messages');
+  console.log('PASS: Blog and custom URLs use editable ordinary panels, shared iframe/refresh, no lifecycle gating or automatic load messages');
   window.destroy();server.close();app.quit();
 }).catch(error=>{console.error(error);window?.destroy();server?.close();app.exit(1);});
 setTimeout(()=>app.exit(1),25000).unref();

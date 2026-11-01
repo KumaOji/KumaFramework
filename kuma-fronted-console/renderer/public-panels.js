@@ -7,25 +7,18 @@
   const status=document.getElementById('public-panel-status');
   const storageKey='kuma-public-panels-v1';
   const catalogKey='kuma-public-panels-catalog-version';
+  const grafanaHome={name:'Grafana',url:'http://localhost:3000/'};
   const blogPanels=[
-    {name:'Blog',url:'http://localhost:4321'},
-    {name:'知识仓库',url:'http://localhost:4321/knowledge'}
+    {name:'Blog',url:'http://localhost:4321'}
   ];
   function feedback(text){status.textContent=text;status.hidden=!text;}
   const additions=[
     {name:'n8n · 工作流自动化',url:'http://localhost:5678',externalOnly:true},
     {name:'Nacos · 配置与注册中心',url:'http://localhost:8848/nacos/',externalOnly:true},
-    {name:'Qdrant · 向量数据库',url:'http://localhost:6333/dashboard',externalOnly:true},
-    {name:'Grafana · 总览',url:'http://localhost:3000/d/kuma-overview'},
-    {name:'Grafana · 监控组件',url:'http://localhost:3000/d/kuma-monitoring'},
-    {name:'Grafana · 日志',url:'http://localhost:3000/d/kuma-logs'},
-    {name:'Grafana · 调用链',url:'http://localhost:3000/d/kuma-traces'},
-    {name:'Grafana · Gateway',url:'http://localhost:3000/d/kuma-gateway'},
-    {name:'Grafana · Reference',url:'http://localhost:3000/d/kuma-reference'}
+    {name:'Qdrant · 向量数据库',url:'http://localhost:6333/dashboard',externalOnly:true}
   ];
   const defaults=[
-    {name:'Grafana · Kuma Services',url:'http://localhost:3000/d/kuma-services'},
-    {name:'Grafana · 日志与链路 Explore',url:'http://localhost:3000/explore'},
+    grafanaHome,
     {name:'Prometheus',url:'http://localhost:9090'},
     {name:'Alertmanager',url:'http://localhost:9093'},
     {name:'SkyWalking',url:'http://localhost:12880'},
@@ -44,9 +37,10 @@
       try{return p&&typeof p.name==='string'&&p.name.trim()&&typeof p.url==='string'&&validUrl(p.url);}catch{return false;}
     }).slice(0,100);
     const version=Number(localStorage.getItem(catalogKey)||0);
-    if(version<5){
+    if(version<7){
       if(Array.isArray(saved)){
-        for(const panel of [...(version<2?additions:[]),...(version<3?blogPanels:[])]){
+        panels=panels.filter(panel=>{const url=new URL(panel.url);return !(panel.name==='知识仓库'&&['localhost','127.0.0.1'].includes(url.hostname)&&url.port==='4321'&&['/knowledge','/knowledge/'].includes(url.pathname)&&!url.search&&!url.hash);});
+        for(const panel of [...(version<2?[grafanaHome,...additions]:[]),...(version<3?blogPanels:[])]){
           if(panels.length>=100)break;
           if(!panels.some(p=>new URL(p.url).href===new URL(panel.url).href||p.name===panel.name))panels.push(panel);
         }
@@ -54,11 +48,14 @@
         for(const panel of panels){
           const url=new URL(panel.url);
           if(version<4&&url.port==='8848'&&['/nacos','/nacos/'].includes(url.pathname)){url.pathname='/nacos/';panel.url=url.href;panel.externalOnly=true;}
-          if(url.port==='5678')panel.externalOnly=true;
+          if(version<5&&url.port==='5678')panel.externalOnly=true;
         }
+        const localGrafana=panel=>{const url=new URL(panel.url);return ['localhost','127.0.0.1','[::1]'].includes(url.hostname)&&url.port==='3000';};
+        const grafanaIndex=panels.findIndex(localGrafana);
+        if(grafanaIndex>=0){panels=panels.filter(panel=>!localGrafana(panel));panels.splice(Math.min(grafanaIndex,panels.length),0,{...grafanaHome});}
         localStorage.setItem(storageKey,JSON.stringify(panels));
       }
-      localStorage.setItem(catalogKey,'5');
+      localStorage.setItem(catalogKey,'7');
     }
   }catch{feedback('保存的配置无法读取，已加载默认入口');}
   function persist(){

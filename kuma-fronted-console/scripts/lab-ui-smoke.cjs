@@ -306,8 +306,7 @@ app.whenReady().then(async()=>{
   assert.equal(knowledgeSyncs,1);
   await evaluate(`document.getElementById('blog-preview-entry').click();`);
   await waitFor(`state.servicesTab==='panels' && !document.getElementById('service-dialog').open && document.getElementById('public-panel-preview').src==='http://localhost:4321/'`);
-  await evaluate(`const selector=document.getElementById('public-panel-select');selector.value=Array.from(selector.options).find(o=>o.textContent==='知识仓库').value;selector.dispatchEvent(new Event('change'));`);
-  assert.equal(await evaluate(`document.getElementById('public-panel-preview').src`),'http://localhost:4321/knowledge');
+  assert.ok(await evaluate(`!Array.from(document.getElementById('public-panel-select').options).some(option=>option.textContent==='知识仓库')`));
   await evaluate(`location.hash='projects';navigate();`);
   await waitFor(`!document.getElementById('blog-backend-start').disabled`);
   await evaluate(`ServiceDialog.open('blog');document.getElementById('blog-backend-start').click();`);

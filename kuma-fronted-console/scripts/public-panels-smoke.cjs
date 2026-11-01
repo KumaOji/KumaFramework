@@ -25,8 +25,8 @@ app.whenReady().then(async()=>{
   await js(`${helpers}const state={page:'overview'};let pageScrollTimer;function closeDrawer(){};${navigation}window.addEventListener('hashchange',navigate);navigate();`);
   await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
   const initialCount=await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length");
-  assert.equal(initialCount,12,'Existing custom panel plus eleven new built-in entries');
-  assert.ok(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name.includes('n8n') && p.externalOnly===true) && JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name.includes('Nacos') && new URL(p.url).pathname==='/nacos/') && localStorage.getItem('kuma-public-panels-catalog-version')==='5'"));
+  assert.equal(initialCount,6,'Existing custom panel plus Grafana home, three WSL apps and Blog');
+  assert.ok(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name.includes('n8n') && p.externalOnly===true) && JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name.includes('Nacos') && new URL(p.url).pathname==='/nacos/') && localStorage.getItem('kuma-public-panels-catalog-version')==='7' && !JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name==='知识仓库')"));
   assert.equal(hits,0,'Hidden panel must not load');
   await js("location.hash='projects/panels'");
   await waitFor("state.servicesTab==='panels' && !$('public-panels').hidden && $('public-panel-preview').getAttribute('src')");
@@ -62,6 +62,16 @@ app.whenReady().then(async()=>{
   await js("const state={page:'overview',servicesTab:'projects'};");
   await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
   assert.ok(await js("(()=>{const panels=JSON.parse(localStorage.getItem('kuma-public-panels-v1'));return panels.length===1 && panels[0].name==='My n8n' && panels[0].url==='http://localhost:5678/workflows?view=custom#keep' && panels[0].externalOnly===true;})()"),'n8n upgrade preserves custom URL/name and switches to a standalone window');
+  await js(`localStorage.setItem('kuma-public-panels-catalog-version','5');localStorage.setItem('kuma-public-panels-v1',${JSON.stringify(JSON.stringify([{name:'Blog',url:'http://localhost:4321'},{name:'知识仓库',url:'http://localhost:4321/knowledge'},{name:'My custom page',url}]))});`);
+  await new Promise(resolve=>{window.webContents.once('did-finish-load',resolve);window.reload();});
+  await js("const state={page:'overview',servicesTab:'projects'};");
+  await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
+  assert.ok(await js("(()=>{const panels=JSON.parse(localStorage.getItem('kuma-public-panels-v1'));return panels.length===2 && panels[0].name==='Blog' && panels[1].name==='My custom page';})()"),'Catalog upgrade removes the old knowledge preset and keeps Blog/custom panels');
+  await js(`localStorage.setItem('kuma-public-panels-catalog-version','6');localStorage.setItem('kuma-public-panels-v1',${JSON.stringify(JSON.stringify([{name:'Grafana services',url:'http://localhost:3000/d/kuma-services'},{name:'Blog',url:'http://localhost:4321'},{name:'Grafana Explore',url:'http://127.0.0.1:3000/explore'},{name:'Grafana home',url:'http://localhost:3000/'},{name:'My custom page',url}]))});`);
+  await new Promise(resolve=>{window.webContents.once('did-finish-load',resolve);window.reload();});
+  await js("const state={page:'overview',servicesTab:'projects'};");
+  await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
+  assert.ok(await js("(()=>{const panels=JSON.parse(localStorage.getItem('kuma-public-panels-v1'));return panels.length===3 && panels[0].name==='Grafana' && panels[0].url==='http://localhost:3000/' && panels[1].name==='Blog' && panels[2].name==='My custom page';})()"),'Grafana dashboards collapse into one home entry without changing other services');
   console.log('PASS: tab routing, lazy iframe loading, custom URLs, persistence, escaped names, rejected schemes, unload and removal');
   window.destroy();server.close();fixture.close();app.quit();
 }).catch(e=>{console.error(e);window?.destroy();server?.close();fixture?.close();app.exit(1);});
