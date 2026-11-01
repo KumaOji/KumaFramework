@@ -16,12 +16,13 @@
 
 package com.kuma.cloud.gateway.config;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
 import com.kuma.cloud.gateway.filter.GatewayAuditWebFilter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -38,11 +39,11 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableWebFluxSecurity
-@ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GatewaySecurityConfiguration {
 
     @Bean
     @Order(0)
+    @RefreshScope(proxyMode = ScopedProxyMode.INTERFACES)
     public SecurityWebFilterChain gatewaySecurityWebFilterChain(
             ServerHttpSecurity http, GatewayCloudProperties properties,
             ObjectProvider<GatewayAuditWebFilter> auditFilters,
@@ -58,7 +59,7 @@ public class GatewaySecurityConfiguration {
             http.addFilterAfter(audit::capturePrincipal, SecurityWebFiltersOrder.SECURITY_CONTEXT_SERVER_WEB_EXCHANGE);
         }
 
-        if (properties.getAuth().isEnabled()) {
+        if (properties.isEnabled() && properties.getAuth().isEnabled()) {
             http.authorizeExchange(exchanges -> {
                 if (managementPort != serverPort) {
                     exchanges.pathMatchers("/actuator/prometheus", "/actuator/metrics/**", "/actuator/env/**")

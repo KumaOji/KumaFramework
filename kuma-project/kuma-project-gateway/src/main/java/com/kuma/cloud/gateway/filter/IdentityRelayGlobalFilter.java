@@ -51,6 +51,9 @@ public class IdentityRelayGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        if (!properties.isEnabled()) {
+            return chain.filter(exchange);
+        }
         ServerHttpRequest.Builder builder = exchange.getRequest().mutate();
         String clientIp = ClientIpResolver.resolve(exchange.getRequest(), properties.isTrustProxyHeaders());
         builder.header(GatewayHeaders.GATEWAY_SOURCE, GatewayHeaders.GATEWAY_SOURCE_VALUE);

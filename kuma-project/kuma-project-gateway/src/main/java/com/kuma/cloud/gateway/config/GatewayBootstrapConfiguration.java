@@ -19,7 +19,6 @@ package com.kuma.cloud.gateway.config;
 import com.kuma.boot.common.utils.log.LogUtils;
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(GatewayCloudProperties.class)
-@ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GatewayBootstrapConfiguration implements InitializingBean {
 
     @Override

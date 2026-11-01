@@ -26,7 +26,6 @@ import com.kuma.cloud.gateway.filter.StripIdentityHeadersGlobalFilter;
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,7 +36,6 @@ import org.springframework.context.annotation.Configuration;
  * @since 2026-04-23
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GatewayFilterConfiguration {
 
     @Bean
@@ -66,7 +64,6 @@ public class GatewayFilterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".access", name = "enabled", havingValue = "true")
     public ClientAccessGlobalFilter clientAccessGlobalFilter(GatewayCloudProperties properties) {
         return new ClientAccessGlobalFilter(properties);
     }
@@ -79,7 +76,6 @@ public class GatewayFilterConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".log", name = "enabled", havingValue = "true", matchIfMissing = true)
     public RequestLogGlobalFilter requestLogGlobalFilter(
             GatewayCloudProperties properties, ObjectProvider<com.kuma.boot.ip2region.model.Ip2regionSearcher> ip2regionSearcher) {
         return new RequestLogGlobalFilter(properties, ip2regionSearcher);

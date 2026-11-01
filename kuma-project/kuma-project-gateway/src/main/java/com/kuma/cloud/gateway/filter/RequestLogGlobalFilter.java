@@ -64,6 +64,9 @@ public class RequestLogGlobalFilter implements WebFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        if (!properties.isEnabled() || !properties.getLog().isEnabled()) {
+            return chain.filter(exchange);
+        }
         GatewayCloudProperties.Log logConfig = properties.getLog();
         String path = exchange.getRequest().getURI().getPath();
         if (GatewayPathMatcher.matchesAny(path, logConfig.getExcludePaths())) {

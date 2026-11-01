@@ -28,7 +28,6 @@ import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,27 +41,18 @@ public class ClientAccessGlobalFilter implements GlobalFilter, Ordered {
     private static final Logger log = LoggerFactory.getLogger(ClientAccessGlobalFilter.class);
 
     private final GatewayCloudProperties properties;
-    private final List<IpAddressMatcher> whiteListMatchers = new ArrayList<>();
-    private final List<IpAddressMatcher> blackListMatchers = new ArrayList<>();
-
     public ClientAccessGlobalFilter(GatewayCloudProperties properties) {
         this.properties = properties;
-        reloadMatchers();
-    }
-
-    private void reloadMatchers() {
-        whiteListMatchers.clear();
-        blackListMatchers.clear();
-        properties.getAccess().getWhiteList().forEach(pattern -> whiteListMatchers.add(new IpAddressMatcher(pattern)));
-        properties.getAccess().getBlackList().forEach(pattern -> blackListMatchers.add(new IpAddressMatcher(pattern)));
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if (!properties.getAccess().isEnabled()) {
+        if (!properties.isEnabled() || !properties.getAccess().isEnabled()) {
             return chain.filter(exchange);
         }
-        reloadMatchers();
+        GatewayCloudProperties.Access access = properties.getAccess();
+        List<IpAddressMatcher> whiteListMatchers = access.getWhiteList().stream().map(IpAddressMatcher::new).toList();
+        List<IpAddressMatcher> blackListMatchers = access.getBlackList().stream().map(IpAddressMatcher::new).toList();
 
         String clientIp = ClientIpResolver.resolve(exchange.getRequest(), properties.isTrustProxyHeaders());
         if (!whiteListMatchers.isEmpty() && whiteListMatchers.stream().noneMatch(matcher -> matcher.matches(clientIp))) {

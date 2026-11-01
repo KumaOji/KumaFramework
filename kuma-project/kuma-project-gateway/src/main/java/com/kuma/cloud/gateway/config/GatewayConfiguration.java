@@ -18,12 +18,12 @@ package com.kuma.cloud.gateway.config;
 
 import com.kuma.cloud.gateway.properties.GatewayCloudProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
  * 网关 CORS 统一配置。
@@ -32,7 +32,6 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
  * @since 2026-04-23
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class GatewayConfiguration {
 
     private final GatewayCloudProperties properties;
@@ -43,18 +42,21 @@ public class GatewayConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = GatewayCloudProperties.PREFIX + ".cors", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @Order(Ordered.HIGHEST_PRECEDENCE + 20)
     public CorsWebFilter corsWebFilter() {
-        GatewayCloudProperties.Cors cors = properties.getCors();
-        CorsConfiguration config = new CorsConfiguration();
-        cors.getAllowedOriginPatterns().forEach(config::addAllowedOriginPattern);
-        cors.getAllowedMethods().forEach(config::addAllowedMethod);
-        cors.getAllowedHeaders().forEach(config::addAllowedHeader);
-        cors.getExposedHeaders().forEach(config::addExposedHeader);
-        config.setAllowCredentials(cors.isAllowCredentials());
-        config.setMaxAge(cors.getMaxAge());
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return new CorsWebFilter(source);
+        return new CorsWebFilter(exchange -> {
+            if (!properties.isEnabled() || !properties.getCors().isEnabled()) {
+                return null;
+            }
+            GatewayCloudProperties.Cors cors = properties.getCors();
+            CorsConfiguration config = new CorsConfiguration();
+            cors.getAllowedOriginPatterns().forEach(config::addAllowedOriginPattern);
+            cors.getAllowedMethods().forEach(config::addAllowedMethod);
+            cors.getAllowedHeaders().forEach(config::addAllowedHeader);
+            cors.getExposedHeaders().forEach(config::addExposedHeader);
+            config.setAllowCredentials(cors.isAllowCredentials());
+            config.setMaxAge(cors.getMaxAge());
+            return config;
+        });
     }
 }
