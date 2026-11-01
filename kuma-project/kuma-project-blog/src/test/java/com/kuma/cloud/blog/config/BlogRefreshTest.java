@@ -16,6 +16,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BlogRefreshTest {
     @Test
+    void oauth2LoginSecurityChainStartsWithARefreshableClientRepository() {
+        new org.springframework.boot.test.context.runner.WebApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+                .withUserConfiguration(RefreshingOAuth2ClientConfiguration.class, OAuth2LoginTestConfiguration.class)
+                .withPropertyValues(
+                        "spring.security.oauth2.client.registration.blog.provider=uaa",
+                        "spring.security.oauth2.client.registration.blog.client-id=blog",
+                        "spring.security.oauth2.client.registration.blog.client-secret=secret",
+                        "spring.security.oauth2.client.registration.blog.authorization-grant-type=authorization_code",
+                        "spring.security.oauth2.client.registration.blog.redirect-uri=http://localhost/callback",
+                        "spring.security.oauth2.client.provider.uaa.authorization-uri=http://localhost/authorize",
+                        "spring.security.oauth2.client.provider.uaa.token-uri=http://localhost/token")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasSingleBean(org.springframework.security.web.SecurityFilterChain.class);
+                    var repository = context.getBean(ClientRegistrationRepository.class);
+                    assertThat(org.springframework.core.ResolvableType.forInstance(repository)
+                            .as(Iterable.class).resolveGeneric())
+                            .isEqualTo(org.springframework.security.oauth2.client.registration.ClientRegistration.class);
+                });
+    }
+
+    @org.springframework.context.annotation.Configuration(proxyBeanMethods = false)
+    @org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+    static class OAuth2LoginTestConfiguration {
+        @org.springframework.context.annotation.Bean
+        org.springframework.security.web.SecurityFilterChain loginChain(
+                org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
+            return http.oauth2Login(org.springframework.security.config.Customizer.withDefaults()).build();
+        }
+    }
+
+    @Test
     void refreshUpdatesTheExistingMvcAsyncAdapter() {
         var adapter = org.mockito.Mockito.mock(
                 org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.class);
