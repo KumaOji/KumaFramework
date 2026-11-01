@@ -23,7 +23,7 @@ app.whenReady().then(async()=>{
     const state={errors:{},network:{ready:true,adapters:[{name:'<virtual>',virtual:true,status:'Up',ipv4:['192.0.2.1/24'],ipv6:['::1/128'],dns:['1.1.1.1'],gateways:['192.0.2.254']}],system:{enabled:true,server:'127.0.0.1:7890'},environment:[],proxyRoutes:['Windows static']}};
     function notice(id,text){$(id).hidden=!text;$(id).textContent=text;}
     let calls=0,fail=false;
-    async function api(){calls++;await new Promise(r=>setTimeout(r,50));if(fail)throw Error('offline');return {testedAt:new Date().toISOString(),results:[{name:'GitHub',url:'https://github.com/',route:'direct',reachable:true,status:403,totalMs:25},{name:'Google',route:'proxy',reachable:false,error:'<timeout>'}]};}
+    async function api(path){calls++;await new Promise(r=>setTimeout(r,50));if(fail)throw Error('offline');if(path==='/api/host/router/test')return {address:'192.168.0.1',testedAt:new Date().toISOString(),local:{pingStatus:'Success',pingMs:2,neighbors:[{index:1,interface:'Ethernet',mac:'AA-BB-CC-DD-EE-FF',state:'Reachable'}],routes:[{index:1,interface:'Ethernet',destination:'0.0.0.0/0',metric:10}]},adapters:[{index:1,name:'<Ethernet>',status:'Up',ipv4:['192.168.0.10/24'],gateways:['192.168.0.1'],dns:['192.168.0.1']}],services:[{name:'HTTP',url:'http://192.168.0.1/',reachable:true,status:401,totalMs:10},{name:'HTTPS',url:'https://192.168.0.1/',reachable:false,error:'<certificate error>'}]};return {testedAt:new Date().toISOString(),results:[{name:'GitHub',url:'https://github.com/',route:'direct',reachable:true,status:403,totalMs:25},{name:'Google',route:'proxy',reachable:false,error:'<timeout>'}]};}
     ${functions}
     renderNetwork();`);
   await js(`let pageScrollTimer;function closeDrawer(){};${navigation}
@@ -37,7 +37,7 @@ app.whenReady().then(async()=>{
   await js("location.hash='overview/network';");
   await js('navigate();');
   assert.equal(await js('calls'),0,'Rendering must not trigger external probes');
-  assert.ok(await js("$('network-details-panel').parentElement===$('network-proxy-panel').parentElement && !$('network-details-panel').contains($('network-proxies')) && $('network-proxy-panel').contains($('network-test')) && $('network-proxy-panel').contains($('network-test-results')) && $('network-test-title').tagName==='H3'"),'Network and proxy panels are siblings; connectivity belongs to proxy settings');
+  assert.ok(await js("!$('network-proxy-panel') && !$('network-proxies') && $('network-details-panel').parentElement===$('network-connectivity-panel').parentElement && $('network-connectivity-panel').contains($('network-test')) && $('network-connectivity-panel').contains($('network-test-results')) && $('network-test-title').tagName==='H2'"),'Proxy settings are removed; connectivity has its own panel');
   assert.ok(await js("$('network-adapters').textContent.includes('虚拟') && $('network-adapters').textContent.includes('::1/128')"));
   assert.equal(await js("$('network-adapters').querySelector('virtual')"),null,'Adapter name must be escaped');
   assert.equal(await js("$('network-adapters').querySelector('details').open"),false,'Adapter details start collapsed');
@@ -55,7 +55,28 @@ app.whenReady().then(async()=>{
   await js("fail=true;$('network-test').click()");
   await new Promise(r=>setTimeout(r,150));
   assert.ok(await js("$('network-test-status').textContent.includes('offline') && $('network-test-results').textContent.includes('HTTP 403')"));
-  console.log('PASS: adapter details, escaped output, manual probes, loading state, HTTP status, failure and retained results');
+  await js("fail=false;location.hash='overview/router';");
+  await js('navigate();');
+  assert.ok(await js("state.page==='overview' && state.overviewTab==='router' && !$('overview').hidden && !$('router').hidden && $('overview-system').hidden && $('network').hidden && $('overview').contains($('router')) && $('overview-router-tab').getAttribute('aria-selected')==='true' && $('overview-router-tab').tabIndex===0"));
+  assert.equal(await js("$('router-refresh').disabled"),true);
+  await new Promise(r=>setTimeout(r,150));
+  assert.ok(await js("!$('router-refresh').disabled && $('router-summary').textContent.includes('AA-BB-CC-DD-EE-FF') && $('router-services').textContent.includes('HTTP 401') && $('router-services').textContent.includes('<certificate error>') && $('router-connections').textContent.includes('192.168.0.10/24') && $('router-connections').textContent.includes('0.0.0.0/0')"));
+  assert.equal(await js("$('router-connections').querySelector('ethernet')"),null,'Router inventory must be escaped');
+  const afterRouter=await js('calls');
+  await js('navigate();');
+  assert.equal(await js('calls'),afterRouter,'Repeated navigation must not start another router probe');
+  await js("fail=true;$('router-refresh').click();$('router-refresh').click();");
+  await new Promise(r=>setTimeout(r,150));
+  assert.equal(await js('calls'),afterRouter+1,'Router refresh prevents duplicate requests');
+  assert.ok(await js("$('router-warning').textContent.includes('offline') && $('router-summary').textContent.includes('AA-BB-CC-DD-EE-FF') && !$('router-refresh').disabled"),'Failed refresh keeps last router result');
+  await js("location.hash='overview/network';");
+  await js('navigate();');
+  assert.ok(await js("$('router').hidden && !$('network').hidden"));
+  const tabs=source.slice(source.indexOf('for(const [id,attribute,paths]'),source.indexOf('function metric('));
+  await js(`${tabs}window.addEventListener('hashchange',navigate);$('overview-network-tab').focus();$('overview-network-tab').dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true}));`);
+  assert.ok(await js("location.hash==='#overview/router' && !$('router').hidden && document.activeElement===$('overview-router-tab')"),'End key opens and focuses the router tab');
+  await new Promise(r=>setTimeout(r,150));
+  console.log('PASS: network and router tabs, keyboard navigation, adapter details, escaped output, manual probes, loading state, HTTP status, failure and retained results');
   window.destroy();server.close();app.quit();
 }).catch(e=>{console.error(e);window?.destroy();server?.close();app.exit(1);});
 setTimeout(()=>app.exit(1),15000).unref();

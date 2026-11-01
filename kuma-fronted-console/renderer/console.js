@@ -15,10 +15,11 @@ async function api(path, options) {
 }
 function navigate() {
   const previousPage=state.page;
-  const requested=location.hash.slice(1),page=['network','overview/network'].includes(requested)?'overview':['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog','projects/panels'].includes(requested)?'projects':requested;
+  const previousOverviewTab=state.overviewTab;
+  const requested=location.hash.slice(1),page=['network','overview/network','overview/router'].includes(requested)?'overview':['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog','projects/panels'].includes(requested)?'projects':requested;
   state.page = ['overview','server','projects','ai','lab','settings'].includes(page) ? page : 'overview';
-  state.overviewTab=['network','overview/network'].includes(requested)?'network':'system';
-  $('overview-system').hidden=state.overviewTab!=='system';$('network').hidden=state.overviewTab!=='network';
+  state.overviewTab=requested==='overview/router'?'router':['network','overview/network'].includes(requested)?'network':'system';
+  $('overview-system').hidden=state.overviewTab!=='system';$('network').hidden=state.overviewTab!=='network';$('router').hidden=state.overviewTab!=='router';
   document.querySelectorAll('[data-overview-view]').forEach(button=>{const active=button.dataset.overviewView===state.overviewTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   state.infrastructureTab=['cluster','server/wsl'].includes(requested)?'wsl':'remote';
   $('infrastructure-remote').hidden=state.infrastructureTab!=='remote';$('cluster').hidden=state.infrastructureTab!=='wsl';
@@ -31,9 +32,10 @@ function navigate() {
   $('page-title').textContent = {overview:'本机概览',network:'本机网络',server:'服务器与 WSL',projects:'项目与组件',ai:'AI 工作台',lab:'Lab 实验室',settings:'Console 配置'}[state.page];
   closeDrawer();clearTimeout(pageScrollTimer);
   if(previousPage!==state.page){window.scrollTo(0,0);pageScrollTimer=setTimeout(()=>window.scrollTo(0,0),0);}
+  if(state.page==='overview'&&state.overviewTab==='router'&&(previousPage!=='overview'||previousOverviewTab!=='router'))loadRouter();
 }
 window.addEventListener('hashchange', navigate); navigate();
-for(const [id,attribute,paths] of [['overview-tabs','overview-view',{system:'overview',network:'overview/network'}],['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',panels:'projects/panels'}]]){
+for(const [id,attribute,paths] of [['overview-tabs','overview-view',{system:'overview',network:'overview/network',router:'overview/router'}],['infrastructure-tabs','environment',{remote:'server',wsl:'server/wsl'}],['service-tabs','service-view',{projects:'projects',panels:'projects/panels'}]]){
   $(id).onclick=event=>{
     const button=event.target.closest(`[data-${attribute}]`);if(!button)return;
     const hash='#'+paths[button.getAttribute(`data-${attribute}`)];if(location.hash===hash)return;
@@ -117,9 +119,6 @@ function renderNetwork() {
     }).join(''):'<div class="empty">暂无平台网卡详情，可在「系统概览」查看通用网卡信息。</div>';
     list.dataset.signature=signature;
   }
-  const p=n.system||{};
-  const rows=[['Windows 用户代理',p.enabled?'已启用 · '+(p.server||'未配置地址'):'未启用'],['代理绕过',p.bypass||'—'],['PAC 配置',p.pac||'未配置'],...(n.environment||[]).map(e=>[e.name,e.value]),['可测试代理',(n.proxyRoutes||[]).join(' / ')||'未检测到可测试的静态代理（带认证信息的代理不参与测试）']];
-  $('network-proxies').innerHTML=rows.map(([k,v])=>`<div class="stack-row"><strong>${esc(k)}</strong><div class="subtle">${esc(v)}</div></div>`).join('')+(n.winhttp?`<details><summary>WinHTTP 代理</summary><pre>${esc(n.winhttp)}</pre></details>`:'');
 }
 $('network-test').onclick=async()=>{
   const button=$('network-test'),status=$('network-test-status');button.disabled=true;button.setAttribute('aria-busy','true');status.textContent='正在测试直连与代理链路…';
@@ -130,6 +129,30 @@ $('network-test').onclick=async()=>{
   }catch(e){status.textContent='测试失败：'+e.message+'；下方保留上次结果';}
   finally{button.disabled=false;button.removeAttribute('aria-busy');}
 };
+function renderRouter() {
+  const r=state.router;if(!r)return;
+  const local=r.local||{},services=r.services||[],neighbors=local.neighbors||[],routes=local.routes||[];
+  const reachable=services.some(s=>s.reachable)||local.pingStatus==='Success';
+  const row=(label,value)=>`<div class="stack-row"><strong>${esc(label)}</strong><div class="subtle">${esc(value)}</div></div>`;
+  $('router-summary').innerHTML=row('路由器地址',r.address)+row('检测状态',reachable?'可达':'未确认可达（可能禁用 Ping 或管理服务）')+row('Ping',local.pingStatus==='Success'?`${local.pingMs} ms`:local.pingStatus||'未提供')+row('路由器 MAC',neighbors.filter(n=>n.mac&&n.mac!=='00-00-00-00-00-00').map(n=>`${n.mac} · ${n.interface} · ${n.state}`).join(' / ')||'未读取到有效邻居记录');
+  $('router-services').innerHTML=`<table><thead><tr><th>管理入口</th><th>结果</th><th>响应耗时</th><th>详情</th></tr></thead><tbody>${services.map(s=>`<tr><td>${esc(s.name)}<div class="muted">${esc(s.url)}</div></td><td>${badge(s.reachable?'可达':'检测失败',s.reachable?'ok':'bad')}</td><td>${s.totalMs==null?'—':esc(Math.round(s.totalMs))+' ms'}</td><td>${s.status?'HTTP '+esc(s.status):esc(s.error||'无 HTTP 响应')}</td></tr>`).join('')}</tbody></table>`;
+  const indexes=new Set([...neighbors,...routes].map(n=>n.index));
+  const adapters=(r.adapters||[]).filter(a=>(a.gateways||[]).includes(r.address)||indexes.has(a.index));
+  $('router-connections').innerHTML=adapters.map(a=>row(a.name,`${a.status} · ${(a.ipv4||[]).join(' / ')||'无 IPv4'} · 网关 ${(a.gateways||[]).join(' / ')||'—'} · DNS ${(a.dns||[]).join(' / ')||'—'}`)).join('')+(!adapters.length?'<div class="empty">未发现关联网卡，当前默认网关可能不是 192.168.0.1。</div>':'')+routes.map(route=>row('IPv4 路由',`${route.destination} → ${r.address} · ${route.interface} · 跃点 ${route.metric}`)).join('')+row('网卡采样时间',r.adaptersSampledAt?new Date(r.adaptersSampledAt).toLocaleString('zh-CN'):'等待本机网络采样');
+}
+async function loadRouter() {
+  if(state.routerBusy)return;
+  state.routerBusy=true;
+  const button=$('router-refresh');button.disabled=true;button.setAttribute('aria-busy','true');
+  $('router-updated').textContent='正在检测…';notice('router-warning','');
+  try {
+    state.router=await api('/api/host/router/test',{method:'POST'});
+    renderRouter();notice('router-warning',state.router.warning||'');
+    $('router-updated').textContent='最近检测 '+time(state.router.testedAt);
+  }catch(e){notice('router-warning','检测失败：'+e.message+(state.router?'；下方保留上次结果。':''));$('router-updated').textContent=state.router?'最近成功检测 '+time(state.router.testedAt):'检测失败';}
+  finally{state.routerBusy=false;button.disabled=false;button.removeAttribute('aria-busy');}
+}
+$('router-refresh').onclick=loadRouter;
 function renderHost() {
   const h = state.host; notice('host-warning',state.errors.host || h?.error);
   if(!h?.ready || !h.cpu) return;

@@ -238,10 +238,7 @@ summary { font-size:12px;border-color:var(--border-soft) }
 .network-adapter-details { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding:0 23px 20px }
 .network-adapter-details h3 { font-size:12px;margin:0 0 8px;color:var(--text) }
 .network-adapter-details p { overflow-wrap:anywhere;margin:4px 0;font-size:12px }
-.network-connectivity { margin:20px 23px 23px;border:1px solid var(--border);border-radius:12px;overflow:hidden }
-.network-connectivity h3 { margin:0;font-size:14px;font-weight:550 }
 .network-test-note { padding:0 23px 18px }
-@media(max-width:600px) { .network-connectivity { margin:14px } }
 @media(max-width:700px) { .network-adapter-details { grid-template-columns:1fr;gap:14px } }
 @media(max-width:1250px) { .service-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)) } }
 @media(max-width:600px) { .service-summary-grid { grid-template-columns:1fr;padding:14px;gap:12px }.service-dialog { width:calc(100vw - 20px);max-height:calc(100dvh - 20px) } }

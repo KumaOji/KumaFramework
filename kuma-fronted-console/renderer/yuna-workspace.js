@@ -61,7 +61,7 @@
     });
   }
   function updateWorkspaceArt(){
-    const overviewImage=document.querySelector('#overview .workspace-hero-art');if(overviewImage){const network=state.overviewTab==='network';setWorkspaceArt(overviewImage,network?'network-v1':'overview',network?'Yuna 查看网络节点与地球连接图':'Yuna 在系统监控工作台前查看数据');}
+    const overviewImage=document.querySelector('#overview .workspace-hero-art');if(overviewImage){const network=['network','router'].includes(state.overviewTab);setWorkspaceArt(overviewImage,network?'network-v1':'overview',network?'Yuna 查看网络节点与地球连接图':'Yuna 在系统监控工作台前查看数据');}
     const image=document.querySelector('#server .workspace-hero-art');if(!image)return;
     const local=state.infrastructureTab==='wsl';setWorkspaceArt(image,local?'cluster':'server',local?'银白发少女观察相互连接的集群立方体':'银白发少女在服务器机房检查运行状态');
 
