@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.security;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import com.kuma.boot.security.spring.autoconfigure.properties.OAuth2EndpointProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestClient;
 import java.time.Instant;
 import java.util.Map;
 
+@RefreshScope
 @Component
 public class OAuth2TokenClient {
 

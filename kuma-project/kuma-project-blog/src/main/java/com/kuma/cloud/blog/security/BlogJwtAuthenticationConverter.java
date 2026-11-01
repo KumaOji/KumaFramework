@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.security;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.domain.vo.LoginVO;
 import com.kuma.cloud.blog.service.UserService;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 /**
  * 将 UAA 签发的 JWT 身份映射到 Blog 本地用户和权限模型。
  */
+@RefreshScope
 @Component
 public class BlogJwtAuthenticationConverter
         implements Converter<Jwt, UsernamePasswordAuthenticationToken> {

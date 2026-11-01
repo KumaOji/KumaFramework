@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.service.impl;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -36,6 +37,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
+@RefreshScope
 @Service
 @RequiredArgsConstructor
 public class MusicServiceImpl implements MusicService {

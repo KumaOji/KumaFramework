@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.security;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.time.Instant;
 
+@RefreshScope
 @Component
 public class OAuth2CookieService {
 

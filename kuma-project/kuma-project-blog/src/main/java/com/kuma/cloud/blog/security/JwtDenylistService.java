@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.security;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
 
+@RefreshScope
 @Service
 public class JwtDenylistService {
 

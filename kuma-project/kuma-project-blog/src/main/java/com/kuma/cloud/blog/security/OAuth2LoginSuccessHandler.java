@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.security;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import com.kuma.cloud.blog.domain.entity.User;
 import com.kuma.cloud.blog.service.PermissionService;
 import com.kuma.cloud.blog.service.UserService;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 
+@RefreshScope
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 

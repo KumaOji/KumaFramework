@@ -1,5 +1,6 @@
 package com.kuma.cloud.blog.controller;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import com.kuma.boot.auditlog.annotation.AuditLog;
 import com.kuma.boot.auditlog.enums.OperateType;
 
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 @Tag(name = "认证管理")
+@RefreshScope
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor

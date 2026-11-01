@@ -1,5 +1,7 @@
 package com.kuma.cloud.blog.config;
 
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import com.kuma.cloud.blog.security.JwtDenylistService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,7 @@ import java.util.List;
 public class JwtConfig {
 
     @Bean
+    @RefreshScope(proxyMode = ScopedProxyMode.INTERFACES)
     public JwtDecoder blogJwtDecoder(
             @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}") String jwkSetUri,
             @Value("${blog.oauth2.issuer-uri}") String issuerUri,
