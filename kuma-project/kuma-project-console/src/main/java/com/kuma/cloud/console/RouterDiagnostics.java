@@ -58,6 +58,10 @@ public class RouterDiagnostics {
             var snapshot = network.snapshot();
             data.put("adapters", snapshot.getOrDefault("adapters", List.of()));
             data.put("adaptersSampledAt", snapshot.getOrDefault("sampledAt", ""));
+            String inventoryWarning = snapshot.containsKey("error") ? String.valueOf(snapshot.get("error"))
+                    : !Boolean.TRUE.equals(snapshot.get("ready")) ? "本机网卡信息尚未完成采样，请稍后刷新。" : "";
+            if (!inventoryWarning.isBlank())
+                data.put("warning", data.containsKey("warning") ? data.get("warning") + "；" + inventoryWarning : inventoryWarning);
             data.put("testedAt", Instant.now().toString());
             return data;
         } finally { testing.set(false); }
