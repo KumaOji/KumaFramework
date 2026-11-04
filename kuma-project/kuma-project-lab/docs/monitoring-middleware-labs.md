@@ -1,7 +1,7 @@
 # 六个可观测性中间件实验
 
 这组实验使用现有 WSL 部署，实际调用组件 API，输出可查回的证据与 `checks`。
-无需先启动 LabApplication；学习卡片可直接复制命令。Lab 启动后也提供对应 HTTP 接口。
+无需先启动 LabApplication；实验卡片可直接复制命令。Lab 启动后也提供对应 HTTP 接口。
 每次使用独立 runId；只新增自己的日志、调用链和一分钟测试告警。
 
 ## UI 位置
@@ -15,10 +15,10 @@
 | SkyWalking | http://localhost:12880 | 本实验使用 **Zipkin Trace / Lens** 按 traceId 查询；已有 Java Agent 实验使用原生 Trace 页面 |
 | OTel Collector | OTLP HTTP `localhost:4318/v1/traces`，gRPC `localhost:4317` | 没有独立业务 UI；下游 SkyWalking 查回证明管道畅通，WSL `kubectl logs` 查看 Collector 日志 |
 
-控制台的六张学习卡片也提供 UI 按钮和页面位置。这里的 localhost 是 Windows 本机，
+控制台的六张实验卡片也提供 UI 按钮和页面位置。这里的 localhost 是 Windows 本机，
 WSL 的 systemd 转发服务须已运行。Grafana 用户 `admin` 的本地随机密码在 WSL
 `/home/kuma/.config/kuma-observability/grafana-admin-password`；启动脚本读取到进程环境，
-不写入实验报告、命令行或学习卡片。
+不写入实验报告、命令行或实验卡片。
 
 ## 一次运行全部实验
 

@@ -34,7 +34,7 @@ def add(identifier, group, name, description, runtime, commands, topics, expecte
                       doc=f'/lab-guides/{Path(doc).name}', mainClass=main))
 
 
-add('lock', 'Java 并发与内存', '并发与锁学习', '可见性、原子性、CAS、锁与任务完成通知。', 'JDK 25 · 本机',
+add('lock', 'Java 并发与内存', '并发与锁实验', '可见性、原子性、CAS、锁与任务完成通知。', 'JDK 25 · 本机',
     jdk_commands(['lock'], 'lock.LockLearningDemo', 'lock-lab'),
     ['volatile', 'CAS / ABA', 'ReentrantLock', 'AQS', 'CountDownLatch'],
     ['全部五组并发检查通过；示例用于验证同步语义。'], [f'{java}/lock/LockLearningDemo.java'], 'docs/memory-labs.md',
@@ -58,11 +58,11 @@ for identifier, name, suffix, topics, expected in [
 for identifier, name, main, topics, expected in [
     ('network', 'Webhook 与 Socket 完整实验', 'NetworkLearningDemo', ['Webhook', 'TCP', 'UDP'], ['Webhook、TCP 和 UDP 全部检查通过。']),
     ('webhook', 'Webhook 签名、幂等与重试', 'WebhookLesson', ['HMAC-SHA256', '篡改与过期拒绝', '并发去重', '503 重试'],
-     ['重复事件仅一份模拟业务效果；重试首次503、第二次202。', '本例为自定义教学签名协议，事件表仅在进程内保存。']),
+     ['重复事件仅一份模拟业务效果；重试首次503、第二次202。', '本例为自定义示例签名协议，事件表仅在进程内保存。']),
     ('socket', 'TCP 分帧与 UDP 通信', 'SocketLesson', ['长度前缀', '半关闭', 'EOF', '读取超时', 'UDP 数据报'],
      ['三个 TCP 帧内容正确；非法帧被拒绝；超时后连接仍可用。', '两个 UDP 数据报完整回显；回环成功不代表公网可靠性。']),
 ]:
-    add(identifier, '网络通信学习', name, '使用回环地址和临时端口，无需 Lab 服务或外部系统。', 'JDK 25 · 本机',
+    add(identifier, '网络通信实验', name, '使用回环地址和临时端口，无需 Lab 服务或外部系统。', 'JDK 25 · 本机',
         jdk_commands(['network'], f'network.{main}', 'network-lab'), topics, expected,
         [f'{java}/network/{main}.java'], 'docs/network-labs.md', f'com.kuma.cloud.lab.network.{main}')
 
@@ -121,7 +121,7 @@ for identifier, name, description, command, runtime, topics, expected, sources, 
      [f'{java}/observability/SkyWalkingLearningDemo.java', f'{java}/observability/ObservabilityLabController.java'],
      'com.kuma.cloud.lab.observability.SkyWalkingLearningDemo'),
 ]:
-    add(identifier, 'OTel 与 SkyWalking 学习', name, description, runtime, command, topics, expected,
+    add(identifier, 'OTel 与 SkyWalking 实验', name, description, runtime, command, topics, expected,
         sources, 'docs/observability-labs.md', main)
     if identifier == 'otel-skywalking':
         cards[-1]['mainArgs'] = '--export http://localhost:4318/v1/traces http://localhost:9412'
@@ -215,7 +215,102 @@ for identifier, name, task, args, topics, expected, source in [
         'com.kuma.cloud.lab.' + ('network.SocketLifecycleLesson' if task == 'socketLab' else 'session.SessionLearningDemo'))
     cards[-1]['mainArgs'] = 'lifecycle' if identifier == 'socket-lifecycle' else identifier.removeprefix('session-') if identifier.startswith('session-') else 'all'
 
-guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md', 'elasticsearch-labs.md', 'socket-session-labs.md')
+
+# Existing audit lessons are generated here as well, so refresh preserves their cards.
+cards.extend([{'kind': 'learning',
+  'id': 'audit-log-all',
+  'group': '日志审计实验',
+  'name': '日志审计完整实验',
+  'description': '复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。',
+  'runtime': 'JDK 25 · Spring AOP · 无外部中间件',
+  'commands': './gradlew.bat :kuma-project:kuma-project-lab:auditLogLab',
+  'topics': ['AuditLog', 'SpEL', '操作人', '成功/失败', '异常传播'],
+  'expected': ['5条实际审计快照，全部checks通过；业务失败与存储故障均有明确解释。'],
+  'sources': ['kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java'],
+  'doc': '/lab-guides/audit-log-labs.md',
+  'mainClass': 'com.kuma.cloud.lab.auditlog.AuditLogLearningDemo',
+  'mainArgs': 'all'},
+ {'kind': 'learning',
+  'id': 'audit-log-content',
+  'group': '日志审计实验',
+  'name': '审计敏感内容策略与截断',
+  'description': '复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。',
+  'runtime': 'JDK 25 · Spring AOP · 无外部中间件',
+  'commands': './gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=content',
+  'topics': ['recordParams', 'recordResult', '敏感信息', '长度截断'],
+  'expected': ['示例密钥不出现在审计入参/出参，400字符普通文本按160字符加后缀截断。'],
+  'sources': ['kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java'],
+  'doc': '/lab-guides/audit-log-labs.md',
+  'mainClass': 'com.kuma.cloud.lab.auditlog.AuditLogLearningDemo',
+  'mainArgs': 'content'},
+ {'kind': 'learning',
+  'id': 'audit-log-proxy',
+  'group': '日志审计实验',
+  'name': '审计代理边界与自调用',
+  'description': '复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。',
+  'runtime': 'JDK 25 · Spring AOP · 无外部中间件',
+  'commands': './gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=proxy',
+  'topics': ['Spring AOP', '代理', 'self invocation', 'this调用'],
+  'expected': ['自调用无新增记录；通过Spring代理调用相同方法新增一条审计。'],
+  'sources': ['kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java'],
+  'doc': '/lab-guides/audit-log-labs.md',
+  'mainClass': 'com.kuma.cloud.lab.auditlog.AuditLogLearningDemo',
+  'mainArgs': 'proxy'},
+ {'kind': 'learning',
+  'id': 'audit-log-storage',
+  'group': '日志审计实验',
+  'name': '审计存储失败的业务语义',
+  'description': '复用真实 audit-log starter 和 Spring AOP，逐步返回审计证据与检查结果，每次运行隔离。',
+  'runtime': 'JDK 25 · Spring AOP · 无外部中间件',
+  'commands': './gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=storage',
+  'topics': ['AuditLogStore', '故障隔离', '审计丢失'],
+  'expected': ['存储抛错时业务仍成功，但没有审计记录；不能以业务成功推断审计可靠。'],
+  'sources': ['kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java'],
+  'doc': '/lab-guides/audit-log-labs.md',
+  'mainClass': 'com.kuma.cloud.lab.auditlog.AuditLogLearningDemo',
+  'mainArgs': 'storage'}])
+
+for prefix, group, task, main, runtime, lessons in [
+    ('mysql-advanced', 'MySQL 索引与事务进阶', 'mysqlAdvancedLab', 'MysqlAdvancedLearningDemo', 'JDK 25 · MySQL/InnoDB', [
+        ('all', '完整索引与事务实验', ['EXPLAIN', 'MVCC', '行锁/间隙锁', '死锁', 'Spring事务']),
+        ('indexes', '联合索引、覆盖与回表', ['EXPLAIN', '最左前缀', '覆盖索引', '回表']),
+        ('isolation', 'RC/RR 与 MVCC', ['快照读', '当前读', '提交可见性']),
+        ('locks', '行锁与间隙锁', ['FOR UPDATE', '1205超时', '回滚释放']),
+        ('deadlock', '真实 InnoDB 死锁', ['交叉持锁', '1213牺牲者', '事务回滚']),
+        ('propagation', 'Spring 事务传播与失效', ['REQUIRED', 'REQUIRES_NEW', 'NESTED', 'rollback-only', 'UnexpectedRollbackException', '自调用', 'rollbackFor']),
+        ('optimistic', '丢失更新与版本冲突控制', ['双连接交错', 'version', '影响行数', '有限重试', '条件原子UPDATE']),
+    ]),
+    ('redis-advanced', 'Redis 缓存与分布式锁进阶', 'redisAdvancedLab', 'RedisAdvancedLearningDemo', 'JDK 25 · Redis · 缓存项需MySQL', [
+        ('all', '完整缓存与锁实验', ['穿透/击穿/雪崩', '一致性', '租约锁', 'Lua']),
+        ('cache', '空值缓存与热点互斥重建', ['真实MySQL回源', '6并发', '锁内二次检查']),
+        ('avalanche', '集中到期与错峰TTL', ['真实过期', '首波失效', 'TTL分布']),
+        ('consistency', '旧值回填与数据库缓存一致性', ['真实MySQL/Redis', '固定交错', '共用锁协调']),
+        ('locks', '租约、误释放与续期', ['SET NX', 'token校验', 'Lua解锁', '手动续期']),
+        ('lua', 'Lua并发库存扣减', ['原子检查扣减', '12请求', '5份库存']),
+        ('fencing', '陈旧持有者与下游写入屏障', ['租约失效', 'fencing token', 'MySQL条件写', '重放拒绝', '序列回退边界']),
+    ]),
+    ('threadpool', 'Java 线程池与异步进阶', 'threadPoolLab', 'ThreadPoolLearningDemo', 'JDK 25 · 无需中间件', [
+        ('all', '完整线程池与异步实验', ['队列', '拒绝', '异常', '取消', '饥饿', 'MDC']),
+        ('queue', '有界队列与拒绝策略', ['AbortPolicy', 'CallerRunsPolicy', '反压']),
+        ('exceptions', 'execute / submit 异常差异', ['UncaughtExceptionHandler', 'ExecutionException']),
+        ('cancellation', '等待超时与任务取消', ['get(timeout)', 'cancel(true)', '协作中断']),
+        ('starvation', '嵌套等待饥饿与异步组合', ['单线程池', 'CompletableFuture', '非阻塞组合']),
+        ('context', 'ThreadLocal / MDC 传递与清理', ['线程复用残留', '提交时快照', 'finally恢复']),
+        ('bulkhead', '慢依赖隔离与超时预算', ['共享池阻塞', 'bulkhead', '有界拒绝', 'orTimeout', '底层任务继续执行']),
+    ]),
+]:
+    for lesson, name, topics in lessons:
+        if prefix == 'threadpool':
+            command = f'./gradlew.bat :kuma-project:kuma-project-lab:{task} -Pp0Lesson={lesson}'
+        else:
+            group_arg = 'mysql' if prefix.startswith('mysql') else 'redis'
+            command = f'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group {group_arg} -Lesson {lesson}'
+        add(f'{prefix}-{lesson}', group, name, '独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。',
+            runtime, command, topics, ['所选实验checks全部为true；详见教程中的实际值与边界。'],
+            [f'{java}/p0/{main}.java'], 'docs/p0-advanced-labs.md', f'com.kuma.cloud.lab.p0.{main}')
+        cards[-1]['mainArgs'] = lesson
+
+guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md', 'elasticsearch-labs.md', 'socket-session-labs.md', 'audit-log-labs.md', 'p0-advanced-labs.md')
 for name in guides:
     shutil.copyfile(lab / 'docs' / name, docs / name)
 (renderer / 'lab-learning.json').write_text(json.dumps(cards, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

@@ -57,9 +57,9 @@ Blog 服务卡片保留前端、后端独立启停、知识仓库同步、状态
 - WSL 系统详情可切换任意运行中的发行版，查看系统版本、CPU 拓扑与 vmstat、完整内存信息、磁盘/文件系统、全部网卡、全部进程、监听端口与 systemd 服务。按需读取，结果缓存 15 秒；k3s 使用配置中指定的发行版。
 - 项目页面自动识别运行中的 Kuma Application 主类或仓库 JAR，显示 PID、启动时间、累计 CPU 时间和实际监听端口。运行诊断可读取 Actuator 健康、信息、指标、JVM 内存/线程数、CPU、运行时间和线程转储。未开放/需认证的端点显示实际 HTTP 状态。
 - Lab 已离线内置仓库全部 70 个实验接口，包含 Kafka 完整异步实验、实时步骤查询、topic / broker 检查与实验清理。`scripts/refresh-lab-catalog.py` 从 Controller / DTO 源码更新目录，正常使用控制台无需 Python。运行中的 Lab 仍可同步最新 OpenAPI；示例 JSON 需按业务填写。
-- Lab 同时提供24个本机/Linux学习实验：并发与内存、Webhook/Socket、JDK各版本正式及预览功能。界面显示命令、代码入口、预期结果与离线说明，可按运行方式筛选；使用 `scripts/refresh-lab-learning.py` 同步学习目录。
+- Lab 同时提供本机/Linux终端实验：并发与内存、Webhook/Socket、JDK各版本正式及预览功能。界面显示命令、代码入口、预期结果与离线说明，可按运行方式筛选；使用 `scripts/refresh-lab-learning.py` 同步实验目录。
 - Lab 响应默认把 JSON 字符串内的换行和制表符显示为实际排版；可切换回 JSON 格式，复制按钮始终复制原始响应，保留 JSON 有效性和原始内容。
-- Lab 增加六个可观测性中间件实验（Loki、Prometheus、Alertmanager、OTel、SkyWalking、Grafana），学习卡片包含可点击 UI 入口和具体页面位置。调用链查回实验允许120秒，其余请求仍为30秒。与 Prometheus 同时运行时将 Lab 改为19090端口，并设置 `KUMA_LAB_URL=http://127.0.0.1:19090/api`。
+- Lab 增加六个可观测性中间件实验（Loki、Prometheus、Alertmanager、OTel、SkyWalking、Grafana），实验卡片包含可点击 UI 入口和具体页面位置。调用链查回实验允许120秒，其余请求仍为30秒。与 Prometheus 同时运行时将 Lab 改为19090端口，并设置 `KUMA_LAB_URL=http://127.0.0.1:19090/api`。
 - 概览仅显示通用监控摘要，不固定展示业务项目名。WSL 默认自动选择一个已运行发行版；非 Windows 系统隐藏 WSL 导航，其他本机指标继续由 OSHI 采集。没有配置 Lab 服务时，监控后端仍能启动。
 - 项目页面列出仓库全部 17 个有 Gradle 构建文件的应用模块（7 个启用、10 个未启用 Demo），支持按项目或 starter 搜索。每个项目可查看去重后的直接/间接 starter、逐层引入路径及完整模块依赖树，并关联发现的项目进程和已配置的服务状态。
 - 启用项目的依赖目录由 `gradle/console-catalog.gradle` 在构建控制台时读取 Gradle 加载后的 `api` / `implementation` / `runtimeOnly` / `compileOnly` 声明，递归遍历仓库模块，处理依赖排除与 `transitive=false`，不包含测试依赖。第三方 starter 显示坐标，不解析其发布包内部依赖；这是一份构建声明目录，不代表运行时自动配置已激活。修改项目依赖后，停止并重新启动控制台即可重新构建目录。

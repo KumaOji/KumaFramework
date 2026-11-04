@@ -1,5 +1,53 @@
 [
   {
+    "group": "日志审计实验",
+    "name": "完整审计实验：成功、失败、内容策略、代理边界与存储故障",
+    "method": "POST",
+    "path": "/lab/audit-log/scenario",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "成功审计、操作人及 SpEL 业务标识",
+    "method": "POST",
+    "path": "/lab/audit-log/success",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "失败审计与原业务异常保留",
+    "method": "POST",
+    "path": "/lab/audit-log/failure",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "敏感内容关闭与大文本截断",
+    "method": "POST",
+    "path": "/lab/audit-log/content",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "同对象自调用与代理调用对照",
+    "method": "POST",
+    "path": "/lab/audit-log/proxy",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
+    "group": "日志审计实验",
+    "name": "审计存储不可用时业务继续执行",
+    "method": "POST",
+    "path": "/lab/audit-log/storage",
+    "body": "",
+    "source": "AuditLogLabController.java"
+  },
+  {
     "group": "MySQL Binlog monitor",
     "name": "Get the embedded binlog monitor status",
     "method": "GET",
@@ -43,7 +91,7 @@
   },
   {
     "group": "Elasticsearch 实验",
-    "name": "ES 学习目录：索引与 CRUD、全文搜索、分组聚合",
+    "name": "ES 实验目录：索引与 CRUD、全文搜索、分组聚合",
     "method": "GET",
     "path": "/lab/elasticsearch/topics",
     "body": "",
@@ -82,7 +130,7 @@
     "source": "ElasticsearchLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "综合场景：类加载 + Mark Word + HashMap + Socket + 文件处理",
     "method": "POST",
     "path": "/lab/javacore/scenario",
@@ -90,7 +138,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "类加载器层次与加载阶段说明",
     "method": "GET",
     "path": "/lab/javacore/classloader",
@@ -98,7 +146,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "Mark Word / 对象头布局观察（基于 JOL）",
     "method": "GET",
     "path": "/lab/javacore/markword",
@@ -106,7 +154,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "HashMap 内部桶位与扩容参数观察",
     "method": "POST",
     "path": "/lab/javacore/hashmap/inspect",
@@ -114,7 +162,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "HashMap 哈希碰撞演示（相同桶索引的 key）",
     "method": "GET",
     "path": "/lab/javacore/hashmap/collision",
@@ -122,7 +170,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "Socket TCP 回显通信演示",
     "method": "POST",
     "path": "/lab/javacore/socket/send",
@@ -132,7 +180,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "文件处理综合演示（写入、读取、复制、列举）",
     "method": "POST",
     "path": "/lab/javacore/file/scenario",
@@ -140,7 +188,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "写入文本文件到实验工作目录",
     "method": "POST",
     "path": "/lab/javacore/file/write",
@@ -152,7 +200,7 @@
     "source": "JavaCoreLabController.java"
   },
   {
-    "group": "Java 基础知识学习",
+    "group": "Java 基础机制实验",
     "name": "读取实验工作目录中的文本文件",
     "method": "POST",
     "path": "/lab/javacore/file/read",
@@ -474,7 +522,7 @@
     "source": "MonitoringMiddlewareLabController.java"
   },
   {
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "实验路线与现有 Collector 的功能边界",
     "method": "GET",
     "path": "/lab/observability/guide",
@@ -482,7 +530,7 @@
     "source": "ObservabilityLabController.java"
   },
   {
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "OTel SDK：span、W3C 传播、异步断链、采样、指标和日志关联",
     "method": "POST",
     "path": "/lab/observability/otel",
@@ -490,7 +538,7 @@
     "source": "ObservabilityLabController.java"
   },
   {
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "SkyWalking：正常调用与自定义 span",
     "method": "POST",
     "path": "/lab/observability/skywalking/normal",
@@ -498,7 +546,7 @@
     "source": "ObservabilityLabController.java"
   },
   {
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "SkyWalking：200ms 模拟慢调用定位",
     "method": "POST",
     "path": "/lab/observability/skywalking/slow",
@@ -506,12 +554,180 @@
     "source": "ObservabilityLabController.java"
   },
   {
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "SkyWalking：异常事件与错误 span，模拟失败被捕获后返回 HTTP 200",
     "method": "POST",
     "path": "/lab/observability/skywalking/error",
     "body": "",
     "source": "ObservabilityLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "MySQL 完整进阶实验：索引、MVCC、行锁间隙锁、死锁与事务传播",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/scenario",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "EXPLAIN 联合索引、覆盖索引与回表对照",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/indexes",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "RC/RR 隔离级别、MVCC 快照读与 FOR UPDATE 当前读",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/isolation",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "真实行锁与 RR 间隙锁阻塞、1205超时与回滚释放",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/locks",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "两个事务反向持锁，观察真实1213死锁牺牲者",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/deadlock",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "Spring REQUIRED/REQUIRES_NEW/NESTED、自调用失效与受检异常回滚",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/propagation",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "MySQL 索引与事务进阶实验",
+    "name": "丢失更新、version冲突检测、有限重试与条件原子UPDATE对照",
+    "method": "POST",
+    "path": "/lab/mysql/advanced/optimistic",
+    "body": "",
+    "source": "MysqlAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "Redis 完整进阶实验：穿透击穿雪崩、一致性、租约锁与Lua",
+    "method": "POST",
+    "path": "/lab/redis/advanced/scenario",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "真实MySQL回源：空值缓存防穿透与互斥重建防击穿",
+    "method": "POST",
+    "path": "/lab/redis/advanced/cache",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "集中到期与错峰TTL：观察首波缓存雪崩",
+    "method": "POST",
+    "path": "/lab/redis/advanced/avalanche",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "真实MySQL/Redis复现旧值回填与共用锁协调",
+    "method": "POST",
+    "path": "/lab/redis/advanced/consistency",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "锁租约到期、错误DEL、token校验Lua解锁与手动续期",
+    "method": "POST",
+    "path": "/lab/redis/advanced/locks",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "并发Lua原子库存扣减，验证无超卖",
+    "method": "POST",
+    "path": "/lab/redis/advanced/lua",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "Redis 缓存与分布式锁进阶实验",
+    "name": "锁过期后陈旧写入、单调fencing token与MySQL下游写入屏障",
+    "method": "POST",
+    "path": "/lab/redis/advanced/fencing",
+    "body": "",
+    "source": "RedisAdvancedLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "线程池完整实验：队列拒绝、异常、取消、饥饿与上下文清理",
+    "method": "POST",
+    "path": "/lab/threadpool/scenario",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "有界队列、AbortPolicy 与 CallerRunsPolicy 对照",
+    "method": "POST",
+    "path": "/lab/threadpool/queue",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "execute 未捕获异常与 submit Future 异常对照",
+    "method": "POST",
+    "path": "/lab/threadpool/exceptions",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "get 超时不会取消任务；cancel(true) 与协作中断",
+    "method": "POST",
+    "path": "/lab/threadpool/cancellation",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "同池嵌套等待导致饥饿与 CompletableFuture 非阻塞组合",
+    "method": "POST",
+    "path": "/lab/threadpool/starvation",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "ThreadLocal 残留、MDC 快照传递与 finally 恢复",
+    "method": "POST",
+    "path": "/lab/threadpool/context",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
+  },
+  {
+    "group": "线程池与异步进阶实验",
+    "name": "慢依赖隔离、共享池阻塞、有界拒绝与CompletableFuture超时边界",
+    "method": "POST",
+    "path": "/lab/threadpool/bulkhead",
+    "body": "",
+    "source": "ThreadPoolLabController.java"
   },
   {
     "group": "Redis 测试",
@@ -671,7 +887,7 @@
     "source": "SnowflakeTestController.java"
   },
   {
-    "group": "Spring 核心机制学习",
+    "group": "Spring 核心机制实验",
     "name": "综合场景：IOC + 上下文 + 事件 + 分层架构",
     "method": "POST",
     "path": "/lab/spring/scenario",
@@ -679,7 +895,7 @@
     "source": "SpringLabController.java"
   },
   {
-    "group": "Spring 核心机制学习",
+    "group": "Spring 核心机制实验",
     "name": "IOC 演示：@Primary、@Qualifier、prototype 作用域",
     "method": "GET",
     "path": "/lab/spring/ioc",
@@ -687,7 +903,7 @@
     "source": "SpringLabController.java"
   },
   {
-    "group": "Spring 核心机制学习",
+    "group": "Spring 核心机制实验",
     "name": "ApplicationContext 演示：Bean 数量、Profile、Aware 回调",
     "method": "GET",
     "path": "/lab/spring/context",
@@ -695,7 +911,7 @@
     "source": "SpringLabController.java"
   },
   {
-    "group": "Spring 核心机制学习",
+    "group": "Spring 核心机制实验",
     "name": "事件演示：发布自定义事件并由 @EventListener 处理",
     "method": "POST",
     "path": "/lab/spring/events/publish",
@@ -706,7 +922,7 @@
     "source": "SpringLabController.java"
   },
   {
-    "group": "Spring 核心机制学习",
+    "group": "Spring 核心机制实验",
     "name": "架构演示：Controller → Service → Repository + 领域事件",
     "method": "POST",
     "path": "/lab/spring/architecture",
@@ -837,53 +1053,5 @@
     "path": "/lab/vector/status",
     "body": "",
     "source": "VectorTestController.java"
-  },
-  {
-    "group": "日志审计实验",
-    "name": "完整日志审计实验",
-    "method": "POST",
-    "path": "/lab/audit-log/scenario",
-    "body": "",
-    "source": "AuditLogLabController.java"
-  },
-  {
-    "group": "日志审计实验",
-    "name": "成功审计与 SpEL 业务标识",
-    "method": "POST",
-    "path": "/lab/audit-log/success",
-    "body": "",
-    "source": "AuditLogLabController.java"
-  },
-  {
-    "group": "日志审计实验",
-    "name": "失败审计与原异常传播",
-    "method": "POST",
-    "path": "/lab/audit-log/failure",
-    "body": "",
-    "source": "AuditLogLabController.java"
-  },
-  {
-    "group": "日志审计实验",
-    "name": "敏感内容关闭与截断",
-    "method": "POST",
-    "path": "/lab/audit-log/content",
-    "body": "",
-    "source": "AuditLogLabController.java"
-  },
-  {
-    "group": "日志审计实验",
-    "name": "代理调用与自调用对照",
-    "method": "POST",
-    "path": "/lab/audit-log/proxy",
-    "body": "",
-    "source": "AuditLogLabController.java"
-  },
-  {
-    "group": "日志审计实验",
-    "name": "审计存储故障与业务结果",
-    "method": "POST",
-    "path": "/lab/audit-log/storage",
-    "body": "",
-    "source": "AuditLogLabController.java"
   }
 ]

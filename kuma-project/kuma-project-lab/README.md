@@ -2,6 +2,8 @@
 
 这是一个独立的测试实验项目，用于集中保存框架和业务技术验证代码，避免临时测试污染正式业务模块。
 
+实验以机制假设、可控执行交错、故障注入、真实观测证据和结果断言组织。每项说明成立条件、失败边界与设计取舍；完整场景用于串联机制，单项入口用于定位问题和对照验证。基础操作保留为前置环节，不把接口可达或一次成功运行当作架构保证。
+
 ## 启动方式
 
 与 Blog / UAA 相同：从 Nacos 拉配置，本机地址写在 `bootstrap-local.yml`。
@@ -21,6 +23,11 @@
 
 ## 测试分类
 
+新增三组进阶实验：**MySQL 索引与事务**、**Redis 缓存与分布式锁**、**线程池与异步**。
+覆盖 EXPLAIN/MVCC/死锁/事务传播/丢失更新、缓存穿透击穿雪崩/一致性/Lua/租约锁/fencing，以及拒绝策略/异常/取消/饥饿/上下文清理/依赖资源隔离。
+均返回逐步证据与断言，控制台提供单项与完整场景入口，使用独立实验数据并自动清理。
+运行方法、接口和边界见 [三组进阶实验教程](docs/p0-advanced-labs.md)。
+
 - `transaction`：数据库事务、提交、回滚和变更快照测试
 - `auditlog`：操作审计、SpEL、敏感内容策略、代理边界与审计存储故障实验
 - `binlog`：MySQL Row Binlog 变更捕获测试
@@ -33,10 +40,10 @@
 - `jni`：通过 JNI 调用 C 实现整数运算、字符串处理与数组求和
 - `bloom`：布隆过滤器插入、查询与假阳性演示
 - `snowflake`：雪花算法 ID 生成、解析与唯一性验证
-- `spring`：IOC、事件监听、ApplicationContext 与分层架构学习
+- `spring`：IOC、事件监听、ApplicationContext 与分层架构实验
 - `javacore`：类加载、Mark Word、HashMap 结构、Socket 通信、文件处理等 Java 基础
 - `mysql`：建表、加列、GROUP BY、窗口函数等 SQL 基础语法复习
-- `lock`：volatile、CAS / ABA、ReentrantLock / Condition、AQS、CountDownLatch 系统学习
+- `lock`：volatile、CAS / ABA、ReentrantLock / Condition、AQS、CountDownLatch 系统验证
 - `memory`：JMM 重排序与发布、JVM 堆/线程栈/堆外内存；配套 Linux 用户态/内核态、系统调用、mmap 与写时复制实验
 - `network`：Webhook 签名、时间窗口、幂等与重试；TCP 分帧、半关闭、读取超时及 UDP 数据报通信
 - `jdk`：按 JDK 8～25 的代表性功能正式版本组织的实验，统一在 JDK25 运行，含独立预览示例
@@ -49,12 +56,12 @@
 ./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab
 ```
 
-可用 `-PauditLesson=content` 等参数选择单项；Lab 接口为 `/api/lab/audit-log/*`，控制台包含实验入口与学习卡片。步骤与预期见 [日志审计实验教程](docs/audit-log-labs.md)。
+可用 `-PauditLesson=content` 等参数选择单项；Lab 接口为 `/api/lab/audit-log/*`，控制台包含实验入口与实验卡片。步骤与预期见 [日志审计实验教程](docs/audit-log-labs.md)。
 
 ## Elasticsearch 实验
 
 使用现有 WSL ES，包含索引与 Mapping、文档 CRUD、refresh 可见性对照、分词与 match/term、过滤排序高亮、terms/avg/stats 聚合。
-每次创建独立索引并自动清理，报告保留实际请求 DSL、响应和检查结果；控制台已提供学习卡片和 HTTP 实验入口。
+每次创建独立索引并自动清理，报告保留实际请求 DSL、响应和检查结果；控制台已提供实验卡片和 HTTP 实验入口。
 详细步骤见 [Elasticsearch 实验教程](docs/elasticsearch-labs.md)。
 
 ```powershell
@@ -67,7 +74,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 ## OTel 与 SkyWalking 可观测性实验
 
 新增 Loki、Prometheus、Alertmanager、OTel Collector、SkyWalking、Grafana 六个真实中间件实验：
-学习卡片包含可点击 UI 入口和具体页面位置；Loki 在 Grafana Explore 查看，Collector 没有业务 UI。
+实验卡片包含可点击 UI 入口和具体页面位置；Loki 在 Grafana Explore 查看，Collector 没有业务 UI。
 运行方式、证据与边界见 [中间件实验说明](docs/monitoring-middleware-labs.md)。
 
 ```powershell
@@ -78,7 +85,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 与 Prometheus 同时运行时，Lab 使用 `--server.port=19090`，控制台设置
 `KUMA_LAB_URL=http://127.0.0.1:19090/api`，避免原有 9090 端口冲突。
 
-按 [实验教程](docs/observability-labs.md) 学习 OTel span、W3C传播、异步断链修复、采样、指标与日志关联，
+按 [实验教程](docs/observability-labs.md) 验证 OTel span、W3C传播、异步断链修复、采样、指标与日志关联，
 再将真实 trace 发到现有 Collector/SkyWalking 查回，最后对比 SkyWalking Agent 的正常、慢调用和异常场景。
 
 ```powershell
@@ -87,7 +94,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 ./gradlew.bat :kuma-project:kuma-project-lab:skywalkingLab
 ```
 
-Lab 启动后也可使用 `/api/lab/observability/*` 接口。控制台包含实验入口和学习卡片。
+Lab 启动后也可使用 `/api/lab/observability/*` 接口。控制台包含实验入口和实验卡片。
 本地指标/日志实验使用真实 SDK 的内存 exporter；现有后端配置仅接收 traces。
 
 真实数据库实验使用独立 `kuma_observability_lab` PostgreSQL schema / MySQL database，
@@ -123,7 +130,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 ./gradlew.bat :kuma-project:kuma-project-lab:sessionLab
 ```
 
-控制台有学习卡片；Lab 接口为 `/api/lab/socket/*` 和 `/api/lab/session/*`。
+控制台有实验卡片；Lab 接口为 `/api/lab/socket/*` 和 `/api/lab/session/*`。
 
 直接运行 `com.kuma.cloud.lab.network.NetworkLearningDemo.main()`，或分别运行 `WebhookLesson.main()`、`SocketLesson.main()`。
 仅依赖 JDK 25，使用本机回环地址和临时端口，无需 Spring 或外部服务。
@@ -133,18 +140,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 
 直接运行 `com.kuma.cloud.lab.memory.MemoryLearningDemo.main()`，执行已有锁实验和新增 Java 内存实验，无需 Spring 或中间件。
 Linux 专项实验运行 `bash kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh`（从仓库根目录，需要 gcc；可选 trace 模式需要 strace）。
-实验步骤、预期结果、正确性检查与观察边界见 [内存实验学习说明](docs/memory-labs.md)。
+实验步骤、预期结果、正确性检查与观察边界见 [内存实验实验说明](docs/memory-labs.md)。
 
-## 并发与锁学习
+## 并发与锁实验
 
-学习代码位于 `src/main/java/com/kuma/cloud/lab/lock/`，系统讲解写在代码注释中。
-先阅读 `package-info.java` 中的学习路线，再直接运行 `LockLearningDemo.main()`。
+实验代码位于 `src/main/java/com/kuma/cloud/lab/lock/`，系统讲解写在代码注释中。
+先阅读 `package-info.java` 中的实验路线，再直接运行 `LockLearningDemo.main()`。
 示例仅依赖 JDK，无需启动 LabApplication、Nacos 或其他中间件。
 
 按顺序阅读 `VolatileLesson`、`CasLesson`、`ReentrantLockLesson`、`AqsLesson`、
 `CountDownLatchLesson`，每个实验都会检查结果，涵盖可见性、丢失更新、CAS 重试、ABA、
 重入与超时、条件等待、自定义 AQS 独占锁，以及门闩完成通知和结果发布。
-其中 AQS Mutex 是不可重入的教学实现；这些示例用于理解同步语义，不是性能基准。
+其中 AQS Mutex 是不可重入的示例实现；这些示例用于理解同步语义，不是性能基准。
 
 ## 事务测试
 
@@ -509,7 +516,7 @@ GET /api/lab/snowflake/parse/1234567890123456789
 
 返回结果包含时间戳、数据中心 ID、工作机器 ID 与毫秒内序列号。可在 Nacos `kuma-cloud-lab-dev.yaml` 中调整 `kuma.lab.snowflake.worker-id` 与 `datacenter-id`。
 
-## Java 基础知识学习
+## Java 基础机制实验
 
 演示类加载、对象头 Mark Word、HashMap 内部结构、TCP Socket 通信与 NIO 文件处理。
 
@@ -556,7 +563,7 @@ POST /api/lab/javacore/file/write
 
 Mark Word 观察依赖 [JOL](https://github.com/openjdk/jol)（`jol-core`）。Socket 默认监听 `127.0.0.1:19091`，文件实验目录默认为 `data/lab-javacore`，可在 Nacos `kuma-cloud-lab-dev.yaml` 的 `kuma.lab.javacore` 下调整。
 
-## Spring 核心机制学习
+## Spring 核心机制实验
 
 覆盖 IOC、事件监听、ApplicationContext 与经典分层架构，适合对照源码理解 Spring 容器工作原理。
 

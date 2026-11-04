@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/lab/elasticsearch")
 public class ElasticsearchLabController {
-    @Operation(summary = "ES 学习目录：索引与 CRUD、全文搜索、分组聚合")
+    @Operation(summary = "ES 实验目录：索引与 CRUD、全文搜索、分组聚合")
     @GetMapping("/topics")
     public Result<List<ElasticsearchLearningDemo.Topic>> topics() {
         return Result.success(ElasticsearchLearningDemo.topics());

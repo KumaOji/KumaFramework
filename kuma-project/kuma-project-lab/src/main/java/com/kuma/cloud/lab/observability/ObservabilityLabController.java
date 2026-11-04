@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@Tag(name = "OTel 与 SkyWalking 学习")
+@Tag(name = "OTel 与 SkyWalking 实验")
 @RestController
 @RequestMapping("/lab/observability")
 public class ObservabilityLabController {

@@ -1,6 +1,6 @@
 # Socket 与 HTTP Session 实验
 
-Socket 是通信端点，HTTP Session 是应用层的服务端会话。本组实验把两个层次放在一起对照学习。
+Socket 是通信端点，HTTP Session 是应用层的服务端会话。本组实验把两个层次放在一起对照验证。
 所有服务器只监听 `127.0.0.1` 的随机端口，无需 Nacos、WSL 或数据库，不使用业务用户的 Cookie 或 Session。
 
 ## 快速运行
@@ -40,7 +40,7 @@ Session 实验使用真实 Servlet 容器，不是手写 Map 模拟 Session，�
 
 服务端的连接编号用于对照，序号是每次 accept 后新建的连接内变量，不是全局用户 Session。
 本实验使用 DataOutputStream.writeUTF / DataInputStream.readUTF，包含 Java 的长度前缀与 modified UTF-8，
-适合 Java 间的小消息教学；不能当作任意语言通用的 UTF-8 协议，单条数据有长度限制。
+适合 Java 间的小消息示例；不能当作任意语言通用的 UTF-8 协议，单条数据有长度限制。
 空 UTF 帧是本实验协议终止标记，真正 EOF 由 shutdownOutput 产生，二者分别检查。
 
 isConnected 表示曾成功建立连接，close 后仍可能为 true，因此不是连接存活探针。
@@ -52,7 +52,7 @@ TCP_NODELAY 只是启用选项，本实验不据此声称测出了吞吐或延�
 
 独立 Tomcat 使用内存 StandardManager，Session Cookie 名为 `KUMA_LAB_SESSION`。
 每一步报告保存 Set-Cookie、服务端 Session ID、visits、isNew、requestedSessionIdValid 和请求的 remotePort。
-这些 ID 只属于即将关闭的教学容器。
+这些 ID 只属于即将关闭的示例容器。
 
 1. `GET /inspect` 使用 getSession(false)，Session 不存在时不创建、不发送 Session Cookie。
 2. 客户端A `POST /visit` 创建 Session，visits=1、isNew=true，响应带 HttpOnly、SameSite=Lax Cookie。
@@ -89,13 +89,13 @@ SameSite/HttpOnly 检查来自真实 Set-Cookie 属性，但 Java HttpClient 不
 
 空闲有效期是两次访问间的允许间隔，不等于 Cookie 在客户端的有效期。
 本例验证访问时容器判定过期，不声称后台清理线程一定在某个精确时刻释放数据。
-实验约需几秒；有效期1秒用于教学，不是生产建议。
+实验约需几秒；有效期1秒用于示例，不是生产建议。
 容器结束时关闭 Connector、清理内存 Session，并删除本次临时目录；不把会话持久化到磁盘。
 这组实验不涵盖 Redis 分布式 Session、跨实例复制、WebSocket 会话或并发更新 Session 属性。
 
 ## 控制台与 Lab HTTP
 
-控制台学习卡片无需启动 Lab，选择卡片不会自动执行实验，复制命令后在终端运行。
+控制台实验卡片无需启动 Lab，选择卡片不会自动执行实验，复制命令后在终端运行。
 Lab 已运行时还可调用以下接口，均无需请求体：
 
 | 方法 | 路径 | 实验 |

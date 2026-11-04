@@ -1,5 +1,14 @@
 server:
   port: 18080
+resilience4j:
+  timelimiter:
+    instances:
+      blog:
+        # OAuth2 回调包含令牌交换和权限加载，需要与 UAA 使用相同的等待窗口。
+        timeout-duration: 10s
+      uaa:
+        # 登录页首次渲染和密码校验可能超过默认的 1 秒。
+        timeout-duration: 10s
 management:
   tracing:
     enabled: false

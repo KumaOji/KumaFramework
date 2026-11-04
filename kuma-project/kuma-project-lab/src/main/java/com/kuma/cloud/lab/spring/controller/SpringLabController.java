@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Spring 核心机制学习")
+@Tag(name = "Spring 核心机制实验")
 @RestController
 @RequestMapping("/lab/spring")
 @RequiredArgsConstructor

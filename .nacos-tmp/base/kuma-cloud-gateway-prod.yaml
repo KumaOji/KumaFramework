@@ -35,11 +35,6 @@ spring:
           observability:
             enabled: true
           default-filters:
-            - name: Retry
-              args:
-                retries: 1
-                methods: GET
-                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
           routes:
             - id: uaa
@@ -67,11 +62,27 @@ spring:
                   args:
                     name: uaa
                     fallbackUri: forward:/fallback/uaa
+            # 一次性授权状态会在回调时被消费，认证请求不能自动重试。
+            - id: blog-auth
+              uri: lb://kuma-cloud-blog
+              predicates:
+                - Path=/blog/auth/**,/blog/oauth2/**,/blog/login/**,/blog/logout
+              filters:
+                - RewritePath=/blog/(?<segment>.*), /api/${segment}
+                - name: CircuitBreaker
+                  args:
+                    name: blog
+                    fallbackUri: forward:/fallback/blog
             - id: blog
               uri: lb://kuma-cloud-blog
               predicates:
                 - Path=/blog/**
               filters:
+                - name: Retry
+                  args:
+                    retries: 1
+                    methods: GET
+                    statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
                 - RewritePath=/blog/(?<segment>.*), /api/${segment}
                 - name: CircuitBreaker
                   args:
@@ -79,6 +90,12 @@ spring:
                     fallbackUri: forward:/fallback/blog
 
 resilience4j:
+  timelimiter:
+    instances:
+      uaa:
+        timeout-duration: 10s
+      blog:
+        timeout-duration: 10s
   circuitbreaker:
     configs:
       default:

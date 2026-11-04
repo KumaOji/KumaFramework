@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Java 基础知识学习")
+@Tag(name = "Java 基础机制实验")
 @RestController
 @RequestMapping("/lab/javacore")
 @RequiredArgsConstructor

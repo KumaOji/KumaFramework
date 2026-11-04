@@ -168,12 +168,26 @@ bootRun {
 
 test {
     useJUnitPlatform()
+    inputs.property('p0LiveIntegration', providers.environmentVariable('KUMA_LAB_P0_JDBC_URL').map { true }.orElse(false))
+    outputs.upToDateWhen { !providers.environmentVariable('KUMA_LAB_P0_JDBC_URL').isPresent() && !providers.environmentVariable('KUMA_LAB_P0_REDIS_HOST').isPresent() }
     inputs.property('esLabEndpoint', providers.environmentVariable('KUMA_LAB_ES_URL').orElse('offline'))
     outputs.upToDateWhen { !providers.environmentVariable('KUMA_LAB_ES_URL').isPresent() }
     inputs.property('observabilityDatabaseIntegrationEnabled',
             providers.environmentVariable('KUMA_LAB_OBSERVABILITY_JDBC_URL').map { true }.orElse(false))
     // Live DB checks must run again when selecting another server/engine.
     outputs.upToDateWhen { !providers.environmentVariable('KUMA_LAB_OBSERVABILITY_JDBC_URL').isPresent() }
+}
+
+['threadPoolLab': 'ThreadPoolLearningDemo', 'mysqlAdvancedLab': 'MysqlAdvancedLearningDemo',
+ 'redisAdvancedLab': 'RedisAdvancedLearningDemo'].each { taskName, demo ->
+    tasks.register(taskName, JavaExec) {
+        group = 'application'
+        description = 'Run bounded P0 lessons; select one with -Pp0Lesson=<name>'
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass = 'com.kuma.cloud.lab.p0.' + demo
+        args providers.gradleProperty('p0Lesson').getOrElse('all')
+        jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+    }
 }
 
 tasks.register('elasticsearchLab', JavaExec) {

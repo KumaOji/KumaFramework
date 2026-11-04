@@ -3,7 +3,7 @@
     "kind": "learning",
     "id": "lock",
     "group": "Java 并发与内存",
-    "name": "并发与锁学习",
+    "name": "并发与锁实验",
     "description": "可见性、原子性、CAS、锁与任务完成通知。",
     "runtime": "JDK 25 · 本机",
     "commands": "$lab = 'kuma-project/kuma-project-lab'\nNew-Item -ItemType Directory -Force \"$lab/build/lock-lab/classes\" | Out-Null\n$sources = Get-ChildItem \"$lab/src/main/java/com/kuma/cloud/lab/lock\" -Filter '*.java' | ForEach-Object FullName\njavac --release 25 -encoding UTF-8 -d \"$lab/build/lock-lab/classes\" $sources\njava -cp \"$lab/build/lock-lab/classes\" com.kuma.cloud.lab.lock.LockLearningDemo",
@@ -104,7 +104,7 @@
   {
     "kind": "learning",
     "id": "network",
-    "group": "网络通信学习",
+    "group": "网络通信实验",
     "name": "Webhook 与 Socket 完整实验",
     "description": "使用回环地址和临时端口，无需 Lab 服务或外部系统。",
     "runtime": "JDK 25 · 本机",
@@ -126,7 +126,7 @@
   {
     "kind": "learning",
     "id": "webhook",
-    "group": "网络通信学习",
+    "group": "网络通信实验",
     "name": "Webhook 签名、幂等与重试",
     "description": "使用回环地址和临时端口，无需 Lab 服务或外部系统。",
     "runtime": "JDK 25 · 本机",
@@ -139,7 +139,7 @@
     ],
     "expected": [
       "重复事件仅一份模拟业务效果；重试首次503、第二次202。",
-      "本例为自定义教学签名协议，事件表仅在进程内保存。"
+      "本例为自定义示例签名协议，事件表仅在进程内保存。"
     ],
     "sources": [
       "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/network/WebhookLesson.java"
@@ -150,7 +150,7 @@
   {
     "kind": "learning",
     "id": "socket",
-    "group": "网络通信学习",
+    "group": "网络通信实验",
     "name": "TCP 分帧与 UDP 通信",
     "description": "使用回环地址和临时端口，无需 Lab 服务或外部系统。",
     "runtime": "JDK 25 · 本机",
@@ -571,7 +571,7 @@
   {
     "kind": "learning",
     "id": "otel-sdk",
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "OTel SDK：信号、传播与采样",
     "description": "真实 SDK 输出 span 树、异步断链对照、采样、指标和关联日志。",
     "runtime": "JDK 25 · Gradle · 无需后端",
@@ -597,7 +597,7 @@
   {
     "kind": "learning",
     "id": "otel-skywalking",
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "OTel → Collector → SkyWalking 查回",
     "description": "导出真实 OTLP trace，逐个验证同一 trace 的六个 span 已存储。",
     "runtime": "JDK 25 · Gradle · Collector/OAP",
@@ -622,7 +622,7 @@
   {
     "kind": "learning",
     "id": "skywalking-agent",
-    "group": "OTel 与 SkyWalking 学习",
+    "group": "OTel 与 SkyWalking 实验",
     "name": "SkyWalking Agent：正常、慢调用与异常",
     "description": "先运行无 Agent 对照，再按教程挂载 Agent，查询原生自定义 span。",
     "runtime": "JDK 25 · Gradle · 可选 Java Agent",
@@ -1206,7 +1206,7 @@
       "长度截断"
     ],
     "expected": [
-      "教学密钥不出现在审计入参/出参，400字符普通文本按160字符加后缀截断。"
+      "示例密钥不出现在审计入参/出参，400字符普通文本按160字符加后缀截断。"
     ],
     "sources": [
       "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/auditlog/AuditLogLearningDemo.java"
@@ -1261,5 +1261,505 @@
     "doc": "/lab-guides/audit-log-labs.md",
     "mainClass": "com.kuma.cloud.lab.auditlog.AuditLogLearningDemo",
     "mainArgs": "storage"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-all",
+    "group": "MySQL 索引与事务进阶",
+    "name": "完整索引与事务实验",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson all",
+    "topics": [
+      "EXPLAIN",
+      "MVCC",
+      "行锁/间隙锁",
+      "死锁",
+      "Spring事务"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-indexes",
+    "group": "MySQL 索引与事务进阶",
+    "name": "联合索引、覆盖与回表",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson indexes",
+    "topics": [
+      "EXPLAIN",
+      "最左前缀",
+      "覆盖索引",
+      "回表"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "indexes"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-isolation",
+    "group": "MySQL 索引与事务进阶",
+    "name": "RC/RR 与 MVCC",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson isolation",
+    "topics": [
+      "快照读",
+      "当前读",
+      "提交可见性"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "isolation"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-locks",
+    "group": "MySQL 索引与事务进阶",
+    "name": "行锁与间隙锁",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson locks",
+    "topics": [
+      "FOR UPDATE",
+      "1205超时",
+      "回滚释放"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "locks"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-deadlock",
+    "group": "MySQL 索引与事务进阶",
+    "name": "真实 InnoDB 死锁",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson deadlock",
+    "topics": [
+      "交叉持锁",
+      "1213牺牲者",
+      "事务回滚"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "deadlock"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-propagation",
+    "group": "MySQL 索引与事务进阶",
+    "name": "Spring 事务传播与失效",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson propagation",
+    "topics": [
+      "REQUIRED",
+      "REQUIRES_NEW",
+      "NESTED",
+      "rollback-only",
+      "UnexpectedRollbackException",
+      "自调用",
+      "rollbackFor"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "propagation"
+  },
+  {
+    "kind": "learning",
+    "id": "mysql-advanced-optimistic",
+    "group": "MySQL 索引与事务进阶",
+    "name": "丢失更新与版本冲突控制",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · MySQL/InnoDB",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group mysql -Lesson optimistic",
+    "topics": [
+      "双连接交错",
+      "version",
+      "影响行数",
+      "有限重试",
+      "条件原子UPDATE"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/MysqlAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.MysqlAdvancedLearningDemo",
+    "mainArgs": "optimistic"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-all",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "完整缓存与锁实验",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson all",
+    "topics": [
+      "穿透/击穿/雪崩",
+      "一致性",
+      "租约锁",
+      "Lua"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-cache",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "空值缓存与热点互斥重建",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson cache",
+    "topics": [
+      "真实MySQL回源",
+      "6并发",
+      "锁内二次检查"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "cache"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-avalanche",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "集中到期与错峰TTL",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson avalanche",
+    "topics": [
+      "真实过期",
+      "首波失效",
+      "TTL分布"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "avalanche"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-consistency",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "旧值回填与数据库缓存一致性",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson consistency",
+    "topics": [
+      "真实MySQL/Redis",
+      "固定交错",
+      "共用锁协调"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "consistency"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-locks",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "租约、误释放与续期",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson locks",
+    "topics": [
+      "SET NX",
+      "token校验",
+      "Lua解锁",
+      "手动续期"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "locks"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-lua",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "Lua并发库存扣减",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson lua",
+    "topics": [
+      "原子检查扣减",
+      "12请求",
+      "5份库存"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "lua"
+  },
+  {
+    "kind": "learning",
+    "id": "redis-advanced-fencing",
+    "group": "Redis 缓存与分布式锁进阶",
+    "name": "陈旧持有者与下游写入屏障",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · Redis · 缓存项需MySQL",
+    "commands": "powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group redis -Lesson fencing",
+    "topics": [
+      "租约失效",
+      "fencing token",
+      "MySQL条件写",
+      "重放拒绝",
+      "序列回退边界"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/RedisAdvancedLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.RedisAdvancedLearningDemo",
+    "mainArgs": "fencing"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-all",
+    "group": "Java 线程池与异步进阶",
+    "name": "完整线程池与异步实验",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=all",
+    "topics": [
+      "队列",
+      "拒绝",
+      "异常",
+      "取消",
+      "饥饿",
+      "MDC"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "all"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-queue",
+    "group": "Java 线程池与异步进阶",
+    "name": "有界队列与拒绝策略",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=queue",
+    "topics": [
+      "AbortPolicy",
+      "CallerRunsPolicy",
+      "反压"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "queue"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-exceptions",
+    "group": "Java 线程池与异步进阶",
+    "name": "execute / submit 异常差异",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=exceptions",
+    "topics": [
+      "UncaughtExceptionHandler",
+      "ExecutionException"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "exceptions"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-cancellation",
+    "group": "Java 线程池与异步进阶",
+    "name": "等待超时与任务取消",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=cancellation",
+    "topics": [
+      "get(timeout)",
+      "cancel(true)",
+      "协作中断"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "cancellation"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-starvation",
+    "group": "Java 线程池与异步进阶",
+    "name": "嵌套等待饥饿与异步组合",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=starvation",
+    "topics": [
+      "单线程池",
+      "CompletableFuture",
+      "非阻塞组合"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "starvation"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-context",
+    "group": "Java 线程池与异步进阶",
+    "name": "ThreadLocal / MDC 传递与清理",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=context",
+    "topics": [
+      "线程复用残留",
+      "提交时快照",
+      "finally恢复"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "context"
+  },
+  {
+    "kind": "learning",
+    "id": "threadpool-bulkhead",
+    "group": "Java 线程池与异步进阶",
+    "name": "慢依赖隔离与超时预算",
+    "description": "独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。",
+    "runtime": "JDK 25 · 无需中间件",
+    "commands": "./gradlew.bat :kuma-project:kuma-project-lab:threadPoolLab -Pp0Lesson=bulkhead",
+    "topics": [
+      "共享池阻塞",
+      "bulkhead",
+      "有界拒绝",
+      "orTimeout",
+      "底层任务继续执行"
+    ],
+    "expected": [
+      "所选实验checks全部为true；详见教程中的实际值与边界。"
+    ],
+    "sources": [
+      "kuma-project/kuma-project-lab/src/main/java/com/kuma/cloud/lab/p0/ThreadPoolLearningDemo.java"
+    ],
+    "doc": "/lab-guides/p0-advanced-labs.md",
+    "mainClass": "com.kuma.cloud.lab.p0.ThreadPoolLearningDemo",
+    "mainArgs": "bulkhead"
   }
 ]

@@ -1,6 +1,6 @@
 # OTel 与 SkyWalking 实验
 
-这组实验按“产生证据 → 解释证据 → 到后端查回”学习。前面的本地对照使用模拟库存与支付；
+这组实验按“产生证据 → 解释证据 → 到后端查回”验证。前面的本地对照使用模拟库存与支付；
 第9节在你的真实 PostgreSQL/MySQL 实例里创建独立实验命名空间，执行真实 SQL 和事务。
 从仓库根目录运行 Gradle 命令，使用 JDK 25。Linux/WSL 将 `./gradlew.bat` 换成 `./gradlew`。
 独立 main 不需要启动 Spring、Nacos 或业务中间件；首次构建需要下载依赖。
@@ -157,7 +157,7 @@ LabApplication 使用 Spring Boot4，HTTP 自动采集另需 Agent 支持 Boot4/
 
 任务自动设置 service_name=kuma-lab-skywalking、全量 Agent 采样与 keep_tracing=true，
 并启用 `--require-agent`：没有有效 native trace 就失败。keep_tracing 让启动连接尚未就绪时仍产生 trace，
-不代表离线期间的数据一定能成功发送；这些设置仅用于这个独立教学进程。
+不代表离线期间的数据一定能成功发送；这些设置仅用于这个独立示例进程。
 观察三个报告各自的 traceId 和 elapsedMs。用原生追踪页面按 ID 查回，比较
 `lab.skywalking.checkout → inventory / payment`、inventory 的慢 span 和 payment 的错误。
 `activeTrace=true` 只证明当前方法已增强，不能证明 OAP 已收到；程序留5秒给周期上报，但最终仍以查询结果为准。
@@ -179,7 +179,7 @@ Invoke-RestMethod -Uri http://localhost:12880/graphql -Method Post -ContentType 
 
 ## 6. 在 lab 控制台发起实验
 
-启动 LabApplication 后，控制台实验场中可搜索“OTel 与 SkyWalking 学习”。
+启动 LabApplication 后，控制台实验场中可搜索“OTel 与 SkyWalking 实验”。
 
 | 请求（经过 `/api` 前缀） | 观察内容 |
 | --- | --- |
@@ -218,7 +218,7 @@ Invoke-RestMethod -Uri http://localhost:12880/graphql -Method Post -ContentType 
 
 可逆排障练习：先关闭本机 Collector 端口转发，再运行在线任务；观察导出/查询失败。
 恢复转发后重新执行，确认新 trace 能被查回。不要为了练习停掉共享服务器的 OAP 或删除 PVC。
-SDK 教学使用 SimpleSpanProcessor，便于观察即时导出；生产一般采用 BatchSpanProcessor。
+SDK 示例使用 SimpleSpanProcessor，便于观察即时导出；生产一般采用 BatchSpanProcessor。
 
 | 现象 | 优先检查 |
 | --- | --- |

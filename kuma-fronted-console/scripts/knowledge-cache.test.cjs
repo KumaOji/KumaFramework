@@ -10,7 +10,7 @@ function fixture(t){
   t.after(()=>{assert.equal(path.dirname(root),os.tmpdir());assert.ok(path.basename(root).startsWith('knowledge-cache-'));fs.rmSync(root,{recursive:true,force:true});});
   const blog=path.join(root,'KumaBlog'),knowledge=path.join(root,'KumaKnowledge');
   for(const dir of [path.join(blog,'scripts'),path.join(knowledge,'node_modules'),path.join(knowledge,'knowledge'),path.join(knowledge,'content')])fs.mkdirSync(dir,{recursive:true});
-  fs.copyFileSync(path.resolve(__dirname,'../../../kuma-blog-fronted/KumaBlog/scripts/sync-knowledge.mjs'),path.join(blog,'scripts/sync-knowledge.mjs'));
+  fs.copyFileSync(path.resolve(__dirname,'../../../kumaBlogFronted/KumaBlog/scripts/sync-knowledge.mjs'),path.join(blog,'scripts/sync-knowledge.mjs'));
   fs.writeFileSync(path.join(knowledge,'quartz.config.ts'),'export default {}');
   fs.writeFileSync(path.join(knowledge,'content/test.md'),'First version');
   fs.writeFileSync(path.join(knowledge,'knowledge/bootstrap-cli.mjs'),`

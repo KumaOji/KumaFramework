@@ -21,7 +21,7 @@ java -cp "$lab/build/network-lab/classes" com.kuma.cloud.lab.network.NetworkLear
 
 本地 HttpServer 模拟接收方，HttpClient 模拟发送方。请求携带原始 UTF-8 JSON 字节，以及 `X-Lab-Event-Id`、`X-Lab-Timestamp`、`X-Lab-Signature`。
 签名为 `HMAC-SHA256(secret, id + 换行 + timestamp + 换行 + 原始 body)`，十六进制编码。
-这是自定义教学协议；GitHub 的签名仅针对原始 body，不能直接将本协议用于 GitHub 接收端。
+这是自定义示例协议；GitHub 的签名仅针对原始 body，不能直接将本协议用于 GitHub 接收端。
 body 必须按原始字节验签，不能先解析 JSON 再序列化后计算。
 
 | 实验 | 必须检查的结果 |
@@ -68,7 +68,7 @@ UDP connect 只是设置默认对端和过滤来源，不建立 TCP 式连接或
 
 ## 资料
 
-补充学习：[Socket 生命周期与 HTTP Session](socket-session-labs.md)，包含长连接和重连、Cookie与Session隔离、会话ID更换、注销和过期。
+相关实验：[Socket 生命周期与 HTTP Session](socket-session-labs.md)，包含长连接和重连、Cookie与Session隔离、会话ID更换、注销和过期。
 
 - [GitHub Webhook 验签](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries)
 - [GitHub Webhook 实践与重复投递](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)

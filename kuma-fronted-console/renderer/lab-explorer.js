@@ -22,7 +22,7 @@
     const names=[...new Set(presets.map(entry=>entry.group))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
     if(groupFilter.options.length!==names.length+1||names.some((name,index)=>groupFilter.options[index+1]?.value!==name)){
       const previous=groupFilter.value;
-      groupFilter.replaceChildren(new Option('全部知识分组',''),...names.map(name=>new Option(name,name)));
+      groupFilter.replaceChildren(new Option('全部技术分组',''),...names.map(name=>new Option(name,name)));
       groupFilter.value=names.includes(previous)?previous:'';
     }
     const results=groups.flatMap(group=>group.items),filtered=Boolean(search.value.trim()||groupFilter.value||scope!=='all');
@@ -39,7 +39,7 @@
     const grid=byId('lab-quick-results');
     grid.innerHTML=shown.slice(0,filtered?9:6).map(({entry,index})=>{
       const starred=favorites.has(LabCatalog.key(entry)),learning=entry.kind==='learning';
-      return `<article class="quick-experiment ${selected===index?'selected':''}"><div class="quick-meta"><span class="quick-kind ${learning?'lesson':'api'}">${learning?'终端学习':esc(entry.method)}</span><span>${esc(entry.group)}</span><button class="favorite-toggle" data-favorite="${index}" aria-label="${starred?'取消收藏':'收藏'}：${esc(entry.name)}" aria-pressed="${starred}" title="${starred?'取消收藏':'收藏实验'}">${starred?'★':'☆'}</button></div><button class="quick-select" data-quick-select="${index}"><strong>${esc(entry.name)}</strong><span class="quick-description">${esc(learning?entry.description:entry.path)}</span><span class="quick-action">${learning?'查看运行命令':'配置并运行'} <span aria-hidden="true">↗</span></span></button></article>`;
+      return `<article class="quick-experiment ${selected===index?'selected':''}"><div class="quick-meta"><span class="quick-kind ${learning?'lesson':'api'}">${learning?'终端实验':esc(entry.method)}</span><span>${esc(entry.group)}</span><button class="favorite-toggle" data-favorite="${index}" aria-label="${starred?'取消收藏':'收藏'}：${esc(entry.name)}" aria-pressed="${starred}" title="${starred?'取消收藏':'收藏实验'}">${starred?'★':'☆'}</button></div><button class="quick-select" data-quick-select="${index}"><strong>${esc(entry.name)}</strong><span class="quick-description">${esc(learning?entry.description:entry.path)}</span><span class="quick-action">${learning?'查看运行命令':'配置并运行'} <span aria-hidden="true">↗</span></span></button></article>`;
     }).join('');
     if(!shown.length)grid.innerHTML=`<div class="finder-empty"><strong>${scope==='favorites'?'还没有收藏的实验':scope==='recent'?'还没有访问记录':'没有找到匹配的实验'}</strong><p>${scope==='favorites'?'点击实验卡片上的 ☆，下次从这里快速打开。':scope==='recent'?'打开一个实验后，这里会保留最近访问的入口。':'换个关键词，或重置筛选后查看全部实验。'}</p></div>`;
     if(shown.length>9&&filtered)grid.insertAdjacentHTML('beforeend',`<p class="finder-more">显示前 9 项，其余 ${shown.length-9} 项可在下方实验目录中浏览。</p>`);

@@ -14,7 +14,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 
 脚本临时转发 ES 到 Windows `127.0.0.1:19200`，完成后关闭自己创建的转发。
 冷启动时等待 Pod 就绪，并在启动窗口内重试转发；超过55秒仍不可达则失败。
-添加 `-Lesson crud`、`-Lesson search`、`-Lesson aggregation` 可单独学习；`-Port 19201` 可避开端口冲突。
+添加 `-Lesson crud`、`-Lesson search`、`-Lesson aggregation` 可单独运行；`-Port 19201` 可避开端口冲突。
 日志保存在 `kuma-project/kuma-project-lab/build/es-lab/`。
 
 如已有可访问的 ES，直接运行：
@@ -68,15 +68,15 @@ standard 是通用分词器，本实验使用英文样本，不代表安装了�
 在更新和删除前，对原始三条样本聚合：category 的 terms 分桶得到 search=2、database=1；
 每组 avg(price) 分别为30、90。全局 stats：count=3、sum=150、avg=50、min=20、max=90。
 `size=0` 不返回文档，只返回聚合结果；在 keyword 上聚合，避免对 text 启用 fielddata。
-单分片小样本用于学习，不验证大规模分布式 terms 误差、分页或性能。
+单分片小样本用于机制验证，不验证大规模分布式 terms 误差、分页或性能。
 
 ## 控制台与 HTTP
 
-控制台的学习卡片支持完整实验和三个专项，实验接口为：
+控制台的实验卡片支持完整实验和三个专项，实验接口为：
 
 | 方法 | 路径 | 用途 |
 |---|---|---|
-| GET | /api/lab/elasticsearch/topics | 学习目录 |
+| GET | /api/lab/elasticsearch/topics | 实验目录 |
 | POST | /api/lab/elasticsearch/scenario | 完整实验 |
 | POST | /api/lab/elasticsearch/crud | 索引与文档 CRUD |
 | POST | /api/lab/elasticsearch/search | 分词与搜索 |

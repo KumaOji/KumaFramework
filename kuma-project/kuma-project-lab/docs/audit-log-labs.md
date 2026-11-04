@@ -16,7 +16,7 @@
 ./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab -PauditLesson=content
 ```
 
-也可直接运行 `com.kuma.cloud.lab.auditlog.AuditLogLearningDemo.main()`。控制台的“日志审计实验”组提供 HTTP 入口与学习卡片。
+也可直接运行 `com.kuma.cloud.lab.auditlog.AuditLogLearningDemo.main()`。控制台的“日志审计实验”组提供 HTTP 入口与实验卡片。
 
 ## 实验步骤与预期
 
@@ -24,13 +24,13 @@
 |---|---|---|
 | success | 通过代理确认 `ORDER-001` | 新增成功审计，原返回值不变；`bizId=ORDER-001`，SpEL 描述为“确认订单:ORDER-001” |
 | failure | 模拟订单已经确认 | 新增 `success=false` 记录，保存异常消息且不保存成功返回值；原异常继续抛出 |
-| content | 更新教学密钥，再传入400字符文本 | 密钥操作的 `params/result` 为空；普通大文本保留前160字符并追加 `...(truncated)` |
+| content | 更新示例密钥，再传入400字符文本 | 密钥操作的 `params/result` 为空；普通大文本保留前160字符并追加 `...(truncated)` |
 | proxy | 对照同对象自调用与外部代理调用 | `this.confirm()` 无新增审计；经代理调用相同方法新增一条 |
 | storage | 模拟 `AuditLogStore.save()` 失败 | 框架记录诊断错误，业务仍返回成功；报告确认没有保存记录 |
 
 完整实验返回5条审计记录：成功1条、业务失败1条、内容策略2条、代理调用1条；存储故障没有保存记录。报告中的 `steps` 解释各步，`records` 是实际切面交给存储的快照，`checks` 全部为 true。
 
-教学服务示例：
+实验服务示例：
 
 ```java
 @AuditLog(module = "lab.audit.orders", type = OperateType.UPDATE,

@@ -5,7 +5,7 @@
   const templates={
     code:'请解释以下代码的执行流程、关键设计和边界条件。\n\n代码：\n\n希望重点理解：\n',
     debug:'请根据以下信息分析问题，区分已知事实与推测，并给出可验证的排查步骤。\n\n预期行为：\n实际行为：\n复现步骤：\n相关代码或日志：\n',
-    learning:'请围绕以下知识点设计一个可重复的学习实验，包含前置条件、操作步骤、预期结果和验证方法。\n\n知识点：\n当前理解：\n运行环境：\n'
+    learning:'请围绕以下知识点设计一个可重复的技术实验，包含机制假设、前置条件、故障注入、观测证据、结果断言、设计取舍与适用边界。\n\n知识点：\n待验证的假设：\n运行环境：\n'
   };
   const key='kuma-ai-prompt-draft';
   try{prompt.value=localStorage.getItem(key)||'';if(prompt.value)status.textContent='已恢复本机草稿';}catch{status.textContent='无法读取本机草稿，仍可编辑和复制';}

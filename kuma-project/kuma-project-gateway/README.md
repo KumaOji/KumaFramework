@@ -11,6 +11,15 @@ Gateway 使用 Spring Boot 4 原生 OpenTelemetry/Micrometer 自动装配：
 
 每个应用采用一套自动追踪方案；本 Gateway 使用 OTel SDK，无需再挂 Java Agent。
 
+Blog、UAA 路由的熔断器 `blog`、`uaa` 均显式设置 TimeLimiter 为 10 秒：
+`resilience4j.timelimiter.instances.<名称>.timeout-duration=10s`。
+该限制独立于 Gateway HTTP 客户端的 `response-timeout`；仅调整 HTTP 超时仍会受到
+TimeLimiter 默认 1 秒的限制，导致登录页首次渲染或密码校验被提前降级。
+生产 Nacos 的 `kuma-cloud-gateway-prod.yaml` 应保留同样配置，修改后重启 Gateway 生效。
+认证路由（UAA 以及 Blog 的 `/auth/**`、`/oauth2/**`、`/login/**`、`/logout`）
+不使用 Retry；OAuth2 回调会消费一次性授权状态，重试可能在原请求成功时返回 401。
+普通 Blog GET 接口的 Retry 放在普通 Blog 路由上，认证路由须排在它之前。
+
 ## Windows 本机启动
 
 先完成 WSL 监控组件部署，再在仓库根目录构建：

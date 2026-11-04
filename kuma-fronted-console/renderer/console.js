@@ -337,7 +337,7 @@ function renderPresets(){
   $('lab-api-count').textContent=presets.filter(p=>p.kind!=='learning').length;
   $('lab-learning-count').textContent=presets.filter(p=>p.kind==='learning').length;
   $('lab-presets').innerHTML=groups.map(group=>`<details class="preset-category" data-group="${esc(group.name)}" ${$('lab-search').value.trim()||!collapsedLabGroups.has(group.name)?'open':''}><summary class="preset-group"><span>${esc(group.name)}</span><span class="group-count">${group.items.length}</span></summary>`+group.items.map(({entry:p,index:i})=>{
-    const learning=p.kind==='learning', tag=learning?'学习':p.method;
+    const learning=p.kind==='learning', tag=learning?'终端':p.method;
     return `<button class="preset ${selected===i?'active':''}" data-preset="${i}" aria-pressed="${selected===i}" title="${esc(learning?p.runtime:p.path)}"><span class="method-tag ${learning?'learning':p.method.toLowerCase()}">${esc(tag)}</span><span class="preset-label">${esc(p.name)}</span></button>`;
   }).join('')+'</details>').join('')||'<div class="empty"><strong>没有找到相关实验</strong><p>试试 Elasticsearch、Redis 或 JDK 等关键词。</p></div>';
   $('lab-presets').querySelectorAll('details').forEach(group=>group.addEventListener('toggle',()=>{if(group.isConnected&&!$('lab-search').value.trim()){if(group.open)collapsedLabGroups.delete(group.dataset.group);else collapsedLabGroups.add(group.dataset.group);}}));
@@ -367,7 +367,7 @@ $('lab-presets').onclick=e=>{const button=e.target.closest('[data-preset]');if(b
 $('toggle-lab-catalog').onclick=()=>setLabCatalogCompact(!document.querySelector('.lab-catalog').classList.contains('compact'));
 const labNarrowScreen=window.matchMedia('(max-width:850px)');setLabCatalogCompact(true);labNarrowScreen.addEventListener('change',event=>{if(event.matches)setLabCatalogCompact(true);});
 Promise.allSettled([api('/lab-catalog.json'),api('/lab-learning.json')]).then(results=>{
-  const failures=[];results.forEach((result,index)=>{if(result.status==='fulfilled')LabCatalog.merge(presets,result.value);else failures.push(`${index?'学习':'接口'}目录加载失败：${result.reason.message}`);});
+  const failures=[];results.forEach((result,index)=>{if(result.status==='fulfilled')LabCatalog.merge(presets,result.value);else failures.push(`${index?'终端':'接口'}目录加载失败：${result.reason.message}`);});
   renderPresets();if(selected>=0&&presets[selected]?.kind!=='learning')$('lab-request-title').textContent=`${presets[selected].group} · ${presets[selected].name}`;
   $('lab-discovery-status').textContent=failures.length?failures.join('；'):`已加载 ${presets.length} 个实验，可按知识点浏览或搜索。选择实验后查看运行方式与操作说明。`;
 });
@@ -445,7 +445,7 @@ $('discover-lab').onclick=async()=>{
     if(!incoming.length)throw Error('未发现可同步的 Lab 实验接口');
     const count=LabCatalog.merge(presets,incoming);renderPresets();
     if(selected>=0&&presets[selected]?.kind!=='learning')$('lab-request-title').textContent=`${presets[selected].group} · ${presets[selected].name}`;
-    status.dataset.state='success';status.textContent=`已同步 ${incoming.length} 个接口（新增 ${count} 个），学习目录保留。示例 JSON 请按实际业务填写。`;
+    status.dataset.state='success';status.textContent=`已同步 ${incoming.length} 个接口（新增 ${count} 个），终端实验目录保留。示例 JSON 请按实际业务填写。`;
   }catch(e){status.dataset.state='error';status.textContent='同步失败：'+e.message+'。请确认 Lab 已启动；内置实验仍可浏览。';}
   finally{button.disabled=false;button.textContent='同步接口';button.removeAttribute('aria-busy');}
 };
