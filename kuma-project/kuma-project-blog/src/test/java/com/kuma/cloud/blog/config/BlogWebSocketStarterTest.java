@@ -6,6 +6,9 @@ import com.kuma.cloud.blog.domain.vo.LoginVO;
 import com.kuma.cloud.blog.security.*;
 import com.kuma.cloud.blog.service.ChatBlacklistService;
 import com.kuma.cloud.blog.websocket.ChatHandshakeInterceptor;
+import com.kuma.cloud.blog.websocket.ChatAccessService;
+import com.kuma.cloud.blog.service.PermissionService;
+import com.kuma.cloud.blog.domain.vo.UserAuthoritiesVO;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -32,6 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,7 +55,7 @@ class BlogWebSocketStarterTest {
             .withUserConfiguration(WebSocketConfig.class, Dependencies.class);
 
     @Test
-    void blogDefaultsExposeExistingSockJsEndpointAndAnonymousTopicSubscriptions() {
+    void blogDefaultsExposeSockJsAndOnlyAuthenticatedTopicSubscriptions() {
         runner.run(context -> {
             assertThat(context).hasNotFailed();
             var properties = context.getBean(WebSocketStompProperties.class);
@@ -65,6 +69,12 @@ class BlogWebSocketStarterTest {
 
             var outbound = context.getBean("clientOutboundChannel", SubscribableChannel.class);
             var inbound = context.getBean("clientInboundChannel", MessageChannel.class);
+            authenticate(context.getBean(JwtDecoder.class), context.getBean(BlogJwtAuthenticationConverter.class));
+            var anonymousHeaders = StompHeaderAccessor.create(StompCommand.CONNECT);
+            anonymousHeaders.setSessionId("anonymous");
+            anonymousHeaders.setSessionAttributes(new HashMap<>());
+            assertThatThrownBy(() -> inbound.send(MessageBuilder.createMessage(new byte[0], anonymousHeaders.getMessageHeaders())))
+                    .hasRootCauseInstanceOf(org.springframework.security.access.AccessDeniedException.class);
             var broker = context.getBean(SimpleBrokerMessageHandler.class);
             var received = new LinkedBlockingQueue<Message<?>>();
             MessageHandler receiver = received::add;
@@ -94,18 +104,13 @@ class BlogWebSocketStarterTest {
     }
 
     @Test
-    void handshakeKeepsCookieIdentityBlacklistAndGuestFallback() {
+    void handshakeRequiresValidCookieIdentityPermissionAndNoBlacklist() {
         runner.run(context -> {
             var interceptor = context.getBean(ChatHandshakeInterceptor.class);
             var decoder = context.getBean(JwtDecoder.class);
             var converter = context.getBean(BlogJwtAuthenticationConverter.class);
             var blacklist = context.getBean(ChatBlacklistService.class);
-            var login = new LoginVO();
-            login.setEmail("user@example.com");
-            var jwt = Jwt.withTokenValue("valid-jwt").header("alg", "RS256").subject("user").build();
-            when(decoder.decode("valid-jwt")).thenReturn(jwt);
-            when(converter.convert(jwt)).thenReturn(new UsernamePasswordAuthenticationToken(
-                    new BlogUserDetails(login), null));
+            var login = authenticate(decoder, converter);
             var attributes = new HashMap<String, Object>();
             assertThat(handshake(interceptor, "valid-jwt", attributes)).isTrue();
             assertThat(attributes).containsEntry("loginResponse", login);
@@ -113,12 +118,28 @@ class BlogWebSocketStarterTest {
             when(blacklist.isBlocked(login.getEmail())).thenReturn(true);
             assertThat(handshake(interceptor, "valid-jwt", new HashMap<>())).isFalse();
             attributes.clear();
-            assertThat(handshake(interceptor, null, attributes)).isTrue();
+            assertThat(handshake(interceptor, null, attributes)).isFalse();
             assertThat(attributes).isEmpty();
             when(decoder.decode("invalid-jwt")).thenThrow(new IllegalArgumentException("invalid"));
-            assertThat(handshake(interceptor, "invalid-jwt", attributes)).isTrue();
+            assertThat(handshake(interceptor, "invalid-jwt", attributes)).isFalse();
             assertThat(attributes).isEmpty();
+            when(blacklist.isBlocked(login.getEmail())).thenReturn(false);
+            var denied = new UserAuthoritiesVO();
+            denied.setDirectPermissions(List.of());
+            when(context.getBean(PermissionService.class).getUserAuthorities(1L)).thenReturn(denied);
+            assertThat(handshake(interceptor, "valid-jwt", attributes)).isFalse();
         });
+    }
+
+    private static LoginVO authenticate(JwtDecoder decoder, BlogJwtAuthenticationConverter converter) {
+        var login = new LoginVO();
+        login.setUserId(1L);
+        login.setUsername("user");
+        login.setEmail("user@example.com");
+        var jwt = Jwt.withTokenValue("valid-jwt").header("alg", "RS256").subject("user").build();
+        when(decoder.decode("valid-jwt")).thenReturn(jwt);
+        when(converter.convert(jwt)).thenReturn(new UsernamePasswordAuthenticationToken(new BlogUserDetails(login), null));
+        return login;
     }
 
     private static boolean handshake(ChatHandshakeInterceptor interceptor, String token, Map<String, Object> attributes) {
@@ -131,7 +152,7 @@ class BlogWebSocketStarterTest {
     private static Message<byte[]> frame(StompCommand command, String destination) {
         var headers = StompHeaderAccessor.create(command);
         headers.setSessionId("guest-session");
-        headers.setSessionAttributes(new HashMap<>());
+        headers.setSessionAttributes(new HashMap<>(Map.of("chatAccessToken", "valid-jwt")));
         if (destination != null) headers.setDestination(destination);
         if (command == StompCommand.SUBSCRIBE) headers.setSubscriptionId("chat-subscription");
         return MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
@@ -143,5 +164,15 @@ class BlogWebSocketStarterTest {
         @Bean JwtDecoder jwtDecoder() { return mock(JwtDecoder.class); }
         @Bean BlogJwtAuthenticationConverter converter() { return mock(BlogJwtAuthenticationConverter.class); }
         @Bean ChatBlacklistService blacklist() { return mock(ChatBlacklistService.class); }
+        @Bean PermissionService permissions() {
+            var service = mock(PermissionService.class);
+            var grants = new UserAuthoritiesVO();
+            grants.setDirectPermissions(List.of(BlogPermissions.CHAT_READ, BlogPermissions.CHAT_SEND));
+            when(service.getUserAuthorities(1L)).thenReturn(grants);
+            return service;
+        }
+        @Bean ChatAccessService access(PermissionService permissions, ChatBlacklistService blacklist) {
+            return new ChatAccessService(permissions, blacklist);
+        }
     }
 }

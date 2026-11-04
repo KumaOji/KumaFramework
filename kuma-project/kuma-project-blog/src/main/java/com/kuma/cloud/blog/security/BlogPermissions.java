@@ -10,7 +10,7 @@ import java.util.List;
  * <p>三类用户的权限分配策略：
  * <ul>
  *   <li><b>管理员</b>：在 {@code sys_role_permission} 中关联所有模块通配符（{@code article:*} 等）</li>
- *   <li><b>普通用户</b>：固定拥有只读权限（{@code article:read}、{@code music:read}）</li>
+ *   <li><b>普通用户</b>：默认与游客一致，无受保护的业务权限；公开功能由 HTTP 访问规则决定</li>
  *   <li><b>授权用户</b>：在 {@code sys_user_permission} 中按人单独分配具体权限码</li>
  * </ul>
  */
@@ -88,6 +88,8 @@ public final class BlogPermissions {
 
     /** 聊天室模块所有权限（用于管理员角色关联） */
     public static final String CHAT_ALL       = "chat:*";
+    public static final String CHAT_READ      = "chat:read";
+    public static final String CHAT_SEND      = "chat:send";
     public static final String CHAT_CREATE    = "chat:create";
     public static final String CHAT_UPDATE    = "chat:update";
     public static final String CHAT_DELETE    = "chat:delete";
@@ -134,6 +136,8 @@ public final class BlogPermissions {
                 def(AI_CHAT_RAG, "知识库问答", "ai_chat", "RAG 增强对话与会话管理"),
                 def(AI_CHAT_TEXT, "文本工具", "ai_chat", "摘要、翻译、关键词、情感分析"),
                 def(CHAT_ALL, "聊天室全部权限", "chat", "聊天室模块所有权限"),
+                def(CHAT_READ, "查看聊天", "chat", "查看聊天室、历史消息和在线用户"),
+                def(CHAT_SEND, "发送聊天消息", "chat", "进入聊天室并发送消息（同时需要查看聊天权限）"),
                 def(CHAT_CREATE, "创建聊天室", "chat", "新建聊天室"),
                 def(CHAT_UPDATE, "编辑聊天室", "chat", "修改聊天室"),
                 def(CHAT_DELETE, "删除聊天室", "chat", "删除聊天室"),
@@ -143,6 +147,10 @@ public final class BlogPermissions {
 
     public static List<String> allCodes() {
         return catalog().stream().map(PermissionDef::code).toList();
+    }
+
+    public static List<String> moduleWildcards() {
+        return allCodes().stream().filter(code -> code.endsWith(":*")).toList();
     }
 
     private static PermissionDef def(String code, String name, String module, String description) {

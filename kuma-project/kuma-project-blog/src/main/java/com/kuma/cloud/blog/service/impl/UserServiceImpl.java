@@ -22,6 +22,8 @@ import com.kuma.boot.totp.time.SystemTimeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.jdbc.core.JdbcTemplate;
+import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -40,6 +42,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final TotpAttemptLimiter totpAttemptLimiter;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public User getByUsername(String username) {
@@ -82,6 +85,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createUser(User user) {
         LocalDateTime now = LocalDateTime.now();
         user.setCreateTime(now);
@@ -92,6 +96,10 @@ public class UserServiceImpl implements UserService {
         if (user.getStatus() == null) user.setStatus(1);
         if (user.getIsAdmin() == null) user.setIsAdmin(0);
         userMapper.insert(user);
+        jdbcTemplate.update("""
+                INSERT IGNORE INTO sys_user_role (user_id, role_id)
+                SELECT ?, id FROM sys_role WHERE code = ?
+                """, user.getId(), user.getIsAdmin() == 1 ? RoleConstants.ADMIN : RoleConstants.USER);
         return user.getId();
     }
 

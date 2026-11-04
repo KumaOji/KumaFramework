@@ -11,7 +11,7 @@ import java.util.List;
  * <p>三类用户的权限来源：
  * <ul>
  *   <li><b>管理员</b>：通过 sys_user_role 关联 ROLE_ADMIN，角色权限包含 article:* 等通配符</li>
- *   <li><b>普通用户</b>：通过 sys_user_role 关联 ROLE_USER，角色权限为只读</li>
+ *   <li><b>普通用户</b>：通过 sys_user_role 关联 ROLE_USER，默认不附加业务权限，与游客共享公开功能</li>
  *   <li><b>授权用户</b>：在 ROLE_USER 基础上，sys_user_permission 额外授予具体权限码</li>
  * </ul>
  */

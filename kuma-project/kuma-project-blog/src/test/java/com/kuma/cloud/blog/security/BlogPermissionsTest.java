@@ -7,6 +7,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BlogPermissionsTest {
 
     @Test
+    void catalogIncludesAssignableChatReadAndSendPermissions() {
+        assertThat(BlogPermissions.allCodes()).contains(BlogPermissions.CHAT_READ, BlogPermissions.CHAT_SEND);
+    }
+
+    @Test
     void catalogIncludesKnowledgeBasePermissions() {
         assertThat(BlogPermissions.catalog())
                 .extracting(BlogPermissions.PermissionDef::code)

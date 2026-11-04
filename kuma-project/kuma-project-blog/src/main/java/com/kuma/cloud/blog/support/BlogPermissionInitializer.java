@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,12 +28,27 @@ public class BlogPermissionInitializer implements ApplicationRunner {
     private final PermissionService permissionService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void run(ApplicationArguments args) {
         int inserted = syncCatalog();
-        Long adminRoleId = ensureAdminRole();
+        Long adminRoleId = ensureRole(RoleConstants.ADMIN, "管理员", "默认拥有全部权限");
+        Long userRoleId = ensureRole(RoleConstants.USER, "普通用户", "默认与游客一致，额外能力通过用户单独授权");
+        // ROLE_ADMIN 与 is_admin 均为现有管理员身份来源，统一为一致的数据。
+        jdbcTemplate.update("""
+                UPDATE user u
+                INNER JOIN sys_user_role ur ON ur.user_id = u.id
+                SET u.is_admin = 1
+                WHERE ur.role_id = ? AND (u.is_admin IS NULL OR u.is_admin <> 1)
+                """, adminRoleId);
         int bound = grantAllToAdmin(adminRoleId);
         int linked = linkAdminUsers(adminRoleId);
-        evictAdminCaches();
+        // 普通角色只标记身份；公开访问由 SecurityConfig 决定，不授予受保护的业务能力。
+        jdbcTemplate.update("DELETE FROM sys_role_permission WHERE role_id = ?", userRoleId);
+        jdbcTemplate.update("""
+                INSERT IGNORE INTO sys_user_role (user_id, role_id)
+                SELECT u.id, ? FROM user u WHERE COALESCE(u.is_admin, 0) <> 1
+                """, userRoleId);
+        evictUserCaches();
         log.info("权限清单已同步：新增 {} 项，ROLE_ADMIN 绑定 {} 条，管理员用户关联 {} 人",
                 inserted, bound, linked);
     }
@@ -42,6 +58,8 @@ public class BlogPermissionInitializer implements ApplicationRunner {
         int inserted = 0;
         for (BlogPermissions.PermissionDef def : BlogPermissions.catalog()) {
             if (findPermissionId(def.code()) != null) {
+                jdbcTemplate.update("UPDATE sys_permission SET name = ?, module = ?, description = ? WHERE code = ?",
+                        def.name(), def.module(), def.description(), def.code());
                 continue;
             }
             if (hasTimestamps) {
@@ -69,33 +87,40 @@ public class BlogPermissionInitializer implements ApplicationRunner {
         return ids.isEmpty() ? null : ids.getFirst();
     }
 
-    private Long ensureAdminRole() {
+    private Long ensureRole(String code, String name, String description) {
         List<Long> ids = jdbcTemplate.query(
                 "SELECT id FROM sys_role WHERE code = ?",
                 (rs, rowNum) -> rs.getLong(1),
-                RoleConstants.ADMIN);
+                code);
         if (!ids.isEmpty()) {
+            jdbcTemplate.update("UPDATE sys_role SET name = ?, description = ? WHERE id = ?",
+                    name, description, ids.getFirst());
             return ids.getFirst();
         }
         if (hasColumn("sys_role", "create_time")) {
             jdbcTemplate.update(
-                    "INSERT INTO sys_role (code, name, create_time, update_time) VALUES (?, '管理员', NOW(), NOW())",
-                    RoleConstants.ADMIN);
+                    "INSERT INTO sys_role (code, name, description, create_time, update_time) VALUES (?, ?, ?, NOW(), NOW())",
+                    code, name, description);
         } else {
             jdbcTemplate.update(
-                    "INSERT INTO sys_role (code, name) VALUES (?, '管理员')",
-                    RoleConstants.ADMIN);
+                    "INSERT INTO sys_role (code, name, description) VALUES (?, ?, ?)",
+                    code, name, description);
         }
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM sys_role WHERE code = ?", Long.class, RoleConstants.ADMIN);
+                "SELECT id FROM sys_role WHERE code = ?", Long.class, code);
     }
 
     private int grantAllToAdmin(Long adminRoleId) {
+        jdbcTemplate.update("""
+                DELETE rp FROM sys_role_permission rp
+                INNER JOIN sys_permission p ON p.id = rp.permission_id
+                WHERE rp.role_id = ? AND p.code NOT LIKE '%:*'
+                """, adminRoleId);
         return jdbcTemplate.update(
                 """
                 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
                 SELECT ?, p.id FROM sys_permission p
-                WHERE NOT EXISTS (
+                WHERE p.code LIKE '%:*' AND NOT EXISTS (
                     SELECT 1 FROM sys_role_permission rp
                     WHERE rp.role_id = ? AND rp.permission_id = p.id)
                 """,
@@ -116,9 +141,9 @@ public class BlogPermissionInitializer implements ApplicationRunner {
                 adminRoleId, adminRoleId);
     }
 
-    private void evictAdminCaches() {
+    private void evictUserCaches() {
         jdbcTemplate.query(
-                "SELECT username FROM user WHERE is_admin = 1",
+                "SELECT username FROM user",
                 (rs, rowNum) -> rs.getString(1))
                 .forEach(permissionService::evictCache);
     }

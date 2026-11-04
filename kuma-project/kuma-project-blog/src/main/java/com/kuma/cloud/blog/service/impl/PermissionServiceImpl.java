@@ -3,7 +3,6 @@ package com.kuma.cloud.blog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kuma.boot.cache.redis.repository.RedisRepository;
 import com.kuma.boot.security.spring.access.expression.AuthorizeCheckService;
-import com.kuma.boot.security.spring.access.expression.Permissions;
 import com.kuma.boot.security.spring.access.expression.RoleConstants;
 import com.kuma.cloud.blog.domain.entity.SysPermission;
 import com.kuma.cloud.blog.domain.entity.User;
@@ -56,7 +55,8 @@ public class PermissionServiceImpl implements PermissionService {
             if (!roles.contains(RoleConstants.ADMIN)) {
                 roles.add(RoleConstants.ADMIN);
             }
-            rolePermissions.addAll(BlogPermissions.allCodes());
+            rolePermissions.removeIf(code -> !code.endsWith(":*"));
+            rolePermissions.addAll(BlogPermissions.moduleWildcards());
             rolePermissions = new ArrayList<>(new LinkedHashSet<>(rolePermissions));
         }
         UserAuthoritiesVO vo = new UserAuthoritiesVO();
@@ -84,8 +84,8 @@ public class PermissionServiceImpl implements PermissionService {
         all.addAll(directPermsFut.join());
         if (isAdmin(userId, all)) {
             all.add(RoleConstants.ADMIN);
-            all.add(Permissions.ALL);
-            all.addAll(BlogPermissions.allCodes());
+            all.removeIf(code -> !code.startsWith("ROLE_") && !code.endsWith(":*"));
+            all.addAll(BlogPermissions.moduleWildcards());
         }
 
         List<String> authorities = new ArrayList<>(all);

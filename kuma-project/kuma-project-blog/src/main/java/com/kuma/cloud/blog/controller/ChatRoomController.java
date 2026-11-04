@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ public class ChatRoomController {
 
     @Operation(summary = "获取聊天空间列表")
     @GetMapping("/room/list")
+    @PreAuthorize("@chatAccessService.canAccess(authentication, 'chat:read')")
     public Result<List<ChatRoomVO>> list() {
         List<ChatRoomVO> rooms = chatRoomService.listActive();
         rooms.forEach(r -> r.setOnlineCount(onlineUserRegistry.getOnlineCount(r.getId())));
@@ -61,6 +63,7 @@ public class ChatRoomController {
 
     @Operation(summary = "获取聊天室历史消息（最近50条）")
     @GetMapping("/room/{roomId}/history")
+    @PreAuthorize("@chatAccessService.canAccess(authentication, 'chat:read')")
     public Result<List<ChatMessageVO>> history(@PathVariable Long roomId) {
         List<ChatHistory> histories = chatRoomService.getRecentHistory(roomId, 50);
         List<ChatMessageVO> result = histories.stream().map(h -> {
@@ -80,6 +83,7 @@ public class ChatRoomController {
 
     @Operation(summary = "获取聊天室在线用户")
     @GetMapping("/room/{roomId}/online")
+    @PreAuthorize("@chatAccessService.canAccess(authentication, 'chat:read')")
     public Result<List<ChatOnlineUserVO>> online(@PathVariable Long roomId) {
         List<ChatOnlineUserVO> users = onlineUserRegistry.getOnlineUsers(roomId).stream().map(u -> {
             ChatOnlineUserVO vo = new ChatOnlineUserVO();

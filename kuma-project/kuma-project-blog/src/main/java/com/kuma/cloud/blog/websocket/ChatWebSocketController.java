@@ -27,13 +27,10 @@ public class ChatWebSocketController {
     private final OnlineUserRegistry registry;
     private final ChatRoomService chatRoomService;
 
-    private static final String GUEST_NICK_KEY = "guestNickname";
-    private static final String GUEST_AVATAR_KEY = "guestAvatar";
-
     @MessageMapping("/chat.join/{roomId}")
     public void join(@DestinationVariable Long roomId, ChatGuestProfileDTO profile,
                      SimpMessageHeaderAccessor accessor) {
-        ChatUserInfo userInfo = resolveUser(accessor, profile);
+        ChatUserInfo userInfo = resolveUser(accessor);
         registry.join(roomId, userInfo);
 
         ChatMessageVO msg = buildMessage("JOIN", roomId, userInfo, userInfo.getNickname() + " 加入了聊天室");
@@ -41,11 +38,11 @@ public class ChatWebSocketController {
         broadcastOnlineCount(roomId);
     }
 
-    /** 静默更新访客资料（不广播系统消息） */
+    /** 同步当前登录用户资料（不广播系统消息） */
     @MessageMapping("/chat.profile/{roomId}")
     public void updateProfile(@DestinationVariable Long roomId, ChatGuestProfileDTO profile,
                               SimpMessageHeaderAccessor accessor) {
-        ChatUserInfo userInfo = resolveUser(accessor, profile);
+        ChatUserInfo userInfo = resolveUser(accessor);
         registry.join(roomId, userInfo);
     }
 
@@ -56,10 +53,7 @@ public class ChatWebSocketController {
         String content = request.getContent().strip();
         if (content.length() > 500) content = content.substring(0, 500);
 
-        ChatGuestProfileDTO profile = new ChatGuestProfileDTO();
-        profile.setNickname(request.getNickname());
-        profile.setAvatar(request.getAvatar());
-        ChatUserInfo userInfo = resolveUser(accessor, profile);
+        ChatUserInfo userInfo = resolveUser(accessor);
 
         ChatHistory history = new ChatHistory();
         history.setRoomId(roomId);
@@ -97,27 +91,6 @@ public class ChatWebSocketController {
         });
     }
 
-    private void storeGuestProfile(SimpMessageHeaderAccessor accessor, ChatGuestProfileDTO profile) {
-        if (profile == null) return;
-        Map<String, Object> attrs = accessor.getSessionAttributes();
-        if (attrs == null) return;
-        if (profile.getNickname() != null && !profile.getNickname().isBlank()) {
-            String nick = profile.getNickname().strip();
-            if (nick.length() > 50) nick = nick.substring(0, 50);
-            attrs.put(GUEST_NICK_KEY, nick);
-        }
-        if (profile.getAvatar() != null && !profile.getAvatar().isBlank()) {
-            String av = profile.getAvatar().strip();
-            if (av.length() > 255) av = av.substring(0, 255);
-            attrs.put(GUEST_AVATAR_KEY, av);
-        }
-    }
-
-    private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor, ChatGuestProfileDTO profile) {
-        storeGuestProfile(accessor, profile);
-        return resolveUser(accessor);
-    }
-
     private ChatUserInfo resolveUser(SimpMessageHeaderAccessor accessor) {
         Map<String, Object> attrs = accessor.getSessionAttributes();
         String sessionId = accessor.getSessionId();
@@ -126,12 +99,7 @@ public class ChatWebSocketController {
             String nickname = lr.getNickname() != null ? lr.getNickname() : lr.getUsername();
             return new ChatUserInfo(lr.getUserId(), nickname, null, sessionId);
         }
-        String guestNick = attrs != null ? (String) attrs.get(GUEST_NICK_KEY) : null;
-        String guestAvatar = attrs != null ? (String) attrs.get(GUEST_AVATAR_KEY) : null;
-        if (guestNick == null || guestNick.isBlank()) {
-            guestNick = "访客" + sessionId.substring(0, Math.min(4, sessionId.length()));
-        }
-        return new ChatUserInfo(null, guestNick, guestAvatar, sessionId);
+        throw new org.springframework.security.access.AccessDeniedException("请先登录后再使用聊天");
     }
 
     private ChatMessageVO buildMessage(String type, Long roomId, ChatUserInfo user, String content) {
