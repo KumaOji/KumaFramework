@@ -37,6 +37,20 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 
 ## 配置
 
+### DeepSeek 对话
+
+「AI 工作台」提供类似 Open WebUI 的会话侧栏、历史搜索、多轮流式对话、普通/深度思考模型选择、思考过程折叠、Markdown/表格/代码块与复制、编辑最后一个问题、重新生成、停止、重命名、删除和 JSON 导出。Enter 发送，Shift+Enter 换行，中文输入法确认文字不会误发送。页面不会自动读取项目文件或执行命令。
+
+可在仓库根目录的本机 `gradle.properties` 配置 `deepseek.api.key=<你的密钥>`。该文件已被 Git 忽略，Console 在运行时读取，不把密钥打进 JAR；修改密钥后下一次请求生效，无需重新构建。直接运行 JAR、Gradle bootRun 和 Electron 使用相同逻辑；独立安装时通过 `KUMA_CONSOLE_WORKSPACE` 指定仓库路径。
+
+密钥优先级为 `DEEPSEEK_API_KEY` 环境变量 → 仓库 `gradle.properties` 的 `deepseek.api.key` → 当前系统用户的 `~/.kuma-console/deepseek.key`。未配置前两项时，可通过「连接设置」保存到最后一个文件；使用环境变量或 Gradle 配置时，界面提示配置来源并禁止覆盖。密钥不进入前端存储或配置响应。使用官方 `https://api.deepseek.com/chat/completions`，模型标识为 `deepseek-chat` 和 `deepseek-reasoner`，实际模型由 DeepSeek 解析别名。
+
+对话、草稿与系统提示词保存在当前浏览器/Electron 客户端的 localStorage；浏览器与桌面端各自独立，清理站点数据会移除历史。请求包含当前对话的历史正文；停止或失败的回复保留在界面，但不作为完整回答发送给下一轮。系统提示词用于新对话。每次最多发送 120 条消息、12 万字符，超限需新建对话；生成最多 8192 tokens、180 秒。停止按钮同时取消本机上游请求，已生成部分仍可能计费。
+
+`GET /api/ai/status` 只报告配置状态；`POST /api/ai/connection` 保存密钥；`POST /api/ai/chat?requestId=<UUID>` 返回 SSE；`POST /api/ai/cancel/{id}` 取消请求。所有写操作检查本机 Origin，最多并发两次生成。鉴权失败、余额不足、限流和网络失败均明确显示。
+
+验证：仓库根目录运行 `./gradlew.bat :kuma-project:kuma-project-console:test`；前端目录运行 `npm test`、`npm run test:ai-ui`。浏览器测试使用隔离配置和模拟 SSE，不产生 API 费用。
+
 WSL / k3s 页可选择已安装的发行版进行「启动发行版」「关闭发行版」，也可「关闭全部 WSL」。启动执行 `wsl --distribution … --exec /bin/sh -c "exec sleep infinity"` 并保持后台会话，关闭指定发行版执行 `wsl --terminate …`，关闭全部执行 `wsl --shutdown`；不删除发行版及其文件。关闭会停止其中的 Linux 服务与集群，启动后由发行版自身的 systemd 配置恢复服务。监控会先检查发行版是否运行，避免查询自动拉起已关闭的 WSL。Gateway 日志直接读取 Windows 本机文件。
 
 Lab、Blog 后端、UAA、Gateway 启动时会检查构建缓存：已有 JAR 与源码、资源及 Gradle 配置一致时直接启动，跳过 Gradle；缺少产物或相关输入变化时才执行增量构建。共享 starter 的源码变化也会使缓存失效，其他应用源码变化不会触发该应用构建。缓存标记保存在 `build/startup-cache/`；Lab 按 JAR 内容复用运行副本，Blog/UAA/Gateway 继续使用已有 SHA256 运行副本。前端直接运行 Astro 开发服务，保留其开发缓存；知识仓库同步在内容、代码、配置及依赖锁文件未变化时复用现有页面。可设置 `KNOWLEDGE_FORCE_BUILD=1` 强制重新生成知识仓库。

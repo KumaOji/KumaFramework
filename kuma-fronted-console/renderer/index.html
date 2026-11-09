@@ -25,6 +25,8 @@
   <script src="/sakura.js" defer></script>
   <script src="/yuna-workspace.js" defer></script>
   <script src="/console-settings.js" defer></script>
+  <link rel="stylesheet" href="/ai-workspace.css">
+  <script src="/ai-chat-model.js" defer></script>
   <script src="/ai-workspace.js" defer></script>
   <script src="/public-panels.js" defer></script>
   <script src="/service-dialog.js" defer></script>
@@ -124,16 +126,31 @@
         </div>
       </section>
       <section class="page" id="ai" hidden>
-        <div class="page-heading"><div><h1>AI 工作台</h1><p>整理问题与上下文，从一个清晰的提示开始。</p></div></div>
-        <div class="two-columns">
-          <article class="panel"><div class="panel-heading"><div><h2>提示词草稿</h2><p>选择模板后编辑，草稿仅保存在当前客户端。</p></div><span class="status">未连接模型</span></div>
-            <div class="ai-prompt-tools controls" role="group" aria-label="提示词模板"><button class="button small" data-ai-template="code">代码解释</button><button class="button small" data-ai-template="debug">排查问题</button><button class="button small" data-ai-template="learning">终端实验</button></div>
-            <label class="field-label" for="ai-prompt">问题与上下文</label><textarea id="ai-prompt" class="ai-prompt" rows="12" placeholder="描述你的目标、相关代码或日志，以及希望得到的结果…"></textarea>
-            <div class="panel-heading"><span id="ai-draft-status" class="muted" role="status" aria-live="polite">输入内容后自动保存草稿</span><div class="controls"><button id="ai-clear" class="button small">清空</button><button id="ai-copy" class="button primary">复制提示词</button></div></div>
-          </article>
-          <div><article class="panel"><div class="panel-heading"><div><h2>AI 对话与知识库</h2><p>进入项目现有的 Blog，使用 AI 对话与知识库功能。</p></div></div><div class="ai-entry-content"><p>在「项目服务」启动 Blog，再进入「公共面板」登录使用。</p><a class="button" href="#blog">进入 Blog ↗</a></div></article>
-          <article class="panel"><div class="panel-heading"><div><h2>向量检索实验</h2><p>通过 Lab 验证向量写入、相似度检索和元数据过滤。</p></div></div><div class="ai-entry-content"><p>打开实验后检查参数，准备好再运行。</p><button id="ai-open-vector" class="button">打开向量实验 ↗</button></div></article></div>
+        <div class="page-heading"><div><h1>AI 工作台</h1><p>与 DeepSeek 一起思考、编写和探索。</p></div></div>
+        <div class="ai-chat-shell panel">
+          <aside class="ai-history" aria-label="对话历史">
+            <button id="ai-new" class="button primary">＋ 新建对话</button>
+            <input id="ai-search" type="search" placeholder="搜索对话…" aria-label="搜索对话">
+            <div id="ai-conversations"></div>
+            <p class="muted ai-local-note">对话保存在当前客户端<br>仅发送你输入的内容</p>
+          </aside>
+          <div class="ai-chat-main">
+            <div class="ai-chat-toolbar"><div><strong id="ai-title">新对话</strong><span id="ai-connection" class="muted" role="status">正在检查连接…</span></div><div class="controls"><label class="sr-only" for="ai-model">选择模型</label><select id="ai-model"><option value="deepseek-chat">DeepSeek · 对话</option><option value="deepseek-reasoner">DeepSeek · 深度思考</option></select><button id="ai-settings" class="button small">连接设置</button><button id="ai-rename" class="button small" title="重命名对话">重命名</button><button id="ai-export" class="button small">导出</button><button id="ai-delete" class="button small">删除</button></div></div>
+            <div id="ai-messages" class="ai-messages" role="log" aria-label="对话消息" aria-live="off"></div>
+            <form id="ai-composer" class="ai-composer">
+              <label class="sr-only" for="ai-prompt">发送消息</label><textarea id="ai-prompt" rows="3" maxlength="60000" placeholder="向 DeepSeek 提问…" aria-label="发送消息"></textarea>
+              <div class="ai-composer-bottom"><span id="ai-draft-status" class="muted" role="status" aria-live="polite">Enter 发送 · Shift+Enter 换行</span><div class="controls"><button id="ai-stop" type="button" class="button" hidden>停止生成</button><button id="ai-send" class="button primary" type="submit">发送 ↑</button></div></div>
+            </form>
+          </div>
         </div>
+        <dialog id="ai-rename-dialog" class="ai-settings-dialog"><form id="ai-rename-form"><h2>重命名对话</h2><label for="ai-rename-input">对话名称</label><input id="ai-rename-input" maxlength="100" required><div class="controls"><button id="ai-rename-cancel" type="button" class="button">取消</button><button type="submit" class="button primary">保存</button></div></form></dialog>
+        <dialog id="ai-settings-dialog" class="ai-settings-dialog"><form id="ai-connection-form">
+          <div class="panel-heading"><h2>DeepSeek 连接</h2><button id="ai-settings-close" type="button" class="button small" aria-label="关闭连接设置">关闭</button></div>
+          <p class="muted">连接 DeepSeek 官方 API。密钥仅保存在本机后端，不会写入对话历史。</p>
+          <label for="ai-api-key">API Key</label><input id="ai-api-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…">
+          <label for="ai-system-prompt">系统提示词（用于新对话）</label><textarea id="ai-system-prompt" rows="4" maxlength="8000" placeholder="例如：使用中文回答，结合具体例子解释。"></textarea>
+          <p id="ai-settings-status" class="muted" role="status"></p><button id="ai-save-settings" type="submit" class="button primary">保存设置</button>
+        </form></dialog>
       </section>
       <section class="page" id="lab" hidden>
         <div class="anime-hero lab-hero"><div class="hero-copy"><span class="hero-kicker">EXPLORE / RUN / DISCOVER</span><h1>今天，想探索什么？</h1><p>从一个实验开始，理解代码背后的原理。</p><div class="hero-tags"><span>Lab 实验室</span><span>你的灵感，由这里出发</span></div></div><span class="hero-caption">与 Kuma 一起，点亮新的知识。</span></div>

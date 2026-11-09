@@ -16,7 +16,7 @@ n8n 当前返回 `X-Frame-Options: SAMEORIGIN`，拒绝 Console 跨源嵌入，�
 
 本机没有对应 localhost 转发时，在已运行的 WSL K3s 环境执行 `wsl -d Ubuntu-24.04 -u root -- bash /mnt/d/KumaProject/KumaFramework/scripts/expose-service-panels-wsl.sh`。该脚本仅为已存在的三个服务创建绑定 127.0.0.1 的 systemd 端口转发，不创建新应用，不更改登录配置。
 
-侧栏「AI 工作台」位于 Lab 上方（`#ai`），提供代码解释、问题排查和终端实验的提示词模板，可编辑、自动保存本机草稿、复制或清空。新选模板会追加到已有内容。工作台暂未直接连接模型，可通过入口进入 Blog AI 对话与知识库，或打开 Lab 向量实验；打开实验不会自动执行请求。
+侧栏「AI 工作台」位于 Lab 上方（`#ai`），已接入 DeepSeek 官方 API。参考 Open WebUI 的会话交互，提供历史搜索、多轮流式回复、对话/深度思考模型切换、Markdown 与代码复制、编辑最后一个问题、重新生成、停止、重命名、删除与 JSON 导出。Enter 发送，Shift+Enter 换行。历史与草稿保存在当前客户端。密钥可放在仓库根目录本机 `gradle.properties` 的 `deepseek.api.key`（运行时读取，不打进 JAR），也支持优先级更高的环境变量 `DEEPSEEK_API_KEY`；两者均未配置时，可在「连接设置」保存到用户目录。密钥不进入前端存储。页面不会自动读取项目或执行命令。运行 `npm run test:ai-ui` 验证隔离的模拟流式对话，不产生 API 费用。详细配置见后端 README。
 
 ## Yuna 工作空间主题
 
