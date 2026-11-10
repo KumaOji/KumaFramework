@@ -50,3 +50,8 @@ data/
 # Python test bytecode
 __pycache__/
 *.py[cod]
+
+# Credential exports and accidental local copies; real storage is outside Git.
+**/console-credentials.local.*
+**/console-credentials.private.*
+/.local/console-credentials*

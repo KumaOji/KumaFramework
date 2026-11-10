@@ -25,6 +25,8 @@
   <script src="/sakura.js" defer></script>
   <script src="/yuna-workspace.js" defer></script>
   <script src="/console-settings.js" defer></script>
+  <script src="/credentials.js" defer></script>
+  <link rel="stylesheet" href="/credentials.css">
   <link rel="stylesheet" href="/ai-workspace.css">
   <script src="/ai-chat-model.js" defer></script>
   <script src="/ai-workspace.js" defer></script>
@@ -168,6 +170,7 @@
         <div class="page-heading"><div><h1>Console 配置</h1><p>管理控制台的外观、启动方式与个人偏好。</p></div></div>
         <article class="panel console-preferences"><div class="panel-heading"><div><h2>外观与体验</h2><p>设置保存在当前客户端，修改后立即生效。</p></div></div><div class="console-setting-row"><div><label for="console-theme">界面主题</label><p>选择适合当前环境的显示模式。</p></div><select id="console-theme"><option value="dark">深色模式</option><option value="light">浅色模式</option></select></div><div class="console-setting-row"><div><label for="console-welcome">启动欢迎动画</label><p>浏览器首次打开时播放；桌面启动页继续展示服务准备状态。</p></div><input id="console-welcome" type="checkbox" role="switch"></div><div class="console-setting-row"><div><strong>预览启动动画</strong><p>随时重播欢迎画面。</p></div><button id="console-preview-intro" class="button">播放动画</button></div></article>
         <div id="console-desktop-settings"><article id="console-desktop-hint" class="panel"><div class="panel-heading"><div><h2>桌面启动</h2><p>开机自动启动设置可在 Windows 桌面版中使用。</p></div></div></article></div>
+        <article class="panel" id="console-credentials"><div class="panel-heading"><div><h2>本机账号与凭据</h2><p>读取 localhost / WSL 已保存的账号。密码默认隐藏，显示后 60 秒或离开页面时自动隐藏。</p></div><div class="controls"><button id="credentials-refresh" class="button">读取 / 刷新</button><button id="credentials-hide" class="button">全部隐藏</button></div></div><p id="credentials-status" class="muted" role="status" aria-live="polite">点击读取，获取本机凭据目录；不会启动 WSL 或重置密码。</p><div id="credentials-list"></div></article>
         <article class="panel"><div class="panel-heading"><div><h2>当前控制台</h2><p>当前客户端的运行信息。</p></div></div><dl class="console-info"><div><dt>运行方式</dt><dd id="console-client-mode">浏览器</dd></div><div><dt>访问地址</dt><dd id="console-client-address"></dd></div></dl></article>
         <p id="console-settings-status" class="muted" role="status" aria-live="polite"></p>
       </section>

@@ -1,5 +1,7 @@
 # Kuma Console 桌面前端
 
+「Console 配置 → 本机账号与凭据」内置 `scripts/get-console-credentials.ps1` 的读取入口。点击「读取 / 刷新」获取脱敏列表，按服务显示并复制账号、密码、API Key 或临时登录链接；显示后 60 秒、窗口失焦或离开页面时隐藏明文。接口仅接受本机同源请求，不缓存响应；凭据不会保存在浏览器或源码中。需要 Windows 和本机工作区，打包桌面版可用 `KUMA_CONSOLE_WORKSPACE` 指向此仓库。私有账号仍填写在用户目录 `.kuma-console/credentials.json`，详见 [凭据说明](../scripts/console-credentials.md)。界面测试：`pnpm run test:credentials-ui`（仅使用假凭据）。
+
 「本机概览」包含「系统概览」「本机网络」「本机路由器」三个同级页签。`#overview/network` 打开网络详情与手动网站连通性测试，旧的 `#network` 链接继续可用；`#overview/router` 查看固定地址 `192.168.0.1` 的 Ping、HTTP / HTTPS 连通性、MAC 邻居记录、相关网卡与 IPv4 路由，进入时检测一次，也可手动刷新，并可打开路由器管理页面。邻居、路由和 Ping 采集仅支持 Windows；WAN、Wi-Fi、在线设备和实时流量需要路由器专用接口及登录授权。侧栏统一高亮本机概览，页签支持方向键及 Home / End。
 
 「项目与组件」只保留「项目服务」和「公共面板」两个页签。「已配置的服务探测」统一提供 UAA、Gateway、Lab、Blog 前后端的启停、状态、日志、知识同步及健康探测和诊断；定时刷新保留操作控件和日志，不重复生成相同服务卡片。状态筛选包含本机运行状态与 HTTP 可达状态。
