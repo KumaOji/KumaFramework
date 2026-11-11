@@ -12,7 +12,7 @@
 
 Console 的「Console 配置 → 本机账号与凭据」提供相同读取能力，浏览器版和桌面版共用。先点击「读取 / 刷新」获得脱敏列表，再按服务显示、复制凭据；60 秒、窗口失焦或离开页面时隐藏。`POST /api/credentials` 仅允许本机同源且携带专用请求头的请求，响应使用 `no-store`，拒绝一次性显示所有服务的密码。需要 Windows 及本机仓库脚本；打包桌面版通过 `KUMA_CONSOLE_WORKSPACE` 指向仓库目录。
 
-自动来源包括 Grafana 的 WSL 密码文件、青龙的 WSL 凭据文件，以及现有 k3s Secret 中的 n8n Basic Auth、Qdrant、MySQL、PostgreSQL、Redis 配置。dsh 返回本机启动日志中的登录链接，原进程停止后链接可能失效。n8n Basic Auth 配置与应用内 owner 登录并非同一账号。
+自动来源包括项目 bootstrap.yml 的 Nacos 登录配置、本机 dev 配置中的 UAA 管理员初始化账号、Grafana 的 WSL 密码文件、青龙的 WSL 凭据文件，以及现有 k3s Secret 中的 Qdrant、MySQL、PostgreSQL、Redis 配置。项目配置中的环境变量占位符优先读取当前环境，再使用配置默认值；私有文件仍优先。UAA dev 配置先读取 `.nacos-tmp/base/kuma-cloud-uaa-dev.yaml`，再读取模块的 `application-dev.yml`。dsh 返回本机启动日志中的登录链接，原进程停止后链接可能失效。默认列表合并 UAA / Blog 登录，只显示一份 Qdrant 密钥，不列出无需独立登录的采集接口。n8n Basic Auth 配置与应用内 owner 登录并非同一账号，因此不默认展示；可用 `-Service n8n-basic` 显式读取，Qdrant gRPC 别名和其他原有 service id 也保留显式查询。私有文件中单独保存的条目仍可展示。初始化账号不代表当前应用账号密码已验证或已重置。
 
 `available` 表示读取到了已保存的值，不代表已执行登录验证；密码在界面修改后，旧配置可能不再有效。`manual-required` 表示需补充已知账号，`unavailable` 表示当前环境无法读取来源，`no-stored-login` 表示此目录没有记录独立登录密码。
 

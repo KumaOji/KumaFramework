@@ -14,7 +14,7 @@ async function serve(req,res){
     const query=JSON.parse(body);reads++;
     if(query.reveal){assert.equal(query.service,'grafana');reveals++;if(delayReveal)await new Promise(resolve=>setTimeout(resolve,250));}
     res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});
-    res.end(JSON.stringify([{...fixture,password:query.reveal?'fixture-password':fixture.password}]));return;
+    res.end(JSON.stringify([{...fixture,password:query.reveal?'fixture-password':fixture.password},...(query.reveal?[]:[{service:'otlp',name:'OTLP',status:'no-stored-login'}])]));return;
   }
   if(url.pathname.startsWith('/api/')){res.writeHead(200,{'Content-Type':'application/json'});res.end('{}');return;}
   try{

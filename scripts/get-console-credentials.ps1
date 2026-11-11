@@ -10,6 +10,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $credentialWorkspace = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. (Join-Path $PSScriptRoot 'credential-project-sources.ps1')
 $PrivateFile = [IO.Path]::GetFullPath($PrivateFile)
 if ($PrivateFile.StartsWith($credentialWorkspace + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
     throw 'The private credential file must be outside this repository.'
@@ -97,13 +98,13 @@ function Read-SecretField([string]$Name, [string]$Field) {
 $catalog = @(
     @{ id='grafana'; name='Grafana'; kind='wsl-text'; username='admin'; path='/home/kuma/.config/kuma-observability/grafana-admin-password' },
     @{ id='qinglong'; name='Life / QingLong'; kind='wsl-json'; path='/home/kuma/.config/life-deals/qinglong.json' },
-    @{ id='nacos'; name='Nacos'; kind='manual'; note='Login password is not the Nacos server token or database password. Add the known login to the private file.' },
+    @{ id='nacos'; name='Nacos'; kind='project-login'; note='读取项目的 Nacos 登录配置；不使用服务端 token 或数据库密码。' },
     @{ id='n8n'; name='n8n / owner login'; kind='manual'; note='Owner login is application-managed; a password hash cannot be recovered. Add the known login to the private file.' },
-    @{ id='n8n-basic'; name='n8n / configured Basic Auth'; kind='k8s'; secret='n8n-auth'; usernameKey='basic-auth-user'; passwordKey='basic-auth-password'; note='Configured Basic Auth values; these may differ from the application owner login.' },
+    @{ id='n8n-basic'; name='n8n / configured Basic Auth'; kind='k8s'; hiddenDefault=$true; secret='n8n-auth'; usernameKey='basic-auth-user'; passwordKey='basic-auth-password'; note='Configured Basic Auth values; these may differ from the application owner login.' },
     @{ id='qdrant'; name='Qdrant'; kind='k8s'; secret='qdrant-auth'; apiKeyKey='api-key' },
     @{ id='dsh'; name='DeepSeek Harness'; kind='launch-link'; note='Uses the current process login URL, not a username/password or model API key.' },
-    @{ id='uaa'; name='UAA'; kind='environment'; username='admin'; variable='UAA_ADMIN_PASSWORD'; note='If supplied through another configuration source, add the known login to the private file.' },
-    @{ id='blog'; name='Blog'; kind='manual'; note='User accounts are application-managed; no plaintext password recovery.' },
+    @{ id='uaa'; name='UAA / Blog 登录'; kind='project-login'; note='读取项目管理员初始化配置。Blog 使用 UAA 登录；账号改过密码后，初始配置可能不再有效。' },
+    @{ id='blog'; name='Blog'; kind='manual'; hiddenDefault=$true; note='Blog uses UAA login. A separately saved Blog account can still be requested explicitly.' },
     @{ id='mysql'; name='MySQL'; kind='k8s'; secret='mysql-auth'; username='root'; passwordKey='root-password' },
     @{ id='postgresql'; name='PostgreSQL'; kind='k8s'; secret='postgresql-auth'; usernameKey='username'; passwordKey='password' },
     @{ id='redis'; name='Redis'; kind='k8s'; secret='redis-auth'; username='default'; passwordKey='password' }
@@ -114,9 +115,9 @@ foreach ($item in @(
     @('zipkin','Zipkin API'), @('otlp','OTLP HTTP'), @('otlp-grpc','OTLP gRPC'),
     @('skywalking-agent','SkyWalking Agent'), @('life-redis','Life / Redis'), @('kafka','Kafka')
 )) {
-    $catalog += @{ id=$item[0]; name=$item[1]; kind='none'; note='No independent panel login is recorded here; downstream APIs may still require application authorization.' }
+    $catalog += @{ id=$item[0]; name=$item[1]; kind='none'; hiddenDefault=$true; note='No independent panel login is recorded here; downstream APIs may still require application authorization.' }
 }
-$catalog += @{ id='qdrant-grpc'; name='Qdrant gRPC'; kind='k8s'; secret='qdrant-auth'; apiKeyKey='api-key' }
+$catalog += @{ id='qdrant-grpc'; name='Qdrant gRPC'; kind='k8s'; hiddenDefault=$true; secret='qdrant-auth'; apiKeyKey='api-key' }
 if ($privateServices) {
     foreach ($property in $privateServices.PSObject.Properties) {
         if ($catalog.id -notcontains $property.Name) { $catalog += @{ id=$property.Name; name=$property.Name; kind='manual' } }
@@ -127,6 +128,7 @@ foreach ($id in $requested) { if ($id -ne 'all' -and $catalog.id -notcontains $i
 
 $results = foreach ($entry in $catalog) {
     if ($requested -notcontains 'all' -and $requested -notcontains $entry.id) { continue }
+    if ($requested -contains 'all' -and $entry.hiddenDefault -and !($privateServices -and $privateServices.PSObject.Properties[$entry.id])) { continue }
     $result = [ordered]@{ service=$entry.id; name=$entry.name; status='unavailable'; username=''; password=''; apiKey=''; loginUrl=''; source=$entry.kind; note=[string]$entry.note }
     $override = if ($privateServices) { $privateServices.PSObject.Properties[$entry.id].Value } else { $null }
     try {
@@ -146,6 +148,15 @@ $results = foreach ($entry in $catalog) {
                     if ($entry.apiKeyKey) { $result.apiKey=Read-SecretField $entry.secret $entry.apiKeyKey }
                 }
                 'environment' { $result.username=$entry.username; $result.password=[Environment]::GetEnvironmentVariable($entry.variable) }
+                'project-login' {
+                    $login = Read-CredentialProjectLogin $credentialWorkspace $entry.id
+                    if ($login) {
+                        $result.username=$login.username; $result.password=$login.password; $result.source=$login.source
+                    } elseif ($entry.id -eq 'uaa' -and $env:UAA_ADMIN_PASSWORD) {
+                        $result.username=if ($env:UAA_ADMIN_USERNAME) { $env:UAA_ADMIN_USERNAME } else { 'admin' }
+                        $result.password=$env:UAA_ADMIN_PASSWORD; $result.source='environment'
+                    } else { $result.status='manual-required' }
+                }
                 'launch-link' {
                     $log = Join-Path $credentialWorkspace 'build\dsh-runtime\dsh.log'
                     $text = Get-Content -LiteralPath $log -Raw -Encoding UTF8

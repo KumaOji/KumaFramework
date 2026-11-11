@@ -38,7 +38,7 @@
     for(const entry of entries){
       const value=revealed.get(entry.service),card=element('div',undefined,'credential-card');
       const heading=element('div',undefined,'credential-heading');
-      heading.append(element('h3',entry.name+' · '+entry.service));
+      heading.append(element('h3',entry.name));
       if(entry.status==='available'){
         const show=element('button',pending.has(entry.service)?'读取中…':value?'隐藏':'显示凭据','button small');
         show.disabled=pending.has(entry.service);show.onclick=()=>toggle(entry);heading.append(show);
@@ -64,7 +64,7 @@
   }
   refresh.onclick=async()=>{
     hideAll();const current=generation;refresh.disabled=true;status.textContent='正在读取本机与 WSL 凭据…';
-    try{const data=await read();if(current!==generation)return;entries=data;render();status.textContent='已读取 '+entries.length+' 个服务。缺失的已知账号可填入用户目录 .kuma-console/credentials.json。';}
+    try{const data=await read();if(current!==generation)return;entries=data.filter(entry=>entry.status!=='no-stored-login');render();status.textContent='已读取 '+entries.length+' 个服务。账号从项目配置或本机保存的凭据获取；缺失账号可补充到用户目录 .kuma-console/credentials.json。';}
     catch(error){if(current===generation)status.textContent=error.message;}
     finally{refresh.disabled=false;}
   };
