@@ -20,6 +20,7 @@ public class LabLifecycle {
     private final Path workspace;
     private final URI target;
     private Process process;
+    private ProcessHandle discovered;
     private String phase = "STOPPED", message = "Lab 尚未启动";
     private long generation;
     private Path log;
@@ -45,17 +46,64 @@ public class LabLifecycle {
         catch (IOException e) { return false; }
     }
 
+    boolean matches(String executable, String command) {
+        String name = executable.replace('\\', '/');
+        name = name.substring(name.lastIndexOf('/') + 1).toLowerCase(Locale.ROOT);
+        if (!Set.of("java", "java.exe", "javaw.exe").contains(name)) return false;
+        String base = workspace.toString().replace('\\', '/').toLowerCase(Locale.ROOT) + "/";
+        var jar = java.util.regex.Pattern.compile("(?:^|\\s)-jar\\s+(?:\"([^\"]+)\"|'([^']+)'|(\\S+))").matcher(command);
+        if (jar.find()) {
+            String argument = jar.group(1) != null ? jar.group(1) : jar.group(2) != null ? jar.group(2) : jar.group(3);
+            String path = Path.of(argument).toAbsolutePath().normalize().toString().replace('\\', '/').toLowerCase(Locale.ROOT);
+            return path.endsWith(".jar") && (path.startsWith(base + "kuma-project/kuma-project-lab/")
+                    || path.startsWith(base + "logs/lab-local/runtime/"));
+        }
+        return command.replace('\\', '/').toLowerCase(Locale.ROOT).contains(base + "kuma-project/kuma-project-lab/")
+                && java.util.regex.Pattern.compile("(?:^|\\s)com\\.kuma\\.cloud\\.lab\\.LabApplication(?:\\s|$)").matcher(command).find();
+    }
+
+    private Optional<ProcessHandle> discover() {
+        if (!local()) return Optional.empty();
+        if (!System.getProperty("os.name").startsWith("Windows")) {
+            return ProcessHandle.allProcesses().filter(p -> matches(p.info().command().orElse(""),
+                    p.info().commandLine().orElse(""))).findFirst();
+        }
+        var result = new CommandRunner().run(List.of("powershell", "-NoProfile", "-Command",
+                "$listeners = @(Get-NetTCPConnection -State Listen -LocalPort " + port()
+                        + " -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess); "
+                        + "Get-CimInstance Win32_Process | Where-Object { $_.Name -in @('java.exe','javaw.exe') -and $_.ProcessId -in $listeners } "
+                        + "| Select-Object ProcessId,Name,CommandLine | ConvertTo-Json -Compress"), Duration.ofSeconds(4));
+        if (!result.success() || result.output().isBlank()) return Optional.empty();
+        try {
+            var mapper = new tools.jackson.databind.ObjectMapper();
+            var json = mapper.readTree(result.output());
+            var rows = json.isArray() ? json : mapper.createArrayNode().add(json);
+            for (var row : rows) if (matches(row.path("Name").asString(), row.path("CommandLine").asString())) {
+                var handle = ProcessHandle.of(row.path("ProcessId").asLong()).filter(ProcessHandle::isAlive);
+                if (handle.isPresent()) return handle;
+            }
+        } catch (Exception ignored) { }
+        return Optional.empty();
+    }
+
     public synchronized Map<String, Object> status() {
+        if (discovered != null && !discovered.isAlive() && !phase.equals("STOPPING")) {
+            discovered = null; phase = "STOPPED"; message = "Lab 已退出";
+        }
         if (process != null && !process.isAlive() && Set.of("STARTING", "RUNNING").contains(phase)) {
             phase = "FAILED"; message = "Lab 已退出（" + process.exitValue() + "），请查看启动日志"; process = null;
         }
         if (phase.equals("STARTING") && reachable()) { phase = "RUNNING"; message = "Lab 已监听端口 " + port(); }
         boolean busy = Set.of("BUILDING", "STARTING", "STOPPING").contains(phase);
-        boolean occupied = process == null && !busy && reachable();
+        boolean occupied = process == null && discovered == null && !busy && reachable();
+        if (occupied) {
+            discovered = discover().orElse(null);
+            if (discovered != null) { phase = "RUNNING"; message = "已识别运行中的 Lab，监听端口 " + port(); occupied = false; }
+        }
         boolean available = local() && Files.isDirectory(workspace.resolve("kuma-project/kuma-project-lab"));
         return Map.of("state", occupied ? "EXTERNAL" : phase, "message", occupied ? "端口 " + port() + " 已被其他进程占用；请检查占用服务或调整 KUMA_LAB_URL" : message,
-                "pid", process == null ? 0L : process.pid(), "canStart", available && !busy && process == null && !occupied,
-                "canStop", !phase.equals("STOPPING") && (process != null || phase.equals("BUILDING")),
+                "pid", process != null ? process.pid() : discovered != null ? discovered.pid() : 0L, "canStart", available && !busy && process == null && discovered == null && !occupied,
+                "canStop", !phase.equals("STOPPING") && (process != null || discovered != null || phase.equals("BUILDING")),
                 "logPath", log == null ? "" : log.toString());
     }
 
@@ -121,15 +169,18 @@ public class LabLifecycle {
 
     public synchronized Map<String, Object> stop() {
         if (phase.equals("STOPPING")) return status();
+        status();
         ++generation;
         Process owned = process;
-        if (owned == null) { phase = "STOPPED"; message = "Lab 已停止"; return status(); }
+        ProcessHandle adopted = discovered;
+        if (owned == null && adopted == null) { phase = "STOPPED"; message = "Lab 已停止"; return status(); }
         phase = "STOPPING"; message = "正在停止 Lab…";
         Thread.ofVirtual().name("lab-stop").start(() -> {
-            terminate(owned);
+            if (owned != null) terminate(owned);
+            if (adopted != null) BlogLifecycle.terminate(adopted);
             synchronized (this) {
-                if (owned.isAlive()) { phase = "FAILED"; message = "停止失败，请查看进程 " + owned.pid(); }
-                else { process = null; phase = "STOPPED"; message = "Lab 已停止"; }
+                if ((owned != null && owned.isAlive()) || (adopted != null && adopted.isAlive())) { phase = "FAILED"; message = "停止失败，请查看 Lab 进程"; }
+                else { process = null; discovered = null; phase = "STOPPED"; message = "Lab 已停止"; }
             }
         });
         return status();
@@ -154,5 +205,5 @@ public class LabLifecycle {
     }
 
     @PreDestroy
-    public synchronized void shutdown() { ++generation; if (process != null) terminate(process); }
+    public synchronized void shutdown() { ++generation; }
 }

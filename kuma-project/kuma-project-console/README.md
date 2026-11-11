@@ -37,23 +37,43 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 
 ## 配置
 
-### DeepSeek 对话
+### 本机与 WSL 地址
 
-「AI 工作台」提供类似 Open WebUI 的会话侧栏、历史搜索、多轮流式对话、普通/深度思考模型选择、思考过程折叠、Markdown/表格/代码块与复制、编辑最后一个问题、重新生成、停止、重命名、删除和 JSON 导出。Enter 发送，Shift+Enter 换行，中文输入法确认文字不会误发送。页面不会自动读取项目文件或执行命令。
+统一读取已保存账号的方法见 [Console 本机凭据读取](../../scripts/console-credentials.md)：根目录运行 `./scripts/get-console-credentials.ps1` 默认隐藏密码，添加 `-Reveal` 返回明文。私有补充文件位于 Git 工作区之外的当前用户目录，不随代码提交。
 
-可在仓库根目录的本机 `gradle.properties` 配置 `deepseek.api.key=<你的密钥>`。该文件已被 Git 忽略，Console 在运行时读取，不把密钥打进 JAR；修改密钥后下一次请求生效，无需重新构建。直接运行 JAR、Gradle bootRun 和 Electron 使用相同逻辑；独立安装时通过 `KUMA_CONSOLE_WORKSPACE` 指定仓库路径。
+「项目与组件 → 本机与 WSL 地址」按监控与告警、WSL 应用、本机项目、项目接口、采集接口和非网页连接集中展示入口，支持名称/端口搜索与自定义地址。Grafana 固定在监控组首位，默认 `http://localhost:3000/`；其本机转发对应 WSL `base` 命名空间。MySQL、PostgreSQL、Redis、Kafka 与 gRPC 地址标明为集群内连接，供专用客户端使用，不作为网页打开。
 
-密钥优先级为 `DEEPSEEK_API_KEY` 环境变量 → 仓库 `gradle.properties` 的 `deepseek.api.key` → 当前系统用户的 `~/.kuma-console/deepseek.key`。未配置前两项时，可通过「连接设置」保存到最后一个文件；使用环境变量或 Gradle 配置时，界面提示配置来源并禁止覆盖。密钥不进入前端存储或配置响应。使用官方 `https://api.deepseek.com/chat/completions`，模型标识为 `deepseek-chat` 和 `deepseek-reasoner`，实际模型由 DeepSeek 解析别名。
+`GET /api/service-entries` 提供地址目录，dsh、Life、Blog 和项目接口读取实际后端配置。可通过 `console.panels.<入口id>-url` 覆盖目录地址，Grafana 额外支持环境变量 `KUMA_GRAFANA_URL`。dsh 临时登录链接只保存在前端内存，不写入持久化面板地址。青龙、n8n、Nacos 等使用独立窗口，其余面板按实际支持程度内嵌。
 
-对话、草稿与系统提示词保存在当前浏览器/Electron 客户端的 localStorage；浏览器与桌面端各自独立，清理站点数据会移除历史。请求包含当前对话的历史正文；停止或失败的回复保留在界面，但不作为完整回答发送给下一轮。系统提示词用于新对话。每次最多发送 120 条消息、12 万字符，超限需新建对话；生成最多 8192 tokens、180 秒。停止按钮同时取消本机上游请求，已生成部分仍可能计费。
+### Life（WSL / k3s）
 
-`GET /api/ai/status` 只报告配置状态；`POST /api/ai/connection` 保存密钥；`POST /api/ai/chat?requestId=<UUID>` 返回 SSE；`POST /api/ai/cancel/{id}` 取消请求。所有写操作检查本机 Origin，最多并发两次生成。鉴权失败、余额不足、限流和网络失败均明确显示。
+「项目与组件 → 项目服务」仅展示本机项目的启停与日志，不包含 WSL Life、青龙、RSSHub 或 Redis 卡片，也不轮询 Life 状态。青龙与 RSSHub 仍可通过公共面板访问，WSL / k3s 环境在「服务器与 WSL」查看。后端 Life API 保留，可查询已部署的 `Ubuntu-24.04` / `life-deals`；状态查询不会唤起已停止的 WSL。
 
-验证：仓库根目录运行 `./gradlew.bat :kuma-project:kuma-project-console:test`；前端目录运行 `npm test`、`npm run test:ai-ui`。浏览器测试使用隔离配置和模拟 SSE，不产生 API 费用。
+`application.yml` 的 `console.life.directory` 默认 `D:/Vscode_project/life`（`KUMA_LIFE_DIR`），`console.life.distribution` 默认 `Ubuntu-24.04`（`KUMA_LIFE_DISTRIBUTION`）；面板端口为 `console.life.qinglong-port` / `console.life.rsshub-port`，默认 5700 / 1200，可用 `KUMA_LIFE_QINGLONG_PORT` / `KUMA_LIFE_RSSHUB_PORT` 覆盖。这两个端口应与 WSL 中已有转发服务一致，Console 不重新部署 Life。
+
+接口：`GET /api/life`、`GET /api/life/details`、`POST /api/life/start`、`POST /api/life/stop`。启停异步执行，最多等待 90 秒；失败原因显示在卡片中。
+
+后端验证：`./gradlew.bat :kuma-project:kuma-project-console:test --tests com.kuma.cloud.console.LifeLifecycleTest`。本机项目服务界面验证：前端目录运行 `npm run test:dsh-ui`。
+
+### DeepSeek Harness（dsh）
+
+dsh 启停位于「项目与组件 → 项目服务」，与 UAA、Gateway 等服务并列。原生 Web UI 统一从「本机与 WSL 地址」打开，独立 AI 工作台导航已合并；旧 `#ai` 链接会跳转到统一入口。
+
+在 `src/main/resources/application.yml` 配置 `console.dsh.directory`，默认 `D:/Vscode_project/deepseek-harness`；可用环境变量 `KUMA_DSH_DIR` 覆盖。端口为 `console.dsh.port`，默认 3080，可用 `KUMA_DSH_PORT` 覆盖。目标目录应已执行 `pnpm install` 和 `pnpm run build`。
+
+点击「启动 dsh」使用该目录 `pnpm dsh` 对应的公共 CLI 启动 Web profile（`web --host 127.0.0.1 --port 3080 --no-open`），就绪后点击「打开工作台」进入统一地址页中的原生界面，也可独立窗口打开。已在配置端口运行的 dsh 会被复用；停止按钮可关闭当前 Console 启动的进程，也可关闭从配置目录启动、监听配置端口的 dsh Web 进程，重开 Console 后仍可识别并停止。需要登录的 dsh 也可停止；无法确认身份的端口占用进程不会被停止。关闭 Console 后 dsh 继续运行。启动日志位于 `build/dsh-runtime/dsh.log`。
+
+密钥、模型、工作区和会话都通过 dsh 自身配置管理；Console 不再读取 `deepseek.api.key`、保存密钥或调用模型 API。原聊天历史不会迁移到 dsh。修改目录或端口后需重启 Console 后端；打包版需重新构建。
+
+接口：`GET /api/ai/status`、`GET /api/ai/logs`、`POST /api/ai/start`、`POST /api/ai/stop`。写操作检查本机 Origin。
+
+验证：根目录运行 `./gradlew.bat :kuma-project:kuma-project-console:test --tests com.kuma.cloud.console.DshLifecycleTest`；前端目录运行 `npm run check`、`npm test`、`npm run test:dsh-ui`。界面测试使用模拟 dsh，不调用模型 API。
 
 WSL / k3s 页可选择已安装的发行版进行「启动发行版」「关闭发行版」，也可「关闭全部 WSL」。启动执行 `wsl --distribution … --exec /bin/sh -c "exec sleep infinity"` 并保持后台会话，关闭指定发行版执行 `wsl --terminate …`，关闭全部执行 `wsl --shutdown`；不删除发行版及其文件。关闭会停止其中的 Linux 服务与集群，启动后由发行版自身的 systemd 配置恢复服务。监控会先检查发行版是否运行，避免查询自动拉起已关闭的 WSL。Gateway 日志直接读取 Windows 本机文件。
 
 Lab、Blog 后端、UAA、Gateway 启动时会检查构建缓存：已有 JAR 与源码、资源及 Gradle 配置一致时直接启动，跳过 Gradle；缺少产物或相关输入变化时才执行增量构建。共享 starter 的源码变化也会使缓存失效，其他应用源码变化不会触发该应用构建。缓存标记保存在 `build/startup-cache/`；Lab 按 JAR 内容复用运行副本，Blog/UAA/Gateway 继续使用已有 SHA256 运行副本。前端直接运行 Astro 开发服务，保留其开发缓存；知识仓库同步在内容、代码、配置及依赖锁文件未变化时复用现有页面。可设置 `KNOWLEDGE_FORCE_BUILD=1` 强制重新生成知识仓库。
+
+重新打开 Console 后，会按本仓库的服务 JAR 路径和实际监听端口重新识别 UAA、Gateway 与 Blog 后端，Blog 前端按配置目录和 Astro 监听进程重新识别；对应的停止按钮仍可手动关闭服务。退出 Console 本身不会停止这些服务。
 
 UAA、Gateway 与 Blog 后端通过 `scripts/service-build.ps1` 对同一工作区的服务构建互斥，避免独立 Gradle 进程并发写入共享 starter 的 classes / JAR。仅实际构建时等待，直接复用 JAR 的启动不占用构建锁；进程退出或构建失败后释放锁。可运行 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/service-build.test.ps1` 验证并发构建串行化与异常释放。
 
@@ -63,7 +83,7 @@ Blog 服务卡片保留前端、后端独立启停、知识仓库同步、状态
 
 启动 Blog 会先执行前端项目的 `scripts/sync-knowledge.mjs`，把同级 `KumaKnowledge` 构建到 Blog 的 `public/knowledge/`，成功后才启动前端。「同步知识仓库」按钮可独立更新内容，Blog 运行时也可使用；同步状态及构建日志会显示在 Blog 页面。停止 Blog 会取消进行中的知识仓库构建，并停止前端进程，因此 Blog 与 `/knowledge` 页面一起关闭。已生成的知识仓库文件保留。同步脚本支持通过 `KNOWLEDGE_ROOT` 指定知识仓库路径。
 
-左侧导航的 **Blog** 页面控制仓库上级 `kuma-blog-fronted/KumaBlog` 的 Astro 前端，默认地址为 `http://localhost:4321`。支持启动、停止、打开网页、查看启动日志；也可识别并停止已从该项目启动的 Astro 开发进程。启动使用本机 Node 和项目现有的 Astro 依赖，缺少依赖时先在前端项目执行 `pnpm install`。`KUMA_BLOG_FRONTEND_DIR` 可指定包含 `package.json` 的 `KumaBlog` 目录，`KUMA_BLOG_FRONTEND_PORT` 可覆盖端口。由控制台启动的前端在控制台退出时一并停止；仅被识别的已有进程不会随控制台退出而停止。
+左侧导航的 **Blog** 页面控制仓库上级 `kumaBlogFronted/KumaBlog`（兼容旧目录 `kuma-blog-fronted/KumaBlog`） 的 Astro 前端，默认地址为 `http://localhost:4321`。支持启动、停止、打开网页、查看启动日志；也可识别并停止已从该项目启动的 Astro 开发进程。启动使用本机 Node 和项目现有的 Astro 依赖，缺少依赖时先在前端项目执行 `pnpm install`。`KUMA_BLOG_FRONTEND_DIR` 可指定包含 `package.json` 的 `KumaBlog` 目录，`KUMA_BLOG_FRONTEND_PORT` 可覆盖端口。Console 退出时保留 Blog 前端、知识仓库构建及后端服务；仅点击对应的停止按钮才停止服务。
 
 补充的监控功能：
 
@@ -94,7 +114,7 @@ Blog 服务卡片保留前端、后端独立启停、知识仓库同步、状态
 
 `console.projects` 可添加其他正在运行的项目；Lab 工作台使用名称为 `Lab` 的地址。地址包含应用的 context-path，例如 `/api`。接口路径填写 `/lab/kafka/status`，无需重复 `/api`。
 
-「项目与组件 → 项目服务 → 已配置的服务探测」的 Lab 卡片提供 **启动 Lab / 停止 Lab / 查看日志**，并合并 HTTP 探测与诊断；Lab 页面专注于实验目录与请求操作；服务连接、Swagger 和管理操作集中在服务探测区的 Lab 详情中。启动会先构建当前仓库的 Lab，再用控制台所用的 JDK 启动独立 JVM，使用 `dev` 配置和现有 `bootstrap-local.yml`，端口及 context-path 跟随 `KUMA_LAB_URL`。构建和启动均在后台执行，日志位于 Lab 的 `build/console-runtime/`。构建中也可停止；控制台退出时会停止它启动的 Lab。
+「项目与组件 → 项目服务 → 已配置的服务探测」的 Lab 卡片提供 **启动 Lab / 停止 Lab / 查看日志**，并合并 HTTP 探测与诊断；Lab 页面专注于实验目录与请求操作；服务连接、Swagger 和管理操作集中在服务探测区的 Lab 详情中。启动会先构建当前仓库的 Lab，再用控制台所用的 JDK 启动独立 JVM，使用 `dev` 配置和现有 `bootstrap-local.yml`，端口及 context-path 跟随 `KUMA_LAB_URL`。构建和启动均在后台执行，日志位于 Lab 的 `build/console-runtime/`。构建中也可手动停止；Console 退出时保留已启动的 Lab 和正在进行的构建。重开 Console 后按实际监听端口和本仓库的 Lab JAR 路径或 LabApplication 主类重新识别，显示运行状态并允许手动停止；其他进程占用端口时仍禁止停止。
 
 停止按钮只控制本控制台启动的进程。已有 IDE 启动的 Lab 或其他程序占用目标端口时，会显示端口占用并禁用启动。仅支持本机 HTTP Lab 地址；WSL 或远程服务继续使用实验请求功能。通常自动从当前目录向上查找仓库；独立安装的桌面程序可设置 `KUMA_CONSOLE_WORKSPACE=D:\KumaProject\KumaFramework` 指定仓库。
 

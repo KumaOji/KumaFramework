@@ -14,6 +14,8 @@ class BlogBackendTest {
         assertThat(backend.matches("java.exe", "java -jar \"" + runtime + "\" --server.port=9000")).isTrue();
         assertThat(backend.matches("java.exe", "java -jar \"" + root.resolve("kuma-project/kuma-project-blog/build/libs/blog.jar") + "\"")).isTrue();
         assertThat(backend.matches("java.exe", "java -jar D:/other/blog.jar")).isFalse();
+        assertThat(backend.matches("C:/Java/bin/javaw.exe", "javaw -jar \"" + runtime + "\"")).isTrue();
+        assertThat(backend.matches("java.exe", "java -jar D:/other/blog.jar -Dlog.path=\"" + runtime + "\"")).isFalse();
         assertThat(backend.matches("node.exe", "node -jar \"" + runtime + "\"")).isFalse();
         assertThat(backend.matches("java.exe", "java -jar \"" + root.resolve("logs/uaa-local/runtime/hash.jar") + "\"")).isFalse();
     }

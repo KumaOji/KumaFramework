@@ -12,6 +12,16 @@ spring:
       pool:
         size: 3
 console:
+  panels:
+    grafana-url: ${KUMA_GRAFANA_URL:http://localhost:3000/}
+  life:
+    directory: ${KUMA_LIFE_DIR:D:/Vscode_project/life}
+    distribution: ${KUMA_LIFE_DISTRIBUTION:Ubuntu-24.04}
+    qinglong-port: ${KUMA_LIFE_QINGLONG_PORT:5700}
+    rsshub-port: ${KUMA_LIFE_RSSHUB_PORT:1200}
+  dsh:
+    directory: ${KUMA_DSH_DIR:D:/Vscode_project/deepseek-harness}
+    port: ${KUMA_DSH_PORT:3080}
   components:
     distribution: ${KUMA_COMPONENTS_DISTRIBUTION:Ubuntu-24.04}
   blog:

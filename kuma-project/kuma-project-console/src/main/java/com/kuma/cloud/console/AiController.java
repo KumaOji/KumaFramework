@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -14,32 +13,21 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/ai")
 public class AiController {
-    private final DeepSeekClient client;
-    private final ObjectMapper mapper;
-    public AiController(DeepSeekClient client, ObjectMapper mapper) { this.client = client; this.mapper = mapper; }
+    private final DshLifecycle dsh;
+    public AiController(DshLifecycle dsh) { this.dsh = dsh; }
 
-    @GetMapping("/status") public Object status() { return client.status(); }
-    public record Connection(String apiKey) {}
-    @PostMapping("/connection") public Object connection(@RequestBody Connection connection, HttpServletRequest request) throws IOException {
-        checkOrigin(request); client.saveKey(connection.apiKey()); return client.status();
+    @GetMapping("/status") public Object status(HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store"); return dsh.status();
     }
-
-    @PostMapping(value = "/chat", produces = "text/event-stream")
-    public void chat(@RequestBody DeepSeekClient.Chat chat, @RequestParam String requestId, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        checkOrigin(request); client.validate(chat);
-        if (!requestId.matches("[A-Za-z0-9-]{16,80}")) throw new IllegalArgumentException("请求标识无效");
-        response.setContentType("text/event-stream"); response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-Control", "no-store"); response.setHeader("X-Accel-Buffering", "no");
-        var writer = response.getWriter();
-        client.stream(chat, (event, data) -> {
-            writer.write("event: " + event + "\ndata: " + mapper.writeValueAsString(data) + "\n\n");
-            writer.flush();
-            if (writer.checkError()) throw new IOException("Client disconnected");
-        }, requestId);
+    @GetMapping("/logs") public Object logs(HttpServletResponse response) throws IOException {
+        response.setHeader("Cache-Control", "no-store");
+        return Map.of("body", dsh.logs().get("body").replaceAll("([?&]token=)[A-Za-z0-9_-]+", "$1[redacted]"));
     }
-
-    @PostMapping("/cancel/{id}") public Object cancel(@PathVariable String id, HttpServletRequest request) {
-        checkOrigin(request);client.cancel(id);return Map.of("cancelled", true);
+    @PostMapping("/start") public Object start(HttpServletRequest request) throws IOException {
+        checkOrigin(request); return dsh.start();
+    }
+    @PostMapping("/stop") public Object stop(HttpServletRequest request) {
+        checkOrigin(request); return dsh.stop();
     }
 
     static void checkOrigin(HttpServletRequest request) {

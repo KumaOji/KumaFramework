@@ -16,8 +16,8 @@
     const content=document.querySelector(`[data-service-detail="${name}"]`);
     if(!content)return;
     if(dialog.open){close();restore();}
-    active=name;trigger=document.querySelector(`[data-service-open="${name}"]`);
-    document.getElementById('service-dialog-title').textContent={uaa:'UAA · 认证服务',gateway:'Gateway · 网关服务',blog:'Blog · 前后端与知识仓库',lab:'Lab · 实验服务'}[name];
+    active=name;dialog.dataset.service=name;trigger=document.querySelector(`[data-service-open="${name}"]`);
+    document.getElementById('service-dialog-title').textContent={uaa:'UAA · 认证服务',gateway:'Gateway · 网关服务',blog:'Blog · 前后端与知识仓库',lab:'Lab · 实验服务',dsh:'DeepSeek Harness · AI 工作台'}[name];
     content.hidden=false;body.append(content);dialog.showModal();
     document.getElementById('service-dialog-close').focus({preventScroll:true});
   }

@@ -1,7 +1,6 @@
 'use strict';
 (() => {
   const pages={
-    ai:{title:'AI 工作台',label:'AI / YOUR THOUGHT PARTNER',caption:'让想法，从这里开始',image:'settings-v1',art:'Yuna 在工作台前思考问题并操作悬浮面板'},
     overview:{title:'本机概览',label:'01 / SYSTEM OVERVIEW',caption:'看见系统的每一次脉动',description:'处理器、内存与进程，一眼掌握。',art:'银白发少女在系统监控工作台前查看数据'},
     server:{title:'服务器与 WSL',label:'02 / SERVER & WSL',caption:'远程与本机，在同一处连接',description:'远程服务器、本机 WSL 与 k3s，在同一工作空间管理。',art:'银白发少女在服务器机房检查运行状态'},
     projects:{title:'项目与组件',label:'03 / PROJECTS & COMPONENTS',caption:'让项目与公共能力，自然连接',description:'项目服务、公共组件与 Blog，在同一处管理。',art:'银白发少女整理项目蓝图与模块'},

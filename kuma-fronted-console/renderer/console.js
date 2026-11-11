@@ -16,15 +16,15 @@ async function api(path, options) {
 function navigate() {
   const previousPage=state.page;
   const previousOverviewTab=state.overviewTab;
-  const requested=location.hash.slice(1),page=['network','overview/network','overview/router'].includes(requested)?'overview':['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog','projects/panels'].includes(requested)?'projects':requested;
-  state.page = ['overview','server','projects','ai','lab','settings'].includes(page) ? page : 'overview';
+  const requested=location.hash.slice(1),page=['network','overview/network','overview/router'].includes(requested)?'overview':['cluster','server/wsl'].includes(requested)?'server':['components','projects/components','blog','projects/blog','projects/panels','ai'].includes(requested)?'projects':requested;
+  state.page = ['overview','server','projects','lab','settings'].includes(page) ? page : 'overview';
   state.overviewTab=requested==='overview/router'?'router':['network','overview/network'].includes(requested)?'network':'system';
   $('overview-system').hidden=state.overviewTab!=='system';$('network').hidden=state.overviewTab!=='network';$('router').hidden=state.overviewTab!=='router';
   document.querySelectorAll('[data-overview-view]').forEach(button=>{const active=button.dataset.overviewView===state.overviewTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   state.infrastructureTab=['cluster','server/wsl'].includes(requested)?'wsl':'remote';
   $('infrastructure-remote').hidden=state.infrastructureTab!=='remote';$('cluster').hidden=state.infrastructureTab!=='wsl';
   document.querySelectorAll('[data-environment]').forEach(button=>{const active=button.dataset.environment===state.infrastructureTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
-  state.servicesTab=['blog','projects/blog','projects/panels'].includes(requested)?'panels':'projects';
+  state.servicesTab=['blog','projects/blog','projects/panels','ai'].includes(requested)?'panels':'projects';
   $('project-services').hidden=state.servicesTab!=='projects';$('public-panels').hidden=state.servicesTab!=='panels';
   document.querySelectorAll('[data-service-view]').forEach(button=>{const active=button.dataset.serviceView===state.servicesTab;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});
   document.querySelectorAll('.page').forEach(el => el.hidden = el.id !== state.page);
@@ -284,9 +284,9 @@ function renderManagedServices(){
     let probe=details.querySelector('.managed-probe');
     if(!probe){probe=document.createElement('div');probe.className='managed-probe';details.append(probe);}
     const status=card.querySelector('[data-service-status]');status.replaceChildren();
-    const statusIds={uaa:['component-uaa-state'],gateway:['component-gateway-state'],blog:['blog-process-state','blog-backend-state'],lab:['lab-process-state']}[key];
+    const statusIds={uaa:['component-uaa-state'],gateway:['component-gateway-state'],blog:['blog-process-state','blog-backend-state'],lab:['lab-process-state'],dsh:['dsh-state']}[key];
     statusIds.forEach((id,index)=>{const source=$(id),copy=source.cloneNode(true);copy.removeAttribute('id');if(key==='blog')copy.textContent=(index?'后端 ':'前端 ')+source.textContent;status.append(copy);});
-    card.querySelector('[data-service-address]').textContent=project?.url||({uaa:$('component-uaa-url').textContent,gateway:$('component-gateway-url').textContent,blog:$('blog-url').textContent,lab:'未配置服务地址'}[key]);
+    card.querySelector('[data-service-address]').textContent=project?.url||({uaa:$('component-uaa-url').textContent,gateway:$('component-gateway-url').textContent,blog:$('blog-url').textContent,lab:'未配置服务地址',dsh:card.dataset.address||'http://localhost:3080'}[key]);
     probe.replaceChildren();
     if(project){
       const summary=document.createElement('div');summary.className='project-message';summary.textContent=`${project.name} · ${project.url} · HTTP ${project.httpStatus||'—'} · ${project.latency??'—'} ms · ${project.message||''}`;

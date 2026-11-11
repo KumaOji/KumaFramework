@@ -131,10 +131,10 @@ app.whenReady().then(async()=>{
   await paint();
   await fs.writeFile(path.join(output,'kuma-titlebar.png'),(await window.webContents.capturePage()).toPNG());
   await evaluate(`document.body.classList.remove('desktop');document.getElementById('desktop-bar').hidden=true;`);
-  await waitFor(`document.querySelectorAll('.workspace-hero-art').length===6 && Array.from(document.querySelectorAll('.workspace-hero-art')).every(img=>img.complete&&img.naturalWidth>0)`);
+  await waitFor(`document.querySelectorAll('.workspace-hero-art').length===5 && Array.from(document.querySelectorAll('.workspace-hero-art')).every(img=>img.complete&&img.naturalWidth>0)`);
   assert.equal(await evaluate(`new Set(Array.from(document.querySelectorAll('.workspace-hero-art')).map(img=>img.src)).size`),5);
   assert.ok(await evaluate(`document.getElementById('overview').contains(document.getElementById('network')) && document.querySelector('#settings .workspace-hero-art').getAttribute('src').endsWith('/settings-v1.png')`));
-  assert.equal(await evaluate(`document.querySelectorAll('#workspace-navigation > a .workspace-nav-art img').length`),5);
+  assert.equal(await evaluate(`document.querySelectorAll('#workspace-navigation > a .workspace-nav-art img').length`),4);
   await evaluate(`location.hash='overview';navigate();document.getElementById('overview-system-tab').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));`);
   await waitFor(`state.page==='overview' && state.overviewTab==='network' && !document.getElementById('network').hidden`);
   assert.ok(await evaluate(`document.getElementById('overview-system').hidden && !document.querySelector('nav [data-page=network]') && document.querySelector('nav [data-page=overview]').getAttribute('aria-current')==='page'`));
@@ -142,7 +142,7 @@ app.whenReady().then(async()=>{
   await evaluate(`document.getElementById('overview-network-tab').dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));`);
   await waitFor(`state.overviewTab==='system' && !document.getElementById('overview-system').hidden && document.getElementById('network').hidden`);
   await evaluate(`location.hash='lab';navigate();`);
-  assert.ok(await evaluate(`!document.getElementById('open-lab-finder') && !document.querySelector('nav [data-page="cluster"]') && !document.querySelector('nav [data-page="components"]') && !document.querySelector('nav [data-page="blog"]') && document.querySelectorAll('#workspace-navigation > a[data-page]').length===5`));
+  assert.ok(await evaluate(`!document.getElementById('open-lab-finder') && !document.querySelector('nav [data-page="cluster"]') && !document.querySelector('nav [data-page="components"]') && !document.querySelector('nav [data-page="blog"]') && document.querySelectorAll('#workspace-navigation > a[data-page]').length===4`));
   await evaluate(`window.__sidebarBefore=document.querySelector('.sidebar').getBoundingClientRect().width;window.__contentBefore=document.querySelector('.workspace').getBoundingClientRect().x;document.getElementById('workspace-toggle').click();`);
   assert.ok(await evaluate(`!document.getElementById('workspace-navigation').hidden && document.documentElement.dataset.sidebar==='collapsed' && document.getElementById('workspace-toggle').getAttribute('aria-expanded')==='false' && !document.getElementById('lab').hidden && document.querySelector('.sidebar').getBoundingClientRect().width<window.__sidebarBefore && document.querySelector('.workspace').getBoundingClientRect().x<window.__contentBefore`));
   await evaluate(`document.getElementById('console-settings-link').click();`);
@@ -163,17 +163,10 @@ app.whenReady().then(async()=>{
   assert.ok(await evaluate(`!document.getElementById('lab-presets').hidden && document.getElementById('toggle-lab-catalog').getAttribute('aria-expanded')==='true'`));
   await evaluate(`document.getElementById('toggle-lab-catalog').click()`);
   assert.ok(await evaluate(`!document.getElementById('lab').hidden`));
-  assert.ok(await evaluate(`document.querySelector('[data-page=projects]').nextElementSibling.dataset.page==='ai' && !document.querySelector('[data-page=lab]').nextElementSibling`));
-  assert.ok(await evaluate(`document.querySelector('[data-page=lab]').previousElementSibling.dataset.page==='ai'`));
-  await evaluate(`document.querySelector('[data-page=ai]').click();`);
-  await waitFor(`state.page==='ai' && !document.getElementById('ai').hidden`);
-  assert.equal(await evaluate(`document.getElementById('page-title').textContent`),'AI 工作台');
-  await evaluate(`document.querySelector('.ai-suggestions button').click();document.getElementById('ai-prompt').dispatchEvent(new Event('input'));`);
-  assert.ok(await evaluate(`document.getElementById('ai-prompt').value.includes('执行流程') && JSON.parse(localStorage.getItem('kuma-ai-conversations-v1'))[0].draft.includes('执行流程')`));
-  await evaluate(`document.getElementById('ai-settings').click();`);
-  assert.ok(await evaluate(`document.getElementById('ai-settings-dialog').open`));
-  await evaluate(`document.getElementById('ai-settings-close').click();document.getElementById('ai-new').click();`);
-  assert.equal(await evaluate(`document.getElementById('ai-prompt').value`),'');
+  assert.ok(await evaluate(`document.querySelector('[data-page=projects]').nextElementSibling.dataset.page==='lab' && !document.querySelector('[data-page=ai]')`));
+  await evaluate(`location.hash='projects';navigate();document.querySelector('[data-service-open=dsh]').click();`);
+  assert.ok(await evaluate(`document.getElementById('service-dialog').open && document.getElementById('service-dialog-body').contains(document.getElementById('dsh-start')) && !document.getElementById('ai')`));
+  await evaluate(`window.ServiceDialog.close();`);
   await evaluate(`location.hash='server';navigate();`);
   await waitFor(`state.page==='server' && state.infrastructureTab==='remote'`);
   await evaluate(`new Promise(resolve=>setTimeout(resolve,80))`);
@@ -517,7 +510,7 @@ app.whenReady().then(async()=>{
   await paint();
   await fs.writeFile(path.join(output,'elasticsearch-api.png'),(await window.webContents.capturePage()).toPNG());
   assert.equal(requests,2); // explicit discovery requests only; lesson selection must not execute experiments
-  for(const page of ['overview','network','server','cluster','projects','components','ai','lab','blog','settings']){
+  for(const page of ['overview','network','server','cluster','projects','components','lab','blog','settings']){
     await evaluate(`location.hash=${JSON.stringify(page)};navigate();setTheme('dark');window.scrollTo(0,0);`);
     await waitFor(`Array.from(document.querySelectorAll('.page:not([hidden]) .workspace-hero-art')).every(img=>img.complete&&img.naturalWidth>0)`);
     await paint();
@@ -528,7 +521,7 @@ app.whenReady().then(async()=>{
   await evaluate(`location.hash='lab';navigate();setTheme('light');`);await paint();
   await fs.writeFile(path.join(output,'yuna-lab-light.png'),(await window.webContents.capturePage()).toPNG());
   window.setSize(480,900);await waitFor('window.innerWidth<=480');
-  for(const page of ['overview','network','server','cluster','projects','components','ai','lab','blog','settings']){
+  for(const page of ['overview','network','server','cluster','projects','components','lab','blog','settings']){
     await evaluate(`location.hash=${JSON.stringify(page)};navigate();`);await paint();
     assert.ok(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'),page+' mobile overflow');
   }

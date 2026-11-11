@@ -24,6 +24,13 @@ app.whenReady().then(async()=>{
   const navigation=source.slice(source.indexOf('function navigate()'),source.indexOf("window.addEventListener('hashchange', navigate)"));
   await js(`${helpers}const state={page:'overview'};let pageScrollTimer;function closeDrawer(){};${navigation}window.addEventListener('hashchange',navigate);navigate();`);
   await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
+  assert.equal(await js("document.querySelector('#service-entry-directory .service-entry').dataset.serviceEntry"),'grafana','Grafana is first in the unified directory');
+  assert.ok(await js("['dsh','qinglong','rsshub','grafana','prometheus','skywalking','blog-frontend'].every(id=>document.querySelector('[data-service-entry=\"'+id+'\"]'))"),'Web applications remain visible');
+  assert.ok(await js("['project-uaa','project-gateway','project-lab','project-blog','management-gateway','loki','zipkin','otlp'].every(id=>!document.querySelector('[data-service-entry=\"'+id+'\"]'))"),'Technical endpoints are not default bookmarks');
+  await js("document.getElementById('service-entry-search').value='5700';document.getElementById('service-entry-search').dispatchEvent(new Event('input'))");
+  assert.equal(await js("document.querySelectorAll('#service-entry-directory .service-entry').length"),1,'Directory searches ports');
+  assert.equal(await js("document.querySelector('#service-entry-directory .service-entry').dataset.serviceEntry"),'qinglong');
+  await js("document.getElementById('service-entry-search').value='';document.getElementById('service-entry-search').dispatchEvent(new Event('input'))");
   const initialCount=await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length");
   assert.equal(initialCount,6,'Existing custom panel plus Grafana home, three WSL apps and Blog');
   assert.ok(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name.includes('n8n') && p.externalOnly===true) && JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name.includes('Nacos') && new URL(p.url).pathname==='/nacos/') && localStorage.getItem('kuma-public-panels-catalog-version')==='7' && !JSON.parse(localStorage.getItem('kuma-public-panels-v1')).some(p=>p.name==='知识仓库')"));
@@ -33,6 +40,20 @@ app.whenReady().then(async()=>{
   assert.ok(await js("$('project-services').hidden && $('service-panels-tab').previousElementSibling.id==='service-projects-tab' && $('service-panels-tab').getAttribute('aria-selected')==='true'"));
   await new Promise(r=>setTimeout(r,150));assert.ok(hits>0);
   assert.equal(await js("$('public-panel-open').href"),url);
+  assert.equal(await js("$('public-panel-manager').open"),false,'Bookmark editor is collapsed by default');
+  assert.equal(await js("$('public-browser-address').value"),url);
+  assert.equal(await js("document.querySelectorAll('.service-entry-group').length"),0,'Bookmarks use one compact strip');
+  await js(`$('public-browser-address').value=${JSON.stringify(url+'?temporary=1')};$('public-browser-form').dispatchEvent(new Event('submit',{cancelable:true}));`);
+  assert.equal(await js("$('public-panel-preview').getAttribute('src')"),url+'?temporary=1');
+  assert.equal(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length"),initialCount,'Browsing must not automatically create bookmarks');
+  await js("$('public-panel-back').click()");
+  assert.equal(await js("$('public-browser-address').value"),url);
+  await js("$('public-panel-forward').click()");
+  assert.equal(await js("$('public-browser-address').value"),url+'?temporary=1');
+  await js("$('public-panel-bookmark').click()");
+  assert.equal(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length"),initialCount+1,'Star saves the current address');
+  await js("$('public-panel-delete').click()");
+  assert.equal(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length"),initialCount);
   await js("$('public-panel-new').click();$('public-panel-name').value='<custom>';$('public-panel-url').value='javascript:alert(1)';$('public-panel-form').dispatchEvent(new Event('submit',{cancelable:true}));");
   assert.equal(await js("JSON.parse(localStorage.getItem('kuma-public-panels-v1')).length"),initialCount);
   await js(`$('public-panel-url').value=${JSON.stringify(url+'?view=custom')};$('public-panel-form').dispatchEvent(new Event('submit',{cancelable:true}));`);
@@ -72,7 +93,17 @@ app.whenReady().then(async()=>{
   await js("const state={page:'overview',servicesTab:'projects'};");
   await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
   assert.ok(await js("(()=>{const panels=JSON.parse(localStorage.getItem('kuma-public-panels-v1'));return panels.length===3 && panels[0].name==='Grafana' && panels[0].url==='http://localhost:3000/' && panels[1].name==='Blog' && panels[2].name==='My custom page';})()"),'Grafana dashboards collapse into one home entry without changing other services');
-  console.log('PASS: tab routing, lazy iframe loading, custom URLs, persistence, escaped names, rejected schemes, unload and removal');
+  await js(`localStorage.setItem('kuma-public-panels-v1',${JSON.stringify(JSON.stringify([{name:'My diagnostic',url:'http://localhost:18081/actuator/health'}]))});`);
+  await new Promise(resolve=>{window.webContents.once('did-finish-load',resolve);window.reload();});
+  await js(`const state={page:'overview',servicesTab:'projects'};window.fetch=async()=>({ok:true,json:async()=>[
+    {id:'grafana',name:'Grafana',group:'监控与告警',url:'http://localhost:3000/'},
+    {id:'management-gateway',name:'Gateway · 管理接口',group:'项目接口',url:'http://localhost:18081/actuator'},
+    {id:'otlp',name:'OTLP',group:'采集接口',url:'http://localhost:4318/v1/traces'}
+  ]});void 0;`);
+  await js(fs.readFileSync(path.join(renderer,'public-panels.js'),'utf8'));
+  await waitFor("document.querySelectorAll('#service-entry-directory .service-entry').length===2");
+  assert.ok(await js("!document.querySelector('[data-service-entry=management-gateway]') && !document.querySelector('[data-service-entry=otlp]') && document.querySelector('[data-service-entry=custom]').title.includes('My diagnostic')"),'Fetched technical presets stay hidden while explicitly saved diagnostics remain');
+  console.log('PASS: tab routing, lazy iframe loading, custom URLs, persistence, escaped names, rejected schemes, unload, removal and web-only presets');
   window.destroy();server.close();fixture.close();app.quit();
 }).catch(e=>{console.error(e);window?.destroy();server?.close();fixture?.close();app.exit(1);});
 setTimeout(()=>app.exit(1),15000).unref();

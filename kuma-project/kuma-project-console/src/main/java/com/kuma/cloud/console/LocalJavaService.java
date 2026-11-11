@@ -41,10 +41,16 @@ public class LocalJavaService {
     }
 
     boolean matches(String executable, String command) {
-        String normalized = command.replace('\\', '/').toLowerCase(Locale.ROOT);
+        String executableName = executable.replace('\\', '/');
+        executableName = executableName.substring(executableName.lastIndexOf('/') + 1).toLowerCase(Locale.ROOT);
+        if (!Set.of("java", "java.exe", "javaw.exe").contains(executableName)) return false;
+        var jarArgument = java.util.regex.Pattern.compile("(?:^|\\s)-jar\\s+(?:\"([^\"]+)\"|'([^']+)'|(\\S+))").matcher(command);
+        if (!jarArgument.find()) return false;
+        String jar = jarArgument.group(1) != null ? jarArgument.group(1) : jarArgument.group(2) != null ? jarArgument.group(2) : jarArgument.group(3);
+        String normalized = Path.of(jar).toAbsolutePath().normalize().toString().replace('\\', '/').toLowerCase(Locale.ROOT);
         String base = root.toString().replace('\\', '/').toLowerCase(Locale.ROOT) + "/";
-        return executable.equalsIgnoreCase("java.exe") && normalized.contains("-jar ")
-                && (normalized.contains(base + "logs/" + name + "-local/runtime/") || normalized.contains(base + "kuma-project/kuma-project-" + name + "/"));
+        return normalized.endsWith(".jar") && (normalized.startsWith(base + "logs/" + name + "-local/runtime/")
+                || normalized.startsWith(base + "kuma-project/kuma-project-" + name + "/"));
     }
 
     private Optional<ProcessHandle> discover(boolean listenerOnly) {
@@ -146,12 +152,7 @@ public class LocalJavaService {
     }
 
     @PreDestroy public synchronized void shutdown() {
+        // Console owns its monitoring tasks, not the lifetime of project services.
         ++generation;
-        if (launcher != null) {
-            LabLifecycle.terminate(launcher);
-            if (server == null) server = discover(false).orElse(null);
-            owned = server != null;
-        }
-        if (owned && server != null) BlogLifecycle.terminate(server);
     }
 }

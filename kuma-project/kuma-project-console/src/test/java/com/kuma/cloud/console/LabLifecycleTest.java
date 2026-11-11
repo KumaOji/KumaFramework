@@ -15,6 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 class LabLifecycleTest {
     @TempDir Path workspace;
 
+    private void cleanup(LabLifecycle lab) throws Exception {
+        lab.stop();
+        assertTimeoutPreemptively(Duration.ofSeconds(15), () -> {
+            while (!lab.status().get("state").equals("STOPPED")) Thread.sleep(25);
+        });
+    }
+
     private LabLifecycle lifecycle(String url) throws Exception {
         Files.createDirectories(workspace.resolve("kuma-project/kuma-project-lab"));
         Files.writeString(workspace.resolve("settings.gradle"), "");
@@ -24,6 +31,17 @@ class LabLifecycleTest {
     @Test void resolvesWorkspaceFromModuleDirectory() throws Exception {
         lifecycle("http://127.0.0.1:9090/api");
         assertThat(LabLifecycle.findWorkspace(workspace.resolve("kuma-project/kuma-project-lab"))).isEqualTo(workspace);
+    }
+
+    @Test void identifiesLabJarsAndIdeMainClassWithoutConfusingOtherServices() throws Exception {
+        var lab = lifecycle("http://127.0.0.1:19090/api");
+        String jar = workspace.resolve("kuma-project/kuma-project-lab/build/console-runtime/lab-test.jar").toString();
+        assertThat(lab.matches("java.exe", "java -jar \"" + jar + "\"")).isTrue();
+        assertThat(lab.matches("C:/Java/bin/javaw.exe", "javaw -jar \"" + jar + "\"")).isTrue();
+        assertThat(lab.matches("java.exe", "java -cp \"" + workspace.resolve("kuma-project/kuma-project-lab/build/classes/java/main") + "\" com.kuma.cloud.lab.LabApplication")).isTrue();
+        assertThat(lab.matches("java.exe", "java -jar D:/other/lab.jar")).isFalse();
+        assertThat(lab.matches("java.exe", "java -javaagent:\"" + jar + "\" -jar D:/other/blog.jar")).isFalse();
+        assertThat(lab.matches("node.exe", "node -jar \"" + jar + "\"")).isFalse();
     }
 
     @Test void rejectsRemoteTargetAndOccupiedPort() throws Exception {
@@ -58,7 +76,7 @@ class LabLifecycleTest {
             assertThat(ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
             assertThat(lab.status()).containsEntry("canStart", true).containsEntry("canStop", false);
             assertThat(lab.logs().get("body")).contains("fake-build-started");
-        } finally { lab.shutdown(); }
+        } finally { cleanup(lab); }
     }
 
     @Test void buildFailureIsReportedInStatusAndLog() throws Exception {
@@ -73,10 +91,10 @@ class LabLifecycleTest {
             });
             assertThat(lab.status().get("message").toString()).contains("7");
             assertThat(lab.logs().get("body")).contains("build-failed");
-        } finally { lab.shutdown(); }
+        } finally { cleanup(lab); }
     }
 
-    @Test void launchesJarDetectsReadinessAndStopsOwnedJvm() throws Exception {
+    @Test void launchesJarThenReopensConsoleAndStopsRediscoveredJvm() throws Exception {
         int port;
         try (ServerSocket listener = new ServerSocket(0)) { port = listener.getLocalPort(); }
         var lab = lifecycle("http://127.0.0.1:" + port + "/api");
@@ -103,6 +121,7 @@ class LabLifecycleTest {
         }
         boolean windows = System.getProperty("os.name").startsWith("Windows");
         Files.writeString(workspace.resolve(windows ? "gradlew.bat" : "gradlew"), windows ? "@exit /b 0\r\n" : "exit 0\n");
+        var reopened = lifecycle("http://127.0.0.1:" + port + "/api");
         try {
             lab.start();
             assertTimeoutPreemptively(Duration.ofSeconds(15), () -> {
@@ -111,11 +130,18 @@ class LabLifecycleTest {
             long pid = ((Number) lab.status().get("pid")).longValue();
             assertThat(lab.logs().get("body")).contains("fake-lab-running");
             assertThat(lab.status()).containsEntry("canStart", false).containsEntry("canStop", true);
-            lab.stop();
+            try (var console = new org.springframework.context.annotation.AnnotationConfigApplicationContext()) {
+                console.registerBean(LabLifecycle.class, () -> lab);
+                console.refresh();
+            }
+            assertThat(ProcessHandle.of(pid).orElseThrow().isAlive()).isTrue();
+            assertThat(reopened.status()).containsEntry("state", "RUNNING").containsEntry("pid", pid)
+                    .containsEntry("canStart", false).containsEntry("canStop", true);
+            reopened.stop();
             assertTimeoutPreemptively(Duration.ofSeconds(15), () -> {
-                while (!lab.status().get("state").equals("STOPPED")) Thread.sleep(25);
+                while (!reopened.status().get("state").equals("STOPPED")) Thread.sleep(25);
             });
             assertThat(ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
-        } finally { lab.shutdown(); }
+        } finally { cleanup(reopened); cleanup(lab); }
     }
 }

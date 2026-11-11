@@ -41,10 +41,18 @@ public class BlogLifecycle {
                          @Value("${console.blog.directory:}") String directory,
                          @Value("${console.blog.port:4321}") int port, CommandRunner commands, ObjectMapper mapper) {
         Path root = workspace.isBlank() ? LabLifecycle.findWorkspace(Path.of(System.getProperty("user.dir"))) : Path.of(workspace).toAbsolutePath().normalize();
-        this.directory = directory.isBlank() ? root.resolveSibling("kuma-blog-fronted").resolve("KumaBlog") : Path.of(directory).toAbsolutePath().normalize();
+        this.directory = directory.isBlank() ? defaultDirectory(root) : Path.of(directory).toAbsolutePath().normalize();
         runtime = root.resolve("build/blog-runtime");
         if (port < 1024 || port > 65535) throw new IllegalArgumentException("Blog 端口必须在 1024 到 65535 之间");
         this.port = port; this.commands = commands; this.mapper = mapper;
+    }
+
+    private static Path defaultDirectory(Path root) {
+        Path current = root.resolveSibling("kumaBlogFronted").resolve("KumaBlog");
+        Path legacy = root.resolveSibling("kuma-blog-fronted").resolve("KumaBlog");
+        if (Files.exists(current.resolve("package.json"))) return current;
+        if (Files.exists(legacy.resolve("package.json"))) return legacy;
+        return current;
     }
 
     private boolean reachable() {
@@ -236,8 +244,7 @@ public class BlogLifecycle {
     }
 
     @PreDestroy public synchronized void shutdown() {
+        // Leave Astro and any knowledge build running when Console exits.
         ++generation;
-        if (synchronizing != null) LabLifecycle.terminate(synchronizing);
-        if (owned && process != null) terminate(process);
     }
 }

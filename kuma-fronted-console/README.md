@@ -6,9 +6,9 @@
 
 「项目与组件」只保留「项目服务」和「公共面板」两个页签。「已配置的服务探测」统一提供 UAA、Gateway、Lab、Blog 前后端的启停、状态、日志、知识同步及健康探测和诊断；定时刷新保留操作控件和日志，不重复生成相同服务卡片。状态筛选包含本机运行状态与 HTTP 可达状态。
 
-服务区使用一个大面板包住四张紧凑状态卡片，主界面仅展示服务、状态、地址与「查看详情」。启停、日志、知识同步和诊断放入独立服务弹窗；支持关闭按钮、Esc 和点击遮罩关闭，关闭后焦点回到原入口并停止自动刷新日志。切换页面会关闭弹窗，重新打开保留现有日志和控件状态。
+服务区使用一个大面板包住五张本机项目状态卡片（dsh、UAA、Gateway、Blog、Lab），主界面仅展示项目、状态、地址与「查看详情」。启停、日志、知识同步和诊断放入独立服务弹窗；支持关闭按钮、Esc 和点击遮罩关闭，关闭后焦点回到原入口并停止自动刷新日志。切换页面会关闭弹窗，重新打开保留现有日志和控件状态。
 
-「公共面板」（`#projects/panels`）将 Blog、Grafana、Prometheus、Alertmanager、SkyWalking 及其他 URL 作为同一种可编辑面板条目，统一使用一个预览区域。所有条目都可修改名称、地址和展示方式，支持保存、移除、刷新与新窗口打开；Blog 无专属预览区，也不根据服务状态限制加载。服务卡片的面板入口使用相同的 URL 打开逻辑，桌面登录继续可用。页面加载不显示额外状态说明，仅在保存或输入错误时显示反馈。离开页签会释放嵌入页面。
+「公共面板」（`#projects/panels`）采用浏览器布局：顶部地址栏、后退 / 前进、刷新、收藏与新窗口入口，下方是一行可搜索的快捷书签，主要区域用于网页。内置 Grafana、Blog、监控和 WSL 网页入口；项目 API、Actuator、采集接口及 MySQL / Redis 等非网页连接不作为默认书签。直接输入网址只临时浏览，点击星标才保存为书签；名称、地址、打开方式和删除放入默认折叠的「管理书签」。已有自定义书签继续保留，离开页签会释放嵌入页面。后退 / 前进切换通过地址栏或书签打开的地址。
 
 WSL 现有的 n8n（5678）、Nacos（8848/nacos/）和 Qdrant（6333/dashboard）也提供默认入口，Grafana 仅保留一个首页入口（http://localhost:3000/），各仪表盘在 Grafana 内切换；旧的多个 Grafana 预设会自动合并。新增目录会一次性补入旧客户端保存的列表，保留已有自定义项；升级后移除的入口不会反复恢复。展示方式可选内嵌或新窗口，Qdrant 当前返回禁止嵌入响应头，默认使用新窗口。
 
@@ -18,7 +18,7 @@ n8n 当前返回 `X-Frame-Options: SAMEORIGIN`，拒绝 Console 跨源嵌入，�
 
 本机没有对应 localhost 转发时，在已运行的 WSL K3s 环境执行 `wsl -d Ubuntu-24.04 -u root -- bash /mnt/d/KumaProject/KumaFramework/scripts/expose-service-panels-wsl.sh`。该脚本仅为已存在的三个服务创建绑定 127.0.0.1 的 systemd 端口转发，不创建新应用，不更改登录配置。
 
-侧栏「AI 工作台」位于 Lab 上方（`#ai`），已接入 DeepSeek 官方 API。参考 Open WebUI 的会话交互，提供历史搜索、多轮流式回复、对话/深度思考模型切换、Markdown 与代码复制、编辑最后一个问题、重新生成、停止、重命名、删除与 JSON 导出。Enter 发送，Shift+Enter 换行。历史与草稿保存在当前客户端。密钥可放在仓库根目录本机 `gradle.properties` 的 `deepseek.api.key`（运行时读取，不打进 JAR），也支持优先级更高的环境变量 `DEEPSEEK_API_KEY`；两者均未配置时，可在「连接设置」保存到用户目录。密钥不进入前端存储。页面不会自动读取项目或执行命令。运行 `npm run test:ai-ui` 验证隔离的模拟流式对话，不产生 API 费用。详细配置见后端 README。
+「项目与组件 → 项目服务」集中管理本机 UAA、Gateway、Blog、Lab、dsh 的启停与日志。WSL 青龙 / Life、MySQL、Redis 等应用和基础组件不属于本机项目服务。dsh 使用本机 DeepSeek Harness，目录默认 `D:/Vscode_project/deepseek-harness`（后端 `console.dsh.directory` / `KUMA_DSH_DIR`），端口默认 3080（`KUMA_DSH_PORT`）。「本机与 WSL 地址」集中展示 Grafana、监控组件、WSL 应用、项目接口和 dsh 工作台，可按名称或端口搜索。Grafana 入口位于监控组首位，默认 `http://localhost:3000/`。dsh 的临时登录令牌只用于当前页面，不保存到面板地址配置。
 
 ## Yuna 工作空间主题
 
@@ -75,7 +75,7 @@ pnpm start
 
 桌面窗口最小化时自动显示置顶的 Yuna 悬浮球，可拖动调整位置，球上显示 CPU 使用率。点击展开「本机概览」，查看 CPU、内存、存储、进程数、运行时间及上下行网速，每 2 秒读取本机监控数据；断线时保留最近数值并提示重试，过期采样也会明确标记。再次点击球、面板右上角 × 或按 Esc 可收起；「打开 Kuma Console」恢复主窗口并隐藏悬浮球。恢复主窗口后停止悬浮球轮询，退出程序时销毁悬浮窗口。此功能仅适用于 Electron 桌面客户端。
 
-退出 Kuma Console 会保留 WSL 及其中的中间件和集群。需要关闭时，在「服务器与 WSL」中手动选择关闭发行版或关闭全部 WSL。
+退出 Kuma Console 只停止 Console 自身的后端，保留 UAA、Gateway、Blog 前后端、Lab、dsh、正在进行的服务构建，以及 WSL 和其中的中间件与集群。项目服务通过各自的停止按钮手动停止。需要关闭时，在「服务器与 WSL」中手动选择关闭发行版或关闭全部 WSL。
 
 系统托盘验证：`pnpm run test:system-tray`，覆盖关闭、隐藏、最小化驻留托盘，图标和菜单恢复，悬浮球联动，以及显式退出后的窗口和托盘清理。`pnpm test` 使用 JDK 验证结束 Java 控制台后端后，其常驻子会话仍保持运行。
 
@@ -106,3 +106,5 @@ pnpm run dist        # 构建便携 EXE，包含后端 JAR
 实验目录与说明同步：运行 `python kuma-project/kuma-project-console/scripts/refresh-lab-learning.py`（从仓库根目录）。脚本检查源码路径及JDK版本表，生成 `lab-learning.json` 和 `lab-guides/`；正常使用界面无需Python。
 
 项目目录默认筛选「已启动」：发现匹配的本机项目进程，或服务探测获得 HTTP 响应（包括健康检查异常），即纳入列表；Gradle 构建启用状态不作为启动依据。计数随运行状态刷新，探测失败时不使用对应来源的旧数据判断已启动。服务可达与健康检查通过分别展示，后端每 10 秒探测一次。
+
+青龙和 RSSHub 的访问入口保留在「公共面板」，WSL / k3s 环境状态在「服务器与 WSL」查看。项目服务页面不轮询 Life 部署状态。

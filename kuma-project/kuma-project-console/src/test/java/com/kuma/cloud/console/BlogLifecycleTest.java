@@ -15,6 +15,36 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 class BlogLifecycleTest {
     @TempDir Path root;
 
+    private void cleanup(BlogLifecycle blog) throws Exception {
+        blog.stop();
+        assertTimeoutPreemptively(Duration.ofSeconds(15), () -> {
+            while (blog.status().get("state").equals("STOPPING") || Boolean.TRUE.equals(blog.status().get("canStop"))) Thread.sleep(25);
+        });
+    }
+
+    @Test void resolvesCurrentRepositoryNameAndKeepsLegacyFallback() throws Exception {
+        Path workspace = Files.createDirectories(root.resolve("KumaFramework"));
+        Path current = root.resolve("kumaBlogFronted/KumaBlog");
+        Path legacy = root.resolve("kuma-blog-fronted/KumaBlog");
+        var missing = new BlogLifecycle(workspace.toString(), "", 4321, new CommandRunner(), new ObjectMapper());
+        assertThat(missing.status()).containsEntry("directory", current.toString()).containsEntry("canStart", false);
+
+        Files.createDirectories(legacy);
+        Files.writeString(legacy.resolve("package.json"), "{}");
+        var fallback = new BlogLifecycle(workspace.toString(), "", 4321, new CommandRunner(), new ObjectMapper());
+        assertThat(fallback.status()).containsEntry("directory", legacy.toString());
+
+        Files.createDirectories(current.resolve("node_modules/astro"));
+        Files.writeString(current.resolve("package.json"), "{}");
+        Files.writeString(current.resolve("node_modules/astro/astro.js"), "");
+        int port; try (var socket = new ServerSocket(0)) { port = socket.getLocalPort(); }
+        var preferred = new BlogLifecycle(workspace.toString(), "", port, new CommandRunner(), new ObjectMapper());
+        assertThat(preferred.status()).containsEntry("directory", current.toString()).containsEntry("canStart", true);
+
+        var explicit = new BlogLifecycle(workspace.toString(), legacy.toString(), 4321, new CommandRunner(), new ObjectMapper());
+        assertThat(explicit.status()).containsEntry("directory", legacy.toString());
+    }
+
     BlogLifecycle create(int port) throws Exception {
         Path blog = root.resolve("front end/KumaBlog");
         Files.createDirectories(blog.resolve("node_modules/astro"));
@@ -49,7 +79,32 @@ class BlogLifecycleTest {
             });
             assertThat(ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
             assertThat(blog.status()).containsEntry("canOpen", false).containsEntry("canStart", true);
-        } finally { blog.shutdown(); }
+        } finally { cleanup(blog); }
+    }
+
+    @Test void rediscoversAndStopsFrontendAfterConsoleRestart() throws Exception {
+        int port; try (var socket = new ServerSocket(0)) { port = socket.getLocalPort(); }
+        var original = create(port);
+        var reopened = new BlogLifecycle(root.toString(), root.resolve("front end/KumaBlog").toString(), port,
+                new CommandRunner(), new ObjectMapper());
+        try {
+            original.start();
+            assertTimeoutPreemptively(Duration.ofSeconds(15), () -> {
+                while (!original.status().get("state").equals("RUNNING")) Thread.sleep(25);
+            });
+            long pid = ((Number) original.status().get("pid")).longValue();
+            try (var console = new org.springframework.context.annotation.AnnotationConfigApplicationContext()) {
+                console.registerBean(BlogLifecycle.class, () -> original);
+                console.refresh();
+            }
+            assertThat(ProcessHandle.of(pid).orElseThrow().isAlive()).isTrue();
+            assertThat(reopened.status()).containsEntry("pid", pid).containsEntry("canStop", true);
+            reopened.stop();
+            assertTimeoutPreemptively(Duration.ofSeconds(15), () -> {
+                while (!reopened.status().get("state").equals("STOPPED")) Thread.sleep(25);
+            });
+            assertThat(ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
+        } finally { cleanup(reopened); cleanup(original); }
     }
 
     @Test void preparesFirstPageAndRetriesHttpErrorsBeforeOpeningPreview() throws Exception {
@@ -77,7 +132,7 @@ class BlogLifecycleTest {
                 while (!Boolean.TRUE.equals(blog.status().get("canOpen"))) Thread.sleep(25);
             });
             assertThat(blog.status()).containsEntry("state", "RUNNING");
-        } finally { blog.shutdown(); }
+        } finally { cleanup(blog); }
     }
 
     @Test void matchesOnlyAstroDevFromConfiguredDirectory() throws Exception {
@@ -111,7 +166,7 @@ class BlogLifecycleTest {
             });
             assertThat(blog.status()).containsEntry("state", "FAILED").containsEntry("pid", 0L).containsEntry("canStart", true);
             assertThat(blog.logs().get("body")).contains("Bad knowledge build");
-        } finally { blog.shutdown(); }
+        } finally { cleanup(blog); }
     }
 
     @Test void manualSyncDoesNotStartBlogAndCanBeCancelled() throws Exception {
@@ -136,7 +191,7 @@ class BlogLifecycleTest {
             });
             assertThat(blog.status()).containsEntry("knowledgeState", "CANCELLED");
             assertThat(ProcessHandle.of(syncPid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
-        } finally { blog.shutdown(); }
+        } finally { cleanup(blog); }
     }
 
     @Test void stopClosesFrontendAndActiveKnowledgeBuildIncludingChildren() throws Exception {
@@ -167,6 +222,6 @@ class BlogLifecycleTest {
             assertThat(ProcessHandle.of(frontendPid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
             assertThat(ProcessHandle.of(buildPid).map(ProcessHandle::isAlive).orElse(false)).isFalse();
             assertThat(blog.status()).containsEntry("canOpen", false).containsEntry("knowledgeState", "CANCELLED");
-        } finally { blog.shutdown(); }
+        } finally { cleanup(blog); }
     }
 }

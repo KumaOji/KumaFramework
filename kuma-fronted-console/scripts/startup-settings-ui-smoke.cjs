@@ -20,6 +20,9 @@ app.whenReady().then(async()=>{
   const html='<body><div id="desktop-bar" hidden></div><button id="theme-toggle"></button><section id="overview"><div class="page-heading"></div></section><section id="settings"><div id="console-desktop-settings"></div></section></body>';
   window=new BrowserWindow({show:false,webPreferences:{preload:path.resolve(__dirname,'../electron/preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
   await window.loadURL('data:text/html,'+encodeURIComponent(html));
+  for(const file of ['console.css','studio.css','sakura.css','yuna-workspace.css','design-system.css']){
+    await window.webContents.insertCSS(await fs.readFile(path.resolve(__dirname,'../renderer',file),'utf8'));
+  }
   const evaluate=source=>window.webContents.executeJavaScript(source);
   await evaluate(script);
   const waitReady=async()=>{
@@ -30,6 +33,11 @@ app.whenReady().then(async()=>{
     throw Error('Startup settings did not become ready');
   };
   await waitReady();
+  for(const width of [1200,480]){
+    window.setSize(width,800);
+    const size=await evaluate(`(()=>{const input=document.getElementById('desktop-startup-toggle'),box=input.getBoundingClientRect();return {width:box.width,height:box.height,padding:getComputedStyle(input).padding};})()`);
+    assert.deepEqual(size,{width:19,height:19,padding:'0px'},'Startup checkbox must keep its size on desktop and mobile');
+  }
   assert.equal(await evaluate('document.getElementById("desktop-settings").parentElement.id'),'console-desktop-settings');
   assert.equal(await evaluate('document.getElementById("desktop-startup-toggle").checked'),true);
   assert.equal(await evaluate('typeof window.require'), 'undefined');

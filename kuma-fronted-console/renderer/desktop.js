@@ -34,7 +34,7 @@ if(window.kumaDesktop?.platform==='win32'&&window.kumaDesktop.getOpenAtLogin){
   const settings=document.createElement('article');
   settings.className='panel';
   settings.id='desktop-settings';
-  settings.innerHTML='<div class="panel-heading"><div><h2>桌面设置</h2><p>登录 Windows 后自动打开 Kuma Console</p></div><label class="controls"><input id="desktop-startup-toggle" type="checkbox" role="switch" disabled>开机自动启动</label></div><p id="desktop-startup-status" class="muted" role="status" style="margin:0 23px 20px">正在读取设置…</p>';
+  settings.innerHTML='<div class="panel-heading"><div><h2>桌面设置</h2><p>登录 Windows 后自动打开 Kuma Console</p></div><label class="desktop-startup-control"><input id="desktop-startup-toggle" type="checkbox" role="switch" disabled>开机自动启动</label></div><p id="desktop-startup-status" class="muted" role="status" style="margin:0 23px 20px">正在读取设置…</p>';
   const settingsContainer=document.getElementById('console-desktop-settings');
   if(settingsContainer){settingsContainer.append(settings);const hint=document.getElementById('console-desktop-hint');if(hint)hint.hidden=true;}
   else document.querySelector('#overview .page-heading').after(settings);
