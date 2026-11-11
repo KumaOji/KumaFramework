@@ -25,7 +25,5 @@
 权限、修复默认角色关联、清空 `ROLE_USER` 的业务权限，并清除用户权限缓存。
 创建新用户时同时写入相应角色关联。
 
-已有数据库可以先备份权限表和用户身份字段，再在 Blog 数据库执行
-`sql/blog-permissions-normalize.sql`（相对仓库根目录）。脚本可重复执行，不删除
-用户、不修改密码、不移除单独授权。手工执行 SQL 后还需清除相应用户的
-`user:authorities:<username>` 缓存，或重启 Blog 由初始化器处理。
+已有数据库可以先备份权限表和用户身份字段，再重启 Blog，由
+`BlogPermissionInitializer` 完成默认权限整理及相应用户权限缓存清理。
