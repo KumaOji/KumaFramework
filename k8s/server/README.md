@@ -16,6 +16,23 @@ server/
 预览：`kubectl kustomize k8s/server`。
 现有服务器部署入口：`bash /data/k8s/scripts/apply-k8s.sh`。
 
+## GitHub Actions 触发边界
+
+以下 push 规则针对 `master`，各工作流同时保留 `workflow_dispatch` 手动发布入口。
+
+| 修改范围 | 自动触发 |
+|---|---|
+| `k8s/server/**` | Apply K8s Configs，上传并应用服务器通用入口 |
+| `k8s/server/blog/blog-backend.yaml` | 同时触发 Blog 应用发布 |
+| `k8s/server/base/uaa.yaml`、`gateway.yaml`、`lab.yaml` | 同时触发对应应用发布 |
+| 流水线实际使用的部署、验证或等待脚本 | 触发其依赖工作流 |
+| `k8s/local/**` | 不触发服务器发布 |
+
+Apply 工作流在镜像同步和 SSH 步骤之前渲染 `k8s/server`，检查引用文件存在，
+并拒绝把 Secret 示例、应用 placeholder 镜像纳入通用入口。
+UAA、Gateway、Lab、Blog 的应用发布均上传所需的等待脚本，不依赖服务器上遗留的副本。
+提交消息中的 `[skip ci]` 只跳过该次 push 的自动触发，不会禁用后续正常提交或手动发布。
+
 ## 服务器应用与中间件同步
 
 服务器 `117.72.13.197` 的 K3s 部署 Blog、UAA、Gateway、内网 Lab，以及

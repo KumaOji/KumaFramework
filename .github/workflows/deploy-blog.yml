@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/deploy-blog.yml'
       - 'k8s/server/blog/blog-backend.yaml'
+      - 'scripts/apply-k8s-resource.py'
+      - 'scripts/wait-observability-server.sh'
       - 'kuma-project/kuma-project-blog/**'
       - '.nacos-tmp/base/kuma-cloud-blog*-prod.yaml'
       - 'scripts/publish-nacos-prod.sh'

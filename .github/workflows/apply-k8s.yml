@@ -8,6 +8,8 @@ on:
       - 'scripts/apply-k8s.sh'
       - 'scripts/prepare-monitoring-server.sh'
       - 'scripts/check-observability.py'
+      - 'scripts/check-monitoring-server.py'
+      - 'scripts/expose-monitoring-server.sh'
       - 'scripts/apply-k8s-resource.py'
       - '.github/workflows/apply-k8s.yml'
   workflow_dispatch:
@@ -25,6 +27,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate server manifests before deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest="$(mktemp)"
+          trap 'rm -f "$manifest"' EXIT
+          kubectl kustomize k8s/server > "$manifest"
+          if grep -Eq '^kind: Secret$|^[[:space:]]*image:.*:placeholder' "$manifest"; then
+            echo 'Server configuration entrypoint must exclude Secret examples and application placeholder images.' >&2
+            exit 1
+          fi
 
       - name: Login to ACR
         uses: docker/login-action@v3
