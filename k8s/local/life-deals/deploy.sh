@@ -29,4 +29,5 @@ for name in qinglong rsshub; do
   fi
   k3s kubectl -n kube-system rollout status "$daemonset" --timeout=180s
 done
+bash "${framework}/scripts/expose-service-panels-wsl.sh" qinglong rsshub
 bash ./status.sh

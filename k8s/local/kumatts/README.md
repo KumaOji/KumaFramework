@@ -1,88 +1,46 @@
-# KumaTTS on the local WSL k3s node
+﻿# KumaTTS 本地部署
 
-Namespace: `kumatts`. Deployments: `astrbot` and `voice`, one replica each.
+`kumatts` 命名空间运行 AstrBot 和 voice，使用 host 网络，默认入口分别为
+http://localhost:6185 和 http://localhost:9880。
 
-Canonical deployment directory: `D:\KumaProject\KumaFramework\k8s\local\kumatts`.
-The original `D:\KumaProject\KumaTTS\deploy\k3s` paths now forward to this directory.
-`namespace.yaml`, `astrbot.yaml` and `voice.yaml` are the only deployment sources;
-`Containerfile` and lifecycle tools are maintained alongside them. Application source
-remains in `D:\KumaProject\KumaTTS`.
-The image uses Ubuntu 24.04 system libraries and mounts this machine's existing
-Python environments and model files at their original paths. It is a local-node
-deployment, not a standalone image for another machine.
+该部署依赖主机上的 KumaTTS 源码、Python 环境和模型，并非独立可移植镜像。
+部署前调整 `astrbot.yaml`、`voice.yaml` 和相关脚本中的项目路径；
+默认项目位于 `/mnt/d/KumaProject/KumaTTS`。
+源码、Python 环境和模型以只读方式挂载，应用数据、运行目录和缓存可写。
 
-Both Pods use host networking to retain Windows-to-WSL localhost access and the
-existing plugin endpoint. AstrBot remains at http://localhost:6185 and the voice
-API at http://localhost:9880. No new public ingress is configured.
+## 准备与部署
 
-Code, Python environments and models are mounted read-only. AstrBot `data`, voice
-`.runtime` and model caches are writable host directories. The original credentials
-and history remain there; the manifest contains no API keys or passwords.
+需要 Buildah、NVIDIA Container Toolkit 及 k3s 的 `nvidia` RuntimeClass。
+GPU 安装辅助入口为 `install-toolkit.sh`，执行前应检查其主机配置操作。
+voice 使用 `NVIDIA_VISIBLE_DEVICES=all`，与主机进程共享 GPU，未配置独占资源预留。
 
-The voice Pod uses `runtimeClassName: nvidia` and `NVIDIA_VISIBLE_DEVICES=all`.
-GPU access is shared with other host processes; no device plugin or exclusive GPU
-reservation is configured. Models still load per job and release VRAM on exit.
-K3s restarts failed containers, but restarting an active inference job interrupts it.
-WSL must be running for the services to be available.
-
-## Verified on this machine
-
-On 2026-11-11 the voice Pod recognized the RTX 5080 using PyTorch 2.11.0+cu128.
-Actual authenticated HTTP jobs passed for cute TTS, gentle TTS and RVC conversion,
-including downloaded WAV hash, finite-sample and non-silence checks. Audio and
-receipts are in `D:\KumaProject\KumaTTS\acceptance-k3s`; listening quality remains for the user to
-judge. Windows localhost checks returned HTTP 200 for the UI and voice health API.
-The optional WeText frontend still falls back after ModelScope download errors,
-as it did before migration; this can add delay to per-job model initialization.
-
-## Manage from Windows PowerShell
-
-```powershell
-& D:\KumaProject\KumaTTS\Start-KumaTTS.ps1
-wsl -d Ubuntu-24.04 -u root -- kubectl -n kumatts get pods -o wide
-wsl -d Ubuntu-24.04 -u root -- kubectl -n kumatts logs deployment/voice --tail=100
-wsl -d Ubuntu-24.04 -u root -- kubectl -n kumatts logs deployment/astrbot --tail=100
-wsl -d Ubuntu-24.04 -u root -- kubectl -n kumatts scale deployment/voice deployment/astrbot --replicas=0
-```
-
-Use the scale-to-zero command to stop both applications while preserving data.
-Do not run the saved legacy launcher at the same time as these Pods.
-
-## Rebuild on this WSL host
-
-Run as root inside Ubuntu-24.04. Buildah and NVIDIA Container Toolkit are installed.
-The toolkit was installed using NVIDIA's official apt repository; K3s was restarted
-once to discover the NVIDIA runtime, without changing its default runtime.
-Runtime setup follows the [K3s NVIDIA configuration](https://docs.k3s.io/advanced#nvidia-container-runtime-support)
-and [NVIDIA Container Toolkit installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+在 WSL 的仓库根目录执行：
 
 ```bash
-deploy=/mnt/d/KumaProject/KumaFramework/k8s/local/kumatts
+deploy=k8s/local/kumatts
+image=$(python3 "$deploy/prepare.py" --image)
 buildah bud --layers --isolation chroot --network host \
-  -t localhost/kumatts-runtime:20261111-v2 \
-  -f "$deploy/Containerfile" "$deploy"
+  -t "$image" -f "$deploy/Containerfile" "$deploy"
 bash "$deploy/migrate.sh"
 ```
 
-`prepare.py` validates the canonical YAML instead of generating `kumatts.json`.
-`migrate.sh` reads the image tag from both Deployment manifests, imports the image
-into k3s, validates prerequisites, stops only PID-verified legacy project processes,
-and deploys only `kumatts`. Update both Deployment image tags together for future image changes.
-
-Read-only Kubernetes configuration validation:
+`migrate.sh` 导入镜像、检查前置条件，停止由旧启动器记录且命令行匹配的项目进程，
+再部署 `kumatts`。两个 Deployment 的镜像标签需同步更新。
+普通检查与更新不执行上述迁移操作：
 
 ```bash
-python3 /mnt/d/KumaProject/KumaFramework/scripts/deploy-local-wsl.py --namespace kumatts
+python3 scripts/deploy-local-wsl.py --namespace kumatts
+python3 scripts/deploy-local-wsl.py --namespace kumatts --apply
 ```
 
-The shared deployment script checks host directories, the NVIDIA RuntimeClass and
-the imported image before applying. It does not build/import images or stop legacy
-processes. Use `migrate.sh` explicitly for those operations; normal configuration
-validation does not run inference or touch running jobs.
+## 运维
 
-## Return to legacy processes
+```bash
+kubectl -n kumatts get pods -o wide
+kubectl -n kumatts logs deployment/voice --tail=100
+kubectl -n kumatts logs deployment/astrbot --tail=100
+kubectl -n kumatts scale deployment/voice deployment/astrbot --replicas=0
+```
 
-First scale both deployments to zero and wait for their Pods to terminate. Then
-run `bash /mnt/d/KumaProject/KumaFramework/k8s/local/kumatts/start-services-legacy.sh` as user
-`kuma`. This uses the same original data. The normal project launcher now starts
-the k3s deployments, so do not use it while testing legacy mode.
+停止保留主机数据，重新部署可恢复副本；容器重启会中断正在执行的推理任务。
+如需使用 `start-services-legacy.sh`，先缩容并等待两个 Pod 退出，避免端口和数据目录冲突。

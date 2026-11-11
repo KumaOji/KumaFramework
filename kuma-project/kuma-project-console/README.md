@@ -39,7 +39,7 @@ java --enable-preview --enable-native-access=ALL-UNNAMED -jar kuma-project/kuma-
 
 ### 本机与 WSL 地址
 
-统一读取已保存账号的方法见 [Console 本机凭据读取](../../scripts/console-credentials.md)：根目录运行 `./scripts/get-console-credentials.ps1` 默认隐藏密码，添加 `-Reveal` 返回明文。私有补充文件位于 Git 工作区之外的当前用户目录，不随代码提交。
+统一读取已保存账号的方法见 [Console 本机凭据读取](../../kuma-fronted-console/README.md#credentials)：根目录运行 `./scripts/get-console-credentials.ps1` 默认隐藏密码，添加 `-Reveal` 返回明文。私有补充文件位于 Git 工作区之外的当前用户目录，不随代码提交。
 
 「项目与组件 → 本机与 WSL 地址」按监控与告警、WSL 应用、本机项目、项目接口、采集接口和非网页连接集中展示入口，支持名称/端口搜索与自定义地址。Grafana 固定在监控组首位，默认 `http://localhost:3000/`；其本机转发对应 WSL `base` 命名空间。MySQL、PostgreSQL、Redis、Kafka 与 gRPC 地址标明为集群内连接，供专用客户端使用，不作为网页打开。
 
