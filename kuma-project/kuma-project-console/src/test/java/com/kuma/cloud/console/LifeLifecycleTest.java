@@ -10,12 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 class LifeLifecycleTest {
     static class Commands extends CommandRunner {
-        boolean running = true, forwarding = true, failRead = false;
+        boolean running = true, accessible = true, failRead = false;
+        String nodeIp = "172.23.89.45";
         volatile int replicas = 1;
         final List<List<String>> calls = new CopyOnWriteArrayList<>();
         @Override public Result run(List<String> command, Duration timeout) {
             calls.add(command);
             if (command.contains("--list")) return new Result(true, running ? "Ubuntu-24.04\n" : "", "");
+            if (command.contains("nodes")) return new Result(true, "{\"items\":[{\"status\":{\"addresses\":[{\"type\":\"InternalIP\",\"address\":\"" + nodeIp + "\"}]}}]}", "");
             if (command.contains("json")) {
                 if (failRead) return new Result(false, "", "k3s unavailable");
                 String items = String.join(",", List.of("qinglong", "rsshub", "redis").stream()
@@ -23,7 +25,7 @@ class LifeLifecycleTest {
                                 + "},\"status\":{\"readyReplicas\":" + replicas + "}}").toList());
                 return new Result(true, "{\"items\":[" + items + "]}", "");
             }
-            if (command.getLast().startsWith("systemctl is-active")) return new Result(forwarding, "", "");
+            if (command.getLast().startsWith("curl ")) return new Result(accessible, "", "");
             if (command.getLast().contains("--replicas=0")) replicas = 0;
             if (command.getLast().contains("--replicas=1")) { running = true; replicas = 1; }
             return new Result(true, "resources", "");
@@ -39,11 +41,13 @@ class LifeLifecycleTest {
         life.details();
         assertThat(commands.calls).allSatisfy(call -> assertThat(call).contains("--list"));
     }
-    @Test void readsExistingDeploymentAndRequiresBothAccessServices() {
+    @Test void readsExistingDeploymentAndChecksDirectAccess() {
         var commands = new Commands(); var life = life(commands);
         assertThat(life.status()).containsEntry("state", "RUNNING").containsEntry("canStop", true)
-                .containsEntry("qinglongUrl", "http://localhost:5700").containsEntry("rsshubUrl", "http://localhost:1200");
-        commands.forwarding = false;
+                .containsEntry("qinglongUrl", "http://172.23.89.45:5700").containsEntry("rsshubUrl", "http://172.23.89.45:1200");
+        commands.nodeIp = "172.23.90.10";
+        assertThat(life.status()).containsEntry("qinglongUrl", "http://172.23.90.10:5700");
+        commands.accessible = false;
         assertThat(life.status()).containsEntry("state", "DEGRADED").containsEntry("canStart", true);
         commands.failRead = true;
         assertThat(life.status()).containsEntry("state", "UNKNOWN").containsEntry("canStart", false).containsEntry("canStop", false);
@@ -53,7 +57,7 @@ class LifeLifecycleTest {
         life.action("stop");
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> { while (life.status().get("state").equals("STOPPING")) Thread.sleep(10); });
         assertThat(commands.replicas).isZero();
-        commands.forwarding = false;
+        commands.accessible = false;
         life.action("start");
         assertTimeoutPreemptively(Duration.ofSeconds(3), () -> { while (life.status().get("state").equals("STARTING")) Thread.sleep(10); });
         assertThat(commands.replicas).isEqualTo(1);
@@ -64,5 +68,6 @@ class LifeLifecycleTest {
         });
         assertThatThrownBy(() -> life.action("credentials")).isInstanceOf(IllegalArgumentException.class);
         assertThat(commands.calls).noneSatisfy(call -> assertThat(call).contains("credentials", "cat"));
+        assertThat(commands.calls).allSatisfy(call -> assertThat(String.join(" ", call)).doesNotContain("port-forward", "life-deals-qinglong", "life-deals-rsshub"));
     }
 }

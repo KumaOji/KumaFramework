@@ -18,8 +18,19 @@ import xml.etree.ElementTree as ET
 import json
 import pathlib
 import time
+import subprocess
+
+def service_url(name, port):
+    address = subprocess.check_output([
+        'k3s', 'kubectl', '-n', 'life-deals', 'get', 'service', name,
+        '-o', 'jsonpath={.spec.clusterIP}',
+    ], text=True).strip()
+    return f'http://{address}:{port}'
+
+rsshub_url = service_url('rsshub', 1200)
+qinglong_url = service_url('qinglong', 5700) + '/api'
 for path in ['/healthz', '/smzdm/ranking/pinlei/11/3?limit=2']:
-    with urllib.request.urlopen('http://127.0.0.1:1200' + path, timeout=50) as response:
+    with urllib.request.urlopen(rsshub_url + path, timeout=50) as response:
         data = response.read()
     if 'smzdm' in path:
         root = ET.fromstring(data)
@@ -37,7 +48,7 @@ def api(path, method='GET', payload=None):
     if token:
         headers['Authorization'] = 'Bearer ' + token
     body = json.dumps(payload).encode() if payload is not None else None
-    req = urllib.request.Request('http://127.0.0.1:5700/api' + path, data=body, headers=headers, method=method)
+    req = urllib.request.Request(qinglong_url + path, data=body, headers=headers, method=method)
     with urllib.request.urlopen(req, timeout=15) as response:
         result = json.load(response)
     assert result['code'] == 200, f'API failure: {method} {path}'

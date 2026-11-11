@@ -25,8 +25,6 @@
     ...additions,...blogPanels
   ];
   let entries=[...defaults.map((entry,index)=>({...entry,id:['grafana','prometheus','alertmanager','skywalking','n8n','nacos','qdrant','blog-frontend'][index],group:index<4?'监控与告警':index<7?'WSL 应用':'本机项目'})),
-    {id:'qinglong',name:'Life · 青龙',url:'http://localhost:5700',group:'WSL 应用',externalOnly:true},
-    {id:'rsshub',name:'Life · RSSHub',url:'http://localhost:1200',group:'WSL 应用'},
     {id:'dsh',name:'DeepSeek Harness',url:'http://localhost:3080',group:'本机项目'},
     {id:'project-uaa',name:'UAA · API',url:'http://localhost:33336',group:'项目接口',externalOnly:true},
     {id:'project-gateway',name:'Gateway · API',url:'http://localhost:18080',group:'项目接口',externalOnly:true},
@@ -207,6 +205,14 @@
   fetch('/api/service-entries').then(response=>{if(!response.ok)throw Error();return response.json();}).then(data=>{
     if(!Array.isArray(data))return;
     entries=data.filter(entry=>{try{return typeof entry.id==='string'&&typeof entry.name==='string'&&typeof entry.group==='string'&&(entry.readOnly===true?['mysql:','postgresql:','redis:','kafka:','grpc:'].includes(new URL(entry.url).protocol):validUrl(entry.url));}catch{return false;}});
-    renderDirectory();
+    for(const entry of entries.filter(item=>['qinglong','rsshub'].includes(item.id))){
+      for(const panel of panels){
+        const url=new URL(panel.url),port=entry.id==='qinglong'?'5700':'1200';
+        if(panel.serviceId!==entry.id&&!(panel.name===entry.name&&['localhost','127.0.0.1','[::1]'].includes(url.hostname)&&url.port===port))continue;
+        const direct=new URL(entry.url);url.host=direct.host;url.protocol=direct.protocol;
+        panel.url=url.href;panel.serviceId=entry.id;
+      }
+    }
+    persist();render();
   }).catch(()=>{});
 })();

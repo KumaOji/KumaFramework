@@ -53,7 +53,7 @@ python3 scripts/deploy-local-wsl.py --apply
 |---|---|---|---|
 | base | 中间件、监控、链路追踪、Secret 示例、本地指标入口 | WSL 的现有 PVC 和 Secret | [监控说明](#monitoring) |
 | kube-system | Strimzi HelmChart、Traefik 配置、k3s 内置启动清单参考 | k3s 自动生成的控制器和证书 | 本文下方说明 |
-| life-deals | 3 个工作负载、2 个 PVC、3 个 Service、端口转发、RSS 初始化文件和管理脚本 | `D:\Vscode_project\life` 的 Faker/QingLong/RSSHub 源码，以及现有青龙和 Redis 数据卷 | [life-deals](life-deals/README.md) |
+| life-deals | 3 个工作负载、2 个 PVC、3 个 Service（青龙/RSSHub 为 LoadBalancer）、RSS 初始化文件和管理脚本 | `D:\Vscode_project\life` 的 Faker/QingLong/RSSHub 源码，以及现有青龙和 Redis 数据卷 | [life-deals](life-deals/README.md) |
 | kumatts | 2 个工作负载、构建文件、GPU 安装、镜像导入与迁移脚本 | `D:\KumaProject\KumaTTS` 源码、Python 环境、模型、AstrBot data 和语音任务目录 | [kumatts](kumatts/README.md) |
 
 旧项目部署路径中的脚本保留为兼容转发入口，统一调用此目录；不再生成 `kumatts.json`

@@ -8,15 +8,16 @@ switch ($Action) {
     'start' {
         wsl -d $distro -u root -- systemctl start k3s
         if ($LASTEXITCODE -ne 0) { throw 'Failed to start k3s' }
-        wsl -d $distro -u root -- k3s kubectl -n life-deals scale deployment/qinglong deployment/rsshub deployment/redis --replicas=1
-        wsl -d $distro -u root -- systemctl start life-deals-qinglong life-deals-rsshub
+        $deployPath = (wsl -d $distro --exec wslpath -u "$($PSScriptRoot.Replace('\', '/'))/deploy.sh").Trim()
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to resolve deploy.sh path' }
+        wsl -d $distro -u root -- bash $deployPath
     }
     'status' {
-        wsl -d $distro -u root -- k3s kubectl -n life-deals get deployments,pods,pvc
-        wsl -d $distro -- systemctl is-active life-deals-qinglong life-deals-rsshub
+        $statusPath = (wsl -d $distro --exec wslpath -u "$($PSScriptRoot.Replace('\', '/'))/status.sh").Trim()
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to resolve status.sh path' }
+        wsl -d $distro -u root -- bash $statusPath
     }
     'stop' {
-        wsl -d $distro -u root -- systemctl stop life-deals-qinglong life-deals-rsshub
         wsl -d $distro -u root -- k3s kubectl -n life-deals scale deployment/qinglong deployment/rsshub deployment/redis --replicas=0
     }
     'credentials' {

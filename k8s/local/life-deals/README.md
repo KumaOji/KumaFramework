@@ -13,15 +13,16 @@
 | `qinglong.yaml` | 青龙 Deployment、Service、10Gi PVC |
 | `redis.yaml` | 独立 Redis Deployment、Service、1Gi PVC |
 | `rsshub.yaml` | RSSHub Deployment、Service、可选 rsshub-secrets 引用 |
-| `deploy.sh`、`life-deals-*.service` | 仅部署本命名空间并安装两个 localhost 访问入口 |
+| `deploy.sh` | 仅部署本命名空间，等待 ServiceLB 就绪并卸载旧端口转发服务 |
 | `life-deals.ps1`、`status.sh` | 启停、状态和本机凭据查看入口 |
 | `bootstrap-faker.sh`、`rss_watch.py`、`feeds.json` | 显式同步和初始化任务，保留容器内已有订阅 |
 | `configure-panel.py`、`verify.sh` | 首次面板初始化和业务验证工具，普通部署不自动运行 |
 
 ## 访问与账号
 
-- 青龙：<http://localhost:5700>，管理员用户名 `kuma`。
-- RSSHub：<http://localhost:1200>。
+- 青龙：`http://<WSL节点IP>:5700`，管理员用户名 `kuma`。
+- RSSHub：`http://<WSL节点IP>:1200`。
+- 两个入口均由 k3s `LoadBalancer` 提供，不依赖 `kubectl port-forward`。节点 IP 可能随 WSL 重启变化，运行 `life-deals.ps1 status` 查看当前地址。端口在 WSL 节点网络开放；Redis 保持 ClusterIP，仅集群内部访问。
 - 管理员随机密码只保存在 WSL 的 `/home/kuma/.config/life-deals/qinglong.json`，文件权限为 `600`。
 - 在本机 PowerShell 中执行以下命令查看登录信息，不必把密码发到聊天中：
 
@@ -33,7 +34,7 @@
 
 - 青龙、RSSHub、独立 Redis 缓存以及持久化数据卷。
 - 时区 `Asia/Hong_Kong`。
-- WSL 启动后，k3s 和两个本机端口转发服务自动恢复。入口绑定 `127.0.0.1`。
+- WSL 启动后，k3s 自动恢复应用和两个 ServiceLB 入口，不再安装本机端口转发服务。
 - Faker 文件位于青龙容器的 `/ql/data/scripts/faker2`，其 Linux Node 和 Python 依赖已安装。
 - 好价榜每 15 分钟抓取一次，记录去重状态；首次抓取只建立基线。
 - 按用户选择，通知关闭；只抓取并记入青龙日志。
@@ -44,13 +45,13 @@
 好价榜 RSS 地址：
 
 ```text
-http://localhost:1200/smzdm/ranking/pinlei/11/3?limit=20
+http://<WSL节点IP>:1200/smzdm/ranking/pinlei/11/3?limit=20
 ```
 
 关键词订阅示例：
 
 ```text
-http://localhost:1200/smzdm/keyword/SSD?limit=20
+http://<WSL节点IP>:1200/smzdm/keyword/SSD?limit=20
 ```
 
 在青龙「脚本管理」中修改 `life-deals/feeds.json`，可以增加关键词路由和标题排除词。
@@ -79,8 +80,8 @@ RSS 爆料聚合也不等于指定商品 SKU 的实时价格监控；后者需�
 & D:\KumaProject\KumaFramework\k8s\local\life-deals\life-deals.ps1 stop
 ```
 
-`stop` 仅停止本命名空间的三个应用及其访问入口，保留数据，不停止现有 k3s 或其他应用。
-它不会禁用服务的开机启动；下次 WSL 启动时入口服务仍会尝试运行，应用可用 `start` 恢复。
+`stop` 将本命名空间的三个应用缩容为 0，保留数据、Service 和 ServiceLB，不停止现有 k3s 或其他应用。没有应用副本时，入口无法提供业务响应。
+缩容状态在 WSL 重启后仍然保留；用 `start` 重新应用清单即可恢复为 1 个副本。
 Windows 启动本身不保证 WSL 已启动；可执行上面的 `start` 命令唤起。
 
 重新应用部署配置：

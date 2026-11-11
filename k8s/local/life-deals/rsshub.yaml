@@ -69,6 +69,7 @@ metadata:
   name: rsshub
   namespace: life-deals
 spec:
+  type: LoadBalancer
   selector:
     app: life-deals-rsshub
   ports:

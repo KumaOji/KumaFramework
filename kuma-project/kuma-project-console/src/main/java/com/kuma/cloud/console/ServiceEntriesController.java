@@ -8,8 +8,9 @@ import java.util.*;
 public class ServiceEntriesController {
     private final Environment config;
     private final ConsoleProperties properties;
-    public ServiceEntriesController(Environment config, ConsoleProperties properties) {
-        this.config = config; this.properties = properties;
+    private final LifeLifecycle life;
+    public ServiceEntriesController(Environment config, ConsoleProperties properties, LifeLifecycle life) {
+        this.config = config; this.properties = properties; this.life = life;
     }
     public record Entry(String id, String name, String group, String url, boolean externalOnly, String description, boolean readOnly) {}
 
@@ -23,8 +24,9 @@ public class ServiceEntriesController {
         entries.add(entry("n8n", "n8n · 工作流自动化", "WSL 应用", "http://localhost:5678", true, "WSL · base"));
         entries.add(entry("nacos", "Nacos · 配置与注册中心", "WSL 应用", "http://localhost:8848/nacos/", true, "WSL · base"));
         entries.add(entry("qdrant", "Qdrant · 向量数据库", "WSL 应用", "http://localhost:6333/dashboard", true, "WSL · base"));
-        entries.add(entry("qinglong", "Life · 青龙", "WSL 应用", port("console.life.qinglong-port", 5700), true, "WSL · life-deals · 定时任务"));
-        entries.add(entry("rsshub", "Life · RSSHub", "WSL 应用", port("console.life.rsshub-port", 1200), false, "WSL · life-deals · RSS 订阅"));
+        var lifeUrls = life.urls();
+        if (lifeUrls.containsKey("qinglongUrl")) entries.add(entry("qinglong", "Life · 青龙", "WSL 应用", lifeUrls.get("qinglongUrl"), true, "WSL · life-deals · 定时任务"));
+        if (lifeUrls.containsKey("rsshubUrl")) entries.add(entry("rsshub", "Life · RSSHub", "WSL 应用", lifeUrls.get("rsshubUrl"), false, "WSL · life-deals · RSS 订阅"));
         entries.add(entry("dsh", "DeepSeek Harness", "本机项目", port("console.dsh.port", 3080), false, "本机 · AI 工作台"));
         entries.add(entry("blog-frontend", "Blog", "本机项目", port("console.blog.port", 4321), false, "本机 · Blog 前端"));
         for (var project : properties.projects()) {

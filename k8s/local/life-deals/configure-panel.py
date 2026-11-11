@@ -4,9 +4,14 @@ import json
 import os
 import pathlib
 import secrets
+import subprocess
 import urllib.request
 
-base_url = 'http://127.0.0.1:5700/api'
+service_ip = subprocess.check_output([
+    'k3s', 'kubectl', '-n', 'life-deals', 'get', 'service', 'qinglong',
+    '-o', 'jsonpath={.spec.clusterIP}',
+], text=True).strip()
+base_url = f'http://{service_ip}:5700/api'
 secret_dir = pathlib.Path('/home/kuma/.config/life-deals')
 secret_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 os.chmod(secret_dir, 0o700)

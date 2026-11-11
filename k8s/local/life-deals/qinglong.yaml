@@ -78,6 +78,7 @@ metadata:
   name: qinglong
   namespace: life-deals
 spec:
+  type: LoadBalancer
   selector:
     app: life-deals-qinglong
   ports:
