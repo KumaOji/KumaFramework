@@ -9,6 +9,18 @@ K8S_NAMESPACE="${K8S_NAMESPACE:-base}"
 CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config/base}"
 CONFIG_PATTERN="${CONFIG_PATTERN:-kuma-*-prod.yaml}"
 
+# Reuse the existing server credential when Actions has no optional password override.
+# The server already stores the application login in this Secret; no new environment
+# variable or GitHub Secret is required after moving the deployment manifests.
+if [ -z "${NACOS_PASSWORD}" ]; then
+  NACOS_PASSWORD=$(kubectl get secret kuma-secret -n "${K8S_NAMESPACE}" \
+    -o 'jsonpath={.data.nacos-password}' | base64 --decode)
+  if [ -z "${NACOS_PASSWORD}" ]; then
+    echo "ERROR: Existing Secret ${K8S_NAMESPACE}/kuma-secret has no nacos-password." >&2
+    exit 1
+  fi
+fi
+
 echo "=== nacos status ==="
 NACOS_SVC="${NACOS_SVC:-nacos}"
 if ! kubectl get svc "${NACOS_SVC}" -n "${K8S_NAMESPACE}" >/dev/null 2>&1; then
@@ -47,7 +59,8 @@ fi
 
 login_nacos() {
   curl -s -X POST "http://${NACOS_SERVER}/nacos/v1/auth/login" \
-    -d "username=${NACOS_USERNAME}&password=$1"
+    --data-urlencode "username=${NACOS_USERNAME}" \
+    --data-urlencode "password=$1"
 }
 
 extract_token() {

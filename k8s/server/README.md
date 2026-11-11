@@ -16,6 +16,16 @@ server/
 预览：`kubectl kustomize k8s/server`。
 现有服务器部署入口：`bash /data/k8s/scripts/apply-k8s.sh`。
 
+## 沿用服务器现有凭据
+
+目录和文件名整理不改变 GitHub Secrets 名称、Kubernetes Secret 名称或字段，也不要求重新配置服务器环境变量。
+SSH 和 ACR 继续使用原来的 `BLOG_SERVER_HOST`、`BLOG_SERVER_USER`、`BLOG_SERVER_SSH_KEY`、
+`ALIYUN_REGISTRY_USERNAME`、`ALIYUN_REGISTRY_PASSWORD`。
+`NACOS_PASSWORD` 是可选覆盖；未设置时，生产配置发布脚本自动读取服务器
+`base/kuma-secret` 的 `nacos-password`。应用仍使用原有的 `base/kuma-secret` 和 `blog/blog-secret`。
+Grafana 沿用 `base/grafana-admin` 及 `/data/kuma-observability/grafana-admin-password`；
+镜像拉取沿用 `base/observability-registry`。`secrets.example.yaml` 不参与自动部署，不会覆盖现有密钥。
+
 ## GitHub Actions 触发边界
 
 以下 push 规则针对 `master`，各工作流同时保留 `workflow_dispatch` 手动发布入口。

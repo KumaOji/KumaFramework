@@ -43,4 +43,5 @@ jobs:
             CONFIG_ROOT=/tmp/nacos-config/.nacos-tmp/base NACOS_PASSWORD="${NACOS_PASSWORD:-}" \
               /tmp/nacos-config/scripts/publish-nacos-prod.sh
         env:
+          # Optional override; the script otherwise reads base/kuma-secret on the server.
           NACOS_PASSWORD: ${{ secrets.NACOS_PASSWORD }}
