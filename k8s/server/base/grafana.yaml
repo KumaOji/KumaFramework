@@ -1,0 +1,154 @@
+apiVersion: v1
+data:
+  datasources.yaml: "apiVersion: 1\ndatasources:\n  - name: Prometheus\n    uid: prometheus\n\
+    \    type: prometheus\n    access: proxy\n    url: http://prometheus:9090\n  \
+    \  isDefault: true\n    editable: false\n    jsonData:\n      httpMethod: POST\n\
+    \      timeInterval: 15s\n  - name: Loki\n    uid: loki\n    type: loki\n    access:\
+    \ proxy\n    url: http://loki:3100\n    editable: false\n    jsonData:\n     \
+    \ derivedFields:\n        - name: traceId\n          matcherRegex: '\"traceId\"\
+    \\s*:\\s*\"([0-9a-f]{32})\"'\n          datasourceUid: skywalking-zipkin\n   \
+    \       url: '$${__value.raw}'\n  - name: SkyWalking traces\n    uid: skywalking-zipkin\n\
+    \    type: zipkin\n    access: proxy\n    url: http://skywalking-oap:9412/zipkin\n\
+    \    editable: false\n    jsonData:\n      tracesToLogsV2:\n        datasourceUid:\
+    \ loki\n        spanStartTimeShift: '-1m'\n        spanEndTimeShift: '1m'\n  \
+    \      customQuery: true\n        query: '{service_name=~\"kuma-cloud-(blog|uaa|gateway)|kuma-reference\"\
+    } |= \"$${__span.traceId}\"'\n  - name: Alertmanager\n    uid: alertmanager\n\
+    \    type: alertmanager\n    access: proxy\n    url: http://alertmanager:9093\n\
+    \    editable: false\n    jsonData:\n      implementation: prometheus\n"
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: base
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: base
+spec:
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+  selector:
+    app: grafana
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: grafana
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  serviceName: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - env:
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              key: admin-user
+              name: grafana-admin
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: admin-password
+              name: grafana-admin
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: 'false'
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: 'false'
+        - name: GF_ANALYTICS_REPORTING_ENABLED
+          value: 'false'
+        - name: GF_METRICS_ENABLED
+          value: 'true'
+        image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-grafana:13.2.3
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: grafana
+        ports:
+        - containerPort: 3000
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          timeoutSeconds: 3
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /api/health
+            port: http
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: dashboard-providers
+          readOnly: true
+        - mountPath: /var/lib/grafana/dashboards
+          name: gateway-dashboard
+          readOnly: true
+        - mountPath: /var/lib/grafana
+          name: data
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: provisioning
+          readOnly: true
+      imagePullSecrets:
+      - name: observability-registry
+      securityContext:
+        fsGroup: 472
+        runAsGroup: 472
+        runAsNonRoot: true
+        runAsUser: 472
+      volumes:
+      - configMap:
+          items:
+          - key: providers.yaml
+            path: providers.yaml
+          name: gateway-dashboard
+        name: dashboard-providers
+      - name: gateway-dashboard
+        projected:
+          sources:
+          - configMap:
+              items:
+              - key: gateway.json
+                path: gateway.json
+              name: gateway-dashboard
+          - configMap:
+              items:
+              - key: services.json
+                path: services.json
+              name: services-dashboard
+          - configMap:
+              name: observability-dashboards
+          - configMap:
+              name: reference-dashboard
+      - configMap:
+          name: grafana-provisioning
+        name: provisioning
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi

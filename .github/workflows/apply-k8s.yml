@@ -81,7 +81,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: scripts/check-observability.py,scripts/apply-k8s-resource.py,scripts/prepare-monitoring-server.sh,scripts/check-monitoring-server.py,scripts/expose-monitoring-server.sh
+          source: scripts/check-observability.py,scripts/apply-k8s.sh,scripts/apply-k8s-resource.py,scripts/prepare-monitoring-server.sh,scripts/check-monitoring-server.py,scripts/expose-monitoring-server.sh
           target: /data/k8s/scripts/
           strip_components: 1
 
@@ -108,23 +108,7 @@ jobs:
             kubectl apply -f "$registry_manifest"
             rm -f "$registry_manifest"
             trap - EXIT
-            for f in /data/k8s/server/base/*.yaml /data/k8s/server/blog/*.yaml; do
-              b=$(basename "$f")
-              case "$b" in
-                *secret.example.yaml|*secret.yaml) continue ;;
-                kustomization.yaml|observability.yaml) continue ;;
-                blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml|lab.yaml) continue ;;
-                # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
-                mysql.yaml)
-                  python3 /data/k8s/scripts/apply-k8s-resource.py "$f"
-                  continue
-                  ;;
-              esac
-              kubectl apply -f "$f"
-            done
-            kubectl apply -k /data/k8s/server/observability
-            kubectl apply -k /data/k8s/server/monitoring
-            kubectl rollout status deployment/nacos -n base --timeout=300s || true
+            bash /data/k8s/scripts/apply-k8s.sh --skip-prepare
             kubectl rollout status statefulset/skywalking-storage -n base --timeout=600s
             for deployment in skywalking-oap skywalking-ui otel-collector; do
               kubectl rollout status "deployment/${deployment}" -n base --timeout=300s

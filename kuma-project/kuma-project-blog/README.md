@@ -37,7 +37,7 @@ Stop-Process -Id (Get-Content logs/blog-local/process-id.txt)
 OAuth 登录另需启动 UAA（`localhost:33336`）；健康检查与公开文章接口可独立验证。
 本脚本默认启用 `dev,observability`，日志进入 Loki，调用链经 OTel Collector
 进入 SkyWalking，Prometheus 从独立管理端口采集指标。传入 `-WithoutObservability`
-可只使用 `dev`。三服务联合启动、面板与验证见 [可观测性说明](../../../k8s/local/monitoring/SERVICES.md)。
+可只使用 `dev`。三服务联合启动、面板与验证见 [可观测性说明](../../../k8s/local/README.md#service-integration)。
 
 ## Nacos 配置
 

@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: blog-management
+  namespace: blog
+spec:
+  ingress:
+  - ports:
+    - port: 9000
+      protocol: TCP
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: base
+      podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - port: 19001
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: blog-background
+  policyTypes:
+  - Ingress

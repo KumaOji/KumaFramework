@@ -25,7 +25,9 @@ chmod 600 "${password_file}"
 if [[ ${EUID} -eq 0 ]]; then
   chown "${local_user}:$(id -gn "${local_user}")" "${credential_dir}" "${password_file}"
 fi
-kubectl apply -k "${repo_root}/k8s/local/monitoring"
+for manifest in loki prometheus grafana alertmanager grafana-dashboard-gateway grafana-dashboard-services grafana-dashboards-observability grafana-dashboard-reference gateway-metrics; do
+  kubectl apply -f "${repo_root}/k8s/local/base/${manifest}.yaml"
+done
 for component in loki grafana prometheus alertmanager; do
   kubectl -n base rollout status "statefulset/${component}" --timeout=600s
 done

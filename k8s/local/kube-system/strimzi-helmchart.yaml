@@ -1,0 +1,17 @@
+# WSL local configuration; runtime metadata removed.
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  annotations:
+    helmcharts.cattle.io/managed-by: helm-controller
+  name: strimzi-cluster-operator
+  namespace: kube-system
+spec:
+  chart: https://github.com/strimzi/strimzi-kafka-operator/releases/download/1.1.0/strimzi-kafka-operator-helm-3-chart-1.1.0.tgz
+  createNamespace: true
+  driver: secret
+  failurePolicy: abort
+  targetNamespace: base
+  timeout: 10m0s
+  valuesContent: "replicas: 1\nwatchAnyNamespace: false\nresources:\n  requests:\n\
+    \    cpu: 100m\n    memory: 384Mi\n  limits:\n    cpu: 500m\n    memory: 512Mi"

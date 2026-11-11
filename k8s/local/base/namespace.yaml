@@ -1,0 +1,5 @@
+# WSL local configuration; runtime metadata removed.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: base

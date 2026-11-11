@@ -1,0 +1,81 @@
+apiVersion: v1
+data:
+  config.yaml: "receivers:\n  otlp:\n    protocols:\n      grpc:\n        endpoint:\
+    \ 0.0.0.0:4317\n      http:\n        endpoint: 0.0.0.0:4318\nprocessors:\n  memory_limiter:\n\
+    \    check_interval: 1s\n    limit_mib: 192\n    spike_limit_mib: 48\n  batch:\n\
+    \    timeout: 5s\n    send_batch_size: 512\nexporters:\n  otlp/skywalking:\n \
+    \   endpoint: skywalking-oap:11800\n    tls:\n      insecure: true\n    sending_queue:\n\
+    \      queue_size: 1000\n    retry_on_failure:\n      enabled: true\n      max_elapsed_time:\
+    \ 300s\nextensions:\n  health_check:\n    endpoint: 0.0.0.0:13133\nservice:\n\
+    \  extensions: [health_check]\n  pipelines:\n    traces:\n      receivers: [otlp]\n\
+    \      processors: [memory_limiter, batch]\n      exporters: [otlp/skywalking]\n"
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: base
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: base
+spec:
+  ports:
+  - name: otlp-grpc
+    port: 4317
+  - name: otlp-http
+    port: 4318
+  selector:
+    app: otel-collector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+      - args:
+        - --config=/etc/otelcol/config.yaml
+        image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-otel-collector:0.123.0
+        livenessProbe:
+          httpGet:
+            path: /
+            port: health
+        name: collector
+        ports:
+        - containerPort: 4317
+          name: otlp-grpc
+        - containerPort: 4318
+          name: otlp-http
+        - containerPort: 13133
+          name: health
+        readinessProbe:
+          httpGet:
+            path: /
+            port: health
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - mountPath: /etc/otelcol
+          name: config
+          readOnly: true
+      imagePullSecrets:
+      - name: observability-registry
+      volumes:
+      - configMap:
+          name: otel-collector-config
+        name: config

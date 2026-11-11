@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+  namespace: life-deals
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: life-deals
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: life-deals-redis
+  template:
+    metadata:
+      labels:
+        app: life-deals-redis
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: redis
+        image: docker.io/library/redis@sha256:d30960f73a599496d8b2802c97758bab6b1cd421fd06337f837779c47a57e1f3
+        args:
+        - redis-server
+        - --appendonly
+        - 'yes'
+        - --maxmemory
+        - 128mb
+        - --maxmemory-policy
+        - allkeys-lru
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: redis-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: life-deals
+spec:
+  selector:
+    app: life-deals-redis
+  ports:
+  - port: 6379
+    targetPort: 6379

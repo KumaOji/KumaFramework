@@ -1,7 +1,7 @@
 # UAA 本地调试
 
 与 Blog、Gateway 共用 Loki、Prometheus、Grafana、OTel Collector 和 SkyWalking，
-联合启动与验证见 [三服务可观测性说明](../../../k8s/local/monitoring/SERVICES.md)。
+联合启动与验证见 [三服务可观测性说明](../../../k8s/local/README.md#service-integration)。
 
 从仓库根目录单独启动 UAA：
 

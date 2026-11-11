@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: astrbot
+  namespace: kumatts
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: astrbot
+  template:
+    metadata:
+      labels:
+        app: astrbot
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: kuma-tool
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: astrbot
+        image: localhost/kumatts-runtime:20261111-v2
+        imagePullPolicy: Never
+        workingDir: /mnt/d/KumaProject/KumaTTS/AstrBot
+        command:
+        - /home/kuma/.local/share/feiyu-voice/astrbot/bin/python
+        - main.py
+        env:
+        - name: HOME
+          value: /tmp
+        - name: PYTHONUNBUFFERED
+          value: '1'
+        - name: PYTHONDONTWRITEBYTECODE
+          value: '1'
+        - name: TZ
+          value: Asia/Hong_Kong
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            memory: 4Gi
+        startupProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /
+            port: 6185
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /
+            port: 6185
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /
+            port: 6185
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 6
+        volumeMounts:
+        - name: code
+          mountPath: /mnt/d/KumaProject/KumaTTS/AstrBot
+          readOnly: true
+        - name: runtime
+          mountPath: /home/kuma/.local/share/feiyu-voice/astrbot
+          readOnly: true
+        - name: data
+          mountPath: /mnt/d/KumaProject/KumaTTS/AstrBot/data
+          readOnly: false
+      volumes:
+      - name: code
+        hostPath:
+          path: /mnt/d/KumaProject/KumaTTS/AstrBot
+          type: Directory
+      - name: runtime
+        hostPath:
+          path: /home/kuma/.local/share/feiyu-voice/astrbot
+          type: Directory
+      - name: data
+        hostPath:
+          path: /mnt/d/KumaProject/KumaTTS/AstrBot/data
+          type: Directory

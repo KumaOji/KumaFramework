@@ -1,6 +1,6 @@
 # Reference 日志、审计与指标
 
-入口：[Reference 开发模板观测](http://localhost:3000/d/kuma-reference)。面板配置在 [reference-dashboard.yaml](../../k8s/local/monitoring/resources/reference-dashboard.yaml)，通过现有 Grafana provisioning 加载。
+入口：[Reference 开发模板观测](http://localhost:3000/d/kuma-reference)。面板配置在 [grafana-dashboard-reference.yaml](../../k8s/local/base/grafana-dashboard-reference.yaml)，通过现有 Grafana provisioning 加载。
 
 ## 接入约定
 

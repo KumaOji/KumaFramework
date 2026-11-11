@@ -6,7 +6,8 @@ if [[ ${EUID} -ne 0 ]]; then
   exit 1
 fi
 kubectl_bin="$(command -v kubectl)"
-for component in ui collector oap; do
+components=(ui collector oap)
+for component in "${components[@]}"; do
   case "${component}" in
     ui) service=skywalking-ui; ports='12880:8080' ;;
     collector) service=otel-collector; ports='4317:4317 4318:4318' ;;
@@ -30,8 +31,8 @@ WantedBy=multi-user.target
 EOF
 done
 systemctl daemon-reload
-for component in ui collector oap; do
+for component in "${components[@]}"; do
   systemctl enable "kuma-observability-${component}.service"
   systemctl restart "kuma-observability-${component}.service"
 done
-echo 'UI: http://localhost:12880; OTLP: localhost:4317 / localhost:4318; SkyWalking Agent: localhost:11800'
+echo 'UI: http://localhost:12880; Traces: Grafana http://localhost:3000/d/kuma-traces; OTLP: localhost:4317 / localhost:4318; SkyWalking Agent: localhost:11800'

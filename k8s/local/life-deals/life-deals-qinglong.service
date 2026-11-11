@@ -1,0 +1,14 @@
+[Unit]
+Description=Life deals QingLong localhost access
+After=k3s.service
+Wants=k3s.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/k3s kubectl -n life-deals port-forward --address=127.0.0.1 service/qinglong 5700:5700
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

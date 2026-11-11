@@ -1,0 +1,9 @@
+FROM docker.io/library/ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 ffmpeg libsndfile1 libgomp1 libglib2.0-0 libgl1 \
+    libatomic1 ca-certificates git curl ripgrep fonts-noto-cjk \
+    && rm -rf /var/lib/apt/lists/*
+RUN ln -s python3.12 /usr/bin/python3
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 TZ=Asia/Hong_Kong
+USER 1000:1000

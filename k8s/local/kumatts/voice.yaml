@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voice
+  namespace: kumatts
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: voice
+  template:
+    metadata:
+      labels:
+        app: voice
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: kuma-tool
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: voice
+        image: localhost/kumatts-runtime:20261111-v2
+        imagePullPolicy: Never
+        workingDir: /mnt/d/KumaProject/KumaTTS/astrbot_plugin_feiyu_voice/server
+        command:
+        - /home/kuma/.local/share/feiyu-voice/api/bin/python
+        - -m
+        - feiyu_voice_service
+        env:
+        - name: HOME
+          value: /tmp
+        - name: PYTHONUNBUFFERED
+          value: '1'
+        - name: PYTHONDONTWRITEBYTECODE
+          value: '1'
+        - name: TZ
+          value: Asia/Hong_Kong
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: all
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute,utility
+        - name: HF_HOME
+          value: /mnt/g/models/cache/feiyu-huggingface
+        - name: HF_HUB_DISABLE_XET
+          value: '1'
+        - name: MODELSCOPE_CACHE
+          value: /mnt/g/models/cache/modelscope
+        - name: TORCH_HOME
+          value: /mnt/g/models/cache/torch
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            memory: 20Gi
+        startupProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /health
+            port: 9880
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /health
+            port: 9880
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            host: 127.0.0.1
+            path: /health
+            port: 9880
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 6
+        volumeMounts:
+        - name: code
+          mountPath: /mnt/d/KumaProject/KumaTTS/astrbot_plugin_feiyu_voice/server
+          readOnly: true
+        - name: runtime
+          mountPath: /home/kuma/.local/share/feiyu-voice
+          readOnly: true
+        - name: python
+          mountPath: /home/kuma/.local/share/uv/python
+          readOnly: true
+        - name: models
+          mountPath: /mnt/g/models
+          readOnly: true
+        - name: cache
+          mountPath: /mnt/g/models/cache
+          readOnly: false
+        - name: jobs
+          mountPath: /mnt/d/KumaProject/KumaTTS/astrbot_plugin_feiyu_voice/server/.runtime
+          readOnly: false
+      volumes:
+      - name: code
+        hostPath:
+          path: /mnt/d/KumaProject/KumaTTS/astrbot_plugin_feiyu_voice/server
+          type: Directory
+      - name: runtime
+        hostPath:
+          path: /home/kuma/.local/share/feiyu-voice
+          type: Directory
+      - name: python
+        hostPath:
+          path: /home/kuma/.local/share/uv/python
+          type: Directory
+      - name: models
+        hostPath:
+          path: /mnt/g/models
+          type: Directory
+      - name: cache
+        hostPath:
+          path: /mnt/g/models/cache
+          type: Directory
+      - name: jobs
+        hostPath:
+          path: /mnt/d/KumaProject/KumaTTS/astrbot_plugin_feiyu_voice/server/.runtime
+          type: Directory
+      runtimeClassName: nvidia

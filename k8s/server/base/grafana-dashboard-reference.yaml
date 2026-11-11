@@ -1,0 +1,277 @@
+apiVersion: v1
+data:
+  reference.json: "{\n  \"uid\": \"kuma-reference\",\n  \"title\": \"13 · Reference\
+    \ · 开发模板观测\",\n  \"description\": \"HTTP、业务变化、运行资源、审计与日志。趋势至少需要两个采样点；无数据不代表零。业务计数是调用增量，不是订单存量。\"\
+    ,\n  \"tags\": [\n    \"kuma\",\n    \"reference\",\n    \"audit\"\n  ],\n  \"\
+    schemaVersion\": 39,\n  \"version\": 1,\n  \"refresh\": \"15s\",\n  \"timezone\"\
+    : \"browser\",\n  \"time\": {\n    \"from\": \"now-30m\",\n    \"to\": \"now\"\
+    \n  },\n  \"links\": [\n    {\n      \"type\": \"link\",\n      \"title\": \"\
+    SkyWalking 调用链\",\n      \"url\": \"/d/kuma-traces\",\n      \"keepTime\": true\n\
+    \    },\n    {\n      \"type\": \"link\",\n      \"title\": \"可观测性总览\",\n    \
+    \  \"url\": \"/d/kuma-overview\",\n      \"keepTime\": true\n    }\n  ],\n  \"\
+    templating\": {\n    \"list\": [\n      {\n        \"name\": \"environment\",\n\
+    \        \"label\": \"环境\",\n        \"type\": \"query\",\n        \"datasource\"\
+    : {\n          \"type\": \"prometheus\",\n          \"uid\": \"prometheus\"\n\
+    \        },\n        \"query\": \"label_values(http_server_requests_seconds_count{application=\\\
+    \"kuma-reference\\\"}, environment)\",\n        \"refresh\": 1,\n        \"includeAll\"\
+    : true,\n        \"allValue\": \".*\",\n        \"current\": {\n          \"text\"\
+    : \"All\",\n          \"value\": \"$__all\"\n        }\n      },\n      {\n  \
+    \      \"name\": \"instance\",\n        \"label\": \"指标实例\",\n        \"type\"\
+    : \"query\",\n        \"datasource\": {\n          \"type\": \"prometheus\",\n\
+    \          \"uid\": \"prometheus\"\n        },\n        \"query\": \"label_values(up{job=\\\
+    \"reference\\\"}, instance)\",\n        \"refresh\": 1,\n        \"includeAll\"\
+    : true,\n        \"allValue\": \".*\",\n        \"current\": {\n          \"text\"\
+    : \"All\",\n          \"value\": \"$__all\"\n        }\n      }\n    ]\n  },\n\
+    \  \"panels\": [\n    {\n      \"id\": 1,\n      \"title\": \"采集状态（0 失联；无数据表示尚未注册）\"\
+    ,\n      \"type\": \"stat\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 0,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"up{job=\\\"reference\\\",instance=~\\\
+    \"$instance\\\"}\",\n          \"legendFormat\": \"{{instance}}\"\n        }\n\
+    \      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"short\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\",\n          \"values\": false\n   \
+    \     }\n      }\n    },\n    {\n      \"id\": 2,\n      \"title\": \"HTTP 请求速率\"\
+    ,\n      \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\": 0,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"sum by (method,uri,status) (rate(http_server_requests_seconds_count{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \",uri!~\\\"/actuator.*\\\"}[$__rate_interval]))\",\n          \"legendFormat\"\
+    : \"{{method}} {{uri}} {{status}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"reqps\"\n        },\n    \
+    \    \"overrides\": []\n      },\n      \"options\": {\n        \"legend\": {\n\
+    \          \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n\
+    \        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n        }\n\
+    \      }\n    },\n    {\n      \"id\": 3,\n      \"title\": \"HTTP P95 耗时\",\n\
+    \      \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 8,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"histogram_quantile(0.95,sum by (le,uri)\
+    \ (rate(http_server_requests_seconds_bucket{application=\\\"kuma-reference\\\"\
+    ,environment=~\\\"$environment\\\",instance=~\\\"$instance\\\",uri!~\\\"/actuator.*\\\
+    \"}[$__rate_interval])))\",\n          \"legendFormat\": \"{{uri}}\"\n       \
+    \ }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"\
+    unit\": \"s\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"\
+    placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\"\
+    : \"multi\"\n        }\n      }\n    },\n    {\n      \"id\": 4,\n      \"title\"\
+    : \"HTTP 错误速率（4xx / 5xx）\",\n      \"type\": \"timeseries\",\n      \"description\"\
+    : \"\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"\
+    uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 12,\n  \
+    \      \"y\": 8,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (status)\
+    \ (rate(http_server_requests_seconds_count{application=\\\"kuma-reference\\\"\
+    ,environment=~\\\"$environment\\\",instance=~\\\"$instance\\\",status=~\\\"[45]..\\\
+    \"}[$__rate_interval]))\",\n          \"legendFormat\": \"{{status}}\"\n     \
+    \   }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n         \
+    \ \"unit\": \"reqps\"\n        },\n        \"overrides\": []\n      },\n     \
+    \ \"options\": {\n        \"legend\": {\n          \"displayMode\": \"table\"\
+    ,\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n \
+    \         \"mode\": \"multi\"\n        }\n      }\n    },\n    {\n      \"id\"\
+    : 5,\n      \"title\": \"业务操作成功次数（所选时间内）\",\n      \"type\": \"stat\",\n     \
+    \ \"description\": \"createOrder 为新建，confirmOrder 为 CREATED → CONFIRMED。统计进程观测到的成功调用，非数据库存量；重启会重置原始计数。\"\
+    ,\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\"\
+    : \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"\
+    y\": 16,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n\
+    \        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (method)\
+    \ (increase(reference_business_calls_success_total{application=\\\"kuma-reference\\\
+    \",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\"}[$__range]))\"\
+    ,\n          \"legendFormat\": \"{{method}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"short\"\n        },\n    \
+    \    \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"calcs\": [\n            \"lastNotNull\"\n          ],\n     \
+    \     \"fields\": \"\",\n          \"values\": false\n        }\n      }\n   \
+    \ },\n    {\n      \"id\": 6,\n      \"title\": \"业务操作失败次数（所选时间内）\",\n      \"\
+    type\": \"stat\",\n      \"description\": \"业务状态冲突、数据不存在等 Service 异常；参数校验失败在 HTTP\
+    \ 指标中查看。\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n    \
+    \    \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 12,\n\
+    \        \"y\": 16,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"\
+    targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum\
+    \ by (method,exception) (increase(reference_business_calls_error_total{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \"}[$__range]))\",\n          \"legendFormat\": \"{{method}} {{exception}}\"\n\
+    \        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n    \
+    \      \"unit\": \"short\"\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"reduceOptions\": {\n          \"calcs\": [\n\
+    \            \"lastNotNull\"\n          ],\n          \"fields\": \"\",\n    \
+    \      \"values\": false\n        }\n      }\n    },\n    {\n      \"id\": 7,\n\
+    \      \"title\": \"业务操作速率\",\n      \"type\": \"timeseries\",\n      \"description\"\
+    : \"\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"\
+    uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 0,\n   \
+    \     \"y\": 24,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (method)\
+    \ (rate(reference_business_calls_total{application=\\\"kuma-reference\\\",environment=~\\\
+    \"$environment\\\",instance=~\\\"$instance\\\"}[$__rate_interval]))\",\n     \
+    \     \"legendFormat\": \"{{method}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"ops\"\n        },\n      \
+    \  \"overrides\": []\n      },\n      \"options\": {\n        \"legend\": {\n\
+    \          \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n\
+    \        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n        }\n\
+    \      }\n    },\n    {\n      \"id\": 8,\n      \"title\": \"业务操作 P95 耗时\",\n\
+    \      \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\": 24,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"histogram_quantile(0.95,sum by (le,method)\
+    \ (rate(reference_business_execution_time_seconds_bucket{application=\\\"kuma-reference\\\
+    \",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\"}[$__rate_interval])))\"\
+    ,\n          \"legendFormat\": \"{{method}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"s\"\n        },\n        \"\
+    overrides\": []\n      },\n      \"options\": {\n        \"legend\": {\n     \
+    \     \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n     \
+    \   },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n        }\n   \
+    \   }\n    },\n    {\n      \"id\": 9,\n      \"title\": \"JVM 堆内存\",\n      \"\
+    type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\": {\n\
+    \        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n\
+    \      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 32,\n        \"w\": 12,\n\
+    \        \"h\": 8\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"sum by (instance) (jvm_memory_used_bytes{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \",area=\\\"heap\\\"})\",\n          \"legendFormat\": \"{{instance}}\"\n    \
+    \    }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n        \
+    \  \"unit\": \"bytes\"\n        },\n        \"overrides\": []\n      },\n    \
+    \  \"options\": {\n        \"legend\": {\n          \"displayMode\": \"table\"\
+    ,\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n \
+    \         \"mode\": \"multi\"\n        }\n      }\n    },\n    {\n      \"id\"\
+    : 10,\n      \"title\": \"进程 CPU\",\n      \"type\": \"timeseries\",\n      \"\
+    description\": \"\",\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"\
+    x\": 12,\n        \"y\": 32,\n        \"w\": 12,\n        \"h\": 8\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"process_cpu_usage{application=\\\"kuma-reference\\\",environment=~\\\"$environment\\\
+    \",instance=~\\\"$instance\\\"}\",\n          \"legendFormat\": \"{{instance}}\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"percentunit\"\n        },\n        \"overrides\": []\n   \
+    \   },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"table\",\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\"\
+    : {\n          \"mode\": \"multi\"\n        }\n      }\n    },\n    {\n      \"\
+    id\": 11,\n      \"title\": \"GC 暂停耗时 / 秒\",\n      \"type\": \"timeseries\",\n\
+    \      \"description\": \"\",\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"\
+    x\": 0,\n        \"y\": 40,\n        \"w\": 12,\n        \"h\": 8\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"sum by (cause) (rate(jvm_gc_pause_seconds_sum{application=\\\"kuma-reference\\\
+    \",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\"}[$__rate_interval]))\"\
+    ,\n          \"legendFormat\": \"{{cause}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"s\"\n        },\n        \"\
+    overrides\": []\n      },\n      \"options\": {\n        \"legend\": {\n     \
+    \     \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n     \
+    \   },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n        }\n   \
+    \   }\n    },\n    {\n      \"id\": 12,\n      \"title\": \"JVM 线程数\",\n     \
+    \ \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\": 40,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"jvm_threads_live_threads{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \"}\",\n          \"legendFormat\": \"{{instance}}\"\n        }\n      ],\n  \
+    \    \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\"\
+    \n        },\n        \"overrides\": []\n      },\n      \"options\": {\n    \
+    \    \"legend\": {\n          \"displayMode\": \"table\",\n          \"placement\"\
+    : \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\
+    \n        }\n      }\n    },\n    {\n      \"id\": 13,\n      \"title\": \"数据库连接池活跃连接\"\
+    ,\n      \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 48,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"hikaricp_connections_active{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \"}\",\n          \"legendFormat\": \"{{pool}}\"\n        }\n      ],\n      \"\
+    fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\"\n   \
+    \     },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"\
+    legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"\
+    bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n\
+    \        }\n      }\n    },\n    {\n      \"id\": 14,\n      \"title\": \"数据库连接池等待连接\"\
+    ,\n      \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\": 48,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"hikaricp_connections_pending{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \"}\",\n          \"legendFormat\": \"{{pool}}\"\n        }\n      ],\n      \"\
+    fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\"\n   \
+    \     },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"\
+    legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"\
+    bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n\
+    \        }\n      }\n    },\n    {\n      \"id\": 15,\n      \"title\": \"数据库获取连接\
+    \ P95\",\n      \"type\": \"timeseries\",\n      \"description\": \"\",\n    \
+    \  \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\
+    \n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 56,\n    \
+    \    \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"expr\": \"histogram_quantile(0.95,sum\
+    \ by (le,pool) (rate(hikaricp_connections_acquire_seconds_bucket{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \"}[$__rate_interval])))\",\n          \"legendFormat\": \"{{pool}}\"\n      \
+    \  }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"\
+    unit\": \"s\"\n        },\n        \"overrides\": []\n      },\n      \"options\"\
+    : {\n        \"legend\": {\n          \"displayMode\": \"table\",\n          \"\
+    placement\": \"bottom\"\n        },\n        \"tooltip\": {\n          \"mode\"\
+    : \"multi\"\n        }\n      }\n    },\n    {\n      \"id\": 16,\n      \"title\"\
+    : \"数据库连接超时速率\",\n      \"type\": \"timeseries\",\n      \"description\": \"\"\
+    ,\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\"\
+    : \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 12,\n       \
+    \ \"y\": 56,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (pool)\
+    \ (rate(hikaricp_connections_timeout_total{application=\\\"kuma-reference\\\"\
+    ,environment=~\\\"$environment\\\",instance=~\\\"$instance\\\"}[$__rate_interval]))\"\
+    ,\n          \"legendFormat\": \"{{pool}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"ops\"\n        },\n      \
+    \  \"overrides\": []\n      },\n      \"options\": {\n        \"legend\": {\n\
+    \          \"displayMode\": \"table\",\n          \"placement\": \"bottom\"\n\
+    \        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n        }\n\
+    \      }\n    },\n    {\n      \"id\": 17,\n      \"title\": \"业务线程池活跃线程\",\n\
+    \      \"type\": \"timeseries\",\n      \"description\": \"\",\n      \"datasource\"\
+    : {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n    \
+    \  },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 64,\n        \"\
+    w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n      \
+    \    \"refId\": \"A\",\n          \"expr\": \"executor_active_threads{application=\\\
+    \"kuma-reference\\\",environment=~\\\"$environment\\\",instance=~\\\"$instance\\\
+    \",name=\\\"reference-business\\\"}\",\n          \"legendFormat\": \"{{instance}}\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"short\"\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"legend\": {\n          \"displayMode\": \"table\"\
+    ,\n          \"placement\": \"bottom\"\n        },\n        \"tooltip\": {\n \
+    \         \"mode\": \"multi\"\n        }\n      }\n    },\n    {\n      \"id\"\
+    : 18,\n      \"title\": \"业务线程池排队任务\",\n      \"type\": \"timeseries\",\n    \
+    \  \"description\": \"\",\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"\
+    x\": 12,\n        \"y\": 64,\n        \"w\": 12,\n        \"h\": 8\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"executor_queued_tasks{application=\\\"kuma-reference\\\",environment=~\\\"\
+    $environment\\\",instance=~\\\"$instance\\\",name=\\\"reference-business\\\"}\"\
+    ,\n          \"legendFormat\": \"{{instance}}\"\n        }\n      ],\n      \"\
+    fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\"\n   \
+    \     },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"\
+    legend\": {\n          \"displayMode\": \"table\",\n          \"placement\": \"\
+    bottom\"\n        },\n        \"tooltip\": {\n          \"mode\": \"multi\"\n\
+    \        }\n      }\n    },\n    {\n      \"id\": 19,\n      \"title\": \"订单操作审计（展开\
+    \ message 查看操作人、scope、结果与耗时）\",\n      \"type\": \"logs\",\n      \"description\"\
+    : \"创建记录的 result 包含订单 ID，确认记录 bizId 为 scope:ID。失败记录 success=false。日志 traceId 可跳转至\
+    \ SkyWalking；日志按环境筛选，涵盖所有实例。\",\n      \"datasource\": {\n        \"type\": \"\
+    loki\",\n        \"uid\": \"loki\"\n      },\n      \"gridPos\": {\n        \"\
+    x\": 0,\n        \"y\": 72,\n        \"w\": 24,\n        \"h\": 10\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"{service_name=\\\"kuma-reference\\\",environment=~\\\"$environment\\\"} |\
+    \ json | logger_name=\\\"com.kuma.boot.auditlog.AUDIT\\\"\",\n          \"queryType\"\
+    : \"range\"\n        }\n      ],\n      \"options\": {\n        \"showTime\":\
+    \ true,\n        \"showLabels\": false,\n        \"wrapLogMessage\": true,\n \
+    \       \"sortOrder\": \"Descending\"\n      }\n    },\n    {\n      \"id\": 20,\n\
+    \      \"title\": \"应用日志与链路关联\",\n      \"type\": \"logs\",\n      \"description\"\
+    : \"展开 traceId 字段跳转 SkyWalking。Agent 自身链路使用独立 ID；这里关联 OpenTelemetry 导出的链路。\",\n\
+    \      \"datasource\": {\n        \"type\": \"loki\",\n        \"uid\": \"loki\"\
+    \n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 82,\n    \
+    \    \"w\": 24,\n        \"h\": 10\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"expr\": \"{service_name=\\\"kuma-reference\\\
+    \",environment=~\\\"$environment\\\"} | json\",\n          \"queryType\": \"range\"\
+    \n        }\n      ],\n      \"options\": {\n        \"showTime\": true,\n   \
+    \     \"showLabels\": false,\n        \"wrapLogMessage\": true,\n        \"sortOrder\"\
+    : \"Descending\"\n      }\n    }\n  ]\n}\n"
+kind: ConfigMap
+metadata:
+  name: reference-dashboard
+  namespace: base

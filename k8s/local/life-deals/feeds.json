@@ -1,0 +1,11 @@
+{
+  "feeds": [
+    {
+      "name": "什么值得买：全部好价榜（3小时）",
+      "path": "/smzdm/ranking/pinlei/11/3?limit=20"
+    }
+  ],
+  "exclude_keywords": [],
+  "max_log_items_per_feed": 20,
+  "max_items_per_run": 10
+}

@@ -1,0 +1,92 @@
+apiVersion: v1
+data:
+  gateway.json: "{\n  \"uid\": \"kuma-gateway\",\n  \"title\": \"11 · Prometheus ·\
+    \ Gateway 网关\",\n  \"tags\": [\n    \"kuma\",\n    \"gateway\"\n  ],\n  \"schemaVersion\"\
+    : 39,\n  \"version\": 2,\n  \"refresh\": \"30s\",\n  \"time\": {\n    \"from\"\
+    : \"now-30m\",\n    \"to\": \"now\"\n  },\n  \"panels\": [\n    {\n      \"id\"\
+    : 1,\n      \"title\": \"请求速率（次/秒）\",\n      \"type\": \"timeseries\",\n     \
+    \ \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\": \"prometheus\"\
+    \n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"y\": 0,\n     \
+    \   \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n        {\n\
+    \          \"refId\": \"A\",\n          \"expr\": \"sum(rate(http_server_requests_seconds_count{application=\\\
+    \"kuma-cloud-gateway\\\"}[5m]))\",\n          \"legendFormat\": \"{{routeId}}\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"reqps\"\n        },\n        \"overrides\": []\n      }\n\
+    \    },\n    {\n      \"id\": 2,\n      \"title\": \"5xx 错误率\",\n      \"type\"\
+    : \"timeseries\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n\
+    \        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\"\
+    : 12,\n        \"y\": 0,\n        \"w\": 12,\n        \"h\": 8\n      },\n   \
+    \   \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"sum(rate(http_server_requests_seconds_count{application=\\\"kuma-cloud-gateway\\\
+    \",status=~\\\"5..\\\"}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{application=\\\
+    \"kuma-cloud-gateway\\\"}[5m])),0.001)\",\n          \"legendFormat\": \"{{routeId}}\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"percentunit\"\n        },\n        \"overrides\": []\n   \
+    \   }\n    },\n    {\n      \"id\": 3,\n      \"title\": \"请求 P95 耗时\",\n    \
+    \  \"type\": \"timeseries\",\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"\
+    x\": 0,\n        \"y\": 8,\n        \"w\": 12,\n        \"h\": 8\n      },\n \
+    \     \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"histogram_quantile(0.95,sum by(le)(rate(http_server_requests_seconds_bucket{application=\\\
+    \"kuma-cloud-gateway\\\"}[5m])))\",\n          \"legendFormat\": \"{{routeId}}\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"s\"\n        },\n        \"overrides\": []\n      }\n    },\n\
+    \    {\n      \"id\": 4,\n      \"title\": \"JVM 已用内存\",\n      \"type\": \"timeseries\"\
+    ,\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\"\
+    : \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 12,\n       \
+    \ \"y\": 8,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum(jvm_memory_used_bytes{application=\\\
+    \"kuma-cloud-gateway\\\"})\",\n          \"legendFormat\": \"{{routeId}}\"\n \
+    \       }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n     \
+    \     \"unit\": \"bytes\"\n        },\n        \"overrides\": []\n      }\n  \
+    \  },\n    {\n      \"id\": 5,\n      \"title\": \"路由请求速率\",\n      \"type\":\
+    \ \"timeseries\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n\
+    \        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\"\
+    : 0,\n        \"y\": 16,\n        \"w\": 12,\n        \"h\": 8\n      },\n   \
+    \   \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"sum by(routeId)(rate(spring_cloud_gateway_requests_seconds_count{application=\\\
+    \"kuma-cloud-gateway\\\"}[5m]))\",\n          \"legendFormat\": \"{{routeId}}\"\
+    \n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n   \
+    \       \"unit\": \"reqps\"\n        },\n        \"overrides\": []\n      }\n\
+    \    },\n    {\n      \"id\": 6,\n      \"title\": \"目标可用状态\",\n      \"type\"\
+    : \"timeseries\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n\
+    \        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\"\
+    : 12,\n        \"y\": 16,\n        \"w\": 12,\n        \"h\": 8\n      },\n  \
+    \    \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"up{job=\\\"gateway\\\"}\",\n          \"legendFormat\": \"{{routeId}}\"\n\
+    \        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n    \
+    \      \"unit\": \"short\"\n        },\n        \"overrides\": []\n      }\n \
+    \   },\n    {\n      \"id\": 7,\n      \"title\": \"Gateway 日志\",\n      \"type\"\
+    : \"logs\",\n      \"datasource\": {\n        \"type\": \"loki\",\n        \"\
+    uid\": \"loki\"\n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"\
+    y\": 24,\n        \"w\": 24,\n        \"h\": 12\n      },\n      \"targets\":\
+    \ [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"{service_name=\\\
+    \"kuma-cloud-gateway\\\"}\",\n          \"queryType\": \"range\"\n        }\n\
+    \      ],\n      \"options\": {\n        \"showTime\": true,\n        \"wrapLogMessage\"\
+    : true,\n        \"sortOrder\": \"Descending\"\n      }\n    }\n  ],\n  \"links\"\
+    : [\n    {\n      \"type\": \"link\",\n      \"title\": \"00 · 可观测性总览\",\n   \
+    \   \"url\": \"/d/kuma-overview\",\n      \"icon\": \"dashboard\",\n      \"includeVars\"\
+    : true,\n      \"keepTime\": true,\n      \"targetBlank\": false\n    },\n   \
+    \ {\n      \"type\": \"link\",\n      \"title\": \"10 · Prometheus · 服务指标\",\n\
+    \      \"url\": \"/d/kuma-services\",\n      \"icon\": \"dashboard\",\n      \"\
+    includeVars\": true,\n      \"keepTime\": true,\n      \"targetBlank\": false\n\
+    \    },\n    {\n      \"type\": \"link\",\n      \"title\": \"11 · Prometheus\
+    \ · Gateway 网关\",\n      \"url\": \"/d/kuma-gateway\",\n      \"icon\": \"dashboard\"\
+    ,\n      \"includeVars\": true,\n      \"keepTime\": true,\n      \"targetBlank\"\
+    : false\n    },\n    {\n      \"type\": \"link\",\n      \"title\": \"12 · Prometheus\
+    \ · 监控组件\",\n      \"url\": \"/d/kuma-monitoring\",\n      \"icon\": \"dashboard\"\
+    ,\n      \"includeVars\": true,\n      \"keepTime\": true,\n      \"targetBlank\"\
+    : false\n    },\n    {\n      \"type\": \"link\",\n      \"title\": \"20 · Loki\
+    \ · 服务日志\",\n      \"url\": \"/d/kuma-logs\",\n      \"icon\": \"dashboard\",\n\
+    \      \"includeVars\": true,\n      \"keepTime\": true,\n      \"targetBlank\"\
+    : false\n    },\n    {\n      \"type\": \"link\",\n      \"title\": \"30 · SkyWalking\
+    \ · 调用链\",\n      \"url\": \"/d/kuma-traces\",\n      \"icon\": \"dashboard\"\
+    ,\n      \"includeVars\": true,\n      \"keepTime\": true,\n      \"targetBlank\"\
+    : false\n    }\n  ]\n}\n"
+  providers.yaml: "apiVersion: 1\nproviders:\n  - name: kuma-gateway\n    orgId: 1\n\
+    \    folder: Kuma\n    type: file\n    disableDeletion: false\n    updateIntervalSeconds:\
+    \ 15\n    options:\n      path: /var/lib/grafana/dashboards\n"
+kind: ConfigMap
+metadata:
+  name: gateway-dashboard
+  namespace: base

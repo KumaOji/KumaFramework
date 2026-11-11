@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-management
+  namespace: base
+spec:
+  ingress:
+  - ports:
+    - port: 18080
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - port: 18081
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: gateway
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: uaa-management
+  namespace: base
+spec:
+  ingress:
+  - ports:
+    - port: 33336
+      protocol: TCP
+  - from:
+    - podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - port: 19002
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: uaa
+  policyTypes:
+  - Ingress

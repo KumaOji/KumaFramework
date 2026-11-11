@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: base
+data:
+  config.yaml: "receivers:\n  otlp:\n    protocols:\n      grpc:\n        endpoint:\
+    \ 0.0.0.0:4317\n      http:\n        endpoint: 0.0.0.0:4318\nprocessors:\n  memory_limiter:\n\
+    \    check_interval: 1s\n    limit_mib: 192\n    spike_limit_mib: 48\n  batch:\n\
+    \    timeout: 5s\n    send_batch_size: 512\nexporters:\n  otlp/skywalking:\n \
+    \   endpoint: skywalking-oap:11800\n    tls:\n      insecure: true\n    sending_queue:\n\
+    \      queue_size: 1000\n    retry_on_failure:\n      enabled: true\n      max_elapsed_time:\
+    \ 300s\nextensions:\n  health_check:\n    endpoint: 0.0.0.0:13133\nservice:\n\
+    \  extensions: [health_check]\n  pipelines:\n    traces:\n      receivers: [otlp]\n\
+    \      processors: [memory_limiter, batch]\n      exporters: [otlp/skywalking]\n"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: base
+spec:
+  selector:
+    app: otel-collector
+  ports:
+  - name: otlp-grpc
+    port: 4317
+  - name: otlp-http
+    port: 4318
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+      - name: collector
+        image: docker.io/otel/opentelemetry-collector-contrib:0.123.0
+        args:
+        - --config=/etc/otelcol/config.yaml
+        ports:
+        - name: otlp-grpc
+          containerPort: 4317
+        - name: otlp-http
+          containerPort: 4318
+        - name: health
+          containerPort: 13133
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: health
+        livenessProbe:
+          httpGet:
+            path: /
+            port: health
+        volumeMounts:
+        - name: config
+          mountPath: /etc/otelcol
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: otel-collector-config

@@ -1,0 +1,14 @@
+[Unit]
+Description=Life deals RSSHub localhost access
+After=k3s.service
+Wants=k3s.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/k3s kubectl -n life-deals port-forward --address=127.0.0.1 service/rsshub 1200:1200
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

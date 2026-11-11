@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-oap
+  namespace: base
+spec:
+  selector:
+    app: skywalking-oap
+  ports:
+  - name: grpc
+    port: 11800
+  - name: http
+    port: 12800
+  - name: zipkin-query
+    port: 9412
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-oap
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: skywalking-oap
+  template:
+    metadata:
+      labels:
+        app: skywalking-oap
+    spec:
+      initContainers:
+      - name: wait-for-storage
+        image: docker.io/apache/skywalking-oap-server:10.2.0
+        command:
+        - bash
+        - -ec
+        - "until curl --fail --silent --max-time 5 http://skywalking-storage:9200/_cluster/health;\
+          \ do\n  sleep 5\ndone\n"
+      containers:
+      - name: oap
+        image: docker.io/apache/skywalking-oap-server:10.2.0
+        env:
+        - name: SW_STORAGE
+          value: elasticsearch
+        - name: SW_STORAGE_ES_CLUSTER_NODES
+          value: skywalking-storage:9200
+        - name: SW_STORAGE_ES_INDEX_REPLICAS_NUMBER
+          value: '0'
+        - name: SW_OTEL_RECEIVER
+          value: default
+        - name: SW_OTEL_RECEIVER_ENABLED_HANDLERS
+          value: otlp-traces
+        - name: SW_RECEIVER_ZIPKIN
+          value: default
+        - name: SW_QUERY_ZIPKIN
+          value: default
+        - name: SW_HEALTH_CHECKER
+          value: default
+        - name: SW_CORE_RECORD_DATA_TTL
+          value: '3'
+        - name: SW_CORE_METRICS_DATA_TTL
+          value: '7'
+        - name: JAVA_OPTS
+          value: -Xms512m -Xmx1024m
+        ports:
+        - name: grpc
+          containerPort: 11800
+        - name: http
+          containerPort: 12800
+        - name: zipkin-query
+          containerPort: 9412
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+          limits:
+            memory: 2Gi
+        startupProbe:
+          httpGet:
+            path: /healthcheck
+            port: http
+          periodSeconds: 10
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: http
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5

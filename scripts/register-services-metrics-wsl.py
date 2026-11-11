@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 address = str(ipaddress.IPv4Address(sys.argv[1]))
-selected = set(sys.argv[2:]) or {"blog", "uaa", "gateway", "reference"}
+selected = set(sys.argv[2:]) or {"uaa", "gateway", "reference"}
 if selected - {"blog", "uaa", "gateway", "reference"}:
     raise SystemExit("Unknown service name")
 for service, port in (("blog", 19001), ("uaa", 19002), ("gateway", 18081), ("reference", 19092)):

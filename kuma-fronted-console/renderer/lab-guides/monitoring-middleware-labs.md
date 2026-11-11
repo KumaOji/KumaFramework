@@ -104,7 +104,7 @@ Zipkin Trace / Lens 页面，以 traceId 查询，展开树结构并比较正常
 
 预期：六个关联 span 均查回，报告还保留完整的后端 span 列表。
 OTLP trace 使用 Zipkin 查询路径；已有 `skywalkingLab` Agent 实验走原生 APM，二者的 UI 页面不同。
-真实 Blog → UAA → Gateway 接入情况见仓库 `k8s/local/monitoring/SERVICES.md`。
+真实 Blog → UAA → Gateway 接入情况见仓库 `k8s/local/README.md#service-integration`。
 
 ## 6. Grafana：数据源与面板
 

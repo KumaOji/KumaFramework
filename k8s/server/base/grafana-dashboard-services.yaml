@@ -1,0 +1,107 @@
+apiVersion: v1
+data:
+  services.json: "{\n  \"uid\": \"kuma-services\",\n  \"title\": \"10 · Prometheus\
+    \ · 服务指标\",\n  \"tags\": [\n    \"kuma\",\n    \"blog\",\n    \"uaa\",\n    \"\
+    gateway\"\n  ],\n  \"schemaVersion\": 39,\n  \"version\": 2,\n  \"refresh\": \"\
+    30s\",\n  \"time\": {\n    \"from\": \"now-30m\",\n    \"to\": \"now\"\n  },\n\
+    \  \"templating\": {\n    \"list\": [\n      {\n        \"name\": \"application\"\
+    ,\n        \"label\": \"服务\",\n        \"type\": \"custom\",\n        \"query\"\
+    : \"kuma-cloud-blog,kuma-cloud-uaa,kuma-cloud-gateway,kuma-reference\",\n    \
+    \    \"multi\": true,\n        \"includeAll\": true,\n        \"allValue\": \"\
+    kuma-cloud-(blog|uaa|gateway)|kuma-reference\",\n        \"current\": {\n    \
+    \      \"text\": \"All\",\n          \"value\": \"$__all\"\n        }\n      }\n\
+    \    ]\n  },\n  \"panels\": [\n    {\n      \"id\": 1,\n      \"title\": \"采集状态（1\
+    \ 正常，0 失联）\",\n      \"type\": \"stat\",\n      \"datasource\": {\n        \"\
+    type\": \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\"\
+    : {\n        \"x\": 0,\n        \"y\": 0,\n        \"w\": 12,\n        \"h\":\
+    \ 8\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"up{job=~\\\"blog|uaa|gateway|reference\\\"}\",\n      \
+    \    \"legendFormat\": \"{{application}} {{pool}} {{job}}\"\n        }\n     \
+    \ ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"\
+    short\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n     \
+    \ \"id\": 2,\n      \"title\": \"请求速率\",\n      \"type\": \"timeseries\",\n  \
+    \    \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\": \"\
+    prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 12,\n        \"y\"\
+    : 0,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n \
+    \       {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (application)\
+    \ (rate(http_server_requests_seconds_count{application=~\\\"$application\\\"}[5m]))\"\
+    ,\n          \"legendFormat\": \"{{application}} {{pool}} {{job}}\"\n        }\n\
+    \      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"reqps\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n \
+    \     \"id\": 3,\n      \"title\": \"5xx 错误率\",\n      \"type\": \"timeseries\"\
+    ,\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\"\
+    : \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"\
+    y\": 8,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n\
+    \        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (application)\
+    \ (rate(http_server_requests_seconds_count{application=~\\\"$application\\\",status=~\\\
+    \"5..\\\"}[5m])) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~\\\
+    \"$application\\\"}[5m])), 0.001)\",\n          \"legendFormat\": \"{{application}}\
+    \ {{pool}} {{job}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"\
+    defaults\": {\n          \"unit\": \"percentunit\"\n        },\n        \"overrides\"\
+    : []\n      }\n    },\n    {\n      \"id\": 4,\n      \"title\": \"P95 响应时间\"\
+    ,\n      \"type\": \"timeseries\",\n      \"datasource\": {\n        \"type\"\
+    : \"prometheus\",\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\"\
+    : {\n        \"x\": 12,\n        \"y\": 8,\n        \"w\": 12,\n        \"h\"\
+    : 8\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"histogram_quantile(0.95, sum by (application, le) (rate(http_server_requests_seconds_bucket{application=~\\\
+    \"$application\\\"}[5m])))\",\n          \"legendFormat\": \"{{application}} {{pool}}\
+    \ {{job}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"s\"\n        },\n        \"overrides\": []\n      }\n\
+    \    },\n    {\n      \"id\": 5,\n      \"title\": \"JVM 堆内存\",\n      \"type\"\
+    : \"timeseries\",\n      \"datasource\": {\n        \"type\": \"prometheus\",\n\
+    \        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\"\
+    : 0,\n        \"y\": 16,\n        \"w\": 12,\n        \"h\": 8\n      },\n   \
+    \   \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"sum by (application) (jvm_memory_used_bytes{application=~\\\"$application\\\
+    \",area=\\\"heap\\\"})\",\n          \"legendFormat\": \"{{application}} {{pool}}\
+    \ {{job}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"bytes\"\n        },\n        \"overrides\": []\n  \
+    \    }\n    },\n    {\n      \"id\": 6,\n      \"title\": \"数据库连接使用数\",\n    \
+    \  \"type\": \"timeseries\",\n      \"datasource\": {\n        \"type\": \"prometheus\"\
+    ,\n        \"uid\": \"prometheus\"\n      },\n      \"gridPos\": {\n        \"\
+    x\": 12,\n        \"y\": 16,\n        \"w\": 12,\n        \"h\": 8\n      },\n\
+    \      \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"hikaricp_connections_active{application=~\\\"$application\\\"}\",\n      \
+    \    \"legendFormat\": \"{{application}} {{pool}} {{job}}\"\n        }\n     \
+    \ ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"\
+    short\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n     \
+    \ \"id\": 7,\n      \"title\": \"HTTP 请求总数\",\n      \"type\": \"timeseries\"\
+    ,\n      \"datasource\": {\n        \"type\": \"prometheus\",\n        \"uid\"\
+    : \"prometheus\"\n      },\n      \"gridPos\": {\n        \"x\": 0,\n        \"\
+    y\": 24,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\": [\n\
+    \        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (application)\
+    \ (http_server_requests_seconds_count{application=~\\\"$application\\\"})\",\n\
+    \          \"legendFormat\": \"{{application}} {{pool}} {{job}}\"\n        }\n\
+    \      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"short\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n \
+    \     \"id\": 8,\n      \"title\": \"关联日志（traceId 可跳转 SkyWalking）\",\n      \"\
+    type\": \"logs\",\n      \"datasource\": {\n        \"type\": \"loki\",\n    \
+    \    \"uid\": \"loki\"\n      },\n      \"gridPos\": {\n        \"x\": 12,\n \
+    \       \"y\": 24,\n        \"w\": 12,\n        \"h\": 8\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"{service_name=~\\\
+    \"$application\\\"} | json\",\n          \"queryType\": \"range\"\n        }\n\
+    \      ],\n      \"options\": {\n        \"showTime\": true,\n        \"showLabels\"\
+    : false,\n        \"wrapLogMessage\": true,\n        \"sortOrder\": \"Descending\"\
+    \n      }\n    }\n  ],\n  \"links\": [\n    {\n      \"type\": \"link\",\n   \
+    \   \"title\": \"00 · 可观测性总览\",\n      \"url\": \"/d/kuma-overview\",\n      \"\
+    icon\": \"dashboard\",\n      \"includeVars\": true,\n      \"keepTime\": true,\n\
+    \      \"targetBlank\": false\n    },\n    {\n      \"type\": \"link\",\n    \
+    \  \"title\": \"10 · Prometheus · 服务指标\",\n      \"url\": \"/d/kuma-services\"\
+    ,\n      \"icon\": \"dashboard\",\n      \"includeVars\": true,\n      \"keepTime\"\
+    : true,\n      \"targetBlank\": false\n    },\n    {\n      \"type\": \"link\"\
+    ,\n      \"title\": \"11 · Prometheus · Gateway 网关\",\n      \"url\": \"/d/kuma-gateway\"\
+    ,\n      \"icon\": \"dashboard\",\n      \"includeVars\": true,\n      \"keepTime\"\
+    : true,\n      \"targetBlank\": false\n    },\n    {\n      \"type\": \"link\"\
+    ,\n      \"title\": \"12 · Prometheus · 监控组件\",\n      \"url\": \"/d/kuma-monitoring\"\
+    ,\n      \"icon\": \"dashboard\",\n      \"includeVars\": true,\n      \"keepTime\"\
+    : true,\n      \"targetBlank\": false\n    },\n    {\n      \"type\": \"link\"\
+    ,\n      \"title\": \"20 · Loki · 服务日志\",\n      \"url\": \"/d/kuma-logs\",\n\
+    \      \"icon\": \"dashboard\",\n      \"includeVars\": true,\n      \"keepTime\"\
+    : true,\n      \"targetBlank\": false\n    },\n    {\n      \"type\": \"link\"\
+    ,\n      \"title\": \"30 · SkyWalking · 调用链\",\n      \"url\": \"/d/kuma-traces\"\
+    ,\n      \"icon\": \"dashboard\",\n      \"includeVars\": true,\n      \"keepTime\"\
+    : true,\n      \"targetBlank\": false\n    }\n  ]\n}\n"
+kind: ConfigMap
+metadata:
+  name: services-dashboard
+  namespace: base

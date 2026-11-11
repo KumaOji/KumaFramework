@@ -1,0 +1,99 @@
+apiVersion: v1
+data:
+  alertmanager.yml: "global:\n  resolve_timeout: 5m\nroute:\n  receiver: local\n \
+    \ group_by: [alertname, job]\n  group_wait: 30s\n  group_interval: 5m\n  repeat_interval:\
+    \ 4h\n# Local-only receiver: alerts are visible in the UI; no external notifications.\n\
+    receivers:\n  - name: local\n"
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: base
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: base
+spec:
+  ports:
+  - name: http
+    port: 9093
+    targetPort: http
+  selector:
+    app: alertmanager
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: alertmanager
+  namespace: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  serviceName: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+      - args:
+        - --config.file=/etc/alertmanager/alertmanager.yml
+        - --storage.path=/alertmanager
+        - --cluster.listen-address=
+        image: crpi-1obf2jefhlbm76al.cn-guangzhou.personal.cr.aliyuncs.com/kumaoji/observability-alertmanager:v0.34.1
+        livenessProbe:
+          httpGet:
+            path: /-/ready
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: alertmanager
+        ports:
+        - containerPort: 9093
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: http
+          timeoutSeconds: 3
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /-/ready
+            port: http
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /alertmanager
+          name: data
+        - mountPath: /etc/alertmanager
+          name: config
+          readOnly: true
+      imagePullSecrets:
+      - name: observability-registry
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+      volumes:
+      - configMap:
+          name: alertmanager-config
+        name: config
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

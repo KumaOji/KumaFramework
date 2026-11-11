@@ -1,126 +1,67 @@
-# K8s 环境配置
+# Kubernetes 部署配置
 
-顶层只按环境分为两个目录，各环境的资源与 Kustomize 引用均在自身目录内：
+按环境、命名空间管理部署文件；目录不再按 monitoring、observability 等功能分类。
 
 ```text
 k8s/
 ├── local/
-│   ├── observability/        # WSL：Collector、SkyWalking、Elasticsearch
-│   └── monitoring/           # WSL：Grafana、Loki、Prometheus、Alertmanager
-│       └── resources/        # 本地监控资源与仪表盘
+│   ├── base/          # 中间件、监控、链路追踪、Grafana 面板
+│   ├── kube-system/   # Helm 安装、自定义配置、k3s 内置组件参考
+│   ├── life-deals/    # 青龙、RSSHub、Redis、任务与运维脚本
+│   ├── kumatts/       # AstrBot、语音服务、本地镜像与 GPU 工具
+│   ├── k3s-config.yaml
+│   └── kustomization.yaml
 └── server/
-    ├── base/                 # 服务器 base 命名空间资源与应用
-    ├── blog/                 # 服务器 blog 命名空间资源与应用
-    ├── observability/        # 服务器观测栈覆盖配置
-    └── monitoring/           # 服务器监控覆盖配置
-        └── resources/        # 服务器监控资源与仪表盘
+    ├── base/          # 服务器中间件、应用、监控与链路追踪
+    ├── blog/          # Blog 前后端、Ingress、网络策略
+    ├── kube-system/   # 服务器 Traefik 配置
+    └── kustomization.yaml
 ```
 
-`base`、`blog` 是服务器内部的命名空间分类，环境通过 `local`、`server` 区分。两套监控资源独立维护；公共指标或仪表盘需要两边同时更新。
+## 部署与操作说明
 
-- 本地监控：[local/monitoring/README.md](local/monitoring/README.md)。
-- 服务器部署：[server/monitoring/README.md](server/monitoring/README.md)。
-- 服务器应用清单由对应 deploy 工作流发布，基础设施由 Apply K8s Configs 工作流发布；本地目录变更不会触发服务器 Apply 工作流。
+| 范围 | 文档 |
+|---|---|
+| WSL 总入口、凭据和数据边界 | [本地部署](local/README.md) |
+| 本地监控、服务指标接入 | [监控](local/README.md#monitoring)、[服务接入](local/README.md#service-integration) |
+| Collector、SkyWalking、OTel 接入 | [链路追踪](local/README.md#tracing) |
+| 青龙、RSSHub、订阅任务 | [Life Deals](local/life-deals/README.md) |
+| AstrBot、语音服务、GPU 和本地镜像 | [KumaTTS](local/kumatts/README.md) |
+| 服务器发布、备份与 UI 隧道 | [服务器部署](server/README.md) |
 
-## OTel Collector + SkyWalking
+## YAML 命名
 
-本地 WSL K3s 使用 `local/observability/observability.yaml`，服务器使用 `server/base/observability.yaml`，分别部署 Collector、SkyWalking OAP/UI 和独立 Elasticsearch 存储。
-服务器通过 `server/observability/kustomization.yaml` 覆盖镜像地址为现有阿里云 ACR，并配置 `observability-registry` 拉取凭据；本地继续使用官方镜像。
-版本固定为 SkyWalking 10.2.0、Collector Contrib 0.123.0、Elasticsearch 8.17.3。
+文件名统一使用小写英文和连字符，扩展名为 `.yaml`；文件名描述部署组件或资源用途。
+一个组件的工作负载、Service、ConfigMap 和必要 PVC 可以放在同一文件，避免无意义拆分。
 
-## 部署和验证
+| 类型 | 文件名示例 |
+|---|---|
+| 命名空间、Kustomize 入口 | `namespace.yaml`、`kustomization.yaml` |
+| 应用与基础组件 | `mysql.yaml`、`otel-collector.yaml`、`skywalking-ui.yaml` |
+| Grafana 面板 | `grafana-dashboard-gateway.yaml`、`grafana-dashboards-observability.yaml` |
+| Helm 安装与覆盖配置 | `strimzi-helmchart.yaml`、`traefik-helmchart-config.yaml` |
+| Ingress、网络策略 | `gateway-ingress.yaml`、`management-network-policy.yaml` |
+| 密钥示例 | `secrets.example.yaml`，不加入 Kustomize |
+| Blog 应用 | `blog-backend.yaml`、`blog-frontend.yaml` |
 
-需要已有 `base` 命名空间、可用的默认 StorageClass（K3s 默认 `local-path`），以及约 2.4Gi 可调度内存；组件内存限制合计 4.75Gi。
-Elasticsearch 使用 20Gi PVC；单副本用于目前单机 K3s 环境。保留追踪记录 3 天、指标 7 天，PVC 在删除 StatefulSet 后保留。
+文件名与 Kubernetes 资源名相互独立。例如 Blog 文件名已修正，资源名称仍沿用
+`blog-background`、`blog-fronted`，避免重新创建服务或改变现有工作负载。
+`local/kube-system` 中的内置组件 YAML 是当前 k3s 版本的启动参考；仅 Kustomize 显式列出的文件参与日常部署。
 
-仓库根目录执行：
+## 常用入口
+
+在 WSL 的仓库根目录执行：
 
 ```bash
-bash scripts/deploy-observability.sh
-python3 scripts/check-observability.py
+# 检查所有本地资源，不修改集群。
+python3 scripts/deploy-local-wsl.py
+# 单独检查或部署一个命名空间。
+python3 scripts/deploy-local-wsl.py --namespace life-deals
+python3 scripts/deploy-local-wsl.py --namespace kumatts --apply
+# 预览服务器通用配置；实际发布由 GitHub Actions 和服务器脚本执行。
+kubectl kustomize k8s/server
 ```
 
-WSL 可从 Windows 执行（路径按实际仓库位置调整）：
-
-```powershell
-wsl -d Ubuntu-24.04 -u root -- bash /mnt/d/IDEA_project/KumaFramework/scripts/deploy-observability.sh
-wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts/check-observability.py
-```
-
-`check-observability.py` 上报一条测试 trace，并从 OAP 查询确认 Collector、OAP 和存储整条链路。
-Apply K8s 工作流在 `master` 上的 `k8s/server/**`、验证脚本或工作流文件变更时触发，使用已有 GitHub Secrets 同步文件、部署、等待组件就绪并运行测试 trace 验证；服务器需要 Python 3。
-流水线先将固定版本的官方镜像同步到 ACR（已有标签则跳过），使用现有 `ALIYUN_REGISTRY_USERNAME/PASSWORD` 创建服务器拉取凭据，再应用服务器覆盖配置。
-也可只复制此文件到服务器并 `kubectl apply -f observability.yaml`，不会重部署业务应用。
-
-## 访问
-
-默认 Service 均为 ClusterIP。通过端口转发访问 UI，无需开放服务器公网端口：
-
-```bash
-kubectl -n base port-forward svc/skywalking-ui 12880:8080 --address=127.0.0.1
-kubectl -n base port-forward svc/otel-collector 4317:4317 4318:4318 --address=127.0.0.1
-kubectl -n base port-forward svc/skywalking-oap 11800:11800 9412:9412 --address=127.0.0.1
-```
-
-三个命令需分别保持运行。WSL 下浏览器打开 http://localhost:12880 。服务器上可配合 SSH 隧道：
-
-```bash
-ssh -L 12880:127.0.0.1:12880 user@server
-```
-
-本地 WSL 也可安装自动重连、随 WSL systemd 启动的转发服务：
-
-```powershell
-wsl -d Ubuntu-24.04 -u root -- bash /mnt/d/IDEA_project/KumaFramework/scripts/expose-observability-wsl.sh
-```
-
-服务名称为 `kuma-observability-ui`、`kuma-observability-collector`、`kuma-observability-oap`。
-可通过 `systemctl disable --now <服务名>` 停用。这些服务仅用于 WSL 本地访问，服务器无需安装。
-
-SkyWalking 10.2 的 OTLP traces 会转换为 Zipkin 格式，在 UI 的 Zipkin Trace / Lens 页面查看；原生 Agent traces 在普通服务和追踪页面查看。
-
-## 应用接入
-
-Blog/UAA/Gateway 已使用 Boot 4 原生 OpenTelemetry 接入；服务器四组件监控、
-Lab 发布、UI 隧道与完整验证见 [服务器同步说明](server/monitoring/README.md)。
-
-本清单启用 **traces** 管道。部署成功不代表业务应用已经接入；示例 trace 的服务名为 `kuma-observability-smoke`。
-
-### 现有 OTel starter
-
-业务应用引入：
-
-```groovy
-api project(':kuma-boot-framework:kuma-boot-starter-otel')
-```
-
-在启动时可读取的配置中启用（生产建议先采样 10%）：
-
-```yaml
-kuma:
-  boot:
-    otel:
-      enabled: true
-      endpoint: http://otel-collector.base.svc.cluster.local:4318/v1/traces
-      sampling:
-        probability: 0.1
-```
-
-从 Windows/IDE 启动时，端口转发后 endpoint 改为 `http://localhost:4318/v1/traces`。
-容器环境也可通过 `KUMA_BOOT_OTEL_ENABLED=true` 和 `KUMA_BOOT_OTEL_ENDPOINT` 设置。
-
-### SkyWalking Java Agent
-
-Agent 文件需单独安装或用 initContainer 挂载，并添加 JVM 参数 `-javaagent:/path/to/skywalking-agent.jar`。
-设置 `SW_AGENT_NAME=kuma-cloud-uaa`（每个应用使用不同名称）、`SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap.base.svc.cluster.local:11800`。
-IDE 本地接入时使用转发后的 `localhost:11800`。选择与应用 JDK 和框架兼容的 Agent 版本后再挂载。
-同一应用先选择一种自动采集方式，避免重复采集；Collector 和 OAP 可以同时接收不同应用的两种数据。
-
-## 维护
-
-Collector ConfigMap 修改后执行 `kubectl -n base rollout restart deployment/otel-collector`。
-可手动运行 GitHub Actions 的 `Inspect Observability` 工作流，只读检查服务器 Pod、PVC、资源和事件。
-Collector 的重试队列在内存中，重启会丢失未发送的数据；Elasticsearch 数据持久化。
-此部署未启用遥测接收鉴权，不创建公网 Ingress；对外发布 UI 时需配置访问控制。
-
-参考：[SkyWalking OTLP traces](https://skywalking.apache.org/docs/main/v10.2.0/en/setup/backend/otlp-trace/)、[SkyWalking Docker](https://skywalking.apache.org/docs/main/v10.2.0/en/setup/backend/backend-docker/)、[Collector 配置](https://opentelemetry.io/docs/collector/configuration/)。
+本地文件变更不会触发服务器 Apply 工作流。服务器通用入口排除应用占位镜像和 Secret 示例，
+应用镜像由各自的发布工作流管理。
+原 Life、KumaTTS 项目的部署目录保留兼容转发入口，应用源码、模型、凭据与运行数据保持原位置。

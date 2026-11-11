@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qinglong-data
+  namespace: life-deals
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qinglong
+  namespace: life-deals
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: life-deals-qinglong
+  template:
+    metadata:
+      labels:
+        app: life-deals-qinglong
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: qinglong
+        image: docker.io/whyour/qinglong@sha256:f0f1fde2cf6dd60f5798c35e41b4b679b1ffaa48b1cf62460c54bb25ef45f41a
+        env:
+        - name: TZ
+          value: Asia/Hong_Kong
+        - name: QL_SCHEDULER
+          value: node
+        - name: QL_LANG
+          value: zh-CN
+        ports:
+        - containerPort: 5700
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 2Gi
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 5700
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 5700
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 5700
+          periodSeconds: 30
+          failureThreshold: 5
+        volumeMounts:
+        - name: data
+          mountPath: /ql/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: qinglong-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qinglong
+  namespace: life-deals
+spec:
+  selector:
+    app: life-deals-qinglong
+  ports:
+  - port: 5700
+    targetPort: 5700

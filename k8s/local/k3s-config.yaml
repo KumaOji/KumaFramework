@@ -1,0 +1,3 @@
+# Install as /etc/rancher/k3s/config.yaml; not a Kubernetes resource.
+# Keep the packaged Traefik and ServiceLB enabled.
+disable: []

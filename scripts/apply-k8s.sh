@@ -1,53 +1,25 @@
 #!/usr/bin/env bash
-# 在服务器执行：应用 /data/k8s 下除 secret 与应用部署外的全部清单
-# 目录布局与仓库 k8s/ 对齐：/data/k8s/server/base（base 命名空间）、/data/k8s/server/blog（blog 命名空间）
+# 在现有服务器执行：按命名空间组织的 Kustomize 入口只包含配置与基础设施。
+# Secret 和应用镜像部署由各自的发布流程管理。
 set -euo pipefail
 
 K8S_ROOT="${K8S_ROOT:-/data/k8s}"
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-shopt -s nullglob
-files=("${K8S_ROOT}"/server/base/*.yaml "${K8S_ROOT}"/server/blog/*.yaml)
-if [ ${#files[@]} -eq 0 ]; then
-  echo "ERROR: no yaml under ${K8S_ROOT}/server/{base,blog}"
+if [[ ! -f "${K8S_ROOT}/server/kustomization.yaml" ]]; then
+  echo "ERROR: missing ${K8S_ROOT}/server/kustomization.yaml"
   exit 1
 fi
+case "${1:-}" in
+  '') bash "${script_dir}/prepare-monitoring-server.sh" ;;
+  --skip-prepare) ;; # Apply workflow already made the private backup and credentials.
+  *) echo "Usage: $0 [--skip-prepare]" >&2; exit 2 ;;
+esac
 
-for file in "${files[@]}"; do
-  base=$(basename "${file}")
-  case "${base}" in
-    *secret.example.yaml|*secret.yaml)
-      echo "SKIP ${base}"
-      continue
-      ;;
-    kustomization.yaml)
-      continue
-      ;;
-    observability.yaml)
-      if [[ -f "${K8S_ROOT}/server/observability/kustomization.yaml" ]]; then
-        continue
-      fi
-      ;;
-    blog-background.yaml|blog-fronted.yaml|gateway.yaml|uaa.yaml|lab.yaml)
-      echo "SKIP ${base} (image managed by deploy workflow)"
-      continue
-      ;;
-    mysql.yaml)
-      # Preserve provisioner-owned immutable fields of the bound MySQL PVC.
-      python3 "${script_dir}/apply-k8s-resource.py" "${file}"
-      continue
-      ;;
-  esac
-  echo "APPLY ${base}"
-  kubectl apply -f "${file}"
-done
-
-if [[ -f "${K8S_ROOT}/server/observability/kustomization.yaml" ]]; then
-  kubectl apply -k "${K8S_ROOT}/server/observability"
-fi
-if [[ -f "${K8S_ROOT}/server/monitoring/kustomization.yaml" ]]; then
-  bash "${script_dir}/prepare-monitoring-server.sh"
-  kubectl apply -k "${K8S_ROOT}/server/monitoring"
-fi
+manifest="$(mktemp)"
+trap 'rm -f "$manifest"' EXIT
+kubectl kustomize "${K8S_ROOT}/server" > "$manifest"
+# Preserve provisioner-owned PVC fields and remove obsolete probe handlers.
+python3 "${script_dir}/apply-k8s-resource.py" "$manifest"
 
 kubectl rollout status deployment/nacos -n base --timeout=300s || true
