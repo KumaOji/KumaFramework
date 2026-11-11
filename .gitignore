@@ -8,7 +8,7 @@ build/
 # temp
 temp/
 
-# properties
+# Local build configuration and private account reference (never commit)
 gradle.properties
 
 # log

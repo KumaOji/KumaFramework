@@ -7,6 +7,7 @@ spring:
     import:
       - classpath:blog-websocket.properties
       - "nacos:kuma-shared-${KUMA_CONFIG_PROFILE:${spring.profiles.active}}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
+      # Blog 业务、日志、指标和追踪统一从同一份环境配置加载。
       - "nacos:kuma-cloud-blog-${KUMA_CONFIG_PROFILE:${spring.profiles.active}}.yaml?group=DEFAULT_GROUP&refreshEnabled=true"
       - optional:classpath:bootstrap-local.yml
   cloud:

@@ -1,6 +1,7 @@
 # Kuma Console 桌面前端
 
-「Console 配置 → 本机账号与凭据」内置 `scripts/get-console-credentials.ps1` 的读取入口。点击「读取 / 刷新」获取脱敏列表，按服务显示并复制账号、密码、API Key 或临时登录链接；显示后 60 秒、窗口失焦或离开页面时隐藏明文。接口仅接受本机同源请求，不缓存响应；凭据不会保存在浏览器或源码中。需要 Windows 和本机工作区，打包桌面版可用 `KUMA_CONSOLE_WORKSPACE` 指向此仓库。私有账号仍填写在用户目录 `.kuma-console/credentials.json`，详见 [凭据读取](#credentials)。界面测试：`pnpm run test:credentials-ui`（仅使用假凭据）。
+本机、WSL 和服务器账号参考在仓库根目录 `gradle.properties` 中维护，按 `account.local.*`、`account.server.*` 分组。该文件被 Git 忽略，仅供本机手动查阅。
+
 
 「本机概览」包含「系统概览」「本机网络」「本机路由器」三个同级页签。`#overview/network` 打开网络详情与手动网站连通性测试，旧的 `#network` 链接继续可用；`#overview/router` 查看固定地址 `192.168.0.1` 的 Ping、HTTP / HTTPS 连通性、MAC 邻居记录、相关网卡与 IPv4 路由，进入时检测一次，也可手动刷新，并可打开路由器管理页面。邻居、路由和 Ping 采集仅支持 Windows；WAN、Wi-Fi、在线设备和实时流量需要路由器专用接口及登录授权。侧栏统一高亮本机概览，页签支持方向键及 Home / End。
 
@@ -108,36 +109,3 @@ pnpm run dist        # 构建便携 EXE，包含后端 JAR
 项目目录默认筛选「已启动」：发现匹配的本机项目进程，或服务探测获得 HTTP 响应（包括健康检查异常），即纳入列表；Gradle 构建启用状态不作为启动依据。计数随运行状态刷新，探测失败时不使用对应来源的旧数据判断已启动。服务可达与健康检查通过分别展示，后端每 10 秒探测一次。
 
 青龙和 RSSHub 的访问入口保留在「公共面板」，WSL / k3s 环境状态在「服务器与 WSL」查看。项目服务页面不轮询 Life 部署状态。
-
-<a id="credentials"></a>
-
-## 本机凭据读取
-
-在仓库根目录运行，默认隐藏密码；添加 `-Reveal` 才返回明文：
-
-```powershell
-.\scripts\get-console-credentials.ps1
-.\scripts\get-console-credentials.ps1 -Service grafana,qinglong -Reveal
-.\scripts\get-console-credentials.ps1 -Initialize
-notepad "$env:USERPROFILE\.kuma-console\credentials.json"
-```
-
-脚本读取已有配置、本机凭据文件及运行中 k3s 的 Secret，不启动 WSL、不修改账号。
-读取到保存值不代表登录验证成功；数据库连接密码也不代表应用网页登录密码。
-
-私有补充文件位于当前用户目录 `.kuma-console/credentials.json`，优先于自动来源：
-
-```json
-{
-  "version": 1,
-  "services": {
-    "nacos": { "username": "填写用户名", "password": "填写密码" },
-    "n8n": { "username": "填写登录邮箱", "password": "填写密码" }
-  }
-}
-```
-
-按 service id 保存条目，支持 `username`、`password`、`apiKey`、`loginUrl`。
-`-Initialize` 设置仅当前 Windows 用户和 SYSTEM 可访问的 ACL；
-`-PrivateFile` 可指定其他路径，但不能放在 Git 工作区内。
-CLI 验证入口为 `scripts/console-credentials.test.ps1`，只使用临时假凭据。

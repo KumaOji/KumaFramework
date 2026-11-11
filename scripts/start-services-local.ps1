@@ -89,7 +89,7 @@ foreach ($service in $Services) {
     if ($debugPort -gt 0) { $arguments += "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:$debugPort" }
     if (!$WithoutObservability) { $arguments += "-Dlogging.config=$loggingConfig" }
     $configUri = 'file:' + ($localConfig -replace '\\', '/')
-    $profile = if ($WithoutObservability) { 'dev' } else { 'dev,observability' }
+    $profile = if ($WithoutObservability -or $service -eq 'blog') { 'dev' } else { 'dev,observability' }
     $arguments += @('-jar', ('"' + $runtimeJar + '"'), "--spring.profiles.active=$profile",
         '--KUMA_CONFIG_PROFILE=dev', ('"--spring.config.additional-location=' + $configUri + '"'),
         "--server.port=$port", '--server.address=0.0.0.0',
@@ -97,6 +97,11 @@ foreach ($service in $Services) {
         "--spring.data.redis.host=$wslAddress",
         "--spring.datasource.dynamic.datasource.mysql.url=jdbc:mysql://${wslAddress}:3306/${database}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&preserveInstants=true&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true")
     if ($service -eq 'blog') { $arguments += "--kuma.boot.ai.qdrant.host=$wslAddress" }
+    if ($service -eq 'blog' -and $WithoutObservability) {
+        $arguments += @('--logging.config=classpath:logback-spring.xml',
+            '--management.tracing.enabled=false', '--management.server.port=-1',
+            '--management.endpoints.web.exposure.include=health,info')
+    }
     if (!$WithoutObservability) {
         # CLI takes precedence over Nacos settings, including logging.config and tracing.enabled.
         $arguments += @("--logging.config=$loggingConfig",

@@ -70,7 +70,7 @@ spring:
             max-lifetime: 1800000
 
 logging:
-  config: classpath:logback-spring.xml
+  config: classpath:logback-observability.xml
   level:
     root: INFO
 
@@ -158,7 +158,7 @@ kuma:
         version: true
         trace: true
       request:
-        enabled: true
+        enabled: false
         types:
           - LOGGER
       global-exception:
@@ -205,10 +205,43 @@ kuma:
       packages-to-scan:
         - com.kuma.cloud.blog
 
+    monitor:
+      enabled: false
 management:
   tracing:
-    enabled: false
+    enabled: true
+    sampling:
+      probability: ${KUMA_TRACING_SAMPLING:0.1}
   otlp:
     metrics:
       export:
         enabled: false
+  server:
+    port: ${BLOG_MANAGEMENT_PORT:19001}
+    address: ${KUMA_MANAGEMENT_ADDRESS:127.0.0.1}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${KUMA_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${KUMA_ENVIRONMENT:local}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
+observability:
+  environment: ${KUMA_ENVIRONMENT:local}
+  loki-url: ${KUMA_LOKI_URL:http://localhost:3100/loki/api/v1/push}

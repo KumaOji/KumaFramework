@@ -35,17 +35,16 @@ Stop-Process -Id (Get-Content logs/blog-local/process-id.txt)
 
 启动前需保证 WSL 中间件就绪，WSL Gateway 服务 `kuma-gateway-local` 已启动。
 OAuth 登录另需启动 UAA（`localhost:33336`）；健康检查与公开文章接口可独立验证。
-本脚本默认启用 `dev,observability`，日志进入 Loki，调用链经 OTel Collector
+Blog 使用 `dev` 配置统一启用可观测性，日志进入 Loki，调用链经 OTel Collector
 进入 SkyWalking，Prometheus 从独立管理端口采集指标。传入 `-WithoutObservability`
-可只使用 `dev`。三服务联合启动、面板与验证见 [可观测性说明](../../../k8s/local/README.md#service-integration)。
+可关闭 Loki 日志、调用链和独立管理端口。三服务联合启动、面板与验证见 [可观测性说明](../../../k8s/local/README.md#service-integration)。
 
 ## Nacos 配置
 
 Blog 不保留 `application*.yml`。`bootstrap.yml` 负责应用名、运行环境和 Nacos 连接，
-默认开关和业务配置由 `kuma-cloud-blog-dev.yaml` / `kuma-cloud-blog-prod.yaml` 提供。
-启用 `observability` profile 时，`bootstrap-observability.yml` 额外导入
-`kuma-cloud-blog-observability-dev.yaml` / `kuma-cloud-blog-observability-prod.yaml`。
-以上 Data ID 均位于 `base` 命名空间、`DEFAULT_GROUP` 分组。
+业务、日志、指标和追踪统一由 `kuma-cloud-blog-dev.yaml` / `kuma-cloud-blog-prod.yaml` 提供，
+不需要额外启用 `observability` profile 或发布独立的观测配置。
+Data ID 位于 `base` 命名空间、`DEFAULT_GROUP` 分组。
 
 `KUMA_CONFIG_PROFILE` 指定 Nacos 配置环境，未设置时使用当前 active profile；
 同时启用多个 profile 时必须显式设置为 `dev` 或 `prod`，现有启动脚本和部署清单已设置。
