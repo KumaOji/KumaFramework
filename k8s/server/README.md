@@ -34,12 +34,14 @@ Grafana 沿用 `base/grafana-admin` 及 `/data/kuma-observability/grafana-admin-
 |---|---|
 | `k8s/server/**` | Apply K8s Configs，上传并应用服务器通用入口 |
 | `k8s/server/blog/blog-backend.yaml` | 同时触发 Blog 应用发布 |
+| `k8s/server/blog/blog-frontend.yaml` | Apply 沿用服务器当前前端镜像，应用 Deployment 和 Service 配置 |
 | `k8s/server/base/uaa.yaml`、`gateway.yaml`、`lab.yaml` | 同时触发对应应用发布 |
 | 流水线实际使用的部署、验证或等待脚本 | 触发其依赖工作流 |
 | `k8s/local/**` | 不触发服务器发布 |
 
 Apply 工作流在镜像同步和 SSH 步骤之前渲染 `k8s/server`，检查引用文件存在，
 并拒绝把 Secret 示例、应用 placeholder 镜像纳入通用入口。
+前端清单由同一部署脚本单独应用，用当前 `blog-fronted` 镜像替换占位符，不改变已有前端版本；后端清单继续由各应用发布流程管理。
 UAA、Gateway、Lab、Blog 的应用发布均上传所需的等待脚本，不依赖服务器上遗留的副本。
 提交消息中的 `[skip ci]` 只跳过该次 push 的自动触发，不会禁用后续正常提交或手动发布。
 

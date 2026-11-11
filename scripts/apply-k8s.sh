@@ -22,4 +22,17 @@ kubectl kustomize "${K8S_ROOT}/server" > "$manifest"
 # Preserve provisioner-owned PVC fields and remove obsolete probe handlers.
 python3 "${script_dir}/apply-k8s-resource.py" "$manifest"
 
+# Frontend images are published separately. Apply its configuration with the
+# running image so changes to this server manifest are not silently skipped.
+frontend_manifest="${K8S_ROOT}/server/blog/blog-frontend.yaml"
+if [[ -f "$frontend_manifest" ]]; then
+  frontend_image=$(kubectl -n blog get deployment blog-fronted -o 'jsonpath={.spec.template.spec.containers[?(@.name=="blog-fronted")].image}')
+  if [[ -z "$frontend_image" || "$frontend_image" == *:placeholder ]]; then
+    echo 'ERROR: blog-fronted has no published image to preserve.' >&2
+    exit 1
+  fi
+  python3 "${script_dir}/apply-k8s-resource.py" "$frontend_manifest" --image "$frontend_image"
+  kubectl rollout status deployment/blog-fronted -n blog --timeout=300s
+fi
+
 kubectl rollout status deployment/nacos -n base --timeout=300s || true
