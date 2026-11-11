@@ -50,8 +50,10 @@ Blog 不保留 `application*.yml`。`bootstrap.yml` 负责应用名、运行环�
 `KUMA_CONFIG_PROFILE` 指定 Nacos 配置环境，未设置时使用当前 active profile；
 同时启用多个 profile 时必须显式设置为 `dev` 或 `prod`，现有启动脚本和部署清单已设置。
 Nacos 导入为必需项，配置中心连接失败时启动失败。
-配置源文件位于仓库 `.nacos-tmp/base/`，dev 配置通过 `scripts/publish-nacos-dev.sh` 发布，
+配置源文件位于仓库 `.nacos-tmp/local/base/` (dev) / `.nacos-tmp/server/base/` (prod)，dev 配置通过 `scripts/publish-nacos-dev.sh` 发布，
 prod 配置通过 `Publish Nacos Prod Configs` 工作流发布。先发布配置，再重启 Blog。
+密码和客户端密钥使用变量引用。发布新的 dev 配置前，为应用配置相应环境变量，
+或在不入库的 `bootstrap-local.yml` 中覆盖对应属性；不要填写服务器凭据作为默认值。
 
 
 ## 操作审计

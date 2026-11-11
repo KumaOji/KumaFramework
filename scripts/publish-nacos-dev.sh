@@ -3,7 +3,8 @@
 set -euo pipefail
 
 NACOS_SERVER="${NACOS_SERVER:-172.23.89.45:8848}"
-CONFIG_ROOT="${CONFIG_ROOT:-.nacos-tmp/base}"
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG_ROOT="${CONFIG_ROOT:-${repo_root}/.nacos-tmp/local/base}"
 TENANT="${TENANT:-base}"
 
 login_nacos() {

@@ -16,7 +16,7 @@
 会依次加载：
 
 - `kuma-shared-dev.yaml`（共享中间件变量）
-- `kuma-cloud-lab-dev.yaml`（端口、数据源、Redis、Kafka、Lab 实验项；仓库镜像在 `.nacos-tmp/base/`）
+- `kuma-cloud-lab-dev.yaml`（端口、数据源、Redis、Kafka、Lab 实验项；仓库镜像在 `.nacos-tmp/local/base/`）
 - `bootstrap-local.yml`（只覆盖 Nacos 地址）
 
 本地没有 `application.yml`。改配置改 Nacos 里的 `kuma-cloud-lab-dev.yaml`，再执行 `scripts/publish-nacos-dev.sh`。

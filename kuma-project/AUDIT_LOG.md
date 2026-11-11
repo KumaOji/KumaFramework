@@ -44,7 +44,7 @@ kuma:
 
 `enabled=false` 可关闭操作审计；Blog/UAA 的认证回调使用空存储，UAA 原有登录表审计仍保留。Servlet 切面支持异步输出时的 MDC 捕获与恢复；当前应用模板选择同步生成日志，远端发送沿用日志组件的批量机制。
 
-配置源位于 `.nacos-tmp/base/kuma-cloud-{blog,uaa,gateway}-{dev,prod}.yaml`。按应用已有流程发布配置并重启更新后的服务。本次代码接入不代表运行中服务已重启或线上 Nacos 已更新。
+配置源位于 `.nacos-tmp/local/base/kuma-cloud-{blog,uaa,gateway}-dev.yaml` / `.nacos-tmp/server/base/kuma-cloud-{blog,uaa,gateway}-prod.yaml`。按应用已有流程发布配置并重启更新后的服务。本次代码接入不代表运行中服务已重启或线上 Nacos 已更新。
 
 在 [Grafana Explore](http://localhost:3000/explore) 选择 Loki 查询三个服务的审计：
 

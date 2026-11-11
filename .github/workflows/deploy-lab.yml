@@ -14,8 +14,8 @@ on:
       - 'gradle.properties'
       - 'build.gradle'
       - 'settings.gradle'
-      - '.nacos-tmp/base/kuma-cloud-lab-prod.yaml'
-      - '.nacos-tmp/base/kuma-shared-prod.yaml'
+      - '.nacos-tmp/server/base/kuma-cloud-lab-prod.yaml'
+      - '.nacos-tmp/server/base/kuma-shared-prod.yaml'
   workflow_dispatch:
 
 env:

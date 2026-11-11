@@ -8,7 +8,7 @@ try {
     . (Join-Path $PSScriptRoot 'credential-project-sources.ps1')
     $projectFixture = Join-Path $credentialFixtureDir 'project'
     $projectNacosFixture = Join-Path $projectFixture 'kuma-project/kuma-project-uaa/src/main/resources/bootstrap.yml'
-    $projectUaaFixture = Join-Path $projectFixture '.nacos-tmp/base/kuma-cloud-uaa-dev.yaml'
+    $projectUaaFixture = Join-Path $projectFixture '.nacos-tmp/local/base/kuma-cloud-uaa-dev.yaml'
     [IO.Directory]::CreateDirectory((Split-Path $projectNacosFixture -Parent)) | Out-Null
     [IO.Directory]::CreateDirectory((Split-Path $projectUaaFixture -Parent)) | Out-Null
     [IO.File]::WriteAllText($projectNacosFixture, @'

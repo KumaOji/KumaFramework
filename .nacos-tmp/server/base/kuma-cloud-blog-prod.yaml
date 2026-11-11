@@ -101,7 +101,7 @@ blog:
     audience: ${BLOG_OAUTH2_AUDIENCE:blog}
     login-success-url: ${BLOG_LOGIN_SUCCESS_URL}
     refresh-token-max-age: 30d
-  admin-initial-password: admin123
+  admin-initial-password: ${ADMIN_INITIAL_PASSWORD}
   music:
     base-path: /data/music
 

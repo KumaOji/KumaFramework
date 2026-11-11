@@ -6,7 +6,8 @@ NACOS_USERNAME="${NACOS_USERNAME:-nacos}"
 NACOS_PASSWORD="${NACOS_PASSWORD:-}"
 NACOS_SERVER="127.0.0.1:8848"
 K8S_NAMESPACE="${K8S_NAMESPACE:-base}"
-CONFIG_ROOT="${CONFIG_ROOT:-/tmp/nacos-config/base}"
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG_ROOT="${CONFIG_ROOT:-${repo_root}/.nacos-tmp/server/base}"
 CONFIG_PATTERN="${CONFIG_PATTERN:-kuma-*-prod.yaml}"
 
 # Reuse the existing server credential when Actions has no optional password override.

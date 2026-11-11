@@ -32,7 +32,7 @@ function Read-CredentialProjectLogin([string]$Workspace, [string]$Service) {
     $sources = switch ($Service) {
         'nacos' { @(@{path='kuma-project/kuma-project-uaa/src/main/resources/bootstrap.yml'; prefix='spring.cloud.nacos'}) }
         'uaa' { @(
-            @{path='.nacos-tmp/base/kuma-cloud-uaa-dev.yaml'; prefix='kuma.uaa.admin'},
+            @{path='.nacos-tmp/local/base/kuma-cloud-uaa-dev.yaml'; prefix='kuma.uaa.admin'},
             @{path='kuma-project/kuma-project-uaa/src/main/resources/application-dev.yml'; prefix='kuma.uaa.admin'}
         ) }
         default { @() }

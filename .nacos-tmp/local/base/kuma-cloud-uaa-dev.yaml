@@ -122,12 +122,12 @@ kuma:
     admin:
       init-enabled: true
       username: ${UAA_ADMIN_USERNAME:admin}
-      password: ${UAA_ADMIN_PASSWORD:admin123}
+      password: ${UAA_ADMIN_PASSWORD}
       nickname: 超级管理员
       email: admin@kumacloud.top
     clients:
       - client-id: blog
-        client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
+        client-secret: ${BLOG_OAUTH2_CLIENT_SECRET}
         client-name: Kuma Blog
         grant-types:
           - authorization_code
@@ -147,7 +147,7 @@ kuma:
         require-authorization-consent: false
         require-proof-key: false
       - client-id: gateway
-        client-secret: ${GATEWAY_OAUTH2_CLIENT_SECRET:gateway-secret}
+        client-secret: ${GATEWAY_OAUTH2_CLIENT_SECRET}
         client-name: Kuma Gateway
         grant-types:
           - client_credentials

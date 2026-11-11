@@ -32,7 +32,7 @@ spring:
           blog:
             provider: blog-uaa
             client-id: ${BLOG_OAUTH2_CLIENT_ID:blog}
-            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET:blog-secret}
+            client-secret: ${BLOG_OAUTH2_CLIENT_SECRET}
             client-authentication-method: client_secret_basic
             authorization-grant-type: authorization_code
             redirect-uri: "http://localhost:9000/api/login/oauth2/code/blog"
@@ -125,7 +125,7 @@ blog:
     audience: blog
     login-success-url: http://localhost:4321
     refresh-token-max-age: 30d
-  admin-initial-password: admin123
+  admin-initial-password: ${ADMIN_INITIAL_PASSWORD}
   music:
     base-path: E:\blog-resource\music
 
