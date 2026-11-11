@@ -72,7 +72,7 @@ GATEWAY_ENVIRONMENT=local
 ## 验证
 
 ```powershell
-wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/kuma-project/kuma-project-gateway/scripts/check-observability-wsl.py /mnt/d/IDEA_project/KumaFramework/kuma-project/kuma-project-gateway/build/libs/gateway-2026.10.jar
+wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/kuma-project/kuma-project-gateway/scripts/check-observability-wsl.py /mnt/d/IDEA_project/KumaFramework/kuma-project/kuma-project-gateway/build/libs/gateway-2026.11.jar
 wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts/check-monitoring-wsl.py
 ```
 

@@ -61,7 +61,7 @@ foreach ($service in $Services) {
         $previousId = [int](Get-Content -LiteralPath $pidPath)
         $previous = Get-CimInstance Win32_Process -Filter "ProcessId=$previousId"
         if ($previous -and $previous.Name -eq 'java.exe' -and
-            ($previous.CommandLine -like "*$service-2026.10.jar*" -or $previous.CommandLine -like "*$service-local*runtime*")) {
+            ($previous.CommandLine -like "*$service-2026.11.jar*" -or $previous.CommandLine -like "*$service-local*runtime*")) {
             Stop-Process -Id $previousId
             Wait-Process -Id $previousId -Timeout 15 -ErrorAction SilentlyContinue
         } elseif ($previous) { throw "PID $previousId belongs to a different process; refusing to stop it." }
