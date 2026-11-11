@@ -4,7 +4,7 @@
 Loki、Prometheus、Grafana、Alertmanager、OTel Collector、SkyWalking。
 MySQL、Redis、Nacos、Qdrant、Ollama 保持现有持久化目录与已有清单。
 
-`k8s/monitoring` 是本地与服务器共用的四组件清单与面板；服务器 overlay 将镜像
+`k8s/server/monitoring/resources` 保存服务器四组件清单与面板；服务器 overlay 将镜像
 替换为 ACR，并将 Prometheus 的三个业务目标改为集群 Service，不使用 WSL EndpointSlice。
 应用使用 `prod,observability`，Nacos 配置仍为 `prod`；管理端口不经公网 Ingress，
 NetworkPolicy 只允许 Prometheus Pod 采集。指标环境为 `server`，日志与 traceId 关联。

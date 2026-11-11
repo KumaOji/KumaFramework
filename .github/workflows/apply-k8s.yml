@@ -4,7 +4,9 @@ on:
   push:
     branches: [master]
     paths:
-      - 'k8s/**'
+      - 'k8s/server/**'
+      - 'scripts/apply-k8s.sh'
+      - 'scripts/prepare-monitoring-server.sh'
       - 'scripts/check-observability.py'
       - 'scripts/apply-k8s-resource.py'
       - '.github/workflows/apply-k8s.yml'
@@ -61,27 +63,17 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          script: mkdir -p /data/k8s/base /data/k8s/blog /data/k8s/scripts /data/k8s/server/observability /data/k8s/server/monitoring /data/k8s/monitoring
+          script: mkdir -p /data/k8s/server /data/k8s/scripts
 
-      - name: Copy base k8s files to server
+      - name: Copy server environment manifests
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/base/*
-          target: /data/k8s/base/
-          strip_components: 2
-
-      - name: Copy blog k8s files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.BLOG_SERVER_HOST }}
-          username: ${{ secrets.BLOG_SERVER_USER }}
-          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/blog/*
-          target: /data/k8s/blog/
-          strip_components: 2
+          source: k8s/server
+          target: /data/k8s/
+          strip_components: 1
 
       - name: Copy deployment helpers to server
         uses: appleboy/scp-action@v0.1.7
@@ -92,36 +84,6 @@ jobs:
           source: scripts/check-observability.py,scripts/apply-k8s-resource.py,scripts/prepare-monitoring-server.sh,scripts/check-monitoring-server.py,scripts/expose-monitoring-server.sh
           target: /data/k8s/scripts/
           strip_components: 1
-
-      - name: Copy server observability overlay
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.BLOG_SERVER_HOST }}
-          username: ${{ secrets.BLOG_SERVER_USER }}
-          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/server/observability/*
-          target: /data/k8s/server/observability/
-          strip_components: 3
-
-      - name: Copy common monitoring resources
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.BLOG_SERVER_HOST }}
-          username: ${{ secrets.BLOG_SERVER_USER }}
-          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/monitoring/*
-          target: /data/k8s/monitoring/
-          strip_components: 2
-
-      - name: Copy server monitoring overlay
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.BLOG_SERVER_HOST }}
-          username: ${{ secrets.BLOG_SERVER_USER }}
-          key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/server/monitoring/*
-          target: /data/k8s/server/monitoring/
-          strip_components: 3
 
       - name: Apply k8s configs and verify observability
         uses: appleboy/ssh-action@v1
@@ -146,7 +108,7 @@ jobs:
             kubectl apply -f "$registry_manifest"
             rm -f "$registry_manifest"
             trap - EXIT
-            for f in /data/k8s/base/*.yaml /data/k8s/blog/*.yaml; do
+            for f in /data/k8s/server/base/*.yaml /data/k8s/server/blog/*.yaml; do
               b=$(basename "$f")
               case "$b" in
                 *secret.example.yaml|*secret.yaml) continue ;;

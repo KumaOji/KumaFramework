@@ -5,7 +5,7 @@ on:
     branches: [master]
     paths:
       - '.github/workflows/deploy-gateway.yml'
-      - 'k8s/base/gateway.yaml'
+      - 'k8s/server/base/gateway.yaml'
       - 'scripts/apply-k8s-resource.py'
       - 'kuma-project/kuma-project-gateway/**'
       - 'kuma-boot-framework/**'
@@ -115,7 +115,7 @@ jobs:
           host: ${{ secrets.BLOG_SERVER_HOST }}
           username: ${{ secrets.BLOG_SERVER_USER }}
           key: ${{ secrets.BLOG_SERVER_SSH_KEY }}
-          source: k8s/base/gateway.yaml,scripts/apply-k8s-resource.py
+          source: k8s/server/base/gateway.yaml,scripts/apply-k8s-resource.py
           target: /data/kuma-deploy/
           strip_components: 0
 
@@ -130,7 +130,7 @@ jobs:
             set -eu
             bash /data/kuma-deploy/scripts/wait-observability-server.sh
             # 先同步清单（env/探针等），再用真实镜像覆盖 placeholder，避免镜像被重置导致 ImagePullBackOff
-            python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/base/gateway.yaml \
+            python3 /data/kuma-deploy/scripts/apply-k8s-resource.py /data/kuma-deploy/k8s/server/base/gateway.yaml \
               --image ${{ steps.ver.outputs.FULL_IMAGE }}
             kubectl scale deployment/gateway -n base --replicas=1
             kubectl rollout status deployment/gateway -n base --timeout=1800s

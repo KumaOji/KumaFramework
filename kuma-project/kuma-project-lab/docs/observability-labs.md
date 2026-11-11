@@ -13,7 +13,7 @@
 | OTel SDK | 创建 ID、记录数据、采样、聚合并调用 exporter | 查看报告的 spans、metrics、logs 和 checks |
 | Propagator | 将上下文注入/提取协议载体 | 查看 `traceparent` 与远端 parentSpanId |
 | OTLP exporter | 把遥测发送到接收端 | 在线模式把 trace 发到 4318 |
-| Collector | receiver 接收，processor 处理，exporter 转发 | 查看 `k8s/base/observability.yaml` 的 traces pipeline |
+| Collector | receiver 接收，processor 处理，exporter 转发 | 查看 `k8s/local/observability/observability.yaml` 的 traces pipeline |
 | SkyWalking Java Agent | 增强受支持的框架与库，产生原生遥测 | `-javaagent` 前后对比，toolkit 自定义 span |
 | SkyWalking OAP | 接收、分析并写入存储，提供查询 API | 按 trace ID 查回，查看原生服务指标 |
 | SkyWalking UI | 展示服务、实例、端点、拓扑与追踪 | OTel 走 Zipkin/Lens；Agent 走原生追踪 |
@@ -110,7 +110,7 @@ Collector 尾部采样可在收到完整或足够的 trace 后按错误/耗时�
 
 ## 3. 在线 OTel：发到 Collector，再从 SkyWalking 查回
 
-先按 [部署说明](../../../k8s/OBSERVABILITY.md) 确认本地 WSL 的四个组件正常，开启已有转发服务：
+先按 [部署说明](../../../k8s/README.md) 确认本地 WSL 的四个组件正常，开启已有转发服务：
 
 ```powershell
 wsl -d Ubuntu-24.04 -u root -- bash /mnt/d/IDEA_project/KumaFramework/scripts/expose-observability-wsl.sh
@@ -209,7 +209,7 @@ Invoke-RestMethod -Uri http://localhost:12880/graphql -Method Post -ContentType 
 
 ## 7. Collector 功能与排障练习
 
-打开 `k8s/base/observability.yaml`：
+打开 `k8s/local/observability/observability.yaml`：
 - receiver：OTLP gRPC4317、HTTP4318接收 SDK 遥测。
 - memory_limiter：约束 Collector 内存压力；它不是应用 JVM 的内存限制。
 - batch：集中发送，减少网络开销，可能使后端出现数据的时间稍有延迟。

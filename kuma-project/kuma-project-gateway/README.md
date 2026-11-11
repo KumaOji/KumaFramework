@@ -32,7 +32,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-services-local
 UAA 和 Gateway 均在 Windows 运行，WSL 仅承载中间件与监控。也可通过控制台「本地公共组件」手动启停，打开控制台不会自动启动应用。
 启动脚本读取当前仓库的 bootJar、`bootstrap-local.yml` 和 WSL 中间件地址；日志在 `logs/gateway-local`。
 运行 jar 按 SHA256 复制到 `logs/gateway-local/runtime`，后续 Gradle 构建不会破坏正在运行的实例。
-旧 `start-gateway-observability-wsl.sh` 已停用；遗留 `kuma-gateway-local` systemd 服务应停止并禁用自启。
+Gateway 统一使用 Windows 启动入口；遗留 `kuma-gateway-local` systemd 服务应停止并禁用自启。
 
 | 用途 | 地址 |
 |---|---|

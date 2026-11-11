@@ -50,7 +50,7 @@ Kuma 文件夹按编号排列六张中文仪表盘，各页顶部可直接切换
 默认每 30 秒刷新；新增页面默认最近一小时。日志每次最多展示 200 条。
 调用链页面未填写 Trace ID 时，跨度面板留空；可先展开请求日志中的 traceId，
 点击数据源关联链接进入 Explore。仪表盘通过 ConfigMap 文件供应，修改应同步到
-`k8s/monitoring/*dashboard*.yaml`，避免下一次供应覆盖手动修改。
+`k8s/local/monitoring/resources/*dashboard*.yaml`，避免下一次供应覆盖手动修改。
 
 Prometheus 查询 `up` 可看到八个采集目标（含 Gateway、Blog、UAA），Loki 查询 `{service_name="kuma-monitoring-smoke"}` 可看到监控验证脚本的日志。
 Loki 是日志 API 服务，其日志界面由 Grafana 提供。

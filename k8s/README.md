@@ -1,6 +1,30 @@
-# OTel Collector + SkyWalking
+# K8s 环境配置
 
-本地 WSL K3s 和服务器共用 `base/observability.yaml`，部署 Collector、SkyWalking OAP/UI 和独立 Elasticsearch 存储。
+顶层只按环境分为两个目录，各环境的资源与 Kustomize 引用均在自身目录内：
+
+```text
+k8s/
+├── local/
+│   ├── observability/        # WSL：Collector、SkyWalking、Elasticsearch
+│   └── monitoring/           # WSL：Grafana、Loki、Prometheus、Alertmanager
+│       └── resources/        # 本地监控资源与仪表盘
+└── server/
+    ├── base/                 # 服务器 base 命名空间资源与应用
+    ├── blog/                 # 服务器 blog 命名空间资源与应用
+    ├── observability/        # 服务器观测栈覆盖配置
+    └── monitoring/           # 服务器监控覆盖配置
+        └── resources/        # 服务器监控资源与仪表盘
+```
+
+`base`、`blog` 是服务器内部的命名空间分类，环境通过 `local`、`server` 区分。两套监控资源独立维护；公共指标或仪表盘需要两边同时更新。
+
+- 本地监控：[local/monitoring/README.md](local/monitoring/README.md)。
+- 服务器部署：[server/monitoring/README.md](server/monitoring/README.md)。
+- 服务器应用清单由对应 deploy 工作流发布，基础设施由 Apply K8s Configs 工作流发布；本地目录变更不会触发服务器 Apply 工作流。
+
+## OTel Collector + SkyWalking
+
+本地 WSL K3s 使用 `local/observability/observability.yaml`，服务器使用 `server/base/observability.yaml`，分别部署 Collector、SkyWalking OAP/UI 和独立 Elasticsearch 存储。
 服务器通过 `server/observability/kustomization.yaml` 覆盖镜像地址为现有阿里云 ACR，并配置 `observability-registry` 拉取凭据；本地继续使用官方镜像。
 版本固定为 SkyWalking 10.2.0、Collector Contrib 0.123.0、Elasticsearch 8.17.3。
 
@@ -24,7 +48,7 @@ wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts
 ```
 
 `check-observability.py` 上报一条测试 trace，并从 OAP 查询确认 Collector、OAP 和存储整条链路。
-Apply K8s 工作流在 `master` 上的 `k8s/**`、验证脚本或工作流文件变更时触发，使用已有 GitHub Secrets 同步文件、部署、等待组件就绪并运行测试 trace 验证；服务器需要 Python 3。
+Apply K8s 工作流在 `master` 上的 `k8s/server/**`、验证脚本或工作流文件变更时触发，使用已有 GitHub Secrets 同步文件、部署、等待组件就绪并运行测试 trace 验证；服务器需要 Python 3。
 流水线先将固定版本的官方镜像同步到 ACR（已有标签则跳过），使用现有 `ALIYUN_REGISTRY_USERNAME/PASSWORD` 创建服务器拉取凭据，再应用服务器覆盖配置。
 也可只复制此文件到服务器并 `kubectl apply -f observability.yaml`，不会重部署业务应用。
 

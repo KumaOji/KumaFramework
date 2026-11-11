@@ -26,7 +26,7 @@ $env:KUMA_LAB_ES_URL = 'http://127.0.0.1:19200'
 
 默认地址是 `http://127.0.0.1:19200`。当前 WSL ES 没有开启鉴权；此实验仅支持无鉴权 HTTP(S) origin。
 K3s 内运行 Lab 时可设置 `KUMA_LAB_ES_URL=http://skywalking-storage.base.svc.cluster.local:9200`。
-仓库的 `k8s/base/lab.yaml` 已配置集群内地址，下次部署时生效。
+仓库的 `k8s/server/base/lab.yaml` 已配置集群内地址，下次部署时生效。
 
 ## 索引与文档 CRUD
 

@@ -48,7 +48,7 @@ wsl -d Ubuntu-24.04 -u root -- curl --noproxy localhost -X POST http://localhost
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-services-local.ps1 -Build -Restart
 
 # Gateway 已构建、已运行时无需重复启动。
-wsl -d Ubuntu-24.04 -u root -- bash /mnt/d/IDEA_project/KumaFramework/scripts/start-gateway-observability-wsl.sh
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-services-local.ps1 -Services gateway
 
 # 验证真实三服务链、日志、调用链、指标、鉴权、面板与数据源。
 wsl -d Ubuntu-24.04 -u root -- python3 /mnt/d/IDEA_project/KumaFramework/scripts/check-services-observability-wsl.py
