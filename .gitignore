@@ -8,8 +8,10 @@ build/
 # temp
 temp/
 
-# Local build configuration and private account reference (never commit)
+# Local build configuration and private secrets (never commit)
 gradle.properties
+/secrets.gradle
+/secrets.md
 
 # log
 logs/

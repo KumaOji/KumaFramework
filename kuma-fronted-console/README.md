@@ -1,6 +1,6 @@
 # Kuma Console 桌面前端
 
-本机、WSL 和服务器账号参考在仓库根目录 `gradle.properties` 中维护，按 `account.local.*`、`account.server.*` 分组。该文件被 Git 忽略，仅供本机手动查阅。
+本机、WSL 和服务器账号及 API Key 在仓库根目录 `secrets.md` 中维护，按 DeepSeek、本机 / WSL、服务器分组。该文件被 Git 忽略，仅供本机手动查阅。
 
 
 「本机概览」包含「系统概览」「本机网络」「本机路由器」三个同级页签。`#overview/network` 打开网络详情与手动网站连通性测试，旧的 `#network` 链接继续可用；`#overview/router` 查看固定地址 `192.168.0.1` 的 Ping、HTTP / HTTPS 连通性、MAC 邻居记录、相关网卡与 IPv4 路由，进入时检测一次，也可手动刷新，并可打开路由器管理页面。邻居、路由和 Ping 采集仅支持 Windows；WAN、Wi-Fi、在线设备和实时流量需要路由器专用接口及登录授权。侧栏统一高亮本机概览，页签支持方向键及 Home / End。
