@@ -3,6 +3,15 @@
 `kumatts` 命名空间运行 AstrBot 和 voice，使用 host 网络，默认入口分别为
 http://localhost:6185 和 http://localhost:9880。
 
+AstrBot 默认账号为 `astrbot`；当前版本首次启动会随机生成初始密码，
+请在启动日志中查找 `Initial password`（首次登录后需设置账户）：
+
+```bash
+kubectl -n kumatts logs deployment/astrbot | grep -E 'Initial username|Initial password'
+```
+
+已有数据目录会保留原有账户密码，重启或重新部署不会重置。
+
 该部署依赖主机上的 KumaTTS 源码、Python 环境和模型，并非独立可移植镜像。
 部署前调整 `astrbot.yaml`、`voice.yaml` 和相关脚本中的项目路径；
 默认项目位于 `/mnt/d/KumaProject/KumaTTS`。
