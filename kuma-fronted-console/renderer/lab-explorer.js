@@ -52,7 +52,7 @@
   byId('lab-search-clear').onclick=()=>{search.value='';renderPresets();search.focus();};
   groupFilter.onchange=renderPresets;
   document.querySelectorAll('[data-lab-scope]').forEach(button=>button.onclick=()=>{scope=button.dataset.labScope;renderPresets();});
-  const topics=['Redis','Kafka','Elasticsearch','Socket','Session','事务','JDK 25','内存'];
+  const topics=['Java 基础','数据库','SQL','MVCC','行锁','表锁','事务','锁','并发','线程池','连接池','CPU','继承','抽象类','对象初始化','值传递','volatile','对象','Mark Word','类加载','Redis','Kafka','Elasticsearch','Socket','Session','JDK 25','内存'];
   byId('lab-topic-shortcuts').innerHTML='<span>直达知识点</span>'+topics.map(topic=>`<button data-lab-topic="${esc(topic)}" aria-pressed="false">${esc(topic)}</button>`).join('');
   byId('lab-topic-shortcuts').onclick=event=>{const button=event.target.closest('[data-lab-topic]');if(!button)return;scope='all';groupFilter.value='';search.value=search.value===button.dataset.labTopic?'':button.dataset.labTopic;renderPresets();};
   byId('lab-quick-results').onclick=event=>{

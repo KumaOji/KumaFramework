@@ -23,6 +23,22 @@
 
 ## 测试分类
 
+新增 **Java 语法与对象基础**：语法、volatile、对象语义、Mark Word 和类加载五组可运行实验，console Lab 提供单项及完整入口。运行 `./gradlew.bat :kuma-project:kuma-project-lab:javaBasicsLab`，详见 [Java 基础实验教程](docs/java-basics-labs.md)。
+
+基础实验还包含继承、抽象类与接口、对象初始化和值传递四个独立入口。新增 **Java 锁与并发** 十二项实验，覆盖synchronized、ReentrantLock/Condition、读写锁、StampedLock、Semaphore、wait/notify、交叉持锁恢复，以及原子更新、线程协作、阻塞队列、异步取消和ThreadLocal清理。运行 `./gradlew.bat :kuma-project:kuma-project-lab:javaConcurrencyLab`，详见 [锁与并发实验教程](docs/java-concurrency-labs.md)。
+
+新增 **类加载、内存、CPU、线程池与连接池** 十六项实验：初始化失败/TCCL/加载器隔离、内存持有与Arena生命周期、CPU计时与线程状态、线程池扩容关闭与虚拟线程下游约束，以及真实HikariCP/PostgreSQL连接复用/耗尽/事务复位/容量等待。运行时使用`javaRuntimeLab`，连接池使用下方WSL脚本的`-Group connectionpool`；console Lab含完整组与单项卡片，详见 [运行时与资源实验教程](docs/runtime-resource-labs.md)。
+
+新增 **数据库操作与事务** 十二项实验：CRUD、参数绑定、批处理、关联聚合窗口分页、五类约束，以及提交回滚、转账原子性、保存点、RC/RR、乐观更新、行锁等待和Spring事务传播。默认使用现有WSL PostgreSQL的`kuma_lab`专用库，每次独立schema且保留结果；console Lab提供完整组与单项入口，详见 [数据库与事务实验教程](docs/database-transaction-labs.md)。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-database-labs-wsl.ps1 -Group all
+```
+
+脚本按需创建专用库，从现有Pod读取凭据，不写入源码。首次已在PostgreSQL 18.4完整验证16项数据库/事务/连接池实验。`public.lab_runs`记录每次实验schema；显式离线模式使用`-PdatabaseEngine=h2`，默认不会自动退回内存数据库。
+
+另增 **PostgreSQL MVCC、行锁与表锁** 六项实验：版本与快照、RC/RR新增行、NOWAIT/SKIP LOCKED、表级SHARE/ACCESS EXCLUSIVE、真实阻塞链观测及可串行化写偏差。继续使用`kuma_lab`，同次完整运行共用一个schema并保留observations证据。WSL脚本使用`-Group postgres`，`-Group all`会一起运行；见 [MVCC与锁教程](docs/postgresql-mvcc-lock-labs.md)。
+
 新增三组进阶实验：**MySQL 索引与事务**、**Redis 缓存与分布式锁**、**线程池与异步**。
 覆盖 EXPLAIN/MVCC/死锁/事务传播/丢失更新、缓存穿透击穿雪崩/一致性/Lua/租约锁/fencing，以及拒绝策略/异常/取消/饥饿/上下文清理/依赖资源隔离。
 均返回逐步证据与断言，控制台提供单项与完整场景入口，使用独立实验数据并自动清理。

@@ -13,7 +13,13 @@ dependencyManagement {
     }
 }
 
+// H2 is only on standalone JDBC learning tasks, never the Spring Boot runtime.
+configurations {
+    connectionPoolLabRuntime
+}
+
 dependencies {
+    connectionPoolLabRuntime 'com.h2database:h2:2.4.240'
     api project(':kuma-boot-framework:kuma-boot-starter-common')
     api project(':kuma-boot-framework:kuma-boot-starter-core')
     api project(':kuma-boot-framework:kuma-boot-starter-web')
@@ -197,6 +203,69 @@ tasks.register('elasticsearchLab', JavaExec) {
     mainClass = 'com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo'
     jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
     args providers.gradleProperty('esLesson').getOrElse('all')
+}
+
+tasks.register('javaBasicsLab', JavaExec) {
+    group = 'application'
+    description = 'Run Java syntax, volatile, objects, Mark Word and class-loading experiments'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.basics.JavaBasicsLearningDemo'
+    args providers.gradleProperty('javaBasicsLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('javaConcurrencyLab', JavaExec) {
+    group = 'application'
+    description = 'Run bounded Java lock and concurrency experiments without middleware'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.concurrent.ConcurrencyLearningDemo'
+    args providers.gradleProperty('concurrencyLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('javaRuntimeLab', JavaExec) {
+    group = 'application'
+    description = 'Run class-loading, memory, CPU and thread-pool resource experiments'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.runtime.RuntimeLearningDemo'
+    args providers.gradleProperty('runtimeLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('javaConnectionPoolLab', JavaExec) {
+    group = 'application'
+    description = 'Run real HikariCP/PostgreSQL connection-pool experiments; H2 is explicit offline mode'
+    classpath = sourceSets.main.runtimeClasspath
+    if (providers.gradleProperty('databaseEngine').getOrElse('postgresql') == 'h2') {
+        classpath += configurations.connectionPoolLabRuntime
+    }
+    systemProperty 'kuma.lab.database.engine', providers.gradleProperty('databaseEngine').getOrElse('postgresql')
+    mainClass = 'com.kuma.cloud.lab.runtime.ConnectionPoolLearningDemo'
+    args providers.gradleProperty('connectionPoolLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('databaseLab', JavaExec) {
+    group = 'application'
+    description = 'Run database operations and JDBC/Spring transactions on dedicated PostgreSQL schemas'
+    classpath = sourceSets.main.runtimeClasspath
+    if (providers.gradleProperty('databaseEngine').getOrElse('postgresql') == 'h2') {
+        classpath += configurations.connectionPoolLabRuntime
+    }
+    systemProperty 'kuma.lab.database.engine', providers.gradleProperty('databaseEngine').getOrElse('postgresql')
+    mainClass = 'com.kuma.cloud.lab.database.DatabaseLearningDemo'
+    args providers.gradleProperty('databaseLesson').getOrElse('all')
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+}
+
+tasks.register('postgresConcurrencyLab', JavaExec) {
+    group = 'application'
+    description = 'Run real PostgreSQL MVCC, row/table locks, blocking evidence and serializable experiments'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.kuma.cloud.lab.database.PostgresConcurrencyLearningDemo'
+    args providers.gradleProperty('postgresLesson').getOrElse('all')
+    systemProperty 'kuma.lab.database.engine', 'postgresql'
+    jvmArgs '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
 }
 
 tasks.register('socketLab', JavaExec) {

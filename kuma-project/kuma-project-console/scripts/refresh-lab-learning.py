@@ -310,7 +310,160 @@ for prefix, group, task, main, runtime, lessons in [
             [f'{java}/p0/{main}.java'], 'docs/p0-advanced-labs.md', f'com.kuma.cloud.lab.p0.{main}')
         cards[-1]['mainArgs'] = lesson
 
-guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md', 'elasticsearch-labs.md', 'socket-session-labs.md', 'audit-log-labs.md', 'p0-advanced-labs.md')
+for lesson, name, description, topics, expected in [
+    ('all', 'Java 基础完整实验', '串联语法、volatile、对象、Mark Word、类加载、继承、抽象类、对象初始化和值传递。',
+     ['Java 基础', '语法', 'volatile', '对象', 'Mark Word', '类加载', '继承', '抽象类', '对象初始化', '值传递'], ['九组实验全部通过，最后输出 Java basics: all passed。']),
+    ('syntax', 'Java 语法与基础类型', '运行数值、控制流、字符串、装箱、泛型、集合、Lambda 和异常语法。',
+     ['自增', '类型转换', '溢出', '移位', '短路', 'switch', 'String', '装箱/拆箱', '泛型', 'Stream', 'try-with-resources'],
+     ['数值和控制流结果正确；null 拆箱抛预期异常。', '资源逆序关闭，主异常保留两个 suppressed 异常。']),
+    ('volatile', 'volatile 基础：可见性与非原子性', '真实线程验证安全发布；固定读写交错展示复合更新丢失，与 AtomicInteger 对照。',
+     ['volatile', '可见性', 'happens-before', '安全发布', '非原子性', 'AtomicInteger'],
+     ['读取到 payload=42；两线程各100次更新后 volatile=100，AtomicInteger=200。', '显式拆分读写并用屏障固定交错，不将自然调度概率作为断言。']),
+    ('objects', '对象基础：引用、值传递与多态', '观察对象引用、字段隐藏、动态分派、相等契约和浅不可变的差异。',
+     ['对象', '值传递', '继承', '多态', 'equals', 'hashCode', 'record', '浅拷贝'],
+     ['对象变更可见，形参重新赋值不影响调用方；字段取父类、方法执行子类实现。', 'HashSet 去重；共享集合发生变化，复制集合保持原内容。']),
+    ('markword', 'Mark Word 基础：同一对象头变化', '使用 JOL 观察同一对象在计算 identity hash 和 synchronized 前后的真实布局。',
+     ['Mark Word', 'markword', '对象头', 'JOL', 'identityHashCode', 'synchronized', '字段对齐'],
+     ['输出 fresh / after hash / held / released 四次布局和带字段对象布局。', '持锁检查与 identity hash 稳定性通过；头部尺寸及位模式不固定断言，JOL 警告见教程。']),
+    ('classloading', '类加载基础：初始化与类身份', '验证仅加载、常量内联、初始化顺序、双亲委派和不同加载器的同名类。',
+     ['类加载', 'ClassLoader', '双亲委派', 'static', '初始化顺序', 'Class.forName', '类身份'],
+     ['仅加载和编译期常量不触发初始化；父类静态初始化先执行且仅一次。', '两次实例构造执行完整实例顺序；不同 defining loader 的同名类不可赋值。']),
+    ('inheritance', 'Java 继承：重写、重载与多态', '对照声明类型和运行时类型，观察字段隐藏、static隐藏、方法分派、super和强转。',
+     ['继承', 'override', 'overload', '重写', '重载', 'super', 'instanceof', 'static'],
+     ['父类引用调用子类重写方法，字段及static方法按声明类型选择。', '重载签名按编译期类型选择；非法向下转型抛出预期 ClassCastException。']),
+    ('abstract', '抽象类与接口：模板方法与具体子类', '通过带状态和构造器的抽象类、接口默认方法、final模板和匿名子类运行具体实现。',
+     ['抽象类', 'abstract', '接口', 'default', 'final', '模板方法', '匿名类'],
+     ['Rectangle面积12，模板报告name=rectangle, area=12；匿名具体子类面积7。', '反射确认抽象修饰符；不能直接实例化等编译期约束见教程反例。']),
+    ('initialization', '对象初始化：字段、代码块与构造链', '完整记录父子static、字段初始化、实例块、super/this构造链，并展示构造器动态分派风险。',
+     ['对象初始化', '构造器', '初始化块', '默认值', 'super', 'this', '动态分派'],
+     ['父类构造器调用子类重写方法时，子类字段为默认值0，完成构造后为20。', '第二次构造不执行static；this链不重复执行字段和实例块。']),
+    ('passing', 'Java 值传递：基本类型、引用与容器', '逐项对照基本类型、对象、String、数组、List和swap，区别共享对象修改与形参重新赋值。',
+     ['值传递', '引用', '形参', 'String', '数组', '集合', 'swap'],
+     ['基本类型仍为1；对象和数组元素变为2；String仍为kuma；集合增加second。', '交换形参不能交换调用方变量；返回新值后可由调用方显式接收。']),
+]:
+    add(f'java-basics-{lesson}', 'Java 语法与对象基础', name, description, 'JDK 25 · Gradle · 无需中间件',
+        f'./gradlew.bat :kuma-project:kuma-project-lab:javaBasicsLab -PjavaBasicsLesson={lesson}',
+        topics, expected, [f'{java}/basics/{source}.java' for source in
+                          ['JavaBasicsLearningDemo', 'SyntaxLesson', 'VolatileLesson', 'ObjectLesson', 'MarkWordLesson', 'ClassLoadingLesson', 'ObjectSemanticsLessons']],
+        'docs/java-basics-labs.md', 'com.kuma.cloud.lab.basics.JavaBasicsLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
+for lesson, name, topics, expected in [
+    ('all', 'Java 锁与并发完整实验', ['锁', '并发', 'synchronized', 'CAS', '线程协作', '异步'], ['十二组实验通过，输出 Java concurrency: all passed。']),
+    ('locks', '各种锁完整实验', ['锁', 'synchronized', 'ReentrantLock', '读写锁', 'StampedLock', 'Semaphore', '死锁'], ['七组锁实验通过；等待有界且所有线程可回收。']),
+    ('concurrency', 'Java 并发完整实验', ['并发', '原子更新', '线程协作', '阻塞队列', '异步', 'ThreadLocal'], ['五组并发实验通过；所有工作线程在退出前回收。']),
+    ('monitor', 'synchronized：互斥、重入与异常释放', ['锁', 'synchronized', 'monitor', '可重入', '互斥'], ['两线程计数2000；异常退出后另一个线程能获得同一monitor。']),
+    ('reentrant', 'ReentrantLock：超时、中断与 Condition', ['锁', 'ReentrantLock', '公平锁', 'tryLock', 'lockInterruptibly', 'Condition'], ['重入计数2；timed tryLock失败；等待者响应中断；Condition通知后观察到ready=true。']),
+    ('readwrite', '读写锁：读共享、写排他与降级', ['锁', 'ReentrantReadWriteLock', '读写锁', '共享锁', '排他锁', '锁降级'], ['另一个读者可进入，写者超时获取失败；写锁降级后保留一个读锁。']),
+    ('stamped', 'StampedLock：乐观读与校验回退', ['锁', 'StampedLock', '乐观读', 'validate', '读锁'], ['读取旧值1后发生真实线程写入2，旧stamp校验失败，读锁回退读到2。']),
+    ('semaphore', 'Semaphore：许可与并发资源上限', ['锁', 'Semaphore', '信号量', '共享许可', '限流'], ['两个任务占满许可，第三个任务获取失败；任务结束后全部归还。']),
+    ('waitnotify', 'wait/notify：条件等待与唤醒', ['锁', 'wait', 'notifyAll', 'monitor', '条件循环'], ['等待者释放monitor后写者更新42并通知；未持锁notifyAll抛出预期异常。']),
+    ('deadlock', '交叉持锁：循环等待与中断恢复', ['锁', '死锁', '循环等待', 'lockInterruptibly', '锁顺序'], ['两个任务分别持一把锁再等待对方；取消后至少一个被中断，两个锁最终均释放。']),
+    ('atomic', '并发更新：CAS、ABA 与单键原子计算', ['并发', 'CAS', 'ABA', 'AtomicInteger', 'AtomicStampedReference', 'ConcurrentHashMap'], ['固定交错普通计数100，原子计数和compute均为200；普通CAS接受ABA，旧版本戳CAS被拒绝。']),
+    ('coordination', '线程协作：Latch、Barrier 与 Phaser', ['并发', 'CountDownLatch', 'CyclicBarrier', 'Phaser', '线程协作'], ['两个工作线程完成四次工作；Barrier复用两轮；Phaser注销后终止。']),
+    ('queue', '阻塞队列：生产消费与背压', ['并发', 'ArrayBlockingQueue', 'BlockingQueue', '生产者消费者', '背压', 'FIFO'], ['容量2的队列拒绝第三项；真实并发消费收到1～5，终止标记结束消费。']),
+    ('future', '异步任务：组合、异常与取消', ['并发', 'Future', 'CompletableFuture', 'thenCombine', '异常', '取消', '中断'], ['组合结果42；异常降级-1且原始cause保留；取消的Future抛出CancellationException，任务响应中断。']),
+    ('threadlocal', 'ThreadLocal：线程池复用与清理', ['并发', 'ThreadLocal', '线程复用', '上下文', 'remove'], ['主线程上下文不自动传播；工作线程残留task-one；finally.remove后下一任务为null。']),
+]:
+    add(f'java-concurrent-{lesson}', 'Java 锁与并发实验', name,
+        '真实线程、固定交错、有限等待与显式断言；每项可单独运行，无需服务或中间件。',
+        'JDK 25 · Gradle · 无需中间件',
+        f'./gradlew.bat :kuma-project:kuma-project-lab:javaConcurrencyLab -PconcurrencyLesson={lesson}',
+        topics, expected, [f'{java}/concurrent/{source}.java' for source in
+                          ['ConcurrencyLearningDemo', 'LockExperiments', 'ConcurrentExperiments']],
+        'docs/java-concurrency-labs.md', 'com.kuma.cloud.lab.concurrent.ConcurrencyLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
+for lesson, group, name, topics, expected in [
+    ('all', 'Java 运行时与资源', '类加载、内存、CPU 与线程池完整实验', ['类加载', '内存', 'CPU', '线程池'], ['十二项实验通过，输出 Java runtime: all passed；连接池使用独立入口。']),
+    ('classloading', 'Java 类加载进阶', '类加载进阶完整实验', ['类加载', '初始化失败', 'ClassLoader', 'TCCL'], ['初始化失败、加载器隔离与上下文资源三项通过。']),
+    ('loader-failure', 'Java 类加载进阶', '类加载：初始化失败与错误状态', ['类加载', 'static', 'ExceptionInInitializerError', 'NoClassDefFoundError'], ['仅加载不执行static；首次初始化抛ExceptionInInitializerError，后续抛NoClassDefFoundError，初始化只尝试一次。']),
+    ('loader-identity', 'Java 类加载进阶', '类加载：定向隔离与默认委派', ['类加载', 'ClassLoader', '双亲委派', '类身份', 'ClassNotFoundException'], ['同一加载器缓存Class；不同加载器的同名类不可赋值；String仍委派；缺失类抛预期异常。']),
+    ('loader-context', 'Java 类加载进阶', '类加载：TCCL 与资源查找', ['类加载', 'TCCL', 'URLClassLoader', '资源', '上下文加载器'], ['显式使用TCCL读取临时隔离资源，finally恢复原加载器并删除实验临时文件。']),
+    ('memory', 'Java 内存与生命周期', '内存与生命周期完整实验', ['内存', '堆', '直接内存', '引用', 'Arena'], ['内存区域、引用持有、原生段生命周期三项通过；不依赖固定GC时机。']),
+    ('memory-regions', 'Java 内存与生命周期', '内存：堆、非堆与直接缓冲区', ['内存', 'heap', 'non-heap', 'ByteBuffer', 'GC', 'BufferPoolMXBean'], ['4MiB堆数组和2MiB直接缓冲区读写正确；输出堆、非堆、缓冲池及GC指标。']),
+    ('memory-retention', 'Java 内存与生命周期', '内存：强引用持有与容器清理', ['内存', '强引用', '弱引用', 'WeakReference', 'GC', '内存泄漏'], ['8块256KiB数组被容器持有，clear后逻辑持有解除；弱引用回收仅记录观测值。']),
+    ('memory-lifetime', 'Java 内存与生命周期', '内存：Arena 生命周期与访问约束', ['内存', 'Arena', 'MemorySegment', 'FFM', '越界', '线程约束'], ['原生段读到42，越界和跨线程访问被拒绝；close后访问抛IllegalStateException。']),
+    ('cpu', 'CPU 与线程调度', 'CPU 与线程调度完整实验', ['CPU', 'CPU time', 'wall time', '并行', '线程状态'], ['计时、两分片计算和线程状态三项通过；耗时比值及加速比不作为断言。']),
+    ('cpu-time', 'CPU 与线程调度', 'CPU：运行时间与线程 CPU 时间', ['CPU', 'ThreadMXBean', 'CPU time', 'wall time', '等待'], ['输出有限计算与60ms等待的wall/CPU纳秒数；不支持CPU计时则标记-1。']),
+    ('cpu-parallel', 'CPU 与线程调度', 'CPU：有界并行计算与结果合并', ['CPU', '并行', '分片', '线程池', 'JIT'], ['两个各100万项分片合并结果与200万项串行计算相同；打印耗时，不保证并行更快。']),
+    ('cpu-states', 'CPU 与线程调度', 'CPU：monitor 阻塞与带超时等待', ['CPU', '线程调度', 'BLOCKED', 'TIMED_WAITING', 'ThreadInfo'], ['观察真实BLOCKED状态及锁持有者ID；观察Latch的TIMED_WAITING；释放条件后任务均完成。']),
+    ('threadpool', 'Java 线程池容量与生命周期', '线程池容量与生命周期完整实验', ['并发池', '线程池', 'ThreadPoolExecutor', 'shutdown', '虚拟线程'], ['扩容、关闭及虚拟线程下游容量三项通过。']),
+    ('pool-growth', 'Java 线程池容量与生命周期', '线程池：核心、队列、扩容与拒绝', ['并发池', '线程池', 'corePoolSize', 'maximumPoolSize', '有界队列', '拒绝'], ['核心1/最大2/队列1：先排队、队列满再扩容、第四项拒绝；已接受任务全部完成。']),
+    ('pool-shutdown', 'Java 线程池容量与生命周期', '线程池：有序关闭与立即关闭', ['并发池', '线程池', 'shutdown', 'shutdownNow', 'Future', '取消'], ['shutdown完成已接受任务；shutdownNow中断运行任务并返回排队Future，实验显式取消该Future。']),
+    ('pool-virtual', 'Java 线程池容量与生命周期', '虚拟线程：任务并发与下游容量', ['并发池', '线程池', '虚拟线程', 'Semaphore', '下游容量'], ['32个虚拟线程任务在3个许可下运行，下游占用峰值3，结束后许可全部归还。']),
+]:
+    add(f'java-runtime-{lesson}', group, name,
+        '独立JVM、有限资源与显式断言；与已有Java基础、JMM及线程池进阶实验配合阅读。',
+        'JDK 25 · Gradle · 无需中间件',
+        f'./gradlew.bat :kuma-project:kuma-project-lab:javaRuntimeLab -PruntimeLesson={lesson}', topics, expected,
+        [f'{java}/runtime/{source}.java' for source in
+         ['RuntimeLearningDemo', 'LoaderExperiments', 'MemoryExperiments', 'CpuExperiments', 'PoolExperiments']],
+        'docs/runtime-resource-labs.md', 'com.kuma.cloud.lab.runtime.RuntimeLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
+jdbc_script = 'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-database-labs-wsl.ps1'
+for lesson, name, topics, expected in [
+    ('all', 'JDBC 连接池完整实验', ['连接池', 'HikariCP', 'JDBC', 'PostgreSQL', '事务', '线程池'], ['四项真实JDBC实验通过，输出 Java connection pool: all passed。']),
+    ('reuse', '连接池：逻辑关闭与物理连接复用', ['连接池', 'HikariCP', 'JDBC', 'close', 'unwrap', '连接复用'], ['两次借用逻辑句柄不同、解包后的PostgreSQL物理连接相同，物理连接仍打开。']),
+    ('timeout', '连接池：耗尽、获取超时与恢复', ['连接池', 'connectionTimeout', '连接耗尽', 'SQLTransientConnectionException'], ['唯一连接未归还时，另一个线程获取超时；归还后再次借用并执行SELECT 42成功。']),
+    ('transaction', '连接池：事务回滚与连接状态复位', ['连接池', '事务', 'rollback', 'commit', 'autoCommit', '隔离级别'], ['未提交插入在归还时回滚；autoCommit与隔离级别复位；显式提交一行、回滚一行后只剩一行。']),
+    ('capacity', '线程池与连接池：容量差异与等待', ['连接池', '线程池', '并发池', '等待连接', '背压', '容量'], ['4个工作线程竞争2个真实连接，观测到等待者；最终4行提交，连接占用峰值2。']),
+]:
+    add(f'java-connection-pool-{lesson}', 'Java JDBC 连接池', name,
+        '使用现有WSL PostgreSQL的kuma_lab专用库，每次独立schema，保留数据供查询；凭据从Pod运行时读取。',
+        'JDK 25 · Gradle · WSL PostgreSQL · HikariCP',
+        jdbc_script + f' -Group connectionpool -Lesson {lesson}', topics, expected,
+        [f'{java}/runtime/ConnectionPoolLearningDemo.java', f'{java}/runtime/RuntimeLearningDemo.java',
+         f'{java}/database/LabDatabase.java', 'scripts/run-database-labs-wsl.ps1', 'scripts/prepare-lab-postgresql.sh'],
+        'docs/runtime-resource-labs.md', 'com.kuma.cloud.lab.runtime.ConnectionPoolLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
+for lesson, group, name, topics, expected in [
+    ('all', '数据库与事务完整实验', '数据库操作与事务完整实验', ['数据库', 'SQL', 'JDBC', '事务', 'Spring', 'PostgreSQL'], ['五项数据库操作和七项事务实验全部通过，输出 Database learning: all passed。']),
+    ('operations', '数据库操作基础', '数据库操作完整实验', ['数据库', 'SQL', 'CRUD', '参数绑定', '批处理', '查询', '约束'], ['CRUD、绑定、批处理、查询与约束五项通过。']),
+    ('crud', '数据库操作基础', 'CRUD：主键生成、增查改删与行数', ['数据库', 'SQL', 'CRUD', 'INSERT', 'SELECT', 'UPDATE', 'DELETE', '生成主键'], ['生成主键用于读写；修改后价格15；首次删除1行、重复删除0行，最终表为空。']),
+    ('binding', '数据库操作基础', '参数绑定：引号、NULL 与金额', ['数据库', 'SQL', 'PreparedStatement', '参数绑定', 'SQL注入', 'NULL', 'BigDecimal'], ['注入形状字符串仅按字面值匹配；含引号文本、NULL和DECIMAL金额1.25正确读回。']),
+    ('batch', '数据库操作基础', '批处理：成功提交与整批失败回滚', ['数据库', 'SQL', '批处理', 'executeBatch', 'BatchUpdateException', '事务', 'rollback'], ['成功批次提交3行；后续批次发生CHECK约束错误，回滚后不留下已执行部分，最终仍为3行。']),
+    ('queries', '数据库操作基础', 'SQL 查询：关联、聚合、窗口与分页', ['数据库', 'SQL', 'JOIN', 'GROUP BY', 'HAVING', '窗口函数', 'ROW_NUMBER', '分页'], ['LEFT JOIN保留未售商品；food收入15；价格排名book/rice/apple；固定数据上两种分页结果一致。']),
+    ('constraints', '数据库操作基础', '数据约束：主键、唯一、非空、检查与外键', ['数据库', 'SQL', '主键', '唯一约束', 'NOT NULL', 'CHECK', '外键', 'SQLState'], ['五种约束均返回23类SQLState；失败语句不改变原有两行账户和余额。']),
+    ('transactions', 'JDBC 与 Spring 事务', '事务完整实验', ['数据库', '事务', 'commit', 'rollback', '保存点', '隔离级别', '乐观锁', 'Spring'], ['边界、转账、保存点、隔离、乐观更新、锁等待、Spring传播七项通过。']),
+    ('boundaries', 'JDBC 与 Spring 事务', '事务边界：自动提交、commit 与 rollback', ['数据库', '事务', 'autoCommit', 'commit', 'rollback', '可见性'], ['自动提交后95；未提交时自身85、观察者95；commit后85；后续rollback仍为85。']),
+    ('transfer', 'JDBC 与 Spring 事务', '转账事务：扣款故障与原子回滚', ['数据库', '事务', '转账', '原子性', '故障注入', '条件更新', '余额不足'], ['成功转账后70/80，扣款后注入主键冲突触发回滚，余额仍70/80、总额150、审计仅1行；余额不足不扣款。']),
+    ('savepoint', 'JDBC 与 Spring 事务', '事务保存点：局部回滚与外层提交', ['数据库', '事务', 'Savepoint', '保存点', '局部回滚'], ['回滚到保存点撤销Bob的999增量、保留Alice扣款，继续提交后余额90/60。']),
+    ('isolation', 'JDBC 与 Spring 事务', '事务隔离：双连接 RC 与 RR 对照', ['数据库', '事务', '隔离级别', 'READ_COMMITTED', 'REPEATABLE_READ', '脏读', '不可重复读'], ['两种级别均不读未提交值；写者提交后RC读110、RR保持100；开启新事务后均读110。']),
+    ('optimistic', 'JDBC 与 Spring 事务', '并发更新：丢失更新、版本冲突与重试', ['数据库', '事务', '丢失更新', '乐观锁', 'version', '影响行数', '重试'], ['旧值覆盖余额80；版本条件拒绝旧版本更新，刷新版本后仅重试一次，最终余额70、版本2。']),
+    ('locking', 'JDBC 与 Spring 事务', '行锁：FOR UPDATE、等待超时与恢复', ['数据库', '事务', '行锁', 'SELECT FOR UPDATE', '锁等待', '超时'], ['持行锁时另一线程更新超时，PostgreSQL返回SQLState 55P03；提交释放锁后可更新到101。']),
+    ('spring', 'JDBC 与 Spring 事务', 'Spring 事务：独立提交、嵌套回滚与回滚标记', ['数据库', '事务', 'Spring', 'TransactionTemplate', 'REQUIRED', 'REQUIRES_NEW', 'NESTED', 'rollback-only', 'UnexpectedRollbackException'], ['REQUIRES_NEW审计提交不随外层回滚；NESTED局部回滚后外层提交90/60；REQUIRED内层异常即使捕获仍使整体回滚。']),
+]:
+    add(f'database-{lesson}', group, name,
+        '默认使用WSL真实PostgreSQL的kuma_lab专用库，独立schema保留数据；打印SQL、结果及显式检查。',
+        'JDK 25 · Gradle · WSL PostgreSQL · Spring事务',
+        jdbc_script + f' -Group database -Lesson {lesson}', topics, expected,
+        [f'{java}/database/{source}.java' for source in
+         ['DatabaseLearningDemo', 'DatabaseSupport', 'LabDatabase', 'DatabaseOperations', 'TransactionExperiments', 'SpringTransactionExperiments']]
+        + ['scripts/run-database-labs-wsl.ps1', 'scripts/prepare-lab-postgresql.sh'],
+        'docs/database-transaction-labs.md', 'com.kuma.cloud.lab.database.DatabaseLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
+for lesson, name, topics, expected in [
+    ('all', 'PostgreSQL MVCC、行锁与表锁完整实验', ['数据库', 'PostgreSQL', 'MVCC', '行锁', '表锁', '阻塞链', '可串行化'], ['六项实验在同一专属schema内通过，observations表保留快照与锁观测；输出 PostgreSQL concurrency: all passed。']),
+    ('mvcc', 'MVCC：旧版本、新版本与快照', ['数据库', 'PostgreSQL', 'MVCC', 'xmin', 'ctid', '快照', 'REPEATABLE READ'], ['未提交更新期间普通读仍为100；提交后RR读旧版本100，新语句读110；记录xmin/ctid/快照，旧事务结束后读110。']),
+    ('phantom', 'MVCC：RC/RR 与新增行可见性', ['数据库', 'PostgreSQL', 'MVCC', '幻读', 'RC', 'RR', '快照'], ['并发连接插入提交后，RC条件查询行数2→3，PostgreSQL RR保持2；新事务都读3行。']),
+    ('row-locks', '行锁：NOWAIT、SKIP LOCKED 与不同记录', ['数据库', 'PostgreSQL', '行锁', 'FOR UPDATE', 'NOWAIT', 'SKIP LOCKED'], ['锁住行1后普通读不受该行锁阻塞；NOWAIT抛55P03；SKIP LOCKED仅得行2，更新行2成功。']),
+    ('table-locks', '表锁：SHARE 与 ACCESS EXCLUSIVE', ['数据库', 'PostgreSQL', '表锁', 'LOCK TABLE', 'ShareLock', 'AccessExclusiveLock'], ['SHARE允许普通SELECT但阻止写；ACCESS EXCLUSIVE连普通SELECT也阻止；超时55P03，释放后恢复。']),
+    ('lock-monitor', '锁观测：等待者、持有者与阻塞链', ['数据库', 'PostgreSQL', '行锁', 'pg_locks', 'pg_stat_activity', 'pg_blocking_pids', '阻塞链'], ['实际等待时记录后端PID、Lock等待事件和未授予锁；提交持有者后写入完成到101且阻塞链为空。']),
+    ('serializable', 'MVCC：写偏差与可串行化冲突', ['数据库', 'PostgreSQL', 'MVCC', '写偏差', 'SERIALIZABLE', 'SSI', '40001'], ['两个事务读取均有两人值班：RR允许分别下班导致0；SERIALIZABLE拒绝一个事务并返回40001，重新检查后保留1人。']),
+]:
+    add(f'postgres-{lesson}', 'PostgreSQL MVCC 与锁', name,
+        '使用WSL PostgreSQL的kuma_lab库；本次运行共用独立schema，保留业务表和observations证据表，不清空历史实验。',
+        'JDK 25 · Gradle · WSL PostgreSQL', jdbc_script + f' -Group postgres -Lesson {lesson}', topics, expected,
+        [f'{java}/database/PostgresConcurrencyLearningDemo.java', f'{java}/database/DatabaseSupport.java',
+         f'{java}/database/LabDatabase.java', 'scripts/run-database-labs-wsl.ps1'],
+        'docs/postgresql-mvcc-lock-labs.md', 'com.kuma.cloud.lab.database.PostgresConcurrencyLearningDemo')
+    cards[-1]['mainArgs'] = lesson
+
+guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md', 'elasticsearch-labs.md', 'socket-session-labs.md', 'audit-log-labs.md', 'p0-advanced-labs.md', 'java-basics-labs.md', 'java-concurrency-labs.md', 'runtime-resource-labs.md', 'database-transaction-labs.md', 'postgresql-mvcc-lock-labs.md')
 for name in guides:
     shutil.copyfile(lab / 'docs' / name, docs / name)
 (renderer / 'lab-learning.json').write_text(json.dumps(cards, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
