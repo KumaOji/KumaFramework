@@ -104,7 +104,7 @@ pnpm run dist        # 构建便携 EXE，包含后端 JAR
 
 修改前端后，停止并重新启动后端，或者运行 `pnpm run prepare:backend` 后重启服务。更新离线 Lab 目录继续使用后端的 `scripts/refresh-lab-catalog.py`，生成文件写入本模块的 `renderer/`。
 
-实验目录与说明同步：运行 `python kuma-project/kuma-project-console/scripts/refresh-lab-learning.py`（从仓库根目录）。脚本检查源码路径及JDK版本表，生成 `lab-learning.json` 和 `lab-guides/`；正常使用界面无需Python。
+实验目录与说明同步：运行 `python kuma-project/kuma-project-console/scripts/refresh-lab-learning.py`（从仓库根目录）。脚本检查源码路径及JDK版本表，检查 `lab-guides/` 中的教程并生成 `lab-learning.json`；正常使用界面无需Python。
 
 项目目录默认筛选「已启动」：发现匹配的本机项目进程，或服务探测获得 HTTP 响应（包括健康检查异常），即纳入列表；Gradle 构建启用状态不作为启动依据。计数随运行状态刷新，探测失败时不使用对应来源的旧数据判断已启动。服务可达与健康检查通过分别展示，后端每 10 秒探测一次。
 

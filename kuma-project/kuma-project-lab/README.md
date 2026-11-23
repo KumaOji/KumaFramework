@@ -21,15 +21,19 @@
 
 本地没有 `application.yml`。改配置改 Nacos 里的 `kuma-cloud-lab-dev.yaml`，再执行 `scripts/publish-nacos-dev.sh`。
 
+## 日志
+
+Lab 输出控制台日志，并异步写入 `logs/lab.log` 和 `logs/lab-error.log`。可用环境变量 `LOG_PATH` 指定日志目录。文件按日期和 100 MB 大小滚动，常规日志保留 30 天，错误日志保留 60 天。根日志级别为 `INFO`，`com.kuma.cloud.lab` 在 `dev` 为 `DEBUG`，在 `prod` 为 `WARN`。
+
 ## 测试分类
 
-新增 **Java 语法与对象基础**：语法、volatile、对象语义、Mark Word 和类加载五组可运行实验，console Lab 提供单项及完整入口。运行 `./gradlew.bat :kuma-project:kuma-project-lab:javaBasicsLab`，详见 [Java 基础实验教程](docs/java-basics-labs.md)。
+新增 **Java 语法与对象基础**：语法、volatile、对象语义、Mark Word 和类加载五组可运行实验，console Lab 提供单项及完整入口。运行 `./gradlew.bat :kuma-project:kuma-project-lab:javaBasicsLab`，详见 [Java 基础实验教程](../../kuma-fronted-console/renderer/lab-guides/java-basics-labs.md)。
 
-基础实验还包含继承、抽象类与接口、对象初始化和值传递四个独立入口。新增 **Java 锁与并发** 十二项实验，覆盖synchronized、ReentrantLock/Condition、读写锁、StampedLock、Semaphore、wait/notify、交叉持锁恢复，以及原子更新、线程协作、阻塞队列、异步取消和ThreadLocal清理。运行 `./gradlew.bat :kuma-project:kuma-project-lab:javaConcurrencyLab`，详见 [锁与并发实验教程](docs/java-concurrency-labs.md)。
+基础实验还包含继承、抽象类与接口、对象初始化和值传递四个独立入口。新增 **Java 锁与并发** 十二项实验，覆盖synchronized、ReentrantLock/Condition、读写锁、StampedLock、Semaphore、wait/notify、交叉持锁恢复，以及原子更新、线程协作、阻塞队列、异步取消和ThreadLocal清理。运行 `./gradlew.bat :kuma-project:kuma-project-lab:javaConcurrencyLab`，详见 [锁与并发实验教程](../../kuma-fronted-console/renderer/lab-guides/java-concurrency-labs.md)。
 
-新增 **类加载、内存、CPU、线程池与连接池** 十六项实验：初始化失败/TCCL/加载器隔离、内存持有与Arena生命周期、CPU计时与线程状态、线程池扩容关闭与虚拟线程下游约束，以及真实HikariCP/PostgreSQL连接复用/耗尽/事务复位/容量等待。运行时使用`javaRuntimeLab`，连接池使用下方WSL脚本的`-Group connectionpool`；console Lab含完整组与单项卡片，详见 [运行时与资源实验教程](docs/runtime-resource-labs.md)。
+新增 **类加载、内存、CPU、线程池与连接池** 十六项实验：初始化失败/TCCL/加载器隔离、内存持有与Arena生命周期、CPU计时与线程状态、线程池扩容关闭与虚拟线程下游约束，以及真实HikariCP/PostgreSQL连接复用/耗尽/事务复位/容量等待。运行时使用`javaRuntimeLab`，连接池使用下方WSL脚本的`-Group connectionpool`；console Lab含完整组与单项卡片，详见 [运行时与资源实验教程](../../kuma-fronted-console/renderer/lab-guides/runtime-resource-labs.md)。
 
-新增 **数据库操作与事务** 十二项实验：CRUD、参数绑定、批处理、关联聚合窗口分页、五类约束，以及提交回滚、转账原子性、保存点、RC/RR、乐观更新、行锁等待和Spring事务传播。默认使用现有WSL PostgreSQL的`kuma_lab`专用库，每次独立schema且保留结果；console Lab提供完整组与单项入口，详见 [数据库与事务实验教程](docs/database-transaction-labs.md)。
+新增 **数据库操作与事务** 十二项实验：CRUD、参数绑定、批处理、关联聚合窗口分页、五类约束，以及提交回滚、转账原子性、保存点、RC/RR、乐观更新、行锁等待和Spring事务传播。默认使用现有WSL PostgreSQL的`kuma_lab`专用库，每次独立schema且保留结果；console Lab提供完整组与单项入口，详见 [数据库与事务实验教程](../../kuma-fronted-console/renderer/lab-guides/database-transaction-labs.md)。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-database-labs-wsl.ps1 -Group all
@@ -37,12 +41,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 
 脚本按需创建专用库，从现有Pod读取凭据，不写入源码。首次已在PostgreSQL 18.4完整验证16项数据库/事务/连接池实验。`public.lab_runs`记录每次实验schema；显式离线模式使用`-PdatabaseEngine=h2`，默认不会自动退回内存数据库。
 
-另增 **PostgreSQL MVCC、行锁与表锁** 六项实验：版本与快照、RC/RR新增行、NOWAIT/SKIP LOCKED、表级SHARE/ACCESS EXCLUSIVE、真实阻塞链观测及可串行化写偏差。继续使用`kuma_lab`，同次完整运行共用一个schema并保留observations证据。WSL脚本使用`-Group postgres`，`-Group all`会一起运行；见 [MVCC与锁教程](docs/postgresql-mvcc-lock-labs.md)。
+另增 **PostgreSQL MVCC、行锁与表锁** 六项实验：版本与快照、RC/RR新增行、NOWAIT/SKIP LOCKED、表级SHARE/ACCESS EXCLUSIVE、真实阻塞链观测及可串行化写偏差。继续使用`kuma_lab`，同次完整运行共用一个schema并保留observations证据。WSL脚本使用`-Group postgres`，`-Group all`会一起运行；见 [MVCC与锁教程](../../kuma-fronted-console/renderer/lab-guides/postgresql-mvcc-lock-labs.md)。
 
 新增三组进阶实验：**MySQL 索引与事务**、**Redis 缓存与分布式锁**、**线程池与异步**。
 覆盖 EXPLAIN/MVCC/死锁/事务传播/丢失更新、缓存穿透击穿雪崩/一致性/Lua/租约锁/fencing，以及拒绝策略/异常/取消/饥饿/上下文清理/依赖资源隔离。
 均返回逐步证据与断言，控制台提供单项与完整场景入口，使用独立实验数据并自动清理。
-运行方法、接口和边界见 [三组进阶实验教程](docs/p0-advanced-labs.md)。
+运行方法、接口和边界见 [三组进阶实验教程](../../kuma-fronted-console/renderer/lab-guides/p0-advanced-labs.md)。
 
 - `transaction`：数据库事务、提交、回滚和变更快照测试
 - `auditlog`：操作审计、SpEL、敏感内容策略、代理边界与审计存储故障实验
@@ -72,13 +76,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 ./gradlew.bat :kuma-project:kuma-project-lab:auditLogLab
 ```
 
-可用 `-PauditLesson=content` 等参数选择单项；Lab 接口为 `/api/lab/audit-log/*`，控制台包含实验入口与实验卡片。步骤与预期见 [日志审计实验教程](docs/audit-log-labs.md)。
+可用 `-PauditLesson=content` 等参数选择单项；Lab 接口为 `/api/lab/audit-log/*`，控制台包含实验入口与实验卡片。步骤与预期见 [日志审计实验教程](../../kuma-fronted-console/renderer/lab-guides/audit-log-labs.md)。
 
 ## Elasticsearch 实验
 
 使用现有 WSL ES，包含索引与 Mapping、文档 CRUD、refresh 可见性对照、分词与 match/term、过滤排序高亮、terms/avg/stats 聚合。
 每次创建独立索引并自动清理，报告保留实际请求 DSL、响应和检查结果；控制台已提供实验卡片和 HTTP 实验入口。
-详细步骤见 [Elasticsearch 实验教程](docs/elasticsearch-labs.md)。
+详细步骤见 [Elasticsearch 实验教程](../../kuma-fronted-console/renderer/lab-guides/elasticsearch-labs.md)。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-elasticsearch-labs-wsl.ps1
@@ -91,7 +95,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 
 新增 Loki、Prometheus、Alertmanager、OTel Collector、SkyWalking、Grafana 六个真实中间件实验：
 实验卡片包含可点击 UI 入口和具体页面位置；Loki 在 Grafana Explore 查看，Collector 没有业务 UI。
-运行方式、证据与边界见 [中间件实验说明](docs/monitoring-middleware-labs.md)。
+运行方式、证据与边界见 [中间件实验说明](../../kuma-fronted-console/renderer/lab-guides/monitoring-middleware-labs.md)。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1
@@ -101,7 +105,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 与 Prometheus 同时运行时，Lab 使用 `--server.port=19090`，控制台设置
 `KUMA_LAB_URL=http://127.0.0.1:19090/api`，避免原有 9090 端口冲突。
 
-按 [实验教程](docs/observability-labs.md) 验证 OTel span、W3C传播、异步断链修复、采样、指标与日志关联，
+按 [实验教程](../../kuma-fronted-console/renderer/lab-guides/observability-labs.md) 验证 OTel span、W3C传播、异步断链修复、采样、指标与日志关联，
 再将真实 trace 发到现有 Collector/SkyWalking 查回，最后对比 SkyWalking Agent 的正常、慢调用和异常场景。
 
 ```powershell
@@ -133,13 +137,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 ```
 
 支持 `-Version 21` 等参数只跑指定版本功能，`-Version 25 -IncludePreview` 额外运行25预览示例。
-正式功能无需预览开关、Spring 或中间件；版本地图与历史预览说明见 [JDK 功能实验](docs/jdk-version-labs.md)。
+正式功能无需预览开关、Spring 或中间件；版本地图与历史预览说明见 [JDK 功能实验](../../kuma-fronted-console/renderer/lab-guides/jdk-version-labs.md)。
 
 ## Webhook 与 Socket 通信实验
 
 新增 Socket 长连接、半关闭、连接内状态和重连，以及真实 Servlet HTTP Session 的 Cookie延续、
 客户端隔离、跨TCP连接保持会话、ID更换、注销和空闲过期实验。
-无需启动 Spring、Nacos 或 WSL，教程见 [Socket 与 Session 实验](docs/socket-session-labs.md)：
+无需启动 Spring、Nacos 或 WSL，教程见 [Socket 与 Session 实验](../../kuma-fronted-console/renderer/lab-guides/socket-session-labs.md)：
 
 ```powershell
 ./gradlew.bat :kuma-project:kuma-project-lab:socketLab
@@ -150,13 +154,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-la
 
 直接运行 `com.kuma.cloud.lab.network.NetworkLearningDemo.main()`，或分别运行 `WebhookLesson.main()`、`SocketLesson.main()`。
 仅依赖 JDK 25，使用本机回环地址和临时端口，无需 Spring 或外部服务。
-运行命令、协议、预期结果与实验边界见 [网络通信实验说明](docs/network-labs.md)。
+运行命令、协议、预期结果与实验边界见 [网络通信实验说明](../../kuma-fronted-console/renderer/lab-guides/network-labs.md)。
 
 ## 内存模型与用户空间 / 内核空间实验
 
 直接运行 `com.kuma.cloud.lab.memory.MemoryLearningDemo.main()`，执行已有锁实验和新增 Java 内存实验，无需 Spring 或中间件。
 Linux 专项实验运行 `bash kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh`（从仓库根目录，需要 gcc；可选 trace 模式需要 strace）。
-实验步骤、预期结果、正确性检查与观察边界见 [内存实验实验说明](docs/memory-labs.md)。
+实验步骤、预期结果、正确性检查与观察边界见 [内存实验实验说明](../../kuma-fronted-console/renderer/lab-guides/memory-labs.md)。
 
 ## 并发与锁实验
 

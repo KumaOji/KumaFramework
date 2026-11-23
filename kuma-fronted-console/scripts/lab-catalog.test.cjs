@@ -52,7 +52,7 @@ test('short English prefixes find real Alertmanager APIs and lessons while avoid
   assert.equal(model.matches({name:'Redis',path:'/lab/redis'},'re'),true);
 });
 
-test('all lesson cards have existing sources, mirrored docs, commands and searchable runtime/topics',()=>{
+test('all lesson cards have existing sources, nonempty guides, commands and searchable runtime/topics',()=>{
   const cards=JSON.parse(fs.readFileSync(path.join(renderer,'lab-learning.json'),'utf8'));
   const ids=new Set();
   for(const card of cards){
@@ -60,7 +60,7 @@ test('all lesson cards have existing sources, mirrored docs, commands and search
     assert.ok(card.commands && card.expected.length && card.topics.length);
     for(const source of card.sources)assert.ok(fs.existsSync(path.resolve(renderer,'../..',source)),source);
     const doc=fs.readFileSync(path.join(renderer,card.doc),'utf8');
-    assert.equal(doc,fs.readFileSync(path.resolve(renderer,'../../kuma-project/kuma-project-lab/docs',path.basename(card.doc)),'utf8'));
+    assert.ok(doc.trim(),card.doc);
   }
   for(const id of ['memory','webhook','socket','linux-memory','jdk-8','jdk-21','jdk-25','jdk25-preview',
     'otel-sdk','otel-skywalking','skywalking-agent','database-otel','database-skywalking',

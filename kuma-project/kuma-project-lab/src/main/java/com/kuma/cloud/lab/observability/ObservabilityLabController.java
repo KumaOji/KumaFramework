@@ -25,7 +25,7 @@ public class ObservabilityLabController {
                 "live", "Gradle otelLab -PotelExport=true：OTLP 导出，并从 OAP 按 ID 查回六个关联 span。",
                 "agent", "挂载兼容 Agent 后调用 skywalking/normal、slow、error，在原生追踪页面比较。",
                 "pipeline", "仓库 Collector 仅启用 traces；本实验 metrics/logs 仅在 SDK 内存导出，不会上报 SkyWalking。",
-                "docs", "kuma-project/kuma-project-lab/docs/observability-labs.md"));
+                "docs", "kuma-fronted-console/renderer/lab-guides/observability-labs.md"));
     }
 
     @Operation(summary = "OTel SDK：span、W3C 传播、异步断链、采样、指标和日志关联")

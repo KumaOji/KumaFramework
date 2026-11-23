@@ -1,7 +1,6 @@
-"""Generate standalone lesson cards and docs for the shared renderer (Python 3.10+)."""
+"""Generate standalone lesson cards for the shared renderer (Python 3.10+)."""
 import json
 import re
-import shutil
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[3]
@@ -24,27 +23,27 @@ def jdk_commands(packages, main, folder):
 
 
 def add(identifier, group, name, description, runtime, commands, topics, expected, sources, doc, main=''):
-    for path in [*sources, doc]:
+    for path in sources:
         if not (lab / path).is_file():
             raise ValueError(f'Missing lesson source: {path}')
     cards.append(dict(kind='learning', id=identifier, group=group, name=name,
                       description=description, runtime=runtime, commands=commands,
                       topics=topics, expected=expected,
                       sources=[f'kuma-project/kuma-project-lab/{path}' for path in sources],
-                      doc=f'/lab-guides/{Path(doc).name}', mainClass=main))
+                      doc=f'/lab-guides/{doc}', mainClass=main))
 
 
 add('lock', 'Java 并发与内存', '并发与锁实验', '可见性、原子性、CAS、锁与任务完成通知。', 'JDK 25 · 本机',
     jdk_commands(['lock'], 'lock.LockLearningDemo', 'lock-lab'),
     ['volatile', 'CAS / ABA', 'ReentrantLock', 'AQS', 'CountDownLatch'],
-    ['全部五组并发检查通过；示例用于验证同步语义。'], [f'{java}/lock/LockLearningDemo.java'], 'docs/memory-labs.md',
+    ['全部五组并发检查通过；示例用于验证同步语义。'], [f'{java}/lock/LockLearningDemo.java'], 'memory-labs.md',
     'com.kuma.cloud.lab.lock.LockLearningDemo')
 add('memory', 'Java 并发与内存', 'JMM 与 JVM 内存区域', '运行锁实验、重排序统计、发布验证与内存区域观察。', 'JDK 25 · 本机',
     jdk_commands(['lock', 'memory'], 'memory.MemoryLearningDemo', 'memory-lab'),
     ['happens-before', 'Store buffering', 'VarHandle', '堆 / 线程栈 / 元空间', '堆外缓冲区'],
     ['volatile 对照中 (0,0) 为零；release/acquire 发布通过。', '线程局部值与直接缓冲区检查通过；普通字段不保证出现 (0,0)。'],
     [f'{java}/memory/MemoryLearningDemo.java', f'{java}/memory/JmmLesson.java', f'{java}/memory/JvmMemoryLesson.java'],
-    'docs/memory-labs.md', 'com.kuma.cloud.lab.memory.MemoryLearningDemo')
+    'memory-labs.md', 'com.kuma.cloud.lab.memory.MemoryLearningDemo')
 for identifier, name, suffix, topics, expected in [
     ('linux-memory', 'Linux 用户态与内核空间', '', ['系统调用', 'CPU user/system 时间', 'mmap', '缺页', '写时复制', 'EFAULT'],
      ['映射读写与写时复制通过；PROT_NONE 缓冲区返回 EFAULT，恢复权限后成功。', 'CPU 时间和缺页数量为观察值，不断言固定数值。']),
@@ -54,7 +53,7 @@ for identifier, name, suffix, topics, expected in [
     add(identifier, 'Linux 内存与系统调用', name, '在 Linux 或 WSL 终端运行，从仓库根目录执行。',
         'Linux / WSL · gcc' + (' · strace' if suffix else ''),
         'bash kuma-project/kuma-project-lab/scripts/run-linux-memory-lab.sh' + suffix,
-        topics, expected, ['src/main/c/linux_memory_lab.c', 'scripts/run-linux-memory-lab.sh'], 'docs/memory-labs.md')
+        topics, expected, ['src/main/c/linux_memory_lab.c', 'scripts/run-linux-memory-lab.sh'], 'memory-labs.md')
 for identifier, name, main, topics, expected in [
     ('network', 'Webhook 与 Socket 完整实验', 'NetworkLearningDemo', ['Webhook', 'TCP', 'UDP'], ['Webhook、TCP 和 UDP 全部检查通过。']),
     ('webhook', 'Webhook 签名、幂等与重试', 'WebhookLesson', ['HMAC-SHA256', '篡改与过期拒绝', '并发去重', '503 重试'],
@@ -64,7 +63,7 @@ for identifier, name, main, topics, expected in [
 ]:
     add(identifier, '网络通信实验', name, '使用回环地址和临时端口，无需 Lab 服务或外部系统。', 'JDK 25 · 本机',
         jdk_commands(['network'], f'network.{main}', 'network-lab'), topics, expected,
-        [f'{java}/network/{main}.java'], 'docs/network-labs.md', f'com.kuma.cloud.lab.network.{main}')
+        [f'{java}/network/{main}.java'], 'network-labs.md', f'com.kuma.cloud.lab.network.{main}')
 
 versions = {
     8: ('Lambda、Stream 与异步任务', 'EarlyJdkLessons', ['Optional', 'java.time', 'CompletableFuture']),
@@ -88,20 +87,20 @@ if not declared or {int(v.strip()) for v in declared[1].split(',')} != set(versi
     raise ValueError('JDK lesson version map is out of sync with VERSIONS')
 add('jdk-all', 'JDK 版本功能', 'JDK 8～25 全部代表性功能', '版本标签表示正式引入版本，统一使用 JDK25 执行。', 'JDK 25 · 正式功能',
     ps, [f'JDK {v}' for v in versions], ['14个版本分组及紧凑源文件检查通过。'],
-    [f'{java}/jdk/JdkVersionLearningDemo.java', 'scripts/run-jdk-version-labs.ps1'], 'docs/jdk-version-labs.md',
+    [f'{java}/jdk/JdkVersionLearningDemo.java', 'scripts/run-jdk-version-labs.ps1'], 'jdk-version-labs.md',
     'com.kuma.cloud.lab.jdk.JdkVersionLearningDemo')
 for version, (name, source, topics) in versions.items():
     add(f'jdk-{version}', 'JDK 版本功能', f'JDK {version} · {name}', '在 JDK25 上体验该正式版本的代表性功能，并检查结果。',
         'JDK 25 · 正式功能', ps + f' -Version {version}', topics, ['所选版本的功能检查通过；版本号不是本机 JDK 的切换指令。'],
-        [f'{java}/jdk/{source}.java'], 'docs/jdk-version-labs.md', 'com.kuma.cloud.lab.jdk.JdkVersionLearningDemo')
+        [f'{java}/jdk/{source}.java'], 'jdk-version-labs.md', 'com.kuma.cloud.lab.jdk.JdkVersionLearningDemo')
     cards[-1]['mainArgs'] = str(version)
 add('jdk25-compact', 'JDK 25 独立示例', '紧凑源文件与实例 main', '直接运行不含显式 class 的源文件。', 'JDK 25 · 正式功能',
     'java --source 25 kuma-project/kuma-project-lab/examples/jdk25/CompactMain.java', ['IO.println', '实例 main', '紧凑源文件'],
-    ['sum=6 passed。'], ['examples/jdk25/CompactMain.java'], 'docs/jdk-version-labs.md')
+    ['sum=6 passed。'], ['examples/jdk25/CompactMain.java'], 'jdk-version-labs.md')
 add('jdk25-preview', 'JDK 25 独立示例', '原始类型模式与 switch（预览）', '独立编译运行，脚本为编译及运行启用预览开关。',
     'JDK 25 · 预览功能', ps + ' -Version 25 -IncludePreview', ['primitive patterns', '精确窄化', '--enable-preview'],
     ['127 匹配 byte、128 不匹配；primitive switch 通过。', '预览编译警告为预期输出。'],
-    ['examples/jdk25-preview/PrimitivePatterns.java'], 'docs/jdk-version-labs.md')
+    ['examples/jdk25-preview/PrimitivePatterns.java'], 'jdk-version-labs.md')
 
 for identifier, name, description, command, runtime, topics, expected, sources, main in [
     ('otel-sdk', 'OTel SDK：信号、传播与采样', '真实 SDK 输出 span 树、异步断链对照、采样、指标和关联日志。',
@@ -122,11 +121,10 @@ for identifier, name, description, command, runtime, topics, expected, sources, 
      'com.kuma.cloud.lab.observability.SkyWalkingLearningDemo'),
 ]:
     add(identifier, 'OTel 与 SkyWalking 实验', name, description, runtime, command, topics, expected,
-        sources, 'docs/observability-labs.md', main)
+        sources, 'observability-labs.md', main)
     if identifier == 'otel-skywalking':
         cards[-1]['mainArgs'] = '--export http://localhost:4318/v1/traces http://localhost:9412'
 
-docs = renderer / 'lab-guides'
 database_script = 'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-observability-database-wsl.ps1'
 for identifier, name, suffix, topics, expected in [
     ('database-otel', '真实 PostgreSQL/MySQL + OTel SQL trace', ' -Export',
@@ -140,7 +138,7 @@ for identifier, name, suffix, topics, expected in [
         '默认使用现有WSL PostgreSQL；独立实验命名空间，每次按runId隔离，不清空历史结果。',
         'JDK 25 · Gradle · WSL真实数据库 · Collector/OAP', database_script + suffix, topics, expected,
         [f'{java}/observability/DatabaseObservabilityLearningDemo.java', 'scripts/run-observability-database-wsl.ps1'],
-        'docs/observability-labs.md', 'com.kuma.cloud.lab.observability.DatabaseObservabilityLearningDemo')
+        'observability-labs.md', 'com.kuma.cloud.lab.observability.DatabaseObservabilityLearningDemo')
 
 monitoring_script = 'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-monitoring-labs-wsl.ps1'
 for component, name, topics, expected, ui in [
@@ -168,7 +166,7 @@ for component, name, topics, expected, ui in [
         '连接真实WSL组件，返回可查回证据、检查结果与UI位置；无需启动LabApplication。',
         'JDK 25 · Gradle · WSL中间件', monitoring_script + ' -Component ' + component,
         topics, expected, [f'{java}/observability/MonitoringMiddlewareLabs.java', 'scripts/run-monitoring-labs-wsl.ps1'],
-        'docs/monitoring-middleware-labs.md', 'com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs')
+        'monitoring-middleware-labs.md', 'com.kuma.cloud.lab.observability.MonitoringMiddlewareLabs')
     cards[-1]['mainArgs'] = component
     cards[-1]['uiLinks'] = [dict(name=name, url=url, location=location) for name, url, location in ui]
 
@@ -184,10 +182,9 @@ for lesson, name, topics in [
         'JDK 25 · Gradle · WSL Elasticsearch 8.17', es_script + ' -Lesson ' + lesson,
         topics, ['所有 checks 为 true，最后 indexCleaned=true。', '每个专项独立建样本，无需启动 Spring 或 Nacos。'],
         [f'{java}/elasticsearch/ElasticsearchLearningDemo.java', 'scripts/run-elasticsearch-labs-wsl.ps1', 'scripts/forward-elasticsearch-lab.sh'],
-        'docs/elasticsearch-labs.md', 'com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo')
+        'elasticsearch-labs.md', 'com.kuma.cloud.lab.elasticsearch.ElasticsearchLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
-docs.mkdir(exist_ok=True)
 for identifier, name, task, args, topics, expected, source in [
     ('socket-all', 'Socket 完整实验：协议与连接生命周期', 'socketLab', '',
      ['TCP 分帧', 'UDP', 'SO_TIMEOUT', '长连接', '半关闭 / EOF', '重连'],
@@ -211,7 +208,7 @@ for identifier, name, task, args, topics, expected, source in [
     add(identifier, 'Socket 与 HTTP Session', name,
         '本机真实Socket / Servlet容器，返回逐步证据与checks；无需Nacos、WSL或数据库。',
         'JDK 25 · Gradle · 本机回环', './gradlew.bat :kuma-project:kuma-project-lab:' + task + args,
-        topics, expected, [f'{java}/{source}'], 'docs/socket-session-labs.md',
+        topics, expected, [f'{java}/{source}'], 'socket-session-labs.md',
         'com.kuma.cloud.lab.' + ('network.SocketLifecycleLesson' if task == 'socketLab' else 'session.SessionLearningDemo'))
     cards[-1]['mainArgs'] = 'lifecycle' if identifier == 'socket-lifecycle' else identifier.removeprefix('session-') if identifier.startswith('session-') else 'all'
 
@@ -307,7 +304,7 @@ for prefix, group, task, main, runtime, lessons in [
             command = f'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-p0-labs-wsl.ps1 -Group {group_arg} -Lesson {lesson}'
         add(f'{prefix}-{lesson}', group, name, '独立数据与小型线程池，返回真实逐步证据和断言；手动运行并自动清理。',
             runtime, command, topics, ['所选实验checks全部为true；详见教程中的实际值与边界。'],
-            [f'{java}/p0/{main}.java'], 'docs/p0-advanced-labs.md', f'com.kuma.cloud.lab.p0.{main}')
+            [f'{java}/p0/{main}.java'], 'p0-advanced-labs.md', f'com.kuma.cloud.lab.p0.{main}')
         cards[-1]['mainArgs'] = lesson
 
 for lesson, name, description, topics, expected in [
@@ -345,7 +342,7 @@ for lesson, name, description, topics, expected in [
         f'./gradlew.bat :kuma-project:kuma-project-lab:javaBasicsLab -PjavaBasicsLesson={lesson}',
         topics, expected, [f'{java}/basics/{source}.java' for source in
                           ['JavaBasicsLearningDemo', 'SyntaxLesson', 'VolatileLesson', 'ObjectLesson', 'MarkWordLesson', 'ClassLoadingLesson', 'ObjectSemanticsLessons']],
-        'docs/java-basics-labs.md', 'com.kuma.cloud.lab.basics.JavaBasicsLearningDemo')
+        'java-basics-labs.md', 'com.kuma.cloud.lab.basics.JavaBasicsLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
 for lesson, name, topics, expected in [
@@ -371,7 +368,7 @@ for lesson, name, topics, expected in [
         f'./gradlew.bat :kuma-project:kuma-project-lab:javaConcurrencyLab -PconcurrencyLesson={lesson}',
         topics, expected, [f'{java}/concurrent/{source}.java' for source in
                           ['ConcurrencyLearningDemo', 'LockExperiments', 'ConcurrentExperiments']],
-        'docs/java-concurrency-labs.md', 'com.kuma.cloud.lab.concurrent.ConcurrencyLearningDemo')
+        'java-concurrency-labs.md', 'com.kuma.cloud.lab.concurrent.ConcurrencyLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
 for lesson, group, name, topics, expected in [
@@ -399,7 +396,7 @@ for lesson, group, name, topics, expected in [
         f'./gradlew.bat :kuma-project:kuma-project-lab:javaRuntimeLab -PruntimeLesson={lesson}', topics, expected,
         [f'{java}/runtime/{source}.java' for source in
          ['RuntimeLearningDemo', 'LoaderExperiments', 'MemoryExperiments', 'CpuExperiments', 'PoolExperiments']],
-        'docs/runtime-resource-labs.md', 'com.kuma.cloud.lab.runtime.RuntimeLearningDemo')
+        'runtime-resource-labs.md', 'com.kuma.cloud.lab.runtime.RuntimeLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
 jdbc_script = 'powershell -NoProfile -ExecutionPolicy Bypass -File kuma-project/kuma-project-lab/scripts/run-database-labs-wsl.ps1'
@@ -416,7 +413,7 @@ for lesson, name, topics, expected in [
         jdbc_script + f' -Group connectionpool -Lesson {lesson}', topics, expected,
         [f'{java}/runtime/ConnectionPoolLearningDemo.java', f'{java}/runtime/RuntimeLearningDemo.java',
          f'{java}/database/LabDatabase.java', 'scripts/run-database-labs-wsl.ps1', 'scripts/prepare-lab-postgresql.sh'],
-        'docs/runtime-resource-labs.md', 'com.kuma.cloud.lab.runtime.ConnectionPoolLearningDemo')
+        'runtime-resource-labs.md', 'com.kuma.cloud.lab.runtime.ConnectionPoolLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
 for lesson, group, name, topics, expected in [
@@ -443,7 +440,7 @@ for lesson, group, name, topics, expected in [
         [f'{java}/database/{source}.java' for source in
          ['DatabaseLearningDemo', 'DatabaseSupport', 'LabDatabase', 'DatabaseOperations', 'TransactionExperiments', 'SpringTransactionExperiments']]
         + ['scripts/run-database-labs-wsl.ps1', 'scripts/prepare-lab-postgresql.sh'],
-        'docs/database-transaction-labs.md', 'com.kuma.cloud.lab.database.DatabaseLearningDemo')
+        'database-transaction-labs.md', 'com.kuma.cloud.lab.database.DatabaseLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
 for lesson, name, topics, expected in [
@@ -460,11 +457,12 @@ for lesson, name, topics, expected in [
         'JDK 25 · Gradle · WSL PostgreSQL', jdbc_script + f' -Group postgres -Lesson {lesson}', topics, expected,
         [f'{java}/database/PostgresConcurrencyLearningDemo.java', f'{java}/database/DatabaseSupport.java',
          f'{java}/database/LabDatabase.java', 'scripts/run-database-labs-wsl.ps1'],
-        'docs/postgresql-mvcc-lock-labs.md', 'com.kuma.cloud.lab.database.PostgresConcurrencyLearningDemo')
+        'postgresql-mvcc-lock-labs.md', 'com.kuma.cloud.lab.database.PostgresConcurrencyLearningDemo')
     cards[-1]['mainArgs'] = lesson
 
-guides = ('memory-labs.md', 'network-labs.md', 'jdk-version-labs.md', 'observability-labs.md', 'monitoring-middleware-labs.md', 'elasticsearch-labs.md', 'socket-session-labs.md', 'audit-log-labs.md', 'p0-advanced-labs.md', 'java-basics-labs.md', 'java-concurrency-labs.md', 'runtime-resource-labs.md', 'database-transaction-labs.md', 'postgresql-mvcc-lock-labs.md')
-for name in guides:
-    shutil.copyfile(lab / 'docs' / name, docs / name)
+guides = {card['doc'] for card in cards}
+for guide in sorted(guides):
+    if not (renderer / guide.lstrip('/')).is_file():
+        raise FileNotFoundError(guide)
 (renderer / 'lab-learning.json').write_text(json.dumps(cards, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-print(f'Generated {len(cards)} standalone lessons and {len(guides)} guides.')
+print(f'Generated {len(cards)} standalone lessons with {len(guides)} guides.')

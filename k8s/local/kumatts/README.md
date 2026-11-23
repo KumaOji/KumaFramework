@@ -52,4 +52,3 @@ kubectl -n kumatts scale deployment/voice deployment/astrbot --replicas=0
 ```
 
 停止保留主机数据，重新部署可恢复副本；容器重启会中断正在执行的推理任务。
-如需使用 `start-services-legacy.sh`，先缩容并等待两个 Pod 退出，避免端口和数据目录冲突。
