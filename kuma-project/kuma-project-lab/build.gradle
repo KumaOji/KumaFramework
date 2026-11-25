@@ -28,6 +28,7 @@ dependencies {
     api project(':kuma-boot-framework:kuma-boot-starter-data-vector')
     api project(':kuma-boot-framework:kuma-boot-starter-springdoc')
     implementation project(':kuma-boot-framework:kuma-boot-starter-audit-log')
+    implementation project(':kuma-boot-framework:kuma-boot-starter-logger')
     api(project(':kuma-cloud-framework:kuma-cloud-starter-bootstrap')) {
         exclude group: 'org.springframework.cloud', module: 'spring-cloud-starter-loadbalancer'
     }
@@ -55,6 +56,8 @@ dependencies {
     // Use the Boot BOM for the entire SDK/exporter family; catalog 1.37 mixed with
     // Boot-managed exporter internals causes NoSuchMethodError during OTLP export.
     implementation 'io.opentelemetry:opentelemetry-sdk'
+    // The logger starter brings an older incubator API, which the SDK also uses.
+    runtimeOnly "io.opentelemetry:opentelemetry-api-incubator:${dependencyManagement.importedProperties['opentelemetry.version']}-alpha"
     implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
     implementation projectLibs.skywalking.apm.toolkit.trace
 }

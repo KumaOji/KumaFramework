@@ -7,6 +7,7 @@ description = 'KumaFramework 公共模块'
 // 将 project.version 写入 kmc-version.properties，供 KmcVersion 在 IDE 模式下读取
 def kmcProjectVersion = project.version
 processResources {
+    inputs.property('kmcProjectVersion', kmcProjectVersion)
     filesMatching('kmc-version.properties') {
         expand(project: [version: kmcProjectVersion])
     }

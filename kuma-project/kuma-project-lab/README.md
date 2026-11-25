@@ -23,7 +23,7 @@
 
 ## 日志
 
-Lab 输出控制台日志，并异步写入 `logs/lab.log` 和 `logs/lab-error.log`。可用环境变量 `LOG_PATH` 指定日志目录。文件按日期和 100 MB 大小滚动，常规日志保留 30 天，错误日志保留 60 天。根日志级别为 `INFO`，`com.kuma.cloud.lab` 在 `dev` 为 `DEBUG`，在 `prod` 为 `WARN`。
+Lab 使用框架 `kuma-boot-starter-logger` 的默认 Logback 配置。文件日志默认写入用户主目录下的 `logs/kuma-cloud-lab/`，可通过 `logging.file.path`（环境变量 `LOGGING_FILE_PATH`）调整。
 
 ## 实验教程
 
