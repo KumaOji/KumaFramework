@@ -2,8 +2,6 @@
 
 参考 blog 的常规分层，用于复制后开发新业务。沿用仓库 Java 25、Spring Boot 和 Gradle 版本管理。
 
-日常开发约定见 [业务项目开发规范](DEVELOPMENT.md)，涵盖命名、分层、接口、异常、事务及框架复用。
-
 日志、操作审计、指标及 Grafana 演示见 [可观测性说明](OBSERVABILITY.md)。
 
 ## 项目结构
@@ -11,8 +9,6 @@
 ```text
 kuma-project-reference/
 ├── build.gradle
-├── config/nacos/                 Nacos 配置模板
-├── scripts/                      本机初始化、启动和演示
 ├── sql/                          PostgreSQL/MySQL 建表与保留数据的升级脚本
 └── src/
     ├── main/
@@ -70,7 +66,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | Actuator / Prometheus | kuma-boot-starter-actuator、kuma-boot-starter-prometheus，health / info / prometheus 及 Kuma 监控扩展 |
 | 操作审计 | kuma-boot-starter-audit-log，创建与确认订单的 `@AuditLog` 示例 |
 | 业务与资源指标 | kuma-boot-starter-metrics，`@TimedMethod`、动态数据源连接池和业务线程池指标 |
-| 链路追踪 | Spring Boot 4 OpenTelemetry starter，经 WSL Collector 导出到 SkyWalking；启动脚本加载 SkyWalking Java Agent |
+| 链路追踪 | Spring Boot 4 OpenTelemetry starter，经 WSL Collector 导出到 SkyWalking；可选 SkyWalking Java Agent |
 
 MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MySQL database `kuma_reference_mysql`。DataScope 白名单映射数据源名与目标 schema/database；框架的 DataSourceExecutor 使用 @DS 切换数据源并设置 TenantContextHolder，SchemaInterceptor 根据当前 JDBC 驱动选择 PostgreSQL 或 MySQL SQL parser，将 Mapper SQL 限定到目标 schema/database。数据库、schema 和表由部署流程预先创建，应用启动时不执行数据库初始化。上下文在调用结束或异常后恢复。
 
@@ -78,11 +74,7 @@ MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MyS
 
 Redis / JetCache 当前禁用；Kafka、认证、对象存储等尚未在本模块配置。传递依赖不代表已接入。
 
-业务模块通过 Kuma starter 获取 AOP、JDBC 等能力，不重复声明对应的 Spring Boot starter。数据库初始化由部署流程负责，应用不在启动时创建或迁移数据库结构。
-
 线程池直接注入框架的 `asyncThreadPoolTaskExecutor`，配置统一使用 `kuma.boot.core.async`。核心参数为 `core-pool-size`、`max-pool-siz`（沿用框架现有拼写）、`queue-capacity`、`rejection-policy` 和 `await-termination-seconds`。reference 使用 `ABORT` 拒绝策略，过载返回 503；框架默认仍为 `CALLER_RUNS`。
-
-普通异步任务复用 core 的线程池。独立的 `kuma-boot-starter-threadpool` 提供 DynamicTP 能力，当前模板未启用其演示线程池。线程池等运行参数统一由 Nacos 管理，配置模板见 `config/nacos/kuma-reference-dev.yaml`；bootstrap.yml 只保留应用名称、环境和 Nacos 连接、导入及注册配置。已发布的 Nacos 配置需同步使用 `kuma.boot.core.async`。
 
 Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。只有一个构造器时不需要 `@Autowired`；多个同类型 Bean 使用参数上的 `@Qualifier` 区分。
 
@@ -92,7 +84,7 @@ Service 和 Controller 的必需依赖使用构造器注入及 `final` 字段。
 
 reference 在 config 下通过 `@ImportAutoConfiguration` 选择 core、logger、data-datasource、data-mybatis、web、actuator 所需的配置。配置类只负责接入，具体能力复用框架实现。ExecutionConfiguration 显式引入框架 Clock，MyBatisConfiguration 通过 `@MapperScan` 指定本项目 Mapper。入口使用 `@KumaBootApplication(oauth2ResourceServer = false)` 显式关闭 OAuth2 资源服务；`SecurityConfig` 声明匿名放行策略，接入认证时同步调整启动注解与安全策略。OpenTelemetry starter 通过自身的 `AutoConfiguration.imports` 自动接入。
 
-运行配置由 Nacos 加载，本地模板为 `config/nacos/kuma-reference-dev.yaml`：
+运行配置由 Nacos 加载，本地模板为 [Nacos 开发配置](../../.nacos-tmp/local/base/kuma-reference-dev.yaml)：
 
 | 配置项 | 默认值 |
 |---|---|
@@ -110,31 +102,9 @@ reference 在 config 下通过 `@ImportAutoConfiguration` 选择 core、logger�
 
 应用地址 `http://127.0.0.1:19092`，健康检查 `/actuator/health`，指标入口 `/actuator/prometheus`。
 
-### OpenTelemetry 和 SkyWalking
-
-Nacos 模板已配置 `management.tracing` 和 Boot 4 的 `management.opentelemetry.tracing.export.otlp`。默认发送到 `http://localhost:4318/v1/traces`，对应 WSL 已转发的 OTEL Collector；Collector 再转发到 SkyWalking OAP。开发环境默认采样率为 1.0，可通过 `REFERENCE_TRACING_SAMPLING` 调整，通过 `REFERENCE_OTLP_ENDPOINT` 修改接收地址，通过 `REFERENCE_TRACING_ENABLED` 控制追踪。
-
-在仓库根目录执行 `./kuma-project/kuma-project-reference/scripts/start-wsl.ps1` 会同时加载数据库环境变量和 SkyWalking Agent。Agent 优先使用 `SKYWALKING_AGENT_JAR` 指定的路径；本机未设置时复用 lab 已解压的 `kuma-project/kuma-project-lab/build/tools/skywalking-agent/skywalking-agent.jar`。复制模板到新项目时需另外准备完整 Agent 目录，包含 plugins、activations 和 config。
-
-直接使用 Gradle 启动时可传入 `-PskywalkingAgent=<Agent JAR 绝对路径>`，可选 `-PskywalkingBackend=localhost:11800`。IDEA 则在 ReferenceApplication 的 VM options 中加入：
-
-```text
--javaagent:<Agent JAR 绝对路径>
--Dskywalking.agent.service_name=kuma-reference
--Dskywalking.collector.backend_service=localhost:11800
-```
-
-SkyWalking UI 为 `http://localhost:12880`。请求订单接口后，业务日志中的 `OtlpTraceId` 应有 traceId/spanId，加载 Agent 后请求线程的 `TID` 应有值；两套追踪的 ID 可能不同。启动日志没有请求上下文时仍可能为空。只使用 OpenTelemetry 导出也可以在 SkyWalking 查看追踪，但不会自动填充 SkyWalking toolkit 的 `%tid`。
-
-WebConfiguration 显式引入 WebMdcAutoConfiguration，由框架统一注册 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.trace=false`、`kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。项目提供对应 Filter Bean 或 FilterRegistrationBean 时，框架会退让，避免重复注册。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
-
-三个过滤器同时处理 REQUEST 和 ASYNC 分派：异步任务的结果或异常回到 Servlet 线程时，重新建立 MDC，并在该次分派结束后清理。框架生成的 TraceId 和解析后的请求租户保存在请求属性中，因此初始请求与异步异常日志使用同一个关联 ID，后续请求不会沿用上次的租户或版本。
-
-core 的异步池会组合框架上下文装饰器与应用提供的 TaskDecorator。reference 提供 SkyWalking RunnableWrapper 装饰器，保证其业务异步任务延续请求的 SkyWalking 链路；未加载 Agent 时该包装器不会生成 SkyWalking ID。Klog 字段读取 MDC 的 `tl`，当前框架中的 KlogAutoConfiguration 和 KlogIdGenerator 未实现实际 Klog 接入，因此该字段仍为空。
-
 使用 `SPRING_CLOUD_NACOS_SERVER_ADDR` 修改 Nacos 地址，使用 `SPRING_PROFILES_ACTIVE` 切换环境；对应的 Nacos Data ID 需提前配置。运行时 Nacos 导入为必需项，连接池等配置修改后需重启；本地模板变更后需发布到对应的 Nacos Data ID。
 
-WSL 开发环境可运行 `scripts/initialize-wsl.ps1` 初始化 PostgreSQL schema。MySQL database 与 `kuma-reference-mysql` Kubernetes Secret 需由部署环境预先准备；`scripts/start-wsl.ps1` 会从 Secret 加载两种数据库的环境变量。配置模板仅保留凭据占位变量，真实凭据由部署环境或受控配置中心提供。
+部署环境需提前准备 PostgreSQL schema、MySQL database 及应用账号，并通过 `REFERENCE_PG_*` 和 `REFERENCE_MYSQL_*` 环境变量提供连接信息。表结构见 [PostgreSQL SQL](sql/postgresql/schema.sql) 和 [MySQL SQL](sql/mysql/schema.sql)。
 
 ## 接口
 
@@ -195,9 +165,11 @@ reference 设置 `kuma.boot.web.error.handling.default-error-code-strategy=RESUL
 
 ## 复制为新项目
 
+模板允许匿名访问、客户端选择 `scope` 和提交商品价格。用于实际业务前，需明确访问控制、数据范围授权、价格来源和写入接口的幂等策略。
+
 1. 复制源码及配置模板，排除 build、日志及真实凭据。
 2. 修改模块名、根包、启动类、Gradle mainClass 和 JAR 名称。
-3. 在 settings.gradle 注册新模块，更新脚本和请求示例中的模块路径。
+3. 在 settings.gradle 注册新模块，更新文档命令和请求示例中的模块路径。
 4. 分配应用名、端口、Nacos Data ID、数据库账户和 schema，更新 DataScope 与 JDBC currentSchema。
 5. 根据业务替换订单示例，并由部署流程预先创建并维护所需的数据库、schema 和表。
 6. 保留隔离测试配置，验证 test 和 bootJar 后，再检查部署环境的中间件连通性。
@@ -211,8 +183,8 @@ reference 设置 `kuma.boot.web.error.handling.default-error-code-strategy=RESUL
 .\gradlew.bat :kuma-project:kuma-project-reference:bootJar
 ```
 
-真实 WSL 验证单独运行，会访问 PostgreSQL schema，并启动 MySQL 数据源：
+设置上述数据库环境变量后，可单独运行真实 WSL 测试。测试连接 PostgreSQL 和 MySQL。
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\kuma-project\kuma-project-reference\scripts\start-wsl.ps1 -Action test
+.\gradlew.bat :kuma-project:kuma-project-reference:wslTest
 ```

@@ -21,13 +21,16 @@
 
 ## 本机演示
 
-已有 WSL PostgreSQL、MySQL 和对应 Secret、表结构，以及 Prometheus、Loki、Grafana、SkyWalking 时，在仓库根目录启动：
+按 [启动说明](README.md#启动) 准备 Nacos、数据库和连接环境变量后，在仓库根目录启动。
 
 ```powershell
-.\kuma-project\kuma-project-reference\scripts\start-wsl.ps1 -Observability
+$env:KUMA_CONFIG_PROFILE = "dev"
+$env:SPRING_PROFILES_ACTIVE = "dev,observability"
+$env:SERVER_ADDRESS = "0.0.0.0"
+.\gradlew.bat :kuma-project:kuma-project-reference:bootRun
 ```
 
-该模式加载仓库中的 `config/nacos/kuma-reference-dev.yaml`，关闭 Nacos 配置加载和服务注册，启用 `dev,observability`，加载 SkyWalking Agent。它不修改已发布的 Nacos 配置。应用监听 `0.0.0.0:19092`，以便 WSL Prometheus 抓取；普通启动仍沿用 Nacos 配置。
+应用监听 `0.0.0.0:19092`，供 WSL Prometheus 抓取。需要 SkyWalking Agent 时，传入下文的 `-PskywalkingAgent` 参数。
 
 Prometheus 的本机抓取任务为 `reference`，目标 `reference-local:19092/actuator/prometheus`。在 WSL 中执行以下命令注册 Windows 宿主地址；网络地址变化后重新执行：
 
@@ -37,13 +40,27 @@ python3 scripts/register-services-metrics-wsl.py "$(ip -4 route show default | a
 
 Loki 日志需要激活 `observability` profile；`no-loki` profile 可关闭远程日志。通过 `KUMA_LOKI_URL`、`REFERENCE_OTLP_ENDPOINT` 分别调整日志与链路接收地址，`KUMA_ENVIRONMENT` 设置环境标签。使用 Nacos 常规启动时，同步发布配置模板，并用 `KUMA_CONFIG_PROFILE=dev` 固定 Data ID 后再追加 `observability` profile，避免将多个 profile 拼进 Data ID。
 
-另开终端生成演示流量：
+使用 [订单接口](README.md#接口) 分别创建和确认 MAIN、MYSQL 订单，生成审计、日志和指标。
 
-```powershell
-python .\kuma-project\kuma-project-reference\scripts\demo-observability.py
+## 链路追踪与日志上下文
+
+Nacos 模板已配置 `management.tracing` 和 Boot 4 的 `management.opentelemetry.tracing.export.otlp`。默认发送到 `http://localhost:4318/v1/traces`，对应 WSL 已转发的 OTEL Collector；Collector 再转发到 SkyWalking OAP。开发环境默认采样率为 1.0，可通过 `REFERENCE_TRACING_SAMPLING` 调整，通过 `REFERENCE_OTLP_ENDPOINT` 修改接收地址，通过 `REFERENCE_TRACING_ENABLED` 控制追踪。
+
+直接使用 Gradle 启动时可传入 `-PskywalkingAgent=<Agent JAR 绝对路径>`，可选 `-PskywalkingBackend=localhost:11800`。IDEA 则在 ReferenceApplication 的 VM options 中加入：
+
+```text
+-javaagent:<Agent JAR 绝对路径>
+-Dskywalking.agent.service_name=kuma-reference
+-Dskywalking.collector.backend_service=localhost:11800
 ```
 
-脚本默认执行三轮，每轮分别在 MAIN、MYSQL 新建并确认一笔演示订单，然后产生 409、404、400 等响应。会保留六笔真实演示订单；不会删除或修改已有订单。输出的 `traceId` 可用于搜索链路。
+SkyWalking UI 为 `http://localhost:12880`。请求订单接口后，业务日志中的 `OtlpTraceId` 应有 traceId/spanId，加载 Agent 后请求线程的 `TID` 应有值；两套追踪的 ID 可能不同。启动日志没有请求上下文时仍可能为空。只使用 OpenTelemetry 导出也可以在 SkyWalking 查看追踪，但不会自动填充 SkyWalking toolkit 的 `%tid`。
+
+WebConfiguration 显式引入 WebMdcAutoConfiguration，由框架统一注册 TraceFilter、TenantFilter、VersionFilter，均支持 Servlet 异步请求。`kmc-tenant-id` 请求头或同名参数会写入日志 MDC，未提供时使用框架默认租户 `1`；`kmc-request-version` 请求头会写入 RequestVersion，未提供时为空。可通过 `kuma.boot.web.filter.trace=false`、`kuma.boot.web.filter.tenant=false` 或 `kuma.boot.web.filter.version=false` 关闭对应过滤器。项目提供对应 Filter Bean 或 FilterRegistrationBean 时，框架会退让，避免重复注册。日志中的请求租户用于关联上下文，订单数据库路由仍由 DataScope 白名单控制。
+
+三个过滤器同时处理 REQUEST 和 ASYNC 分派：异步任务的结果或异常回到 Servlet 线程时，重新建立 MDC，并在该次分派结束后清理。框架生成的 TraceId 和解析后的请求租户保存在请求属性中，因此初始请求与异步异常日志使用同一个关联 ID，后续请求不会沿用上次的租户或版本。
+
+core 的异步池会组合框架上下文装饰器与应用提供的 TaskDecorator。reference 提供 SkyWalking RunnableWrapper 装饰器，保证其业务异步任务延续请求的 SkyWalking 链路；未加载 Agent 时该包装器不会生成 SkyWalking ID。Klog 字段读取 MDC 的 `tl`，当前框架中的 KlogAutoConfiguration 和 KlogIdGenerator 未实现实际 Klog 接入，因此该字段仍为空。
 
 ## 面板读法
 
