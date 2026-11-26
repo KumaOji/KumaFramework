@@ -109,6 +109,8 @@ kuma:
               tenant-database-prefix: kuma_reference
               db-type: POSTGRE_SQL
     cache:
+      redis:
+        enabled: false
       jetcache:
         enabled: false
 

@@ -17,6 +17,7 @@ import com.kuma.boot.common.utils.number.Money;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kuma.cloud.reference.domain.model.ProductSnapshot;
 import com.kuma.cloud.reference.mapper.OrderMapper;
+import com.kuma.cloud.reference.service.ConfirmedOrderCache;
 import com.kuma.cloud.reference.service.OrderService;
 import com.kuma.boot.data.datasource.dynamic.mybatisplus.DataSourceExecutor;
 import java.time.Clock;
@@ -37,13 +38,16 @@ public class OrderServiceImpl implements OrderService {
     private final Clock clock;
     private final DataSourceExecutor schemas;
     private final TransactionalUtils transactions;
+    private final ConfirmedOrderCache confirmedOrders;
 
     public OrderServiceImpl(OrderMapper orders, Clock clock,
-                            DataSourceExecutor schemas, TransactionalUtils transactions) {
+                            DataSourceExecutor schemas, TransactionalUtils transactions,
+                            ConfirmedOrderCache confirmedOrders) {
         this.schemas = schemas;
         this.transactions = transactions;
         this.orders = orders;
         this.clock = clock;
+        this.confirmedOrders = confirmedOrders;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @TimedMethod("getOrder")
     public OrderVO get(Long id, DataScope scope) {
-        return inScope(scope, true, () -> toVO(requireOrder(id)));
+        return confirmedOrders.get(id, scope, () -> inScope(scope, true, () -> toVO(requireOrder(id))));
     }
 
     @Override

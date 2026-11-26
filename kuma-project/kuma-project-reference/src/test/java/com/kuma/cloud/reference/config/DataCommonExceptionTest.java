@@ -12,6 +12,7 @@ import com.kuma.boot.web.error.mapper.*;
 import com.kuma.cloud.reference.domain.dto.CreateOrderDTO;
 import com.kuma.cloud.reference.domain.enums.DataScope;
 import com.kuma.cloud.reference.mapper.OrderMapper;
+import com.kuma.cloud.reference.service.ConfirmedOrderCache;
 import com.kuma.cloud.reference.service.impl.OrderServiceImpl;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -88,7 +89,7 @@ class DataCommonExceptionTest {
                 .thenAnswer(call -> call.getArgument(2, Supplier.class).get());
         when(manager.getTransaction(any())).thenAnswer(call -> new SimpleTransactionStatus());
         return new OrderServiceImpl(orders, Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC),
-                schemas, new TransactionalUtils(new TransactionTemplate(manager)));
+                schemas, new TransactionalUtils(new TransactionTemplate(manager)), mock(ConfirmedOrderCache.class));
     }
 
     private CreateOrderDTO request() {

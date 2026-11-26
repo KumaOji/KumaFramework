@@ -14,8 +14,18 @@ server:
 spring:
   autoconfigure:
     exclude:
-      # MyBatis 组件传递了缓存依赖；此订单示例不启用 Redis 客户端。
+      # Reference 使用 Lettuce 连接 Redis。
       - org.redisson.spring.starter.RedissonAutoConfigurationV4
+  data:
+    redis:
+      client-type: lettuce
+      host: ${REFERENCE_REDIS_HOST:172.23.89.45}
+      port: ${REFERENCE_REDIS_PORT:31281}
+      username: ${REFERENCE_REDIS_USERNAME:default}
+      password: ${REFERENCE_REDIS_PASSWORD:}
+      database: ${REFERENCE_REDIS_DATABASE:0}
+      connect-timeout: 500ms
+      timeout: 500ms
   application:
     name: kuma-reference
   main:
@@ -68,6 +78,7 @@ logging:
   config: classpath:logback-observability.xml
   level:
     com.kuma.cloud.reference: DEBUG
+    com.kuma.boot.data.mybatis.interceptor.log.interceptor.ActualSqlInterceptor: TRACE
   access:
     enabled: false
 
@@ -136,9 +147,15 @@ kuma:
               tenant-database-prefix: kuma_reference
               db-type: POSTGRE_SQL
     cache:
+      redis:
+        enabled: ${REFERENCE_REDIS_ENABLED:true}
       jetcache:
         enabled: false
 
+reference:
+  redis:
+    key-prefix: ${REFERENCE_REDIS_KEY_PREFIX:kuma-reference:dev}
+    order-cache-ttl: ${REFERENCE_REDIS_ORDER_CACHE_TTL:5m}
 
 management:
   metrics:
@@ -166,7 +183,7 @@ management:
         enabled: false
   health:
     redis:
-      enabled: false
+      enabled: ${REFERENCE_REDIS_ENABLED:true}
   endpoints:
     web:
       exposure:

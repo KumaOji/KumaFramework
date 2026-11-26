@@ -45,6 +45,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | OrderController | `@BusinessApi` | 复用统一 `Result<T>` 返回体；仍配合 `@RestController` 和请求映射注解 |
 | OrderServiceImpl | `@Manager` | 复用框架基于 `@Service` 的组件注解，保留 Service 接口及实现分层 |
 | DataSourceConfiguration | `@EnableDynamicDataSource` | 统一导入动态数据源配置、`#last` 参数解析链和数据源路由组件 |
+| MyBatisConfiguration | `@EnableActualSql` | 启动时打印 `KUMA SQL LOG`，开发环境以 `TRACE` 记录 Mapper 方法、SQL 参数、耗时和行数 |
 | OrderPageQO.status | `@StringEnums` | 复用字段取值校验，允许 CREATED / CONFIRMED，未传值时不筛选状态 |
 
 `@KumaBootApplication` 默认仍启用 OAuth2，已有项目无需修改。reference 使用显式关闭选项，并由 SecurityConfig 声明匿名访问策略。`@EnableDynamicDataSource` 同时适用于 YAML/Nacos 配置来源；数据库配置来源仍受原有 enabled 配置控制。事务支持继续显式导入，不修改 `AutoConfiguration.imports`。
@@ -62,6 +63,7 @@ Controller 注入 Service 接口，使用 Jakarta Validation 校验 DTO/QO；Ser
 | Web MVC | kuma-boot-starter-web，MVC 配置、参数转换、异步执行、Trace MDC 和 HTTP 交换记录 |
 | 日志 | kuma-boot-starter-logger，统一 Logback 输出；Nacos 模板启用 reference DEBUG 日志以查看数据源/schema 路由 |
 | MyBatis / MyBatis-Plus | Kuma starter、单一 SqlSessionFactory、BaseMapperX 和条件构造器 |
+| Redis | kuma-boot-starter-cache-redis、Lettuce、已确认订单详情缓存与 Actuator 健康检查 |
 | 业务线程池 | kuma-boot-starter-core 的异步池、MDC/上下文传递、有界队列、拒绝策略和优雅关闭 |
 | Actuator / Prometheus | kuma-boot-starter-actuator、kuma-boot-starter-prometheus，health / info / prometheus 及 Kuma 监控扩展 |
 | 操作审计 | kuma-boot-starter-audit-log，创建与确认订单的 `@AuditLog` 示例 |
@@ -72,7 +74,13 @@ MAIN 对应 PostgreSQL 的 `kuma_reference_main` schema；MYSQL 对应独立 MyS
 
 先选择数据源再开启事务，事务内禁止切换到其他数据源。分页 count 与 data 共用 REPEATABLE READ 只读事务。数据源切换和 SQL schema 改写是两项组件能力，不代表主从复制或跨库分布式事务。
 
-Redis / JetCache 当前禁用；Kafka、认证、对象存储等尚未在本模块配置。传递依赖不代表已接入。
+JetCache 当前关闭。Kafka、认证和对象存储尚未在本模块配置。
+
+### Redis 连接与订单缓存
+
+开发配置通过 `spring.data.redis` 连接 WSL Redis，默认地址为 `172.23.89.45:31281`、ACL 用户为 `default`、逻辑库为 `0`。Windows 本地启动时通过环境变量注入 `REFERENCE_REDIS_PASSWORD`。容器内可通过 `REFERENCE_REDIS_HOST=redis.base.svc.cluster.local`、`REFERENCE_REDIS_PORT=6379` 和 Redis Secret 连接。地址、端口、用户名和逻辑库分别由 `REFERENCE_REDIS_HOST`、`REFERENCE_REDIS_PORT`、`REFERENCE_REDIS_USERNAME` 和 `REFERENCE_REDIS_DATABASE` 覆盖。设置 `REFERENCE_REDIS_ENABLED=false` 可以关闭订单缓存和 Redis 健康检查。连接和命令超时均为 500 ms。
+
+`GET /api/orders/{id}` 查询已确认订单后，通过 Kuma Starter 的 `RedisRepository` 写入缓存，后续查询可以直接命中。键按应用环境、数据范围和订单 ID 隔离，默认格式为 `kuma-reference:dev:orders:v1:MAIN:123`，过期时间为 5 分钟，可通过 `REFERENCE_REDIS_KEY_PREFIX` 和 `REFERENCE_REDIS_ORDER_CACHE_TTL` 调整。待确认订单每次从数据库查询，因此确认后首次查询即可读到最新状态。Redis 连接、读写或反序列化失败时，详情查询仍可由数据库完成。创建、确认和分页直接走数据库。Redis 启用后，其连通性纳入 `/actuator/health`。
 
 线程池直接注入框架的 `asyncThreadPoolTaskExecutor`，配置统一使用 `kuma.boot.core.async`。核心参数为 `core-pool-size`、`max-pool-siz`（沿用框架现有拼写）、`queue-capacity`、`rejection-policy` 和 `await-termination-seconds`。reference 使用 `ABORT` 拒绝策略，过载返回 503；框架默认仍为 `CALLER_RUNS`。
 
@@ -181,6 +189,12 @@ reference 设置 `kuma.boot.web.error.handling.default-error-code-strategy=RESUL
 ```powershell
 .\gradlew.bat :kuma-project:kuma-project-reference:test
 .\gradlew.bat :kuma-project:kuma-project-reference:bootJar
+```
+
+通过 `REFERENCE_REDIS_TEST_PASSWORD` 提供真实 Redis 测试密码后，可以验证 Actuator 连通性、确认后缓存及过期时间。测试使用随机键前缀和 H2 订单数据。
+
+```powershell
+.\gradlew.bat :kuma-project:kuma-project-reference:test --tests '*RedisReferenceApplicationTest.cachesOnlyConfirmedOrdersWithScopeAndExpiry'
 ```
 
 设置上述数据库环境变量后，可单独运行真实 WSL 测试。测试连接 PostgreSQL 和 MySQL。
